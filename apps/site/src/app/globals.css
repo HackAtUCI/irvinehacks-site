@@ -16,7 +16,7 @@ body {
 
 h1 {
 	font-size: calc(30px + 2vw);
-	font-weight: bold;
+	font-weight: 700;
 }
 
 p {
@@ -26,5 +26,5 @@ p {
 
 a {
 	font-size: calc(13px + 1vw);
-	font-weight: bold;
+	font-weight: 700;
 }

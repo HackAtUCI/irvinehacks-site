@@ -3,11 +3,10 @@ import styles from "./Button.module.css";
 interface ButtonProps {
 	text: string;
 	href?: string;
-	isLink: boolean;
 }
 
-const Button: React.FC<ButtonProps> = ({ text, href, isLink }) => {
-	if (isLink) {
+const Button: React.FC<ButtonProps> = ({ text, href }) => {
+	if (href) {
 		return (
 			<a
 				href={href}
@@ -20,11 +19,9 @@ const Button: React.FC<ButtonProps> = ({ text, href, isLink }) => {
 		);
 	}
 	return (
-		<input
-			type="submit"
-			className={styles.button + " font-body"}
-			value={text}
-		/>
+		<button type="submit" className={styles.button + " font-body"}>
+			{text}
+		</button>
 	);
 };
 

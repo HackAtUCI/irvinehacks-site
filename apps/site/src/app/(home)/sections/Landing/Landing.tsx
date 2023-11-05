@@ -10,7 +10,6 @@ const Landing = () => {
 				<Button
 					text="Stay updated"
 					href="https://uci.us13.list-manage.com/subscribe?u=5976872928cd5681fbaca89f6&id=93333e11eb"
-					isLink
 				/>
 			</div>
 		</section>

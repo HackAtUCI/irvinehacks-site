@@ -9,14 +9,12 @@
 	border-radius: 15px;
 	color: var(--color-brown);
 	padding: 0.55rem 1.25rem;
+	transition:
+		filter 0.1s ease,
+		box-shadow 0.1s ease;
 
 	&:hover {
-		background-image: radial-gradient(
-			50% 50% at 50% 50%,
-			#ffffff 0%,
-			#ffe7a9 51.04%,
-			#ffb72f 100%
-		);
 		box-shadow: 0px 0px 20px #fffce2;
+		filter: brightness(1.05);
 	}
 }

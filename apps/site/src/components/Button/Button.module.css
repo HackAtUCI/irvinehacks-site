@@ -1,0 +1,22 @@
+.button {
+	background-image: radial-gradient(
+		50% 50% at 50% 50%,
+		#fff3d6 0%,
+		#ffda7b 51.04%,
+		#ffa700 100%
+	);
+	box-shadow: 0px 0px 20px rgba(255, 252, 226, 0.5);
+	border-radius: 15px;
+	color: var(--color-brown);
+	padding: 0.55rem 1.25rem;
+
+	&:hover {
+		background-image: radial-gradient(
+			50% 50% at 50% 50%,
+			#ffffff 0%,
+			#ffe7a9 51.04%,
+			#ffb72f 100%
+		);
+		box-shadow: 0px 0px 20px #fffce2;
+	}
+}

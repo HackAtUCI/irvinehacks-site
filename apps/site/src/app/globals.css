@@ -1,27 +1,30 @@
+@import url("https://fonts.googleapis.com/css2?family=Alegreya:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+	--color-cream: #fffce2;
+	--color-brown: #432810;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+	color: var(--color-cream);
+}
+
+h1 {
+	font-size: calc(30px + 2vw);
+	font-weight: bold;
+}
+
+p {
+	font-size: calc(15px + 1.5vw);
+	margin-bottom: 1rem;
+}
+
+a {
+	font-size: calc(13px + 1vw);
+	font-weight: bold;
 }

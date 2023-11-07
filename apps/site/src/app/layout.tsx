@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+import { Layout } from "@/components/dom/Layout";
+
 export const metadata: Metadata = {
 	title: "IrvineHacks 2024",
 	description:
@@ -14,7 +16,10 @@ export default function RootLayout({
 }) {
 	return (
 		<html lang="en">
-			<body>{children}</body>
+			<body>
+				{/* reference: https://github.com/pmndrs/react-three-next */}
+				<Layout>{children}</Layout>
+			</body>
 		</html>
 	);
 }

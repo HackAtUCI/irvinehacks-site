@@ -1,6 +1,12 @@
 "use client";
 
-import { forwardRef, Suspense, useImperativeHandle, useRef } from "react";
+import {
+	forwardRef,
+	MutableRefObject,
+	Suspense,
+	useImperativeHandle,
+	useRef,
+} from "react";
 import {
 	OrbitControls,
 	PerspectiveCamera,
@@ -8,7 +14,7 @@ import {
 } from "@react-three/drei";
 import { Three } from "@/helpers/components/Three";
 
-export const Common = ({ color }) => (
+export const Common = ({ color }: any) => (
 	<Suspense fallback={null}>
 		{color && <color attach="background" args={[color]} />}
 		<ambientLight intensity={0.5} />
@@ -19,7 +25,7 @@ export const Common = ({ color }) => (
 );
 
 const View = forwardRef(({ children, orbit, ...props }: any, ref) => {
-	const localRef = useRef(null);
+	const localRef = useRef<any>(null);
 	useImperativeHandle(ref, () => localRef.current);
 
 	return (

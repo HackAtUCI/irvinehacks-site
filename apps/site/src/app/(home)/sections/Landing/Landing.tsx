@@ -1,6 +1,6 @@
 "use client";
 
-import Button from "@/components/Button/Button";
+import Button from "@/lib/components/Button/Button";
 import styles from "./Landing.module.css";
 
 import { View } from "@/components/canvas/View";

@@ -9,6 +9,7 @@ export default function Scene({ ...props }) {
 	return (
 		<Canvas {...props}>
 			{/* @ts-ignore */}
+			{/* Tunnel exit where all View components render into this global canvas */}
 			<r3f.Out />
 			<Preload all />
 		</Canvas>

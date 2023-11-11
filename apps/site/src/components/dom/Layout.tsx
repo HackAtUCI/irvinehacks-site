@@ -18,6 +18,9 @@ const Layout = ({ children }: { children: ReactNode }) => {
 			}}
 		>
 			{children}
+			{/* Canvas wrapper component defined as a child 
+			to allow for compatibilty as a client component in layout.tsx
+			*/}
 			<Scene
 				style={{
 					position: "fixed",

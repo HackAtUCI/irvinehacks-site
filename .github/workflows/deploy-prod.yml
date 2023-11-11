@@ -22,3 +22,15 @@ jobs:
                   vercel-token: ${{ secrets.VERCEL_TOKEN }}
                   vercel-org-id: ${{ vars.VERCEL_ORG_ID}}
                   vercel-project-id: ${{ vars.VERCEL_PROJECT_ID_SITE}}
+    Studio:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - uses: amondnet/vercel-action@v25
+              with:
+                  vercel-version: 30.2.2
+                  github-comment: false
+                  vercel-args: "--prod"
+                  vercel-token: ${{ secrets.VERCEL_TOKEN }}
+                  vercel-org-id: ${{ vars.VERCEL_ORG_ID}}
+                  vercel-project-id: ${{ vars.VERCEL_PROJECT_ID_STUDIO}}

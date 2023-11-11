@@ -5,9 +5,9 @@ const Fireflies = () => {
 		<>
 			<Sparkles
 				color="orange"
-				count={100}
-				noise={1}
-				opacity={1}
+				count={95}
+				noise={0.35}
+				opacity={0.6}
 				speed={0.3}
 				size={
 					new Float32Array([

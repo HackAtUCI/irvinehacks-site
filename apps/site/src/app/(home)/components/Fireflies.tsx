@@ -7,7 +7,7 @@ const Fireflies = () => {
 				color="orange"
 				count={95}
 				noise={0.35}
-				opacity={0.6}
+				opacity={0.8}
 				speed={0.3}
 				size={
 					new Float32Array([

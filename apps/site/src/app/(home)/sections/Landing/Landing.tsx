@@ -14,7 +14,7 @@ const Landing = () => {
 			<View className="h-full w-full absolute">
 				<Suspense fallback={null}>
 					<Fireflies />
-					<PerspectiveCamera makeDefault position={[0.1, 0, 0.5]} />
+					<PerspectiveCamera makeDefault position={[0.1, 0.1, 0.6]} />
 				</Suspense>
 			</View>
 			<div className={styles.landingGroup}>

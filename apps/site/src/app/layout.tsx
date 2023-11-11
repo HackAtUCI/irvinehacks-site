@@ -16,7 +16,7 @@ export default function RootLayout({
 }) {
 	return (
 		<html lang="en">
-			<body>
+			<body className="overflow-y-hidden overflow-x-hidden">
 				{/* reference: https://github.com/pmndrs/react-three-next */}
 				<Layout>{children}</Layout>
 			</body>

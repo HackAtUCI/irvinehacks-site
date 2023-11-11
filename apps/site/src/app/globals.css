@@ -16,17 +16,6 @@ body {
 	background-color: var(--color-dark-blue);
 }
 
-h1 {
-	font-size: calc(30px + 2vw);
-	font-weight: 700;
-}
-
 p {
-	font-size: calc(15px + 1.5vw);
 	margin-bottom: 1rem;
-}
-
-a {
-	font-size: calc(13px + 1vw);
-	font-weight: 700;
 }

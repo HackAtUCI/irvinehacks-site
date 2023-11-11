@@ -8,10 +8,12 @@
 :root {
 	--color-cream: #fffce2;
 	--color-brown: #432810;
+	--color-dark-blue: #090c31;
 }
 
 body {
 	color: var(--color-cream);
+	background-color: var(--color-dark-blue);
 }
 
 h1 {

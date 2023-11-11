@@ -19,7 +19,7 @@ jobs:
                       <table>
                         <tr>
                           <td><strong>Name</strong></td>
-                          <td>Hack at UCI Site</td>
+                          <td>IrvineHacks 2024 Site</td>
                         </tr>
                         <tr>
                           <td><strong>Preview</strong></td>
@@ -34,3 +34,29 @@ jobs:
                   vercel-token: ${{ secrets.VERCEL_TOKEN }}
                   vercel-org-id: ${{ vars.VERCEL_ORG_ID}}
                   vercel-project-id: ${{ vars.VERCEL_PROJECT_ID_SITE}}
+    Studio:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - uses: amondnet/vercel-action@v25
+              with:
+                  vercel-version: 30.2.2
+                  github-comment: |
+                      <table>
+                        <tr>
+                          <td><strong>Name</strong></td>
+                          <td>Sanity Studio</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Preview</strong></td>
+                          <td><a href='{{deploymentUrl}}'>Visit Preview</a></td>
+                        </tr>
+                        <tr>
+                          <td><strong>Commit</strong></td>
+                          <td>{{deploymentCommit}}</td>
+                        </tr>
+                      </table>
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  vercel-token: ${{ secrets.VERCEL_TOKEN }}
+                  vercel-org-id: ${{ vars.VERCEL_ORG_ID}}
+                  vercel-project-id: ${{ vars.VERCEL_PROJECT_ID_STUDIO}}

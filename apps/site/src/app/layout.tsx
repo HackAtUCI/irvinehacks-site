@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import water from "@/assets/backgrounds/water.png";
 import "./globals.css";
 
 import { Layout } from "@/components/dom/Layout";
@@ -16,7 +17,7 @@ export default function RootLayout({
 }) {
 	return (
 		<html lang="en">
-			<body>
+			<body style={{ backgroundImage: `url(${water.src})` }}>
 				{/* reference: https://github.com/pmndrs/react-three-next */}
 				<Layout>{children}</Layout>
 			</body>

@@ -1,5 +1,10 @@
-import { Landing } from "./sections";
+import { About, Landing } from "./sections";
 
 export default function Home() {
-	return <Landing />;
+	return (
+		<>
+			<Landing />
+			<About />
+		</>
+	);
 }

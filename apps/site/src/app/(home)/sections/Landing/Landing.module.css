@@ -1,8 +1,0 @@
-.landingSection {
-	background-image: url("~@/assets/backgrounds/landing-background.jpg");
-	background-position: center;
-	background-repeat: no-repeat;
-	background-size: cover;
-	position: relative;
-	min-height: 100vh;
-}

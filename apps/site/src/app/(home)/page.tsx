@@ -1,4 +1,4 @@
-import { Landing, MentorVolunteer } from "./sections";
+import { Landing, MentorVolunteer, FAQ } from "./sections";
 
 export default function Home() {
 	// Show landing section only if still in maintenance,
@@ -9,6 +9,8 @@ export default function Home() {
 		<>
 			<Landing />
 			<MentorVolunteer />
+			{/* @ts-expect-error Async Server Component */}
+			<FAQ type="single" />
 		</>
 	);
 }

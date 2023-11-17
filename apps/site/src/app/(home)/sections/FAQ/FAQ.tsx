@@ -15,7 +15,11 @@ const FAQ = async () => {
 	return (
 		<section className={styles.container}>
 			<div className={styles.faq}>
-				<h2 className={`font-display ${styles.title}`}>FAQ</h2>
+				<h2
+					className={`font-display sm:!text-[4.5rem] ${styles.title}`}
+				>
+					FAQ
+				</h2>
 				<FAQAccordion faq={faq} />
 			</div>
 		</section>

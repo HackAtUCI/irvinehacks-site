@@ -64,9 +64,7 @@ export const Content = React.forwardRef<
 		{...props}
 		ref={forwardedRef}
 	>
-		<div className={(styles.contentPadding, clsx(styles.content))}>
-			{children}
-		</div>
+		<div className={styles.contentPadding}>{children}</div>
 	</RadixAccordion.Content>
 ));
 Content.displayName = RadixAccordion.Content.displayName;

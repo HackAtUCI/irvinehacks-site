@@ -54,7 +54,7 @@
 	}
 
 	.contentPadding {
-		padding-bottom: 24px;
+		padding-bottom: 1.25rem;
 	}
 
 	@keyframes slideDown {
@@ -83,10 +83,7 @@
 	}
 }
 
-@media (min-width: 576px) {
-	.trigger {
-		font-size: 1.5rem;
-	}
+@media (min-width: 640px) {
 	.content {
 		p {
 			font-size: 1.25rem;

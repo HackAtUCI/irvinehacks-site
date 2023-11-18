@@ -1,9 +1,4 @@
-// "use client";
-
-// import Accordion from "react-bootstrap/Accordion";
 import { Root, Item, Trigger, Content } from "@/lib/components/Accordion";
-
-// import styles from "./FAQ.module.scss";
 
 interface FAQAccordion {
 	faq: {

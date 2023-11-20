@@ -11,8 +11,7 @@ export default function Home() {
 		<>
 			<Landing />
 			<MentorVolunteer />
-			{/* @ts-expect-error Async Server Component */}
-			<FAQ type="single" />
+			<FAQ />
 		</>
 	);
 }

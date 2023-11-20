@@ -13,10 +13,10 @@ const FAQ = async () => {
 	}));
 
 	return (
-		<section className={styles.container}>
-			<div className={styles.faq}>
+		<section className={`${styles.container} py-24 flex justify-center bg-no-repeat bg-cover bg-center bg-top`}>
+			<div className="relative flex flex-col w-4/5 pb-7">
 				<h2
-					className={`font-display sm:!text-[4.5rem] ${styles.title}`}
+					className={`${styles.title} my-6 font-display sm:!text-[4.5rem] text-[#fffce2] text-4xl text-center`}
 				>
 					FAQ
 				</h2>

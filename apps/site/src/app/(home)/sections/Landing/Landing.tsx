@@ -11,7 +11,7 @@ import Fireflies from "../../components/Fireflies";
 const Landing = () => {
 	return (
 		<section className={styles.landingSection}>
-			<View className="h-full w-full absolute">
+			<View className="absolute w-full h-full">
 				<Suspense fallback={null}>
 					<Fireflies />
 					<PerspectiveCamera makeDefault position={[0.1, 0.1, 0.6]} />

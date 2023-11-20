@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+import water from "./water.png";
 import { Layout } from "@/components/dom/Layout";
 
 export const metadata: Metadata = {
@@ -16,7 +17,12 @@ export default function RootLayout({
 }) {
 	return (
 		<html lang="en">
-			<body className="overflow-y-hidden overflow-x-hidden">
+			<body
+				style={{
+					backgroundImage: `url(${water.src})`,
+				}}
+				className="overflow-x-hidden bg-top bg-repeat-y bg-[length:100%]"
+			>
 				{/* reference: https://github.com/pmndrs/react-three-next */}
 				<Layout>{children}</Layout>
 			</body>

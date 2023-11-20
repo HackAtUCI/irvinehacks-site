@@ -13,7 +13,9 @@ const FAQ = async () => {
 	}));
 
 	return (
-		<section className={`${styles.container} py-24 flex justify-center bg-no-repeat bg-cover bg-center bg-top`}>
+		<section
+			className={`${styles.container} rounded-[500rem/20rem] py-24 flex justify-center bg-no-repeat bg-cover bg-center bg-top`}
+		>
 			<div className="relative flex flex-col w-4/5 pb-7">
 				<h2
 					className={`${styles.title} my-6 font-display sm:!text-[4.5rem] text-[#fffce2] text-4xl text-center`}

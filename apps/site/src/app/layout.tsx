@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import water from "@/assets/backgrounds/water.png";
+import water from "@/assets/backgrounds/water.jpg";
 import "./globals.css";
 
 import { Layout } from "@/components/dom/Layout";

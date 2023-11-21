@@ -6,7 +6,7 @@ import styles from "./About.module.css";
 const About = () => {
 	return (
 		<>
-			<section className="container md mx-auto text-center my-14 w-3/4 sm:w-1/2 xl:w-2/5 relative">
+			<section className="container md mx-auto text-center my-14 w-96 sm:w-1/2 xl:w-2/5 relative">
 				<Lantern
 					width={300}
 					height={300}
@@ -32,12 +32,12 @@ const About = () => {
 						<span className={styles.statistic}>500+</span> Hackers
 					</h2>
 					<h2>
-						<span className={styles.statistic}>&#36;10,000</span> in
+						<span className={styles.statistic}>$10,000</span> in
 						Prizes
 					</h2>
 				</div>
 				<h3 className="text-xl lg:text-2xl mb-5">
-					Create &#43; Connect &#43; Inspire
+					Create + Connect + Inspire
 				</h3>
 				<p>
 					IrvineHacks is the largest collegiate hackathon in Orange

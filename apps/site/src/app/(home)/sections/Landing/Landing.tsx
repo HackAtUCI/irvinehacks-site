@@ -13,7 +13,7 @@ const Landing = () => {
 	return (
 		<section
 			style={{ backgroundImage: `url(${landingBackground.src})` }}
-			className="bg-auto xl:bg-cover bg-no-repeat bg-center"
+			className="bg-cover bg-no-repeat bg-center"
 		>
 			<View className="h-full w-full absolute">
 				<Suspense fallback={null}>

@@ -9,7 +9,6 @@ export default function Home() {
 		<>
 			<Landing />
 			<MentorVolunteer />
-			<div style={{ height: 400 }}></div>
 		</>
 	);
 }

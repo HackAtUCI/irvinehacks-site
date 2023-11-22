@@ -4,7 +4,7 @@ import stand2 from "./stand-2.png";
 
 const MentorVolunteer = () => {
 	return (
-		<div className="grid max-w-lg lg:max-w-none lg:grid-cols-[repeat(2,450px)] lg:items-stretch justify-center m-auto gap-x-8 gap-y-12 mt-24">
+		<div className="grid max-w-lg lg:max-w-none lg:grid-cols-[repeat(2,450px)] lg:items-stretch justify-center m-auto gap-x-8 gap-y-24 mt-24">
 			<Stand
 				imageSrc={stand1}
 				header="Apply to be a Mentor"

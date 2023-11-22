@@ -6,6 +6,7 @@
 	position: relative;
 	min-height: 100vh;
 	min-width: 100vw;
+	overflow-x: hidden;
 }
 
 .landingGroup {
@@ -14,4 +15,40 @@
 	left: 50%;
 	transform: translate(-50%, -50%);
 	text-align: center;
+}
+
+.fogLeft,
+.fogRight {
+	animation-delay: 0.5s;
+	animation-duration: 4s;
+	animation-fill-mode: forwards;
+	animation-timing-function: ease;
+	z-index: 1000;
+}
+
+.fogLeft {
+	animation-name: slideOutLeft;
+}
+
+.fogRight {
+	animation-name: slideOutRight;
+}
+
+@keyframes slideOutLeft {
+	from {
+		transform: none;
+	}
+
+	to {
+		transform: translate(-100%, 0);
+	}
+}
+
+@keyframes slideOutRight {
+	from {
+		transform: none;
+	}
+	to {
+		transform: translate(100%, 0);
+	}
 }

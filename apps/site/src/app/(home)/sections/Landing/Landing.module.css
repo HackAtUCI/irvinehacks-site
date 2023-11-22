@@ -1,0 +1,35 @@
+.fogLeft,
+.fogRight {
+	animation-delay: 0.5s;
+	animation-duration: 4s;
+	animation-fill-mode: forwards;
+	animation-timing-function: ease;
+	z-index: 1000;
+}
+
+.fogLeft {
+	animation-name: slideOutLeft;
+}
+
+.fogRight {
+	animation-name: slideOutRight;
+}
+
+@keyframes slideOutLeft {
+	from {
+		transform: none;
+	}
+
+	to {
+		transform: translate(-100%, 0);
+	}
+}
+
+@keyframes slideOutRight {
+	from {
+		transform: none;
+	}
+	to {
+		transform: translate(100%, 0);
+	}
+}

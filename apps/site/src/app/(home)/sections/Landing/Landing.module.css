@@ -18,7 +18,7 @@
 
 .fogLeft,
 .fogRight {
-	animation-delay: 1s;
+	animation-delay: 0.5s;
 	animation-duration: 4s;
 	animation-fill-mode: forwards;
 	animation-timing-function: ease;

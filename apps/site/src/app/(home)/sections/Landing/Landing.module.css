@@ -1,5 +1,5 @@
 .landingSection {
-	background-image: url("~@/assets/backgrounds/landing-background.png");
+	background-image: url("~@/assets/backgrounds/landing-background.jpg");
 	background-position: center;
 	background-repeat: no-repeat;
 	background-size: cover;
@@ -19,7 +19,7 @@
 
 .fogLeft,
 .fogRight {
-	animation-delay: 0.5s;
+	animation-delay: 1.5s;
 	animation-duration: 4s;
 	animation-fill-mode: forwards;
 	animation-timing-function: ease;

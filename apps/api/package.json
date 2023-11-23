@@ -1,0 +1,7 @@
+{
+	"name": "api",
+	"private": true,
+	"scripts": {
+		"dev": "python src/dev.py"
+	}
+}

@@ -1,0 +1,11 @@
+{
+	"buildCommand": "cd ../.. && turbo run build --filter={apps/site} && cd apps/site && ./copy-api.sh",
+	"rewrites": [{ "source": "/api/(.*)", "destination": "api/index.py" }],
+	"functions": {
+		"api/index.py": {
+			"memory": 512,
+			"maxDuration": 10,
+			"excludeFiles": "{*.{js,ts,json},@(.next|.turbo|node_modules|public)/**,src/{*,!(api)/**}}"
+		}
+	}
+}

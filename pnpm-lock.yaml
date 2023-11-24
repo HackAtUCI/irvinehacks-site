@@ -19,7 +19,7 @@ importers:
         version: link:packages/tsconfig
       turbo:
         specifier: latest
-        version: 1.10.13
+        version: 1.10.16
 
   apps/sanity:
     dependencies:
@@ -31,7 +31,7 @@ importers:
         version: 3.1.0(react-dom@18.2.0)(react-is@18.2.0)(react@18.2.0)(sanity@3.19.2)(styled-components@5.3.9)
       '@sanity/vision':
         specifier: ^3.15.1
-        version: 3.19.2(@babel/runtime@7.21.5)(@codemirror/lint@6.4.2)(@codemirror/state@6.3.1)(@codemirror/theme-one-dark@6.1.2)(@lezer/common@1.1.1)(codemirror@6.0.1)(react-dom@18.2.0)(react-is@18.2.0)(react@18.2.0)(styled-components@5.3.9)
+        version: 3.19.2(@babel/runtime@7.23.2)(@codemirror/lint@6.4.2)(@codemirror/state@6.3.1)(@codemirror/theme-one-dark@6.1.2)(@lezer/common@1.1.1)(codemirror@6.0.1)(react-dom@18.2.0)(react-is@18.2.0)(react@18.2.0)(styled-components@5.3.9)
       lucide-react:
         specifier: ^0.271.0
         version: 0.271.0(react@18.2.0)
@@ -3811,7 +3811,7 @@ packages:
       uuid: 8.3.2
     dev: false
 
-  /@sanity/vision@3.19.2(@babel/runtime@7.21.5)(@codemirror/lint@6.4.2)(@codemirror/state@6.3.1)(@codemirror/theme-one-dark@6.1.2)(@lezer/common@1.1.1)(codemirror@6.0.1)(react-dom@18.2.0)(react-is@18.2.0)(react@18.2.0)(styled-components@5.3.9):
+  /@sanity/vision@3.19.2(@babel/runtime@7.23.2)(@codemirror/lint@6.4.2)(@codemirror/state@6.3.1)(@codemirror/theme-one-dark@6.1.2)(@lezer/common@1.1.1)(codemirror@6.0.1)(react-dom@18.2.0)(react-is@18.2.0)(react@18.2.0)(styled-components@5.3.9):
     resolution: {integrity: sha512-IKNt97jm81jdhzqk+sYXCa/tFgRj3VwS7njfVupb2T8KFTxTp2aakXRd/b+FcaXjb4eQCnbqsd5esxIra0lW3A==}
     peerDependencies:
       react: ^18
@@ -3830,7 +3830,7 @@ packages:
       '@sanity/color': 2.2.5
       '@sanity/icons': 2.7.0(react@18.2.0)
       '@sanity/ui': 1.9.2(react-dom@18.2.0)(react-is@18.2.0)(react@18.2.0)(styled-components@5.3.9)
-      '@uiw/react-codemirror': 4.21.20(@babel/runtime@7.21.5)(@codemirror/autocomplete@6.11.0)(@codemirror/language@6.9.2)(@codemirror/lint@6.4.2)(@codemirror/search@6.5.4)(@codemirror/state@6.3.1)(@codemirror/theme-one-dark@6.1.2)(@codemirror/view@6.22.0)(codemirror@6.0.1)(react-dom@18.2.0)(react@18.2.0)
+      '@uiw/react-codemirror': 4.21.20(@babel/runtime@7.23.2)(@codemirror/autocomplete@6.11.0)(@codemirror/language@6.9.2)(@codemirror/lint@6.4.2)(@codemirror/search@6.5.4)(@codemirror/state@6.3.1)(@codemirror/theme-one-dark@6.1.2)(@codemirror/view@6.22.0)(codemirror@6.0.1)(react-dom@18.2.0)(react@18.2.0)
       hashlru: 2.3.0
       is-hotkey: 0.1.8
       json5: 2.2.3
@@ -4392,7 +4392,7 @@ packages:
       '@codemirror/view': 6.22.0
     dev: false
 
-  /@uiw/react-codemirror@4.21.20(@babel/runtime@7.21.5)(@codemirror/autocomplete@6.11.0)(@codemirror/language@6.9.2)(@codemirror/lint@6.4.2)(@codemirror/search@6.5.4)(@codemirror/state@6.3.1)(@codemirror/theme-one-dark@6.1.2)(@codemirror/view@6.22.0)(codemirror@6.0.1)(react-dom@18.2.0)(react@18.2.0):
+  /@uiw/react-codemirror@4.21.20(@babel/runtime@7.23.2)(@codemirror/autocomplete@6.11.0)(@codemirror/language@6.9.2)(@codemirror/lint@6.4.2)(@codemirror/search@6.5.4)(@codemirror/state@6.3.1)(@codemirror/theme-one-dark@6.1.2)(@codemirror/view@6.22.0)(codemirror@6.0.1)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-PdyewPvNXnvT3JHj888yjpbWsAGw5qlxW6w1sMdsqJ0R6vPV++ob1iZXCGrM1FVpbqPK0DNfpXvjzp2gIr3lYw==}
     peerDependencies:
       '@babel/runtime': '>=7.11.0'
@@ -4403,7 +4403,7 @@ packages:
       react: '>=16.8.0'
       react-dom: '>=16.8.0'
     dependencies:
-      '@babel/runtime': 7.21.5
+      '@babel/runtime': 7.23.2
       '@codemirror/commands': 6.3.0
       '@codemirror/state': 6.3.1
       '@codemirror/theme-one-dark': 6.1.2
@@ -10571,64 +10571,64 @@ packages:
       - react
     dev: false
 
-  /turbo-darwin-64@1.10.13:
-    resolution: {integrity: sha512-vmngGfa2dlYvX7UFVncsNDMuT4X2KPyPJ2Jj+xvf5nvQnZR/3IeDEGleGVuMi/hRzdinoxwXqgk9flEmAYp0Xw==}
+  /turbo-darwin-64@1.10.16:
+    resolution: {integrity: sha512-+Jk91FNcp9e9NCLYlvDDlp2HwEDp14F9N42IoW3dmHI5ZkGSXzalbhVcrx3DOox3QfiNUHxzWg4d7CnVNCuuMg==}
     cpu: [x64]
     os: [darwin]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo-darwin-arm64@1.10.13:
-    resolution: {integrity: sha512-eMoJC+k7gIS4i2qL6rKmrIQGP6Wr9nN4odzzgHFngLTMimok2cGLK3qbJs5O5F/XAtEeRAmuxeRnzQwTl/iuAw==}
+  /turbo-darwin-arm64@1.10.16:
+    resolution: {integrity: sha512-jqGpFZipIivkRp/i+jnL8npX0VssE6IAVNKtu573LXtssZdV/S+fRGYA16tI46xJGxSAivrZ/IcgZrV6Jk80bw==}
     cpu: [arm64]
     os: [darwin]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo-linux-64@1.10.13:
-    resolution: {integrity: sha512-0CyYmnKTs6kcx7+JRH3nPEqCnzWduM0hj8GP/aodhaIkLNSAGAa+RiYZz6C7IXN+xUVh5rrWTnU2f1SkIy7Gdg==}
+  /turbo-linux-64@1.10.16:
+    resolution: {integrity: sha512-PpqEZHwLoizQ6sTUvmImcRmACyRk9EWLXGlqceogPZsJ1jTRK3sfcF9fC2W56zkSIzuLEP07k5kl+ZxJd8JMcg==}
     cpu: [x64]
     os: [linux]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo-linux-arm64@1.10.13:
-    resolution: {integrity: sha512-0iBKviSGQQlh2OjZgBsGjkPXoxvRIxrrLLbLObwJo3sOjIH0loGmVIimGS5E323soMfi/o+sidjk2wU1kFfD7Q==}
+  /turbo-linux-arm64@1.10.16:
+    resolution: {integrity: sha512-TMjFYz8to1QE0fKVXCIvG/4giyfnmqcQIwjdNfJvKjBxn22PpbjeuFuQ5kNXshUTRaTJihFbuuCcb5OYFNx4uw==}
     cpu: [arm64]
     os: [linux]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo-windows-64@1.10.13:
-    resolution: {integrity: sha512-S5XySRfW2AmnTeY1IT+Jdr6Goq7mxWganVFfrmqU+qqq3Om/nr0GkcUX+KTIo9mPrN0D3p5QViBRzulwB5iuUQ==}
+  /turbo-windows-64@1.10.16:
+    resolution: {integrity: sha512-+jsf68krs0N66FfC4/zZvioUap/Tq3sPFumnMV+EBo8jFdqs4yehd6+MxIwYTjSQLIcpH8KoNMB0gQYhJRLZzw==}
     cpu: [x64]
     os: [win32]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo-windows-arm64@1.10.13:
-    resolution: {integrity: sha512-nKol6+CyiExJIuoIc3exUQPIBjP9nIq5SkMJgJuxsot2hkgGrafAg/izVDRDrRduQcXj2s8LdtxJHvvnbI8hEQ==}
+  /turbo-windows-arm64@1.10.16:
+    resolution: {integrity: sha512-sKm3hcMM1bl0B3PLG4ifidicOGfoJmOEacM5JtgBkYM48ncMHjkHfFY7HrJHZHUnXM4l05RQTpLFoOl/uIo2HQ==}
     cpu: [arm64]
     os: [win32]
     requiresBuild: true
     dev: true
     optional: true
 
-  /turbo@1.10.13:
-    resolution: {integrity: sha512-vOF5IPytgQPIsgGtT0n2uGZizR2N3kKuPIn4b5p5DdeLoI0BV7uNiydT7eSzdkPRpdXNnO8UwS658VaI4+YSzQ==}
+  /turbo@1.10.16:
+    resolution: {integrity: sha512-2CEaK4FIuSZiP83iFa9GqMTQhroW2QryckVqUydmg4tx78baftTOS0O+oDAhvo9r9Nit4xUEtC1RAHoqs6ZEtg==}
     hasBin: true
     optionalDependencies:
-      turbo-darwin-64: 1.10.13
-      turbo-darwin-arm64: 1.10.13
-      turbo-linux-64: 1.10.13
-      turbo-linux-arm64: 1.10.13
-      turbo-windows-64: 1.10.13
-      turbo-windows-arm64: 1.10.13
+      turbo-darwin-64: 1.10.16
+      turbo-darwin-arm64: 1.10.16
+      turbo-linux-64: 1.10.16
+      turbo-linux-arm64: 1.10.16
+      turbo-windows-64: 1.10.16
+      turbo-windows-arm64: 1.10.16
     dev: true
 
   /type-check@0.4.0:

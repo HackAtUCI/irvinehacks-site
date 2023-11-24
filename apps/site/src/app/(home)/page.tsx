@@ -1,4 +1,4 @@
-import { About, Landing } from "./sections";
+import { About, Landing, MentorVolunteer } from "./sections";
 
 export default function Home() {
 	// Show landing section only if still in maintenance,
@@ -9,6 +9,7 @@ export default function Home() {
 		<>
 			<Landing />
 			<About />
+			<MentorVolunteer />
 		</>
 	);
 }

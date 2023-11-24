@@ -22,7 +22,7 @@ const Landing = () => {
 			}}
 			className="bg-cover bg-no-repeat bg-center"
 		>
-			<View className="h-full w-full absolute">
+			<View className="absolute w-full h-full">
 				<Suspense fallback={null}>
 					<Fireflies />
 					<PerspectiveCamera makeDefault position={[0.1, 0.1, 0.6]} />

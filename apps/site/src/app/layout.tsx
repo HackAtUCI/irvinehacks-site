@@ -17,7 +17,12 @@ export default function RootLayout({
 }) {
 	return (
 		<html lang="en">
-			<body style={{ backgroundImage: `url(${water.src})` }}>
+			<body
+				style={{
+					backgroundImage: `url(${water.src})`,
+				}}
+				className="overflow-x-hidden bg-top bg-repeat-y bg-[length:100%]"
+			>
 				{/* reference: https://github.com/pmndrs/react-three-next */}
 				<Layout>{children}</Layout>
 			</body>

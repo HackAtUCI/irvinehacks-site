@@ -1,22 +1,25 @@
+import type { ComponentProps } from "react";
+import Link from "next/link";
 import styles from "./Button.module.css";
+import clsx from "clsx";
 
 interface ButtonProps {
 	text: string;
-	href?: string;
 	className?: string;
+	href?: ComponentProps<typeof Link>["href"];
 }
 
 const Button: React.FC<ButtonProps> = ({ text, href, className }) => {
 	if (href) {
 		return (
-			<a
+			<Link
 				href={href}
 				target="_blank"
 				rel="noopener noreferrer"
-				className={styles.button + " font-body " + className}
+				className={clsx(styles.button, "font-body", className)}
 			>
 				{text}
-			</a>
+			</Link>
 		);
 	}
 	return (

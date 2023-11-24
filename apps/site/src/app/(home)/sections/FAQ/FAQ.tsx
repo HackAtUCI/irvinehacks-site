@@ -7,7 +7,7 @@ import styles from "./FAQ.module.scss";
 const FAQ = async () => {
 	const questions = await getQuestions();
 	const faq = questions[0]["faqs"].map(({ _key, question, answer }) => ({
-		_key: _key,
+		_key,
 		question: <strong className="w-10/12">{question}</strong>,
 		answer: <PortableText value={answer} />,
 	}));

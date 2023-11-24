@@ -1,7 +1,9 @@
 {
-  "eslint.workingDirectories": [
-    {
-      "mode": "auto"
-    }
-  ]
+	"eslint.workingDirectories": [
+		{
+			"mode": "auto"
+		}
+	],
+	"python.envFile": "${workspaceFolder}/.env",
+	"python.defaultInterpreterPath": ".venv/bin/python",
 }

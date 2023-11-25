@@ -6,7 +6,7 @@ import styles from "./About.module.css";
 const About = () => {
 	return (
 		<>
-			<section className="container md mx-auto text-center my-14 w-96 sm:w-1/2 xl:w-2/5 relative">
+			<section className="container md mx-auto text-center my-14 max-w-sm sm:max-w-lg xl:max-w-screen-md relative">
 				<Lantern
 					width={300}
 					height={300}

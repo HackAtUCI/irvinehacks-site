@@ -8,7 +8,7 @@ import { View } from "@/components/canvas/View";
 import Button from "@/lib/components/Button/Button";
 import Fireflies from "../../components/Fireflies";
 
-import landingBackground from "@/assets/backgrounds/landing-background.jpg";
+import landingBackground from "@/assets/backgrounds/landing-background.png";
 import fogLeft from "@/assets/images/fog-left.png";
 import fogRight from "@/assets/images/fog-right.png";
 

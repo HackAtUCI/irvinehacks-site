@@ -5,17 +5,18 @@ import clsx from "clsx";
 
 interface ButtonProps {
 	text: string;
+	className?: string;
 	href?: ComponentProps<typeof Link>["href"];
 }
 
-const Button: React.FC<ButtonProps> = ({ text, href }) => {
+const Button: React.FC<ButtonProps> = ({ text, href, className }) => {
 	if (href) {
 		return (
 			<Link
 				href={href}
 				target="_blank"
 				rel="noopener noreferrer"
-				className={clsx(styles.button, "font-body")}
+				className={clsx(styles.button, "font-body", className)}
 			>
 				{text}
 			</Link>

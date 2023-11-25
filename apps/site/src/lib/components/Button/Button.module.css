@@ -8,6 +8,8 @@
 	box-shadow: 0px 0px 20px rgba(255, 252, 226, 0.5);
 	border-radius: 15px;
 	color: var(--color-brown);
+	font-size: calc(13px + 1vw);
+	font-weight: 700;
 	padding: 0.55rem 1.25rem;
 	transition:
 		filter 0.1s ease,

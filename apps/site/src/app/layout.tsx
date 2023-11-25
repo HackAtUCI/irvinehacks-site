@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
+import water from "@/assets/backgrounds/water.jpg";
 import "./globals.css";
 
-import water from "./water.png";
 import { Layout } from "@/components/dom/Layout";
 
 export const metadata: Metadata = {

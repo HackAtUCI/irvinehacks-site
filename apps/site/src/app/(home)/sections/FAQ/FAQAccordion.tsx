@@ -13,8 +13,8 @@ const FAQAccordion: React.FC<FAQAccordion> = ({ faq }) => {
 		<Root className="font-body" type="single" collapsible>
 			{faq.map(({ _key, question, answer }) => (
 				<Item key={_key} value={_key}>
-					<Trigger className="sm:!text-[1.5rem]"> {question}</Trigger>
-					<Content> {answer}</Content>
+					<Trigger className="sm:!text-[1.5rem]">{question}</Trigger>
+					<Content>{answer}</Content>
 				</Item>
 			))}
 		</Root>

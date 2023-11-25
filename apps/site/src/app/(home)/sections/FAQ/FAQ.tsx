@@ -18,7 +18,7 @@ const FAQ = async () => {
 		>
 			<div className="relative flex flex-col w-4/5 pb-7">
 				<h2
-					className={`${styles.title} my-6 font-display sm:!text-[4.5rem] text-[#fffce2] text-4xl text-center`}
+					className={`${styles.title} my-6 font-display sm:text-[4.5rem] text-[#fffce2] text-4xl text-center`}
 				>
 					FAQ
 				</h2>

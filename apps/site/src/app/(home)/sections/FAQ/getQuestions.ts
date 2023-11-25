@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { cache } from "react";
-// import { client } from "@/lib/sanity/client";
 import { client } from "@/lib/sanity/client";
 import { SanityDocument } from "@/lib/sanity/types";
 

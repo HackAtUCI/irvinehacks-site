@@ -1,4 +1,4 @@
-import { Landing, MentorVolunteer, FAQ } from "./sections";
+import { About, Landing, MentorVolunteer, FAQ } from "./sections";
 
 export const revalidate = 60;
 
@@ -10,6 +10,7 @@ export default function Home() {
 	) : (
 		<>
 			<Landing />
+			<About />
 			<MentorVolunteer />
 			<FAQ />
 		</>

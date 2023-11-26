@@ -8,7 +8,6 @@ import { View } from "@/components/canvas/View";
 import Button from "@/lib/components/Button/Button";
 import Fireflies from "../../components/Fireflies";
 
-import landingBackground from "@/assets/backgrounds/landing-background.png";
 import fogLeft from "@/assets/images/fog-left.png";
 import fogRight from "@/assets/images/fog-right.png";
 
@@ -16,12 +15,7 @@ import styles from "./Landing.module.css";
 
 const Landing = () => {
 	return (
-		<section
-			style={{
-				backgroundImage: `url(${landingBackground.src})`,
-			}}
-			className="bg-cover bg-no-repeat bg-center"
-		>
+		<section className={styles.landingBackground}>
 			<View className="absolute w-full h-full">
 				<Suspense fallback={null}>
 					<Fireflies />

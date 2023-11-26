@@ -1,3 +1,14 @@
+.landingBackground {
+	background-image: url("~@/assets/backgrounds/fog.png"),
+		url("~@/assets/backgrounds/lantern-glow.png"),
+		url("~@/assets/backgrounds/landing-lanterns-bottom.png"),
+		url("~@/assets/backgrounds/boat.png"),
+		url("~@/assets/backgrounds/stall-left.png"),
+		url("~@/assets/backgrounds/stall-right.png"),
+		url("~@/assets/backgrounds/landing-lanterns.png"),
+		url("~@/assets/backgrounds/sky.png");
+}
+
 .fogLeft,
 .fogRight {
 	animation-delay: 1.5s;

@@ -1,6 +1,17 @@
+.landingBackground {
+	background-image: url("~@/assets/backgrounds/landing-background.jpg");
+	background-position: center bottom;
+	background-repeat: no-repeat;
+	background-size: cover;
+	mask-image: url("~@/assets/backgrounds/landing-background-mask.png");
+	mask-position: center bottom;
+	mask-repeat: no-repeat;
+	mask-size: cover;
+}
+
 .fogLeft,
 .fogRight {
-	animation-delay: 1.5s;
+	animation-delay: 2s;
 	animation-duration: 4s;
 	animation-fill-mode: forwards;
 	animation-timing-function: ease;

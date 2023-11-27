@@ -1,10 +1,10 @@
 .landingBackground {
 	background-image: url("~@/assets/backgrounds/landing-background.jpg");
-	background-position: center;
+	background-position: center bottom;
 	background-repeat: no-repeat;
 	background-size: cover;
 	mask-image: url("~@/assets/backgrounds/landing-background-mask.png");
-	mask-position: center;
+	mask-position: center bottom;
 	mask-repeat: no-repeat;
 	mask-size: cover;
 }

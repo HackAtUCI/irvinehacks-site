@@ -107,6 +107,9 @@ importers:
       '@react-three/fiber':
         specifier: ^8.15.11
         version: 8.15.11(react-dom@18.2.0)(react@18.2.0)(three@0.158.0)
+      '@sanity/image-url':
+        specifier: ^1.0.2
+        version: 1.0.2
       '@types/three':
         specifier: ^0.158.2
         version: 0.158.2

@@ -23,7 +23,7 @@ const Footer = () => {
 		<div className='flex flex-row footer-logos items-center gap-10 mt-12'>
 			{imageArray.map((item, index) => {
 				return(
-					<a>
+					<a key={`footer-logo-${index}`}>
 						<Image
 							src={item[0]}
 							width="35"

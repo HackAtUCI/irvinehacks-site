@@ -20,6 +20,18 @@ const nextConfig = {
 			},
 		];
 	},
+	async redirects() {
+		return [
+			{
+				source: "/mentor",
+				destination: "https://forms.gle/yCmXvG89ygvxUSCd7",
+				permanent: true,
+			},
+			{
+				source: "/volunteer",
+				destination: "https://forms.gle/erpJjErKLJkEZMw48",
+				permanent: true,
+			},
+		];
+	},
 };
-
-module.exports = nextConfig;

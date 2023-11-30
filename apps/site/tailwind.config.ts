@@ -20,7 +20,7 @@ const config: Config = {
 				sans: ["Mulish"],
 			},
 		},
-	}, 
+	},
 	plugins: [],
 };
 export default config;

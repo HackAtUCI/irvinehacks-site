@@ -29,10 +29,10 @@ const About = () => {
 						<span className={styles.statistic}>36</span> Hours
 					</h2>
 					<h2>
-						<span className={styles.statistic}>500+</span> Hackers
+						<span className={styles.statistic}>400+</span> Hackers
 					</h2>
 					<h2>
-						<span className={styles.statistic}>$10,000</span> in
+						<span className={styles.statistic}>$5,000+</span> in
 						Prizes
 					</h2>
 				</div>
@@ -58,7 +58,7 @@ const About = () => {
 				width="150"
 				height="150"
 				alt="Koi fish"
-				className="mx-auto"
+				className="mx-auto mb-14"
 			/>
 		</>
 	);

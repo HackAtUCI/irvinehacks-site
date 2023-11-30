@@ -58,7 +58,7 @@ const About = () => {
 				width="150"
 				height="150"
 				alt="Koi fish"
-				className="mx-auto"
+				className="mx-auto mb-14"
 			/>
 		</>
 	);

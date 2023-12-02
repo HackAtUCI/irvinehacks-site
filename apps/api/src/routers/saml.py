@@ -2,6 +2,7 @@ import json
 import os
 from functools import lru_cache
 from logging import getLogger
+from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Request
@@ -27,14 +28,14 @@ def _get_saml_settings() -> OneLogin_Saml2_Settings:
     but chooses values based on staging or production environment
     and can load values from environment variables instead of files.
     """
-    BASE_PATH = "configuration/saml"
+    BASE_PATH = Path("configuration/saml")
 
     if not SP_KEY:
         raise ValueError("SP_KEY is not defined")
 
     def _read_json(filename: str) -> dict[str, Any]:
-        with open(f"{BASE_PATH}/{filename}") as file:
-            data: dict[str, Any] = json.loads(file.read())
+        with open(BASE_PATH / filename) as file:
+            data: dict[str, Any] = json.load(file)
             return data
 
     settings_filename = "settings-staging.json" if STAGING_ENV else "settings-prod.json"
@@ -47,12 +48,12 @@ def _get_saml_settings() -> OneLogin_Saml2_Settings:
     settings["sp"]["x509cert"] = settings["sp"]["x509cert"] or SP_CRT
     if not settings["sp"]["x509cert"]:
         sp_crt_filename = "sp-staging.crt" if STAGING_ENV else "sp-prod.crt"
-        with open(f"{BASE_PATH}/certs/{sp_crt_filename}") as sp_crt_file:
+        with open(BASE_PATH / "certs" / sp_crt_filename) as sp_crt_file:
             settings["sp"]["x509cert"] = sp_crt_file.read()
 
     settings["sp"]["privateKey"] = SP_KEY
 
-    return OneLogin_Saml2_Settings(settings, custom_base_path="saml")
+    return OneLogin_Saml2_Settings(settings, custom_base_path=str(BASE_PATH))
 
 
 async def _prepare_saml_req(req: Request) -> dict[str, Any]:

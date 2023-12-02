@@ -1,3 +1,4 @@
 fastapi==0.104.1
 httpx==0.25.2
 python-multipart==0.0.5
+python3-saml==1.16.0

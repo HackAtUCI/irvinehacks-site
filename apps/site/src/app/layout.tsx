@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 import { Layout } from "@/components/dom/Layout";
+import Navbar from "@/lib/components/Navbar/Navbar";
 
 export const metadata: Metadata = {
 	title: "IrvineHacks 2024",
@@ -18,6 +19,7 @@ export default function RootLayout({
 		<html lang="en">
 			<body className="overflow-y-hidden overflow-x-hidden">
 				{/* reference: https://github.com/pmndrs/react-three-next */}
+				<Navbar/>
 				<Layout>{children}</Layout>
 			</body>
 		</html>

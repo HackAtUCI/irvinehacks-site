@@ -46,7 +46,7 @@
 		"privateKey": ""
 	},
 	"idp": {
-		"entityId": "urn:mace:incommon:uci.edu",
+		"entityId": "https://shib-qa.service.uci.edu/idp",
 		"singleSignOnService": {
 			"url": "https://shib-qa.service.uci.edu/idp/profile/SAML2/Redirect/SSO",
 			"binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"

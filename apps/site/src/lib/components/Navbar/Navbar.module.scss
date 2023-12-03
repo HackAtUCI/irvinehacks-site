@@ -1,0 +1,22 @@
+.navMenuList {
+    $underline-size: 4px;
+
+	> * > * {
+		font-size: 24px;
+	}
+
+    > * {
+        padding-bottom: 1rem;
+
+        background-image: linear-gradient(white, white);
+		background-repeat: no-repeat;
+		background-position-y: 35px;
+		background-size: 0% $underline-size;
+		transition: background-size 0.25s ease-in-out;
+
+		&:hover,
+		&.active {
+			background-size: 100% $underline-size;
+		}
+    }
+}

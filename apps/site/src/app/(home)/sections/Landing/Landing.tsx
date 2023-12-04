@@ -16,12 +16,7 @@ import styles from "./Landing.module.css";
 
 const Landing = () => {
 	return (
-		<section
-			className={clsx(
-				"bg-center bg-cover bg-no-repeat",
-				styles.landingBackground,
-			)}
-		>
+		<section className={styles.landingBackground}>
 			<View className="absolute w-full h-full">
 				<Suspense fallback={null}>
 					<Fireflies />

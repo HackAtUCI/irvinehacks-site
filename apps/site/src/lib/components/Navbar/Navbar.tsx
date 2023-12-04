@@ -8,8 +8,8 @@ import React from "react";
 import { useState, useEffect } from "react";
 
 import Button from "@/lib/components/Button/Button";
+import HackLogo from "@/lib/components/HackLogo/HackLogo";
 
-import hackLogo from "@/assets/logos/white-anteater-logo.svg";
 import hamburger from "@/assets/icons/navigation-icon.svg";
 import Image from "next/image";
 
@@ -65,11 +65,7 @@ function Navbar() {
 				}
 			>
 				<NavLinkItem href="/">
-					<Image
-						src={hackLogo}
-						width="35"
-						alt="Hack at UCI Anteater Logo"
-					/>
+					<HackLogo />
 				</NavLinkItem>
 				<Image
 					className="ml-auto md:hidden cursor-pointer"

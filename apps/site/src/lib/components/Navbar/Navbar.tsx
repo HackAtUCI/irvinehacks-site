@@ -7,6 +7,7 @@ import styles from "./Navbar.module.scss";
 import React from "react";
 
 import hackLogo from "@/assets/logos/white-anteater-logo.svg";
+import hamburger from "@/assets/icons/navigation-icon.svg";
 import Image from "next/image";
 
 const NavLinkItem = React.forwardRef<
@@ -16,7 +17,7 @@ const NavLinkItem = React.forwardRef<
 	return (
 		<NavMenu.Item>
 			<NavMenu.Link
-				className={clsx(styles.navMenuItem, className)}
+				className={clsx(styles.navMenuLink, className)}
 				{...props}
 				ref={forwardedRef}
 			>
@@ -27,9 +28,27 @@ const NavLinkItem = React.forwardRef<
 });
 
 function Navbar() {
+	const [listShown, setListShown] = React.useState(false);
+	const [transitionApplied, setTransitionApplied] = React.useState(false);
+	const [backgroundChanged, setBackgroundChanged] = React.useState(false);
+
+	const mobileNavInitStateHandler = () => {
+		setListShown(false);
+		setTransitionApplied(false);
+		setBackgroundChanged(false);
+	};
+	window
+		.matchMedia("(min-width: 768px)")
+		.addEventListener("change", mobileNavInitStateHandler);
+
 	return (
-		<NavMenu.Root className="flex fixed w-full z-10 p-3">
-			<NavMenu.List>
+		<NavMenu.Root className="w-full z-10 flex flex-col fixed md:flex-row">
+			<NavMenu.List
+				className={
+					(backgroundChanged ? "bg-black " : "") +
+					`bg-opacity-50 flex p-3`
+				}
+			>
 				<NavLinkItem href="/">
 					<Image
 						src={hackLogo}
@@ -37,10 +56,34 @@ function Navbar() {
 						alt="Hack at UCI Anteater Logo"
 					/>
 				</NavLinkItem>
+				<Image
+					className="ml-auto md:hidden cursor-pointer"
+					src={hamburger}
+					width="35"
+					alt="Mobile hamburger menu"
+					onClick={() => {
+						setListShown(!listShown);
+						setTransitionApplied(true);
+						setBackgroundChanged(true);
+					}}
+				/>
 			</NavMenu.List>
-			<div className="ml-auto">
+			<div
+				className={`${styles.navMenuListWrapper} md:ml-auto inline-block md:flex md:items-center`}
+			>
 				<NavMenu.List
-					className={`${styles.navMenuList} flex gap-10 mr-3`}
+					className={
+						(transitionApplied
+							? `${styles.transformTransition} `
+							: "") +
+						(listShown
+							? `${styles.showList} `
+							: `${styles.hideList} `) +
+						`${styles.navMenuList} font-display gap-10 ps-5 py-3 bg-black bg-opacity-50 md:bg-opacity-0 md:p-0 md:mr-3 md:flex`
+					}
+					onTransitionEnd={() => {
+						if (!listShown) setBackgroundChanged(false);
+					}}
 				>
 					<NavLinkItem href="/">Home</NavLinkItem>
 					<NavLinkItem href="/sponsor">Sponsor</NavLinkItem>

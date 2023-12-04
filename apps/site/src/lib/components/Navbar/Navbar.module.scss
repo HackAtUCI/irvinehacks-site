@@ -1,22 +1,49 @@
-.navMenuList {
-    $underline-size: 4px;
-
-	> * > * {
-		font-size: 24px;
+.navMenuListWrapper {
+	// clip top only when mobile
+	@media (max-width: 768px) {
+		clip-path: inset(0px 0px -100px -100px);
 	}
+}
 
-    > * {
-        padding-bottom: 1rem;
+.navMenuList {
+	@media (max-width: 768px) {
+		transform: translateY(-250px);
+	}
+}
 
-        background-image: linear-gradient(white, white);
-		background-repeat: no-repeat;
-		background-position-y: 35px;
-		background-size: 0% $underline-size;
-		transition: background-size 0.25s ease-in-out;
+// so the transition can be disabled on media break
+.transformTransition {
+	transition: transform 0.5s ease-in-out;
+}
 
-		&:hover,
-		&.active {
-			background-size: 100% $underline-size;
-		}
-    }
+.hideList {
+	@media (max-width: 768px) {
+		transform: translateY(-250px);
+	}
+}
+
+.showList {
+	@media (max-width: 768px) {
+		transform: translateY(0px);
+	}
+}
+
+.navMenuLink {
+	$underline-size: 4px;
+
+	font-size: 24px;
+	text-shadow: 0px 0px 20px #fffce2;
+
+	padding-bottom: 0.75rem;
+
+	background-image: linear-gradient(white, white);
+	background-repeat: no-repeat;
+	background-position-y: 35px;
+	background-size: 0% $underline-size;
+	transition: background-size 0.25s ease-in-out;
+
+	&:hover,
+	&.active {
+		background-size: 100% $underline-size;
+	}
 }

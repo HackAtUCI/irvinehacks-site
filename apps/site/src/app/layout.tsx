@@ -17,10 +17,12 @@ export default function RootLayout({
 }) {
 	return (
 		<html lang="en">
-			<body className="overflow-y-hidden overflow-x-hidden">
+			<body className="overflow-x-hidden">
 				{/* reference: https://github.com/pmndrs/react-three-next */}
 				<Navbar/>
 				<Layout>{children}</Layout>
+				
+				<div style={{width: "100vw", height: "1000px"}}></div>  {/* remove on merge. for testing nav bg changing on scroll */}
 			</body>
 		</html>
 	);

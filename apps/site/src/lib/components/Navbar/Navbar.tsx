@@ -5,6 +5,7 @@ import clsx from "clsx";
 
 import styles from "./Navbar.module.scss";
 import React from "react";
+import { useState, useEffect } from "react";
 
 import Button from "@/lib/components/Button/Button";
 
@@ -30,25 +31,37 @@ const NavLinkItem = React.forwardRef<
 });
 
 function Navbar() {
-	const [listShown, setListShown] = React.useState(false);
-	const [transitionApplied, setTransitionApplied] = React.useState(false);
-	const [backgroundChanged, setBackgroundChanged] = React.useState(false);
+	const [listShown, setListShown] = useState(false);
+	const [transitionApplied, setTransitionApplied] = useState(false);
+	const [collapsedNavBGChanged, setCollapsedNavBGChanged] = useState(false);
+	const [hasScrolled, setHasScrolled] = useState(false);
 
 	const mobileNavInitStateHandler = () => {
 		setListShown(false);
 		setTransitionApplied(false);
-		setBackgroundChanged(false);
+		setCollapsedNavBGChanged(false);
 	};
 	window
 		.matchMedia("(min-width: 768px)")
 		.addEventListener("change", mobileNavInitStateHandler);
 
+	useEffect(() => {
+		const scrollHandler = () =>
+			window.scrollY !== 0 ? setHasScrolled(true) : setHasScrolled(false);
+
+		window.addEventListener("scroll", scrollHandler);
+	}, []);
+
 	return (
-		<NavMenu.Root className="w-full z-10 flex flex-col fixed md:flex-row">
+		<NavMenu.Root
+			className={`${
+				hasScrolled ? "md:bg-black md:bg-opacity-50" : ""
+			} w-full z-10 flex flex-col fixed md:flex-row md:items-center`}
+		>
 			<NavMenu.List
 				className={
-					(backgroundChanged ? "bg-black " : "") +
-					`bg-opacity-50 flex p-3`
+					(collapsedNavBGChanged ? "bg-black " : "") +
+					"bg-opacity-50 flex p-3"
 				}
 			>
 				<NavLinkItem href="/">
@@ -66,12 +79,12 @@ function Navbar() {
 					onClick={() => {
 						setListShown(!listShown);
 						setTransitionApplied(true);
-						setBackgroundChanged(true);
+						setCollapsedNavBGChanged(true);
 					}}
 				/>
 			</NavMenu.List>
 			<div
-				className={`${styles.navMenuListWrapper} md:mt-3 md:mr-3 md:ml-auto inline-block md:flex md:items-center`}
+				className={`${styles.navMenuListWrapper} md:my-3 md:mr-3 md:ml-auto inline-block md:flex md:items-center`}
 			>
 				<NavMenu.List
 					className={
@@ -84,7 +97,7 @@ function Navbar() {
 						`${styles.navMenuList} font-display gap-10 p-5 pt-3 bg-black bg-opacity-50 md:bg-opacity-0 md:p-0 md:flex md:items-center`
 					}
 					onTransitionEnd={() => {
-						if (!listShown) setBackgroundChanged(false);
+						if (!listShown) setCollapsedNavBGChanged(false);
 					}}
 				>
 					<NavLinkItem href="/">Home</NavLinkItem>
@@ -92,7 +105,7 @@ function Navbar() {
 					<NavLinkItem href="/schedule">Schedule</NavLinkItem>
 					<NavLinkItem href="/resources">Resources</NavLinkItem>
 					<NavLinkItem href="/stage">Stage</NavLinkItem>
-					<Button text="Login" href="/login" alt={true}/>
+					<Button text="Login" href="/login" alt />
 				</NavMenu.List>
 			</div>
 		</NavMenu.Root>

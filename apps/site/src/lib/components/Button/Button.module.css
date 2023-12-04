@@ -18,3 +18,11 @@
 		filter: brightness(1.05);
 	}
 }
+
+.altButton {
+	@apply font-display;
+	padding: 0.15rem 1.15rem;
+	border-radius: 10px;
+	background-image: none;
+	background-color: var(--color-cream);
+}

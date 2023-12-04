@@ -6,6 +6,8 @@ import clsx from "clsx";
 import styles from "./Navbar.module.scss";
 import React from "react";
 
+import Button from "@/lib/components/Button/Button";
+
 import hackLogo from "@/assets/logos/white-anteater-logo.svg";
 import hamburger from "@/assets/icons/navigation-icon.svg";
 import Image from "next/image";
@@ -69,7 +71,7 @@ function Navbar() {
 				/>
 			</NavMenu.List>
 			<div
-				className={`${styles.navMenuListWrapper} md:ml-auto inline-block md:flex md:items-center`}
+				className={`${styles.navMenuListWrapper} md:mt-3 md:mr-3 md:ml-auto inline-block md:flex md:items-center`}
 			>
 				<NavMenu.List
 					className={
@@ -79,7 +81,7 @@ function Navbar() {
 						(listShown
 							? `${styles.showList} `
 							: `${styles.hideList} `) +
-						`${styles.navMenuList} font-display gap-10 ps-5 py-3 bg-black bg-opacity-50 md:bg-opacity-0 md:p-0 md:mr-3 md:flex`
+						`${styles.navMenuList} font-display gap-10 p-5 pt-3 bg-black bg-opacity-50 md:bg-opacity-0 md:p-0 md:flex md:items-center`
 					}
 					onTransitionEnd={() => {
 						if (!listShown) setBackgroundChanged(false);
@@ -90,7 +92,7 @@ function Navbar() {
 					<NavLinkItem href="/schedule">Schedule</NavLinkItem>
 					<NavLinkItem href="/resources">Resources</NavLinkItem>
 					<NavLinkItem href="/stage">Stage</NavLinkItem>
-					<NavLinkItem href="/login">Login</NavLinkItem>
+					<Button text="Login" href="/login" alt={true}/>
 				</NavMenu.List>
 			</div>
 		</NavMenu.Root>

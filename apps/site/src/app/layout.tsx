@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import water from "@/assets/backgrounds/water.jpg";
 import Footer from "@/lib/components/Footer/Footer";
 import "./globals.css";
+import Apply from "./apply/page";
 
 import { Layout } from "@/components/dom/Layout";
 
@@ -26,6 +27,7 @@ export default function RootLayout({
 			>
 				{/* reference: https://github.com/pmndrs/react-three-next */}
 				<Layout>{children}</Layout>
+				<Apply />
 				<Footer />
 			</body>
 		</html>

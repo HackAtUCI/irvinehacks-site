@@ -5,12 +5,12 @@ export default function ProfileInformation() {
         <div className="flex flex-col gap-5 w-11/12">
             <p className="text-4xl m-0 font-bold">Profile Information</p>
 
-            <div className="flex gap-5 w-full">
-                <div className="flex flex-col w-6/12">
+            <div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
+                <div className="flex flex-col w-6/12 max-[1000px]:w-full">
                     <label className={`${styles.label}`} htmlFor="linkedin">LinkedIn</label>
                     <input className={`${styles.input}`} type="url" name="linkedin" placeholder="http://" />
                 </div>
-                <div className="flex flex-col w-6/12">
+                <div className="flex flex-col w-6/12 max-[1000px]:w-full">
                     <label className={`${styles.label}`} htmlFor="portfolio">Portfolio (Github, website, etc.)</label>
                     <input className={`${styles.input}`} type="url" name="portfolio" placeholder="http://" />
                 </div>

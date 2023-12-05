@@ -27,8 +27,8 @@ export default function SchoolInformation() {
         <div className="flex flex-col gap-5 w-11/12">
             <p className="text-4xl m-0 font-bold">Education</p>
 
-            <div className="flex gap-5 w-full">
-                <div className="flex flex-col w-6/12">
+            <div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
+                <div className="flex flex-col w-6/12 max-[1000px]:w-full">
                     <DropdownSelect 
                     labelStyle={`${styles.label}`} 
                     inputStyle={`${styles.input}`} 
@@ -37,7 +37,7 @@ export default function SchoolInformation() {
                     values={educationLevels} />
                 </div>
 
-                <div className="flex flex-col w-6/12">
+                <div className="flex flex-col w-6/12 max-[1000px]:w-full">
                     <DropdownSelect 
                     labelStyle={`${styles.label}`} 
                     inputStyle={`${styles.input}`} 
@@ -55,7 +55,7 @@ export default function SchoolInformation() {
             </div>
 
             <div className="flex gap-5 w-full">
-                <div className="flex flex-row items-center gap-5">
+                <div className="flex flex-row items-center gap-5 max-[600px]:flex-col max-[600px]:items-center max-[600px]:gap-1 max-[600px]:w-full text-center">
                     <p className={`text-lg mb-0 p-0`}>Is this your first Hacakthon? <span className="text-[#FF2222]">*</span></p>
                     <div className="flex gap-2 items-center">
                         <input type="radio" id="hack-yes" name="hack-check" value="Yes" defaultChecked={true} required/>

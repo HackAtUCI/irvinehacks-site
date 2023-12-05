@@ -1,34 +1,17 @@
 "use client";
 
 import * as NavMenu from "@radix-ui/react-navigation-menu";
-import clsx from "clsx";
 
 import styles from "./Navbar.module.scss";
 import React from "react";
 import { useState, useEffect } from "react";
 
+import NavLinkItem from "./NavbarHelpers";
 import Button from "@/lib/components/Button/Button";
 import HackLogo from "@/lib/components/HackLogo/HackLogo";
 
 import hamburger from "@/assets/icons/navigation-icon.svg";
 import Image from "next/image";
-
-const NavLinkItem = React.forwardRef<
-	React.ElementRef<typeof NavMenu.Link>,
-	React.ComponentPropsWithoutRef<typeof NavMenu.Link>
->(({ children, className, ...props }, forwardedRef) => {
-	return (
-		<NavMenu.Item>
-			<NavMenu.Link
-				className={clsx(styles.navMenuLink, className)}
-				{...props}
-				ref={forwardedRef}
-			>
-				{children}
-			</NavMenu.Link>
-		</NavMenu.Item>
-	);
-});
 
 function Navbar() {
 	const [listShown, setListShown] = useState(false);
@@ -42,7 +25,8 @@ function Navbar() {
 			setTransitionApplied(false);
 			setCollapsedNavBGChanged(false);
 		};
-
+		
+		// hides list on breakpoint
 		window
 			.matchMedia("(min-width: 768px)")
 			.addEventListener("change", mobileNavInitStateHandler);

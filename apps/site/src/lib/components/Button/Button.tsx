@@ -17,7 +17,7 @@ const Button: React.FC<ButtonProps> = ({ text, href, className, alt }) => {
 				href={href}
 				target="_blank"
 				rel="noopener noreferrer"
-        className={clsx(styles.button, alt && styles.altButton, "font-body", className)}
+        className={clsx(styles.button, alt && styles.altButton, alt ? "font-display" :"font-body", className)}
 			>
 				{text}
 			</Link>

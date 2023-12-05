@@ -17,6 +17,7 @@ const config: Config = {
 			fontFamily: {
 				display: ["Alegreya"],
 				body: ["Mulish"],
+				sans: ["Mulish"],
 			},
 		},
 	},

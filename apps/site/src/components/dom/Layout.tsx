@@ -13,7 +13,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
 				position: "relative",
 				width: " 100%",
 				height: "100%",
-				overflow: "auto",
+				overflowX: "hidden",
 				touchAction: "auto",
 			}}
 		>

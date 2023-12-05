@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import water from "@/assets/backgrounds/water.jpg";
+import Footer from "@/lib/components/Footer/Footer";
 import "./globals.css";
 
 import { Layout } from "@/components/dom/Layout";
@@ -17,12 +19,16 @@ export default function RootLayout({
 }) {
 	return (
 		<html lang="en">
-			<body className="overflow-x-hidden">
+			<body
+				style={{
+					backgroundImage: `url(${water.src})`,
+				}}
+				className="overflow-x-hidden bg-top bg-repeat-y bg-[length:100%]"
+			>
 				{/* reference: https://github.com/pmndrs/react-three-next */}
 				<Navbar/>
 				<Layout>{children}</Layout>
-				
-				<div style={{width: "100vw", height: "1000px"}}></div>  {/* remove on merge. for testing nav bg changing on scroll */}
+				<Footer />
 			</body>
 		</html>
 	);

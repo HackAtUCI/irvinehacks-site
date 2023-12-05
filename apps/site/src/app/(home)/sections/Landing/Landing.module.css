@@ -1,25 +1,17 @@
-.landingSection {
+.landingBackground {
 	background-image: url("~@/assets/backgrounds/landing-background.jpg");
-	background-position: center;
+	background-position: center bottom;
 	background-repeat: no-repeat;
 	background-size: cover;
-	position: relative;
-	min-height: 100vh;
-	min-width: 100vw;
-	overflow-x: hidden;
-}
-
-.landingGroup {
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	text-align: center;
+	mask-image: url("~@/assets/backgrounds/landing-background-mask.png");
+	mask-position: center bottom;
+	mask-repeat: no-repeat;
+	mask-size: cover;
 }
 
 .fogLeft,
 .fogRight {
-	animation-delay: 0.5s;
+	animation-delay: 2s;
 	animation-duration: 4s;
 	animation-fill-mode: forwards;
 	animation-timing-function: ease;

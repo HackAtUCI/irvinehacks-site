@@ -36,14 +36,17 @@ function Navbar() {
 	const [collapsedNavBGChanged, setCollapsedNavBGChanged] = useState(false);
 	const [hasScrolled, setHasScrolled] = useState(false);
 
-	const mobileNavInitStateHandler = () => {
-		setListShown(false);
-		setTransitionApplied(false);
-		setCollapsedNavBGChanged(false);
-	};
-	window
-		.matchMedia("(min-width: 768px)")
-		.addEventListener("change", mobileNavInitStateHandler);
+	useEffect(() => {
+		const mobileNavInitStateHandler = () => {
+			setListShown(false);
+			setTransitionApplied(false);
+			setCollapsedNavBGChanged(false);
+		};
+
+		window
+			.matchMedia("(min-width: 768px)")
+			.addEventListener("change", mobileNavInitStateHandler);
+	}, []);
 
 	useEffect(() => {
 		const scrollHandler = () =>

@@ -77,7 +77,7 @@ function Navbar() {
 					<NavLinkItem href="/schedule">Schedule</NavLinkItem>
 					<NavLinkItem href="/resources">Resources</NavLinkItem>
 					<NavLinkItem href="/stage">Stage</NavLinkItem>
-					<Button text="Login" href="/login" alt />
+					<Button text="Login" href="/login" isLightVersion />
 				</NavMenu.List>
 			</div>
 		</NavMenu.Root>

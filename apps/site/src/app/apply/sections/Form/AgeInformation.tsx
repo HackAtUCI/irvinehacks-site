@@ -2,8 +2,8 @@ export default function AgeInformation() {
     return(
         <div className="flex flex-col gap-5 w-11/12">
             <div className="flex flex-col gap-5">
-                <p className="m-0">Because of limitations imposed by UCI, we are legally not allowed to host minors (those under 18) for IrvineHacks 2024. By answering yes, you affirm that you are and will be 18 years or older by January 26, 2024.</p>
-                <p className="text-[#FF2222] m-0">We will be checking ID. If you are a minor, you will be turned away at the door.</p>
+                <p className="m-0 text-lg">Because of limitations imposed by UCI, we are legally not allowed to host minors (those under 18) for IrvineHacks 2024. By answering yes, you affirm that you are and will be 18 years or older by January 26, 2024.</p>
+                <p className="text-[#FF2222] m-0 text-lg">We will be checking ID. If you are a minor, you will be turned away at the door.</p>
             </div>
 
             <div className="flex flex-col gap-1 w-full items-center">

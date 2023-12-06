@@ -2,9 +2,8 @@
 
 import styles from "./Form.module.scss";
 import DropdownSelect from "../Components/dropdownSelect";
-import { Eye } from "lucide-react";
-import { EyeOff } from "lucide-react";
-import { useRef, useState } from 'react';
+import SingleSelect from "../Components/SingleSelect";
+import { useState } from 'react';
 import PasswordEye from "../Components/PasswordEye";
 
 declare namespace JSX {
@@ -22,12 +21,12 @@ const pronouns = [
 ];
 
 const ethnicity = [
-	{value: "American Indian or Alaskan", text: "American Indian or Alaskan"},
-	{value: "Asian or Pacific Islander", text: "Asian or Pacific Islander"},
-    {value: "Black or African American", text: "Black or African American"},
+	{value: "American", text: "American Indian or Alaskan"},
+	{value: "Asian", text: "Asian or Pacific Islander"},
+    {value: "Black", text: "Black or African American"},
     {value: "Hispanic", text: "Hispanic"},
-    {value: "White or Caucasian", text: "White or Caucasian"},
-    {value: "Two or more races", text: "Two or more races"},
+    {value: "White", text: "White or Caucasian"},
+    {value: "Two-or-more", text: "Two or more races"},
     {value: "Prefer not to answer", text: "Prefer not to answer"},
 ]
 
@@ -68,15 +67,9 @@ export default function BasicInformation() {
             </div>
 
             <div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
-                <div className="flex flex-col w-6/12 max-[1000px]:w-full">
+                <div className="flex flex-col w-full">
                     <label className={`${styles.label}`} htmlFor="email">Email <span className="text-[#FF2222]">*</span></label>
                     <input className={`${styles.input}`} type="email" name="email" required/>
-                </div>
-                <div className="flex flex-col w-3/12 max-[1000px]:w-full">
-                    <DropdownSelect labelStyle={`${styles.label}`} inputStyle={`${styles.input}`} name="gender" labelText="Gender" values={pronouns} />
-                </div>
-                <div className="flex flex-col w-3/12 max-[1000px]:w-full">
-                    <DropdownSelect labelStyle={`${styles.label}`} inputStyle={`${styles.input}`} name="ethnicity" labelText="Race / Ethnicity" values={ethnicity} />
                 </div>
             </div>
 
@@ -107,8 +100,16 @@ export default function BasicInformation() {
                         required />
                         <PasswordEye visible={confirmPasswordVisible} handler={handleChangeConfirmPassword}/>
                     </div>
+                </div>    
+            </div>
+
+            <div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
+                <div className="flex flex-col w-6/12 max-[1000px]:w-full">
+                    <SingleSelect IdentifierID="gender-identifier" name="gender" labelText="Gender" values={pronouns} />
                 </div>
-            
+                <div className="flex flex-col w-6/12 max-[1000px]:w-full">
+                    <SingleSelect IdentifierID="ethnicity-identifier" name="ethnicity" labelText="Race / Ethnicity" values={ethnicity} />
+                </div>
             </div>
         </div>
     )

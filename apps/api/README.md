@@ -17,3 +17,8 @@ which will start a Uvicorn server with auto-reload.
 For deployment, the following environment variables need to be set:
 
 -   `PYTHONPATH=src/api` to properly import Python modules
+-   `SP_KEY`, the private key for SAML authentication
+
+For staging, the following environment variables should also bet set:
+
+-   `DEPLOYMENT=staging`

@@ -1,0 +1,42 @@
+{
+	"security": {
+		"nameIdEncrypted": true,
+		"authnRequestsSigned": true,
+		"logoutRequestSigned": true,
+		"logoutResponseSigned": true,
+		"signMetadata": true,
+		"wantMessagesSigned": true,
+		"wantAssertionsSigned": true,
+		"wantAssertionsEncrypted": true,
+		"wantNameId": false,
+		"wantNameIdEncrypted": true,
+		"wantAttributeStatement": true,
+		"requestedAuthnContext": true,
+		"requestedAuthnContextComparison": "exact",
+		"failOnAuthnContextMismatch": false,
+		"metadataValidUntil": null,
+		"metadataCacheDuration": null,
+		"allowSingleLabelDomains": false,
+		"signatureAlgorithm": "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256",
+		"digestAlgorithm": "http://www.w3.org/2001/04/xmlenc#sha256",
+		"allowRepeatAttributeName": false,
+		"rejectDeprecatedAlgorithm": true
+	},
+	"contactPerson": {
+		"technical": {
+			"givenName": "Hack at UCI",
+			"emailAddress": "hack@uci.edu"
+		},
+		"support": {
+			"givenName": "Hack at UCI",
+			"emailAddress": "hack@uci.edu"
+		}
+	},
+	"organization": {
+		"en-US": {
+			"name": "HackAtUCI",
+			"displayname": "Hack at UCI",
+			"url": "https://hack.ics.uci.edu"
+		}
+	}
+}

@@ -1,0 +1,11 @@
+[tool.pytest.ini_options]
+pythonpath = "src"
+addopts = "--verbose --cov src"
+testpaths = "tests"
+asyncio_mode = "auto"
+
+[tool.coverage.run]
+branch = true
+
+[tool.coverage.report]
+show_missing = true

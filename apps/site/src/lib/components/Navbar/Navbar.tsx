@@ -16,16 +16,14 @@ import Image from "next/image";
 function Navbar() {
 	const [listShown, setListShown] = useState(false);
 	const [transitionApplied, setTransitionApplied] = useState(false);
-	const [collapsedNavBGChanged, setCollapsedNavBGChanged] = useState(false);
 	const [hasScrolled, setHasScrolled] = useState(false);
 
 	useEffect(() => {
 		const mobileNavInitStateHandler = () => {
 			setListShown(false);
 			setTransitionApplied(false);
-			setCollapsedNavBGChanged(false);
 		};
-		
+
 		// hides list on breakpoint
 		window
 			.matchMedia("(min-width: 768px)")
@@ -45,12 +43,7 @@ function Navbar() {
 				hasScrolled ? "md:bg-black md:bg-opacity-50" : ""
 			} w-full z-10 flex flex-col fixed md:flex-row md:items-center`}
 		>
-			<NavMenu.List
-				className={
-					(collapsedNavBGChanged ? "bg-black " : "") +
-					"bg-opacity-50 flex p-3"
-				}
-			>
+			<NavMenu.List className={"bg-black bg-opacity-50 md:bg-opacity-0 flex p-3"}>
 				<NavLinkItem href="/">
 					<HackLogo />
 				</NavLinkItem>
@@ -62,7 +55,6 @@ function Navbar() {
 					onClick={() => {
 						setListShown(!listShown);
 						setTransitionApplied(true);
-						setCollapsedNavBGChanged(true);
 					}}
 				/>
 			</NavMenu.List>
@@ -79,9 +71,6 @@ function Navbar() {
 							: `${styles.hideList} `) +
 						`${styles.navMenuList} font-display gap-10 p-5 pt-3 bg-black bg-opacity-50 md:bg-opacity-0 md:p-0 md:flex md:items-center`
 					}
-					onTransitionEnd={() => {
-						if (!listShown) setCollapsedNavBGChanged(false);
-					}}
 				>
 					<NavLinkItem href="/">Home</NavLinkItem>
 					<NavLinkItem href="/sponsor">Sponsor</NavLinkItem>

@@ -19,7 +19,7 @@ const Landing = () => {
 			<View className="absolute w-full h-full">
 				<Suspense fallback={null}>
 					<Fireflies />
-					<PerspectiveCamera makeDefault position={[0.1, 0.1, 0.6]} />
+					<PerspectiveCamera makeDefault position={[0, -0.1, 1]} />
 				</Suspense>
 			</View>
 			<div className="flex flex-col justify-center items-center min-h-screen text-center overflow-x-hidden relative">

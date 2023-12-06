@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import BarLoader from "./BarLoader";
+import BarLoader from "../BarLoader";
 import clsx from "clsx";
 
 import styles from "./ShiftingCountdown.module.scss"

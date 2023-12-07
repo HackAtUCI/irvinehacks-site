@@ -45,8 +45,8 @@ function Navbar() {
 	return (
 		<NavMenu.Root
 			className={`${
-				hasScrolled ? "md:bg-black md:bg-opacity-50" : ""
-			} w-full z-10 flex flex-col fixed md:flex-row md:items-center`}
+				hasScrolled ? "md:bg-opacity-50" : ""
+			} transition-colors duration-0 md:duration-700 ease-out w-full z-10 flex flex-col fixed bg-black bg-opacity-0 md:flex-row md:items-center`}
 		>
 			<NavMenu.List
 				className={"bg-black bg-opacity-50 md:bg-opacity-0 flex p-3"}

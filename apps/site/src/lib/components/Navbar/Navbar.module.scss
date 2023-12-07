@@ -40,6 +40,8 @@
 	// needed for underline effect to work
 	padding-bottom: 0.5rem;
 
+	filter: brightness(1.05);
+
 	background-image: linear-gradient(white, white);
 	background-repeat: no-repeat;
 	background-position-y: 34px;

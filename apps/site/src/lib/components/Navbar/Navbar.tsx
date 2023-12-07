@@ -15,20 +15,7 @@ import Image from "next/image";
 
 function Navbar() {
 	const [listShown, setListShown] = useState(false);
-	const [transitionApplied, setTransitionApplied] = useState(false);
 	const [hasScrolled, setHasScrolled] = useState(false);
-
-	useEffect(() => {
-		const mobileNavInitStateHandler = () => {
-			setListShown(false);
-			setTransitionApplied(false);
-		};
-
-		// hides list on breakpoint
-		window
-			.matchMedia("(min-width: 768px)")
-			.addEventListener("change", mobileNavInitStateHandler);
-	}, []);
 
 	useEffect(() => {
 		const scrollHandler = () =>
@@ -36,11 +23,6 @@ function Navbar() {
 
 		window.addEventListener("scroll", scrollHandler);
 	}, []);
-
-	const handleMobileMenuClick = () => {
-		setListShown((listShown) => !listShown);
-		setTransitionApplied(true);
-	};
 
 	return (
 		<NavMenu.Root
@@ -56,7 +38,9 @@ function Navbar() {
 				</NavLinkItem>
 				<button
 					className="ml-auto h-auto md:hidden cursor-pointer"
-					onClick={handleMobileMenuClick}
+					onClick={() => {
+						setListShown((listShown) => !listShown);
+					}}
 				>
 					<Image
 						src={hamburger}
@@ -70,13 +54,9 @@ function Navbar() {
 			>
 				<NavMenu.List
 					className={
-						(transitionApplied
-							? `${styles.transformTransition} `
-							: "") +
-						(listShown
-							? `${styles.showList} `
-							: `${styles.hideList} `) +
-						`${styles.navMenuList} font-display gap-10 p-5 pt-3 bg-black bg-opacity-50 md:bg-opacity-0 md:p-0 md:flex md:items-center`
+						(listShown ? "" : "-translate-y-full ") +
+						"transition transform duration-500 ease-in-out md:transition-none md:translate-y-0 " +
+						"[&>*]:mb-5 [&>*]:md:mb-0 font-display gap-10 p-5 pt-3 bg-black bg-opacity-50 md:bg-opacity-0 md:p-0 md:flex md:items-center"
 					}
 				>
 					<NavLinkItem href="/">Home</NavLinkItem>

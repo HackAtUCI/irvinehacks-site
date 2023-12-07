@@ -9,9 +9,9 @@ import { Fireworks } from "@fireworks-js/react";
 import styles from "./ShiftingCountdown.module.scss";
 
 // NOTE: Change this date to whatever date you want to countdown to :)
-// const HACKING_STARTS = "2024-01-26T18:00:00.000";
+const HACKING_STARTS = "2024-01-26T18:00:00.000";
 const HACKING_ENDS = "2024-01-28T24:00:00.000";
-const HACKING_STARTS = "2023-12-06T22:23:00.000"; // Test when countdown ends
+// const HACKING_STARTS = "2023-12-06T22:23:00.000"; // Test when countdown ends
 // HACKING_STARTS.setSeconds(10);
 // const HACKING_ENDS = new Date();
 

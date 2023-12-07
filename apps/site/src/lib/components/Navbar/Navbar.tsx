@@ -37,26 +37,33 @@ function Navbar() {
 		window.addEventListener("scroll", scrollHandler);
 	}, []);
 
+	const handleMobileMenuClick = () => {
+		setListShown((listShown) => !listShown);
+		setTransitionApplied(true);
+	};
+
 	return (
 		<NavMenu.Root
 			className={`${
 				hasScrolled ? "md:bg-black md:bg-opacity-50" : ""
 			} w-full z-10 flex flex-col fixed md:flex-row md:items-center`}
 		>
-			<NavMenu.List className={"bg-black bg-opacity-50 md:bg-opacity-0 flex p-3"}>
+			<NavMenu.List
+				className={"bg-black bg-opacity-50 md:bg-opacity-0 flex p-3"}
+			>
 				<NavLinkItem href="/">
 					<HackLogo />
 				</NavLinkItem>
-				<Image
-					className="ml-auto md:hidden cursor-pointer"
-					src={hamburger}
-					width="35"
-					alt="Mobile hamburger menu"
-					onClick={() => {
-						setListShown(!listShown);
-						setTransitionApplied(true);
-					}}
-				/>
+				<button
+					className="ml-auto h-auto md:hidden cursor-pointer"
+					onClick={handleMobileMenuClick}
+				>
+					<Image
+						src={hamburger}
+						width="40"
+						alt="Mobile hamburger menu"
+					/>
+				</button>
 			</NavMenu.List>
 			<div
 				className={`${styles.navMenuListWrapper} md:my-3 md:mr-3 md:ml-auto inline-block md:flex md:items-center`}

@@ -6,10 +6,10 @@ export default function Schedule() {
 	return (
 		<>
 			<section className="h-full w-full">
-				<div className="h-1/3">
+				<div className="m-36">
 					<ShiftingCountdown />
 				</div>
-				<div className="h-2/3 flex justify-center align-middle">
+				<div className="h-96 flex justify-center align-middle">
 					Placeholder for Schedule
 				</div>
 			</section>

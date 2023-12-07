@@ -4,11 +4,13 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import BarLoader from "../BarLoader";
 import clsx from "clsx";
+import { Fireworks } from "@fireworks-js/react";
 
 import styles from "./ShiftingCountdown.module.scss";
 
 // NOTE: Change this date to whatever date you want to countdown to :)
-const COUNTDOWN_FROM = "12/31/2023";
+const COUNTDOWN_FROM = "2023-12-06T21:49:00.000";
+// const COUNTDOWN_FROM = new Date(); // Test when countdown ends
 
 const SECOND = 1000;
 const MINUTE = SECOND * 60;
@@ -18,6 +20,7 @@ const DAY = HOUR * 24;
 const ShiftingCountdown = () => {
 	const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 	const [showTimer, setShowTimer] = useState(false);
+	const [showFireworks, setShowFireworks] = useState(false);
 
 	const [remaining, setRemaining] = useState({
 		days: 0,
@@ -37,12 +40,16 @@ const ShiftingCountdown = () => {
 
 		const now = new Date();
 
-		const distance = +end - +now;
+		const distance = Math.max(+end - +now, 0);
 
 		const days = Math.floor(distance / DAY);
 		const hours = Math.floor((distance % DAY) / HOUR);
 		const minutes = Math.floor((distance % HOUR) / MINUTE);
 		const seconds = Math.floor((distance % MINUTE) / SECOND);
+
+		if (days == 0 && hours == 0 && minutes == 0 && seconds == 0) {
+			setShowFireworks(true);
+		}
 
 		setRemaining({
 			days,
@@ -54,20 +61,32 @@ const ShiftingCountdown = () => {
 	};
 
 	return (
-		<div className="p-4">
-			{!showTimer ? (
-				<div className="w-full flex justify-center">
-					<BarLoader />
-				</div>
-			) : (
-				<div className="w-full max-w-5xl mx-auto flex items-center">
-					<CountdownItem num={remaining.days} text="days " />
-					<CountdownItem num={remaining.hours} text="hours" />
-					<CountdownItem num={remaining.minutes} text="minutes" />
-					<CountdownItem num={remaining.seconds} text="seconds" />
+		<>
+			<div className="p-4">
+				{!showTimer ? (
+					<div className="w-full flex justify-center">
+						<BarLoader />
+					</div>
+				) : (
+					<div className="w-full max-w-5xl mx-auto flex items-center">
+						<CountdownItem num={remaining.days} text="days " />
+						<CountdownItem num={remaining.hours} text="hours" />
+						<CountdownItem num={remaining.minutes} text="minutes" />
+						<CountdownItem num={remaining.seconds} text="seconds" />
+					</div>
+				)}
+			</div>
+			{showFireworks && (
+				<div className="flex justify-center z-20">
+					<Fireworks
+						className="w-full h-full absolute"
+						options={{
+							opacity: 0.1,
+						}}
+					/>
 				</div>
 			)}
-		</div>
+		</>
 	);
 };
 

@@ -1,9 +1,11 @@
+import Image from "next/image";
+
 import hackAnteater from "@/assets/logos/hackuci-anteater.svg";
 import hackGear from "@/assets/logos/hackuci-gear.svg";
-import Image from "next/image";
+
 import styles from "./HackLogo.module.scss";
 
-function HackLogo() {
+const HackLogo = () => {
 	return (
 		<div className={styles.hackLogo}>
 			<Image src={hackAnteater} alt="Hack at UCI Logo Anteater" />
@@ -14,6 +16,6 @@ function HackLogo() {
 			/>
 		</div>
 	);
-}
+};
 
 export default HackLogo;

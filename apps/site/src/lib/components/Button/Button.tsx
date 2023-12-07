@@ -7,17 +7,27 @@ interface ButtonProps {
 	text: string;
 	className?: string;
 	href?: ComponentProps<typeof Link>["href"];
-  	isLightVersion?: boolean;
+	isLightVersion?: boolean;
 }
 
-const Button: React.FC<ButtonProps> = ({ text, href, className, isLightVersion }) => {
+const Button: React.FC<ButtonProps> = ({
+	text,
+	href,
+	className,
+	isLightVersion,
+}) => {
 	if (href) {
 		return (
 			<Link
 				href={href}
 				target="_blank"
 				rel="noopener noreferrer"
-        className={clsx(styles.button, isLightVersion && styles.lightButton, isLightVersion ? "font-display" :"font-body", className)}
+				className={clsx(
+					styles.button,
+					isLightVersion && styles.lightButton,
+					isLightVersion ? "font-display" : "font-body",
+					className,
+				)}
 			>
 				{text}
 			</Link>

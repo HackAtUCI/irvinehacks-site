@@ -16,7 +16,7 @@ export default function SingleSelect(props: SelectProps) {
                             <div key={`${props.IdentifierID}-${i}`} className="flex gap-2">
                                 <input id={`${props.IdentifierID}-${i}`} type="radio" key={`option-${i}`} name={props.name} value={item.value} required/>
                                 <label className="text-lg" htmlFor={`${props.IdentifierID}-${i}`}>{item.text}</label>
-                                <input type="text" className=" border-b-2 p-1 h-6 border-black w-6/12" />
+                                <input type="text" className="border-b-2 p-1 h-6 border-black w-6/12" />
                             </div> 
                         )
                     }

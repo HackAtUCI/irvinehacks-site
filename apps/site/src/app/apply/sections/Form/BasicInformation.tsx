@@ -1,8 +1,8 @@
 "use client";
 
 import styles from "./Form.module.scss";
-import SingleSelect from "../Components/SingleSelect";
 import { useState } from 'react';
+import SingleSelect from "../Components/SingleSelect";
 import PasswordEye from "../Components/PasswordEye";
 
 declare namespace JSX {
@@ -45,7 +45,7 @@ export default function BasicInformation() {
 
     return(
         <div className="flex flex-col gap-5 w-11/12">
-            <p className="text-4xl m-0 font-bold text-center">Basic Information</p>
+            <p className="text-4xl m-0 font-bold text-center max-[700px]:text-3xl">Basic Information</p>
 
             <div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
                 <div className="flex flex-col w-6/12 max-[1000px]:w-full">

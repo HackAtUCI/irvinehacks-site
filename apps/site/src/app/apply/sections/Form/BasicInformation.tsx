@@ -1,7 +1,6 @@
 "use client";
 
 import styles from "./Form.module.scss";
-import DropdownSelect from "../Components/dropdownSelect";
 import SingleSelect from "../Components/SingleSelect";
 import { useState } from 'react';
 import PasswordEye from "../Components/PasswordEye";
@@ -28,15 +27,8 @@ const ethnicity = [
     {value: "White", text: "White or Caucasian"},
     {value: "Two-or-more", text: "Two or more races"},
     {value: "Prefer not to answer", text: "Prefer not to answer"},
+    {value: "other", text: "Other:"}
 ]
-
-interface SelectProps {
-    labelStyle: string;
-    inputStyle: string;
-    name: string;
-    labelText: string;
-    values: Array<any>;
-}
 
 export default function BasicInformation() {
     const [password, setPassword] = useState("");
@@ -53,7 +45,7 @@ export default function BasicInformation() {
 
     return(
         <div className="flex flex-col gap-5 w-11/12">
-            <p className="text-4xl m-0 font-bold">Basic Information</p>
+            <p className="text-4xl m-0 font-bold text-center">Basic Information</p>
 
             <div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
                 <div className="flex flex-col w-6/12 max-[1000px]:w-full">
@@ -88,7 +80,7 @@ export default function BasicInformation() {
                         title="One number, uppercase, and lowercase letter; at least 8 or more characters"/>
                         <PasswordEye visible={passwordVisible} handler={handleChangePassword}/>
                     </div>
-                    <p className="text-[#FF2222] m-0 text-sm">At least 8 characters with one number, one uppercase, and one lowercase letter</p>
+                    <small className="text-[#676767] m-0 text-sm">At least 8 characters with one number, one uppercase, and one lowercase letter</small>
                 </div>
                 <div className="flex flex-col w-6/12 max-[1000px]:w-full">
                     <label className={`${styles.label}`} htmlFor="confirm-password">Confirm Password <span className="text-[#FF2222]">*</span></label>

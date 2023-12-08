@@ -1,6 +1,10 @@
 import styles from "./Form.module.scss";
 import DropdownSelect from "../Components/dropdownSelect";
 
+//I'm not sure if we want to have different submission values
+//than display texts for the inputs, so I seperated both
+//for good measure
+
 const educationLevels = [
     {value: "first-year-undergrad", text: "First Year Undergraduate"},
     {value: "second-year-undergrad", text: "Second Year Undergraduate"},

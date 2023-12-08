@@ -1,15 +1,13 @@
 "use client";
 
-import styles from "./Form.module.scss";
 import { useState } from 'react';
 import SingleSelect from "../Components/SingleSelect";
 import PasswordEye from "../Components/PasswordEye";
+import styles from "./Form.module.scss";
 
-declare namespace JSX {
-    interface IntrinsicElements {
-      [elemName: string]: any;
-    }
-  }
+//I'm not sure if we want to have different submission values
+//than display texts for the inputs, so I seperated both
+//for good measure
 
 const pronouns = [
 	{value: "she", text: "She/her/hers"},
@@ -31,7 +29,11 @@ const ethnicity = [
 ]
 
 export default function BasicInformation() {
+    //the password state here is supposed to be used for further validation when we
+    //check confirm password, but I'm pretty sure that will have to wait until we
+    //implement the submission process, so I just leave it here for now
     const [password, setPassword] = useState("");
+
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
 

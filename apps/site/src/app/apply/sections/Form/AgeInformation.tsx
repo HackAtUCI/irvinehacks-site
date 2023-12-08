@@ -10,11 +10,11 @@ export default function AgeInformation() {
                 <p className="text-xl font-bold m-0">Will you be 18 years or older by January 26th, 2024? <span className="text-[#FF2222]">*</span></p>
                 <div className="flex gap-5">
                     <div className="flex gap-2 items-center">
-                        <input type="radio" id="minor-yes" name="minor-check" value="Yes" defaultChecked={true}/>
+                        <input type="radio" id="minor-yes" name="minor-check" value="Yes" defaultChecked={true} required/>
                         <label htmlFor="minor-yes" className="font-bold text-xl">Yes</label>
                     </div>
                     <div className="flex gap-2 items-center">
-                        <input type="radio" id="minor-no" name="minor-check" value="No" />
+                        <input type="radio" id="minor-no" name="minor-check" value="No" required/>
                         <label htmlFor="minor-no" className="font-bold text-xl">No</label>
                     </div>
                 </div>

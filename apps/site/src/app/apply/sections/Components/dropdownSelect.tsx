@@ -15,7 +15,7 @@ interface OtherProps {
     name: string
 }
 
-function OtherPopup(props: OtherProps) {
+const OtherPopup = (props: OtherProps) => {
     if(props.value == 'other') {
         return(
             <div className='mt-2 flex gap-2'>

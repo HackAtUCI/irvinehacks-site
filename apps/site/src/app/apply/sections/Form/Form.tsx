@@ -1,12 +1,12 @@
-import styles from "./Form.module.scss";
+import Image from "next/image";
 import BasicInformation from "./BasicInformation";
 import AgeInformation from "./AgeInformation";
 import SchoolInformation from "./SchoolInformation";
 import ProfileInformation from "./ProfileInformation";
+import Button from "@/lib/components/Button/Button";
 import koiLeft from "@/assets/images/koi-swim-left.png";
 import koiRight from "@/assets/images/koi-swim-right.png";
-import Image from "next/image";
-import Button from "@/lib/components/Button/Button";
+import styles from "./Form.module.scss";
 
 export default function Form() {
     return(

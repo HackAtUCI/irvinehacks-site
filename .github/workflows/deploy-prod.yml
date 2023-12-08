@@ -1,7 +1,11 @@
 name: Deploy Production
 
 on:
-    push:
+    workflow_run:
+        workflows:
+            - Run Checks
+        types:
+            - completed
         branches:
             - main
 

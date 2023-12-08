@@ -1,3 +1,7 @@
+[tool.isort]
+profile = "black"
+src_paths = "src"
+
 [tool.pytest.ini_options]
 pythonpath = "src"
 addopts = "--verbose --cov src"
@@ -9,3 +13,8 @@ branch = true
 
 [tool.coverage.report]
 show_missing = true
+
+[tool.mypy]
+mypy_path = "src"
+explicit_package_bases = true
+strict = true

@@ -9,5 +9,5 @@ export default function Apply() {
 			<Title />
 			<Form />
 		</div>
-    )
+	);
 }

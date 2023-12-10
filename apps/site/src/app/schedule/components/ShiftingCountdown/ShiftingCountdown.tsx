@@ -11,9 +11,10 @@ import styles from "./ShiftingCountdown.module.scss";
 // NOTE: Change this date to whatever date you want to countdown to :)
 const HACKING_STARTS = "2024-01-26T18:00:00.000";
 const HACKING_ENDS = "2024-01-28T24:00:00.000";
-// const HACKING_STARTS = "2023-12-06T22:23:00.000"; // Test when countdown ends
-// HACKING_STARTS.setSeconds(10);
-// const HACKING_ENDS = new Date();
+
+// Testing:
+// const HACKING_STARTS = "2023-12-09T21:42:00.000";
+// const HACKING_ENDS = "2023-12-09T21:44:00.000";
 
 const SECOND = 1000;
 const MINUTE = SECOND * 60;
@@ -22,15 +23,15 @@ const DAY = HOUR * 24;
 
 const ShiftingCountdown = () => {
 	const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-	const [showTimer, setShowTimer] = useState(false);
-	const [showFireworks, setShowFireworks] = useState(false);
-	const [timerLabel, setTimerLabel] = useState("Hacking Starts");
 
-	const [remaining, setRemaining] = useState({
+	const [countdown, setCountdown] = useState({
 		days: 0,
 		hours: 0,
 		minutes: 0,
 		seconds: 0,
+		showTimer: false,
+		showFireworks: false,
+		label: "Hacking Starts",
 	});
 
 	useEffect(() => {
@@ -45,7 +46,9 @@ const ShiftingCountdown = () => {
 		let end = new Date(HACKING_STARTS);
 
 		if (now >= new Date(HACKING_STARTS)) {
-			setTimerLabel("Hacking Ends");
+			setCountdown((prev) => {
+				return { ...prev, label: "Hacking Ends" };
+			});
 			end = new Date(HACKING_ENDS);
 		}
 
@@ -58,22 +61,29 @@ const ShiftingCountdown = () => {
 
 		if (days == 0 && hours == 0 && minutes == 0 && seconds == 0) {
 			// triggers when HACKING_STARTS timer ends and HACKING_ENDS timer ends
-			setShowFireworks(true);
+			setCountdown((prev) => {
+				return { ...prev, showFireworks: true };
+			});
 		}
 
-		setRemaining({
-			days,
-			hours,
-			minutes,
-			seconds,
+		setCountdown((prev) => {
+			return {
+				...prev,
+				days: days,
+				hours: hours,
+				minutes: minutes,
+				seconds: seconds,
+			};
 		});
-		setShowTimer(true);
+		setCountdown((prev) => {
+			return { ...prev, showTimer: true };
+		});
 	};
 
 	return (
 		<>
 			<div className="p-4">
-				{!showTimer ? (
+				{!countdown.showTimer ? (
 					<div className="w-full flex justify-center">
 						<BarLoader />
 					</div>
@@ -85,24 +95,24 @@ const ShiftingCountdown = () => {
 								styles.text,
 							)}
 						>
-							{timerLabel}
+							{countdown.label}
 						</span>
 						<div className="w-full max-w-5xl mx-auto flex items-center">
-							<CountdownItem num={remaining.days} text="days " />
-							<CountdownItem num={remaining.hours} text="hours" />
+							<CountdownItem num={countdown.days} text="days " />
+							<CountdownItem num={countdown.hours} text="hours" />
 							<CountdownItem
-								num={remaining.minutes}
+								num={countdown.minutes}
 								text="minutes"
 							/>
 							<CountdownItem
-								num={remaining.seconds}
+								num={countdown.seconds}
 								text="seconds"
 							/>
 						</div>
 					</>
 				)}
 			</div>
-			{showFireworks && (
+			{countdown.showFireworks && (
 				<div className="flex justify-center z-20">
 					<Fireworks
 						className="w-full h-full absolute"

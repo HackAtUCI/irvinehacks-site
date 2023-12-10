@@ -1,3 +1,7 @@
+[tool.isort]
+profile = "black"
+src_paths = "src"
+
 [tool.pytest.ini_options]
 pythonpath = "src"
 addopts = "--verbose --cov src"

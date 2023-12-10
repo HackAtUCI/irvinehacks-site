@@ -15,6 +15,6 @@ branch = true
 show_missing = true
 
 [tool.mypy]
-mypy_path = "src"
+mypy_path = "src,stubs"
 explicit_package_bases = true
 strict = true

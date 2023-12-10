@@ -22,8 +22,6 @@ const HOUR = MINUTE * 60;
 const DAY = HOUR * 24;
 
 const ShiftingCountdown = () => {
-	const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
 	const [countdown, setCountdown] = useState({
 		days: 0,
 		hours: 0,
@@ -35,9 +33,8 @@ const ShiftingCountdown = () => {
 	});
 
 	useEffect(() => {
-		intervalRef.current = setInterval(handleCountdown, 1000);
-
-		return () => clearInterval(intervalRef.current || undefined);
+		const intervalRef = setInterval(handleCountdown, 1000);
+		return () => clearInterval(intervalRef || undefined);
 	}, []);
 
 	const handleCountdown = () => {
@@ -91,14 +88,14 @@ const ShiftingCountdown = () => {
 					<>
 						<span
 							className={clsx(
-								"w-full flex justify-center text-5xl p-4",
+								"w-full flex justify-center text-3xl p-4 md:text-5xl flex-wrap whitespace-nowrap md:mb-5",
 								styles.text,
 							)}
 						>
 							{countdown.label}
 						</span>
-						<div className="w-full max-w-5xl mx-auto flex items-center">
-							<CountdownItem num={countdown.days} text="days " />
+						<div className="w-full mx-auto flex items-center justify-center gap-x-3">
+							<CountdownItem num={countdown.days} text="days" />
 							<CountdownItem num={countdown.hours} text="hours" />
 							<CountdownItem
 								num={countdown.minutes}
@@ -128,7 +125,7 @@ const ShiftingCountdown = () => {
 
 const CountdownItem = ({ num, text }: { num: number; text: string }) => {
 	return (
-		<motion.div className="font-mono w-1/4 h-24 md:h-36 flex flex-col gap-1 md:gap-2 items-center justify-center border-slate-200">
+		<motion.div className="font-mono w-20 md:w-1/4 h-24 md:h-36 flex flex-col gap-1 md:gap-2 items-center justify-center border-slate-200 p-5 flex-shrink-0 whitespace-normal">
 			<div className="w-full p-1 text-center relative overflow-hidden">
 				<AnimatePresence mode="popLayout">
 					<motion.span

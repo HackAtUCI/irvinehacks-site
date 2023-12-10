@@ -1,3 +1,5 @@
+import RequiredAsterisk from "../Components/RequiredAsterisk";
+
 export default function AgeInformation() {
 	return (
 		<div className="flex flex-col gap-5 w-11/12">
@@ -17,7 +19,7 @@ export default function AgeInformation() {
 			<div className="flex flex-col gap-1 w-full items-center">
 				<p className="text-xl font-bold m-0">
 					Will you be 18 years or older by January 26th, 2024?{" "}
-					<span className="text-[#FF2222]">*</span>
+					<RequiredAsterisk />
 				</p>
 				<div className="flex gap-5">
 					<div className="flex gap-2 items-center">
@@ -26,7 +28,6 @@ export default function AgeInformation() {
 							id="minor-yes"
 							name="minor-check"
 							value="Yes"
-							defaultChecked={true}
 							required
 						/>
 						<label

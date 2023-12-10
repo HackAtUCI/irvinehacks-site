@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import RequiredAsterisk from "./RequiredAsterisk";
 
 interface SelectProps {
 	labelStyle: string;
 	inputStyle: string;
 	name: string;
 	labelText: string;
-	values: Array<any>;
+	values: Array<{ value: string; text: string }>;
 }
 
 interface OtherProps {
@@ -23,11 +24,12 @@ const OtherPopup = (props: OtherProps) => {
 					htmlFor={`${props.name}-other-input`}
 					className="text-lg"
 				>
-					Other: <span className="text-[#FF2222]">*</span>
+					Other: <RequiredAsterisk />
 				</label>
 				<input
 					type="text"
 					name={`${props.name}-other-input`}
+					id={`${props.name}-other-input`}
 					className="border-b-2 p-1 h-6 border-black w-6/12"
 					required
 				/>
@@ -42,7 +44,7 @@ export default function DropdownSelect(props: SelectProps) {
 	return (
 		<>
 			<label className={`${props.labelStyle}`} htmlFor={props.name}>
-				{props.labelText} <span className="text-[#FF2222]">*</span>
+				{props.labelText} <RequiredAsterisk />
 			</label>
 			<select
 				className={`${props.inputStyle}`}

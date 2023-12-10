@@ -1,15 +1,14 @@
-import { Eye } from "lucide-react";
-import { EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 
 interface PasswordProps {
 	visible: boolean;
-	handler: any;
+	handler: React.MouseEventHandler<SVGElement>;
 }
 
-export default function PasswordEye(props: PasswordProps) {
-	if (props.visible) {
-		return <EyeOff className="cursor-pointer" onClick={props.handler} />;
+export default function PasswordEyeProps({ visible, handler }: PasswordProps) {
+	if (visible) {
+		return <EyeOff className="cursor-pointer" onClick={handler} />;
 	} else {
-		return <Eye className="cursor-pointer" onClick={props.handler} />;
+		return <Eye className="cursor-pointer" onClick={handler} />;
 	}
 }

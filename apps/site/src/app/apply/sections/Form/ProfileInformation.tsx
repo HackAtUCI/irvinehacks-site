@@ -1,3 +1,4 @@
+import RequiredAsterisk from "../Components/RequiredAsterisk";
 import styles from "./Form.module.scss";
 
 export default function ProfileInformation() {
@@ -16,6 +17,7 @@ export default function ProfileInformation() {
 						className={`${styles.input}`}
 						type="url"
 						name="linkedin"
+						id="linkedin"
 						placeholder="http://"
 					/>
 				</div>
@@ -27,6 +29,7 @@ export default function ProfileInformation() {
 						className={`${styles.input}`}
 						type="url"
 						name="portfolio"
+						id="portfolio"
 						placeholder="http://"
 					/>
 				</div>
@@ -40,7 +43,7 @@ export default function ProfileInformation() {
 					>
 						Why is collaboration important to being a programmer or
 						technologist, and what does it mean to you? (150 words){" "}
-						<span className="text-[#FF2222]">*</span>
+						<RequiredAsterisk />
 					</label>
 					<textarea className="bg-[#E1E1E1] p-3 h-48 resize-none rounded-xl" />
 				</div>
@@ -54,7 +57,7 @@ export default function ProfileInformation() {
 					>
 						If you could do any job, what would it be? (ex.
 						Youtuber, Body Builder, etc.) (100 words){" "}
-						<span className="text-[#FF2222]">*</span>
+						<RequiredAsterisk />
 					</label>
 					<textarea className="bg-[#E1E1E1] p-3 h-48 resize-none rounded-xl" />
 				</div>

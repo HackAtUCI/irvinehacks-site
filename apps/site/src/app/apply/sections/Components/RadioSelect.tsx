@@ -1,0 +1,88 @@
+"use client";
+
+import { useState } from "react";
+
+interface RadioInputs {
+	name: string;
+	labelText: string;
+	IdentifierId: string;
+	values: Array<{ value: string; text: string }>;
+}
+
+interface IsChecked {
+	isChecked: boolean;
+	id: string;
+}
+
+const OtherInput = ({ isChecked, id }: IsChecked) => {
+	return (
+		<input
+			type="text"
+			name={`${id}-other`}
+			className={
+				isChecked
+					? "border-b-2 p-1 h-6 border-black w-6/12"
+					: "border-b-2 p-1 h-6 border-black w-6/12 bg-transparent"
+			}
+			required={isChecked ? true : false}
+			disabled={isChecked ? false : true}
+		/>
+	);
+};
+
+export default function RadioSelect(props: RadioInputs) {
+	const [isOtherChecked, setIsOtherChecked] = useState(false);
+
+	return (
+		<>
+			<p className="m-0 text-lg mb-4">
+				{props.labelText} <span className="text-[#FF2222]">*</span>
+			</p>
+			<div className="w-10/12 flex flex-col gap-2">
+				{props.values.map((item, i) => {
+					const keyandId = `${props.IdentifierId}-${i}`;
+					if (item.value == "other") {
+						return (
+							<div key={keyandId} className="flex gap-2">
+								<input
+									id={keyandId}
+									type="radio"
+									key={`option-${i}`}
+									name={props.name}
+									value={item.value}
+									onChange={(e) =>
+										setIsOtherChecked(e.target.checked)
+									}
+									required
+								/>
+								<label className="text-lg" htmlFor={keyandId}>
+									{item.text}
+								</label>
+								<OtherInput
+									isChecked={isOtherChecked}
+									id={props.IdentifierId}
+								/>
+							</div>
+						);
+					}
+					return (
+						<div key={keyandId} className="flex gap-2">
+							<input
+								id={keyandId}
+								type="radio"
+								key={`option-${i}`}
+								name={props.name}
+								value={item.value}
+								onChange={() => setIsOtherChecked(false)}
+								required
+							/>
+							<label className="text-lg" htmlFor={keyandId}>
+								{item.text}
+							</label>
+						</div>
+					);
+				})}
+			</div>
+		</>
+	);
+}

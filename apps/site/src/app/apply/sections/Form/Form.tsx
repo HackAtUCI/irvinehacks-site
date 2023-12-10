@@ -42,7 +42,7 @@ export default function Form() {
 				<SchoolInformation />
 				<ProfileInformation />
 				<AgeInformation />
-				<Button className="" text="Submit Application" />
+				<Button text="Submit Application" />
 			</form>
 		</div>
 	);

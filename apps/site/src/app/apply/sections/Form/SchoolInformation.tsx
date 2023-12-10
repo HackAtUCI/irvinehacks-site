@@ -1,9 +1,7 @@
 import styles from "./Form.module.scss";
 import DropdownSelect from "../Components/DropdownSelect";
 
-//I'm not sure if we want to have different submission values
-//than display texts for the inputs, so I seperated both
-//for good measure
+//these values can be edited if backend needs it later on
 
 const educationLevels = [
 	{ value: "first-year-undergrad", text: "First Year Undergraduate" },
@@ -65,6 +63,7 @@ export default function SchoolInformation() {
 						className={`${styles.input}`}
 						type="text"
 						name="major"
+						id="major"
 						required
 					/>
 				</div>
@@ -73,7 +72,7 @@ export default function SchoolInformation() {
 			<div className="flex gap-5 w-full">
 				<div className="flex flex-row items-center gap-5 max-[600px]:flex-col max-[600px]:items-center max-[600px]:gap-1 max-[600px]:w-full text-center">
 					<p className={`text-lg mb-0 p-0`}>
-						Is this your first Hacakthon?{" "}
+						Is this your first Hackathon?{" "}
 						<span className="text-[#FF2222]">*</span>
 					</p>
 					<div className="flex gap-2 items-center">
@@ -82,7 +81,6 @@ export default function SchoolInformation() {
 							id="hack-yes"
 							name="hack-check"
 							value="Yes"
-							defaultChecked={true}
 							required
 						/>
 						<label htmlFor="hack-yes" className="font-bold">

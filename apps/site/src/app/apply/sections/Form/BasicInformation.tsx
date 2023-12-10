@@ -1,13 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import SingleSelect from "../Components/SingleSelect";
-import PasswordEye from "../Components/PasswordEye";
+import RadioSelect from "../Components/RadioSelect";
+import PasswordEyeProps from "../Components/PasswordEye";
+import RequiredAsterisk from "../Components/RequiredAsterisk";
 import styles from "./Form.module.scss";
-
-//I'm not sure if we want to have different submission values
-//than display texts for the inputs, so I seperated both
-//for good measure
 
 const pronouns = [
 	{ value: "she", text: "She/her/hers" },
@@ -32,6 +29,8 @@ export default function BasicInformation() {
 	//the password state here is supposed to be used for further validation when we
 	//check confirm password, but I'm pretty sure that will have to wait until we
 	//implement the submission process, so I just leave it here for now
+
+	//still confused about this one as conflicting opinions from Sam and Taesungh
 	const [password, setPassword] = useState("");
 
 	const [passwordVisible, setPasswordVisible] = useState(false);
@@ -54,23 +53,25 @@ export default function BasicInformation() {
 			<div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
 				<div className="flex flex-col w-6/12 max-[1000px]:w-full">
 					<label className={`${styles.label}`} htmlFor="first-name">
-						First Name <span className="text-[#FF2222]">*</span>
+						First Name <RequiredAsterisk />
 					</label>
 					<input
 						className={`${styles.input}`}
 						type="text"
 						name="first-name"
+						id="first-name"
 						required
 					/>
 				</div>
 				<div className="flex flex-col w-6/12 max-[1000px]:w-full">
 					<label className={`${styles.label}`} htmlFor="last-name">
-						Last Name <span className="text-[#FF2222]">*</span>
+						Last Name <RequiredAsterisk />
 					</label>
 					<input
 						className={`${styles.input}`}
 						type="text"
 						name="last-name"
+						id="last-name"
 						required
 					/>
 				</div>
@@ -79,12 +80,13 @@ export default function BasicInformation() {
 			<div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
 				<div className="flex flex-col w-full">
 					<label className={`${styles.label}`} htmlFor="email">
-						Email <span className="text-[#FF2222]">*</span>
+						Email <RequiredAsterisk />
 					</label>
 					<input
 						className={`${styles.input}`}
 						type="email"
 						name="email"
+						id="email"
 						required
 					/>
 				</div>
@@ -93,20 +95,21 @@ export default function BasicInformation() {
 			<div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
 				<div className="flex flex-col w-6/12 max-[1000px]:w-full">
 					<label className={`${styles.label}`} htmlFor="password">
-						Password <span className="text-[#FF2222]">*</span>
+						Password <RequiredAsterisk />
 					</label>
 					<div className="w-full flex items-center gap-3">
 						<input
 							className={`${styles.input} w-full`}
 							type={passwordVisible ? "text" : "password"}
 							name="password"
+							id="password"
 							pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
 							value={password}
 							onChange={(e) => setPassword(e.target.value)}
 							required
 							title="One number, uppercase, and lowercase letter; at least 8 or more characters"
 						/>
-						<PasswordEye
+						<PasswordEyeProps
 							visible={passwordVisible}
 							handler={handleChangePassword}
 						/>
@@ -121,17 +124,17 @@ export default function BasicInformation() {
 						className={`${styles.label}`}
 						htmlFor="confirm-password"
 					>
-						Confirm Password{" "}
-						<span className="text-[#FF2222]">*</span>
+						Confirm Password <RequiredAsterisk />
 					</label>
 					<div className="w-full flex items-center gap-3">
 						<input
 							className={`${styles.input} w-full`}
 							type={confirmPasswordVisible ? "text" : "password"}
 							name="confirm-password"
+							id="confirm-password"
 							required
 						/>
-						<PasswordEye
+						<PasswordEyeProps
 							visible={confirmPasswordVisible}
 							handler={handleChangeConfirmPassword}
 						/>
@@ -141,16 +144,16 @@ export default function BasicInformation() {
 
 			<div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
 				<div className="flex flex-col w-6/12 max-[1000px]:w-full">
-					<SingleSelect
-						IdentifierID="gender-identifier"
+					<RadioSelect
+						IdentifierId="gender-identifier"
 						name="gender"
 						labelText="Gender"
 						values={pronouns}
 					/>
 				</div>
 				<div className="flex flex-col w-6/12 max-[1000px]:w-full">
-					<SingleSelect
-						IdentifierID="ethnicity-identifier"
+					<RadioSelect
+						IdentifierId="ethnicity-identifier"
 						name="ethnicity"
 						labelText="Race / Ethnicity"
 						values={ethnicity}

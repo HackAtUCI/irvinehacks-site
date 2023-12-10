@@ -88,7 +88,7 @@ const ShiftingCountdown = () => {
 					<>
 						<span
 							className={clsx(
-								"w-full flex justify-center text-3xl p-4 md:text-5xl flex-wrap whitespace-nowrap md:mb-5",
+								"w-full flex justify-center text-3xl p-4 md:text-5xl flex-wrap whitespace-nowrap lg:mb-5",
 								styles.text,
 							)}
 						>
@@ -125,7 +125,7 @@ const ShiftingCountdown = () => {
 
 const CountdownItem = ({ num, text }: { num: number; text: string }) => {
 	return (
-		<motion.div className="font-mono w-20 md:w-1/4 h-24 md:h-36 flex flex-col gap-1 md:gap-2 items-center justify-center border-slate-200 p-5 flex-shrink-0 whitespace-normal">
+		<motion.div className="font-mono w-25 lg:w-1/6 h-24 md:h-36 flex flex-col gap-1 md:gap-2 items-center justify-center border-slate-200 p-5 flex-shrink-0 whitespace-normal">
 			<div className="w-full p-1 text-center relative overflow-hidden">
 				<AnimatePresence mode="popLayout">
 					<motion.span

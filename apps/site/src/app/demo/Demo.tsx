@@ -10,8 +10,34 @@ async function Demo() {
 	return (
 		<div>
 			<p>Demo: {message}</p>
-			<form method="post" action="/api/demo/square">
-				<input type="number" required name="value" style={{ color: "black" }} />
+			<form method="post" action="/api/demo/user" className="mb-10">
+				<input
+					type="text"
+					required
+					id="name"
+					name="name"
+					style={{ color: "black" }}
+				/>
+				<br />
+				<button type="submit">Search Name</button>
+			</form>
+			<form method="post" action="/api/demo/add-user">
+				<input
+					type="text"
+					required
+					name="name"
+					style={{ color: "black" }}
+				/>
+				<br />
+				<br />
+				<input
+					type="text"
+					required
+					name="ucinetid"
+					style={{ color: "black" }}
+				/>
+				<br />
+				<br />
 				<button type="submit">Submit</button>
 			</form>
 		</div>

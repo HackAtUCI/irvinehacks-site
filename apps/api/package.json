@@ -2,7 +2,7 @@
 	"name": "api",
 	"private": true,
 	"scripts": {
-		"dev": "python src/dev.py",
+		"dev": "docker compose up --no-deps --build",
 		"test": "pytest",
 		"lint": "flake8 src tests && mypy src tests",
 		"format:write": "black src tests",

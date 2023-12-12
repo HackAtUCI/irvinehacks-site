@@ -7,6 +7,6 @@ RUN pip install --no-cache-dir -r requirements.txt "uvicorn[standard]"
 
 EXPOSE 8000
 
-COPY . .
+COPY src/ src/
 
 CMD ["python3", "src/dev.py"]

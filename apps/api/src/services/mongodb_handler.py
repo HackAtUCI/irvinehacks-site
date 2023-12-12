@@ -2,7 +2,6 @@ import asyncio
 import os
 from enum import Enum
 from logging import getLogger
-
 from typing import Any, Mapping, Optional, Union
 
 from bson import CodecOptions
@@ -40,7 +39,6 @@ class BaseRecord(BaseModel):
 class Collection(str, Enum):
     USERS = "users"
     TESTING = "testing"
-
     SETTINGS = "settings"
 
 
@@ -73,12 +71,10 @@ async def retrieve(
 ) -> list[dict[str, object]]:
     """Search for and retrieve the specified fields of a document (if any exist)
     that satisfy the provided query."""
-
     COLLECTION = DB[collection.value]
 
     result = COLLECTION.find(query, fields)
     output: list[dict[str, object]] = await result.to_list(length=None)
-
     return output
 
 
@@ -105,7 +101,6 @@ async def raw_update_one(
     result: UpdateResult = await COLLECTION.update_one(query, update, upsert=upsert)
     if not result.acknowledged:
         log.error("MongoDB document update was not acknowledged")
-
         raise RuntimeError("Could not update documents in MongoDB collection")
 
     return result.modified_count > 0

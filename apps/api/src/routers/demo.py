@@ -1,4 +1,4 @@
-from typing import Annotated, Union, Optional, Any
+from typing import Annotated, Union, Any
 
 from fastapi import APIRouter, Cookie, Form
 
@@ -20,10 +20,12 @@ async def square(value: Annotated[int, Form()]) -> int:
 
 
 @router.post("/user")
-async def get_user(name: Annotated[str, Form()]) -> list[dict[str, Any]]:
-    results = await retrieve(Collection.USERS, {"name": name}, ["name", "ucinetid"])
-    for i in range(len(results)):
-        results[i]["_id"] = str(results[i]["_id"])
+async def get_user(search_name: Annotated[str, Form()]) -> list[dict[str, object]]:
+    results = await retrieve(
+        Collection.USERS, {"name": search_name}, ["name", "ucinetid"]
+    )
+    for result in results:
+        result["_id"] = str(result["_id"])
     return results
 
 

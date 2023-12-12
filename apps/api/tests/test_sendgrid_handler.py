@@ -25,7 +25,7 @@ async def test_send_single_email(mock_AsyncClient: AsyncMock) -> None:
     await sendgrid_handler.send_email("my-template-id", SAMPLE_SENDER, recipient_data)
     mock_client.send_mail_v3.assert_awaited_once_with(
         body={
-            "from": {"email": SAMPLE_SENDER},
+            "from": {"name": SAMPLE_SENDER[1], "email": SAMPLE_SENDER[0]},
             "personalizations": [
                 {
                     "to": [{"email": recipient_data["email"]}],
@@ -49,7 +49,7 @@ async def test_send_multiple_emails(mock_AsyncClient: AsyncMock) -> None:
     )
     mock_client.send_mail_v3.assert_awaited_once_with(
         body={
-            "from": {"email": SAMPLE_SENDER},
+            "from": {"name": SAMPLE_SENDER[1], "email": SAMPLE_SENDER[0]},
             "personalizations": [
                 {
                     "to": [{"email": SAMPLE_RECIPIENTS[1]["email"]}],

@@ -8,6 +8,8 @@ services:
         environment:
             MONGO_INITDB_ROOT_USERNAME: root
             MONGO_INITDB_ROOT_PASSWORD: example
+        volumes:
+            - mongodb_data_volume:/data/db
 
     mongo-express:
         image: mongo-express
@@ -25,3 +27,6 @@ services:
             - "8000:8000"
         environment:
             MONGODB_URI: mongodb://root:example@mongo:27017
+
+volumes:
+    mongodb_data_volume:

@@ -4,3 +4,5 @@ python-multipart==0.0.5
 python3-saml==1.16.0
 motor==3.3.2
 pydantic[email]==2.5.2
+aiosendgrid==0.1.0
+sendgrid==6.11.0

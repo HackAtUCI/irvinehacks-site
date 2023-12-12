@@ -1,5 +1,1 @@
-import Demo from "./Demo";
-
-export default function DemoPage() {
-	return <Demo />;
-}
+export { default as Demo } from "./Demo";

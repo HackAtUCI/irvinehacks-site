@@ -10,12 +10,12 @@ async function Demo() {
 	return (
 		<div>
 			<p>Demo: {message}</p>
-			<form method="post" action="/api/demo/user" className="mb-10">
+			<form action="/api/demo/user" className="mb-10">
 				<input
 					type="text"
 					required
-					id="name"
-					name="name"
+					id="search_name"
+					name="search_name"
 					style={{ color: "black" }}
 				/>
 				<br />

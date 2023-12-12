@@ -9,4 +9,6 @@ EXPOSE 8000
 
 COPY src/ src/
 
-CMD ["python3", "src/dev.py"]
+ENV PYTHONPATH=src/
+
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0"]

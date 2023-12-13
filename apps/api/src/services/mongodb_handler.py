@@ -14,7 +14,10 @@ log = getLogger(__name__)
 STAGING_ENV = os.getenv("DEPLOYMENT") == "STAGING"
 
 MONGODB_URI = os.getenv("MONGODB_URI")
-MONGODB_CLIENT: AgnosticClient[Mapping[str, object]] = AsyncIOMotorClient(MONGODB_URI)
+
+# Mypy thinks AgnosticClient is a generic type, but providing type parameters to it
+# raises a TypeError.
+MONGODB_CLIENT: AgnosticClient = AsyncIOMotorClient(MONGODB_URI)  # type: ignore
 
 # Resolve Vercel runtime issue
 MONGODB_CLIENT.get_io_loop = asyncio.get_event_loop  # type: ignore

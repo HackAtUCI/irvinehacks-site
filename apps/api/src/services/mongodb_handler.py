@@ -17,7 +17,7 @@ MONGODB_URI = os.getenv("MONGODB_URI")
 MONGODB_CLIENT: AgnosticClient[Mapping[str, object]] = AsyncIOMotorClient(MONGODB_URI)
 
 # Resolve Vercel runtime issue
-MONGODB_CLIENT.get_io_loop = asyncio.get_event_loop # type: ignore
+MONGODB_CLIENT.get_io_loop = asyncio.get_event_loop  # type: ignore
 
 DATABASE_NAME = "irvinehacks" if STAGING_ENV else "irvinehacks-prod"
 DB = MONGODB_CLIENT[DATABASE_NAME].with_options(

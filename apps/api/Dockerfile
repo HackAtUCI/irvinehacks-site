@@ -1,11 +1,14 @@
 FROM python:3.9
 
-COPY requirements.txt requirements.txt
-
 RUN apt-get update && apt-get install -y libxml2-dev libxmlsec1-dev libxmlsec1-openssl
+
+WORKDIR /app
+
+COPY requirements.txt .
+
 RUN pip install --no-cache-dir -r requirements.txt "uvicorn[standard]"
 
-COPY src/ src/
+COPY src/ .
 
 ENV PYTHONPATH=src/
 

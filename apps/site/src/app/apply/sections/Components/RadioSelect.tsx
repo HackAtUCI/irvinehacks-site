@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, forwardRef } from "react";
 
 interface RadioInputs {
 	name: string;
@@ -15,21 +15,20 @@ interface IsChecked {
 	id: string;
 }
 
-const OtherInput = ({ isChecked, id }: IsChecked) => {
-	return (
-		<input
-			type="text"
-			name={`${id}-other`}
-			className={
-				isChecked
-					? "border-b-2 p-1 h-6 border-black w-6/12"
-					: "border-b-2 p-1 h-6 border-black w-6/12 bg-transparent"
-			}
-			required={isChecked ? true : false}
-			disabled={isChecked ? false : true}
-		/>
-	);
-};
+const OtherInput = forwardRef<HTMLInputElement, IsChecked>(({ isChecked, id }, ref) => (
+	<input
+		ref={ref}
+		type="text"
+		name={`${id}-other`}
+		className={
+			isChecked
+				? "border-b-2 p-1 h-6 border-black w-6/12"
+				: "border-b-2 p-1 h-6 border-black w-6/12 bg-transparent"
+		}
+		required={isChecked ? true : false}
+		disabled={isChecked ? false : true}
+	/>
+));
 
 export default function RadioSelect({
 	name,
@@ -39,6 +38,13 @@ export default function RadioSelect({
 	containerClass,
 }: RadioInputs) {
 	const [isOtherChecked, setIsOtherChecked] = useState(false);
+	const otherRef = useRef<HTMLInputElement>(null);
+
+	useEffect(() => {
+		if (isOtherChecked) {
+			otherRef.current?.focus();
+		}
+	}, [isOtherChecked])
 
 	return (
 		<div className={containerClass}>
@@ -68,6 +74,7 @@ export default function RadioSelect({
 								<OtherInput
 									isChecked={isOtherChecked}
 									id={IdentifierId}
+									ref={otherRef}
 								/>
 							</div>
 						);

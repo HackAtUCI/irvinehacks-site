@@ -15,20 +15,23 @@ interface IsChecked {
 	id: string;
 }
 
-const OtherInput = forwardRef<HTMLInputElement, IsChecked>(({ isChecked, id }, ref) => (
-	<input
-		ref={ref}
-		type="text"
-		name={`${id}-other`}
-		className={
-			isChecked
-				? "border-b-2 p-1 h-6 border-black w-6/12"
-				: "border-b-2 p-1 h-6 border-black w-6/12 bg-transparent"
-		}
-		required={isChecked ? true : false}
-		disabled={isChecked ? false : true}
-	/>
-));
+const OtherInput = forwardRef<HTMLInputElement, IsChecked>(
+	({ isChecked, id }, ref) => (
+		<input
+			ref={ref}
+			type="text"
+			name={`${id}-other`}
+			className={
+				isChecked
+					? "border-b-2 p-1 h-6 border-black w-6/12"
+					: "border-b-2 p-1 h-6 border-black w-6/12 bg-transparent"
+			}
+			required={isChecked ? true : false}
+			disabled={isChecked ? false : true}
+		/>
+	),
+);
+OtherInput.displayName = "OtherInput";
 
 export default function RadioSelect({
 	name,
@@ -44,7 +47,7 @@ export default function RadioSelect({
 		if (isOtherChecked) {
 			otherRef.current?.focus();
 		}
-	}, [isOtherChecked])
+	}, [isOtherChecked]);
 
 	return (
 		<div className={containerClass}>

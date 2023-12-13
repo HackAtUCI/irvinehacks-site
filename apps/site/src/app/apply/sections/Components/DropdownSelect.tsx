@@ -42,7 +42,7 @@ export default function DropdownSelect({
 	name,
 	labelText,
 	values,
-	containerClass
+	containerClass,
 }: SelectProps) {
 	const [value, setValue] = useState("");
 

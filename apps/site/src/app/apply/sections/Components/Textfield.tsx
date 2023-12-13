@@ -24,7 +24,12 @@ export default function Textfield({
 					{`${labelText} `}
 					{isRequired ? <RequiredAsterisk /> : <></>}
 				</label>
-				<textarea className={inputClass} id={name} name={name} required={isRequired}/>
+				<textarea
+					className={inputClass}
+					id={name}
+					name={name}
+					required={isRequired}
+				/>
 			</div>
 		</div>
 	);

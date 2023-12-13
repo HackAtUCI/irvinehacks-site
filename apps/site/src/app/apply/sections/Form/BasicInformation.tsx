@@ -1,9 +1,5 @@
-"use client";
-
-import { useState } from "react";
 import RadioSelect from "../Components/RadioSelect";
-import PasswordEyeProps from "../Components/PasswordEye";
-import RequiredAsterisk from "../Components/RequiredAsterisk";
+import TextInput from "../Components/TextInput";
 import styles from "./Form.module.scss";
 
 const pronouns = [
@@ -26,24 +22,6 @@ const ethnicity = [
 ];
 
 export default function BasicInformation() {
-	//the password state here is supposed to be used for further validation when we
-	//check confirm password, but I'm pretty sure that will have to wait until we
-	//implement the submission process, so I just leave it here for now
-
-	//still confused about this one as conflicting opinions from Sam and Taesungh
-	const [password, setPassword] = useState("");
-
-	const [passwordVisible, setPasswordVisible] = useState(false);
-	const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
-
-	const handleChangePassword = () => {
-		setPasswordVisible(!passwordVisible);
-	};
-
-	const handleChangeConfirmPassword = () => {
-		setConfirmPasswordVisible(!confirmPasswordVisible);
-	};
-
 	return (
 		<div className="flex flex-col gap-5 w-11/12">
 			<p className="text-4xl m-0 font-bold text-center max-[700px]:text-3xl">
@@ -51,114 +29,43 @@ export default function BasicInformation() {
 			</p>
 
 			<div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
-				<div className="flex flex-col w-6/12 max-[1000px]:w-full">
-					<label className={`${styles.label}`} htmlFor="first-name">
-						First Name <RequiredAsterisk />
-					</label>
-					<input
-						className={`${styles.input}`}
-						type="text"
-						name="first-name"
-						id="first-name"
-						required
-					/>
-				</div>
-				<div className="flex flex-col w-6/12 max-[1000px]:w-full">
-					<label className={`${styles.label}`} htmlFor="last-name">
-						Last Name <RequiredAsterisk />
-					</label>
-					<input
-						className={`${styles.input}`}
-						type="text"
-						name="last-name"
-						id="last-name"
-						required
-					/>
-				</div>
+				<TextInput
+					name="first-name"
+					labelClass={`${styles.label}`}
+					labelText="First Name"
+					inputClass={`${styles.input}`}
+					containerClass="flex flex-col w-6/12 max-[1000px]:w-full"
+					isRequired={true}
+					type="text"
+					placeholder=""
+				/>
+				<TextInput
+					name="last-name"
+					labelClass={`${styles.label}`}
+					labelText="Last Name"
+					inputClass={`${styles.input}`}
+					containerClass="flex flex-col w-6/12 max-[1000px]:w-full"
+					isRequired={true}
+					type="text"
+					placeholder=""
+				/>
 			</div>
 
 			<div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
-				<div className="flex flex-col w-full">
-					<label className={`${styles.label}`} htmlFor="email">
-						Email <RequiredAsterisk />
-					</label>
-					<input
-						className={`${styles.input}`}
-						type="email"
-						name="email"
-						id="email"
-						required
-					/>
-				</div>
-			</div>
-
-			<div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
-				<div className="flex flex-col w-6/12 max-[1000px]:w-full">
-					<label className={`${styles.label}`} htmlFor="password">
-						Password <RequiredAsterisk />
-					</label>
-					<div className="w-full flex items-center gap-3">
-						<input
-							className={`${styles.input} w-full`}
-							type={passwordVisible ? "text" : "password"}
-							name="password"
-							id="password"
-							pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
-							value={password}
-							onChange={(e) => setPassword(e.target.value)}
-							required
-							title="One number, uppercase, and lowercase letter; at least 8 or more characters"
-						/>
-						<PasswordEyeProps
-							visible={passwordVisible}
-							handler={handleChangePassword}
-						/>
-					</div>
-					<small className="text-[#676767] m-0 text-sm">
-						At least 8 characters with one number, one uppercase,
-						and one lowercase letter
-					</small>
-				</div>
-				<div className="flex flex-col w-6/12 max-[1000px]:w-full">
-					<label
-						className={`${styles.label}`}
-						htmlFor="confirm-password"
-					>
-						Confirm Password <RequiredAsterisk />
-					</label>
-					<div className="w-full flex items-center gap-3">
-						<input
-							className={`${styles.input} w-full`}
-							type={confirmPasswordVisible ? "text" : "password"}
-							name="confirm-password"
-							id="confirm-password"
-							required
-						/>
-						<PasswordEyeProps
-							visible={confirmPasswordVisible}
-							handler={handleChangeConfirmPassword}
-						/>
-					</div>
-				</div>
-			</div>
-
-			<div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
-				<div className="flex flex-col w-6/12 max-[1000px]:w-full">
-					<RadioSelect
-						IdentifierId="gender-identifier"
-						name="gender"
-						labelText="Gender"
-						values={pronouns}
-					/>
-				</div>
-				<div className="flex flex-col w-6/12 max-[1000px]:w-full">
-					<RadioSelect
-						IdentifierId="ethnicity-identifier"
-						name="ethnicity"
-						labelText="Race / Ethnicity"
-						values={ethnicity}
-					/>
-				</div>
+				<RadioSelect
+					IdentifierId="gender-identifier"
+					name="gender"
+					labelText="Gender"
+					values={pronouns}
+					containerClass="flex flex-col w-6/12 max-[1000px]:w-full"
+				/>
+				<RadioSelect
+					IdentifierId="ethnicity-identifier"
+					name="ethnicity"
+					labelText="Race / Ethnicity"
+					values={ethnicity}
+					containerClass="flex flex-col w-6/12 max-[1000px]:w-full"
+				/>
 			</div>
 		</div>
 	);

@@ -1,5 +1,7 @@
 import styles from "./Form.module.scss";
 import DropdownSelect from "../Components/DropdownSelect";
+import TextInput from "../Components/TextInput";
+import SimpleRadio from "../Components/SimpleRadio";
 
 //these values can be edited if backend needs it later on
 
@@ -24,6 +26,19 @@ const universityOptions = [
 	{ value: "other", text: "Other" },
 ];
 
+const yesNoOptions = [
+	{
+		id: "hack-yes",
+		labelText: "Yes",
+		inputValue: "Yes",
+	},
+	{
+		id: "hack-no",
+		labelText: "No",
+		inputValue: "No",
+	},
+];
+
 export default function SchoolInformation() {
 	return (
 		<div className="flex flex-col gap-5 w-11/12">
@@ -32,75 +47,47 @@ export default function SchoolInformation() {
 			</p>
 
 			<div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
-				<div className="flex flex-col w-6/12 max-[1000px]:w-full">
-					<DropdownSelect
-						labelStyle={`${styles.label}`}
-						inputStyle={`${styles.input}`}
-						name="education-level"
-						labelText="Current Education Level"
-						values={educationLevels}
-					/>
-				</div>
+				<DropdownSelect
+					labelStyle={`${styles.label}`}
+					inputStyle={`${styles.input}`}
+					name="education-level"
+					labelText="Current Education Level"
+					values={educationLevels}
+					containerClass="flex flex-col w-6/12 max-[1000px]:w-full"
+				/>
 
-				<div className="flex flex-col w-6/12 max-[1000px]:w-full">
-					<DropdownSelect
-						labelStyle={`${styles.label}`}
-						inputStyle={`${styles.input}`}
-						name="school-name"
-						labelText="School Name"
-						values={universityOptions}
-					/>
-				</div>
+				<DropdownSelect
+					labelStyle={`${styles.label}`}
+					inputStyle={`${styles.input}`}
+					name="school-name"
+					labelText="School Name"
+					values={universityOptions}
+					containerClass="flex flex-col w-6/12 max-[1000px]:w-full"
+				/>
 			</div>
 
-			<div className="flex gap-5 w-full">
-				<div className="flex flex-col w-full">
-					<label className={`${styles.label}`} htmlFor="major">
-						What is your major?{" "}
-						<span className="text-[#FF2222]">*</span>
-					</label>
-					<input
-						className={`${styles.input}`}
-						type="text"
-						name="major"
-						id="major"
-						required
-					/>
-				</div>
-			</div>
+			<TextInput
+				name="major"
+				labelClass={`${styles.label}`}
+				labelText="What is your major?"
+				inputClass={`${styles.input}`}
+				containerClass="flex flex-col w-full"
+				isRequired={true}
+				type="text"
+				placeholder=""
+			/>
 
-			<div className="flex gap-5 w-full">
-				<div className="flex flex-row items-center gap-5 max-[600px]:flex-col max-[600px]:items-center max-[600px]:gap-1 max-[600px]:w-full text-center">
-					<p className={`text-lg mb-0 p-0`}>
-						Is this your first Hackathon?{" "}
-						<span className="text-[#FF2222]">*</span>
-					</p>
-					<div className="flex gap-2 items-center">
-						<input
-							type="radio"
-							id="hack-yes"
-							name="hack-check"
-							value="Yes"
-							required
-						/>
-						<label htmlFor="hack-yes" className="font-bold">
-							Yes
-						</label>
-					</div>
-					<div className="flex gap-2 items-center">
-						<input
-							type="radio"
-							id="hack-no"
-							name="hack-check"
-							value="No"
-							required
-						/>
-						<label htmlFor="hack-no" className="font-bold">
-							No
-						</label>
-					</div>
-				</div>
-			</div>
+			<SimpleRadio
+				name="hack-check"
+				values={yesNoOptions}
+				title="Is this your first Hackathon?"
+				titleClass="text-lg mb-0 p-0"
+				containerClassTotal="flex flex-row items-center gap-5 max-[600px]:flex-col max-[600px]:items-center max-[600px]:gap-1 max-[600px]:w-full text-center"
+				isRequired={true}
+				labelClass="font-bold"
+				containerClassInputLabels="flex gap-2 items-center"
+				containerClassValues="flex gap-3"
+			/>
 		</div>
 	);
 }

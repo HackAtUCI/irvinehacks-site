@@ -1,4 +1,18 @@
 import RequiredAsterisk from "../Components/RequiredAsterisk";
+import SimpleRadio from "../Components/SimpleRadio";
+
+const yesNoOptions = [
+	{
+		id: "minor-yes",
+		labelText: "Yes",
+		inputValue: "Yes",
+	},
+	{
+		id: "minor-no",
+		labelText: "No",
+		inputValue: "No",
+	},
+];
 
 export default function AgeInformation() {
 	return (
@@ -16,41 +30,17 @@ export default function AgeInformation() {
 				</p>
 			</div>
 
-			<div className="flex flex-col gap-1 w-full items-center">
-				<p className="text-xl font-bold m-0">
-					Will you be 18 years or older by January 26th, 2024?{" "}
-					<RequiredAsterisk />
-				</p>
-				<div className="flex gap-5">
-					<div className="flex gap-2 items-center">
-						<input
-							type="radio"
-							id="minor-yes"
-							name="minor-check"
-							value="Yes"
-							required
-						/>
-						<label
-							htmlFor="minor-yes"
-							className="font-bold text-xl"
-						>
-							Yes
-						</label>
-					</div>
-					<div className="flex gap-2 items-center">
-						<input
-							type="radio"
-							id="minor-no"
-							name="minor-check"
-							value="No"
-							required
-						/>
-						<label htmlFor="minor-no" className="font-bold text-xl">
-							No
-						</label>
-					</div>
-				</div>
-			</div>
+			<SimpleRadio
+				name="minor-check"
+				values={yesNoOptions}
+				title="Will you be 18 years or older by January 26th, 2024?"
+				titleClass="text-xl font-bold m-0"
+				containerClassTotal="flex flex-col gap-1 w-full items-center"
+				isRequired={true}
+				labelClass="font-bold text-xl"
+				containerClassInputLabels="flex gap-2 items-center"
+				containerClassValues="flex gap-5"
+			/>
 		</div>
 	);
 }

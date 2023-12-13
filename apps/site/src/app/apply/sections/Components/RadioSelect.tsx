@@ -7,6 +7,7 @@ interface RadioInputs {
 	labelText: string;
 	IdentifierId: string;
 	values: Array<{ value: string; text: string }>;
+	containerClass: string;
 }
 
 interface IsChecked {
@@ -30,17 +31,23 @@ const OtherInput = ({ isChecked, id }: IsChecked) => {
 	);
 };
 
-export default function RadioSelect(props: RadioInputs) {
+export default function RadioSelect({
+	name,
+	labelText,
+	IdentifierId,
+	values,
+	containerClass,
+}: RadioInputs) {
 	const [isOtherChecked, setIsOtherChecked] = useState(false);
 
 	return (
-		<>
+		<div className={containerClass}>
 			<p className="m-0 text-lg mb-4">
-				{props.labelText} <span className="text-[#FF2222]">*</span>
+				{labelText} <span className="text-[#FF2222]">*</span>
 			</p>
 			<div className="w-10/12 flex flex-col gap-2">
-				{props.values.map((item, i) => {
-					const keyandId = `${props.IdentifierId}-${i}`;
+				{values.map((item, i) => {
+					const keyandId = `${IdentifierId}-${i}`;
 					if (item.value == "other") {
 						return (
 							<div key={keyandId} className="flex gap-2">
@@ -48,7 +55,7 @@ export default function RadioSelect(props: RadioInputs) {
 									id={keyandId}
 									type="radio"
 									key={`option-${i}`}
-									name={props.name}
+									name={name}
 									value={item.value}
 									onChange={(e) =>
 										setIsOtherChecked(e.target.checked)
@@ -60,7 +67,7 @@ export default function RadioSelect(props: RadioInputs) {
 								</label>
 								<OtherInput
 									isChecked={isOtherChecked}
-									id={props.IdentifierId}
+									id={IdentifierId}
 								/>
 							</div>
 						);
@@ -71,7 +78,7 @@ export default function RadioSelect(props: RadioInputs) {
 								id={keyandId}
 								type="radio"
 								key={`option-${i}`}
-								name={props.name}
+								name={name}
 								value={item.value}
 								onChange={() => setIsOtherChecked(false)}
 								required
@@ -83,6 +90,6 @@ export default function RadioSelect(props: RadioInputs) {
 					);
 				})}
 			</div>
-		</>
+		</div>
 	);
 }

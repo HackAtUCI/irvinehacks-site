@@ -9,6 +9,7 @@ interface SelectProps {
 	name: string;
 	labelText: string;
 	values: Array<{ value: string; text: string }>;
+	containerClass: string;
 }
 
 interface OtherProps {
@@ -16,20 +17,17 @@ interface OtherProps {
 	name: string;
 }
 
-const OtherPopup = (props: OtherProps) => {
-	if (props.value == "other") {
+const OtherPopup = ({ value, name }: OtherProps) => {
+	if (value == "other") {
 		return (
 			<div className="mt-2 flex gap-2">
-				<label
-					htmlFor={`${props.name}-other-input`}
-					className="text-lg"
-				>
+				<label htmlFor={`${name}-other-input`} className="text-lg">
 					Other: <RequiredAsterisk />
 				</label>
 				<input
 					type="text"
-					name={`${props.name}-other-input`}
-					id={`${props.name}-other-input`}
+					name={`${name}-other-input`}
+					id={`${name}-other-input`}
 					className="border-b-2 p-1 h-6 border-black w-6/12"
 					required
 				/>
@@ -38,20 +36,27 @@ const OtherPopup = (props: OtherProps) => {
 	}
 };
 
-export default function DropdownSelect(props: SelectProps) {
+export default function DropdownSelect({
+	labelStyle,
+	inputStyle,
+	name,
+	labelText,
+	values,
+	containerClass
+}: SelectProps) {
 	const [value, setValue] = useState("");
 
 	return (
-		<>
-			<label className={`${props.labelStyle}`} htmlFor={props.name}>
-				{props.labelText} <RequiredAsterisk />
+		<div className={containerClass}>
+			<label className={`${labelStyle}`} htmlFor={name}>
+				{labelText} <RequiredAsterisk />
 			</label>
 			<select
-				className={`${props.inputStyle}`}
-				name={props.name}
+				className={`${inputStyle}`}
+				name={name}
 				onChange={(e) => setValue(e.target.value)}
 			>
-				{props.values.map((item, i) => {
+				{values.map((item, i) => {
 					return (
 						<option key={`option-${i}`} value={item.value}>
 							{item.text}
@@ -59,7 +64,7 @@ export default function DropdownSelect(props: SelectProps) {
 					);
 				})}
 			</select>
-			<OtherPopup value={value} name={props.name} />
-		</>
+			<OtherPopup value={value} name={name} />
+		</div>
 	);
 }

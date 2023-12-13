@@ -1,4 +1,6 @@
 import RequiredAsterisk from "../Components/RequiredAsterisk";
+import TextInput from "../Components/TextInput";
+import Textfield from "../Components/Textfield";
 import styles from "./Form.module.scss";
 
 export default function ProfileInformation() {
@@ -9,59 +11,45 @@ export default function ProfileInformation() {
 			</p>
 
 			<div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
-				<div className="flex flex-col w-6/12 max-[1000px]:w-full">
-					<label className={`${styles.label}`} htmlFor="linkedin">
-						LinkedIn
-					</label>
-					<input
-						className={`${styles.input}`}
-						type="url"
-						name="linkedin"
-						id="linkedin"
-						placeholder="http://"
-					/>
-				</div>
-				<div className="flex flex-col w-6/12 max-[1000px]:w-full">
-					<label className={`${styles.label}`} htmlFor="portfolio">
-						Portfolio (Github, website, etc.)
-					</label>
-					<input
-						className={`${styles.input}`}
-						type="url"
-						name="portfolio"
-						id="portfolio"
-						placeholder="http://"
-					/>
-				</div>
+				<TextInput
+					name="linkedin"
+					labelClass={`${styles.label}`}
+					labelText="LinkedIn"
+					inputClass={`${styles.input}`}
+					containerClass="flex flex-col w-6/12 max-[1000px]:w-full"
+					isRequired={false}
+					type="url"
+					placeholder="http://"
+				/>
+				<TextInput
+					name="portfolio"
+					labelClass={`${styles.label}`}
+					labelText="Portfolio (Github, website, etc.)"
+					inputClass={`${styles.input}`}
+					containerClass="flex flex-col w-6/12 max-[1000px]:w-full"
+					isRequired={false}
+					type="url"
+					placeholder="http://"
+				/>
 			</div>
 
-			<div className="flex gap-5 w-full">
-				<div className="flex flex-col w-full">
-					<label
-						className={`${styles.label} mt-7`}
-						htmlFor="linkedin"
-					>
-						Why is collaboration important to being a programmer or
-						technologist, and what does it mean to you? (150 words){" "}
-						<RequiredAsterisk />
-					</label>
-					<textarea className="bg-[#E1E1E1] p-3 h-48 resize-none rounded-xl" />
-				</div>
-			</div>
+			<Textfield
+				name="collaboration-answer"
+				labelClass={`${styles.label} mt-7`}
+				labelText="Why is collaboration important to being a programmer or technologist, and what does it mean to you? (150 words)"
+				inputClass={`bg-[#E1E1E1] p-3 h-48 resize-none rounded-xl`}
+				containerClass="flex flex-col w-full"
+				isRequired={true}
+			/>
 
-			<div className="flex gap-5 w-full">
-				<div className="flex flex-col w-full">
-					<label
-						className={`${styles.label} mt-7`}
-						htmlFor="linkedin"
-					>
-						If you could do any job, what would it be? (ex.
-						Youtuber, Body Builder, etc.) (100 words){" "}
-						<RequiredAsterisk />
-					</label>
-					<textarea className="bg-[#E1E1E1] p-3 h-48 resize-none rounded-xl" />
-				</div>
-			</div>
+			<Textfield
+				name="job-answer"
+				labelClass={`${styles.label} mt-7`}
+				labelText="If you could do any job, what would it be? (ex. Youtuber, Body Builder, etc.) (100 words)"
+				inputClass={`bg-[#E1E1E1] p-3 h-48 resize-none rounded-xl`}
+				containerClass="flex flex-col w-full"
+				isRequired={true}
+			/>
 		</div>
 	);
 }

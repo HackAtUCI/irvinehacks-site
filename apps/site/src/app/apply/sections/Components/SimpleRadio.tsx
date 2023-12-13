@@ -31,7 +31,7 @@ export default function SimpleRadio({
 		<div className={containerClassTotal}>
 			<p className={titleClass}>
 				{`${title} `}
-				{!isRequired || <RequiredAsterisk />}
+				{isRequired && <RequiredAsterisk />}
 			</p>
 			<div className={containerClassValues}>
 				{values.map((value, i) => {

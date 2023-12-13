@@ -22,7 +22,7 @@ export default function Textfield({
 			<div className="flex flex-col w-full">
 				<label className={labelClass} htmlFor={name}>
 					{`${labelText} `}
-					{!isRequired || <RequiredAsterisk />}
+					{isRequired && <RequiredAsterisk />}
 				</label>
 				<textarea
 					className={inputClass}

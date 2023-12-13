@@ -7,7 +7,7 @@ from typing import Any, Mapping, Optional, Union
 from bson import CodecOptions
 from motor.core import AgnosticClient
 from motor.motor_asyncio import AsyncIOMotorClient
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 log = getLogger(__name__)
 
@@ -29,15 +29,14 @@ DB = MONGODB_CLIENT[DATABASE_NAME].with_options(
 
 
 class BaseRecord(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     uid: str = Field(alias="_id")
 
     def dict(self, *args: Any, **kwargs: Any) -> dict[str, Any]:
         if "by_alias" in kwargs:
             return BaseModel.model_dump(self, *args, **kwargs)
         return BaseModel.model_dump(self, by_alias=True, *args, **kwargs)
-
-    class Config:
-        populate_by_name = True
 
 
 class Collection(str, Enum):

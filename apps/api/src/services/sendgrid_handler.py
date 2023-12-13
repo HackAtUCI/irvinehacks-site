@@ -28,7 +28,7 @@ async def send_email(
         email_message = Mail()
 
         if send_to_multiple:
-            if type(receiver_data) != list:
+            if not isinstance(receiver_data, list):
                 raise TypeError(
                     f"Expected {list} for receiver_data but got {type(receiver_data)}"
                 )
@@ -38,7 +38,7 @@ async def send_email(
                     p.add_to(Email(email=r["email"], dynamic_template_data=r))
                     email_message.add_personalization(p)
         else:
-            if type(receiver_data) != dict:
+            if not isinstance(receiver_data, dict):
                 raise TypeError(
                     f"Expected {dict} for receiver_data but got {type(receiver_data)}"
                 )
@@ -57,8 +57,8 @@ async def send_email(
 
         async with aiosendgrid.AsyncSendGridClient(api_key=SENDGRID_API_KEY) as client:
             response = await client.send_mail_v3(body=email_message.get())
-            print(response.status_code)
-            print(response.headers)
+            log.debug(response.status_code)
+            log.debug(response.headers)
     except HTTPStatusError as e:
         log.exception("During SendGrid processing: %s", e)
         raise RuntimeError("Could not send email with SendGrid")

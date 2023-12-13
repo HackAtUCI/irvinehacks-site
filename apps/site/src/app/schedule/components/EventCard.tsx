@@ -12,6 +12,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 
 const EventCard = React.forwardRef<
 	React.ElementRef<typeof Card>,
@@ -20,17 +21,25 @@ const EventCard = React.forwardRef<
 	return (
 		<Card
 			ref={ref}
-			className={cn("w-2/3 flex flex-col m-5", className)}
+			className={cn("w-2/3 flex flex-col m-5 border-2", className)}
 			{...props}
 		>
 			<CardHeader>
-				<CardTitle className="mb-2 text-3xl">Event Name</CardTitle>
+				<CardTitle className="mb-2 text-3xl flex">
+					Event Name
+					<Badge
+						variant="outline"
+						className="ml-auto text-lg transition bg-gradient-to-tr from-red-500 via-blue-400 to-purple-500"
+					>
+						Badge
+					</Badge>
+				</CardTitle>
 				<Separator className="bg-white" />
 				<CardDescription className="text-lg">
 					Hosted By: XXX Organization
 				</CardDescription>
 				<CardDescription className="text-sm">
-					X:XX PM - X:XX PM PST | Meeting Link
+					X:XX PM - X:XX PM PST | <a>Meeting Link</a>
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="text-xl">

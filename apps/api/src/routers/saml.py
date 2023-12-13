@@ -7,7 +7,8 @@ from typing import Any
 
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import RedirectResponse, Response
-from onelogin.saml2.auth import OneLogin_Saml2_Auth, OneLogin_Saml2_Settings
+from onelogin.saml2.auth import OneLogin_Saml2_Auth
+from onelogin.saml2.settings import OneLogin_Saml2_Settings
 
 # from auth import user_identity
 
@@ -56,7 +57,7 @@ def _get_saml_settings() -> OneLogin_Saml2_Settings:
     return OneLogin_Saml2_Settings(settings, custom_base_path=str(BASE_PATH))
 
 
-async def _prepare_saml_req(req: Request) -> dict[str, Any]:
+async def _prepare_saml_req(req: Request) -> dict[str, object]:
     """Packages a FastAPI Request into a request dict for SAML Auth"""
     return {
         "http_host": req.url.hostname,
@@ -90,7 +91,7 @@ async def login(req: Request) -> RedirectResponse:
 
 
 @router.post("/acs")
-async def acs(req: Request) -> RedirectResponse:
+async def acs(req: Request) -> str:
     """
     SAML Assertion Consumer Service.
     Accepts the response returned by the SAML Identity Provider and
@@ -113,7 +114,7 @@ async def acs(req: Request) -> RedirectResponse:
         (email,) = auth.get_friendlyname_attribute("email")
         (display_name,) = auth.get_friendlyname_attribute("displayName")
         (ucinetid,) = auth.get_friendlyname_attribute("ucinetid")
-        affiliations: list[str] = auth.get_friendlyname_attribute("uciaffiliation")
+        affiliations = auth.get_friendlyname_attribute("uciaffiliation")
     except (ValueError, TypeError) as e:
         log.exception("Error decoding SAML Attributes: %s", e)
         raise HTTPException(500, "Error decoding user identity")
@@ -142,7 +143,7 @@ async def sls(req: Request) -> str:
 async def get_saml_metadata() -> Response:
     """Provides SAML metadata, used when registering service with IdP"""
     saml_settings = _get_saml_settings()
-    metadata: bytes = saml_settings.get_sp_metadata()
+    metadata = saml_settings.get_sp_metadata()
 
     errors = saml_settings.validate_metadata(metadata)
     if errors:

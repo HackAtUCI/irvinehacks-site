@@ -2,7 +2,10 @@
 	"name": "api",
 	"private": true,
 	"scripts": {
-		"dev": "python src/dev.py",
-		"test": "pytest"
+		"dev": "./run-docker.sh",
+		"test": "pytest",
+		"lint": "flake8 src tests && mypy src tests",
+		"format:write": "black src tests",
+		"format:check": "black --check src tests"
 	}
 }

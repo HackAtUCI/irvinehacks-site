@@ -1,4 +1,5 @@
 import ShiftingCountdown from "./components/ShiftingCountdown/ShiftingCountdown";
+
 import EventCard from "./components/EventCard";
 import EventDiv from "./components/EventDiv";
 export const revalidate = 60;

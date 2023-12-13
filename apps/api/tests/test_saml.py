@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock, patch
 
 from fastapi.testclient import TestClient
-from onelogin.saml2.auth import OneLogin_Saml2_Settings
+from onelogin.saml2.settings import OneLogin_Saml2_Settings
 
 from routers import saml
 

@@ -24,7 +24,7 @@ export default function TextInput({
 	return (
 		<div className={containerClass}>
 			<label className={labelClass} htmlFor={name}>
-				{`${labelText} `} {isRequired ? <RequiredAsterisk /> : <></>}
+				{`${labelText} `} {!isRequired || <RequiredAsterisk />}
 			</label>
 			<input
 				className={inputClass}

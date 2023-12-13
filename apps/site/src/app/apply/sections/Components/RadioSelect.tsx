@@ -26,8 +26,8 @@ const OtherInput = forwardRef<HTMLInputElement, IsChecked>(
 					? "border-b-2 p-1 h-6 border-black w-6/12"
 					: "border-b-2 p-1 h-6 border-black w-6/12 bg-transparent"
 			}
-			required={isChecked ? true : false}
-			disabled={isChecked ? false : true}
+			required={isChecked}
+			disabled={!isChecked}
 		/>
 	),
 );

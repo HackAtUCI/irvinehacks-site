@@ -31,7 +31,7 @@ export default function SimpleRadio({
 		<div className={containerClassTotal}>
 			<p className={titleClass}>
 				{`${title} `}
-				{isRequired ? <RequiredAsterisk /> : <></>}
+				{!isRequired || <RequiredAsterisk />}
 			</p>
 			<div className={containerClassValues}>
 				{values.map((value, i) => {
@@ -47,10 +47,7 @@ export default function SimpleRadio({
 								value={value.inputValue}
 								required={isRequired}
 							/>
-							<label
-								htmlFor={value.inputValue}
-								className={labelClass}
-							>
+							<label htmlFor={value.id} className={labelClass}>
 								{value.labelText}
 							</label>
 						</div>

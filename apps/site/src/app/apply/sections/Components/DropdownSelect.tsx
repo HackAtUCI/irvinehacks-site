@@ -54,6 +54,7 @@ export default function DropdownSelect({
 			<select
 				className={`${inputStyle}`}
 				name={name}
+				id={name}
 				onChange={(e) => setValue(e.target.value)}
 			>
 				{values.map((item, i) => {

@@ -16,7 +16,6 @@ STAGING_ENV = os.getenv("DEPLOYMENT") == "STAGING"
 
 MONGODB_URI = os.getenv("MONGODB_URI")
 MONGODB_CLIENT = AsyncIOMotorClient(MONGODB_URI)
-MONGODB_CLIENT.get_io_loop = asyncio.get_event_loop
 
 DATABASE_NAME = "irvinehacks" if STAGING_ENV else "irvinehacks-prod"
 DB: AgnosticDatabase = MONGODB_CLIENT[DATABASE_NAME].with_options(

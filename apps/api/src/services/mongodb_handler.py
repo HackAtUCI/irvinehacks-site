@@ -5,21 +5,22 @@ from logging import getLogger
 from typing import Any, Mapping, Optional, Union
 
 from bson import CodecOptions
-from motor.core import AgnosticCollection, AgnosticDatabase
+from motor.core import AgnosticClient
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field
-from pymongo.results import InsertOneResult, UpdateResult
 
 log = getLogger(__name__)
 
 STAGING_ENV = os.getenv("DEPLOYMENT") == "STAGING"
 
 MONGODB_URI = os.getenv("MONGODB_URI")
-MONGODB_CLIENT = AsyncIOMotorClient(MONGODB_URI)
-MONGODB_CLIENT.get_io_loop = asyncio.get_event_loop
+MONGODB_CLIENT: AgnosticClient[Mapping[str, object]] = AsyncIOMotorClient(MONGODB_URI)
+
+# Resolve Vercel runtime issue
+MONGODB_CLIENT.get_io_loop = asyncio.get_event_loop # type: ignore
 
 DATABASE_NAME = "irvinehacks" if STAGING_ENV else "irvinehacks-prod"
-DB: AgnosticDatabase = MONGODB_CLIENT[DATABASE_NAME].with_options(
+DB = MONGODB_CLIENT[DATABASE_NAME].with_options(
     codec_options=CodecOptions(tz_aware=True)
 )
 
@@ -46,8 +47,8 @@ async def insert(
     collection: Collection, data: Mapping[str, object]
 ) -> Union[str, bool]:
     """Insert a document into the specified collection of the database"""
-    COLLECTION: AgnosticCollection = DB[collection.value]
-    result: InsertOneResult = await COLLECTION.insert_one(data)
+    COLLECTION = DB[collection.value]
+    result = await COLLECTION.insert_one(data)
     if not result.acknowledged:
         log.error("MongoDB document insertion was not acknowledged")
         raise RuntimeError("Could not insert document into MongoDB collection")
@@ -98,7 +99,7 @@ async def raw_update_one(
 ) -> bool:
     """Search for and update a document using the provided query and raw update."""
     COLLECTION = DB[collection.value]
-    result: UpdateResult = await COLLECTION.update_one(query, update, upsert=upsert)
+    result = await COLLECTION.update_one(query, update, upsert=upsert)
     if not result.acknowledged:
         log.error("MongoDB document update was not acknowledged")
         raise RuntimeError("Could not update documents in MongoDB collection")
@@ -111,7 +112,7 @@ async def update(
 ) -> bool:
     """Search for and update documents (if they exist) using the provided query data."""
     COLLECTION = DB[collection.value]
-    result: UpdateResult = await COLLECTION.update_many(query, {"$set": new_data})
+    result = await COLLECTION.update_many(query, {"$set": new_data})
     if not result.acknowledged:
         log.error("MongoDB document update was not acknowledged")
         raise RuntimeError("Could not update documents in MongoDB collection")

@@ -68,7 +68,7 @@ function Navbar() {
 					<NavLinkItem href="/">Schedule</NavLinkItem>
 					<NavLinkItem href="/">Resources</NavLinkItem>
 					<NavLinkItem href="/">Stage</NavLinkItem> */}
-					<Button text="Login" href="/" isLightVersion />
+					<Button text="Login" href="/api/saml/login" isLightVersion />
 				</NavMenu.List>
 			</div>
 		</NavMenu.Root>

@@ -17,8 +17,8 @@ class ContactInfo(Protocol):
 
 class Template(str, Enum):
     # TODO: provide actual template IDs
-    CONFIRMATION_EMAIL = "d-2026cde7bebd45ad85723443808c5817"
-    GUEST_TOKEN = "d-b19f08e584cb4c0f97b55f567ee10afc"
+    CONFIRMATION_EMAIL = "d-e053b7a4bedd449bafda46c6512d531c"
+    GUEST_TOKEN = "d-d962252a87844188880d7bd19a5b2fbf"
 
 
 async def send_application_confirmation_email(user: ContactInfo) -> None:

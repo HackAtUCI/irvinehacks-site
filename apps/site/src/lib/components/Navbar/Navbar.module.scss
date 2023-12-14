@@ -14,13 +14,11 @@
 	// needed for underline effect to work
 	padding-bottom: 0.5rem;
 
-	filter: brightness(1.05);
-
 	background-image: linear-gradient(white, white);
 	background-repeat: no-repeat;
 	background-position-y: 34px;
 	background-size: 0% $underline-size;
-	transition: 
+	transition:
 		filter 0.1s ease,
 		text-shadow 0.1s ease,
 		background-size 0.25s ease;
@@ -28,8 +26,10 @@
 	&:hover,
 	&:focus,
 	&:active {
-		text-shadow: 0px 0px 20px #ffa700, 0px 0px 20px #ffda7b;
-		filter: brightness(3.05);
+		text-shadow:
+			0px 0px 20px #fffce2,
+			0px 0px 20px #ffc67c,
+			0px 0px 20px #fffce2;
 		background-size: 100% $underline-size;
 	}
 }

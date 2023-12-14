@@ -33,7 +33,7 @@ function Navbar() {
 			<NavMenu.List
 				className={"bg-black bg-opacity-50 md:bg-opacity-0 flex p-3"}
 			>
-				<NavLinkItem href="">
+				<NavLinkItem href="/">
 					<HackLogo />
 				</NavLinkItem>
 				<button
@@ -59,12 +59,12 @@ function Navbar() {
 						"[&>*]:mb-5 [&>*]:md:mb-0 font-display gap-10 p-5 pt-3 bg-black bg-opacity-50 md:bg-opacity-0 md:p-0 md:flex md:items-center"
 					}
 				>
-					<NavLinkItem href="">Home</NavLinkItem>
-					<NavLinkItem href="">Sponsor</NavLinkItem>
-					<NavLinkItem href="">Schedule</NavLinkItem>
-					<NavLinkItem href="">Resources</NavLinkItem>
-					<NavLinkItem href="">Stage</NavLinkItem>
-					<Button text="Login" href="" isLightVersion />
+					<NavLinkItem href="/">Home</NavLinkItem>
+					<NavLinkItem href="/">Sponsor</NavLinkItem>
+					<NavLinkItem href="/">Schedule</NavLinkItem>
+					<NavLinkItem href="/">Resources</NavLinkItem>
+					<NavLinkItem href="/">Stage</NavLinkItem>
+					<Button text="Login" href="/" isLightVersion />
 				</NavMenu.List>
 			</div>
 		</NavMenu.Root>

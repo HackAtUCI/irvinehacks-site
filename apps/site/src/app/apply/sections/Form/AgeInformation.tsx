@@ -1,5 +1,4 @@
-import RequiredAsterisk from "../Components/RequiredAsterisk";
-import SimpleRadio from "../Components/SimpleRadio";
+import SimpleRadio from "@/app/apply/sections/Components/SimpleRadio";
 
 const yesNoOptions = [
 	{

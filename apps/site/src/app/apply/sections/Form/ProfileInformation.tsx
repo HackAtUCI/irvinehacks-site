@@ -1,6 +1,5 @@
-import RequiredAsterisk from "../Components/RequiredAsterisk";
-import TextInput from "../Components/TextInput";
-import Textfield from "../Components/Textfield";
+import TextInput from "@/app/apply/sections/Components/TextInput";
+import Textfield from "@/app/apply/sections/Components/Textfield";
 import styles from "./Form.module.scss";
 
 export default function ProfileInformation() {

@@ -5,7 +5,7 @@ from aiosendgrid import AsyncSendGridClient
 from httpx import HTTPStatusError, Request, Response
 
 from services import sendgrid_handler
-from services.sendgrid_handler import PersonalizationData
+from utils.PersonalizationData import PersonalizationData
 
 SAMPLE_SENDER = ("noreply@irvinehacks.com", "No Reply IrvineHacks")
 SAMPLE_RECIPIENTS: list[PersonalizationData] = [
@@ -13,13 +13,11 @@ SAMPLE_RECIPIENTS: list[PersonalizationData] = [
         "email": "hacker0@uci.edu",
         "first_name": "Hacker",
         "last_name": "Zero",
-        "passphrase": None,
     },
     {
         "email": "hacker1@uci.edu",
         "first_name": "Hacker",
         "last_name": "One",
-        "passphrase": None,
     },
 ]
 

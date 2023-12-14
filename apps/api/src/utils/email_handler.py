@@ -4,7 +4,7 @@ from typing import Protocol
 from pydantic import EmailStr
 
 from services import sendgrid_handler
-from services.sendgrid_handler import PersonalizationData
+from utils.PersonalizationData import PersonalizationData
 
 IH_SENDER = ("apply@irvinehacks.com", "IrvineHacks 2024 Applications")
 
@@ -28,7 +28,6 @@ async def send_application_confirmation_email(user: ContactInfo) -> None:
         "email": user.email,
         "first_name": user.first_name,
         "last_name": user.last_name,
-        "passphrase": None,
     }
     await sendgrid_handler.send_email(Template.CONFIRMATION_EMAIL, IH_SENDER, send_data)
 
@@ -38,7 +37,5 @@ async def send_guest_login_email(email: EmailStr, passphrase: str) -> None:
     send_data: PersonalizationData = {
         "email": email,
         "passphrase": passphrase,
-        "first_name": None,
-        "last_name": None,
     }
     await sendgrid_handler.send_email(Template.GUEST_TOKEN, IH_SENDER, send_data)

@@ -2,6 +2,9 @@ import ShiftingCountdown from "./components/ShiftingCountdown/ShiftingCountdown"
 
 import EventCard from "./components/EventCard";
 import EventDiv from "./components/EventDiv";
+
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 export const revalidate = 60;
 
 const defaultCardProps = {
@@ -19,39 +22,66 @@ const defaultCardProps = {
 export default function Schedule() {
 	return (
 		<>
-			<section className="h-full w-full">
+			<section className="h-full w-full mb-10">
 				<div className="m-36">
 					<ShiftingCountdown />
 				</div>
-				<div className="flex flex-col justify-center items-center mb-10">
-					<EventCard
-						{...defaultCardProps}
-						className="bg-zinc-700 bg-opacity-70 border-gray-400 border"
-					/>
-					<EventDiv
-						className="bg-green-600"
-						titleText="Hacking Starts"
-						subText="X:XX PM - X:XX PM PST"
-					/>
-					<EventCard
-						{...defaultCardProps}
-						className="bg-gray-500 bg-opacity-60 border-gray-400 border"
-					/>
-					<EventCard
-						{...defaultCardProps}
-						className="bg-gray-500 bg-opacity-60 border-gray-400 border"
-					/>
-					<EventCard
-						{...defaultCardProps}
-						className="bg-gray-500 bg-opacity-60 border-gray-400 border"
-					/>
-					<EventCard {...defaultCardProps} className="" />
-					<EventDiv
-						className="bg-red-700"
-						titleText="Hacking Ends"
-						subText="X:XX PM - X:XX PM PST"
-					/>
-				</div>
+				<Tabs defaultValue="Friday">
+					<div className="flex flex-col items-center">
+						<TabsList className="flex justify-end w-2/3 items-center rounded-2xl scale-125">
+							<TabsTrigger
+								value="Friday"
+								className="border data-[state=active]:bg-slate-400 data-[state=active]:bg-opacity-60 rounded-l-2xl"
+							>
+								Friday
+							</TabsTrigger>
+							<TabsTrigger
+								className="border data-[state=active]:bg-slate-400 data-[state=active]:bg-opacity-60"
+								value="Saturday"
+							>
+								Saturday
+							</TabsTrigger>
+							<TabsTrigger
+								value="Sunday"
+								className="border data-[state=active]:bg-slate-400 data-[state=active]:bg-opacity-60 rounded-r-2xl"
+							>
+								Sunday
+							</TabsTrigger>
+						</TabsList>
+					</div>
+
+					<TabsContent value="Friday">
+						<div className="flex flex-col justify-center items-center mb-10">
+							<EventCard
+								{...defaultCardProps}
+								className="bg-zinc-700 bg-opacity-70 border-gray-400 border"
+							/>
+							<EventDiv
+								className="bg-green-600"
+								titleText="Hacking Starts"
+								subText="X:XX PM - X:XX PM PST"
+							/>
+							<EventCard
+								{...defaultCardProps}
+								className="bg-gray-500 bg-opacity-60 border-gray-400 border"
+							/>
+							<EventCard
+								{...defaultCardProps}
+								className="bg-gray-500 bg-opacity-60 border-gray-400 border"
+							/>
+							<EventCard
+								{...defaultCardProps}
+								className="bg-gray-500 bg-opacity-60 border-gray-400 border"
+							/>
+							<EventCard {...defaultCardProps} className="" />
+							<EventDiv
+								className="bg-red-700"
+								titleText="Hacking Ends"
+								subText="X:XX PM - X:XX PM PST"
+							/>
+						</div>
+					</TabsContent>
+				</Tabs>
 			</section>
 		</>
 	);

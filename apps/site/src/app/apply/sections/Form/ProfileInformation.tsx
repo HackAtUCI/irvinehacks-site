@@ -19,7 +19,7 @@ export default function ProfileInformation() {
 					containerClass="flex flex-col w-6/12 max-[1000px]:w-full"
 					isRequired={false}
 					type="url"
-					placeholder="http://"
+					placeholder="https://"
 				/>
 				<TextInput
 					name="portfolio"
@@ -29,7 +29,7 @@ export default function ProfileInformation() {
 					containerClass="flex flex-col w-6/12 max-[1000px]:w-full"
 					isRequired={false}
 					type="url"
-					placeholder="http://"
+					placeholder="https://"
 				/>
 			</div>
 

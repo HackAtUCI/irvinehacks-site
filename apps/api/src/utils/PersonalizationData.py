@@ -1,4 +1,4 @@
-from typing import TypedDict 
+from typing import TypedDict
 from typing_extensions import NotRequired
 
 
@@ -7,4 +7,3 @@ class PersonalizationData(TypedDict):
     first_name: NotRequired[str]
     last_name: NotRequired[str]
     passphrase: NotRequired[str]
-

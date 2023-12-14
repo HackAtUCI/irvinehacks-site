@@ -19,9 +19,6 @@ const config: Config = {
 				body: ["Mulish"],
 				sans: ["Mulish"],
 			},
-			screens: {
-				'pmd': '740px'
-			}
 		},
 	},
 	plugins: [],

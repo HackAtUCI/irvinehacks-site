@@ -55,7 +55,7 @@ function Navbar() {
 				<NavMenu.List
 					className={
 						(listShown ? "" : "-translate-y-full ") +
-						"transition transform duration-500 ease-in-out md:transition-none pmd:translate-y-0 " +
+						"transition transform duration-500 ease-in-out md:transition-none md:translate-y-0 " +
 						"[&>*]:mb-5 [&>*]:md:mb-0 font-display gap-10 p-5 pt-3 bg-black bg-opacity-50 md:bg-opacity-0 md:p-0 md:flex md:items-center"
 					}
 				>

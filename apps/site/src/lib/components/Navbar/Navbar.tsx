@@ -63,11 +63,11 @@ function Navbar() {
 					}
 					onTransitionEnd={() => setHidden(!listShown)}
 				>
-					<NavLinkItem href="/">Home</NavLinkItem>
+					{/* <NavLinkItem href="/">Home</NavLinkItem>
 					<NavLinkItem href="/">Sponsor</NavLinkItem>
 					<NavLinkItem href="/">Schedule</NavLinkItem>
 					<NavLinkItem href="/">Resources</NavLinkItem>
-					<NavLinkItem href="/">Stage</NavLinkItem>
+					<NavLinkItem href="/">Stage</NavLinkItem> */}
 					<Button text="Login" href="/" isLightVersion />
 				</NavMenu.List>
 			</div>

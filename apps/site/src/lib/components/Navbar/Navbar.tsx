@@ -16,6 +16,7 @@ import Image from "next/image";
 function Navbar() {
 	const [listShown, setListShown] = useState(false);
 	const [hasScrolled, setHasScrolled] = useState(false);
+	const [hidden, setHidden] = useState(true);
 
 	useEffect(() => {
 		const scrollHandler = () =>
@@ -40,6 +41,7 @@ function Navbar() {
 					className="ml-auto h-auto md:hidden cursor-pointer"
 					onClick={() => {
 						setListShown((listShown) => !listShown);
+						setHidden(false);
 					}}
 				>
 					<Image
@@ -54,10 +56,12 @@ function Navbar() {
 			>
 				<NavMenu.List
 					className={
+						(hidden ? "opacity-0 " : "opacity-100 ") +
 						(listShown ? "" : "-translate-y-full ") +
-						"transition transform duration-500 ease-in-out md:transition-none md:translate-y-0 " +
+						"transition-transform duration-500 ease-in-out md:transition-none md:translate-y-0 md:opacity-100 " +
 						"[&>*]:mb-5 [&>*]:md:mb-0 font-display gap-10 p-5 pt-3 bg-black bg-opacity-50 md:bg-opacity-0 md:p-0 md:flex md:items-center"
 					}
+					onTransitionEnd={() => setHidden(!listShown)}
 				>
 					<NavLinkItem href="/">Home</NavLinkItem>
 					<NavLinkItem href="/">Sponsor</NavLinkItem>

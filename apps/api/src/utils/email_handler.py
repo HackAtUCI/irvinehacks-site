@@ -4,7 +4,7 @@ from typing import Protocol
 from pydantic import EmailStr
 
 from services import sendgrid_handler
-from utils.PersonalizationData import PersonalizationData
+from services.sendgrid_handler import PersonalizationData
 
 IH_SENDER = ("apply@irvinehacks.com", "IrvineHacks 2024 Applications")
 

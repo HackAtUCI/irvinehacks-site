@@ -2,16 +2,23 @@
 # https://github.com/sendgrid/sendgrid-python
 import os
 from logging import getLogger
-from typing import Iterable, Tuple, Union
+from typing import Iterable, Tuple, TypedDict, Union
+from typing_extensions import NotRequired
 
 import aiosendgrid
 from httpx import HTTPStatusError
 from sendgrid.helpers.mail import Email, Mail, Personalization
-from utils.PersonalizationData import PersonalizationData
 
 log = getLogger(__name__)
 
 SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
+
+
+class PersonalizationData(TypedDict):
+    email: str
+    first_name: NotRequired[str]
+    last_name: NotRequired[str]
+    passphrase: NotRequired[str]
 
 
 async def send_email(

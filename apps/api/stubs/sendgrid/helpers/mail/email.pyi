@@ -1,10 +1,8 @@
-from typing import Tuple
-
-from .dynamic_template_data import DynamicTemplateData
+from typing import Mapping
 
 class Email:
     def __init__(
         self,
-        email: Tuple[str, str] | None = ...,
-        dynamic_template_data: DynamicTemplateData | dict[object, object] | None = ...,
+        email: str | None = ...,
+        dynamic_template_data: Mapping[str, object] | None = ...,
     ) -> None: ...

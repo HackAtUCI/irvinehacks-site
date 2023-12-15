@@ -53,9 +53,9 @@ export default function BasicInformation() {
 
 			<div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
 				<RadioSelect
-					IdentifierId="pronoun-identifier"
-					name="pronoun"
-					labelText="Pronoun"
+					IdentifierId="pronouns-identifier"
+					name="pronouns"
+					labelText="Pronouns"
 					values={pronouns}
 					containerClass="flex flex-col w-6/12 max-[1000px]:w-full"
 				/>

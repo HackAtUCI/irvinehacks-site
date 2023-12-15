@@ -16,8 +16,8 @@ const educationLevels = [
 const universityOptions = [
 	{ value: "UC Irvine", text: "UC Irvine" },
 	{ value: "Cal Poly Pomona", text: "Cal Poly Pomona" },
-	{ value: "Cal State Long Beach", text: "Cal State Long Beach" },
 	{ value: "Cal State Fullerton", text: "Cal State Fullerton" },
+	{ value: "Cal State Long Beach", text: "Cal State Long Beach" },
 	{ value: "UC Berkeley", text: "UC Berkeley" },
 	{ value: "UCLA", text: "UCLA" },
 	{ value: "UC Riverside", text: "UC Riverside" },

@@ -1,0 +1,6 @@
+from httpx import AsyncClient
+from httpx._models import Response as Response
+
+class AsyncSendGridClient(AsyncClient):
+    def __init__(self, api_key: str | None = ...) -> None: ...
+    async def send_mail_v3(self, body: dict[str, object]) -> Response: ...

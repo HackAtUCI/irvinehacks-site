@@ -132,10 +132,10 @@ def _generate_jwt_token(user: User) -> str:
         iat=now,
         exp=now + timedelta(hours=1),
         sub=user.uid,
-        data=user.dict(exclude={"uid"}),
+        data=user.model_dump(exclude={"uid"}),
     )
 
-    token = jwt.encode(claims.dict(), JWT_SECRET, algorithm=JWT_ALGORITHM)
+    token = jwt.encode(claims.model_dump(), JWT_SECRET, algorithm=JWT_ALGORITHM)
     return token
 
 
@@ -147,4 +147,4 @@ def _decode_jwt(user_token: str) -> JWTClaims:
     except JWTError:
         raise ValueError
 
-    return JWTClaims.parse_obj(raw_claims)
+    return JWTClaims.model_validate(raw_claims)

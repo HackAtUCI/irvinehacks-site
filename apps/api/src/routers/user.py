@@ -1,5 +1,5 @@
 from logging import getLogger
-from typing import Optional
+from typing import Annotated, Union
 
 from fastapi import APIRouter, Depends, Form, status
 from fastapi.responses import RedirectResponse
@@ -17,9 +17,9 @@ router = APIRouter()
 
 
 class IdentityResponse(BaseModel):
-    uid: Optional[str]
-    status: Optional[str]
-    role: Optional[Role]
+    uid: Union[str, None]
+    status: Union[str, None]
+    role: Union[Role, None]
 
 
 @router.post("/login")
@@ -40,7 +40,9 @@ async def log_out() -> RedirectResponse:
 
 
 @router.get("/me", response_model=IdentityResponse)
-async def me(user: User = Depends(use_user_identity)) -> dict[str, object]:
+async def me(
+    user: Annotated[Union[User, None], Depends(use_user_identity)]
+) -> dict[str, object]:
     log.info(user)
     if not user:
         return dict()

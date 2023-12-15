@@ -1,6 +1,6 @@
 import os
 from datetime import datetime, timedelta, timezone
-from typing import Any, Optional
+from typing import Annotated, Any, Union
 
 from fastapi import Cookie, HTTPException, Response, status
 from fastapi.testclient import TestClient
@@ -96,7 +96,9 @@ def issue_user_identity(user: User, response: Response) -> Response:
     return response
 
 
-def require_user_identity(irvinehacks_auth: Optional[str] = Cookie(None)) -> User:
+def require_user_identity(
+    irvinehacks_auth: Annotated[Union[str, None], Cookie()] = None
+) -> User:
     """Provide the user decoded from the auth cookie.
     Raise status 401 if valid identity cannot be decoded."""
     user_identity = _decode_user_identity(irvinehacks_auth)
@@ -106,12 +108,14 @@ def require_user_identity(irvinehacks_auth: Optional[str] = Cookie(None)) -> Use
     return user_identity
 
 
-def use_user_identity(irvinehacks_auth: Optional[str] = Cookie(None)) -> Optional[User]:
+def use_user_identity(
+    irvinehacks_auth: Annotated[Union[str, None], Cookie()] = None
+) -> Union[User, None]:
     """Provide the user decoded from the auth cookie or `None` if invalid."""
     return _decode_user_identity(irvinehacks_auth)
 
 
-def _decode_user_identity(user_token: Optional[str]) -> Optional[User]:
+def _decode_user_identity(user_token: Union[str, None]) -> Union[User, None]:
     """Decode a user object from a JWT.
     Return `None` if the token is empty or invalid."""
     if not user_token:

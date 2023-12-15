@@ -59,17 +59,17 @@ export default function Home() {
 							name="email"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel className="text-3xl">
+									<FormLabel className="text-xl md:text-3xl">
 										Email Address
 									</FormLabel>
 									<FormControl>
 										<Input
-											className="text-black"
-											placeholder="PeterTheAnteater@uci.edu"
+											className="text-black text-xs sm:text-base"
+											placeholder="PeterAnteater@uci.edu"
 											{...field}
 										/>
 									</FormControl>
-									<FormDescription>
+									<FormDescription className="text-xs">
 										UCI students will log in with UCI SSO.
 									</FormDescription>
 									<FormMessage />
@@ -79,7 +79,7 @@ export default function Home() {
 
 						<Button
 							type="submit"
-							className="w-1/5 h-14 hover:text-gray-500 active:text-black text-2xl
+							className="md:min-w-1/5 h-14 hover:text-gray-500 active:text-black text-2xl
                              bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500
                              shadow-slate-500/50 shadow-lg hover:shadow-slate-500/80
                              hover:scale-105 transition ease-in"

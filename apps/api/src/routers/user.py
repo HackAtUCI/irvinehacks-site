@@ -17,9 +17,9 @@ router = APIRouter()
 
 
 class IdentityResponse(BaseModel):
-    uid: Union[str, None]
-    status: Union[str, None]
-    role: Union[Role, None]
+    uid: Union[str, None] = None
+    status: Union[str, None] = None
+    role: Union[Role, None] = None
 
 
 @router.post("/login")

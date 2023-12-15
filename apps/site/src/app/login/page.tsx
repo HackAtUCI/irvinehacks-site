@@ -1,4 +1,6 @@
 "use client";
+import { useRouter } from "next/navigation";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -30,6 +32,7 @@ const formSchema = z.object({
 });
 
 export default function Home() {
+	const router = useRouter();
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -39,6 +42,7 @@ export default function Home() {
 
 	const onSubmit = (e: z.infer<typeof formSchema>) => {
 		console.log("submit", e);
+		router.push(LOGIN_PATH);
 	};
 
 	return (

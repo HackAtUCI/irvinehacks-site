@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr, Field, HttpUrl
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, HttpUrl
 
 from .utils import form_body
 
@@ -18,6 +18,8 @@ Review = tuple[datetime, str, Decision]
 
 @form_body
 class RawApplicationData(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, str_max_length=254)
+
     first_name: str
     last_name: str
     email: EmailStr
@@ -32,10 +34,6 @@ class RawApplicationData(BaseModel):
     linkedin_link: Optional[HttpUrl]
     collaboration_question: Optional[str] = Field()
     any_job_question: str = Field()
-
-    class Config:
-        anystr_strip_whitespace = True
-        max_anystr_length = 254
 
 
 class ProcessedApplicationData(RawApplicationData):

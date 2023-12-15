@@ -45,8 +45,6 @@ const EventCard = React.forwardRef<
 		},
 		ref,
 	) => {
-		const currentTime = new Date();
-
 		return (
 			<>
 				<Card
@@ -59,13 +57,13 @@ const EventCard = React.forwardRef<
 					{...props}
 				>
 					<CardHeader className="relative">
-						<CardTitle className="mb-2 text-3xl flex items-baseline text-[#FFDA7B]">
+						<CardTitle className="mb-2 text-3xl flex items-baseline">
 							{titleText} <span className="m-3 text-4xl">|</span>
 							<p className="text-xl">{time}</p>
 							<Badge
 								variant="outline"
 								className={cn(
-									"ml-auto text-lg transition bg-[#DFBA73]",
+									"ml-auto text-lg transition",
 									badgeClassName,
 								)}
 							>
@@ -73,10 +71,10 @@ const EventCard = React.forwardRef<
 							</Badge>
 						</CardTitle>
 						<Separator className="bg-white" />
-						<CardDescription className="text-lg text-[#FFFCE2]">
+						<CardDescription className="text-lg">
 							{subText}
 						</CardDescription>
-						<CardDescription className="text-md text-[#FFFCE2]">
+						<CardDescription className="text-md">
 							<a
 								target="_blank"
 								rel="noopener noreferrer"
@@ -87,10 +85,10 @@ const EventCard = React.forwardRef<
 							</a>
 						</CardDescription>
 					</CardHeader>
-					<CardContent className="text-xl text-[#FFFCE2]">
+					<CardContent className="text-xl">
 						<p>{description}</p>
 					</CardContent>
-					<CardFooter className="ml-auto text-gray-300 text-white/50 ">
+					<CardFooter className="ml-auto text-gray-300">
 						<p>{footerText}</p>
 					</CardFooter>
 				</Card>

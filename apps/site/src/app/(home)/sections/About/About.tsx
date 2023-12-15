@@ -26,7 +26,7 @@ const About = () => {
 				/>
 				<div className="text-2xl lg:text-3xl mb-5">
 					<h2>
-						<span className={styles.statistic}>36</span> Hours
+						<span className={styles.statistic}>3</span> Days
 					</h2>
 					<h2>
 						<span className={styles.statistic}>400+</span> Hackers

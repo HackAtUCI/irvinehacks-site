@@ -40,6 +40,13 @@ def test_can_encode_and_decode_guest_user() -> None:
     assert decoded_user == user
 
 
+def test_scoped_uid_with_dots() -> None:
+    """Test scoped uid properly processes local and domain parts."""
+    assert user_identity.scoped_uid("kate@cc.edu") == "edu.cc.kate"
+    assert user_identity.scoped_uid("kate@student.cc.edu") == "edu.cc.student.kate"
+    assert user_identity.scoped_uid("student.kate@cc.edu") == "edu.cc.student-kate"
+
+
 def test_empty_identity_with_empty_token() -> None:
     """Test that no identity is decoded from an empty token."""
     user = user_identity._decode_user_identity(None)

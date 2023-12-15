@@ -10,6 +10,8 @@ from pydantic import BaseModel, EmailStr
 JWT_ALGORITHM = "HS256"
 JWT_SECRET = os.getenv("JWT_SECRET", "")
 
+COOKIE_NAME = "irvinehacks_auth"
+
 
 class User(BaseModel):
     uid: str
@@ -48,7 +50,7 @@ class UserTestClient(TestClient):
 
     def __init__(self, user: User, *args: Any, **kwargs: Any):
         kwargs["cookies"] = kwargs.get("cookies", dict())
-        kwargs["cookies"]["hackuci_auth"] = _generate_jwt_token(user)
+        kwargs["cookies"][COOKIE_NAME] = _generate_jwt_token(user)
         super().__init__(*args, **kwargs)
 
 
@@ -81,7 +83,7 @@ def utc_now() -> datetime:
 
 def remove_user_identity(response: Response) -> Response:
     """Remove authentication cookie."""
-    response.set_cookie("hackuci_auth", "", max_age=0)
+    response.set_cookie(COOKIE_NAME, "", max_age=0)
     return response
 
 
@@ -89,24 +91,24 @@ def issue_user_identity(user: User, response: Response) -> Response:
     """Issue a user identity as a JWT cookie added to the given response."""
     jwt_token = _generate_jwt_token(user)
     response.set_cookie(
-        "hackuci_auth", jwt_token, max_age=4000, secure=True, httponly=True
+        COOKIE_NAME, jwt_token, max_age=4000, secure=True, httponly=True
     )
     return response
 
 
-def require_user_identity(hackuci_auth: Optional[str] = Cookie(None)) -> User:
+def require_user_identity(irvinehacks_auth: Optional[str] = Cookie(None)) -> User:
     """Provide the user decoded from the auth cookie.
     Raise status 401 if valid identity cannot be decoded."""
-    user_identity = _decode_user_identity(hackuci_auth)
+    user_identity = _decode_user_identity(irvinehacks_auth)
     if not user_identity:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Not authorized")
 
     return user_identity
 
 
-def use_user_identity(hackuci_auth: Optional[str] = Cookie(None)) -> Optional[User]:
+def use_user_identity(irvinehacks_auth: Optional[str] = Cookie(None)) -> Optional[User]:
     """Provide the user decoded from the auth cookie or `None` if invalid."""
-    return _decode_user_identity(hackuci_auth)
+    return _decode_user_identity(irvinehacks_auth)
 
 
 def _decode_user_identity(user_token: Optional[str]) -> Optional[User]:

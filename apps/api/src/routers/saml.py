@@ -10,7 +10,7 @@ from fastapi.responses import RedirectResponse, Response
 from onelogin.saml2.auth import OneLogin_Saml2_Auth
 from onelogin.saml2.settings import OneLogin_Saml2_Settings
 
-# from auth import user_identity
+from auth import user_identity
 
 log = getLogger(__name__)
 
@@ -91,7 +91,7 @@ async def login(req: Request) -> RedirectResponse:
 
 
 @router.post("/acs")
-async def acs(req: Request) -> str:
+async def acs(req: Request) -> RedirectResponse:
     """
     SAML Assertion Consumer Service.
     Accepts the response returned by the SAML Identity Provider and
@@ -119,16 +119,16 @@ async def acs(req: Request) -> str:
         log.exception("Error decoding SAML Attributes: %s", e)
         raise HTTPException(500, "Error decoding user identity")
 
-    # user = user_identity.NativeUser(
-    #     ucinetid=ucinetid,
-    #     display_name=display_name,
-    #     email=email,
-    #     affiliations=affiliations,
-    # )
+    user = user_identity.NativeUser(
+        ucinetid=ucinetid,
+        display_name=display_name,
+        email=email,
+        affiliations=affiliations,
+    )
 
-    # res = RedirectResponse("/", status_code=303)
-    # user_identity.issue_user_identity(user, res)
-    return f"Hello, {display_name} ({ucinetid})"
+    res = RedirectResponse("/", status_code=303)
+    user_identity.issue_user_identity(user, res)
+    return res
 
 
 @router.get("/sls")

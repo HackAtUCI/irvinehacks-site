@@ -24,11 +24,7 @@ const LOGIN_PATH = "/api/user/login";
 const formSchema = z.object({
 	email: z
 		.string()
-		.email({ message: "Sorry, that email address is invalid." })
-		.refine((email) => email.endsWith(".edu"), {
-			message:
-				"Sorry, only emails that end in '.edu' are allowed to log in.",
-		}),
+		.email({ message: "Sorry, that email address is invalid." }),
 });
 
 export default function Home() {

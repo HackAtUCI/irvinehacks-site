@@ -28,22 +28,22 @@ export default function Schedule() {
 				</div>
 				<Tabs defaultValue="Friday">
 					<div className="flex flex-col items-center">
-						<TabsList className="flex justify-end w-2/3 items-center rounded-2xl scale-125">
+						<TabsList className="ml-auto rounded-2xl scale-125 mr-[20%]">
 							<TabsTrigger
 								value="Friday"
-								className="border data-[state=active]:bg-slate-400 data-[state=active]:bg-opacity-60 rounded-l-2xl"
+								className="rounded-l-2xl border"
 							>
 								Friday
 							</TabsTrigger>
 							<TabsTrigger
-								className="border data-[state=active]:bg-slate-400 data-[state=active]:bg-opacity-60"
 								value="Saturday"
+								className="border-t border-b border-r"
 							>
 								Saturday
 							</TabsTrigger>
 							<TabsTrigger
 								value="Sunday"
-								className="border data-[state=active]:bg-slate-400 data-[state=active]:bg-opacity-60 rounded-r-2xl"
+								className="rounded-r-2xl border"
 							>
 								Sunday
 							</TabsTrigger>

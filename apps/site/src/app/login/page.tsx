@@ -21,7 +21,7 @@ const LOGIN_PATH = "/api/user/login";
 export default function Home() {
 	const form = useForm({
 		defaultValues: {
-			username: "",
+			email: "",
 		},
 	});
 
@@ -42,14 +42,14 @@ export default function Home() {
 					>
 						<FormField
 							control={form.control}
-							name="username"
+							name="email"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Username</FormLabel>
+									<FormLabel>Email</FormLabel>
 									<FormControl>
 										<Input
 											className="text-black"
-											placeholder="PeterTheAnteater"
+											placeholder="PeterTheAnteater@uci.edu"
 											{...field}
 										/>
 									</FormControl>

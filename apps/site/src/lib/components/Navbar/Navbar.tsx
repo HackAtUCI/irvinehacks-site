@@ -31,9 +31,7 @@ function Navbar() {
 				hasScrolled ? "md:bg-opacity-50" : ""
 			} transition-colors duration-0 md:duration-700 ease-out w-full z-10 flex flex-col fixed bg-black bg-opacity-0 md:flex-row md:items-center`}
 		>
-			<NavMenu.List
-				className="bg-black bg-opacity-50 md:bg-opacity-0 flex p-3"
-			>
+			<NavMenu.List className="bg-black bg-opacity-50 md:bg-opacity-0 flex p-3">
 				<NavLinkItem href="/">
 					<HackLogo />
 				</NavLinkItem>

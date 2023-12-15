@@ -11,7 +11,7 @@ export default function Home() {
 		<>
 			<Landing />
 			<About />
-			{/* <MentorVolunteer /> */}
+			<MentorVolunteer />
 			<FAQ />
 			<Sponsors />
 		</>

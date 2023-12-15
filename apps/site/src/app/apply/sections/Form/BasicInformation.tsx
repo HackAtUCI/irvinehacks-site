@@ -3,8 +3,8 @@ import TextInput from "@/app/apply/sections/Components/TextInput";
 import styles from "./Form.module.scss";
 
 const pronouns = [
-	{ value: "she", text: "She/her/hers" },
 	{ value: "he", text: "He/him/his" },
+	{ value: "she", text: "She/her/hers" },
 	{ value: "they", text: "They/them/theirs" },
 	{ value: "ze", text: "Ze/zir/zirs" },
 	{ value: "other", text: "Other:" },

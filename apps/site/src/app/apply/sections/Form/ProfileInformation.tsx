@@ -44,7 +44,7 @@ export default function ProfileInformation() {
 			<Textfield
 				name="job-answer"
 				labelClass={`${styles.label} mt-7`}
-				labelText="If you could do any job, what would it be? (ex. Youtuber, Body Builder, etc.) (100 words)"
+				labelText="If you could have any job in the world, what would it be? (ex. Youtuber, Body Builder, etc.) (100 words)"
 				inputClass={`bg-[#E1E1E1] p-3 h-48 resize-none rounded-xl`}
 				containerClass="flex flex-col w-full"
 				isRequired={true}

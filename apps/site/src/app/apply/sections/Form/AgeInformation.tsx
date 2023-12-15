@@ -33,7 +33,7 @@ export default function AgeInformation() {
 				name="minor-check"
 				values={yesNoOptions}
 				title="Will you be 18 years or older by January 26th, 2024?"
-				titleClass="text-xl font-bold m-0"
+				titleClass="text-xl font-bold m-0 text-center"
 				containerClassTotal="flex flex-col gap-1 w-full items-center"
 				isRequired={true}
 				labelClass="font-bold text-xl"

@@ -17,10 +17,10 @@ jobs:
     Site:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v4
             - uses: amondnet/vercel-action@v25
               with:
-                  vercel-version: 30.2.2
+                  vercel-version: 32.6.1
                   github-comment: false
                   vercel-args: "--prod"
                   vercel-token: ${{ secrets.VERCEL_TOKEN }}
@@ -29,10 +29,10 @@ jobs:
     Studio:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v4
             - uses: amondnet/vercel-action@v25
               with:
-                  vercel-version: 30.2.2
+                  vercel-version: 32.6.1
                   github-comment: false
                   vercel-args: "--prod"
                   vercel-token: ${{ secrets.VERCEL_TOKEN }}

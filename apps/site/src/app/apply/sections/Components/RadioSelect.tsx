@@ -57,7 +57,7 @@ export default function RadioSelect({
 			<div className="w-10/12 flex flex-col gap-2">
 				{values.map((item, i) => {
 					const keyandId = `${IdentifierId}-${i}`;
-					if (item.value == "other") {
+					if (item.value === "other") {
 						return (
 							<div key={keyandId} className="flex gap-2">
 								<input

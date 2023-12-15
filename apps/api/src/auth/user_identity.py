@@ -126,9 +126,6 @@ def _decode_user_identity(user_token: Optional[str]) -> Optional[User]:
 
 def _generate_jwt_token(user: User) -> str:
     """Generate a JWT with claims for the given user."""
-    if not JWT_SECRET:
-        raise RuntimeError("JWT_SECRET is not defined")
-
     now = utc_now()
 
     claims = JWTClaims(
@@ -145,9 +142,6 @@ def _generate_jwt_token(user: User) -> str:
 def _decode_jwt(user_token: str) -> JWTClaims:
     """Decode a JWT into its original claims.
     Raise `ValueError` if the token is empty or invalid (including expired)."""
-    if not JWT_SECRET:
-        raise RuntimeError("JWT_SECRET is not defined")
-
     try:
         raw_claims = jwt.decode(user_token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
     except JWTError:

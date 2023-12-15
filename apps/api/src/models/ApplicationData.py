@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import Optional
+from typing import Union
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, HttpUrl
 
@@ -23,20 +23,20 @@ class RawApplicationData(BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
-    pronouns: list[str]
+    pronouns: str
     ethnicity: str
     is_18_older: bool
     university: str
     education_level: str
     major: str
     is_first_hackathon: bool
-    portfolio_link: Optional[HttpUrl]
-    linkedin_link: Optional[HttpUrl]
-    collaboration_question: Optional[str] = Field()
-    any_job_question: str = Field()
+    portfolio_link: Union[HttpUrl, None]
+    linkedin_link: Union[HttpUrl, None]
+    collaboration_question: Union[str, None] = Field(None, max_length=1024)
+    any_job_question: str = Field(max_length=1024)
 
 
 class ProcessedApplicationData(RawApplicationData):
-    resume_url: Optional[HttpUrl]
+    resume_url: Union[HttpUrl, None]
     submission_time: datetime
     reviews: list[Review] = []

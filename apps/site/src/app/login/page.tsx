@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 
 export const revalidate = 60;
 
@@ -31,21 +32,24 @@ export default function Home() {
 
 	return (
 		<div className="flex flex-col justify-center items-center">
-			<section className="m-36 w-2/3 md:w-1/3">
+			<section className="m-36 w-2/3 xl:w-2/5">
 				<h1 className="mb-10 text-4xl md:text-5xl font-bold text-center">
 					Login
 				</h1>
+				<Separator className="mb-10" />
 				<Form {...form}>
 					<form
 						onSubmit={form.handleSubmit(onSubmit)}
-						className="space-y-8 bg-gradient-radial to-blue-900 from-blue-950 p-5 rounded-md"
+						className="space-y-8 bg-gradient-radial to-blue-900 from-blue-950 py-10 px-10 rounded-md drop-shadow-lg"
 					>
 						<FormField
 							control={form.control}
 							name="email"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Email</FormLabel>
+									<FormLabel className="text-3xl">
+										Email Address
+									</FormLabel>
 									<FormControl>
 										<Input
 											className="text-black"
@@ -54,14 +58,22 @@ export default function Home() {
 										/>
 									</FormControl>
 									<FormDescription>
-										(Description) This is your public
-										display name.
+										UCI students will log in with UCI SSO.
 									</FormDescription>
 									<FormMessage />
 								</FormItem>
 							)}
 						/>
-						<Button type="submit">Submit</Button>
+
+						<Button
+							type="submit"
+							className="w-1/5 h-14 hover:text-gray-500 active:text-black text-2xl
+                             bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500
+                             shadow-slate-500/50 shadow-lg hover:shadow-slate-500/80
+                             hover:scale-105 transition ease-in"
+						>
+							Submit
+						</Button>
 					</form>
 				</Form>
 			</section>

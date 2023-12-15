@@ -1,5 +1,7 @@
 "use client";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import * as z from "zod";
 import {
 	Form,
 	FormItem,
@@ -15,18 +17,27 @@ import { Separator } from "@/components/ui/separator";
 
 export const revalidate = 60;
 
-const EMAIL_REGEX = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
-const EDU_REGEX = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.edu)$/;
 const LOGIN_PATH = "/api/user/login";
 
+const formSchema = z.object({
+	email: z
+		.string()
+		.email({ message: "Sorry, that email address is invalid." })
+		.refine((email) => email.endsWith(".edu"), {
+			message:
+				"Sorry, only emails that end in '.edu' are allowed to log in.",
+		}),
+});
+
 export default function Home() {
-	const form = useForm({
+	const form = useForm<z.infer<typeof formSchema>>({
+		resolver: zodResolver(formSchema),
 		defaultValues: {
 			email: "",
 		},
 	});
 
-	const onSubmit = (e: any) => {
+	const onSubmit = (e: z.infer<typeof formSchema>) => {
 		console.log("submit", e);
 	};
 
@@ -40,7 +51,8 @@ export default function Home() {
 				<Form {...form}>
 					<form
 						onSubmit={form.handleSubmit(onSubmit)}
-						className="space-y-8 bg-gradient-radial to-blue-900 from-blue-950 py-10 px-10 rounded-md drop-shadow-lg"
+						className="space-y-8 bg-gradient-radial to-blue-900 from-blue-950
+                        py-10 px-10 rounded-md drop-shadow-lg"
 					>
 						<FormField
 							control={form.control}

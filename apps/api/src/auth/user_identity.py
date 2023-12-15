@@ -30,7 +30,7 @@ class NativeUser(User):
         self, *, ucinetid: str, display_name: str, email: str, affiliations: list[str]
     ):
         uid = f"edu.uci.{ucinetid}"
-        super().__init__(  # type: ignore[call-arg]
+        super().__init__(
             uid=uid,
             ucinetid=ucinetid,
             display_name=display_name,

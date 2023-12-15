@@ -18,3 +18,9 @@ show_missing = true
 mypy_path = "src,stubs"
 explicit_package_bases = true
 strict = true
+plugins = ["pydantic.mypy"]
+
+[tool.pydantic-mypy]
+# init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true

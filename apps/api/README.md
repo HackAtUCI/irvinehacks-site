@@ -18,6 +18,7 @@ For deployment, the following environment variables need to be set:
 
 -   `PYTHONPATH=src/api` to properly import Python modules
 -   `SP_KEY`, the private key for SAML authentication
+-   `JWT_KEY`, the secret key used to sign JWTs
 -   `SENDGRID_API_KEY`, the API key needed to use the SendGrid API
 
 For staging, the following environment variables should also bet set:

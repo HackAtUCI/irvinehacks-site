@@ -32,7 +32,7 @@ async def login(email: EmailStr = Form()) -> RedirectResponse:
 
 
 @router.get("/logout")
-async def log_out() -> RedirectResponse:
+async def logout() -> RedirectResponse:
     """Clear user identity cookie."""
     response = RedirectResponse("/", status.HTTP_303_SEE_OTHER)
     user_identity.remove_user_identity(response)

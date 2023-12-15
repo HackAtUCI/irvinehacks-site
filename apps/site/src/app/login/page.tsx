@@ -42,7 +42,7 @@ export default function Home() {
 	};
 
 	return (
-		<div className="flex flex-col justify-center items-center">
+		<div className="flex flex-col justify-center items-center min-h-screen">
 			<section className="m-36 w-2/3 xl:w-2/5">
 				<h1 className="mb-10 text-4xl md:text-5xl font-bold text-center">
 					Login

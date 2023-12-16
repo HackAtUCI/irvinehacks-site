@@ -56,7 +56,9 @@ export default function DropdownSelect({
 				name={name}
 				id={name}
 				onChange={(e) => setValue(e.target.value)}
+				required
 			>
+				<option value="" selected disabled hidden></option>
 				{values.map((item, i) => {
 					return (
 						<option key={`option-${i}`} value={item.value}>

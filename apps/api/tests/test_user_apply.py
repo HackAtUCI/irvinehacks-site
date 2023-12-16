@@ -1,6 +1,7 @@
 from datetime import datetime
 from unittest.mock import AsyncMock, Mock, patch
 
+import bson
 from aiogoogle import HTTPError
 from fastapi import FastAPI
 from pydantic import HttpUrl
@@ -29,6 +30,7 @@ SAMPLE_APPLICATION = {
     "education_level": "Fifth+ Year Undergraduate",
     "major": "Computer Science",
     "is_first_hackathon": "false",
+    "portfolio": "https://github.com",
     "frq_collaboration": "I am pkfire",
     "frq_dream_job": "I am pkfire",
 }
@@ -249,3 +251,11 @@ def test_apply_successfully_without_resume(
         EXPECTED_APPLICATION_DATA_WITHOUT_RESUME
     )
     assert res.status_code == 201
+
+
+def test_application_data_is_bson_encodable() -> None:
+    """Test that application data model can be encoded into BSON to store in MongoDB."""
+    data = EXPECTED_APPLICATION_DATA.model_copy()
+    data.linkedin = HttpUrl("https://linkedin.com")
+    encoded = bson.encode(EXPECTED_APPLICATION_DATA.model_dump())
+    assert len(encoded) == 415

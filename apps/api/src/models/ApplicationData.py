@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Union
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_serializer
 
 from .utils import form_body
 
@@ -39,3 +39,9 @@ class ProcessedApplicationData(RawApplicationData):
     resume_url: Union[HttpUrl, None] = None
     submission_time: datetime
     reviews: list[Review] = []
+
+    @field_serializer("linkedin", "portfolio", "resume_url")
+    def url2str(self, val: Union[HttpUrl, None]) -> Union[str, None]:
+        if val is not None:
+            return str(val)
+        return val

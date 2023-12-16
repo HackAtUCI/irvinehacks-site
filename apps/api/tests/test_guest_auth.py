@@ -40,7 +40,7 @@ def test_can_validate_key() -> None:
 async def test_get_existing_unexpired_key(mock_mongodb_retrieve_one: AsyncMock) -> None:
     """Test that existing, unexpired guest authorization key can be retrieved."""
     iat = datetime(2023, 1, 11)
-    exp = datetime(2023, 12, 31, tzinfo=timezone.utc)
+    exp = datetime(2024, 7, 1, tzinfo=timezone.utc)
     # this test will fail next year :P
     mock_mongodb_retrieve_one.return_value = {
         "guest_auth": {"iat": iat, "exp": exp, "key": "some-key"}
@@ -64,7 +64,7 @@ async def test_get_nonexisting_key(mock_mongodb_retrieve_one: AsyncMock) -> None
 async def test_expired_key_is_removed(
     mock_mongodb_retrieve_one: AsyncMock, mock_mongodb_update_one: AsyncMock
 ) -> None:
-    """Test that existing, unexpired guest authorization key can be retrieved."""
+    """Test that expired guest authorization key is removed from the database."""
     iat = datetime(2023, 1, 2)
     exp = datetime(2023, 1, 3, tzinfo=timezone.utc)
     mock_mongodb_retrieve_one.return_value = {

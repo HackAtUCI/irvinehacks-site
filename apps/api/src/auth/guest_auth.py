@@ -16,6 +16,7 @@ from utils import email_handler
 AUTH_KEY_SALT = os.getenv("AUTH_KEY_SALT", "")[:16].encode()
 PASSPHRASE_LENGTH = 4
 WORD_LIST: list[str] = []
+T_GUEST_TOKEN = timedelta(minutes=10)
 
 
 class GuestAuth(BaseModel):
@@ -41,7 +42,7 @@ async def initiate_guest_login(email: EmailStr) -> Optional[str]:
 
     uid = user_identity.scoped_uid(email)
     now = utc_now()
-    exp = now + timedelta(minutes=10)
+    exp = now + T_GUEST_TOKEN
 
     guest = GuestRecord(
         uid=uid,

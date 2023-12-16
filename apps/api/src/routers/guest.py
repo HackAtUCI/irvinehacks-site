@@ -24,10 +24,10 @@ def guest_email(email: Annotated[EmailStr, Form()]) -> EmailStr:
         # TODO: sponsor authentication
         raise HTTPException(status.HTTP_501_NOT_IMPLEMENTED)
     if not email.endswith(".edu"):
-        log.info("%s attempted to log in as guest.", email)
-        raise HTTPException(
-            status.HTTP_403_FORBIDDEN, "Only .edu emails are allowed to log in."
-        )
+        log.info("%s attempted to log in as guest without a .edu address.", email)
+        # raise HTTPException(
+        #     status.HTTP_403_FORBIDDEN, "Only .edu emails are allowed to log in."
+        # )
     return email
 
 

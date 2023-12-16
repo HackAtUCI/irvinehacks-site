@@ -16,6 +16,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils/utils";
+
+import ButtonStyles from "@/lib/components/Button/Button.module.css";
 
 export const revalidate = 60;
 
@@ -51,7 +54,7 @@ export default function Home() {
 				<Form {...form}>
 					<form
 						onSubmit={form.handleSubmit(onSubmit)}
-						className="space-y-8 bg-gradient-radial to-blue-900 from-blue-950
+						className="space-y-8 bg-white
                         py-10 px-10 rounded-md drop-shadow-lg"
 					>
 						<FormField
@@ -59,12 +62,12 @@ export default function Home() {
 							name="email"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel className="text-xl md:text-3xl">
+									<FormLabel className="text-xl md:text-2xl text-slate-800 underline underline-offset-4">
 										Email Address
 									</FormLabel>
 									<FormControl>
 										<Input
-											className="text-black text-xs sm:text-base"
+											className="text-black text-xs sm:text-base -translate-x-1"
 											placeholder="PeterAnteater@uci.edu"
 											{...field}
 										/>
@@ -79,10 +82,10 @@ export default function Home() {
 
 						<Button
 							type="submit"
-							className="md:min-w-1/5 h-14 hover:text-gray-500 active:text-black text-2xl
-                             bg-cyan-400 hover:bg-cyan-300 active:bg-cyan-500
-                             shadow-slate-500/50 shadow-lg hover:shadow-slate-500/80
-                             hover:scale-105 transition ease-in"
+							className={cn(
+								"h-14 text-2xl shadow-lg hover:scale-105 transition ease-in",
+								ButtonStyles.button,
+							)}
 						>
 							Submit
 						</Button>

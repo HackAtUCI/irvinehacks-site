@@ -10,19 +10,14 @@ import styles from "./Form.module.scss";
 export default function ResumeInformation() {
 	return (
 		<div className="flex flex-col items-start w-11/12">
-			<label className={styles.label}>
+			<label htmlFor="resume-upload" className={styles.label}>
 				Resume (PDF, 0.5 MB max) <RequiredAsterisk />
 			</label>
-			<button
-				type="button"
-				className={`${styles.upload} flex flex-col cursor-pointer mt-1`}
-				onClick={() => {
-					console.log("clicked");
-				}}
-			>
+			<label htmlFor="resume-upload" className={`${styles.upload} cursor-pointer`}>
 				<Image src={uploadImage} width="100" alt="Upload resume icon" />
 				<h2>Drag & Drop</h2>
-			</button>
+			</label>
+			<input className="hidden" id="resume-upload" type="file"></input>
 		</div>
 	);
 }

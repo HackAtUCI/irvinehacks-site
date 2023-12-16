@@ -84,7 +84,7 @@ async def _get_existing_key(email: EmailStr) -> Optional[str]:
     if not record or not record["guest_auth"]:
         return None
 
-    auth = GuestAuth.parse_obj(record["guest_auth"])
+    auth = GuestAuth.model_validate(record["guest_auth"])
 
     # Reject expired key
     now = utc_now()

@@ -28,7 +28,8 @@ export default function RootLayout({
 			>
 				{/* reference: https://github.com/pmndrs/react-three-next */}
 				<Navbar />
-				<Layout>{children}</Layout>
+				{/* <Layout>{children}</Layout> */}
+				<Apply />
 				<Footer />
 			</body>
 		</html>

@@ -76,22 +76,19 @@ export default function ResumeInformation() {
 				onDragOver={(event) => {
 					event.preventDefault();
 				}}
-				onDragEnter={() => {
-					setIsHovered(true);
-				}}
-				onDragLeave={() => {
-					setIsHovered(false);
-				}}
+				onDragEnter={() => setIsHovered(true)}
+				onDragLeave={() => setIsHovered(false)}
 				onDrop={handleDropUpload}
 			>
 				<Image src={uploadImage} width="100" alt="Upload resume icon" />
 				<h2>Drag & Drop</h2>
 			</label>
 			<input
-				className="hidden"
+				className="opacity-0 absolute"
 				id="resume-upload"
 				type="file"
 				onChange={handleFileUpload}
+                required
 			></input>
 			<OutputFeedBack
 				errorMessage={errorMessage}

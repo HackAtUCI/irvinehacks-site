@@ -18,6 +18,7 @@ For deployment, the following environment variables need to be set:
 
 -   `PYTHONPATH=src/api` to properly import Python modules
 -   `SP_KEY`, the private key for SAML authentication
+-   `JWT_KEY`, the secret key used to sign JWTs
 -   `SENDGRID_API_KEY`, the API key needed to use the SendGrid API
 -   `RESUMES_FOLDER_ID`, the ID of the Google Drive folder to upload to
 -   Either `SERVICE_ACCOUNT_FILE` or `GOOGLE_SERVICE_ACCOUNT_CREDENTIALS`: We use a Google service acccount in tandem with aiogoogle to automatically upload resumes when submitting a form. The keys are JSON that can either be stored in a file, in which case the path of the file should be stored in `SERVICE_ACCOUNT_FILE`, or be stored directly in `GOOGLE_SERVICE_ACCOUNT_CREDENTIALS`. For local development, it is recommended to take the `SERVICE_ACCOUNT_FILE` approach.

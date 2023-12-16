@@ -53,9 +53,8 @@ def test_saml_acs_succeeds(mock_get_saml_auth: MagicMock) -> None:
     res = client.post("/acs", follow_redirects=False)
     mock_auth.process_response.assert_called()
 
-    assert res.text == '"Hello, Hack at UCI (hack)"'
     # check that user is redirected to main page
-    # assert res.status_code == 303
-    # assert res.headers["location"] == "/"
+    assert res.status_code == 303
+    assert res.headers["location"] == "/"
     # check that response sets appropriate cookie
-    # assert res.headers["Set-Cookie"].startswith("hackuci_auth=")
+    assert res.headers["Set-Cookie"].startswith("irvinehacks_auth=")

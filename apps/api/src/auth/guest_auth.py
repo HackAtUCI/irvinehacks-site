@@ -11,7 +11,8 @@ from auth import user_identity
 from auth.user_identity import GuestUser, utc_now
 from services import mongodb_handler
 from services.mongodb_handler import BaseRecord, Collection
-from utils import email_handler
+
+# from utils import email_handler
 
 AUTH_KEY_SALT = os.getenv("AUTH_KEY_SALT", "")[:16].encode()
 PASSPHRASE_LENGTH = 4
@@ -50,7 +51,8 @@ async def initiate_guest_login(email: EmailStr) -> Optional[str]:
     )
 
     await _save_guest_key(guest)
-    await email_handler.send_guest_login_email(email, passphrase)
+    print(email, passphrase)
+    # await email_handler.send_guest_login_email(email, passphrase)
 
     return confirmation
 

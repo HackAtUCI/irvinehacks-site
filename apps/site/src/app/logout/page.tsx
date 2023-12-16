@@ -1,5 +1,5 @@
-import Router from "next/router";
+import { redirect } from "next/navigation";
 
 export default function Logout() {
-	Router.push("/api/user/logout");
+	redirect("/api/user/logout");
 }

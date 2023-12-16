@@ -10,15 +10,11 @@ import Image from "next/image";
 
 import styles from "./Form.module.scss";
 
-import clsx from "clsx";
-
 export default function ResumeInformation() {
 	const [resumePath, setResumePath] = useState("");
 	const [errorMessage, setErrorMessage] = useState("");
-	const [isHovered, setIsHovered] = useState(false);
 
 	const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
-		setIsHovered(false);
 		event.preventDefault();
 
 		setErrorMessage("");
@@ -28,18 +24,6 @@ export default function ResumeInformation() {
 		if (handleFile(file) == false) {
 			event.target.value = "";
 		}
-	};
-
-	const handleDropUpload = (event: React.DragEvent<HTMLLabelElement>) => {
-		setIsHovered(false);
-		event.preventDefault();
-
-		setErrorMessage("");
-		setResumePath("");
-		let file = event.dataTransfer.files
-			? event.dataTransfer.files[0]
-			: null;
-		handleFile(file);
 	};
 
 	const handleFile = (file: File | null) => {
@@ -69,26 +53,18 @@ export default function ResumeInformation() {
 			</label>
 			<label
 				htmlFor="resume-upload"
-				className={clsx(
-					isHovered ? "bg-[#999999]" : "bg-[#e1e1e1]",
-					`${styles.upload} cursor-pointer mb-3`,
-				)}
-				onDragOver={(event) => {
-					event.preventDefault();
-				}}
-				onDragEnter={() => setIsHovered(true)}
-				onDragLeave={() => setIsHovered(false)}
-				onDrop={handleDropUpload}
+				className={`${styles.upload} cursor-pointer mb-3`}
 			>
 				<Image src={uploadImage} width="100" alt="Upload resume icon" />
-				<h2>Drag & Drop</h2>
+				<h2 className="text-center">Upload file</h2>
 			</label>
 			<input
 				className="opacity-0 absolute"
 				id="resume-upload"
 				type="file"
+                accept="application/pdf"
 				onChange={handleFileUpload}
-                required
+				required
 			></input>
 			<OutputFeedBack
 				errorMessage={errorMessage}

@@ -35,7 +35,7 @@ const nextConfig = {
 			{
 				source: "/logout",
 				destination: "/api/user/logout",
-				permanent: true,
+				permanent: false,
 			},
 		];
 	},

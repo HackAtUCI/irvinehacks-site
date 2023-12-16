@@ -30,13 +30,13 @@ class RawApplicationData(BaseModel):
     education_level: str
     major: str
     is_first_hackathon: bool
-    portfolio_link: Union[HttpUrl, None]
-    linkedin_link: Union[HttpUrl, None]
+    portfolio_link: Union[HttpUrl, None] = None
+    linkedin_link: Union[HttpUrl, None] = None
     collaboration_question: Union[str, None] = Field(None, max_length=1024)
     any_job_question: str = Field(max_length=1024)
 
 
 class ProcessedApplicationData(RawApplicationData):
-    resume_url: Union[HttpUrl, None]
+    resume_url: Union[HttpUrl, None] = None
     submission_time: datetime
     reviews: list[Review] = []

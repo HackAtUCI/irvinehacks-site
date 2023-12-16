@@ -12,7 +12,7 @@ from models.ApplicationData import ProcessedApplicationData, RawApplicationData
 from services import mongodb_handler
 from services.mongodb_handler import Collection
 from utils import email_handler, resume_handler
-from utils.user_record import Applicant, Role
+from utils.user_record import Applicant, Role, Status
 
 log = getLogger(__name__)
 
@@ -95,14 +95,14 @@ async def apply(
 
     now = datetime.now(timezone.utc)
     processed_application_data = ProcessedApplicationData(
-        **raw_application_data.dict(),
+        **raw_application_data.model_dump(),
         resume_url=resume_url,
         submission_time=now,
     )
     applicant = Applicant(
-        _id=user.uid,
+        uid=user.uid,
         application_data=processed_application_data,
-        status="PENDING_REVIEW",
+        status=Status.PENDING_REVIEW,
     )
 
     # add applicant to database
@@ -110,7 +110,7 @@ async def apply(
         await mongodb_handler.update_one(
             Collection.USERS,
             {"_id": user.uid},
-            applicant.dict(),
+            applicant.model_dump(),
             upsert=True,
         )
     except RuntimeError:

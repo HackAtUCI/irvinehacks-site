@@ -9,7 +9,7 @@ from models.ApplicationData import ProcessedApplicationData
 from routers import user
 from services.mongodb_handler import Collection
 from utils import resume_handler
-from utils.user_record import Applicant
+from utils.user_record import Applicant, Status
 
 USER_PKFIRE = NativeUser(
     ucinetid="pkfire",
@@ -22,16 +22,15 @@ SAMPLE_APPLICATION = {
     "first_name": "pk",
     "last_name": "fire",
     "email": "pkfire@uci.edu",
-    "gender": "Other",
-    "pronouns": ["pk"],
+    "pronouns": "pk",
     "ethnicity": "fire",
     "is_18_older": "true",
     "university": "UC Irvine",
     "education_level": "Fifth+ Year Undergraduate",
     "major": "Computer Science",
     "is_first_hackathon": "false",
-    "stress_relief_question": "I am pkfire",
-    "company_specialize_question": "I am pkfire",
+    "collaboration_question": "I am pkfire",
+    "any_job_question": "I am pkfire",
 }
 
 SAMPLE_RESUME = ("my-resume.pdf", b"resume", "application/pdf")
@@ -45,29 +44,29 @@ SAMPLE_SUBMISSION_TIME = datetime(2023, 1, 12, 8, 1, 21)
 SAMPLE_VERDICT_TIME = None
 
 EXPECTED_APPLICATION_DATA = ProcessedApplicationData(
-    **SAMPLE_APPLICATION,
-    resume_url=SAMPLE_RESUME_URL,
+    **SAMPLE_APPLICATION,  # type: ignore[arg-type]
+    resume_url=SAMPLE_RESUME_URL,  # type: ignore[arg-type]
     submission_time=SAMPLE_SUBMISSION_TIME,
     verdict_time=SAMPLE_VERDICT_TIME,
 )
 
 EXPECTED_APPLICATION_DATA_WITHOUT_RESUME = ProcessedApplicationData(
-    **SAMPLE_APPLICATION,
+    **SAMPLE_APPLICATION,  # type: ignore[arg-type]
     resume_url=None,
     submission_time=SAMPLE_SUBMISSION_TIME,
     verdict_time=SAMPLE_VERDICT_TIME,
 )
 
 EXPECTED_USER = Applicant(
-    _id="edu.uci.pkfire",
-    status="PENDING_REVIEW",
+    uid="edu.uci.pkfire",
+    status=Status.PENDING_REVIEW,
     application_data=EXPECTED_APPLICATION_DATA,
 )
 
 EXPECTED_USER_WITHOUT_RESUME = Applicant(
-    _id="edu.uci.pkfire",
+    uid="edu.uci.pkfire",
     application_data=EXPECTED_APPLICATION_DATA_WITHOUT_RESUME,
-    status="PENDING_REVIEW",
+    status=Status.PENDING_REVIEW,
 )
 
 resume_handler.RESUMES_FOLDER_ID = "RESUMES_FOLDER_ID"
@@ -100,7 +99,10 @@ def test_apply_successfully(
         resume_handler.RESUMES_FOLDER_ID, *EXPECTED_RESUME_UPLOAD
     )
     mock_mongodb_handler_update_one.assert_awaited_once_with(
-        Collection.USERS, {"_id": EXPECTED_USER.uid}, EXPECTED_USER.dict(), upsert=True
+        Collection.USERS,
+        {"_id": EXPECTED_USER.uid},
+        EXPECTED_USER.model_dump(),
+        upsert=True,
     )
     mock_send_application_confirmation_email.assert_awaited_once_with(
         EXPECTED_APPLICATION_DATA
@@ -240,7 +242,7 @@ def test_apply_successfully_without_resume(
     mock_mongodb_handler_update_one.assert_awaited_once_with(
         Collection.USERS,
         {"_id": EXPECTED_USER.uid},
-        EXPECTED_USER_WITHOUT_RESUME.dict(),
+        EXPECTED_USER_WITHOUT_RESUME.model_dump(),
         upsert=True,
     )
     mock_send_application_confirmation_email.assert_awaited_once_with(

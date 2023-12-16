@@ -29,6 +29,6 @@ class UserRecord(BaseRecord):
 
 
 class Applicant(UserRecord):
-    role = Role.APPLICANT
+    role: Role = Role.APPLICANT
     status: Union[Status, Decision]
     application_data: ProcessedApplicationData

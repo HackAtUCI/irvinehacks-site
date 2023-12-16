@@ -12,7 +12,7 @@ export default function OutputFeedBack(props: outputFeedbackProps) {
 
 	return (
 		<span className="text-xl">
-			{props.resumePath ? "Uploaded " + props.resumePath : ""}
+			{props.resumePath ? "Successfully uploaded " + props.resumePath : ""}
 		</span>
 	);
 }

@@ -1,19 +1,25 @@
 "use client";
 
+import Image from "next/image";
+import React, { useState, useEffect } from "react";
 import * as NavMenu from "@radix-ui/react-navigation-menu";
-
-import styles from "./Navbar.module.scss";
-import React from "react";
-import { useState, useEffect } from "react";
 
 import NavLinkItem from "./NavbarHelpers";
 import Button from "@/lib/components/Button/Button";
 import HackLogo from "@/lib/components/HackLogo/HackLogo";
 
 import hamburger from "@/assets/icons/navigation-icon.svg";
-import Image from "next/image";
+import { Identity } from "@/lib/utils/getUserIdentity";
 
-function Navbar() {
+import styles from "./Navbar.module.scss";
+
+interface NavbarProps {
+	identity: Identity
+}
+
+function Navbar({ identity }: NavbarProps) {
+	const { uid, role, status } = identity;
+
 	const [listShown, setListShown] = useState(false);
 	const [hasScrolled, setHasScrolled] = useState(false);
 	const [hidden, setHidden] = useState(true);
@@ -27,9 +33,8 @@ function Navbar() {
 
 	return (
 		<NavMenu.Root
-			className={`${
-				hasScrolled ? "md:bg-opacity-50" : ""
-			} transition-colors duration-0 md:duration-700 ease-out w-full z-10 flex flex-col fixed bg-black bg-opacity-0 md:flex-row md:items-center`}
+			className={`${hasScrolled ? "md:bg-opacity-50" : ""
+				} transition-colors duration-0 md:duration-700 ease-out w-full z-10 flex flex-col fixed bg-black bg-opacity-0 md:flex-row md:items-center`}
 		>
 			<NavMenu.List className="bg-black bg-opacity-50 md:bg-opacity-0 flex p-3">
 				<NavLinkItem href="/">
@@ -66,7 +71,11 @@ function Navbar() {
 					<NavLinkItem href="/">Schedule</NavLinkItem>
 					<NavLinkItem href="/">Resources</NavLinkItem>
 					<NavLinkItem href="/">Stage</NavLinkItem> */}
-					<Button text="Login" href="/login" isLightVersion />
+					{!status && <NavLinkItem href="/apply">Apply</NavLinkItem>}
+					{status !== null && <NavLinkItem href="/portal">Portal</NavLinkItem>}
+					{uid === null ?
+						<Button text="Login" href="/login" isLightVersion />
+						: <Button text="Logout" href="/api/user/logout" isLightVersion />}
 				</NavMenu.List>
 			</div>
 		</NavMenu.Root>

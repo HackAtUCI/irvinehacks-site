@@ -32,11 +32,6 @@ const nextConfig = {
 				destination: "https://forms.gle/erpJjErKLJkEZMw48",
 				permanent: true,
 			},
-			{
-				source: "/logout",
-				destination: "/api/user/logout",
-				permanent: false,
-			},
 		];
 	},
 };

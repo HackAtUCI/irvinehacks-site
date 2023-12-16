@@ -3,6 +3,7 @@ import BasicInformation from "./BasicInformation";
 import AgeInformation from "./AgeInformation";
 import SchoolInformation from "./SchoolInformation";
 import ProfileInformation from "./ProfileInformation";
+import ResumeInformation from "./ResumeInformation";
 import Button from "@/lib/components/Button/Button";
 import koiLeft from "@/assets/images/koi-swim-left.png";
 import koiRight from "@/assets/images/koi-swim-right.png";
@@ -41,6 +42,7 @@ export default function Form() {
 				<BasicInformation />
 				<SchoolInformation />
 				<ProfileInformation />
+				<ResumeInformation />
 				<AgeInformation />
 				<Button text="Submit Application" />
 			</form>

@@ -15,8 +15,7 @@ api.interceptors.request.use((config) => {
 
 	// Inject user's client-side cookies along with API request
 	const provided = config.headers.get("Cookie");
-	const newCookies =
-		(provided ? `${provided}; ` : "") + cookieStore.toString();
+	const newCookies = (provided ? `${provided}; ` : "") + cookieStore.toString();
 	config.headers.set("Cookie", newCookies);
 
 	return config;

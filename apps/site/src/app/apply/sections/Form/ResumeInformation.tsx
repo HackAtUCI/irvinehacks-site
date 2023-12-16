@@ -40,7 +40,6 @@ export default function ResumeInformation() {
 				setErrorMessage("Invalid file size (file size exceeds 0.5 MB)");
 				return false;
 			}
-
 			setResumePath(path);
 		}
 		return true;
@@ -52,7 +51,7 @@ export default function ResumeInformation() {
 				Resume (PDF, 0.5 MB max) <RequiredAsterisk />
 			</label>
 			<label
-				htmlFor="resume-upload"
+				htmlFor="resume_upload"
 				className={`${styles.upload} cursor-pointer mb-3`}
 			>
 				<Image src={uploadImage} width="100" alt="Upload resume icon" />
@@ -60,7 +59,8 @@ export default function ResumeInformation() {
 			</label>
 			<input
 				className="opacity-0 absolute"
-				id="resume-upload"
+				name="resume_upload"
+				id="resume_upload"
 				type="file"
 				accept="application/pdf"
 				onChange={handleFileUpload}

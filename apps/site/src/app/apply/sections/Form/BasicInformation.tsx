@@ -30,7 +30,7 @@ export default function BasicInformation() {
 
 			<div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
 				<TextInput
-					name="first-name"
+					name="first_name"
 					labelClass={styles.label}
 					labelText="First Name"
 					inputClass={styles.input}
@@ -40,7 +40,7 @@ export default function BasicInformation() {
 					placeholder=""
 				/>
 				<TextInput
-					name="last-name"
+					name="last_name"
 					labelClass={styles.label}
 					labelText="Last Name"
 					inputClass={styles.input}
@@ -53,14 +53,14 @@ export default function BasicInformation() {
 
 			<div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
 				<RadioSelect
-					IdentifierId="pronouns-identifier"
+					IdentifierId="pronouns_identifier"
 					name="pronouns"
 					labelText="Pronouns"
 					values={pronouns}
 					containerClass="flex flex-col w-6/12 max-[1000px]:w-full"
 				/>
 				<RadioSelect
-					IdentifierId="ethnicity-identifier"
+					IdentifierId="ethnicity_identifier"
 					name="ethnicity"
 					labelText="Race / Ethnicity"
 					values={ethnicity}

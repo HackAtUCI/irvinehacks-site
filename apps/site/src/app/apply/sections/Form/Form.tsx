@@ -38,6 +38,9 @@ export default function Form() {
 			/>
 			<form
 				className={`${styles.form} text-[#000000] w-8/12 flex flex-col items-center py-12 gap-10 z-1 max-[800px]:w-9/12 max-[400px]:w-11/12`}
+				action="/api/bruh"
+				method="post"
+				encType="multipart/form-data"
 			>
 				<BasicInformation />
 				<SchoolInformation />

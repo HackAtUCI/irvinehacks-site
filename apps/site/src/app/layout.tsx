@@ -27,9 +27,8 @@ export default function RootLayout({
 				className="overflow-x-hidden bg-top bg-repeat-y bg-[length:100%]"
 			>
 				{/* reference: https://github.com/pmndrs/react-three-next */}
-				<Navbar />
-				{/* <Layout>{children}</Layout> */}
-				<Apply />
+				<Navbar/>
+				<Layout>{children}</Layout>
 				<Footer />
 			</body>
 		</html>

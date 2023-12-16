@@ -62,7 +62,7 @@ export default function ResumeInformation() {
 				className="opacity-0 absolute"
 				id="resume-upload"
 				type="file"
-                accept="application/pdf"
+				accept="application/pdf"
 				onChange={handleFileUpload}
 				required
 			></input>

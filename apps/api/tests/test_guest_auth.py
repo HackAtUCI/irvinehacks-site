@@ -2,11 +2,9 @@ import re
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, patch
 
-from pydantic import EmailStr
-
 from auth import guest_auth
 
-SAMPLE_EMAIL = EmailStr("jeff@amazon.com")
+SAMPLE_EMAIL = "jeff@amazon.com"
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)

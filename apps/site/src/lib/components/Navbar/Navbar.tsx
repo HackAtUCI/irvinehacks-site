@@ -78,7 +78,12 @@ function Navbar({ identity }: NavbarProps) {
 						<NavLinkItem href="/portal">Portal</NavLinkItem>
 					)}
 					{isLoggedIn ? (
-						<Button text="Login" href="/login" isLightVersion />
+						<Button
+							text="Login"
+							href="/login"
+							usePrefetch={false}
+							isLightVersion
+						/>
 					) : (
 						<Button
 							text="Logout"

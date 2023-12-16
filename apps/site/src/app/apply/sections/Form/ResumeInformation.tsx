@@ -10,12 +10,12 @@ import styles from "./Form.module.scss";
 export default function ResumeInformation() {
 	return (
 		<div className="flex flex-col items-start w-11/12">
-			<label>
+			<label className={styles.label}>
 				Resume (PDF, 0.5 MB max) <RequiredAsterisk />
 			</label>
 			<button
 				type="button"
-				className={`${styles.upload} flex flex-col cursor-pointer mt-3`}
+				className={`${styles.upload} flex flex-col cursor-pointer mt-1`}
 				onClick={() => {
 					console.log("clicked");
 				}}

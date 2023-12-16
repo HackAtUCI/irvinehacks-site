@@ -6,7 +6,7 @@ import clsx from "clsx";
 interface ButtonProps {
 	text: string;
 	className?: string;
-	href?: ComponentProps<typeof Link>["href"];
+	href: string;
 	isLightVersion?: boolean;
 	usePrefetch?: boolean;
 }
@@ -20,11 +20,10 @@ const Button: React.FC<ButtonProps> = ({
 }) => {
 	if (href) {
 		return (
-			<Link
+			<a
 				href={href}
 				target={isLightVersion ? "" : "_blank"}
 				rel="noopener noreferrer"
-				prefetch={usePrefetch}
 				className={clsx(
 					styles.button,
 					isLightVersion && styles.lightButton,
@@ -33,7 +32,7 @@ const Button: React.FC<ButtonProps> = ({
 				)}
 			>
 				{text}
-			</Link>
+			</a>
 		);
 	}
 	return (

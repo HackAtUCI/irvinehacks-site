@@ -18,10 +18,6 @@ const nextConfig = {
 						? `${LOCAL_API_URL}/:path*`
 						: VERCEL_API_PATH,
 			},
-			{
-				source: "/logout",
-				destination: "/api/user/logout",
-			},
 		];
 	},
 	async redirects() {
@@ -34,6 +30,11 @@ const nextConfig = {
 			{
 				source: "/volunteer",
 				destination: "https://forms.gle/erpJjErKLJkEZMw48",
+				permanent: true,
+			},
+			{
+				source: "/logout",
+				destination: "/api/user/logout",
 				permanent: true,
 			},
 		];

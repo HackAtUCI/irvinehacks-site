@@ -7,12 +7,15 @@ import Image from "next/image";
 
 import styles from "./Form.module.scss";
 import { ChangeEvent, useState } from "react";
+import clsx from "clsx";
 
 export default function ResumeInformation() {
 	const [resumePath, setResumePath] = useState("");
 	const [errorMessage, setErrorMessage] = useState("");
+	const [isHovered, setIsHovered] = useState(false);
 
 	const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
+		setIsHovered(false);
 		event.preventDefault();
 
 		setErrorMessage("");
@@ -25,6 +28,7 @@ export default function ResumeInformation() {
 	};
 
 	const handleDropUpload = (event: React.DragEvent<HTMLLabelElement>) => {
+		setIsHovered(false);
 		event.preventDefault();
 
 		setErrorMessage("");
@@ -76,8 +80,19 @@ export default function ResumeInformation() {
 			</label>
 			<label
 				htmlFor="resume-upload"
-				className={`${styles.upload} cursor-pointer mb-3`}
-				onDragOver={(event) => {event.preventDefault();}}
+				className={clsx(
+					isHovered ? "bg-[#999999]" : "bg-[#e1e1e1]",
+					`${styles.upload} cursor-pointer mb-3`,
+				)}
+				onDragOver={(event) => {
+					event.preventDefault();
+				}}
+				onDragEnter={() => {
+					setIsHovered(true);
+				}}
+				onDragLeave={() => {
+					setIsHovered(false);
+				}}
 				onDrop={handleDropUpload}
 			>
 				<Image src={uploadImage} width="100" alt="Upload resume icon" />

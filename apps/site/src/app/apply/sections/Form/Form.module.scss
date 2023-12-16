@@ -21,9 +21,10 @@
 }
 
 .upload {
-	// & > img {
-	// 	pointer-events: none;
-	// }
+	& > * {
+		// prevents child elements from interfering with drag & drop
+		pointer-events: none;
+	}
 	border-radius: 12px;
 	padding: 1rem 2rem;
 }

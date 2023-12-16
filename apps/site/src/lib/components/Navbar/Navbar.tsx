@@ -14,7 +14,7 @@ import { Identity } from "@/lib/utils/getUserIdentity";
 import styles from "./Navbar.module.scss";
 
 interface NavbarProps {
-	identity: Identity
+	identity: Identity;
 }
 
 function Navbar({ identity }: NavbarProps) {
@@ -72,10 +72,18 @@ function Navbar({ identity }: NavbarProps) {
 					<NavLinkItem href="/">Resources</NavLinkItem>
 					<NavLinkItem href="/">Stage</NavLinkItem> */}
 					{!status && <NavLinkItem href="/apply">Apply</NavLinkItem>}
-					{status !== null && <NavLinkItem href="/portal">Portal</NavLinkItem>}
-					{uid === null ?
+					{status !== null && (
+						<NavLinkItem href="/portal">Portal</NavLinkItem>
+					)}
+					{uid === null ? (
 						<Button text="Login" href="/login" isLightVersion />
-						: <Button text="Logout" href="/api/user/logout" isLightVersion />}
+					) : (
+						<Button
+							text="Logout"
+							href="/api/user/logout"
+							isLightVersion
+						/>
+					)}
 				</NavMenu.List>
 			</div>
 		</NavMenu.Root>

@@ -101,7 +101,7 @@ def test_successful_guest_verification_provides_identity(
     )
 
     assert res.status_code == 303
-    assert res.headers["Set-Cookie"].startswith("hackuci_auth=")
+    assert res.headers["Set-Cookie"].startswith("irvinehacks_auth=")
 
 
 @patch("auth.guest_auth._get_existing_key", autospec=True)

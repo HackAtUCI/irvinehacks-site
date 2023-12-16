@@ -7,6 +7,9 @@ export interface Identity {
 }
 
 export default async function getUserIdentity() {
-	const identity = await api.get<Identity>("/user/me");
+	const identity = await api.get<Identity>("/user/me").catch((err) => {
+		console.log(err);
+		return { data: { uid: null, role: null, status: null } };
+	});
 	return identity.data;
 }

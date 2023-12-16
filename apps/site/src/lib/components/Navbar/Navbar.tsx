@@ -81,6 +81,7 @@ function Navbar({ identity }: NavbarProps) {
 						<Button
 							text="Logout"
 							href="/api/user/logout"
+							usePrefetch={false}
 							isLightVersion
 						/>
 					)}

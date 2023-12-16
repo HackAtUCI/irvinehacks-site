@@ -1,12 +1,15 @@
 "use client";
 
+import { ChangeEvent, useState } from "react";
+
 import RequiredAsterisk from "@/app/apply/sections/Components/RequiredAsterisk";
+import OutputFeedBack from "./ResumeOutputFeedback";
 
 import uploadImage from "@/assets/icons/upload-resume-icon.svg";
 import Image from "next/image";
 
 import styles from "./Form.module.scss";
-import { ChangeEvent, useState } from "react";
+
 import clsx from "clsx";
 
 export default function ResumeInformation() {
@@ -59,20 +62,6 @@ export default function ResumeInformation() {
 		return true;
 	};
 
-	const getOutputMessage = () => {
-		if (errorMessage) {
-			return (
-				<span className="text-[#FF2222] text-xl">{errorMessage}</span>
-			);
-		}
-
-		return (
-			<span className="text-xl">
-				{resumePath ? "Uploaded " + resumePath : ""}
-			</span>
-		);
-	};
-
 	return (
 		<div className="flex flex-col items-start w-11/12">
 			<label className={styles.label}>
@@ -104,7 +93,10 @@ export default function ResumeInformation() {
 				type="file"
 				onChange={handleFileUpload}
 			></input>
-			{getOutputMessage()}
+			<OutputFeedBack
+				errorMessage={errorMessage}
+				resumePath={resumePath}
+			/>
 		</div>
 	);
 }

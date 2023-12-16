@@ -1,4 +1,5 @@
 from logging import getLogger
+from typing import Annotated
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Cookie, Depends, Form, HTTPException, status
@@ -12,7 +13,7 @@ log = getLogger(__name__)
 router = APIRouter()
 
 
-def guest_email(email: EmailStr = Form()) -> str:
+def guest_email(email: Annotated[EmailStr, Form()]) -> EmailStr:
     """Require a university guest (non-UCI) email as a form field."""
     if user_identity.uci_email(email):
         log.info("%s attempted to log in as guest.", email)
@@ -31,7 +32,9 @@ def guest_email(email: EmailStr = Form()) -> str:
 
 
 @router.post("/login")
-async def guest_login(email: EmailStr = Depends(guest_email)) -> RedirectResponse:
+async def guest_login(
+    email: Annotated[EmailStr, Depends(guest_email)]
+) -> RedirectResponse:
     """Generate login passphrase and set cookie with confirmation token.
     The initiation will send an email with the passphrase."""
     try:
@@ -55,9 +58,9 @@ async def guest_login(email: EmailStr = Depends(guest_email)) -> RedirectRespons
 
 @router.post("/verify")
 async def verify_guest(
-    email: EmailStr = Depends(guest_email),
-    passphrase: str = Form(),
-    guest_confirmation: str = Cookie(),
+    email: Annotated[EmailStr, Depends(guest_email)],
+    passphrase: Annotated[str, Form()],
+    guest_confirmation: Annotated[str, Cookie()],
 ) -> RedirectResponse:
     """Verify guest token"""
     if not await guest_auth.verify_guest_credentials(

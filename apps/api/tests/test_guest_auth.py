@@ -4,6 +4,7 @@ from unittest.mock import AsyncMock, patch
 
 from auth import guest_auth
 
+guest_auth.AUTH_KEY_SALT = "not-a-good-idea".encode()
 SAMPLE_EMAIL = "jeff@amazon.com"
 
 

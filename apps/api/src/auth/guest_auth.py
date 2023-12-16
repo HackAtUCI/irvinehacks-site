@@ -13,7 +13,7 @@ from services import mongodb_handler
 from services.mongodb_handler import BaseRecord, Collection
 from utils import email_handler
 
-AUTH_KEY_SALT = os.getenv("AUTH_KEY_SALT", "not-a-good-idea")[:16].encode()
+AUTH_KEY_SALT = os.getenv("AUTH_KEY_SALT", "")[:16].encode()
 PASSPHRASE_LENGTH = 4
 WORD_LIST: list[str] = []
 

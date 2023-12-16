@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import * as NavMenu from "@radix-ui/react-navigation-menu";
 
 import NavLinkItem from "./NavbarHelpers";
@@ -34,8 +34,9 @@ function Navbar({ identity }: NavbarProps) {
 
 	return (
 		<NavMenu.Root
-			className={`${hasScrolled ? "md:bg-opacity-50" : ""
-				} transition-colors duration-0 md:duration-700 ease-out w-full z-10 flex flex-col fixed bg-black bg-opacity-0 md:flex-row md:items-center`}
+			className={`${
+				hasScrolled ? "md:bg-opacity-50" : ""
+			} transition-colors duration-0 md:duration-700 ease-out w-full z-10 flex flex-col fixed bg-black bg-opacity-0 md:flex-row md:items-center`}
 		>
 			<NavMenu.List className="bg-black bg-opacity-50 md:bg-opacity-0 flex p-3">
 				<NavLinkItem href="/">

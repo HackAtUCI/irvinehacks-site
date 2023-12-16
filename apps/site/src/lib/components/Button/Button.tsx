@@ -2,7 +2,6 @@ import type { ComponentProps } from "react";
 import Link from "next/link";
 import styles from "./Button.module.css";
 import clsx from "clsx";
-import { disableInstantTransitions } from "framer-motion";
 
 interface ButtonProps {
 	text: string;

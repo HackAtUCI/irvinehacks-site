@@ -19,6 +19,7 @@ interface NavbarProps {
 
 function Navbar({ identity }: NavbarProps) {
 	const { uid, role, status } = identity;
+	const isLoggedIn = uid === null;
 
 	const [listShown, setListShown] = useState(false);
 	const [hasScrolled, setHasScrolled] = useState(false);
@@ -75,12 +76,12 @@ function Navbar({ identity }: NavbarProps) {
 					{status !== null && (
 						<NavLinkItem href="/portal">Portal</NavLinkItem>
 					)}
-					{uid === null ? (
+					{isLoggedIn ? (
 						<Button text="Login" href="/login" isLightVersion />
 					) : (
 						<Button
 							text="Logout"
-							href="/api/user/logout"
+							href="/logout"
 							usePrefetch={false}
 							isLightVersion
 						/>

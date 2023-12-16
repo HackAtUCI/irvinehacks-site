@@ -17,7 +17,7 @@ const Button: React.FC<ButtonProps> = ({
 	href,
 	className,
 	isLightVersion,
-	usePrefetch
+	usePrefetch,
 }) => {
 	if (href) {
 		return (

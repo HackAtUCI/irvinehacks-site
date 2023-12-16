@@ -40,7 +40,6 @@ export default function Home() {
 	});
 
 	const onSubmit = (e: z.infer<typeof formSchema>) => {
-		console.log("submit", e);
 		router.push(LOGIN_PATH);
 	};
 
@@ -62,12 +61,12 @@ export default function Home() {
 							name="email"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel className="text-xl md:text-2xl text-slate-800 underline underline-offset-4">
+									<FormLabel className="text-xl md:text-3xl text-slate-800 underline underline-offset-4">
 										Email Address
 									</FormLabel>
 									<FormControl>
 										<Input
-											className="text-black text-xs sm:text-base -translate-x-1"
+											className="text-black text-xs sm:text-base -translate-x-1 bg-slate-200"
 											placeholder="PeterAnteater@uci.edu"
 											{...field}
 										/>

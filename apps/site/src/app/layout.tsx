@@ -22,7 +22,7 @@ export default async function RootLayout({
 				}}
 				className="overflow-x-hidden bg-top bg-repeat-y bg-[length:100%]"
 			>
-				<App children={children} />
+				<App>{children}</App>
 			</body>
 		</html>
 	);

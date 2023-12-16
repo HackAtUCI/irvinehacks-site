@@ -7,11 +7,13 @@ import { Layout } from "@/components/dom/Layout";
 import Footer from "@/lib/components/Footer/Footer";
 
 export default function App({ children }: { children: React.ReactNode }) {
-    return (
-        <UserContext.Provider value={{ uid: "test", role: "test", status: "test" }}>
-            <Navbar />
-            <Layout>{children}</Layout>
-            <Footer />
-        </UserContext.Provider>
-    )
+	return (
+		<UserContext.Provider
+			value={{ uid: "test", role: "test", status: "test" }}
+		>
+			<Navbar />
+			<Layout>{children}</Layout>
+			<Footer />
+		</UserContext.Provider>
+	);
 }

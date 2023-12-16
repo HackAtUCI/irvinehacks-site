@@ -22,16 +22,15 @@ USER_PKFIRE = NativeUser(
 SAMPLE_APPLICATION = {
     "first_name": "pk",
     "last_name": "fire",
-    "email": "pkfire@uci.edu",
     "pronouns": "pk",
     "ethnicity": "fire",
     "is_18_older": "true",
-    "university": "UC Irvine",
+    "school": "UC Irvine",
     "education_level": "Fifth+ Year Undergraduate",
     "major": "Computer Science",
     "is_first_hackathon": "false",
-    "collaboration_question": "I am pkfire",
-    "any_job_question": "I am pkfire",
+    "frq_collaboration": "I am pkfire",
+    "frq_dream_job": "I am pkfire",
 }
 
 SAMPLE_RESUME = ("my-resume.pdf", b"resume", "application/pdf")
@@ -117,7 +116,7 @@ def test_apply_with_invalid_data_causes_422(
 ) -> None:
     """Test that applying with invalid data is unprocessable."""
     bad_application = SAMPLE_APPLICATION.copy()
-    bad_application["email"] = "not-an-email"
+    bad_application["is_18_older"] = "maybe"
     res = client.post("/apply", data=bad_application, files=SAMPLE_FILES)
 
     mock_mongodb_handler_retrieve_one.assert_not_called()

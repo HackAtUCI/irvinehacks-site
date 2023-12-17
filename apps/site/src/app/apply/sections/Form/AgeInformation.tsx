@@ -30,7 +30,7 @@ export default function AgeInformation() {
 			</div>
 
 			<SimpleRadio
-				name="minor_check"
+				name="is_18_older"
 				values={yesNoOptions}
 				title="Will you be 18 years or older by January 26th, 2024?"
 				titleClass="text-xl font-bold m-0 text-center"

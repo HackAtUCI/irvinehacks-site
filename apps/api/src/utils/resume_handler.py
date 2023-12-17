@@ -5,6 +5,7 @@ from typing import Protocol
 
 from aiogoogle import HTTPError
 from fastapi import UploadFile
+from pydantic import HttpUrl
 
 from services import gdrive_handler
 
@@ -20,7 +21,7 @@ class Person(Protocol):
     last_name: str
 
 
-async def upload_resume(person: Person, resume_upload: UploadFile) -> str:
+async def upload_resume(person: Person, resume_upload: UploadFile) -> HttpUrl:
     """Upload resume file to Google Drive and provide url to uploaded file.
     Reject files larger than size limit"""
     if not RESUMES_FOLDER_ID:
@@ -49,4 +50,4 @@ async def upload_resume(person: Person, resume_upload: UploadFile) -> str:
         log.error("During resume upload: %s", err)
         raise RuntimeError("Could not upload resume to Google Drive")
 
-    return resume_url
+    return HttpUrl(resume_url)

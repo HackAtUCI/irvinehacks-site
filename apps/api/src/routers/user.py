@@ -1,15 +1,18 @@
+from datetime import datetime, timezone
 from logging import getLogger
-from typing import Annotated, Union
+from typing import Annotated, Optional, Union
 
-from fastapi import APIRouter, Depends, Form, status
+from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile, status
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, EmailStr
 
 from auth import user_identity
-from auth.user_identity import User, use_user_identity
+from auth.user_identity import User, require_user_identity, use_user_identity
+from models.ApplicationData import ProcessedApplicationData, RawApplicationData
 from services import mongodb_handler
 from services.mongodb_handler import Collection
-from utils.user_record import Role
+from utils import email_handler, resume_handler
+from utils.user_record import Applicant, Role, Status
 
 log = getLogger(__name__)
 
@@ -52,3 +55,76 @@ async def me(
     if not user_record:
         return {"uid": user.uid}
     return {**user_record, "uid": user.uid}
+
+
+@router.post("/apply", status_code=status.HTTP_201_CREATED)
+async def apply(
+    user: Annotated[User, Depends(require_user_identity)],
+    raw_application_data: Annotated[RawApplicationData, Depends(RawApplicationData)],
+    resume: Optional[UploadFile] = None,
+) -> None:
+    # check if email is already in database
+    EXISTING_RECORD = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": user.uid}
+    )
+
+    if EXISTING_RECORD and "status" in EXISTING_RECORD:
+        log.error("User %s has already applied.", user)
+        raise HTTPException(status.HTTP_400_BAD_REQUEST)
+
+    if resume is not None:
+        try:
+            resume_url = await resume_handler.upload_resume(
+                raw_application_data, resume
+            )
+        except TypeError:
+            log.info("%s provided invalid resume type.", user)
+            raise HTTPException(
+                status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, "Invalid resume file type"
+            )
+        except ValueError:
+            log.info("%s provided too large resume.", user)
+            raise HTTPException(
+                status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, "Resume upload is too large"
+            )
+        except RuntimeError as err:
+            log.error("During user %s apply, resume upload: %s", user.uid, err)
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+    else:
+        resume_url = None
+
+    now = datetime.now(timezone.utc)
+    processed_application_data = ProcessedApplicationData(
+        **raw_application_data.model_dump(),
+        resume_url=resume_url,
+        submission_time=now,
+    )
+    applicant = Applicant(
+        uid=user.uid,
+        application_data=processed_application_data,
+        status=Status.PENDING_REVIEW,
+    )
+
+    # add applicant to database
+    try:
+        await mongodb_handler.update_one(
+            Collection.USERS,
+            {"_id": user.uid},
+            applicant.model_dump(),
+            upsert=True,
+        )
+    except RuntimeError:
+        log.error("Could not insert applicant %s to MongoDB.", user.uid)
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    try:
+        await email_handler.send_application_confirmation_email(
+            user.email, applicant.application_data
+        )
+    except RuntimeError:
+        log.error("Could not send confirmation email with SendGrid to %s.", user.uid)
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    # TODO: handle inconsistent results if one service fails
+
+    log.info("%s submitted an application", user.uid)

@@ -59,8 +59,8 @@ async def me(
 
 @router.post("/apply", status_code=status.HTTP_201_CREATED)
 async def apply(
-    user: User = Depends(require_user_identity),
-    raw_application_data: RawApplicationData = Depends(RawApplicationData),
+    user: Annotated[User, Depends(require_user_identity)],
+    raw_application_data: Annotated[RawApplicationData, Depends(RawApplicationData)],
     resume: Optional[UploadFile] = None,
 ) -> None:
     # check if email is already in database

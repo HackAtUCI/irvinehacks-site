@@ -16,10 +16,6 @@
 	margin-bottom: 8px;
 }
 
-.image {
-	z-index: -1;
-}
-
 .upload {
 	& > * {
 		// prevents child elements from interfering with drag & drop

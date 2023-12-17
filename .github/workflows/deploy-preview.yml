@@ -36,6 +36,7 @@ jobs:
                   vercel-project-id: ${{ vars.VERCEL_PROJECT_ID_SITE}}
     Studio:
         runs-on: ubuntu-latest
+        if: contains(github.event.pull_request.labels.*.name, 'sanity')
         steps:
             - uses: actions/checkout@v4
             - uses: amondnet/vercel-action@v25

@@ -1,6 +1,5 @@
 import type { ComponentProps } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import Button from "@/lib/components/Button/Button";
 import standBottom from "./stand-bottom.png";
 
@@ -9,7 +8,7 @@ interface StandProps {
 	header: string;
 	description: string;
 	buttonText: string;
-	buttonHref: ComponentProps<typeof Link>["href"];
+	buttonHref: string;
 }
 
 const Stand: React.FC<StandProps> = ({

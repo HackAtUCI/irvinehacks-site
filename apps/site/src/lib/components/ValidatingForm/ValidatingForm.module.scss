@@ -1,9 +1,9 @@
 .validated {
-	&:invalid p {
+	&:invalid .invalidated {
 		display: block;
 	}
 }
 
-.notYetValidated p {
+.notYetValidated .invalidated {
 	display: none;
 }

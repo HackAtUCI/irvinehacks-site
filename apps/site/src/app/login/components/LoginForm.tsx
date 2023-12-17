@@ -1,5 +1,8 @@
+import clsx from "clsx";
+
 import Button from "@/lib/components/Button/Button";
 import ValidatingForm from "@/lib/components/ValidatingForm/ValidatingForm";
+import styles from "@/lib/components/ValidatingForm/ValidatingForm.module.scss";
 
 const EMAIL_REGEX = /^\w+([\.\-]?\w+)*@\w+([\.\-]?\w+)*(\.\w{2,3})+$/;
 const LOGIN_PATH = "/api/user/login";
@@ -24,7 +27,7 @@ function LoginForm() {
 						UCI students will log in with UCI SSO. Please make sure
 						to use your school email address if you have one.
 					</small>
-					<p className="invalid-feedback text-red-500">
+					<p className={clsx(styles.invalidated, "text-red-500")}>
 						Sorry, that email address is invalid.
 					</p>
 				</div>

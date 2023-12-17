@@ -1,4 +1,4 @@
-import { PortalStatus } from "./page";
+import { PortalStatus } from "./Portal";
 
 interface MessageProps {
 	status: PortalStatus;

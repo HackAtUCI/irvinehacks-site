@@ -1,21 +1,62 @@
-import api from "@/lib/utils/api";
+"use client";
 
-async function getIdentity(): Promise<string> {
-	const res = await api.get<string>("/user/me");
-	return res.data;
+import Head from "next/head";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+
+import VerticalTimeline from "./VerticalTimeline";
+import Message from "./Message";
+import { Identity } from "@/lib/utils/getUserIdentity";
+
+import styles from "./Portal.module.scss";
+
+export const enum PortalStatus {
+	pending = "PENDING_REVIEW",
+	reviewed = "REVIEWED",
+	accepted = "ACCEPTED",
+	rejected = "REJECTED",
+	waitlisted = "WAITLISTED",
+	confirmed = "CONFIRMED",
 }
 
-async function Portal() {
-	const identity = await getIdentity();
+interface PortalProps {
+	identity: Identity;
+}
+
+function Portal({ identity }: PortalProps) {
+	const router = useRouter();
+	const status = identity.status;
+
+	useEffect(() => {
+		if (status === null) {
+			router.push("/apply");
+		}
+	}, [status, router]);
+
+	if (status === null) {
+		return null;
+	}
+
 	return (
-		<div className="min-h-screen flex flex-col justify-center bg-white text-black">
-			<h1>Hello</h1>
-			{Object.entries(identity).map(([key, value]) => (
-				<p key={key}>
-					{key} - {value}
-				</p>
-			))}
-		</div>
+		<>
+			<section className=" w-full flex items-center flex-col">
+				<div className="m-24">
+					<Head>
+						<title>Portal | IrvineHacks 2024</title>
+					</Head>
+					<h1
+						className={`${styles.title} font-display sm:text-[3rem] text-[#fffce2] text-6xl text-center`}
+					>
+						Portal
+					</h1>
+				</div>
+				<div className="bg-white text-black max-w-4xl rounded-2xl p-6 flex flex-col mb-24 w-full">
+					<h2 className="text-4xl font-semibold">Status</h2>
+					<VerticalTimeline status={status} />
+					<Message status={status as PortalStatus} />
+				</div>
+			</section>
+		</>
 	);
 }
 

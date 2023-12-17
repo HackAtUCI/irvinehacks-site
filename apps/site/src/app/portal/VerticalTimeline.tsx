@@ -4,7 +4,7 @@ import BorderCircle from "@/assets/icons/border-circle.svg";
 import CheckCircle from "@/assets/icons/check-circle-fill.svg";
 import XCircle from "@/assets/icons/x-circle-fill.svg";
 
-import { PortalStatus } from "./page";
+import { PortalStatus } from "./Portal";
 
 interface VerticalTimelineProps {
 	status: string;

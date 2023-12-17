@@ -60,8 +60,10 @@ export default function ConfirmationDetails() {
 			</p>
 			<p className="text-[#FF2222] text-2xl text-center">
 				By clicking the button,{" "}
-				<span className="font-bold">{"\""}Proceed to Application,{"\""}</span> you
-				acknowledge that you have read and understood the in-person
+				<span className="font-bold">
+					{'"'}Proceed to Application,{'"'}
+				</span>{" "}
+				you acknowledge that you have read and understood the in-person
 				policy.
 			</p>
 			<Button text="Proceed to Application" href="/apply" />

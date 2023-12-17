@@ -36,6 +36,7 @@ class GuestTokenPersonalization(PersonalizationData):
 async def send_email(
     template_id: Literal[Template.CONFIRMATION_EMAIL],
     sender_email: Tuple[str, str],
+    reply_to: Tuple[str, str],
     receiver_data: ConfirmationPersonalization,
     send_to_multiple: Literal[False] = False,
 ) -> None:
@@ -46,6 +47,7 @@ async def send_email(
 async def send_email(
     template_id: Literal[Template.GUEST_TOKEN],
     sender_email: Tuple[str, str],
+    reply_to: Tuple[str, str],
     receiver_data: GuestTokenPersonalization,
     send_to_multiple: Literal[False] = False,
 ) -> None:
@@ -56,6 +58,7 @@ async def send_email(
 async def send_email(
     template_id: Literal[Template.CONFIRMATION_EMAIL],
     sender_email: Tuple[str, str],
+    reply_to: Tuple[str, str],
     receiver_data: Iterable[ConfirmationPersonalization],
     send_to_multiple: Literal[True],
 ) -> None:
@@ -65,6 +68,7 @@ async def send_email(
 async def send_email(
     template_id: Template,
     sender_email: Tuple[str, str],
+    reply_to: Tuple[str, str],
     receiver_data: Union[PersonalizationData, Iterable[PersonalizationData]],
     send_to_multiple: bool = False,
 ) -> None:

@@ -102,6 +102,7 @@ async def send_email(
             email_message.add_personalization(p)
 
         email_message.from_email = sender_email
+        email_message.reply_to = reply_to
         email_message.template_id = template_id
 
         async with aiosendgrid.AsyncSendGridClient(api_key=SENDGRID_API_KEY) as client:

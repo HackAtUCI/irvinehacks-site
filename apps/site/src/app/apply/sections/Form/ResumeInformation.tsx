@@ -2,11 +2,10 @@
 
 import { ChangeEvent, useEffect, useState, useRef } from "react";
 
+import { FileText } from "lucide-react";
+
 import RequiredAsterisk from "@/app/apply/sections/Components/RequiredAsterisk";
 import OutputFeedBack from "./ResumeOutputFeedback";
-
-import uploadImage from "@/assets/icons/upload-resume-icon.svg";
-import Image from "next/image";
 
 import styles from "./Form.module.scss";
 
@@ -67,9 +66,9 @@ export default function ResumeInformation() {
 			</label>
 			<label
 				htmlFor="resume_upload"
-				className={`${styles.upload} cursor-pointer mb-3`}
+				className={`${styles.upload} cursor-pointer mb-3 p-5 rounded-xl bg-[#e1e1e1]`}
 			>
-				<Image src={uploadImage} width="100" alt="Upload resume icon" />
+				<FileText className="m-auto" width={50} height={50} />
 				<h2 className="text-center">Upload file</h2>
 			</label>
 			<input
@@ -80,7 +79,6 @@ export default function ResumeInformation() {
 				type="file"
 				accept="application/pdf"
 				onChange={handleFileUpload}
-				required
 			></input>
 			<OutputFeedBack
 				errorMessage={errorMessage}

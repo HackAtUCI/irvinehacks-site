@@ -13,7 +13,7 @@ export default function OutputFeedBack({
 
 	return (
 		<span className="text-xl">
-			{resumePath ? "Successfully uploaded " + resumePath : ""}
+			{resumePath ? "Selected " + resumePath : ""}
 		</span>
 	);
 }

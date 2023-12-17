@@ -13,10 +13,11 @@ from services.mongodb_handler import Collection
 from utils import resume_handler
 from utils.user_record import Applicant, Status
 
+USER_EMAIL = "pkfire@uci.edu"
 USER_PKFIRE = NativeUser(
     ucinetid="pkfire",
     display_name="pkfire",
-    email="pkfire@uci.edu",
+    email=USER_EMAIL,
     affiliations=["pkfire"],
 )
 
@@ -107,7 +108,7 @@ def test_apply_successfully(
         upsert=True,
     )
     mock_send_application_confirmation_email.assert_awaited_once_with(
-        EXPECTED_APPLICATION_DATA
+        USER_EMAIL, EXPECTED_APPLICATION_DATA
     )
     assert res.status_code == 201
 
@@ -248,7 +249,7 @@ def test_apply_successfully_without_resume(
         upsert=True,
     )
     mock_send_application_confirmation_email.assert_awaited_once_with(
-        EXPECTED_APPLICATION_DATA_WITHOUT_RESUME
+        USER_EMAIL, EXPECTED_APPLICATION_DATA_WITHOUT_RESUME
     )
     assert res.status_code == 201
 

@@ -119,7 +119,7 @@ async def apply(
 
     try:
         await email_handler.send_application_confirmation_email(
-            applicant.application_data
+            user.email, applicant.application_data
         )
     except RuntimeError:
         log.error("Could not send confirmation email with SendGrid to %s.", user.uid)

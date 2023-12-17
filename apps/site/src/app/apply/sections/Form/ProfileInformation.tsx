@@ -33,7 +33,7 @@ export default function ProfileInformation() {
 			</div>
 
 			<Textfield
-				name="collaboration-answer"
+				name="collaboration_answer"
 				labelClass={`${styles.label} mt-7`}
 				labelText="Why is collaboration important to being a programmer or technologist, and what does it mean to you? (150 words)"
 				inputClass={`bg-[#E1E1E1] p-3 h-48 resize-none rounded-xl`}
@@ -42,7 +42,7 @@ export default function ProfileInformation() {
 			/>
 
 			<Textfield
-				name="job-answer"
+				name="job_answer"
 				labelClass={`${styles.label} mt-7`}
 				labelText="If you could have any job in the world, what would it be? (ex. YouTuber, Body Builder, etc.) (100 words)"
 				inputClass={`bg-[#E1E1E1] p-3 h-48 resize-none rounded-xl`}

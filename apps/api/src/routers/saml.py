@@ -126,7 +126,7 @@ async def acs(req: Request) -> RedirectResponse:
         affiliations=affiliations,
     )
 
-    res = RedirectResponse("/", status_code=303)
+    res = RedirectResponse("/portal", status_code=303)
     user_identity.issue_user_identity(user, res)
     return res
 

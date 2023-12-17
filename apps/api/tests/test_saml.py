@@ -55,6 +55,6 @@ def test_saml_acs_succeeds(mock_get_saml_auth: MagicMock) -> None:
 
     # check that user is redirected to main page
     assert res.status_code == 303
-    assert res.headers["location"] == "/"
+    assert res.headers["location"] == "/portal"
     # check that response sets appropriate cookie
     assert res.headers["Set-Cookie"].startswith("irvinehacks_auth=")

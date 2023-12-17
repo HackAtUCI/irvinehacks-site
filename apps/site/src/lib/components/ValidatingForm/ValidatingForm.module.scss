@@ -1,0 +1,9 @@
+.validated {
+	&:invalid .invalidated {
+		display: block;
+	}
+}
+
+.notYetValidated .invalidated {
+	display: none;
+}

@@ -41,11 +41,7 @@ const Landing = () => {
 				<p className="font-display text-2xl md:text-3xl">
 					January 26&ndash;28
 				</p>
-				<Button
-					className="z-10"
-					text="Stay updated"
-					href="https://uci.us13.list-manage.com/subscribe?u=5976872928cd5681fbaca89f6&id=93333e11eb"
-				/>
+				<Button className="z-10" text="Apply" href="/apply" />
 			</div>
 		</section>
 	);

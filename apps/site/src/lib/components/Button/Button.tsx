@@ -20,8 +20,6 @@ const Button: React.FC<ButtonProps> = ({
 		return (
 			<Link
 				href={href}
-				target={isLightVersion ? "" : "_blank"}
-				rel="noopener noreferrer"
 				className={clsx(
 					styles.button,
 					isLightVersion && styles.lightButton,

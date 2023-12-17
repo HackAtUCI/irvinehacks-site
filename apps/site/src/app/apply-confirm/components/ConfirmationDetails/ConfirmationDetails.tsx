@@ -6,7 +6,9 @@ export default function ConfirmationDetails() {
 		<div
 			className={`${styles.details} w-8/12 flex flex-col items-center p-12 gap-10 z-1 max-[800px]:w-9/12 max-[400px]:w-11/12`}
 		>
-            <h2 className={`${styles.header} text-3xl`}>Please read our in-person policy for IrvineHacks</h2>
+			<h2 className={`${styles.header} text-3xl`}>
+				Please read our in-person policy for IrvineHacks
+			</h2>
 			<p className={`${styles.policy} text-lg`}>
 				Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam
 				congue urna sit amet sem feugiat, eu varius enim faucibus. Proin
@@ -57,8 +59,10 @@ export default function ConfirmationDetails() {
 				metus. Aliquam erat volutpat.
 			</p>
 			<p className="text-[#FF2222] text-2xl text-center">
-				By clicking the button, "Proceed to Application," I acknowledge
-				that I have read and understood the in-person policy
+				By clicking the button,{" "}
+				<span className="font-bold">"Proceed to Application,"</span> you
+				acknowledge that you have read and understood the in-person
+				policy.
 			</p>
 			<Button text="Proceed to Application" href="/apply" />
 		</div>

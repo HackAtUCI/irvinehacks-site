@@ -1,9 +1,9 @@
-.validated {
-	&:invalid .invalidated {
-		display: block;
-	}
+.invalidFeedback {
+	display: none;
 }
 
-.notYetValidated .invalidated {
-	display: none;
+.validated {
+	:invalid ~ .invalidFeedback {
+		display: block;
+	}
 }

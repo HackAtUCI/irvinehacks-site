@@ -1,4 +1,3 @@
-
 import Image from "next/image";
 
 import koiLeft from "@/assets/images/koi-swim-left.png";
@@ -24,40 +23,40 @@ export default function Apply({
 		searchParams?.prefaceAccepted == "true" ? (
 			<>
 				<Title />
-				<Form />
+				<div className="relative w-full flex flex-col items-center">
+					<Image
+						src={koiLeft}
+						height="250"
+						alt="Koi fish"
+						className={`${styles.image} absolute top-0 right-0`}
+					/>
+					<Image
+						src={koiRight}
+						height="250"
+						alt="Koi fish"
+						className={`${styles.image} absolute top-1/4 left-0`}
+					/>
+					<Image
+						src={koiLeft}
+						height="250"
+						alt="Koi fish"
+						className={`${styles.image} absolute top-1/2 right-0`}
+					/>
+					<Image
+						src={koiRight}
+						height="250"
+						alt="Koi fish"
+						className={`${styles.image} absolute top-3/4 left-0`}
+					/>
+					<Form />
+				</div>
 			</>
 		) : (
 			<ApplyConfirm />
 		);
 	return (
 		<div className="flex flex-col items-center gap-10 my-32">
-			<div className="relative w-full flex flex-col items-center">
-				<Image
-					src={koiLeft}
-					height="250"
-					alt="Koi fish"
-					className={`${styles.image} absolute top-0 right-0`}
-				/>
-				<Image
-					src={koiRight}
-					height="250"
-					alt="Koi fish"
-					className={`${styles.image} absolute top-1/4 left-0`}
-				/>
-				<Image
-					src={koiLeft}
-					height="250"
-					alt="Koi fish"
-					className={`${styles.image} absolute top-1/2 right-0`}
-				/>
-				<Image
-					src={koiRight}
-					height="250"
-					alt="Koi fish"
-					className={`${styles.image} absolute top-3/4 left-0`}
-				/>
-				{applyBody}
-			</div>
+			{applyBody}
 		</div>
 	);
 }

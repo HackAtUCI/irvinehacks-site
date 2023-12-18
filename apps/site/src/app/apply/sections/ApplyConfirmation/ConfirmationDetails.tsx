@@ -11,7 +11,7 @@ export default async function ConfirmationDetails({
 }: ConfirmationDetailsProps) {
 	return (
 		<div
-			className={`${styles.details} [&>*]:text-[#432810] w-8/12 flex flex-col items-center p-12 gap-10 z-1 max-[800px]:w-9/12 max-[400px]:w-11/12`}
+			className={`${styles.details} w-8/12 flex flex-col items-center p-12 gap-10 z-1 max-[800px]:w-9/12 max-[400px]:w-11/12`}
 		>
 			<h1 className={`${styles.header} text-5xl`}>Before Applying</h1>
 			<p className={`${styles.policy} text-lg`}>
@@ -25,11 +25,9 @@ export default async function ConfirmationDetails({
 				accredited college or university in the United States and will
 				be over the age of 18 by January 26th, 2024.
 			</p>
-			<p className={`${styles.policy} text-lg`}>
-				<strong className="text-[#FF2222]">
-					Applications are due on January 14th, 2024 at 11:59PM PST.
-				</strong>
-			</p>
+			<strong className="text-lg text-[#FF2222]">
+				Applications are due on January 14th, 2024 at 11:59PM PST.
+			</strong>
 			<Button
 				text={isLoggedIn ? "Proceed to Application" : "Log in to apply"}
 				href={isLoggedIn ? "/apply?prefaceAccepted=true" : "/login"}

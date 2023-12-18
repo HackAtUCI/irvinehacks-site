@@ -2,7 +2,7 @@
 
 import { ChangeEvent, useEffect, useState, useRef } from "react";
 
-import { FileText } from "lucide-react";
+import { FileCheck, FileText } from "lucide-react";
 
 import RequiredAsterisk from "@/app/apply/sections/Components/RequiredAsterisk";
 import OutputFeedBack from "./ResumeOutputFeedback";
@@ -18,8 +18,9 @@ class InvalidFile extends Error {
 
 export default function ResumeInformation() {
 	const inputRef = useRef<HTMLInputElement>(null);
-	const [resumePath, setResumePath] = useState("");
-	const [errorMessage, setErrorMessage] = useState("");
+	const [resumePath, setResumePath] = useState<string>("");
+	const [hasUploaded, setHasUploaded] = useState<boolean>(false);
+	const [errorMessage, setErrorMessage] = useState<string>("");
 
 	useEffect(() => {
 		if (inputRef.current) {
@@ -39,6 +40,7 @@ export default function ResumeInformation() {
 		} catch (error) {
 			event.target.value = "";
 		}
+		setHasUploaded(true);
 	};
 
 	const handleFile = (file: File | null) => {
@@ -68,7 +70,16 @@ export default function ResumeInformation() {
 				htmlFor="resume_upload"
 				className={`${styles.upload} cursor-pointer mb-3 p-5 rounded-xl bg-[#e1e1e1]`}
 			>
-				<FileText className="m-auto" width={50} height={50} />
+				{!hasUploaded ? (
+					<FileText className="m-auto" width={50} height={50} />
+				) : (
+					<FileCheck
+						className="m-auto"
+						width={50}
+						height={50}
+						color="green"
+					/>
+				)}
 				<h2 className="text-center">Upload file</h2>
 			</label>
 			<input

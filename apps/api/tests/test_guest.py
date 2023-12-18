@@ -105,6 +105,8 @@ def test_successful_guest_verification_provides_identity(
     assert res.status_code == 303
     assert res.headers["Set-Cookie"].startswith("irvinehacks_auth=")
 
+    mock_remove_guest_key.assert_awaited_once_with("edu.caltech.beaver")
+
 
 @patch("auth.guest_auth._get_existing_key", autospec=True)
 @patch("auth.guest_auth._remove_guest_key", autospec=True)

@@ -1,19 +1,26 @@
 "use client";
 
-import * as NavMenu from "@radix-ui/react-navigation-menu";
-
-import styles from "./Navbar.module.scss";
-import React from "react";
+import Image from "next/image";
 import { useState, useEffect } from "react";
+import * as NavMenu from "@radix-ui/react-navigation-menu";
 
 import NavLinkItem from "./NavbarHelpers";
 import Button from "@/lib/components/Button/Button";
 import HackLogo from "@/lib/components/HackLogo/HackLogo";
 
 import hamburger from "@/assets/icons/navigation-icon.svg";
-import Image from "next/image";
+import { Identity } from "@/lib/utils/getUserIdentity";
 
-function Navbar() {
+import styles from "./Navbar.module.scss";
+
+interface NavbarProps {
+	identity: Identity;
+}
+
+function Navbar({ identity }: NavbarProps) {
+	const { uid, role, status } = identity;
+	const isLoggedIn = uid === null;
+
 	const [listShown, setListShown] = useState(false);
 	const [hasScrolled, setHasScrolled] = useState(false);
 	const [hidden, setHidden] = useState(true);
@@ -66,7 +73,25 @@ function Navbar() {
 					<NavLinkItem href="/">Schedule</NavLinkItem>
 					<NavLinkItem href="/">Resources</NavLinkItem>
 					<NavLinkItem href="/">Stage</NavLinkItem> */}
-					<Button text="Login" href="/login" isLightVersion />
+					{!status && <NavLinkItem href="/apply">Apply</NavLinkItem>}
+					{status !== null && (
+						<NavLinkItem href="/portal">Portal</NavLinkItem>
+					)}
+					{isLoggedIn ? (
+						<Button
+							text="Login"
+							href="/login"
+							usePrefetch={false}
+							isLightVersion
+						/>
+					) : (
+						<Button
+							text="Logout"
+							href="/logout"
+							usePrefetch={false}
+							isLightVersion
+						/>
+					)}
 				</NavMenu.List>
 			</div>
 		</NavMenu.Root>

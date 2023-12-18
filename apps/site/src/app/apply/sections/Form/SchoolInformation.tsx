@@ -79,7 +79,7 @@ export default function SchoolInformation() {
 				<DropdownSelect
 					labelStyle={styles.label}
 					inputStyle={styles.input}
-					name="school_name"
+					name="school"
 					labelText="School Name"
 					values={universityOptions}
 					containerClass="flex flex-col w-6/12 max-[1000px]:w-full"
@@ -97,7 +97,7 @@ export default function SchoolInformation() {
 				/>
 
 				<SimpleRadio
-					name="hack_check"
+					name="is_first_hackathon"
 					values={yesNoOptions}
 					title="Is this your first Hackathon?"
 					titleClass="text-lg mb-0 p-0"

@@ -2,6 +2,8 @@
 
 import { FormEvent, PropsWithChildren, useState } from "react";
 
+import styles from "./ValidatingForm.module.scss";
+
 interface FormProps {
 	action?: string;
 	method?: string;
@@ -23,7 +25,7 @@ function ValidatingForm(props: PropsWithChildren<FormProps>) {
 		<form
 			onSubmit={handleSubmit}
 			noValidate // use custom validation feedback
-			className={validated ? "validated" : ""}
+			className={validated ? styles.validated : styles.notYetValidated}
 			// validated={validated}
 			{...props}
 		/>

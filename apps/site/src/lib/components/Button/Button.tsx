@@ -1,13 +1,13 @@
 import type { ComponentProps } from "react";
-import Link from "next/link";
 import styles from "./Button.module.css";
 import clsx from "clsx";
 
 interface ButtonProps {
 	text: string;
 	className?: string;
-	href?: ComponentProps<typeof Link>["href"];
+	href?: string;
 	isLightVersion?: boolean;
+	usePrefetch?: boolean;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -18,7 +18,7 @@ const Button: React.FC<ButtonProps> = ({
 }) => {
 	if (href) {
 		return (
-			<Link
+			<a
 				href={href}
 				className={clsx(
 					styles.button,
@@ -28,7 +28,7 @@ const Button: React.FC<ButtonProps> = ({
 				)}
 			>
 				{text}
-			</Link>
+			</a>
 		);
 	}
 	return (

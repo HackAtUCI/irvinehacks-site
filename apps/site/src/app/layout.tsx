@@ -4,7 +4,7 @@ import Footer from "@/lib/components/Footer/Footer";
 import "./globals.css";
 
 import { Layout } from "@/components/dom/Layout";
-import Navbar from "@/lib/components/Navbar/Navbar";
+import NavbarParent from "@/lib/components/Navbar/NavbarParent";
 
 export const metadata: Metadata = {
 	title: "IrvineHacks 2024",
@@ -26,7 +26,7 @@ export default function RootLayout({
 				className="overflow-x-hidden bg-top bg-repeat-y bg-[length:100%]"
 			>
 				{/* reference: https://github.com/pmndrs/react-three-next */}
-				<Navbar />
+				<NavbarParent />
 				<Layout>{children}</Layout>
 				<Footer />
 			</body>

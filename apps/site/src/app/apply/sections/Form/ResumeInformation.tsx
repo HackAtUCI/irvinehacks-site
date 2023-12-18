@@ -75,7 +75,7 @@ export default function ResumeInformation() {
 			<input
 				ref={inputRef}
 				className="opacity-0 absolute"
-				name="resume_upload"
+				name="resume"
 				id="resume_upload"
 				type="file"
 				accept="application/pdf"

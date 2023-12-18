@@ -9,19 +9,20 @@ IH_SENDER = ("apply@irvinehacks.com", "IrvineHacks 2024 Applications")
 
 
 class ContactInfo(Protocol):
-    email: EmailStr
     first_name: str
     last_name: str
 
 
-async def send_application_confirmation_email(user: ContactInfo) -> None:
+async def send_application_confirmation_email(
+    email: EmailStr, user: ContactInfo
+) -> None:
     """Send a confirmation email after a user submits an application.
     Will propagate exceptions from SendGrid."""
     await sendgrid_handler.send_email(
         Template.CONFIRMATION_EMAIL,
         IH_SENDER,
         {
-            "email": user.email,
+            "email": email,
             "first_name": user.first_name,
             "last_name": user.last_name,
         },

@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/router";
 import axios from "axios";
 
 import Button from "@/lib/components/Button/Button";
@@ -20,6 +20,7 @@ const FIELDS_WITH_OTHER = ["pronouns", "ethnicity", "school", "major"];
 export default function Form() {
 	const [submitting, setSubmitting] = useState(false);
 	const [sessionExpired, setSessionExpired] = useState(false);
+	const router = useRouter();
 
 	const handleSubmit = async (
 		event: FormEvent<HTMLFormElement>,
@@ -47,7 +48,7 @@ export default function Form() {
 			const res = await axios.post(APPLY_PATH, formData);
 			if (res.status === 201) {
 				console.log("Application submitted");
-				redirect("/portal");
+				router.push("/portal");
 			}
 		} catch (err) {
 			console.error(err);

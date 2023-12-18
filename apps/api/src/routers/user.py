@@ -62,7 +62,7 @@ async def apply(
     user: Annotated[User, Depends(require_user_identity)],
     raw_application_data: Annotated[RawApplicationData, Depends(RawApplicationData)],
     resume: Optional[UploadFile] = None,
-) -> None:
+) -> str:
     # check if email is already in database
     EXISTING_RECORD = await mongodb_handler.retrieve_one(
         Collection.USERS, {"_id": user.uid}
@@ -137,3 +137,7 @@ async def apply(
     # TODO: handle inconsistent results if one service fails
 
     log.info("%s submitted an application", user.uid)
+    return (
+        "Thank you for submitting an application to IrvineHacks 2024! Please "
+        + "visit https://irvinehacks.com/portal to see your application status."
+    )

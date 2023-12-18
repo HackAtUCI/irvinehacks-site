@@ -18,6 +18,7 @@ const FIELDS_WITH_OTHER = ["pronouns", "ethnicity", "school", "major"];
 
 export default function Form() {
 	const [submitting, setSubmitting] = useState(false);
+	const [sessionExpired, setSessionExpired] = useState(false);
 
 	const handleSubmit = async (
 		event: FormEvent<HTMLFormElement>,
@@ -25,6 +26,7 @@ export default function Form() {
 		// Disable native post submission
 		event.preventDefault();
 		setSubmitting(true);
+		setSessionExpired(false);
 
 		const formData = new FormData(event.currentTarget);
 
@@ -47,12 +49,30 @@ export default function Form() {
 				// TODO: show submitted message
 			}
 		} catch (err) {
-			// TODO: unauthorized error
 			console.error(err);
+			if (axios.isAxiosError(err)) {
+				if (err.response?.status === 401) {
+					setSessionExpired(true);
+				}
+			}
 		}
 
 		setSubmitting(false);
 	};
+
+	const sessionExpiredMessage = (
+		<p className="text-red-500">
+			Your session has expired. Please{" "}
+			<a
+				href="/login"
+				target="_blank"
+				className="text-blue-600 underline"
+			>
+				log in from a new tab
+			</a>{" "}
+			to restore your session and then try submitting again.
+		</p>
+	);
 
 	return (
 		<form
@@ -68,6 +88,7 @@ export default function Form() {
 			<ResumeInformation />
 			<AgeInformation />
 			<Button text="Submit Application" disabled={submitting} />
+			{sessionExpired && sessionExpiredMessage}
 		</form>
 	);
 }

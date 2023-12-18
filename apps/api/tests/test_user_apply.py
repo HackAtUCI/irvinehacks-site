@@ -36,20 +36,6 @@ SAMPLE_APPLICATION = {
     "frq_dream_job": "I am pkfire",
 }
 
-SAMPLE_APPLICATION_NO_JS = {
-    "first_name": "pk",
-    "last_name": "fire",
-    "pronouns": "other",
-    "ethnicity": "fire",
-    "is_18_older": "true",
-    "school": "UC Irvine",
-    "education_level": "Fifth+ Year Undergraduate",
-    "major": "Computer Science",
-    "is_first_hackathon": "false",
-    "portfolio": "https://github.com",
-    "frq_collaboration": "I am pkfire",
-    "frq_dream_job": "I am pkfire",
-}
 
 SAMPLE_RESUME = ("my-resume.pdf", b"resume", "application/pdf")
 SAMPLE_FILES = {"resume": SAMPLE_RESUME}
@@ -277,17 +263,11 @@ def test_application_data_is_bson_encodable() -> None:
     assert len(encoded) == 415
 
 
-@patch("utils.email_handler.send_application_confirmation_email", autospec=True)
-@patch("services.mongodb_handler.update_one", autospec=True)
-@patch("routers.user.datetime", autospec=True)
-@patch("services.gdrive_handler.upload_file", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
-def test_application_data_with_other_throws_400(
+def test_application_data_with_other_throws_422(
     mock_mongodb_handler_retrieve_one: AsyncMock,
-    mock_gdrive_handler_upload_file: AsyncMock,
-    mock_datetime: Mock,
-    mock_mongodb_handler_update_one: AsyncMock,
-    mock_send_application_confirmation_email: AsyncMock,
 ) -> None:
-    res = client.post("/apply", data=SAMPLE_APPLICATION_NO_JS, files=SAMPLE_FILES)
+    contains_other = SAMPLE_APPLICATION.copy()
+    contains_other["pronouns"] = "other"
+    res = client.post("/apply", data=contains_other, files=SAMPLE_FILES)
     assert res.status_code == 422

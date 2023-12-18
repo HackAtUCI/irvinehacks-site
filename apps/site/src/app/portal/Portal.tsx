@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import type { Metadata } from "next";
 
 import VerticalTimeline from "./VerticalTimeline";
 import Message from "./Message";
@@ -15,10 +14,6 @@ export const enum PortalStatus {
 	waitlisted = "WAITLISTED",
 	confirmed = "CONFIRMED",
 }
-
-export const metadata: Metadata = {
-	title: "Portal | IrvineHacks 2024",
-};
 
 async function Portal() {
 	const identity = await getUserIdentity();
@@ -40,7 +35,7 @@ async function Portal() {
 				</div>
 				<div className="bg-white text-black max-w-4xl rounded-2xl p-6 flex flex-col mb-24 w-full">
 					<h2 className="text-4xl font-semibold">Status</h2>
-					<VerticalTimeline status={status} />
+					<VerticalTimeline status={status as PortalStatus} />
 					<Message status={status as PortalStatus} />
 				</div>
 			</section>

@@ -7,7 +7,7 @@ import XCircle from "@/assets/icons/x-circle-fill.svg";
 import { PortalStatus } from "./Portal";
 
 interface VerticalTimelineProps {
-	status: string;
+	status: PortalStatus;
 }
 
 function VerticalTimeline({ status }: VerticalTimelineProps) {

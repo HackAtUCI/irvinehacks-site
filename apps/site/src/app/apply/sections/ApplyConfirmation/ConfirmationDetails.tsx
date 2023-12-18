@@ -32,7 +32,7 @@ export default async function ConfirmationDetails({
 				text={isLoggedIn ? "Proceed to Application" : "Log in to Apply"}
 				href={isLoggedIn ? "/apply?prefaceAccepted=true" : "/login"}
 			/>
-			<hr className="mt-5" />
+			<hr className="mt-5 w-full h-0.5 bg-[#432810]" />
 			<p className="text-display">
 				Interested in helping out instead? Consider applying to be a{" "}
 				<Link className="underline" href="/mentor">

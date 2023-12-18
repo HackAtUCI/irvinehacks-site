@@ -44,7 +44,7 @@ def test_scoped_uid_with_dots() -> None:
     """Test scoped uid properly processes local and domain parts."""
     assert user_identity.scoped_uid("kate@cc.edu") == "edu.cc.kate"
     assert user_identity.scoped_uid("kate@student.cc.edu") == "edu.cc.student.kate"
-    assert user_identity.scoped_uid("student.kate@cc.edu") == "edu.cc.student-kate"
+    assert user_identity.scoped_uid("student.kate@cc.edu") == "edu.cc.student..kate"
 
 
 def test_empty_identity_with_empty_token() -> None:

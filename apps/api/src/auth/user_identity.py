@@ -67,7 +67,7 @@ def scoped_uid(email: EmailStr) -> str:
         raise ValueError("UCI user should use NativeUser")
     local, domain = email.split("@")
     reversed_domains = ".".join(reversed(domain.split(".")))
-    cleaned_local = local.replace(".", "-")
+    cleaned_local = local.replace(".", "..")
     return f"{reversed_domains}.{cleaned_local}"
 
 

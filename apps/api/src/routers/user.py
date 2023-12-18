@@ -137,4 +137,7 @@ async def apply(
     # TODO: handle inconsistent results if one service fails
 
     log.info("%s submitted an application", user.uid)
-    return "Thank you for submitting an application to IrvineHacks 2024! Please visit https://irvinehacks.com/portal to see your application status."
+    return (
+        "Thank you for submitting an application to IrvineHacks 2024! Please "
+        + "visit https://irvinehacks.com/portal to see your application status."
+    )

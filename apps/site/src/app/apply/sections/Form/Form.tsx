@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { redirect } from "next/navigation";
 import axios from "axios";
 
 import Button from "@/lib/components/Button/Button";
@@ -46,7 +47,7 @@ export default function Form() {
 			const res = await axios.post(APPLY_PATH, formData);
 			if (res.status === 201) {
 				console.log("Application submitted");
-				// TODO: show submitted message
+				redirect("/portal");
 			}
 		} catch (err) {
 			console.error(err);

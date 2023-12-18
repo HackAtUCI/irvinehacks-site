@@ -2,11 +2,9 @@
 
 import { ChangeEvent, useEffect, useState, useRef } from "react";
 
-import RequiredAsterisk from "@/app/apply/sections/Components/RequiredAsterisk";
-import OutputFeedBack from "./ResumeOutputFeedback";
+import { FileCheck, FileText, FileWarning } from "lucide-react";
 
-import uploadImage from "@/assets/icons/upload-resume-icon.svg";
-import Image from "next/image";
+import OutputFeedBack from "./ResumeOutputFeedback";
 
 import styles from "./Form.module.scss";
 
@@ -19,8 +17,9 @@ class InvalidFile extends Error {
 
 export default function ResumeInformation() {
 	const inputRef = useRef<HTMLInputElement>(null);
-	const [resumePath, setResumePath] = useState("");
-	const [errorMessage, setErrorMessage] = useState("");
+	const [resumePath, setResumePath] = useState<string>("");
+	const [hasUploaded, setHasUploaded] = useState<boolean>(false);
+	const [errorMessage, setErrorMessage] = useState<string>("");
 
 	useEffect(() => {
 		if (inputRef.current) {
@@ -40,6 +39,7 @@ export default function ResumeInformation() {
 		} catch (error) {
 			event.target.value = "";
 		}
+		setHasUploaded(true);
 	};
 
 	const handleFile = (file: File | null) => {
@@ -62,14 +62,28 @@ export default function ResumeInformation() {
 
 	return (
 		<div className="flex flex-col items-start w-11/12">
-			<label className={styles.label}>
-				Resume (PDF, 0.5 MB max) <RequiredAsterisk />
-			</label>
+			<label className={styles.label}>Resume (PDF, 0.5 MB max)</label>
 			<label
 				htmlFor="resume_upload"
-				className={`${styles.upload} cursor-pointer mb-3`}
+				className={`${styles.upload} cursor-pointer mb-3 p-5 rounded-xl bg-[#e1e1e1]`}
 			>
-				<Image src={uploadImage} width="100" alt="Upload resume icon" />
+				{!hasUploaded ? (
+					<FileText className="m-auto" width={50} height={50} />
+				) : errorMessage === "" ? (
+					<FileCheck
+						className="m-auto"
+						width={50}
+						height={50}
+						color="green"
+					/>
+				) : (
+					<FileWarning
+						className="m-auto"
+						width={50}
+						height={50}
+						color="red"
+					/>
+				)}
 				<h2 className="text-center">Upload file</h2>
 			</label>
 			<input
@@ -80,7 +94,6 @@ export default function ResumeInformation() {
 				type="file"
 				accept="application/pdf"
 				onChange={handleFileUpload}
-				required
 			></input>
 			<OutputFeedBack
 				errorMessage={errorMessage}

@@ -41,6 +41,7 @@ SAMPLE_RESUME = ("my-resume.pdf", b"resume", "application/pdf")
 SAMPLE_FILES = {"resume": SAMPLE_RESUME}
 BAD_RESUME = ("bad-resume.doc", b"resume", "application/msword")
 LARGE_RESUME = ("large-resume.pdf", b"resume" * 100_000, "application/pdf")
+EMPTY_RESUME = ("", b"", "application/octet-stream")
 
 EXPECTED_RESUME_UPLOAD = ("pk-fire-69f2afc2.pdf", b"resume", "application/pdf")
 SAMPLE_RESUME_URL = HttpUrl("https://drive.google.com/file/d/...")
@@ -240,7 +241,7 @@ def test_apply_successfully_without_resume(
     """Test that a valid application is submitted properly without a resume."""
     mock_mongodb_handler_retrieve_one.return_value = None
     mock_datetime.now.return_value = SAMPLE_SUBMISSION_TIME
-    res = client.post("/apply", data=SAMPLE_APPLICATION, files=None)
+    res = client.post("/apply", data=SAMPLE_APPLICATION, files={"resume": EMPTY_RESUME})
 
     mock_gdrive_handler_upload_file.assert_not_called()
     mock_mongodb_handler_update_one.assert_awaited_once_with(

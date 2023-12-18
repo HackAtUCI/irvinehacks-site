@@ -81,7 +81,7 @@ async def apply(
                 "Please enable JavaScript on your browser.",
             )
 
-    if resume is not None:
+    if resume is not None and resume.size and resume.size > 0:
         try:
             resume_url = await resume_handler.upload_resume(
                 raw_application_data, resume

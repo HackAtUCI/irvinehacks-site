@@ -19,7 +19,9 @@ export default function ConfirmationDetails() {
 				be over the age of 18 by February 3rd, 2023.
 			</p>
 			<p className={`${styles.policy} text-4xl`}>
-				<strong>Applications are due on January 14th, 2024 at 11:59PM PST.</strong>
+				<strong>
+					Applications are due on January 14th, 2024 at 11:59PM PST.
+				</strong>
 			</p>
 			<Button
 				text="Proceed to Application"

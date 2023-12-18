@@ -1,4 +1,4 @@
-import ConfirmationDetails from "./components/ConfirmationDetails/ConfirmationDetails";
+import ConfirmationDetails from "./ConfirmationDetails";
 
 export default function ApplyConfirm() {
 	return (

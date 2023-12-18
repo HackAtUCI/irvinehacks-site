@@ -18,7 +18,7 @@ export default function ConfirmationDetails() {
 				accredited college or university in the United States and will
 				be over the age of 18 by February 3rd, 2023.
 			</p>
-			<Button text="Proceed to Application" href="/apply" />
+			<Button text="Proceed to Application" href="/apply?prefaceAccepted=true" />
 		</div>
 	);
 }

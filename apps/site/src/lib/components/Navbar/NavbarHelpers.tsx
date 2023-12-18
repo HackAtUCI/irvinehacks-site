@@ -11,15 +11,14 @@ const NavLinkItem = React.forwardRef<
 >(({ children, className, href, ...props }, forwardedRef) => {
 	return (
 		<NavMenu.Item>
-			<Link href={href as string} passHref legacyBehavior>
-				<NavMenu.Link
-					className={clsx(styles.navMenuLink, className)}
-					{...props}
-					ref={forwardedRef}
-				>
-					{children}
-				</NavMenu.Link>
-			</Link>
+			<NavMenu.Link
+				className={clsx(styles.navMenuLink, className)}
+				{...props}
+				ref={forwardedRef}
+				asChild
+			>
+				<Link href={href as string}>{children}</Link>
+			</NavMenu.Link>
 		</NavMenu.Item>
 	);
 });

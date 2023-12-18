@@ -30,7 +30,7 @@ function Message({ status }: MessageProps) {
 		[PortalStatus.confirmed]: <></>,
 	};
 
-	return <div className="">{messages[status]}</div>;
+	return <div>{messages[status]}</div>;
 }
 
 export default Message;

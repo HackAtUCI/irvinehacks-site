@@ -26,7 +26,7 @@ const OtherPopup = ({ value, name }: OtherProps) => {
 				</label>
 				<input
 					type="text"
-					name={`${name}-other-input`}
+					name={`other_${name}`}
 					id={`${name}-other-input`}
 					className="border-b-2 p-1 h-6 border-black w-6/12"
 					required

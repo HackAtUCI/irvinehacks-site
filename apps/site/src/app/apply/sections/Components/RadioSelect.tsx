@@ -10,17 +10,17 @@ interface RadioInputs {
 	containerClass: string;
 }
 
-interface IsChecked {
+interface OtherInputProps {
 	isChecked: boolean;
-	id: string;
+	name: string;
 }
 
-const OtherInput = forwardRef<HTMLInputElement, IsChecked>(
-	({ isChecked, id }, ref) => (
+const OtherInput = forwardRef<HTMLInputElement, OtherInputProps>(
+	({ isChecked, name }, ref) => (
 		<input
 			ref={ref}
 			type="text"
-			name={`${id}-other`}
+			name={name}
 			className={
 				isChecked
 					? "border-b-2 p-1 h-6 border-black w-6/12"
@@ -76,7 +76,7 @@ export default function RadioSelect({
 								</label>
 								<OtherInput
 									isChecked={isOtherChecked}
-									id={IdentifierId}
+									name={`other_${name}`}
 									ref={otherRef}
 								/>
 							</div>

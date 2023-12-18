@@ -38,9 +38,9 @@ function VerificationForm() {
 						required
 						name="passphrase"
 						placeholder="Enter passphrase"
-						aria-describedby="email-description"
+						aria-describedby="passphrase-description"
 					/>
-					<small id="email-description">
+					<small id="passphrase-description">
 						A login passphrase was sent to your email. Please enter
 						the passphrase.
 					</small>

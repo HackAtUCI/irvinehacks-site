@@ -44,7 +44,7 @@ function VerificationForm() {
 						A login passphrase was sent to your email. Please enter
 						the passphrase.
 					</small>
-					<p className={clsx(styles.invalidated, "text-red-500")}>
+					<p className={clsx(styles.invalidFeedback, "text-red-500")}>
 						Sorry, that passphrase is invalid.
 					</p>
 				</div>

@@ -29,7 +29,7 @@ export default async function ConfirmationDetails({
 				Applications are due on January 14th, 2024 at 11:59PM PST.
 			</strong>
 			<Button
-				text={isLoggedIn ? "Proceed to Application" : "Log in to apply"}
+				text={isLoggedIn ? "Proceed to Application" : "Log in to Apply"}
 				href={isLoggedIn ? "/apply?prefaceAccepted=true" : "/login"}
 			/>
 			<hr className="mt-5" />

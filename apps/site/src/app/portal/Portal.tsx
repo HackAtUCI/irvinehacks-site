@@ -24,22 +24,20 @@ async function Portal() {
 	}
 
 	return (
-		<>
-			<section className=" w-full flex items-center flex-col">
-				<div className="m-24">
-					<h1
-						className={`${styles.title} font-display sm:text-[3rem] text-[#fffce2] text-6xl text-center`}
-					>
-						Portal
-					</h1>
-				</div>
-				<div className="bg-white text-black max-w-4xl rounded-2xl p-6 flex flex-col mb-24 w-full">
-					<h2 className="text-4xl font-semibold">Status</h2>
-					<VerticalTimeline status={status as PortalStatus} />
-					<Message status={status as PortalStatus} />
-				</div>
-			</section>
-		</>
+		<section className=" w-full flex items-center flex-col min-h-screen">
+			<div className="m-24">
+				<h1
+					className={`${styles.title} font-display sm:text-[3rem] text-[#fffce2] text-6xl text-center`}
+				>
+					Portal
+				</h1>
+			</div>
+			<div className="bg-white text-black max-w-4xl rounded-2xl p-6 flex flex-col mb-24 w-full">
+				<h2 className="text-4xl font-semibold">Status</h2>
+				<VerticalTimeline status={status as PortalStatus} />
+				<Message status={status as PortalStatus} />
+			</div>
+		</section>
 	);
 }
 

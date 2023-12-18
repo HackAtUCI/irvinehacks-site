@@ -6,6 +6,7 @@ from services import sendgrid_handler
 from services.sendgrid_handler import Template
 
 IH_SENDER = ("apply@irvinehacks.com", "IrvineHacks 2024 Applications")
+REPLY_TO_HACK_AT_UCI = ("hack@uci.edu", "Hack at UCI")
 
 
 class ContactInfo(Protocol):
@@ -26,6 +27,7 @@ async def send_application_confirmation_email(
             "first_name": user.first_name,
             "last_name": user.last_name,
         },
+        reply_to=REPLY_TO_HACK_AT_UCI,
     )
 
 
@@ -38,4 +40,5 @@ async def send_guest_login_email(email: EmailStr, passphrase: str) -> None:
             "email": email,
             "passphrase": passphrase,
         },
+        reply_to=REPLY_TO_HACK_AT_UCI,
     )

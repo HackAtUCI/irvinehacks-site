@@ -38,6 +38,7 @@ async def send_email(
     sender_email: Tuple[str, str],
     receiver_data: ConfirmationPersonalization,
     send_to_multiple: Literal[False] = False,
+    reply_to: Union[Tuple[str, str], None] = None,
 ) -> None:
     ...
 
@@ -48,6 +49,7 @@ async def send_email(
     sender_email: Tuple[str, str],
     receiver_data: GuestTokenPersonalization,
     send_to_multiple: Literal[False] = False,
+    reply_to: Union[Tuple[str, str], None] = None,
 ) -> None:
     ...
 
@@ -58,6 +60,7 @@ async def send_email(
     sender_email: Tuple[str, str],
     receiver_data: Iterable[ConfirmationPersonalization],
     send_to_multiple: Literal[True],
+    reply_to: Union[Tuple[str, str], None] = None,
 ) -> None:
     ...
 
@@ -67,6 +70,7 @@ async def send_email(
     sender_email: Tuple[str, str],
     receiver_data: Union[PersonalizationData, Iterable[PersonalizationData]],
     send_to_multiple: bool = False,
+    reply_to: Union[Tuple[str, str], None] = None,
 ) -> None:
     """
     Send a personalized templated email to one or multiple receivers via SendGrid
@@ -96,6 +100,9 @@ async def send_email(
                 )
             )
             email_message.add_personalization(p)
+
+        if reply_to is not None:
+            email_message.reply_to = reply_to
 
         email_message.from_email = sender_email
         email_message.template_id = template_id

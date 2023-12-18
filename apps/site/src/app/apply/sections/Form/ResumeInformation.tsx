@@ -4,7 +4,6 @@ import { ChangeEvent, useEffect, useState, useRef } from "react";
 
 import { FileCheck, FileText, FileWarning } from "lucide-react";
 
-import RequiredAsterisk from "@/app/apply/sections/Components/RequiredAsterisk";
 import OutputFeedBack from "./ResumeOutputFeedback";
 
 import styles from "./Form.module.scss";
@@ -63,9 +62,7 @@ export default function ResumeInformation() {
 
 	return (
 		<div className="flex flex-col items-start w-11/12">
-			<label className={styles.label}>
-				Resume (PDF, 0.5 MB max) <RequiredAsterisk />
-			</label>
+			<label className={styles.label}>Resume (PDF, 0.5 MB max)</label>
 			<label
 				htmlFor="resume_upload"
 				className={`${styles.upload} cursor-pointer mb-3 p-5 rounded-xl bg-[#e1e1e1]`}

@@ -84,11 +84,11 @@ def test_requesting_login_when_previous_key_exists_causes_429(
     assert res.status_code == 429
 
 
-@patch("auth.guest_auth._get_existing_key", autospec=True)
 @patch("auth.guest_auth._remove_guest_key", autospec=True)
+@patch("auth.guest_auth._get_existing_key", autospec=True)
 def test_successful_guest_verification_provides_identity(
-    mock_remove_guest_key: AsyncMock,
     mock_get_existing_key: AsyncMock,
+    mock_remove_guest_key: AsyncMock,
 ) -> None:
     """Test a guest successfully verifying guest credentials."""
     mock_get_existing_key.return_value = guest_auth._generate_key(
@@ -122,3 +122,5 @@ def test_invalid_guest_verification_is_unauthorized(
     )
 
     assert res.status_code == 401
+
+    mock_remove_guest_key.assert_awaited_once_with("edu.caltech.beaver")

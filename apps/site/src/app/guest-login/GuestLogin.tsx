@@ -13,7 +13,7 @@ function GuestLogin() {
 					textShadow: "0px 0px 20px rgba(255, 255, 255, 0.75);",
 				}}
 			>
-				Log In
+				Enter Passphrase
 			</h1>
 			<VerificationForm />
 		</div>

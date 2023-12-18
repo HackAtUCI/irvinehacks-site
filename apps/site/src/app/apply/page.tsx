@@ -20,7 +20,7 @@ export default function Apply({
 }) {
 	const applyBody =
 		searchParams !== undefined &&
-		searchParams?.prefaceAccepted == "true" ? (
+		searchParams?.prefaceAccepted === "true" ? (
 			<>
 				<Title />
 				<div className="relative w-full flex flex-col items-center">

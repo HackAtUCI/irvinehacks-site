@@ -72,6 +72,15 @@ async def apply(
         log.error("User %s has already applied.", user)
         raise HTTPException(status.HTTP_400_BAD_REQUEST)
 
+    raw_app_data_dump = raw_application_data.model_dump()
+
+    for field in ["pronouns", "ethnicity", "school", "major"]:
+        if raw_app_data_dump[field] == "other":
+            raise HTTPException(
+                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                "Please enable JavaScript on your browser.",
+            )
+
     if resume is not None:
         try:
             resume_url = await resume_handler.upload_resume(
@@ -95,7 +104,7 @@ async def apply(
 
     now = datetime.now(timezone.utc)
     processed_application_data = ProcessedApplicationData(
-        **raw_application_data.model_dump(),
+        **raw_app_data_dump,
         resume_url=resume_url,
         submission_time=now,
     )

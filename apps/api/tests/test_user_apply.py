@@ -36,6 +36,7 @@ SAMPLE_APPLICATION = {
     "frq_dream_job": "I am pkfire",
 }
 
+
 SAMPLE_RESUME = ("my-resume.pdf", b"resume", "application/pdf")
 SAMPLE_FILES = {"resume": SAMPLE_RESUME}
 BAD_RESUME = ("bad-resume.doc", b"resume", "application/msword")
@@ -260,3 +261,13 @@ def test_application_data_is_bson_encodable() -> None:
     data.linkedin = HttpUrl("https://linkedin.com")
     encoded = bson.encode(EXPECTED_APPLICATION_DATA.model_dump())
     assert len(encoded) == 415
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_application_data_with_other_throws_422(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    contains_other = SAMPLE_APPLICATION.copy()
+    contains_other["pronouns"] = "other"
+    res = client.post("/apply", data=contains_other, files=SAMPLE_FILES)
+    assert res.status_code == 422

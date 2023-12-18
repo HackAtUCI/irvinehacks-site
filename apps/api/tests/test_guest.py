@@ -63,9 +63,9 @@ def test_guest_login_initiation(
             ),
         )
     )
-    # mock_send_guest_login_email.assert_awaited_once_with(
-    #     SAMPLE_EMAIL, SAMPLE_PASSPHRASE
-    # )
+    mock_send_guest_login_email.assert_awaited_once_with(
+        SAMPLE_EMAIL, SAMPLE_PASSPHRASE
+    )
 
     assert res.status_code == 303
     assert res.headers["location"] == "/guest-login?email=beaver%40caltech.edu"

@@ -1,1 +1,1 @@
-export { default as default } from "./PortalParent";
+export { default as default } from "./Portal";

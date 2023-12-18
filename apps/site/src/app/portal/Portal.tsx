@@ -1,12 +1,9 @@
-"use client";
-
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
-import { useEffect } from "react";
 
 import VerticalTimeline from "./VerticalTimeline";
 import Message from "./Message";
-import { Identity } from "@/lib/utils/getUserIdentity";
+import getUserIdentity from "@/lib/utils/getUserIdentity";
 
 import styles from "./Portal.module.scss";
 
@@ -19,25 +16,16 @@ export const enum PortalStatus {
 	confirmed = "CONFIRMED",
 }
 
-interface PortalProps {
-	identity: Identity;
-}
-
 export const metadata: Metadata = {
 	title: "Portal | IrvineHacks 2024",
 };
 
-function Portal({ identity }: PortalProps) {
+async function Portal() {
+	const identity = await getUserIdentity();
 	const status = identity.status;
 
-	useEffect(() => {
-		if (status === null) {
-			redirect("/apply");
-		}
-	}, [status]);
-
 	if (status === null) {
-		return null;
+		redirect("/apply");
 	}
 
 	return (

@@ -2,7 +2,7 @@
 
 import { ChangeEvent, useEffect, useState, useRef } from "react";
 
-import { FileCheck, FileText } from "lucide-react";
+import { FileCheck, FileText, FileWarning } from "lucide-react";
 
 import RequiredAsterisk from "@/app/apply/sections/Components/RequiredAsterisk";
 import OutputFeedBack from "./ResumeOutputFeedback";
@@ -72,12 +72,19 @@ export default function ResumeInformation() {
 			>
 				{!hasUploaded ? (
 					<FileText className="m-auto" width={50} height={50} />
-				) : (
+				) : errorMessage === "" ? (
 					<FileCheck
 						className="m-auto"
 						width={50}
 						height={50}
 						color="green"
+					/>
+				) : (
+					<FileWarning
+						className="m-auto"
+						width={50}
+						height={50}
+						color="red"
 					/>
 				)}
 				<h2 className="text-center">Upload file</h2>

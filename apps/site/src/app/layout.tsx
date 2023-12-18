@@ -5,7 +5,7 @@ import "./globals.css";
 
 import { Layout } from "@/components/dom/Layout";
 import Navbar from "@/lib/components/Navbar/Navbar";
-import ApplyConfirm from "./apply/sections/ApplyConfirmation/page";
+import ApplyConfirm from "./apply/sections/ApplyConfirmation/ApplyConfirm";
 
 export const metadata: Metadata = {
 	title: "IrvineHacks 2024",

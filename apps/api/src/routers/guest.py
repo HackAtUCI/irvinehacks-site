@@ -44,7 +44,10 @@ async def guest_login(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     if not confirmation:
-        raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS)
+        raise HTTPException(
+            status.HTTP_429_TOO_MANY_REQUESTS,
+            "Please wait for the token to expire in 10 minutes.",
+        )
 
     # Redirect to guest login page on client
     # which displays a message to check email and enter passphrase

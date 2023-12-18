@@ -1,5 +1,6 @@
 import Button from "@/lib/components/Button/Button";
 import styles from "./ConfirmationDetails.module.scss";
+import Link from "next/link";
 
 interface ConfirmationDetailsProps {
 	isLoggedIn: boolean;
@@ -30,7 +31,7 @@ export default async function ConfirmationDetails({
 				</strong>
 			</p>
 			<Button
-				text="Proceed to Application"
+				text={isLoggedIn ? "Proceed to Application" : "Log in to apply"}
 				href={isLoggedIn ? "/apply?prefaceAccepted=true" : "/login"}
 			/>
 		</div>

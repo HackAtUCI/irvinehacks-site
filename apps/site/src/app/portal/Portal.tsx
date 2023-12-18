@@ -1,7 +1,7 @@
 "use client";
 
-import Head from "next/head";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
+import type { Metadata } from "next";
 import { useEffect } from "react";
 
 import VerticalTimeline from "./VerticalTimeline";
@@ -23,15 +23,18 @@ interface PortalProps {
 	identity: Identity;
 }
 
+export const metadata: Metadata = {
+	title: "Portal | IrvineHacks 2024",
+};
+
 function Portal({ identity }: PortalProps) {
-	const router = useRouter();
 	const status = identity.status;
 
 	useEffect(() => {
 		if (status === null) {
-			router.push("/apply");
+			redirect("/apply");
 		}
-	}, [status, router]);
+	}, [status]);
 
 	if (status === null) {
 		return null;
@@ -41,9 +44,6 @@ function Portal({ identity }: PortalProps) {
 		<>
 			<section className=" w-full flex items-center flex-col">
 				<div className="m-24">
-					<Head>
-						<title>Portal | IrvineHacks 2024</title>
-					</Head>
 					<h1
 						className={`${styles.title} font-display sm:text-[3rem] text-[#fffce2] text-6xl text-center`}
 					>

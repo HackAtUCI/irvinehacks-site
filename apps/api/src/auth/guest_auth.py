@@ -63,7 +63,8 @@ async def verify_guest_credentials(
     if not key:
         return False
 
-    # TODO: delete used key
+    uid = user_identity.scoped_uid(email)
+    await _remove_guest_key(uid)
     return _validate(key, passphrase, confirmation)
 
 

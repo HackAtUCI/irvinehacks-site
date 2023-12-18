@@ -1,7 +1,13 @@
 import Button from "@/lib/components/Button/Button";
 import styles from "./ConfirmationDetails.module.scss";
 
-export default function ConfirmationDetails() {
+interface ConfirmationDetailsProps {
+	isLoggedIn: boolean;
+}
+
+export default async function ConfirmationDetails({
+	isLoggedIn,
+}: ConfirmationDetailsProps) {
 	return (
 		<div
 			className={`${styles.details} [&>*]:text-[#432810] w-8/12 flex flex-col items-center p-12 gap-10 z-1 max-[800px]:w-9/12 max-[400px]:w-11/12`}
@@ -25,7 +31,7 @@ export default function ConfirmationDetails() {
 			</p>
 			<Button
 				text="Proceed to Application"
-				href="/apply?prefaceAccepted=true"
+				href={isLoggedIn ? "/apply?prefaceAccepted=true" : "/login"}
 			/>
 		</div>
 	);

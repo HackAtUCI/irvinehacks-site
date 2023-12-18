@@ -39,8 +39,8 @@ export default function Form() {
 			}
 		}
 
-		const formEntries = Object.fromEntries(formData.entries());
-		console.debug(formEntries);
+		// const formEntries = Object.fromEntries(formData.entries());
+		// console.debug(formEntries);
 
 		try {
 			const res = await axios.post(APPLY_PATH, formData);

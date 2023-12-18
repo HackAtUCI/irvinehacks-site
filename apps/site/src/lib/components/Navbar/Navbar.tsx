@@ -81,7 +81,7 @@ function Navbar({ identity }: NavbarProps) {
 					)}
 					{isLoggedIn ? (
 						<Button
-							text="Login"
+							text="Log In"
 							href="/login"
 							usePrefetch={false}
 							isLightVersion
@@ -94,7 +94,7 @@ function Navbar({ identity }: NavbarProps) {
 								buttonStyles.lightButton,
 							)}
 						>
-							Logout
+							Log Out
 						</a>
 					)}
 				</NavMenu.List>

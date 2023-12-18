@@ -61,7 +61,7 @@ export default function Form() {
 	};
 
 	const sessionExpiredMessage = (
-		<p className="text-red-500">
+		<p className="text-red-500 w-11/12">
 			Your session has expired. Please{" "}
 			<a
 				href="/login"

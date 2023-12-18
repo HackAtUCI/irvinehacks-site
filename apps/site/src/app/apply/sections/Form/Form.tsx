@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent } from "react";
+import { FormEvent, useState } from "react";
 import axios from "axios";
 
 import Button from "@/lib/components/Button/Button";
@@ -17,11 +17,14 @@ const APPLY_PATH = "/api/user/apply";
 const FIELDS_WITH_OTHER = ["pronouns", "ethnicity", "school", "major"];
 
 export default function Form() {
+	const [submitting, setSubmitting] = useState(false);
+
 	const handleSubmit = async (
 		event: FormEvent<HTMLFormElement>,
 	): Promise<void> => {
 		// Disable native post submission
 		event.preventDefault();
+		setSubmitting(true);
 
 		const formData = new FormData(event.currentTarget);
 
@@ -47,6 +50,8 @@ export default function Form() {
 			// TODO: unauthorized error
 			console.error(err);
 		}
+
+		setSubmitting(false);
 	};
 
 	return (
@@ -62,7 +67,7 @@ export default function Form() {
 			<ProfileInformation />
 			<ResumeInformation />
 			<AgeInformation />
-			<Button text="Submit Application" />
+			<Button text="Submit Application" disabled={submitting} />
 		</form>
 	);
 }

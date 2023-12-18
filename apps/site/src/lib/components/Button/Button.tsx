@@ -8,6 +8,7 @@ interface ButtonProps {
 	href?: string;
 	isLightVersion?: boolean;
 	usePrefetch?: boolean;
+	disabled?: boolean;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -15,6 +16,7 @@ const Button: React.FC<ButtonProps> = ({
 	href,
 	className,
 	isLightVersion,
+	disabled,
 }) => {
 	if (href) {
 		return (
@@ -32,7 +34,11 @@ const Button: React.FC<ButtonProps> = ({
 		);
 	}
 	return (
-		<button type="submit" className={styles.button + " font-body"}>
+		<button
+			type="submit"
+			className={styles.button + " font-body"}
+			disabled={disabled}
+		>
 			{text}
 		</button>
 	);

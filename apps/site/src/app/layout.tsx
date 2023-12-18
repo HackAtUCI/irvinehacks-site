@@ -5,7 +5,6 @@ import "./globals.css";
 
 import { Layout } from "@/components/dom/Layout";
 import Navbar from "@/lib/components/Navbar/Navbar";
-import ApplyConfirm from "./apply/sections/ApplyConfirmation/ApplyConfirm";
 
 export const metadata: Metadata = {
 	title: "IrvineHacks 2024",
@@ -28,8 +27,7 @@ export default function RootLayout({
 			>
 				{/* reference: https://github.com/pmndrs/react-three-next */}
 				<Navbar />
-				{/* <Layout>{children}</Layout> */}
-				<ApplyConfirm />
+				<Layout>{children}</Layout>
 				<Footer />
 			</body>
 		</html>

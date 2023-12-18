@@ -22,7 +22,7 @@ export default async function ConfirmationDetails({
 				understand that I must check in at certain times on all three
 				event days in order to be eligible to win prizes. Lastly, I
 				acknowledge that I am currently a student enrolled in an
-				accredited college or university in the United States and will
+				accredited high school, college, or university in the United States and will
 				be over the age of 18 by January 26th, 2024.
 			</p>
 			<strong className="text-lg text-[#FF2222]">

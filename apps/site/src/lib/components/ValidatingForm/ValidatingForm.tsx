@@ -17,8 +17,8 @@ function ValidatingForm(props: PropsWithChildren<FormProps>) {
 		if (!form.checkValidity()) {
 			// prevent submission to display validation feedback
 			event.preventDefault();
+			setValidated(true);
 		}
-		setValidated(true);
 	};
 
 	return (

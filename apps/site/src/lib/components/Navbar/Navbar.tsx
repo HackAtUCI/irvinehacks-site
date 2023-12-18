@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import clsx from "clsx";
 import * as NavMenu from "@radix-ui/react-navigation-menu";
 
 import NavLinkItem from "./NavbarHelpers";
@@ -11,6 +12,7 @@ import HackLogo from "@/lib/components/HackLogo/HackLogo";
 import hamburger from "@/assets/icons/navigation-icon.svg";
 import { Identity } from "@/lib/utils/getUserIdentity";
 
+import buttonStyles from "@/lib/components/Button/Button.module.css";
 import styles from "./Navbar.module.scss";
 
 interface NavbarProps {
@@ -79,18 +81,21 @@ function Navbar({ identity }: NavbarProps) {
 					)}
 					{isLoggedIn ? (
 						<Button
-							text="Login"
+							text="Log In"
 							href="/login"
 							usePrefetch={false}
 							isLightVersion
 						/>
 					) : (
-						<Button
-							text="Logout"
+						<a
 							href="/logout"
-							usePrefetch={false}
-							isLightVersion
-						/>
+							className={clsx(
+								buttonStyles.button,
+								buttonStyles.lightButton,
+							)}
+						>
+							Log Out
+						</a>
 					)}
 				</NavMenu.List>
 			</div>

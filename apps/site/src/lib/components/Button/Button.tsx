@@ -1,11 +1,13 @@
-import type { ComponentProps } from "react";
-import styles from "./Button.module.css";
+import { ComponentProps } from "react";
+import Link from "next/link";
 import clsx from "clsx";
+
+import styles from "./Button.module.css";
 
 interface ButtonProps {
 	text: string;
 	className?: string;
-	href?: string;
+	href?: ComponentProps<typeof Link>["href"];
 	isLightVersion?: boolean;
 	usePrefetch?: boolean;
 	disabled?: boolean;
@@ -17,10 +19,11 @@ const Button: React.FC<ButtonProps> = ({
 	className,
 	isLightVersion,
 	disabled,
+	usePrefetch = true,
 }) => {
 	if (href) {
 		return (
-			<a
+			<Link
 				href={href}
 				className={clsx(
 					styles.button,
@@ -28,9 +31,10 @@ const Button: React.FC<ButtonProps> = ({
 					isLightVersion ? "font-display" : "font-body",
 					className,
 				)}
+				prefetch={usePrefetch}
 			>
 				{text}
-			</a>
+			</Link>
 		);
 	}
 	return (

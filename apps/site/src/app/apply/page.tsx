@@ -1,23 +1,30 @@
 import Image from "next/image";
-
-import koiLeft from "@/assets/images/koi-swim-left.png";
-import koiRight from "@/assets/images/koi-swim-right.png";
+import { redirect } from "next/navigation";
 
 import ApplyConfirm from "./sections/ApplyConfirmation/ApplyConfirm";
 import Form from "./sections/Form/Form";
 import Title from "./sections/Title/Title";
+import getUserIdentity from "@/lib/utils/getUserIdentity";
+
+import koiLeft from "@/assets/images/koi-swim-left.png";
+import koiRight from "@/assets/images/koi-swim-right.png";
 
 import styles from "./Apply.module.scss";
 
 export const revalidate = 60;
 
-export default function Apply({
+export default async function Apply({
 	searchParams,
 }: {
 	searchParams?: {
 		prefaceAccepted?: string;
 	};
 }) {
+	const identity = await getUserIdentity();
+	if (identity.status !== null) {
+		redirect("/portal");
+	}
+
 	const applyBody =
 		searchParams !== undefined &&
 		searchParams?.prefaceAccepted === "true" ? (

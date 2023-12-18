@@ -34,6 +34,12 @@ export default async function ConfirmationDetails({
 				text={isLoggedIn ? "Proceed to Application" : "Log in to apply"}
 				href={isLoggedIn ? "/apply?prefaceAccepted=true" : "/login"}
 			/>
+			<hr className="mt-5" />
+			<p className="text-display">
+				Interested in helping out instead? Consider applying to be a{" "}
+				<Link className="underline" href="/mentor">mentor</Link> or a{" "}
+				<Link className="underline" href="/volunteer">volunteer</Link>.
+			</p>
 		</div>
 	);
 }

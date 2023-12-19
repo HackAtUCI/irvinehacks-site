@@ -31,8 +31,8 @@ class RawApplicationData(BaseModel):
     is_first_hackathon: bool
     linkedin: Union[HttpUrl, None] = None
     portfolio: Union[HttpUrl, None] = None
-    frq_collaboration: Union[str, None] = Field(None, max_length=1024)
-    frq_dream_job: str = Field(max_length=1024)
+    frq_collaboration: Union[str, None] = Field(None, max_length=2048)
+    frq_dream_job: str = Field(max_length=2048)
 
 
 class ProcessedApplicationData(RawApplicationData):

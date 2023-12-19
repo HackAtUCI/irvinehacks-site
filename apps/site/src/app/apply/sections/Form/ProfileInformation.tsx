@@ -2,6 +2,8 @@ import TextInput from "@/app/apply/sections/Components/TextInput";
 import Textfield from "@/app/apply/sections/Components/Textfield";
 import styles from "./Form.module.scss";
 
+const FRQ_MAX_LENGTH = 2000;
+
 export default function ProfileInformation() {
 	return (
 		<div className="flex flex-col gap-5 w-11/12">
@@ -39,6 +41,7 @@ export default function ProfileInformation() {
 				inputClass={`bg-[#E1E1E1] p-3 h-48 resize-none rounded-xl`}
 				containerClass="flex flex-col w-full"
 				isRequired={true}
+				maxLength={FRQ_MAX_LENGTH}
 			/>
 
 			<Textfield
@@ -48,6 +51,7 @@ export default function ProfileInformation() {
 				inputClass={`bg-[#E1E1E1] p-3 h-48 resize-none rounded-xl`}
 				containerClass="flex flex-col w-full"
 				isRequired={true}
+				maxLength={FRQ_MAX_LENGTH}
 			/>
 		</div>
 	);

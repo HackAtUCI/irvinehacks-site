@@ -7,6 +7,7 @@ interface TextfieldProps {
 	inputClass: string;
 	containerClass: string;
 	isRequired: boolean;
+	maxLength?: number;
 }
 
 export default function Textfield({
@@ -16,6 +17,7 @@ export default function Textfield({
 	inputClass,
 	containerClass,
 	isRequired,
+	maxLength,
 }: TextfieldProps) {
 	return (
 		<div className={containerClass}>
@@ -29,6 +31,7 @@ export default function Textfield({
 					id={name}
 					name={name}
 					required={isRequired}
+					maxLength={maxLength}
 				/>
 			</div>
 		</div>

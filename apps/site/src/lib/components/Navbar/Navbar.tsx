@@ -20,7 +20,7 @@ interface NavbarProps {
 }
 
 function Navbar({ identity }: NavbarProps) {
-	const { uid, role, status } = identity;
+	const { uid, status } = identity;
 	const isLoggedIn = uid === null;
 
 	const [listShown, setListShown] = useState(false);
@@ -45,6 +45,7 @@ function Navbar({ identity }: NavbarProps) {
 					<HackLogo />
 				</NavLinkItem>
 				<button
+					type="button"
 					className="ml-auto h-auto md:hidden cursor-pointer"
 					onClick={() => {
 						setListShown((listShown) => !listShown);

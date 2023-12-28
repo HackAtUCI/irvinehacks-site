@@ -4,6 +4,7 @@ import Button from "@/lib/components/Button/Button";
 import ValidatingForm from "@/lib/components/ValidatingForm/ValidatingForm";
 import styles from "@/lib/components/ValidatingForm/ValidatingForm.module.scss";
 
+// eslint-disable-next-line no-useless-escape
 const EMAIL_REGEX = /^\w+([\.\-]?\w+)*@\w+([\.\-]?\w+)*(\.\w{2,3})+$/;
 const LOGIN_PATH = "/api/user/login";
 

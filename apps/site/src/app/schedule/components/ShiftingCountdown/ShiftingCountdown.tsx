@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import BarLoader from "../BarLoader";
 import clsx from "clsx";
 import { Fireworks } from "@fireworks-js/react";
@@ -56,7 +56,7 @@ const ShiftingCountdown = () => {
 		const minutes = Math.floor((distance % HOUR) / MINUTE);
 		const seconds = Math.floor((distance % MINUTE) / SECOND);
 
-		if (days == 0 && hours == 0 && minutes == 0 && seconds == 0) {
+		if (days === 0 && hours === 0 && minutes === 0 && seconds === 0) {
 			// triggers when HACKING_STARTS timer ends and HACKING_ENDS timer ends
 			setCountdown((prev) => {
 				return { ...prev, showFireworks: true };

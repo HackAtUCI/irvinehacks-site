@@ -10,7 +10,7 @@ const View = forwardRef(
 		{ className, children }: PropsWithChildren<{ className: string }>,
 		ref,
 	) => {
-		const localRef = useRef<HTMLDivElement | null>(null);
+		const localRef = useRef<HTMLDivElement>(null!);
 		useImperativeHandle(ref, () => localRef.current);
 
 		return (
@@ -19,8 +19,6 @@ const View = forwardRef(
 				{/* Sends View component thru tunnel to render on global Canvas in Scene.tsx */}
 				<Three>
 					{/* View component to render 3D view in a div (uses gl.scissor to cut viewport into segments) */}
-					{/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-					{/* @ts-ignore */}
 					<ViewImpl track={localRef}>{children}</ViewImpl>
 				</Three>
 			</>

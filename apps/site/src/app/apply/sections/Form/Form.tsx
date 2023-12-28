@@ -46,6 +46,10 @@ export default function Form() {
 			const res = await axios.post(APPLY_PATH, formData);
 			if (res.status === 201) {
 				console.log("Application submitted");
+
+				// Use window.location instead of router.push in order
+				// to force reload the page to allow user identity to
+				// update with the new status
 				window.location.href = "/portal";
 			}
 		} catch (err) {

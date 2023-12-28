@@ -36,8 +36,9 @@ function Navbar({ identity }: NavbarProps) {
 
 	return (
 		<NavMenu.Root
-			className={`${hasScrolled ? "md:bg-opacity-50" : ""} ${hidden ? "max-md:h-[4rem] max-md:overflow-hidden" : ""
-				} transition-colors duration-0 md:duration-700 ease-out w-full z-50 flex flex-col fixed bg-black bg-opacity-0 md:flex-row md:items-center`}
+			className={`${hasScrolled ? "md:bg-opacity-50" : ""} ${
+				hidden ? "max-md:h-[4rem] max-md:overflow-hidden" : ""
+			} transition-colors duration-0 md:duration-700 ease-out w-full z-50 flex flex-col fixed bg-black bg-opacity-0 md:flex-row md:items-center`}
 		>
 			<NavMenu.List className="bg-black bg-opacity-50 md:bg-opacity-0 flex p-3">
 				<NavLinkItem href="/">

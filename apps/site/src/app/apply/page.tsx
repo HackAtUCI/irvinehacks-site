@@ -25,6 +25,14 @@ export default async function Apply({
 		redirect("/portal");
 	}
 
+	if (
+		searchParams !== undefined &&
+		searchParams?.prefaceAccepted === "true" &&
+		identity.uid === null
+	) {
+		redirect("/login");
+	}
+
 	const applyBody =
 		searchParams !== undefined &&
 		searchParams?.prefaceAccepted === "true" ? (

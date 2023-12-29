@@ -2,7 +2,7 @@ import { PortableText } from "@portabletext/react";
 
 import ShiftingCountdown from "./components/ShiftingCountdown/ShiftingCountdown";
 import { getSchedule } from "./components/getSchedule";
-import SchedulePage from "./components/SchedulePage";
+import SchedulePage from "./components/SchedulePage/SchedulePage";
 
 export const revalidate = 60;
 
@@ -24,7 +24,7 @@ export default async function Schedule() {
 				<div className="m-36">
 					<ShiftingCountdown />
 				</div>
-				<div className="h-96 flex justify-center align-middle">
+				<div className="flex justify-center">
 					<SchedulePage schedule={schedule} />
 				</div>
 			</section>

@@ -6,11 +6,7 @@ import { utcToZonedTime } from "date-fns-tz";
 
 import "@radix-ui/themes/styles.css";
 import "./SchedulePage.scss";
-
-const dateTimeFormat = new Intl.DateTimeFormat("en", {
-	hour: "numeric",
-	minute: "numeric",
-});
+import EventCard from "../EventCard";
 
 const weekdayFormat = new Intl.DateTimeFormat("en", {
 	weekday: "long",
@@ -78,54 +74,9 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 						)}
 						className="w-full mb-5"
 					>
-						<div className="">
-							{day.map(
-								({
-									title,
-									location,
-									virtual,
-									startTime,
-									endTime,
-									organization,
-									description,
-								}) => {
-									const startTimeZoned = utcToZonedTime(
-										startTime,
-										"America/Los_Angeles",
-									);
-									const endTimeZoned = utcToZonedTime(
-										endTime,
-										"America/Los_Angeles",
-									);
-									return (
-										<div
-											key={title}
-											className="text-[#FFFCE2] bg-[#432810] p-5 mb-6"
-										>
-											<h3 className="text-2xl font-bold text-[#FFDA7B]">
-												{title}
-											</h3>
-											<p>Hosted by: {organization}</p>
-											<p>{location}</p>
-											<span>
-												{dateTimeFormat.formatRange(
-													startTimeZoned,
-													endTimeZoned,
-												)}{" "}
-												PST{" "}
-											</span>
-											<span>
-												|{" "}
-												<a href={virtual}>
-													Meeting Link
-												</a>
-											</span>
-											<p>{description}</p>
-										</div>
-									);
-								},
-							)}
-						</div>
+						{day.map((event) => {
+							return <EventCard key={event.title} {...event} />;
+						})}
 					</Tabs.Content>
 				</div>
 			))}

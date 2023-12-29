@@ -8,6 +8,7 @@ const Events = z.array(
 	SanityDocument.extend({
 		_type: z.literal("event"),
 		title: z.string(),
+		eventType: z.string(),
 		location: z.string().optional(),
 		virtual: z.string().url().optional(),
 		startTime: z

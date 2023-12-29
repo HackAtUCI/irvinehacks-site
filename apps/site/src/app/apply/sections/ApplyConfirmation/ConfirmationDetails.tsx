@@ -35,11 +35,11 @@ export default async function ConfirmationDetails({
 			<hr className="mt-5 w-full h-0.5 bg-[#432810]" />
 			<p className="text-display">
 				Interested in helping out instead? Consider applying to be a{" "}
-				<Link className="underline" href="/mentor">
+				<Link className="underline" prefetch={false} href="/mentor">
 					mentor
 				</Link>{" "}
 				or a{" "}
-				<Link className="underline" href="/volunteer">
+				<Link className="underline" prefetch={false} href="/volunteer">
 					volunteer
 				</Link>
 				.

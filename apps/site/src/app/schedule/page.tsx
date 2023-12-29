@@ -2,14 +2,12 @@ import { PortableText } from "@portabletext/react";
 
 import ShiftingCountdown from "./components/ShiftingCountdown/ShiftingCountdown";
 import { getSchedule } from "./components/getSchedule";
-import SchedulePage from "./components/SchedulePage/SchedulePage";
+import SchedulePage from "./sections/SchedulePage";
 
 export const revalidate = 60;
 
 export default async function Schedule() {
 	const events = await getSchedule();
-
-	console.log(events);
 
 	const schedule = events.map((days) =>
 		days.map(({ description, ...day }) => ({

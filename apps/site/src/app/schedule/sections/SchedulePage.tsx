@@ -6,7 +6,7 @@ import { utcToZonedTime } from "date-fns-tz";
 
 import "@radix-ui/themes/styles.css";
 import "./SchedulePage.scss";
-import EventCard from "../EventCard";
+import EventCard from "../components/EventCard";
 
 const weekdayFormat = new Intl.DateTimeFormat("en", {
 	weekday: "long",
@@ -15,6 +15,7 @@ const weekdayFormat = new Intl.DateTimeFormat("en", {
 interface ScheduleProps {
 	schedule: {
 		title: string;
+		eventType: string;
 		location?: string | undefined;
 		virtual?: string | undefined;
 		startTime: Date;

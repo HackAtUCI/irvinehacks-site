@@ -20,47 +20,52 @@ export default async function Apply({
 		prefaceAccepted?: string;
 	};
 }) {
+	const hasAcceptedQueryParam = searchParams?.prefaceAccepted === "true";
+
 	const identity = await getUserIdentity();
+
 	if (identity.status !== null) {
 		redirect("/portal");
 	}
 
-	const applyBody =
-		searchParams !== undefined &&
-		searchParams?.prefaceAccepted === "true" ? (
-			<>
-				<Title />
-				<div className="relative w-full flex flex-col items-center">
-					<Image
-						src={koiLeft}
-						height="250"
-						alt="Koi fish"
-						className={`${styles.image} absolute top-0 right-0`}
-					/>
-					<Image
-						src={koiRight}
-						height="250"
-						alt="Koi fish"
-						className={`${styles.image} absolute top-1/4 left-0`}
-					/>
-					<Image
-						src={koiLeft}
-						height="250"
-						alt="Koi fish"
-						className={`${styles.image} absolute top-1/2 right-0`}
-					/>
-					<Image
-						src={koiRight}
-						height="250"
-						alt="Koi fish"
-						className={`${styles.image} absolute top-3/4 left-0`}
-					/>
-					<Form />
-				</div>
-			</>
-		) : (
-			<ApplyConfirm />
-		);
+	if (hasAcceptedQueryParam && identity.uid === null) {
+		redirect("/login");
+	}
+
+	const applyBody = hasAcceptedQueryParam ? (
+		<>
+			<Title />
+			<div className="relative w-full flex flex-col items-center">
+				<Image
+					src={koiLeft}
+					height="250"
+					alt="Koi fish"
+					className={`${styles.image} absolute top-0 right-0`}
+				/>
+				<Image
+					src={koiRight}
+					height="250"
+					alt="Koi fish"
+					className={`${styles.image} absolute top-1/4 left-0`}
+				/>
+				<Image
+					src={koiLeft}
+					height="250"
+					alt="Koi fish"
+					className={`${styles.image} absolute top-1/2 right-0`}
+				/>
+				<Image
+					src={koiRight}
+					height="250"
+					alt="Koi fish"
+					className={`${styles.image} absolute top-3/4 left-0`}
+				/>
+				<Form />
+			</div>
+		</>
+	) : (
+		<ApplyConfirm />
+	);
 	return (
 		<div className="flex flex-col items-center gap-10 my-32 min-h-[calc(100vh-8rem)]">
 			{applyBody}

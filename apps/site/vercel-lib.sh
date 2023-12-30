@@ -1,7 +1,7 @@
 # Install python3-saml dependencies on Vercel's Serverless Function 
 # environment (Amazon Linux)
 
-yum install -y libxml2-devel xmlsec1-devel xmlsec1-openssl-devel libtool-ltdl-devel libxslt-devel libgcrypt-devel
+yum install -y libxml2-devel xmlsec1-devel xmlsec1-openssl-devel libtool-ltdl-devel libxslt-devel libgcrypt-devel libgpg-error-devel
 lib_files=(
    libltdl.so.7
    libltdl.so.7.3.0
@@ -15,6 +15,7 @@ lib_files=(
    libxslt.so.1.1.28
    libexslt.so.0
    libgcrypt.so.11
+   libgpg-error.so.0
 )
 
 mkdir lib

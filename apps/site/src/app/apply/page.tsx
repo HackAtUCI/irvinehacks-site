@@ -20,8 +20,7 @@ export default async function Apply({
 		prefaceAccepted?: string;
 	};
 }) {
-	const hasAcceptedQueryParam =
-		searchParams !== undefined && searchParams?.prefaceAccepted === "true";
+	const hasAcceptedQueryParam = searchParams?.prefaceAccepted === "true";
 
 	const identity = await getUserIdentity();
 

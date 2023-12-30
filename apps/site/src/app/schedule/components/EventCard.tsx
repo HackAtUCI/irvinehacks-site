@@ -12,7 +12,7 @@ interface EventProps {
 	endTime: Date;
 	organization?: string | undefined;
 	hosts?: string[] | undefined;
-	description?: JSX.Element;
+	description: JSX.Element;
 }
 
 export default function EventCard({
@@ -27,7 +27,9 @@ export default function EventCard({
 }: EventProps) {
 	const EventComponent = () => {
 		if (eventType === "Announcement") {
-			return EventAnnouncement({ title, startTime, endTime });
+			// description is used as the prop as opposed to title because description is a Portable Text object
+			// that can reflect all text formats put in Sanity
+			return EventAnnouncement({ description, startTime, endTime });
 		} else if (eventType === "Miscellaneous") {
 			return EventMiscellaneous({
 				title,

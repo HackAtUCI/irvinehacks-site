@@ -6,13 +6,13 @@ const dateTimeFormat = new Intl.DateTimeFormat("en", {
 });
 
 interface EventAnnouncementProps {
-	title: string;
+	description: JSX.Element;
 	startTime: Date;
 	endTime: Date;
 }
 
 export default function EventAnnouncement({
-	title,
+	description,
 	startTime,
 	endTime,
 }: EventAnnouncementProps) {
@@ -21,7 +21,7 @@ export default function EventAnnouncement({
 
 	return (
 		<div className="text-white bg-[#0F6722] p-5 mb-6 rounded-2xl text-center">
-			<h3 className="text-2xl font-bold mb-3">{title}</h3>
+			<div className="text-2xl">{description}</div>
 			<p className="mb-2">
 				{dateTimeFormat.formatRange(startTimeZoned, endTimeZoned)} PST
 			</p>

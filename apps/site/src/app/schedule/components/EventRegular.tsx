@@ -18,7 +18,7 @@ interface EventProps {
 	endTime: Date;
 	organization?: string | undefined;
 	hosts?: string[] | undefined;
-	description?: JSX.Element;
+	description: JSX.Element;
 }
 
 export default function EventRegular({

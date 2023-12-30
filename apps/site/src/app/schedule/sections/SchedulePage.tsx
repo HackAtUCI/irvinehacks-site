@@ -25,7 +25,7 @@ interface ScheduleProps {
 		endTime: Date;
 		organization?: string | undefined;
 		hosts?: string[] | undefined;
-		description?: JSX.Element;
+		description: JSX.Element;
 	}[][];
 }
 

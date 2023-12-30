@@ -30,14 +30,6 @@ interface ScheduleProps {
 }
 
 export default function SchedulePage({ schedule }: ScheduleProps) {
-	// schedule[0].push({
-	// 	title: "Soon Test",
-	// 	eventType: "Main",
-	// 	location: "Some location",
-	// 	startTime: new Date(+new Date() + 15000),
-	// 	endTime: new Date(+new Date() + 30000),
-	// });
-
 	const [day, setDay] = useState("Friday");
 
 	const [now, setNow] = useState<Date>(
@@ -59,32 +51,32 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 			value={day}
 			defaultValue="Friday"
 			onValueChange={setDay}
-			className="w-4/5"
+			className="w-11/12 sm:w-4/5"
 		>
-			<div className="flex justify-between mb-10">
-				<h2 className="text-[#FFFCE2] text-3xl font-bold">
-					{day} Schedule
-				</h2>
-				<Tabs.List>
+			<div className="text-center mb-6 sm:mb-10 sm:flex sm:justify-between sm:flex-row-reverse">
+				<Tabs.List className="mb-12 sm:mb-0">
 					<Tabs.Trigger
-						className="TabsTrigger text-[#2F1C00] px-4 py-1 border border-[#2F1C00] rounded-l-2xl bg-[#FFFCE2] min-w-[64px]"
+						className="TabsTrigger text-lg text-[#2F1C00] px-3.5 py-1.5 border border-[#2F1C00] rounded-l-2xl bg-[#FFFCE2] min-w-[5rem] sm:min-w-[4rem]"
 						value="Friday"
 					>
 						Fri
 					</Tabs.Trigger>
 					<Tabs.Trigger
-						className="TabsTrigger text-[#2F1C00] px-3 py-1 border border-[#2F1C00] bg-[#FFFCE2]"
+						className="TabsTrigger text-lg text-[#2F1C00] px-3.5 py-1.5 border border-[#2F1C00] bg-[#FFFCE2] min-w-[5rem] sm:min-w-[4rem]"
 						value="Saturday"
 					>
 						Sat
 					</Tabs.Trigger>
 					<Tabs.Trigger
-						className="TabsTrigger text-[#2F1C00] px-4 py-1 border border-[#2F1C00] rounded-r-2xl bg-[#FFFCE2] min-w-[64px]"
+						className="TabsTrigger text-lg text-[#2F1C00] px-3.5 py-1.5 border border-[#2F1C00] rounded-r-2xl bg-[#FFFCE2] min-w-[5rem] sm:min-w-[4rem]"
 						value="Sunday"
 					>
 						Sun
 					</Tabs.Trigger>
 				</Tabs.List>
+				<h2 className="text-[#FFFCE2] font-bold text-2xl sm:text-3xl">
+					{day} Schedule
+				</h2>
 			</div>
 			{schedule.map((day, i) => (
 				<div

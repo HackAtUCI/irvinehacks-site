@@ -38,19 +38,19 @@ export default function EventRegular({
 	const eventTypeComponent = () => {
 		if (eventType === "Main") {
 			return (
-				<div className="px-4 py-2 font-semibold text-[#0D272D] bg-[#DFBA73] rounded-2xl">
+				<div className="inline-block px-4 py-1.5 font-semibold text-[#0D272D] bg-[#DFBA73] rounded-2xl sm:py-2">
 					{eventType}
 				</div>
 			);
 		} else if (eventType === "Workshop") {
 			return (
-				<div className="px-4 py-2 font-semibold text-[#0D272D] bg-[#94A9BD] rounded-2xl">
+				<div className="inline-block px-4 py-1.5 font-semibold text-[#0D272D] bg-[#94A9BD] rounded-2xl sm:py-2 ">
 					{eventType}
 				</div>
 			);
 		} else if (eventType === "Social") {
 			return (
-				<div className="px-4 py-2 font-semibold text-[#0D272D] bg-[#DFA9A9] rounded-2xl">
+				<div className="inline-block px-4 py-1.5 font-semibold text-[#0D272D] bg-[#DFA9A9] rounded-2xl sm:py-2 ">
 					{eventType}
 				</div>
 			);
@@ -85,8 +85,10 @@ export default function EventRegular({
 
 	return (
 		<div className="text-[#FFFCE2] bg-[#432810] p-5 mb-6 rounded-2xl">
-			<div className="flex justify-between items-center mb-3">
-				<h3 className="text-2xl font-bold text-[#FFDA7B]">{title}</h3>
+			<div className="mb-3 sm:flex sm:justify-between sm:items-center">
+				<h3 className="mb-3 text-2xl font-bold text-[#FFDA7B] sm:mb-0">
+					{title}
+				</h3>
 				{eventTypeComponent()}
 			</div>
 			<p className="mb-2">

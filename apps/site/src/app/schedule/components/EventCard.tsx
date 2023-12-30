@@ -23,6 +23,7 @@ export default function EventCard({
 	startTime,
 	endTime,
 	organization,
+	hosts,
 	description,
 }: EventProps) {
 	const EventComponent = () => {
@@ -46,6 +47,7 @@ export default function EventCard({
 				startTime,
 				endTime,
 				organization,
+				hosts,
 				description,
 			});
 		}

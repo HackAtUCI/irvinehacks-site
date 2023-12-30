@@ -14,9 +14,7 @@ export default async function getUserIdentity(): Promise<Identity> {
 		return identity.data;
 	} catch (err) {
 		if (axios.isAxiosError(err)) {
-			console.error(
-				`[getUserIdentity] ${err.message}: ${err.response?.data}`,
-			);
+			console.error(`[getUserIdentity] ${err.message}`);
 		} else {
 			// Don't think this case is possible/relevant but for completeness
 			console.error(err);

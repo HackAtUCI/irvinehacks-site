@@ -1,4 +1,7 @@
 import { utcToZonedTime } from "date-fns-tz";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+dayjs.extend(relativeTime);
 
 const dateTimeFormat = new Intl.DateTimeFormat("en", {
 	hour: "numeric",
@@ -6,6 +9,7 @@ const dateTimeFormat = new Intl.DateTimeFormat("en", {
 });
 
 interface EventProps {
+	now: Date;
 	title: string;
 	eventType: string;
 	location?: string | undefined;
@@ -14,10 +18,11 @@ interface EventProps {
 	endTime: Date;
 	organization?: string | undefined;
 	hosts?: string[] | undefined;
-	description: JSX.Element;
+	description?: JSX.Element;
 }
 
 export default function EventRegular({
+	now,
 	title,
 	eventType,
 	virtual,
@@ -27,6 +32,9 @@ export default function EventRegular({
 	hosts,
 	description,
 }: EventProps) {
+	const startTimeZoned = utcToZonedTime(startTime, "America/Los_Angeles");
+	const endTimeZoned = utcToZonedTime(endTime, "America/Los_Angeles");
+
 	const eventTypeComponent = () => {
 		if (eventType === "Main") {
 			return (
@@ -49,8 +57,31 @@ export default function EventRegular({
 		}
 	};
 
-	const startTimeZoned = utcToZonedTime(startTime, "America/Los_Angeles");
-	const endTimeZoned = utcToZonedTime(endTime, "America/Los_Angeles");
+	const eventMomentComponent = () => {
+		if (now > endTimeZoned) {
+			const dEnd = dayjs(endTimeZoned);
+			const timeAfterEnd = dEnd.from(now);
+			return (
+				<p className="text-white/50 text-right mb-0">
+					Ended {timeAfterEnd}
+				</p>
+			);
+		} else {
+			if (now > startTimeZoned) {
+				return (
+					<p className="text-white text-right mb-0">Happening Now!</p>
+				);
+			} else {
+				const dStart = dayjs(startTimeZoned);
+				const timeUntilStart = dStart.from(now);
+				return (
+					<p className="text-white/50 text-right mb-0">
+						Starting {timeUntilStart}
+					</p>
+				);
+			}
+		}
+	};
 
 	return (
 		<div className="text-[#FFFCE2] bg-[#432810] p-5 mb-6 rounded-2xl">
@@ -67,6 +98,7 @@ export default function EventRegular({
 				<a href={virtual}>Meeting Link</a>
 			</p>
 			{description}
+			{eventMomentComponent()}
 		</div>
 	);
 }

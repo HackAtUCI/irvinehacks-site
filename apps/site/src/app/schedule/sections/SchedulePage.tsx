@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import * as Tabs from "@radix-ui/react-tabs";
 import { utcToZonedTime } from "date-fns-tz";
 
+import EventCard from "../components/EventCard";
+
 import "@radix-ui/themes/styles.css";
 import "./SchedulePage.scss";
-import EventCard from "../components/EventCard";
+
+const T_REFRESH = 15000;
 
 const weekdayFormat = new Intl.DateTimeFormat("en", {
 	weekday: "long",
@@ -22,12 +25,34 @@ interface ScheduleProps {
 		endTime: Date;
 		organization?: string | undefined;
 		hosts?: string[] | undefined;
-		description: JSX.Element;
+		description?: JSX.Element;
 	}[][];
 }
 
 export default function SchedulePage({ schedule }: ScheduleProps) {
+	// schedule[0].push({
+	// 	title: "Soon Test",
+	// 	eventType: "Main",
+	// 	location: "Some location",
+	// 	startTime: new Date(+new Date() + 15000),
+	// 	endTime: new Date(+new Date() + 30000),
+	// });
+
 	const [day, setDay] = useState("Friday");
+
+	const [now, setNow] = useState<Date>(
+		utcToZonedTime(new Date(), "America/Los_Angeles"),
+	);
+
+	useEffect(() => {
+		const refreshNow = setInterval(() => {
+			setNow(utcToZonedTime(new Date(), "America/Los_Angeles"));
+		}, T_REFRESH);
+
+		return () => {
+			clearInterval(refreshNow);
+		};
+	}, []);
 
 	return (
 		<Tabs.Root
@@ -73,10 +98,16 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 								"America/Los_Angeles",
 							),
 						)}
-						className="w-full mb-5"
+						className="w-full"
 					>
 						{day.map((event) => {
-							return <EventCard key={event.title} {...event} />;
+							return (
+								<EventCard
+									key={event.title}
+									now={now}
+									{...event}
+								/>
+							);
 						})}
 					</Tabs.Content>
 				</div>

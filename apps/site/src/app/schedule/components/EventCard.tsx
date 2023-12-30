@@ -3,6 +3,7 @@ import EventAnnouncement from "./EventAnnouncement";
 import EventMiscellaneous from "./EventMiscellaneous";
 
 interface EventProps {
+	now: Date;
 	title: string;
 	eventType: string;
 	location?: string | undefined;
@@ -11,10 +12,11 @@ interface EventProps {
 	endTime: Date;
 	organization?: string | undefined;
 	hosts?: string[] | undefined;
-	description: JSX.Element;
+	description?: JSX.Element;
 }
 
 export default function EventCard({
+	now,
 	title,
 	eventType,
 	virtual,
@@ -35,6 +37,7 @@ export default function EventCard({
 			});
 		} else {
 			return EventRegular({
+				now,
 				title,
 				eventType,
 				virtual,

@@ -2,7 +2,7 @@ interface EventMiscellaneousProps {
 	title: string;
 	startTime: Date;
 	endTime: Date;
-	description: JSX.Element;
+	description?: JSX.Element;
 }
 
 export default function EventMiscellaneous({

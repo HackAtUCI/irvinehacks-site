@@ -13,6 +13,7 @@ lib_files=(
    libxmlsec1.so.1.2.20
    libxslt.so.1
    libxslt.so.1.1.28
+   libexslt.so.0
 )
 
 mkdir lib

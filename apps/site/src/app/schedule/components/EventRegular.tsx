@@ -44,13 +44,13 @@ export default function EventRegular({
 			);
 		} else if (eventType === "Workshop") {
 			return (
-				<div className="inline-block px-4 py-1.5 font-semibold text-[#0D272D] bg-[#94A9BD] rounded-2xl sm:py-2 ">
+				<div className="inline-block px-4 py-1.5 font-semibold text-[#0D272D] bg-[#94A9BD] rounded-2xl sm:py-2">
 					{eventType}
 				</div>
 			);
 		} else if (eventType === "Social") {
 			return (
-				<div className="inline-block px-4 py-1.5 font-semibold text-[#0D272D] bg-[#DFA9A9] rounded-2xl sm:py-2 ">
+				<div className="inline-block px-4 py-1.5 font-semibold text-[#0D272D] bg-[#DFA9A9] rounded-2xl sm:py-2">
 					{eventType}
 				</div>
 			);
@@ -84,7 +84,7 @@ export default function EventRegular({
 	};
 
 	return (
-		<div className="text-[#FFFCE2] bg-[#432810] p-5 mb-6 rounded-2xl">
+		<div className="text-[#FFFCE2] bg-[#432810] p-5 mb-6 rounded-2xl sm:text-lg">
 			<div className="mb-3 sm:flex sm:justify-between sm:items-center">
 				<h3 className="mb-3 text-2xl font-bold text-[#FFDA7B] sm:mb-0">
 					{title}

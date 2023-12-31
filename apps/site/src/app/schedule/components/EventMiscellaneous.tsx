@@ -16,7 +16,7 @@ export default function EventMiscellaneous({
 	const durationInHours = dayjs(endTime).diff(dayjs(startTime), "hour");
 
 	return (
-		<div className="text-white bg-[#973228] p-5 mb-6 rounded-2xl text-right">
+		<div className="text-white bg-[#973228] p-5 mb-6 rounded-2xl text-right text-lg">
 			<h3 className="text-2xl font-bold mb-3">{title}</h3>
 			{description}
 			<p>{durationInHours} hours</p>

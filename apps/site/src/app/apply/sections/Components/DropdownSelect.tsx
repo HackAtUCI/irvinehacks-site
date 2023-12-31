@@ -55,7 +55,7 @@ export default function DropdownSelect({
 				className={`${inputStyle}`}
 				name={name}
 				id={name}
-        defaultValue={""}
+				defaultValue={""}
 				onChange={(e) => setValue(e.target.value)}
 				required
 			>

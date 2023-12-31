@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import * as Tabs from "@radix-ui/react-tabs";
 import { utcToZonedTime } from "date-fns-tz";
 
@@ -30,11 +30,18 @@ interface ScheduleProps {
 }
 
 export default function SchedulePage({ schedule }: ScheduleProps) {
+	const tabsRef = useRef<HTMLDivElement>(null);
+
+	const tabsOffsetTopRef = useRef<number | undefined | null>(null);
+
 	const [day, setDay] = useState("Friday");
 
 	const [now, setNow] = useState<Date>(
 		utcToZonedTime(new Date(), "America/Los_Angeles"),
 	);
+
+	const [haveTabsBeenScrolledToTop, setHaveTabsBeenScrolledToTop] =
+		useState(false);
 
 	useEffect(() => {
 		const refreshNow = setInterval(() => {
@@ -46,6 +53,28 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 		};
 	}, []);
 
+	useEffect(() => {
+		tabsOffsetTopRef.current = tabsRef.current?.offsetTop;
+
+		const detectScroll = () => {
+			if (
+				tabsOffsetTopRef.current !== undefined &&
+				tabsOffsetTopRef.current !== null &&
+				window.scrollY > tabsOffsetTopRef.current
+			) {
+				setHaveTabsBeenScrolledToTop(true);
+			} else {
+				setHaveTabsBeenScrolledToTop(false);
+			}
+		};
+
+		window.addEventListener("scroll", detectScroll);
+
+		return () => {
+			window.removeEventListener("scroll", detectScroll);
+		};
+	}, []);
+
 	return (
 		<Tabs.Root
 			value={day}
@@ -54,7 +83,14 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 			className="w-11/12 sm:w-4/5"
 		>
 			<div className="text-center mb-6 sm:mb-10 sm:flex sm:justify-between sm:flex-row-reverse">
-				<Tabs.List className="mb-12 sm:mb-0">
+				<Tabs.List
+					className={`${
+						haveTabsBeenScrolledToTop
+							? "max-w-[15rem] m-auto xs:max-sm:fixed top-3 left-0 right-0 z-[51] sm:static sm:z-auto"
+							: ""
+					} mb-8 sm:m-0`}
+					ref={tabsRef}
+				>
 					<Tabs.Trigger
 						className="TabsTrigger text-lg text-[#2F1C00] px-3.5 py-1.5 border border-[#2F1C00] rounded-l-2xl bg-[#FFFCE2] min-w-[5rem] sm:min-w-[4rem]"
 						value="Friday"

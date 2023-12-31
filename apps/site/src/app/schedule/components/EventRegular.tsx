@@ -35,14 +35,27 @@ export default function EventRegular({
 	const startTimeZoned = utcToZonedTime(startTime, "America/Los_Angeles");
 	const endTimeZoned = utcToZonedTime(endTime, "America/Los_Angeles");
 
-	let eventBackgroundColor;
-	if (eventType === "Main") {
-		eventBackgroundColor = "#DFBA73";
-	} else if (eventType === "Workshop") {
-		eventBackgroundColor = "#94A9BD";
-	} else if (eventType === "Social") {
-		eventBackgroundColor = "#DFA9A9";
-	}
+	const eventTypeComponent = () => {
+		if (eventType === "Main") {
+			return (
+				<div className="inline-block px-4 py-1.5 font-semibold text-[#0D272D] bg-[#DFBA73] rounded-2xl sm:py-2">
+					{eventType}
+				</div>
+			);
+		} else if (eventType === "Workshop") {
+			return (
+				<div className="inline-block px-4 py-1.5 font-semibold text-[#0D272D] bg-[#94A9BD] rounded-2xl sm:py-2 ">
+					{eventType}
+				</div>
+			);
+		} else if (eventType === "Social") {
+			return (
+				<div className="inline-block px-4 py-1.5 font-semibold text-[#0D272D] bg-[#DFA9A9] rounded-2xl sm:py-2 ">
+					{eventType}
+				</div>
+			);
+		}
+	};
 
 	const eventMomentComponent = () => {
 		if (now > endTimeZoned) {
@@ -76,11 +89,7 @@ export default function EventRegular({
 				<h3 className="mb-3 text-2xl font-bold text-[#FFDA7B] sm:mb-0">
 					{title}
 				</h3>
-				<div
-					className={`inline-block px-4 py-1.5 font-semibold text-[#0D272D] bg-[${eventBackgroundColor}] rounded-2xl sm:py-2`}
-				>
-					{eventType}
-				</div>
+				{eventTypeComponent()}
 			</div>
 			<p className="mb-2">
 				Hosted by:{" "}

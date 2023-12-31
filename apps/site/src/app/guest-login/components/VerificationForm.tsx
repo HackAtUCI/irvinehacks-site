@@ -1,20 +1,16 @@
 "use client";
 
-import { useSearchParams, redirect } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import clsx from "clsx";
 
 import Button from "@/lib/components/Button/Button";
 import ValidatingForm from "@/lib/components/ValidatingForm/ValidatingForm";
-import getUserIdentity from "@/lib/utils/getUserIdentity";
 import styles from "@/lib/components/ValidatingForm/ValidatingForm.module.scss";
 
 const VERIFICATION_PATH = "/api/guest/verify";
 const PASSPHRASE_REGEX = /\w+-\w+-\w+-\w+/;
 
-async function VerificationForm() {
-	const identity = await getUserIdentity();
-	if (identity.uid !== null) redirect("/portal");
-
+function VerificationForm() {
 	const searchParams = useSearchParams();
 	const email = searchParams.get("email");
 

@@ -1,14 +1,18 @@
+import { redirect } from "next/navigation";
 import clsx from "clsx";
 
 import Button from "@/lib/components/Button/Button";
 import ValidatingForm from "@/lib/components/ValidatingForm/ValidatingForm";
+import getUserIdentity from "@/lib/utils/getUserIdentity";
 import styles from "@/lib/components/ValidatingForm/ValidatingForm.module.scss";
 
 // eslint-disable-next-line no-useless-escape
 const EMAIL_REGEX = /^\w+([\.\-]?\w+)*@\w+([\.\-]?\w+)*(\.\w{2,3})+$/;
 const LOGIN_PATH = "/api/user/login";
 
-function LoginForm() {
+async function LoginForm() {
+	const identity = await getUserIdentity();
+	if (identity.uid !== null) redirect("/portal");
 	return (
 		<ValidatingForm method="post" action={LOGIN_PATH}>
 			<div className="bg-white p-5 md:p-10 rounded-2xl mx-5 text-black">

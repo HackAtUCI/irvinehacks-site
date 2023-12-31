@@ -22,7 +22,7 @@ ADMIN_ROLES = (Role.DIRECTOR, Role.REVIEWER)
 class ApplicationDataSummary(BaseModel):
     first_name: str
     last_name: str
-    university: str
+    school: str
     submission_time: datetime
 
 
@@ -48,7 +48,7 @@ async def applicants(
             "status",
             "application_data.first_name",
             "application_data.last_name",
-            "application_data.university",
+            "application_data.school",
             "application_data.submission_time",
             "application_data.reviews",
         ],

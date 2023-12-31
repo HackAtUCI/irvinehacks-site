@@ -69,7 +69,7 @@ def test_can_retrieve_applicants(
             "application_data": {
                 "first_name": "Peter",
                 "last_name": "Anteater",
-                "university": "UC Irvine",
+                "school": "UC Irvine",
                 "submission_time": datetime(2023, 1, 12, 9, 0, 0),
                 "reviews": [[datetime(2023, 1, 18), "edu.uci.alicia", "ACCEPTED"]],
             },
@@ -89,7 +89,7 @@ def test_can_retrieve_applicants(
             "application_data": {
                 "first_name": "Peter",
                 "last_name": "Anteater",
-                "university": "UC Irvine",
+                "school": "UC Irvine",
                 "submission_time": "2023-01-12T09:00:00",
             },
         },

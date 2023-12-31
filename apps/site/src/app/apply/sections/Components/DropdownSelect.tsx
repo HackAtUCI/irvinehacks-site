@@ -18,7 +18,7 @@ interface OtherProps {
 }
 
 const OtherPopup = ({ value, name }: OtherProps) => {
-	if (value == "other") {
+	if (value === "other") {
 		return (
 			<div className="mt-2 flex gap-2">
 				<label htmlFor={`${name}-other-input`} className="text-lg">
@@ -55,10 +55,11 @@ export default function DropdownSelect({
 				className={`${inputStyle}`}
 				name={name}
 				id={name}
+        defaultValue={""}
 				onChange={(e) => setValue(e.target.value)}
 				required
 			>
-				<option value=""></option>
+				<option value="" disabled />
 				{values.map((item, i) => {
 					return (
 						<option key={`option-${i}`} value={item.value}>

@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import Image from "next/image";
 import { PerspectiveCamera } from "@react-three/drei";
 
-import { View } from "@/components/canvas/View";
+import View from "@/components/canvas/View";
 import Button from "@/lib/components/Button/Button";
 import Fireflies from "../../components/Fireflies";
 

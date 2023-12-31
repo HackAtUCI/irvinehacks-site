@@ -33,7 +33,7 @@ export default function ResumeInformation() {
 		setErrorMessage("");
 		setResumePath("");
 
-		let file = event.target.files ? event.target.files[0] : null;
+		const file = event.target.files ? event.target.files[0] : null;
 		try {
 			handleFile(file);
 		} catch (error) {
@@ -45,10 +45,10 @@ export default function ResumeInformation() {
 	const handleFile = (file: File | null) => {
 		if (!file) throw TypeError;
 
-		let path = file.name;
+		const path = file.name;
 
-		let extension = path.split(".").pop();
-		if (extension != "pdf") {
+		const extension = path.split(".").pop();
+		if (extension !== "pdf") {
 			setErrorMessage("Invalid file format");
 			throw new InvalidFile("Invalid file format");
 		}
@@ -94,7 +94,7 @@ export default function ResumeInformation() {
 				type="file"
 				accept="application/pdf"
 				onChange={handleFileUpload}
-			></input>
+			/>
 			<OutputFeedBack
 				errorMessage={errorMessage}
 				resumePath={resumePath}

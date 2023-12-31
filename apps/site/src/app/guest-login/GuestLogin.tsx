@@ -1,7 +1,13 @@
+import { redirect } from "next/navigation";
+
 import VerificationForm from "./components/VerificationForm";
+import getUserIdentity from "@/lib/utils/getUserIdentity";
 import water from "@/assets/backgrounds/water.jpg";
 
-function GuestLogin() {
+async function GuestLogin() {
+	const identity = await getUserIdentity();
+	if (identity.uid !== null) redirect("/portal");
+
 	return (
 		<div
 			className="min-h-screen flex flex-col items-center justify-center"

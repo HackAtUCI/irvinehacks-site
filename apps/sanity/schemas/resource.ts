@@ -16,15 +16,8 @@ export default defineType({
 		defineField({
 			name: "resourceType",
 			title: "Resource Type",
-			type: "string",
-			options: {
-				list: [
-					{ title: "API", value: "api" },
-					{ title: "Backend", value: "backend" },
-					{ title: "Frontend", value: "frontend" },
-					{ title: "Starter Pack", value: "starter-pack" },
-				],
-			},
+			type: "reference",
+			to: [{ type: "resourceCategory" }],
 			validation: (Rule) => Rule.required(),
 		}),
 		defineField({
@@ -44,20 +37,6 @@ export default defineType({
 			name: "link",
 			title: "Link",
 			type: "url",
-			validation: (Rule) => Rule.required(),
-		}),
-		defineField({
-			name: "logo",
-			title: "Logo",
-			type: "image",
-			validation: (Rule) => Rule.required(),
-		}),
-		defineField({
-			name: "stickyNoteColor",
-			title: "Sticky Note Color",
-			description:
-				"Note that the color will be used as a background for black text, so please choose a color with enough contrast.",
-			type: "color",
 			validation: (Rule) => Rule.required(),
 		}),
 	],

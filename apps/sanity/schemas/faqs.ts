@@ -6,6 +6,7 @@ export default defineType({
 	name: "faqs",
 	title: "FAQs",
 	type: "document",
+	icon: FileQuestion,
 	fields: [
 		defineField({
 			name: "faqs",
@@ -28,7 +29,9 @@ export default defineType({
 							of: [
 								defineArrayMember({
 									type: "block",
-									styles: [{ title: "Normal", value: "normal" }],
+									styles: [
+										{ title: "Normal", value: "normal" },
+									],
 									lists: [],
 								}),
 							],
@@ -43,7 +46,9 @@ export default defineType({
 						prepare({ title, subtitle }) {
 							return {
 								title,
-								subtitle: subtitle ? toPlainText(subtitle) : undefined,
+								subtitle: subtitle
+									? toPlainText(subtitle)
+									: undefined,
 								media: FileQuestion,
 							};
 						},

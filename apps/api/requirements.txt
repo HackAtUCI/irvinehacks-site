@@ -8,4 +8,6 @@ pydantic[email]==2.5.2
 aiosendgrid==0.1.0
 sendgrid==6.11.0
 aiogoogle==5.6.0
+
+# To avoid breaking xmlsec for python3-saml
 lxml<5.0.0

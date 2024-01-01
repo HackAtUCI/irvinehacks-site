@@ -88,6 +88,9 @@ async def _get_existing_key(email: EmailStr) -> Optional[str]:
     # Reject expired key
     now = utc_now()
     if now > auth.exp:
+        await mongodb_handler.update_one(
+            Collection.USERS, {"_id": uid}, {"guest_auth": None}
+        )
         return None
 
     return auth.key

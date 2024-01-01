@@ -55,10 +55,11 @@ export default function DropdownSelect({
 				className={`${inputStyle}`}
 				name={name}
 				id={name}
+				defaultValue={""}
 				onChange={(e) => setValue(e.target.value)}
 				required
 			>
-				<option value="" selected disabled hidden />
+				<option value="" disabled />
 				{values.map((item, i) => {
 					return (
 						<option key={`option-${i}`} value={item.value}>

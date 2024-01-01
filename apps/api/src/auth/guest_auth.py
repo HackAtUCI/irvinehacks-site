@@ -88,7 +88,6 @@ async def _get_existing_key(email: EmailStr) -> Optional[str]:
     # Reject expired key
     now = utc_now()
     if now > auth.exp:
-        await _remove_guest_key(uid)
         return None
 
     return auth.key

@@ -63,7 +63,7 @@ async def applicants(
         raise RuntimeError("Could not parse applicant data.")
 
 
-@router.get("/applicant/{uid}")
+@router.get("/applicant/{uid}", dependencies=[Depends(require_role(ADMIN_ROLES))])
 async def applicant(
     uid: str,
 ) -> Applicant:

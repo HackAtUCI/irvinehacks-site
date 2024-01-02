@@ -58,7 +58,8 @@ async def initiate_guest_login(email: EmailStr) -> Optional[str]:
 async def verify_guest_credentials(
     email: EmailStr, passphrase: str, confirmation: str
 ) -> bool:
-    """Check that passphrase and confirmation are valid for the given user."""
+    """Check that passphrase and confirmation are valid for the given user and
+    remove the guest key upon successful validation."""
     key = await _get_existing_key(email)
     if not key:
         return False

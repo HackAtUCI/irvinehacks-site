@@ -64,8 +64,10 @@ async def verify_guest_credentials(
         return False
 
     uid = user_identity.scoped_uid(email)
-    await _remove_guest_key(uid)
-    return _validate(key, passphrase, confirmation)
+    is_valid = _validate(key, passphrase, confirmation)
+    if is_valid:
+        await _remove_guest_key(uid)
+    return is_valid
 
 
 def acquire_guest_identity(email: EmailStr) -> GuestUser:

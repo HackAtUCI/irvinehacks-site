@@ -3,9 +3,11 @@ from datetime import datetime, timezone
 from unittest.mock import AsyncMock, patch
 
 from auth import guest_auth
+from services.mongodb_handler import Collection
 
 guest_auth.AUTH_KEY_SALT = "not-a-good-idea".encode()
 SAMPLE_EMAIL = "jeff@amazon.com"
+SAMPLE_UID = "com.amazon.jeff"
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
@@ -73,7 +75,9 @@ async def test_expired_key_is_removed(
 
     key = await guest_auth._get_existing_key(SAMPLE_EMAIL)
     assert key is None
-    mock_mongodb_update_one.assert_awaited_once()
+    mock_mongodb_update_one.assert_awaited_once_with(
+        Collection.USERS, {"_id": SAMPLE_UID}, {"guest_auth": None}
+    )
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)

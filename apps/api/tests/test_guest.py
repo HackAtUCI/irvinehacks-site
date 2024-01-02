@@ -108,11 +108,11 @@ def test_successful_guest_verification_provides_identity(
     mock_remove_guest_key.assert_awaited_once_with("edu.caltech.beaver")
 
 
-@patch("auth.guest_auth._get_existing_key", autospec=True)
 @patch("auth.guest_auth._remove_guest_key", autospec=True)
+@patch("auth.guest_auth._get_existing_key", autospec=True)
 def test_invalid_guest_verification_is_unauthorized(
-    mock_remove_guest_key: AsyncMock,
     mock_get_existing_key: AsyncMock,
+    mock_remove_guest_key: AsyncMock,
 ) -> None:
     """Test that a guest with invalid credentials is unauthorized."""
     mock_get_existing_key.return_value = "some-existing-key"
@@ -125,4 +125,4 @@ def test_invalid_guest_verification_is_unauthorized(
 
     assert res.status_code == 401
 
-    mock_remove_guest_key.assert_awaited_once_with("edu.caltech.beaver")
+    mock_remove_guest_key.assert_not_awaited()

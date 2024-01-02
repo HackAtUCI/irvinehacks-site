@@ -88,9 +88,7 @@ async def _get_existing_key(email: EmailStr) -> Optional[str]:
     # Reject expired key
     now = utc_now()
     if now > auth.exp:
-        await mongodb_handler.update_one(
-            Collection.USERS, {"_id": uid}, {"guest_auth": None}
-        )
+        await _remove_expired_guest_key(uid)
         return None
 
     return auth.key
@@ -108,6 +106,12 @@ async def _remove_guest_key(uid: str) -> None:
         Collection.USERS,
         {"_id": uid},
         {"guest_auth": None, "last_login": utc_now()},
+    )
+
+
+async def _remove_expired_guest_key(uid: str) -> None:
+    await mongodb_handler.update_one(
+        Collection.USERS, {"_id": uid}, {"guest_auth": None}
     )
 
 

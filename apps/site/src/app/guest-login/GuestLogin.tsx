@@ -16,7 +16,7 @@ async function GuestLogin() {
 			<h1
 				className="font-display text-5xl md:text-7xl mb-10"
 				style={{
-					textShadow: "0px 0px 20px rgba(255, 255, 255, 0.75);",
+					textShadow: "0px 0px 20px rgba(255, 255, 255, 0.75)",
 				}}
 			>
 				Enter Passphrase

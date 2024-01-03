@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import * as Tabs from "@radix-ui/react-tabs";
-import { utcToZonedTime } from "date-fns-tz";
 
 import EventCard from "../components/EventCard";
+import convertToPST from "@/lib/utils/convertToPST";
 
 import "@radix-ui/themes/styles.css";
 import "./SchedulePage.scss";
@@ -36,16 +36,14 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 
 	const [day, setDay] = useState("Friday");
 
-	const [now, setNow] = useState<Date>(
-		utcToZonedTime(new Date(), "America/Los_Angeles"),
-	);
+	const [now, setNow] = useState<Date>(convertToPST(new Date()));
 
 	const [haveTabsBeenScrolledToTop, setHaveTabsBeenScrolledToTop] =
 		useState(false);
 
 	useEffect(() => {
 		const refreshNow = setInterval(() => {
-			setNow(utcToZonedTime(new Date(), "America/Los_Angeles"));
+			setNow(convertToPST(new Date()));
 		}, T_REFRESH);
 
 		return () => {
@@ -121,10 +119,7 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 				>
 					<Tabs.Content
 						value={weekdayFormat.format(
-							utcToZonedTime(
-								day[0].startTime,
-								"America/Los_Angeles",
-							),
+							convertToPST(day[0].startTime),
 						)}
 						className="w-full"
 					>

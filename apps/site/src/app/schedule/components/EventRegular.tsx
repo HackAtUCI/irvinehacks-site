@@ -1,7 +1,7 @@
-import { utcToZonedTime } from "date-fns-tz";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
+import convertToPST from "@/lib/utils/convertToPST";
 
 const dateTimeFormat = new Intl.DateTimeFormat("en", {
 	hour: "numeric",
@@ -21,6 +21,66 @@ interface EventProps {
 	description: JSX.Element;
 }
 
+interface EventTypeProps {
+	eventType: string;
+}
+
+interface EventMomentProps {
+	now: Date;
+	startTimeInPST: Date;
+	endTimeInPST: Date;
+}
+
+function EventTypeComponent({ eventType }: EventTypeProps) {
+	if (eventType === "Main") {
+		return (
+			<div className="inline-block px-4 py-1.5 font-semibold text-[#0D272D] bg-[#DFBA73] rounded-2xl sm:py-2">
+				{eventType}
+			</div>
+		);
+	} else if (eventType === "Workshop") {
+		return (
+			<div className="inline-block px-4 py-1.5 font-semibold text-[#0D272D] bg-[#94A9BD] rounded-2xl sm:py-2">
+				{eventType}
+			</div>
+		);
+	} else if (eventType === "Social") {
+		return (
+			<div className="inline-block px-4 py-1.5 font-semibold text-[#0D272D] bg-[#DFA9A9] rounded-2xl sm:py-2">
+				{eventType}
+			</div>
+		);
+	}
+}
+
+function EventMomentComponent({
+	now,
+	startTimeInPST,
+	endTimeInPST,
+}: EventMomentProps) {
+	if (now > endTimeInPST) {
+		const dEnd = dayjs(endTimeInPST);
+		const timeAfterEnd = dEnd.from(now);
+		return (
+			<p className="text-white/50 text-right mb-0">
+				Ended {timeAfterEnd}
+			</p>
+		);
+	} else {
+		if (now > startTimeInPST) {
+			return <p className="text-white text-right mb-0">Happening Now!</p>;
+		} else {
+			const dStart = dayjs(startTimeInPST);
+			const timeUntilStart = dStart.from(now);
+			return (
+				<p className="text-white/50 text-right mb-0">
+					Starting {timeUntilStart}
+				</p>
+			);
+		}
+	}
+}
+
 export default function EventRegular({
 	now,
 	title,
@@ -32,56 +92,8 @@ export default function EventRegular({
 	hosts,
 	description,
 }: EventProps) {
-	const startTimeZoned = utcToZonedTime(startTime, "America/Los_Angeles");
-	const endTimeZoned = utcToZonedTime(endTime, "America/Los_Angeles");
-
-	const eventTypeComponent = () => {
-		if (eventType === "Main") {
-			return (
-				<div className="inline-block px-4 py-1.5 font-semibold text-[#0D272D] bg-[#DFBA73] rounded-2xl sm:py-2">
-					{eventType}
-				</div>
-			);
-		} else if (eventType === "Workshop") {
-			return (
-				<div className="inline-block px-4 py-1.5 font-semibold text-[#0D272D] bg-[#94A9BD] rounded-2xl sm:py-2">
-					{eventType}
-				</div>
-			);
-		} else if (eventType === "Social") {
-			return (
-				<div className="inline-block px-4 py-1.5 font-semibold text-[#0D272D] bg-[#DFA9A9] rounded-2xl sm:py-2">
-					{eventType}
-				</div>
-			);
-		}
-	};
-
-	const eventMomentComponent = () => {
-		if (now > endTimeZoned) {
-			const dEnd = dayjs(endTimeZoned);
-			const timeAfterEnd = dEnd.from(now);
-			return (
-				<p className="text-white/50 text-right mb-0">
-					Ended {timeAfterEnd}
-				</p>
-			);
-		} else {
-			if (now > startTimeZoned) {
-				return (
-					<p className="text-white text-right mb-0">Happening Now!</p>
-				);
-			} else {
-				const dStart = dayjs(startTimeZoned);
-				const timeUntilStart = dStart.from(now);
-				return (
-					<p className="text-white/50 text-right mb-0">
-						Starting {timeUntilStart}
-					</p>
-				);
-			}
-		}
-	};
+	const startTimeInPST = convertToPST(startTime);
+	const endTimeInPST = convertToPST(endTime);
 
 	return (
 		<div className="text-[#FFFCE2] bg-[#432810] p-5 mb-6 rounded-2xl sm:text-lg">
@@ -89,18 +101,22 @@ export default function EventRegular({
 				<h3 className="mb-3 text-2xl font-bold text-[#FFDA7B] sm:mb-0">
 					{title}
 				</h3>
-				{eventTypeComponent()}
+				<EventTypeComponent eventType={eventType} />
 			</div>
 			<p className="mb-2">
 				Hosted by:{" "}
 				{organization === undefined ? hosts?.join(", ") : organization}
 			</p>
 			<p className="mb-2">
-				{dateTimeFormat.formatRange(startTimeZoned, endTimeZoned)} PST |{" "}
+				{dateTimeFormat.formatRange(startTimeInPST, endTimeInPST)} PST |{" "}
 				<a href={virtual}>Meeting Link</a>
 			</p>
 			{description}
-			{eventMomentComponent()}
+			<EventMomentComponent
+				now={now}
+				startTimeInPST={startTimeInPST}
+				endTimeInPST={endTimeInPST}
+			/>
 		</div>
 	);
 }

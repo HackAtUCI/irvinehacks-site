@@ -1,4 +1,4 @@
-import { utcToZonedTime } from "date-fns-tz";
+import convertToPST from "@/lib/utils/convertToPST";
 
 const dateTimeFormat = new Intl.DateTimeFormat("en", {
 	month: "long",
@@ -19,14 +19,14 @@ export default function EventAnnouncement({
 	startTime,
 	endTime,
 }: EventAnnouncementProps) {
-	const startTimeZoned = utcToZonedTime(startTime, "America/Los_Angeles");
-	const endTimeZoned = utcToZonedTime(endTime, "America/Los_Angeles");
+	const startTimeInPST = convertToPST(startTime);
+	const endTimeInPST = convertToPST(endTime);
 
 	return (
 		<div className="text-white bg-[#0F6722] p-5 mb-6 rounded-2xl text-center">
 			<div className="text-2xl">{description}</div>
 			<p className="mb-2 text-lg">
-				{dateTimeFormat.formatRange(startTimeZoned, endTimeZoned)} PST
+				{dateTimeFormat.formatRange(startTimeInPST, endTimeInPST)} PST
 			</p>
 		</div>
 	);

@@ -1,8 +1,11 @@
 import { utcToZonedTime } from "date-fns-tz";
 
 const dateTimeFormat = new Intl.DateTimeFormat("en", {
+	month: "long",
+	day: "numeric",
 	hour: "numeric",
 	minute: "numeric",
+	timeZone: "America/Los_Angeles",
 });
 
 interface EventAnnouncementProps {

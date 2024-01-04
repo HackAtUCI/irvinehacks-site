@@ -18,8 +18,8 @@ function VerificationForm() {
 	}
 
 	return (
-		<ValidatingForm method="post" action={VERIFICATION_PATH}>
-			<div>
+		<div className="bg-white p-5 md:p-10 rounded-2xl mx-5 text-black">
+			<ValidatingForm method="post" action={VERIFICATION_PATH}>
 				<div className="flex flex-col mb-5">
 					<input
 						type="email"
@@ -47,8 +47,8 @@ function VerificationForm() {
 						Sorry, that passphrase is invalid.
 					</p>
 				</div>
-			</div>
-		</ValidatingForm>
+			</ValidatingForm>
+		</div>
 	);
 }
 

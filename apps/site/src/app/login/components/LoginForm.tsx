@@ -9,8 +9,8 @@ const LOGIN_PATH = "/api/user/login";
 
 function LoginForm() {
 	return (
-		<ValidatingForm method="post" action={LOGIN_PATH}>
-			<div>
+		<div className="bg-white p-5 md:p-10 rounded-2xl mx-5 text-black">
+			<ValidatingForm method="post" action={LOGIN_PATH}>
 				<div className="flex flex-col mb-5">
 					<label htmlFor="email">Email</label>
 					<input
@@ -31,8 +31,8 @@ function LoginForm() {
 						Sorry, that email address is invalid.
 					</p>
 				</div>
-			</div>
-		</ValidatingForm>
+			</ValidatingForm>
+		</div>
 	);
 }
 

@@ -12,7 +12,9 @@ interface FormProps {
 
 function ValidatingForm(props: PropsWithChildren<FormProps>) {
 	const [validated, setValidated] = useState<boolean>(false);
-	const [isDisabled, setIsDisabled] = useState<boolean>(false);
+	const [submitting, setSumbitting] = useState<boolean>(false);
+
+	const { children, ...rest } = props;
 
 	const handleSubmit = (event: FormEvent<HTMLFormElement>): void => {
 		const form = event.currentTarget;
@@ -20,7 +22,7 @@ function ValidatingForm(props: PropsWithChildren<FormProps>) {
 			// prevent submission to display validation feedback
 			event.preventDefault();
 		} else {
-			setIsDisabled(true);
+			setSumbitting(true);
 		}
 		setValidated(true);
 	};
@@ -29,14 +31,12 @@ function ValidatingForm(props: PropsWithChildren<FormProps>) {
 		<form
 			onSubmit={handleSubmit}
 			noValidate // use custom validation feedback
-			className={`bg-white p-5 md:p-10 rounded-2xl mx-5 text-black ${
-				validated ? styles.validated : styles.notYetValidated
-			}`}
+			className={validated ? styles.validated : styles.notYetValidated}
 			// validated={validated}
-			{...props}
+			{...rest}
 		>
-			{props.children}
-			<Button text="Continue" disabled={isDisabled} />
+			{children}
+			<Button text="Continue" disabled={submitting} />
 		</form>
 	);
 }

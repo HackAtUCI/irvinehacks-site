@@ -1,6 +1,5 @@
 import clsx from "clsx";
 
-import Button from "@/lib/components/Button/Button";
 import ValidatingForm from "@/lib/components/ValidatingForm/ValidatingForm";
 import styles from "@/lib/components/ValidatingForm/ValidatingForm.module.scss";
 
@@ -11,7 +10,7 @@ const LOGIN_PATH = "/api/user/login";
 function LoginForm() {
 	return (
 		<ValidatingForm method="post" action={LOGIN_PATH}>
-			<div className="bg-white p-5 md:p-10 rounded-2xl mx-5 text-black">
+			<div>
 				<div className="flex flex-col mb-5">
 					<label htmlFor="email">Email</label>
 					<input
@@ -32,7 +31,6 @@ function LoginForm() {
 						Sorry, that email address is invalid.
 					</p>
 				</div>
-				<Button text="Continue" />
 			</div>
 		</ValidatingForm>
 	);

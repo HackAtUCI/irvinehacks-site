@@ -3,7 +3,6 @@
 import { useSearchParams } from "next/navigation";
 import clsx from "clsx";
 
-import Button from "@/lib/components/Button/Button";
 import ValidatingForm from "@/lib/components/ValidatingForm/ValidatingForm";
 import styles from "@/lib/components/ValidatingForm/ValidatingForm.module.scss";
 
@@ -19,8 +18,8 @@ function VerificationForm() {
 	}
 
 	return (
-		<ValidatingForm method="post" action={VERIFICATION_PATH}>
-			<div className="bg-white p-5 md:p-10 rounded-2xl mx-5 text-black">
+		<div className="bg-white p-5 md:p-10 rounded-2xl mx-5 text-black">
+			<ValidatingForm method="post" action={VERIFICATION_PATH}>
 				<div className="flex flex-col mb-5">
 					<input
 						type="email"
@@ -48,9 +47,8 @@ function VerificationForm() {
 						Sorry, that passphrase is invalid.
 					</p>
 				</div>
-				<Button text="Continue" />
-			</div>
-		</ValidatingForm>
+			</ValidatingForm>
+		</div>
 	);
 }
 

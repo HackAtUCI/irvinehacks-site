@@ -12,7 +12,7 @@ interface FormProps {
 
 function ValidatingForm(props: PropsWithChildren<FormProps>) {
 	const [validated, setValidated] = useState<boolean>(false);
-	const [submitting, setSumbitting] = useState<boolean>(false);
+	const [submitting, setSubmitting] = useState<boolean>(false);
 
 	const { children, ...rest } = props;
 
@@ -22,7 +22,7 @@ function ValidatingForm(props: PropsWithChildren<FormProps>) {
 			// prevent submission to display validation feedback
 			event.preventDefault();
 		} else {
-			setSumbitting(true);
+			setSubmitting(true);
 		}
 		setValidated(true);
 	};

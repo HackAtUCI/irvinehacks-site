@@ -7,3 +7,9 @@
 		display: block;
 	}
 }
+
+.unclickable {
+	button, input {
+		pointer-events: none;
+	}
+}

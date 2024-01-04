@@ -4,7 +4,7 @@ import ButtonDropdown, {
 	ButtonDropdownProps,
 } from "@cloudscape-design/components/button-dropdown";
 
-import { Decision, submitReview, uid } from "admin/utils/useApplicant";
+import { Decision, submitReview, uid } from "@/lib/admin/useApplicant";
 import UserContext from "utils/userContext";
 
 interface ApplicantActionsProps {

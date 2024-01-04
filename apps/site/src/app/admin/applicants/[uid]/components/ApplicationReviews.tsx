@@ -1,7 +1,7 @@
 import { useContext } from "react";
 
-import { ApplicantStatus } from "admin/components";
-import { Review, uid } from "admin/utils/useApplicant";
+import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
+import { Review, uid } from "@/lib/admin/useApplicant";
 import UserContext from "utils/userContext";
 
 interface ApplicationReviewsProps {

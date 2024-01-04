@@ -6,10 +6,10 @@ import Cards from "@cloudscape-design/components/cards";
 import Header from "@cloudscape-design/components/header";
 import { OptionDefinition } from "@cloudscape-design/components/internal/components/option/interfaces";
 
-import { ApplicantStatus } from "admin/components";
-import useApplicants, { ApplicantSummary } from "admin/utils/useApplicants";
+import useApplicants, { ApplicantSummary } from "@/lib/admin/useApplicants";
 
 import ApplicantFilters from "./components/ApplicantFilters";
+import ApplicantStatus from "./components/ApplicantStatus";
 
 function Applicants() {
 	const [selectedStatuses, setSelectedStatuses] = useState<

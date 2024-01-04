@@ -5,10 +5,11 @@ import Header from "@cloudscape-design/components/header";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import Spinner from "@cloudscape-design/components/spinner";
 
-import { ApplicantActions, Application } from "admin/components";
-import useApplicant from "admin/utils/useApplicant";
+import useApplicant from "@/lib/admin/useApplicant";
 
+import ApplicantActions from "./components/ApplicantActions";
 import ApplicantOverview from "./components/ApplicantOverview";
+import Application from "./components/Application";
 
 function Applicant() {
 	const router = useRouter();

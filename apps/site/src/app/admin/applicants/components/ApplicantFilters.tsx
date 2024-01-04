@@ -5,8 +5,9 @@ import { IconProps } from "@cloudscape-design/components/icon";
 import { OptionDefinition } from "@cloudscape-design/components/internal/components/option/interfaces";
 import Multiselect from "@cloudscape-design/components/multiselect";
 
-import { StatusLabels } from "admin/components/ApplicantStatus/ApplicantStatus";
-import { Decision, ReviewStatus, Status } from "admin/utils/useApplicant";
+import { Decision, ReviewStatus, Status } from "@/lib/admin/useApplicant";
+
+import { StatusLabels } from "./ApplicantStatus";
 
 interface ApplicantFiltersProps {
 	selectedStatuses: readonly OptionDefinition[];

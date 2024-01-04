@@ -3,7 +3,7 @@ import { PropsWithChildren, useContext, useEffect } from "react";
 
 import AppLayout from "@cloudscape-design/components/app-layout";
 
-import UserContext from "utils/userContext";
+import UserContext from "@/lib/admin/UserContext";
 
 import AdminSidebar from "./AdminSidebar";
 import Breadcrumbs from "./Breadcrumbs";

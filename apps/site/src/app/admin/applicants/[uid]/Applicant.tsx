@@ -1,5 +1,3 @@
-import { useRouter } from "next/router";
-
 import ContentLayout from "@cloudscape-design/components/content-layout";
 import Header from "@cloudscape-design/components/header";
 import SpaceBetween from "@cloudscape-design/components/space-between";
@@ -11,15 +9,14 @@ import ApplicantActions from "./components/ApplicantActions";
 import ApplicantOverview from "./components/ApplicantOverview";
 import Application from "./components/Application";
 
-function Applicant() {
-	const router = useRouter();
-	const { uid } = router.query;
+interface ApplicantProps {
+	params: { uid: string };
+}
 
-	if (typeof uid === "string") {
-		throw TypeError();
-	}
+function Applicant({ params }: ApplicantProps) {
+	const { uid } = params;
 
-	const { applicant, loading, submitReview } = useApplicant(uid ? uid[0] : "");
+	const { applicant, loading, submitReview } = useApplicant(uid);
 
 	if (loading || !applicant) {
 		return (

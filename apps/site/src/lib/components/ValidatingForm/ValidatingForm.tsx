@@ -12,7 +12,7 @@ interface FormProps {
 
 function ValidatingForm(props: PropsWithChildren<FormProps>) {
 	const [validated, setValidated] = useState<boolean>(false);
-	const [isClickable, setIsClickable] = useState<boolean>(false);
+	const [isDisabled, setIsDisabled] = useState<boolean>(false);
 
 	const handleSubmit = (event: FormEvent<HTMLFormElement>): void => {
 		const form = event.currentTarget;
@@ -20,7 +20,7 @@ function ValidatingForm(props: PropsWithChildren<FormProps>) {
 			// prevent submission to display validation feedback
 			event.preventDefault();
 		} else {
-			setIsClickable(true);
+			setIsDisabled(true);
 		}
 		setValidated(true);
 	};
@@ -36,7 +36,7 @@ function ValidatingForm(props: PropsWithChildren<FormProps>) {
 			{...props}
 		>
 			{props.children}
-			<Button text="Continue" disabled={isClickable} />
+			<Button text="Continue" disabled={isDisabled} />
 		</form>
 	);
 }

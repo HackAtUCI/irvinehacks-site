@@ -4,20 +4,15 @@ import { useState } from "react";
 import Box from "@cloudscape-design/components/box";
 import Cards from "@cloudscape-design/components/cards";
 import Header from "@cloudscape-design/components/header";
-import { OptionDefinition } from "@cloudscape-design/components/internal/components/option/interfaces";
 
 import useApplicants, { ApplicantSummary } from "@/lib/admin/useApplicants";
 
-import ApplicantFilters from "./components/ApplicantFilters";
+import ApplicantFilters, { Options } from "./components/ApplicantFilters";
 import ApplicantStatus from "./components/ApplicantStatus";
 
 function Applicants() {
-	const [selectedStatuses, setSelectedStatuses] = useState<
-		readonly OptionDefinition[]
-	>([]);
-	const [selectedDecisions, setSelectedDecisions] = useState<
-		readonly OptionDefinition[]
-	>([]);
+	const [selectedStatuses, setSelectedStatuses] = useState<Options>([]);
+	const [selectedDecisions, setSelectedDecisions] = useState<Options>([]);
 	const { applicantList, loading } = useApplicants();
 
 	const selectedStatusValues = selectedStatuses.map(({ value }) => value);

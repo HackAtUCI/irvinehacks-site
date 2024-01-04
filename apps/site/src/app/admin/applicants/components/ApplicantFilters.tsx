@@ -2,18 +2,21 @@ import { Dispatch, SetStateAction } from "react";
 
 import ColumnLayout from "@cloudscape-design/components/column-layout";
 import { IconProps } from "@cloudscape-design/components/icon";
-import { OptionDefinition } from "@cloudscape-design/components/internal/components/option/interfaces";
-import Multiselect from "@cloudscape-design/components/multiselect";
+import Multiselect, {
+	MultiselectProps,
+} from "@cloudscape-design/components/multiselect";
 
 import { Decision, ReviewStatus, Status } from "@/lib/admin/useApplicant";
 
 import { StatusLabels } from "./ApplicantStatus";
 
+export type Options = ReadonlyArray<MultiselectProps.Option>;
+
 interface ApplicantFiltersProps {
-	selectedStatuses: readonly OptionDefinition[];
-	setSelectedStatuses: Dispatch<SetStateAction<readonly OptionDefinition[]>>;
-	selectedDecisions: readonly OptionDefinition[];
-	setSelectedDecisions: Dispatch<SetStateAction<readonly OptionDefinition[]>>;
+	selectedStatuses: Options;
+	setSelectedStatuses: Dispatch<SetStateAction<Options>>;
+	selectedDecisions: Options;
+	setSelectedDecisions: Dispatch<SetStateAction<Options>>;
 }
 
 const StatusIcons: Record<Status, IconProps.Name> = {
@@ -25,17 +28,15 @@ const StatusIcons: Record<Status, IconProps.Name> = {
 	[Decision.waitlisted]: "status-negative",
 };
 
-const statusOption = (status: Status) => ({
+const statusOption = (status: Status): MultiselectProps.Option => ({
 	label: StatusLabels[status],
 	value: status,
 	iconName: StatusIcons[status],
 });
 
-const STATUS_OPTIONS: OptionDefinition[] =
-	Object.values(ReviewStatus).map(statusOption);
+const STATUS_OPTIONS = Object.values(ReviewStatus).map(statusOption);
 
-const DECISION_OPTIONS: OptionDefinition[] =
-	Object.values(Decision).map(statusOption);
+const DECISION_OPTIONS = Object.values(Decision).map(statusOption);
 
 function ApplicantFilters({
 	selectedStatuses,

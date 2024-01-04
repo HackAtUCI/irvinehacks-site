@@ -9,7 +9,8 @@
 }
 
 .unclickable {
-	button, input {
+	button,
+	input {
 		pointer-events: none;
 	}
 }

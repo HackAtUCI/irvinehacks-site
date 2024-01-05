@@ -1,20 +1,17 @@
 import { useRouter } from "next/navigation";
 
-import { BreadcrumbGroupProps } from "@cloudscape-design/components/breadcrumb-group";
-import { SideNavigationProps } from "@cloudscape-design/components/side-navigation";
+import { LinkProps } from "@cloudscape-design/components/link";
 
 export const BASE_PATH = "/admin/dashboard";
 
-type FollowEvent = CustomEvent<
-	| BreadcrumbGroupProps.ClickDetail<BreadcrumbGroupProps.Item>
-	| SideNavigationProps.FollowDetail
->;
+type BaseNavigationDetail = LinkProps.FollowDetail;
+type FollowEvent = CustomEvent<BaseNavigationDetail>;
 
 export function useFollowWithNextLink(): (event: FollowEvent) => void {
 	const router = useRouter();
 
 	const followWithNextLink = (event: FollowEvent) => {
-		if (!event.detail.external) {
+		if (!event.detail.external && event.detail.href) {
 			event.preventDefault();
 			router.push(event.detail.href);
 		}

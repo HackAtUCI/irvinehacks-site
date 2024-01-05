@@ -1,12 +1,13 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 
 import Box from "@cloudscape-design/components/box";
 import Cards from "@cloudscape-design/components/cards";
 import Header from "@cloudscape-design/components/header";
+import Link from "@cloudscape-design/components/link";
 
+import { useFollowWithNextLink } from "@/app/admin/layout/common";
 import useApplicants, { ApplicantSummary } from "@/lib/admin/useApplicants";
 
 import ApplicantFilters, { Options } from "./components/ApplicantFilters";
@@ -89,11 +90,18 @@ function Applicants() {
 	);
 }
 
-const CardHeader = ({ _id, application_data }: ApplicantSummary) => (
-	<Link href={`/admin/applicants/${_id}`}>
-		{application_data.first_name} {application_data.last_name}
-	</Link>
-);
+const CardHeader = ({ _id, application_data }: ApplicantSummary) => {
+	const followWithNextLink = useFollowWithNextLink();
+	return (
+		<Link
+			href={`/admin/applicants/${_id}`}
+			fontSize="inherit"
+			onFollow={followWithNextLink}
+		>
+			{application_data.first_name} {application_data.last_name}
+		</Link>
+	);
+};
 
 const DecisionStatus = ({ decision }: ApplicantSummary) =>
 	decision ? <ApplicantStatus status={decision} /> : "-";

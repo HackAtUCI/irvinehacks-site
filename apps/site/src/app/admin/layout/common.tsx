@@ -1,4 +1,4 @@
-import Router from "next/router";
+import { useRouter } from "next/navigation";
 
 import { BreadcrumbGroupProps } from "@cloudscape-design/components/breadcrumb-group";
 import { SideNavigationProps } from "@cloudscape-design/components/side-navigation";
@@ -10,9 +10,15 @@ type FollowEvent = CustomEvent<
 	| SideNavigationProps.FollowDetail
 >;
 
-export const followWithNextLink = (event: FollowEvent) => {
-	if (!event.detail.external) {
-		event.preventDefault();
-		Router.push(event.detail.href);
-	}
-};
+export function useFollowWithNextLink(): (event: FollowEvent) => void {
+	const router = useRouter();
+
+	const followWithNextLink = (event: FollowEvent) => {
+		if (!event.detail.external) {
+			event.preventDefault();
+			router.push(event.detail.href);
+		}
+	};
+
+	return followWithNextLink;
+}

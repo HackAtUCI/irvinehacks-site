@@ -1,4 +1,5 @@
-import { useRouter } from "next/router";
+import { redirect } from "next/navigation";
+
 import { PropsWithChildren, useContext, useEffect } from "react";
 
 import AppLayout from "@cloudscape-design/components/app-layout";
@@ -16,18 +17,17 @@ export function isAdminRole(role: string | null) {
 
 function AdminLayout({ children }: PropsWithChildren) {
 	const { uid, role } = useContext(UserContext);
-	const router = useRouter();
 
 	const loggedIn = uid !== null;
 	const authorized = isAdminRole(role);
 
 	useEffect(() => {
 		if (!loggedIn) {
-			router.replace("/login");
+			redirect("/login")
 		} else if (!authorized) {
-			router.replace("/unauthorized");
+			redirect("/unauthorized")
 		}
-	}, [router, loggedIn, authorized]);
+	}, [loggedIn, authorized]);
 
 	if (!loggedIn || !authorized) {
 		return null;

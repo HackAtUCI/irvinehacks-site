@@ -1,13 +1,14 @@
-import { useRouter } from "next/router";
+import { usePathname } from "next/navigation";
 
 import SideNavigation, {
 	SideNavigationProps,
 } from "@cloudscape-design/components/side-navigation";
 
-import { BASE_PATH, followWithNextLink } from "./common";
+import { BASE_PATH, useFollowWithNextLink } from "./common";
 
 function AdminSidebar() {
-	const router = useRouter();
+	const pathname = usePathname();
+	const followWithNextLink = useFollowWithNextLink();
 
 	const navigationItems: SideNavigationProps.Item[] = [
 		{ type: "link", text: "Applicants", href: "/admin/applicants" },
@@ -17,7 +18,7 @@ function AdminSidebar() {
 
 	return (
 		<SideNavigation
-			activeHref={router.pathname}
+			activeHref={pathname}
 			header={{ href: BASE_PATH, text: "HackUCI 2023" }}
 			onFollow={followWithNextLink}
 			items={navigationItems}

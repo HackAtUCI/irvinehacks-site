@@ -1,11 +1,10 @@
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 import BreadcrumbGroup, {
 	BreadcrumbGroupProps,
 } from "@cloudscape-design/components/breadcrumb-group";
 
-import { BASE_PATH, followWithNextLink } from "./common";
+import { BASE_PATH, useFollowWithNextLink } from "./common";
 
 interface PathTitles {
 	[key: string]: string;
@@ -18,35 +17,10 @@ const pathTitles: PathTitles = {
 const DEFAULT_ITEMS = [{ text: "HackUCI 2023", href: BASE_PATH }];
 
 function Breadcrumbs() {
-	const router = useRouter();
-	const { asPath, isReady } = router;
+	const pathname = usePathname();
+	const followWithNextLink = useFollowWithNextLink();
 
-	const [breadcrumbItems, setBreadcrumbItems] =
-		useState<BreadcrumbGroupProps.Item[]>(DEFAULT_ITEMS);
-
-	useEffect(() => {
-		if (!isReady) {
-			return;
-		}
-
-		const items = [...DEFAULT_ITEMS];
-
-		if (asPath !== BASE_PATH) {
-			asPath
-				.slice("/admin/".length)
-				.split("/")
-				.reduce((partial, path) => {
-					partial += path;
-					items.push({
-						text: pathTitles[path] || path,
-						href: partial,
-					});
-					return partial;
-				}, "/admin/");
-		}
-
-		setBreadcrumbItems(items);
-	}, [asPath, isReady]);
+	const breadcrumbItems = getBreadcrumbItems(pathname);
 
 	return (
 		<BreadcrumbGroup
@@ -55,6 +29,26 @@ function Breadcrumbs() {
 			onFollow={followWithNextLink}
 		/>
 	);
+}
+
+function getBreadcrumbItems(pathname: string): BreadcrumbGroupProps.Item[] {
+	const items = [...DEFAULT_ITEMS];
+
+	if (pathname !== BASE_PATH) {
+		pathname
+			.slice("/admin/".length)
+			.split("/")
+			.reduce((partial, path) => {
+				partial += path;
+				items.push({
+					text: pathTitles[path] || path,
+					href: partial,
+				});
+				return partial;
+			}, "/admin/");
+	}
+
+	return items;
 }
 
 export default Breadcrumbs;

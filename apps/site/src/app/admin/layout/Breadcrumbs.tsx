@@ -14,7 +14,7 @@ const pathTitles: PathTitles = {
 	applicants: "Applicants",
 };
 
-const DEFAULT_ITEMS = [{ text: "HackUCI 2023", href: BASE_PATH }];
+const DEFAULT_ITEMS = [{ text: "IrvineHacks 2024", href: BASE_PATH }];
 
 function Breadcrumbs() {
 	const pathname = usePathname();

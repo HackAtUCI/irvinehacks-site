@@ -19,7 +19,7 @@ function AdminSidebar() {
 	return (
 		<SideNavigation
 			activeHref={pathname}
-			header={{ href: BASE_PATH, text: "HackUCI 2023" }}
+			header={{ href: BASE_PATH, text: "IrvineHacks 2024" }}
 			onFollow={followWithNextLink}
 			items={navigationItems}
 		/>

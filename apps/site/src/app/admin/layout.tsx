@@ -1,13 +1,20 @@
-import { Metadata } from "next/types";
+"use client";
 
 import { PropsWithChildren } from "react";
 
-export const metadata: Metadata = {
-	title: "Admin | IrvineHacks 2024",
-};
+import UserContext from "@/lib/admin/UserContext";
+import useUserIdentity from "@/lib/admin/useUserIdentity";
 
 function Layout({ children }: PropsWithChildren) {
-	return <div style={{ color: "red" }}>{children}</div>;
+	const identity = useUserIdentity();
+
+	if (!identity) {
+		return "Loading...";
+	}
+
+	return (
+		<UserContext.Provider value={identity}>{children}</UserContext.Provider>
+	);
 }
 
 export default Layout;

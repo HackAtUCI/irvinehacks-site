@@ -1,10 +1,13 @@
+"use client";
+
 import { redirect } from "next/navigation";
 
-import { PropsWithChildren, useContext, useEffect } from "react";
+import { PropsWithChildren } from "react";
 
 import AppLayout from "@cloudscape-design/components/app-layout";
 
 import UserContext from "@/lib/admin/UserContext";
+import useUserIdentity from "@/lib/admin/useUserIdentity";
 
 import AdminSidebar from "./AdminSidebar";
 import Breadcrumbs from "./Breadcrumbs";
@@ -16,29 +19,30 @@ export function isAdminRole(role: string | null) {
 }
 
 function AdminLayout({ children }: PropsWithChildren) {
-	const { uid, role } = useContext(UserContext);
+	const identity = useUserIdentity();
 
+	if (!identity) {
+		return "Loading...";
+	}
+
+	const { uid, role } = identity;
 	const loggedIn = uid !== null;
 	const authorized = isAdminRole(role);
 
-	useEffect(() => {
-		if (!loggedIn) {
-			redirect("/login")
-		} else if (!authorized) {
-			redirect("/unauthorized")
-		}
-	}, [loggedIn, authorized]);
-
-	if (!loggedIn || !authorized) {
-		return null;
+	if (!loggedIn) {
+		redirect("/login");
+	} else if (!authorized) {
+		redirect("/unauthorized");
 	}
 
 	return (
-		<AppLayout
-			content={children}
-			navigation={<AdminSidebar />}
-			breadcrumbs={<Breadcrumbs />}
-		/>
+		<UserContext.Provider value={identity}>
+			<AppLayout
+				content={children}
+				navigation={<AdminSidebar />}
+				breadcrumbs={<Breadcrumbs />}
+			/>
+		</UserContext.Provider>
 	);
 }
 

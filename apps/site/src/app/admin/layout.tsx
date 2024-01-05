@@ -1,20 +1,9 @@
-"use client";
+import { Metadata } from "next/types";
 
-import { PropsWithChildren } from "react";
+import "@cloudscape-design/global-styles/index.css";
 
-import UserContext from "@/lib/admin/UserContext";
-import useUserIdentity from "@/lib/admin/useUserIdentity";
+export const metadata: Metadata = {
+	title: "Admin | IrvineHacks 2024",
+};
 
-function Layout({ children }: PropsWithChildren) {
-	const identity = useUserIdentity();
-
-	if (!identity) {
-		return "Loading...";
-	}
-
-	return (
-		<UserContext.Provider value={identity}>{children}</UserContext.Provider>
-	);
-}
-
-export default Layout;
+export { default as default } from "./layout/AdminLayout";

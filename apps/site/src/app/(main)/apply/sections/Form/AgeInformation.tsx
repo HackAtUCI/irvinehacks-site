@@ -1,4 +1,4 @@
-import SimpleRadio from "@/app/apply/sections/Components/SimpleRadio";
+import SimpleRadio from "@/lib/components/forms/SimpleRadio";
 
 const yesNoOptions = [
 	{

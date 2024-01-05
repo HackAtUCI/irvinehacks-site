@@ -1,5 +1,5 @@
-import TextInput from "@/app/apply/sections/Components/TextInput";
-import Textfield from "@/app/apply/sections/Components/Textfield";
+import TextInput from "@/lib/components/forms/TextInput";
+import Textfield from "@/lib/components/forms/Textfield";
 import styles from "./Form.module.scss";
 
 const FRQ_MAX_LENGTH = 2000;

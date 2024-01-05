@@ -1,9 +1,10 @@
 "use client";
 
-import { ReactNode, useRef } from "react";
+import { PropsWithChildren, useRef } from "react";
+
 import Scene from "@/components/canvas/Scene";
 
-const Layout = ({ children }: { children: ReactNode }) => {
+const SceneLayout = ({ children }: PropsWithChildren) => {
 	const ref = useRef<HTMLDivElement>(null);
 
 	return (
@@ -37,4 +38,4 @@ const Layout = ({ children }: { children: ReactNode }) => {
 	);
 };
 
-export { Layout };
+export default SceneLayout;

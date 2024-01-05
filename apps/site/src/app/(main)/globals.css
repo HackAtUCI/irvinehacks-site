@@ -13,6 +13,7 @@
 
 body {
 	color: var(--color-cream);
+	background-color: var(--color-brown);
 }
 
 p {

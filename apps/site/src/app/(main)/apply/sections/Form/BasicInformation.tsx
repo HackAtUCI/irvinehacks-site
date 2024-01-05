@@ -1,5 +1,5 @@
-import RadioSelect from "@/app/apply/sections/Components/RadioSelect";
-import TextInput from "@/app/apply/sections/Components/TextInput";
+import RadioSelect from "@/lib/components/forms/RadioSelect";
+import TextInput from "@/lib/components/forms/TextInput";
 import styles from "./Form.module.scss";
 
 const pronouns = [

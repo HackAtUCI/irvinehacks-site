@@ -11,13 +11,10 @@ interface ApplicationSections {
 }
 
 const APPLICATION_SECTIONS: ApplicationSections = {
-	"Personal Information": ["gender", "pronouns", "ethnicity", "is_18_older"],
-	Education: ["university", "education_level", "major", "is_first_hackathon"],
-	Experience: ["portfolio_link", "linkedin_link", "resume_url"],
-	"Free Response Questions": [
-		"stress_relief_question",
-		"company_specialize_question",
-	],
+	"Personal Information": ["pronouns", "ethnicity", "is_18_older"],
+	Education: ["school", "education_level", "major", "is_first_hackathon"],
+	Experience: ["portfolio", "linkedin", "resume_url"],
+	"Free Response Questions": ["frq_collaboration", "frq_dream_job"],
 };
 
 interface ApplicationProps {

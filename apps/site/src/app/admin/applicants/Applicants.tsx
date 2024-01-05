@@ -48,9 +48,9 @@ function Applicants() {
 				header: CardHeader,
 				sections: [
 					{
-						id: "university",
-						header: "University",
-						content: ({ application_data }) => application_data.university,
+						id: "school",
+						header: "School",
+						content: ({ application_data }) => application_data.school,
 					},
 					{
 						id: "status",

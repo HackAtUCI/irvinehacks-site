@@ -10,7 +10,7 @@ export interface ApplicantSummary {
 	application_data: {
 		first_name: string;
 		last_name: string;
-		university: string;
+		school: string;
 		submission_time: string;
 	};
 }

@@ -2,10 +2,15 @@
 	"name": "api",
 	"private": true,
 	"scripts": {
-		"dev": "./run-docker.sh",
+		"dev": "run-script-os",
+		"dev:win32": ".\\run-docker.bat",
+		"dev:default": "./run-docker.sh",
 		"test": "pytest",
 		"lint": "flake8 src tests && mypy src tests",
 		"format:write": "black src tests",
 		"format:check": "black --check src tests"
+	},
+	"devDependencies": {
+		"run-script-os": "^1.1.6"
 	}
 }

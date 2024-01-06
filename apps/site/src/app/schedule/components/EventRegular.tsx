@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
-dayjs.extend(relativeTime);
 import convertToPST from "@/lib/utils/convertToPST";
+dayjs.extend(relativeTime);
 
 const dateTimeFormat = new Intl.DateTimeFormat("en", {
 	hour: "numeric",

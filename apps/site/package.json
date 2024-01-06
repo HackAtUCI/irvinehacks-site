@@ -17,7 +17,6 @@
 		"@radix-ui/react-select": "^2.0.0",
 		"@radix-ui/react-tabs": "^1.0.4",
 		"@radix-ui/react-toast": "^1.1.5",
-		"@radix-ui/themes": "^2.0.3",
 		"@react-three/drei": "^9.88.14",
 		"@react-three/fiber": "^8.15.11",
 		"@sanity/image-url": "^1.0.2",

@@ -6,7 +6,6 @@ import * as Tabs from "@radix-ui/react-tabs";
 import EventCard from "../components/EventCard";
 import convertToPST from "@/lib/utils/convertToPST";
 
-import "@radix-ui/themes/styles.css";
 import "./SchedulePage.scss";
 
 const T_REFRESH = 15000;

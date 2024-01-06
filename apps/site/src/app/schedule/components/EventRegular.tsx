@@ -32,25 +32,27 @@ interface EventMomentProps {
 }
 
 function EventTypeComponent({ eventType }: EventTypeProps) {
-	if (eventType === "Main") {
-		return (
-			<div className="inline-block px-4 py-1.5 font-semibold text-[#0D272D] bg-[#DFBA73] rounded-2xl sm:py-2">
-				{eventType}
-			</div>
-		);
-	} else if (eventType === "Workshop") {
-		return (
-			<div className="inline-block px-4 py-1.5 font-semibold text-[#0D272D] bg-[#94A9BD] rounded-2xl sm:py-2">
-				{eventType}
-			</div>
-		);
-	} else if (eventType === "Social") {
-		return (
-			<div className="inline-block px-4 py-1.5 font-semibold text-[#0D272D] bg-[#DFA9A9] rounded-2xl sm:py-2">
-				{eventType}
-			</div>
-		);
+	interface EventBackgroundColors {
+		Main: string;
+		Workshop: string;
+		Social: string;
 	}
+
+	const eventBackgroundColors: EventBackgroundColors = {
+		Main: "bg-[#DFBA73]",
+		Workshop: "bg-[#94A9BD]",
+		Social: "bg-[#DFA9A9]",
+	};
+
+	return (
+		<div
+			className={`inline-block px-4 py-1.5 font-semibold text-[#0D272D] ${
+				eventBackgroundColors[eventType as keyof EventBackgroundColors]
+			} rounded-2xl sm:py-2`}
+		>
+			{eventType}
+		</div>
+	);
 }
 
 function EventMomentComponent({

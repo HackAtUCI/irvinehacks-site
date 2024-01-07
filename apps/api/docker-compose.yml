@@ -1,5 +1,5 @@
 # Use root/example as user/password credentials
-version: "3.1"
+version: "3.4"
 
 services:
     mongo:
@@ -27,6 +27,7 @@ services:
             - "8000:8000"
         environment:
             MONGODB_URI: mongodb://root:example@mongo:27017
+            DEPLOYMENT: LOCAL
 
 volumes:
-    mongodb_data_volume:
+    mongodb_data_volume: {}

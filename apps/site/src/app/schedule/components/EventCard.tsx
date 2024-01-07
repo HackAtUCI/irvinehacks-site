@@ -1,19 +1,7 @@
 import EventRegular from "./EventRegular";
 import EventAnnouncement from "./EventAnnouncement";
 import EventMiscellaneous from "./EventMiscellaneous";
-
-interface EventProps {
-	now: Date;
-	title: string;
-	eventType: string;
-	location?: string | undefined;
-	virtual?: string | undefined;
-	startTime: Date;
-	endTime: Date;
-	organization?: string | undefined;
-	hosts?: string[] | undefined;
-	description: JSX.Element;
-}
+import EventProps from "../EventProps";
 
 export default function EventCard({
 	now,

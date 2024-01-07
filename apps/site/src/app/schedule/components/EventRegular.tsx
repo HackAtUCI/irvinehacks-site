@@ -1,25 +1,13 @@
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import convertToPST from "@/lib/utils/convertToPST";
+import EventProps from "../EventProps";
 dayjs.extend(relativeTime);
 
 const dateTimeFormat = new Intl.DateTimeFormat("en", {
 	hour: "numeric",
 	minute: "numeric",
 });
-
-interface EventProps {
-	now: Date;
-	title: string;
-	eventType: string;
-	location?: string | undefined;
-	virtual?: string | undefined;
-	startTime: Date;
-	endTime: Date;
-	organization?: string | undefined;
-	hosts?: string[] | undefined;
-	description: JSX.Element;
-}
 
 interface EventTypeProps {
 	eventType: string;
@@ -31,19 +19,19 @@ interface EventMomentProps {
 	endTimeInPST: Date;
 }
 
+interface EventBackgroundColors {
+	Main: string;
+	Workshop: string;
+	Social: string;
+}
+
+const eventBackgroundColors: EventBackgroundColors = {
+	Main: "bg-[#DFBA73]",
+	Workshop: "bg-[#94A9BD]",
+	Social: "bg-[#DFA9A9]",
+};
+
 function EventTypeComponent({ eventType }: EventTypeProps) {
-	interface EventBackgroundColors {
-		Main: string;
-		Workshop: string;
-		Social: string;
-	}
-
-	const eventBackgroundColors: EventBackgroundColors = {
-		Main: "bg-[#DFBA73]",
-		Workshop: "bg-[#94A9BD]",
-		Social: "bg-[#DFA9A9]",
-	};
-
 	return (
 		<div
 			className={`inline-block px-4 py-1.5 font-semibold text-[#0D272D] ${

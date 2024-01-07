@@ -5,7 +5,6 @@ const dateTimeFormat = new Intl.DateTimeFormat("en", {
 	day: "numeric",
 	hour: "numeric",
 	minute: "numeric",
-	timeZone: "America/Los_Angeles",
 });
 
 interface EventAnnouncementProps {

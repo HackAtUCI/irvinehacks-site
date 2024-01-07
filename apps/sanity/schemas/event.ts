@@ -14,6 +14,21 @@ export default defineType({
 			validation: (Rule) => Rule.required(),
 		}),
 		defineField({
+			name: "eventType",
+			title: "Event Type",
+			type: "string",
+			options: {
+				list: [
+					{ title: "Main", value: "Main" },
+					{ title: "Workshop", value: "Workshop" },
+					{ title: "Social", value: "Social" },
+					{ title: "Announcement", value: "Announcement" },
+					{ title: "Miscellaneous", value: "Miscellaneous" },
+				],
+			},
+			validation: (Rule) => Rule.required(),
+		}),
+		defineField({
 			name: "location",
 			title: "Location",
 			type: "string",

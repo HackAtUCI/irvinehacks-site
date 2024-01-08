@@ -23,7 +23,7 @@ const fetcher = async (url: string) => {
 function useApplicants() {
 	const { data, error, isLoading } = useSWR<ApplicantSummary[]>(
 		"/api/admin/applicants",
-		fetcher
+		fetcher,
 	);
 
 	return { applicantList: data || [], loading: isLoading, error };

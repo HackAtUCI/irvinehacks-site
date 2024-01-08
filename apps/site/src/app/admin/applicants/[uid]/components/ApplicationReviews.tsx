@@ -34,7 +34,7 @@ function ApplicationReviews({ reviews }: ApplicationReviewsProps) {
 						{formatUid(reviewer)} reviewed this application on{" "}
 						{formatDate(date)}
 					</li>
-				)
+				),
 			)}
 		</ul>
 	);

@@ -26,7 +26,7 @@ function Applicants() {
 			(selectedStatuses.length === 0 ||
 				selectedStatusValues.includes(applicant.status)) &&
 			(selectedDecisions.length === 0 ||
-				selectedDecisionValues.includes(applicant.decision || "-"))
+				selectedDecisionValues.includes(applicant.decision || "-")),
 	);
 
 	const items = filteredApplicants;

@@ -26,7 +26,7 @@ function ApplicantActions({ applicant, submitReview }: ApplicantActionsProps) {
 	}
 
 	const handleClick = (
-		event: CustomEvent<ButtonDropdownProps.ItemClickDetails>
+		event: CustomEvent<ButtonDropdownProps.ItemClickDetails>,
 	) => {
 		const review = event.detail.id;
 		submitReview(applicant, review as Decision);

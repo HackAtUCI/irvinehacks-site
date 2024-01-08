@@ -61,7 +61,7 @@ const fetcher = async ([api, uid]: string[]) => {
 function useApplicant(uid: uid) {
 	const { data, error, isLoading, mutate } = useSWR<Applicant | null>(
 		["/api/admin/applicant/", uid],
-		fetcher
+		fetcher,
 	);
 
 	async function submitReview(uid: uid, review: Decision) {

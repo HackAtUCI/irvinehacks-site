@@ -4,11 +4,11 @@ import ButtonDropdown, {
 	ButtonDropdownProps,
 } from "@cloudscape-design/components/button-dropdown";
 
-import { Decision, submitReview, uid } from "@/lib/admin/useApplicant";
+import { Decision, submitReview, Uid } from "@/lib/admin/useApplicant";
 import UserContext from "@/lib/admin/UserContext";
 
 interface ApplicantActionsProps {
-	applicant: uid;
+	applicant: Uid;
 	submitReview: submitReview;
 }
 

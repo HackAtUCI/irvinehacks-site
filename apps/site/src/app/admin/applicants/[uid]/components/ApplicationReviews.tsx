@@ -1,7 +1,7 @@
 import { useContext } from "react";
 
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
-import { Review, uid } from "@/lib/admin/useApplicant";
+import { Review, Uid } from "@/lib/admin/useApplicant";
 import UserContext from "@/lib/admin/UserContext";
 
 interface ApplicationReviewsProps {
@@ -15,7 +15,7 @@ function ApplicationReviews({ reviews }: ApplicationReviewsProps) {
 		return <p>-</p>;
 	}
 
-	const formatUid = (uid: uid) => uid.split(".").at(-1);
+	const formatUid = (uid: Uid) => uid.split(".").at(-1);
 	const formatDate = (timestamp: string) =>
 		new Date(timestamp).toLocaleDateString();
 

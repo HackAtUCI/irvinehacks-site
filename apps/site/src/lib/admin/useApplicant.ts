@@ -1,7 +1,7 @@
 import axios from "axios";
 import useSWR from "swr";
 
-export type uid = string;
+export type Uid = string;
 
 export enum Decision {
 	accepted = "ACCEPTED",
@@ -9,7 +9,7 @@ export enum Decision {
 	waitlisted = "WAITLISTED",
 }
 
-export type Review = [string, uid, Decision];
+export type Review = [string, Uid, Decision];
 
 // The application responses submitted by an applicant
 export interface ApplicationData {
@@ -44,13 +44,13 @@ export const Status = { ...ReviewStatus, ...Decision };
 export type Status = ReviewStatus | Decision;
 
 export interface Applicant {
-	_id: uid;
+	_id: Uid;
 	role: string;
 	status: Status;
 	application_data: ApplicationData;
 }
 
-const fetcher = async ([api, uid]: [string, uid]) => {
+const fetcher = async ([api, uid]: [string, Uid]) => {
 	if (!uid) {
 		return null;
 	}
@@ -58,14 +58,14 @@ const fetcher = async ([api, uid]: [string, uid]) => {
 	return res.data;
 };
 
-function useApplicant(uid: uid) {
+function useApplicant(uid: Uid) {
 	const { data, error, isLoading, mutate } = useSWR<
 		Applicant | null,
 		unknown,
-		[string, uid]
+		[string, Uid]
 	>(["/api/admin/applicant/", uid], fetcher);
 
-	async function submitReview(uid: uid, review: Decision) {
+	async function submitReview(uid: Uid, review: Decision) {
 		await axios.post("/api/admin/review", { applicant: uid, decision: review });
 		// TODO: provide success status to display in alert
 		mutate();
@@ -74,6 +74,6 @@ function useApplicant(uid: uid) {
 	return { applicant: data, loading: isLoading, error, submitReview };
 }
 
-export type submitReview = (uid: uid, review: Decision) => Promise<void>;
+export type submitReview = (uid: Uid, review: Decision) => Promise<void>;
 
 export default useApplicant;

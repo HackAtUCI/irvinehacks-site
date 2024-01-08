@@ -2,6 +2,7 @@
 
 import { Suspense } from "react";
 import Image from "next/image";
+import clsx from "clsx";
 import { PerspectiveCamera } from "@react-three/drei";
 
 import View from "@/components/canvas/View";

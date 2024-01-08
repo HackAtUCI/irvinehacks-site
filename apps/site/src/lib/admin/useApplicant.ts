@@ -50,7 +50,7 @@ export interface Applicant {
 	application_data: ApplicationData;
 }
 
-const fetcher = async ([api, uid]: string[]) => {
+const fetcher = async ([api, uid]: [string, uid]) => {
 	if (!uid) {
 		return null;
 	}
@@ -59,10 +59,11 @@ const fetcher = async ([api, uid]: string[]) => {
 };
 
 function useApplicant(uid: uid) {
-	const { data, error, isLoading, mutate } = useSWR<Applicant | null>(
-		["/api/admin/applicant/", uid],
-		fetcher,
-	);
+	const { data, error, isLoading, mutate } = useSWR<
+		Applicant | null,
+		unknown,
+		[string, uid]
+	>(["/api/admin/applicant/", uid], fetcher);
 
 	async function submitReview(uid: uid, review: Decision) {
 		await axios.post("/api/admin/review", { applicant: uid, decision: review });

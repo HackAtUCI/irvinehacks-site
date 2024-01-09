@@ -1,13 +1,9 @@
 import { Metadata } from "next/types";
 
-import { PropsWithChildren } from "react";
+import "@cloudscape-design/global-styles/index.css";
 
 export const metadata: Metadata = {
 	title: "Admin | IrvineHacks 2024",
 };
 
-function Layout({ children }: PropsWithChildren) {
-	return <div style={{ color: "red" }}>{children}</div>;
-}
-
-export default Layout;
+export { default as default } from "./layout/AdminLayout";

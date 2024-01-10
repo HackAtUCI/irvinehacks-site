@@ -1,10 +1,8 @@
 .button {
-	background-image: radial-gradient(
-		50% 50% at 50% 50%,
-		#fff3d6 0%,
-		#ffda7b 51.04%,
-		#ffa700 100%
-	);
+	background-image: radial-gradient(50% 50% at 50% 50%,
+			#fff3d6 0%,
+			#ffda7b 51.04%,
+			#ffa700 100%);
 	box-shadow: 0px 0px 20px rgba(255, 252, 226, 0.5);
 	border-radius: 15px;
 	color: var(--color-brown);
@@ -32,4 +30,12 @@
 	margin: 0;
 
 	font-size: 28px;
+}
+
+.disabledButton {
+	padding: 0.15rem 1.15rem;
+	font-size: 28px;
+	pointer-events: none;
+
+	filter: brightness(0.5);
 }

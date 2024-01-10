@@ -32,6 +32,11 @@ export default async function Apply({
 		redirect("/login");
 	}
 
+
+	const deadlineMs = 1705305540000;
+	const deadlinePassed = Date.now() > deadlineMs;
+	console.log(deadlinePassed);
+
 	const applyBody = hasAcceptedQueryParam ? (
 		<>
 			<Title />

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import clsx from "clsx";
 import * as NavMenu from "@radix-ui/react-navigation-menu";
+import dayjs from "dayjs";
 
 import NavLinkItem from "./NavbarHelpers";
 import Button from "@/lib/components/Button/Button";
@@ -34,8 +35,8 @@ function Navbar({ identity }: NavbarProps) {
 		window.addEventListener("scroll", scrollHandler);
 	}, []);
 
-	const deadlineMs = 1704907740 * 1000;
-	const deadlinePassed = Date.now() > deadlineMs;
+	const deadlineSeconds = 1705305540;
+	const deadlinePassed = dayjs().unix() > deadlineSeconds;
 
 	return (
 		<NavMenu.Root

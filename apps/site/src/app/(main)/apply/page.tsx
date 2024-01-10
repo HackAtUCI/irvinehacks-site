@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { redirect } from "next/navigation";
+import dayjs from "dayjs";
 
 import ApplyConfirm from "./sections/ApplyConfirmation/ApplyConfirm";
 import Form from "./sections/Form/Form";
@@ -10,6 +11,7 @@ import koiLeft from "@/assets/images/koi-swim-left.png";
 import koiRight from "@/assets/images/koi-swim-right.png";
 
 import styles from "./Apply.module.scss";
+import ApplicationsClosed from "./sections/ApplicationsClosed/ApplicationsClosed";
 
 export const revalidate = 60;
 
@@ -32,10 +34,8 @@ export default async function Apply({
 		redirect("/login");
 	}
 
-
-	const deadlineMs = 1705305540000;
-	const deadlinePassed = Date.now() > deadlineMs;
-	console.log(deadlinePassed);
+	const deadlineSeconds = 1705305540;
+	const deadlinePassed = dayjs().unix() > deadlineSeconds;
 
 	const applyBody = hasAcceptedQueryParam ? (
 		<>
@@ -73,7 +73,7 @@ export default async function Apply({
 	);
 	return (
 		<div className="flex flex-col items-center gap-10 my-32 min-h-[calc(100vh-8rem)]">
-			{applyBody}
+			{deadlinePassed ? <ApplicationsClosed /> : applyBody}
 		</div>
 	);
 }

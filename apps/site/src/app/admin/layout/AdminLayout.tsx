@@ -41,10 +41,12 @@ function AdminLayout({ children }: PropsWithChildren) {
 	return (
 		<SWRConfig
 			value={{
-				onError: (err) => {
+				shouldRetryOnError: (err) => {
 					if (axios.isAxiosError(err) && err.response?.status === 401) {
 						router.push("/login");
+						return false;
 					}
+					return true;
 				},
 			}}
 		>

@@ -34,6 +34,9 @@ function Navbar({ identity }: NavbarProps) {
 		window.addEventListener("scroll", scrollHandler);
 	}, []);
 
+	const deadlineMs = 1704907740 * 1000;
+	const deadlinePassed = Date.now() > deadlineMs;
+
 	return (
 		<NavMenu.Root
 			className={`${hasScrolled ? "md:bg-opacity-50" : ""} ${
@@ -52,11 +55,7 @@ function Navbar({ identity }: NavbarProps) {
 						setHidden(false);
 					}}
 				>
-					<Image
-						src={hamburger}
-						width="40"
-						alt="Mobile hamburger menu"
-					/>
+					<Image src={hamburger} width="40" alt="Mobile hamburger menu" />
 				</button>
 			</NavMenu.List>
 			<div
@@ -76,10 +75,14 @@ function Navbar({ identity }: NavbarProps) {
 					<NavLinkItem href="/">Schedule</NavLinkItem>
 					<NavLinkItem href="/">Resources</NavLinkItem>
 					<NavLinkItem href="/">Stage</NavLinkItem> */}
-					{!status && <NavLinkItem href="/apply">Apply</NavLinkItem>}
-					{status !== null && (
-						<NavLinkItem href="/portal">Portal</NavLinkItem>
-					)}
+					{!status &&
+						(deadlinePassed ? (
+							<Button text="Applications closed" disabled />
+						) : (
+							<NavLinkItem href="/apply">Apply</NavLinkItem>
+						))}
+
+					{status !== null && <NavLinkItem href="/portal">Portal</NavLinkItem>}
 					{isLoggedIn ? (
 						<Button
 							text="Log In"
@@ -90,10 +93,7 @@ function Navbar({ identity }: NavbarProps) {
 					) : (
 						<a
 							href="/logout"
-							className={clsx(
-								buttonStyles.button,
-								buttonStyles.lightButton,
-							)}
+							className={clsx(buttonStyles.button, buttonStyles.lightButton)}
 						>
 							Log Out
 						</a>

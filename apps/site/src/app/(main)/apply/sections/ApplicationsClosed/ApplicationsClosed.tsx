@@ -8,12 +8,18 @@ function ApplicationsClosed() {
 			</h1>
 			<hr className="mt-5 w-full h-0.5 bg-[#432810]" />
 			<p className="pt-10 text-lg">
-				If you already applied, please <Link href="/login" className="text-blue-600 underline">log in</Link> to
-				visit your applicant portal.
+				If you already applied, please{" "}
+				<Link href="/login" className="text-blue-600 underline">
+					log in
+				</Link>{" "}
+				to visit your applicant portal.
 			</p>
 			<p className="text-lg">
 				If you have any other questions or concerns, feel free to contact us at{" "}
-				<a href="mailto:hack@uci.edu" className="text-blue-600 underline">hack@uci.edu</a>.
+				<a href="mailto:hack@uci.edu" className="text-blue-600 underline">
+					hack@uci.edu
+				</a>
+				.
 			</p>
 		</div>
 	);

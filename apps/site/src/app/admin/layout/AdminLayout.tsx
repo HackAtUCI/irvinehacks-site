@@ -41,7 +41,7 @@ function AdminLayout({ children }: PropsWithChildren) {
 	return (
 		<SWRConfig
 			value={{
-				onError: (err, _) => {
+				onError: (err) => {
 					if (axios.isAxiosError(err)) {
 						router.push("/login");
 					}

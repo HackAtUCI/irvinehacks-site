@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { redirect } from "next/navigation";
-import dayjs from "dayjs";
+
+import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
 
 import ApplyConfirm from "./sections/ApplyConfirmation/ApplyConfirm";
 import Form from "./sections/Form/Form";
@@ -34,8 +35,7 @@ export default async function Apply({
 		redirect("/login");
 	}
 
-	const deadlineSeconds = 1705305540;
-	const deadlinePassed = dayjs().unix() > deadlineSeconds;
+	const deadlinePassed = hasDeadlinePassed();
 
 	const applyBody = hasAcceptedQueryParam ? (
 		<>

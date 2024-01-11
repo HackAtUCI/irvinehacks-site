@@ -68,10 +68,7 @@ async def apply(
     deadline = datetime(2024, 1, 15, 7, 59, tzinfo=timezone.utc)
 
     if now > deadline:
-        raise HTTPException(
-            status.HTTP_403_FORBIDDEN,
-            "Applications have been closed."
-        )
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Applications have been closed.")
 
     # check if email is already in database
     EXISTING_RECORD = await mongodb_handler.retrieve_one(

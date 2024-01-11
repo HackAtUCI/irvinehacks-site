@@ -3,8 +3,8 @@ import Link from "next/link";
 function ApplicationsClosed() {
 	return (
 		<div className="rounded-2xl p-10 text-display text-[#432810] bg-white text-center w-8/12 max-[800px]:w-9/12 max-[400px]:w-11/12">
-			<h1 className="text-4xl p-10">
-				<p>Applications for IrvineHacks 2024 were closed on January 14th.</p>
+			<h1 className="text-4xl p-10 font-semibold max-[800px]:p-0">
+				Applications for IrvineHacks 2024 closed on January 14th.
 			</h1>
 			<hr className="mt-5 w-full h-0.5 bg-[#432810]" />
 			<p className="pt-10 text-lg">

@@ -25,7 +25,7 @@ class IdentityResponse(BaseModel):
     role: Union[Role, None] = None
 
 
-def getHasDeadlinePassed():
+def getHasDeadlinePassed() -> bool:
     now = datetime.now(timezone.utc)
     deadline = datetime(2024, 1, 15, 7, 59, tzinfo=timezone.utc)
 

@@ -24,6 +24,11 @@ class IdentityResponse(BaseModel):
     status: Union[str, None] = None
     role: Union[Role, None] = None
 
+def getHasDeadlinePassed():
+    now = datetime.now(timezone.utc)
+    deadline = datetime(2024, 1, 15, 7, 59, tzinfo=timezone.utc)
+
+    return now > deadline
 
 @router.post("/login")
 async def login(email: EmailStr = Form()) -> RedirectResponse:
@@ -65,9 +70,8 @@ async def apply(
 ) -> str:
     # Check if current datetime is past application deadline
     now = datetime.now(timezone.utc)
-    deadline = datetime(2024, 1, 15, 7, 59, tzinfo=timezone.utc)
 
-    if now > deadline:
+    if getHasDeadlinePassed():
         raise HTTPException(
             status.HTTP_403_FORBIDDEN,
             "Applications have been closed."

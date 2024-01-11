@@ -20,6 +20,7 @@ router = APIRouter()
 
 deadline = datetime(2024, 1, 15, 7, 59, tzinfo=timezone.utc)
 
+
 class IdentityResponse(BaseModel):
     uid: Union[str, None] = None
     status: Union[str, None] = None
@@ -72,10 +73,7 @@ async def apply(
     now = datetime.now(timezone.utc)
 
     if _is_past_deadline(now):
-        raise HTTPException(
-            status.HTTP_403_FORBIDDEN,
-            "Applications have closed."
-        )
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Applications have closed.")
 
     # check if email is already in database
     EXISTING_RECORD = await mongodb_handler.retrieve_one(

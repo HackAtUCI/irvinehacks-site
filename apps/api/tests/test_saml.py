@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, AsyncMock, patch
 
 from fastapi.testclient import TestClient
 from onelogin.saml2.settings import OneLogin_Saml2_Settings
@@ -35,8 +35,11 @@ def test_saml_login_redirects(mock_get_saml_settings: MagicMock) -> None:
     assert res.headers["location"].startswith(SSO_URL)
 
 
+@patch("services.mongodb_handler.update_one", autospec=True)
 @patch("routers.saml._get_saml_auth")
-def test_saml_acs_succeeds(mock_get_saml_auth: MagicMock) -> None:
+def test_saml_acs_succeeds(
+    mock_get_saml_auth: MagicMock, mock_mongodb_handler_update_one: AsyncMock
+) -> None:
     """Tests that the ACS route can process a valid auth request"""
     mock_auth = MagicMock()
     mock_get_saml_auth.return_value = mock_auth
@@ -52,6 +55,8 @@ def test_saml_acs_succeeds(mock_get_saml_auth: MagicMock) -> None:
 
     res = client.post("/acs", follow_redirects=False)
     mock_auth.process_response.assert_called()
+
+    mock_mongodb_handler_update_one.assert_awaited_once()
 
     # check that user is redirected to main page
     assert res.status_code == 303

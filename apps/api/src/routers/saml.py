@@ -11,7 +11,8 @@ from onelogin.saml2.auth import OneLogin_Saml2_Auth
 from onelogin.saml2.settings import OneLogin_Saml2_Settings
 
 from auth.user_identity import NativeUser, utc_now, issue_user_identity
-from services.mongodb_handler import Collection, update_one
+from services import mongodb_handler
+from services.mongodb_handler import Collection
 
 log = getLogger(__name__)
 
@@ -84,7 +85,7 @@ async def _get_saml_auth(req: Request) -> OneLogin_Saml2_Auth:
 
 async def _insert_native_record(user: NativeUser) -> None:
     now = utc_now()
-    await update_one(
+    await mongodb_handler.update_one(
         Collection.USERS, {"_id": user.uid}, {"last_login": now}, upsert=True
     )
 

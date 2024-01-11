@@ -83,7 +83,7 @@ async def _get_saml_auth(req: Request) -> OneLogin_Saml2_Auth:
     return OneLogin_Saml2_Auth(request_data, old_settings=settings)
 
 
-async def _insert_native_record(user: NativeUser) -> None:
+async def _update_last_login(user: NativeUser) -> None:
     now = utc_now()
     await mongodb_handler.update_one(
         Collection.USERS, {"_id": user.uid}, {"last_login": now}, upsert=True
@@ -135,7 +135,7 @@ async def acs(req: Request) -> RedirectResponse:
         affiliations=affiliations,
     )
 
-    await _insert_native_record(user)
+    await _update_last_login(user)
 
     res = RedirectResponse("/portal", status_code=303)
     issue_user_identity(user, res)

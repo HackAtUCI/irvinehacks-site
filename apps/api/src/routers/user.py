@@ -25,8 +25,7 @@ class IdentityResponse(BaseModel):
     role: Union[Role, None] = None
 
 
-def getHasDeadlinePassed() -> bool:
-    now = datetime.now(timezone.utc)
+def getHasDeadlinePassed(now: datetime) -> bool:
     deadline = datetime(2024, 1, 15, 7, 59, tzinfo=timezone.utc)
 
     return now > deadline
@@ -73,7 +72,7 @@ async def apply(
     # Check if current datetime is past application deadline
     now = datetime.now(timezone.utc)
 
-    if getHasDeadlinePassed():
+    if getHasDeadlinePassed(now):
         raise HTTPException(
             status.HTTP_403_FORBIDDEN,
             "Applications have been closed."

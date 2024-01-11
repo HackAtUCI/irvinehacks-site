@@ -10,7 +10,8 @@ from fastapi.responses import RedirectResponse, Response
 from onelogin.saml2.auth import OneLogin_Saml2_Auth
 from onelogin.saml2.settings import OneLogin_Saml2_Settings
 
-from auth import user_identity
+from auth.user_identity import NativeUser, utc_now, issue_user_identity
+from services.mongodb_handler import Collection, update_one
 
 log = getLogger(__name__)
 
@@ -81,6 +82,13 @@ async def _get_saml_auth(req: Request) -> OneLogin_Saml2_Auth:
     return OneLogin_Saml2_Auth(request_data, old_settings=settings)
 
 
+async def _insert_native_record(user: NativeUser) -> None:
+    now = utc_now()
+    await update_one(
+        Collection.USERS, {"_id": user.uid}, {"last_login": now}, upsert=True
+    )
+
+
 @router.get("/login")
 async def login(req: Request) -> RedirectResponse:
     auth = await _get_saml_auth(req)
@@ -119,15 +127,17 @@ async def acs(req: Request) -> RedirectResponse:
         log.exception("Error decoding SAML Attributes: %s", e)
         raise HTTPException(500, "Error decoding user identity")
 
-    user = user_identity.NativeUser(
+    user = NativeUser(
         ucinetid=ucinetid,
         display_name=display_name,
         email=email,
         affiliations=affiliations,
     )
 
+    await _insert_native_record(user)
+
     res = RedirectResponse("/portal", status_code=303)
-    user_identity.issue_user_identity(user, res)
+    issue_user_identity(user, res)
     return res
 
 

@@ -18,6 +18,7 @@ log = getLogger(__name__)
 
 router = APIRouter()
 
+deadline = datetime(2024, 1, 15, 7, 59, tzinfo=timezone.utc)
 
 class IdentityResponse(BaseModel):
     uid: Union[str, None] = None
@@ -25,9 +26,7 @@ class IdentityResponse(BaseModel):
     role: Union[Role, None] = None
 
 
-def getHasDeadlinePassed(now: datetime) -> bool:
-    deadline = datetime(2024, 1, 15, 7, 59, tzinfo=timezone.utc)
-
+def _is_past_deadline(now: datetime) -> bool:
     return now > deadline
 
 
@@ -72,10 +71,10 @@ async def apply(
     # Check if current datetime is past application deadline
     now = datetime.now(timezone.utc)
 
-    if getHasDeadlinePassed(now):
+    if _is_past_deadline(now):
         raise HTTPException(
             status.HTTP_403_FORBIDDEN,
-            "Applications have been closed."
+            "Applications have closed."
         )
 
     # check if email is already in database

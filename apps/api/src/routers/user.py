@@ -24,11 +24,13 @@ class IdentityResponse(BaseModel):
     status: Union[str, None] = None
     role: Union[Role, None] = None
 
+
 def getHasDeadlinePassed():
     now = datetime.now(timezone.utc)
     deadline = datetime(2024, 1, 15, 7, 59, tzinfo=timezone.utc)
 
     return now > deadline
+
 
 @router.post("/login")
 async def login(email: EmailStr = Form()) -> RedirectResponse:

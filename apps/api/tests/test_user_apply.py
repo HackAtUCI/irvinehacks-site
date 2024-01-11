@@ -87,7 +87,7 @@ client = UserTestClient(USER_PKFIRE, app)
 @patch("routers.user.getHasDeadlinePassed", autospec=True)
 @patch("routers.user.datetime", autospec=True)
 @patch("services.gdrive_handler.upload_file", autospec=True)
-@patch("services.mongodb_handler.retrieve_one", autospec=True)  
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
 def test_apply_successfully(
     mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_gdrive_handler_upload_file: AsyncMock,

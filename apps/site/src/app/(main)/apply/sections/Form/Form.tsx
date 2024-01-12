@@ -51,6 +51,7 @@ export default function Form() {
 				// to force reload the page to allow user identity to
 				// update with the new status
 				window.location.href = "/portal";
+				return;
 			}
 		} catch (err) {
 			console.error(err);
@@ -67,11 +68,7 @@ export default function Form() {
 	const sessionExpiredMessage = (
 		<p className="text-red-500 w-11/12">
 			Your session has expired. Please{" "}
-			<a
-				href="/login"
-				target="_blank"
-				className="text-blue-600 underline"
-			>
+			<a href="/login" target="_blank" className="text-blue-600 underline">
 				log in from a new tab
 			</a>{" "}
 			to restore your session and then try submitting again.

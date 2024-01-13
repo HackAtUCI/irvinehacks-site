@@ -75,16 +75,9 @@ function Navbar({ identity }: NavbarProps) {
 					<NavLinkItem href="/">Schedule</NavLinkItem>
 					<NavLinkItem href="/">Resources</NavLinkItem>
 					<NavLinkItem href="/">Stage</NavLinkItem> */}
-					{!status &&
-						(deadlinePassed ? (
-							<p
-								className={clsx(styles.navMenuLink, styles.disabledLink, "m-0")}
-							>
-								Applications have closed
-							</p>
-						) : (
-							<NavLinkItem href="/apply">Apply</NavLinkItem>
-						))}
+					{!status && !deadlinePassed && (
+						<NavLinkItem href="/apply">Apply</NavLinkItem>
+					)}
 
 					{status !== null && <NavLinkItem href="/portal">Portal</NavLinkItem>}
 					{isLoggedIn ? (

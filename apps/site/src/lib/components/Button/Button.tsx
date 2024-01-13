@@ -40,11 +40,7 @@ const Button: React.FC<ButtonProps> = ({
 	return (
 		<button
 			type="submit"
-			className={clsx(
-				styles.button,
-				disabled && styles.disabledButton,
-				"font-body",
-			)}
+			className={styles.button + " font-body"}
 			disabled={disabled}
 		>
 			{text}

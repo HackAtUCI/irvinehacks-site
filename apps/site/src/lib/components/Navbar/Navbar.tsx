@@ -77,7 +77,11 @@ function Navbar({ identity }: NavbarProps) {
 					<NavLinkItem href="/">Stage</NavLinkItem> */}
 					{!status &&
 						(deadlinePassed ? (
-							<Button text="Applications closed" disabled />
+							<p
+								className={clsx(styles.navMenuLink, styles.disabledLink, "m-0")}
+							>
+								Applications have closed
+							</p>
 						) : (
 							<NavLinkItem href="/apply">Apply</NavLinkItem>
 						))}

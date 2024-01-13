@@ -33,11 +33,3 @@
 
 	font-size: 28px;
 }
-
-.disabledButton {
-	padding: 0.15rem 1.15rem;
-	font-size: 28px;
-	pointer-events: none;
-
-	filter: brightness(0.5);
-}

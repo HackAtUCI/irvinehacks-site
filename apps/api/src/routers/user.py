@@ -1,4 +1,3 @@
-import urllib.parse
 from datetime import datetime, timezone
 from logging import getLogger
 from typing import Annotated, Optional, Union
@@ -11,7 +10,7 @@ from auth import user_identity
 from auth.authorization import require_accepted_applicant
 from auth.user_identity import User, require_user_identity, use_user_identity
 from models.ApplicationData import ProcessedApplicationData, RawApplicationData
-from services import mongodb_handler
+from services import docusign_handler, mongodb_handler
 from services.mongodb_handler import Collection
 from utils import email_handler, resume_handler
 from utils.user_record import Applicant, Role, Status
@@ -157,7 +156,7 @@ async def apply(
 
 
 @router.get("/waiver")
-async def waiver(
+async def request_waiver(
     user: Annotated[tuple[User, Applicant], Depends(require_accepted_applicant)]
 ) -> RedirectResponse:
     """Request to sign the participant waiver through DocuSign."""
@@ -169,19 +168,5 @@ async def waiver(
 
     user_name = f"{application_data.first_name} {application_data.last_name}"
 
-    role_name = "Participant"
-    query = urllib.parse.urlencode(
-        {
-            "env": "demo",  # temporary
-            "PowerFormId": "d5120219-dec1-41c5-b579-5e6b45c886e8",  # temporary
-            "acct": "cc0e3157-358d-4e10-acb0-ef39db7e3071",  # temporary
-            f"{role_name}_Email": user_data.email,
-            f"{role_name}_UserName": user_name,
-            "v": "2",
-        }
-    )
-
-    FORM_URL = (
-        f"https://demo.docusign.net/Member/PowerFormSigning.aspx?{query}"  # temporary
-    )
-    return RedirectResponse(FORM_URL, status.HTTP_303_SEE_OTHER)
+    form_url = docusign_handler.waiver_form_url(user_data.email, user_name)
+    return RedirectResponse(form_url, status.HTTP_303_SEE_OTHER)

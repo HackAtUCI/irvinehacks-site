@@ -7,6 +7,15 @@ import SponsorTier from "./components/SponsorTier/SponsorTier";
 
 import styles from "./Sponsors.module.scss";
 
+const TIERS = [
+	"platinum",
+	"gold",
+	"silver",
+	"bronze",
+	"sponsored-prize",
+	"in-kind",
+];
+
 export default async function Sponsors() {
 	const sponsors = await getSponsors();
 
@@ -26,27 +35,11 @@ export default async function Sponsors() {
 				</a>
 				.
 			</p>
-			<SponsorTier
-				sponsors={sponsors.get("platinum")}
-				className={styles.platinum}
-			/>
-			<SponsorTier sponsors={sponsors.get("gold")} className={styles.gold} />
-			<SponsorTier
-				sponsors={sponsors.get("silver")}
-				className={styles.silver}
-			/>
-			<SponsorTier
-				sponsors={sponsors.get("bronze")}
-				className={styles.bronze}
-			/>
-			<SponsorTier
-				sponsors={sponsors.get("sponsored-prize")}
-				className={styles["sponsored-prize"]}
-			/>
-			<SponsorTier
-				sponsors={sponsors.get("in-kind")}
-				className={styles["in-kind"]}
-			/>
+			{TIERS.map((tier) => (
+				<div key={tier}>
+					<SponsorTier sponsors={sponsors.get(tier)} className={styles[tier]} />
+				</div>
+			))}
 			<Image src={fishingBoat} alt="boat" width="400" height="400" />
 		</section>
 	);

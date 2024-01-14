@@ -1,3 +1,21 @@
 .title {
 	text-shadow: 0px 0px 20px rgba(255, 255, 255, 0.75);
 }
+
+@media (min-width: 1024px) {
+	.platinum,
+	.gold {
+		max-width: 400px;
+		max-height: 400px;
+	}
+	.silver {
+		max-width: 350px;
+		max-height: 350px;
+	}
+	.bronze,
+	.sponsored-prize,
+	.in-kind {
+		max-width: 300px;
+		max-height: 300px;
+	}
+}

@@ -6,18 +6,19 @@ import { Sponsor } from "../../getSponsors";
 const builder = imageUrlBuilder(client);
 
 interface SponsorTierProps {
+	className: string;
 	sponsors?: z.infer<typeof Sponsor>[];
 }
 
-export default function SponsorTier({ sponsors }: SponsorTierProps) {
+export default function SponsorTier({ className, sponsors }: SponsorTierProps) {
 	return (
-		<div className="lg:flex m-10 lg:gap-10 items-center">
+		<div className="xl:flex m-10 xl:gap-10 items-center">
 			{sponsors?.map(({ _key, name, url, logo }) => (
 				<a key={_key} href={url} target="_blank" rel="noopener noreferrer">
 					<img
 						src={builder.image(logo).format("webp").url()}
 						alt={name + " logo"}
-						className="max-w-full max-h-full lg:max-w-[300px] lg:max-h-[300px] m-auto my-5"
+						className={"max-w-full max-h-full m-auto my-5 " + className}
 					/>
 				</a>
 			))}

@@ -26,12 +26,27 @@ export default async function Sponsors() {
 				</a>
 				.
 			</p>
-			<SponsorTier sponsors={sponsors.get("platinum")} maxWidth={500} />
-			<SponsorTier sponsors={sponsors.get("gold")} maxWidth={400} />
-			<SponsorTier sponsors={sponsors.get("silver")} maxWidth={300} />
-			<SponsorTier sponsors={sponsors.get("bronze")} maxWidth={200} />
-			<SponsorTier sponsors={sponsors.get("sponsored-prize")} maxWidth={200} />
-			<SponsorTier sponsors={sponsors.get("in-kind")} maxWidth={200} />
+			<SponsorTier
+				sponsors={sponsors.get("platinum")}
+				className={styles.platinum}
+			/>
+			<SponsorTier sponsors={sponsors.get("gold")} className={styles.gold} />
+			<SponsorTier
+				sponsors={sponsors.get("silver")}
+				className={styles.silver}
+			/>
+			<SponsorTier
+				sponsors={sponsors.get("bronze")}
+				className={styles.bronze}
+			/>
+			<SponsorTier
+				sponsors={sponsors.get("sponsored-prize")}
+				className={styles["sponsored-prize"]}
+			/>
+			<SponsorTier
+				sponsors={sponsors.get("in-kind")}
+				className={styles["in-kind"]}
+			/>
 			<Image src={fishingBoat} alt="boat" width="400" height="400" />
 		</section>
 	);

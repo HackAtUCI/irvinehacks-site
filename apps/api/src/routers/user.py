@@ -18,11 +18,17 @@ log = getLogger(__name__)
 
 router = APIRouter()
 
+DEADLINE = datetime(2024, 1, 15, 7, 59, tzinfo=timezone.utc)
+
 
 class IdentityResponse(BaseModel):
     uid: Union[str, None] = None
     status: Union[str, None] = None
     role: Union[Role, None] = None
+
+
+def _is_past_deadline(now: datetime) -> bool:
+    return now > DEADLINE
 
 
 @router.post("/login")
@@ -63,6 +69,12 @@ async def apply(
     raw_application_data: Annotated[RawApplicationData, Depends(RawApplicationData)],
     resume: Optional[UploadFile] = None,
 ) -> str:
+    # Check if current datetime is past application deadline
+    now = datetime.now(timezone.utc)
+
+    if _is_past_deadline(now):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Applications have closed.")
+
     # check if email is already in database
     EXISTING_RECORD = await mongodb_handler.retrieve_one(
         Collection.USERS, {"_id": user.uid}
@@ -102,7 +114,6 @@ async def apply(
     else:
         resume_url = None
 
-    now = datetime.now(timezone.utc)
     processed_application_data = ProcessedApplicationData(
         **raw_app_data_dump,
         resume_url=resume_url,

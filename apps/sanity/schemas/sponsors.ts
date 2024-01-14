@@ -34,12 +34,28 @@ export default defineType({
 							options: {
 								list: [
 									{
-										title: "Bronze",
-										value: "bronze",
+										title: "Platinum",
+										value: "platinum",
+									},
+									{
+										title: "Gold",
+										value: "gold",
 									},
 									{
 										title: "Silver",
 										value: "silver",
+									},
+									{
+										title: "Bronze",
+										value: "bronze",
+									},
+									{
+										title: "Sponsored Prize",
+										value: "sponsored-prize",
+									},
+									{
+										title: "In-Kind",
+										value: "in-kind",
 									},
 								],
 								layout: "radio",

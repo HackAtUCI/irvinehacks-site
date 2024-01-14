@@ -18,7 +18,7 @@ log = getLogger(__name__)
 
 router = APIRouter()
 
-deadline = datetime(2024, 1, 15, 7, 59, tzinfo=timezone.utc)
+DEADLINE = datetime(2024, 1, 15, 7, 59, tzinfo=timezone.utc)
 
 
 class IdentityResponse(BaseModel):
@@ -28,7 +28,7 @@ class IdentityResponse(BaseModel):
 
 
 def _is_past_deadline(now: datetime) -> bool:
-    return now > deadline
+    return now > DEADLINE
 
 
 @router.post("/login")

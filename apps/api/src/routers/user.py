@@ -1,3 +1,4 @@
+import urllib.parse
 from datetime import datetime, timezone
 from logging import getLogger
 from typing import Annotated, Optional, Union
@@ -7,6 +8,7 @@ from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, EmailStr
 
 from auth import user_identity
+from auth.authorization import require_accepted_applicant
 from auth.user_identity import User, require_user_identity, use_user_identity
 from models.ApplicationData import ProcessedApplicationData, RawApplicationData
 from services import mongodb_handler
@@ -152,3 +154,34 @@ async def apply(
         "Thank you for submitting an application to IrvineHacks 2024! Please "
         + "visit https://irvinehacks.com/portal to see your application status."
     )
+
+
+@router.get("/waiver")
+async def waiver(
+    user: Annotated[tuple[User, Applicant], Depends(require_accepted_applicant)]
+) -> RedirectResponse:
+    """Request to sign the participant waiver through DocuSign."""
+    user_data, applicant = user
+    application_data = applicant.application_data
+
+    if applicant.status in (Status.WAIVER_SIGNED, Status.CONFIRMED):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Already submitted a waiver.")
+
+    user_name = f"{application_data.first_name} {application_data.last_name}"
+
+    role_name = "Participant"
+    query = urllib.parse.urlencode(
+        {
+            "env": "demo",  # temporary
+            "PowerFormId": "d5120219-dec1-41c5-b579-5e6b45c886e8",  # temporary
+            "acct": "cc0e3157-358d-4e10-acb0-ef39db7e3071",  # temporary
+            f"{role_name}_Email": user_data.email,
+            f"{role_name}_UserName": user_name,
+            "v": "2",
+        }
+    )
+
+    FORM_URL = (
+        f"https://demo.docusign.net/Member/PowerFormSigning.aspx?{query}"  # temporary
+    )
+    return RedirectResponse(FORM_URL, status.HTTP_303_SEE_OTHER)

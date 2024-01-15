@@ -9,7 +9,7 @@ export default function Title() {
 				Apply
 			</h1>
 			<h2 className="text-[#fffce2] text-4xl font-bold m-5 text-center max-[900px]:text-3xl max-[500px]:text-2xl">
-				Applications close on January 14th, 2024 at 11:59PM PST
+				Applications close on January 15th, 2024 at 12:01AM PST
 			</h2>
 		</>
 	);

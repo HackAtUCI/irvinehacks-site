@@ -61,6 +61,7 @@ export default function Form() {
 				// to force reload the page to allow user identity to
 				// update with the new status
 				window.location.href = "/portal";
+				return;
 			}
 		} catch (err) {
 			console.error(err);

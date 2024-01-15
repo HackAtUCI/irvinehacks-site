@@ -3,6 +3,8 @@ Allow: /
 Disallow: /api/
 Disallow: /admin/
 Disallow: /demo/
+Disallow: /login
 Disallow: /logout
 Disallow: /mentor
 Disallow: /volunteer
+Disallow: /portal

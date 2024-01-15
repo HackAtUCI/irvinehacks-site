@@ -24,5 +24,13 @@ const Sponsors = SanityDocument.extend({
 });
 
 export const getSponsors = cache(async () => {
-	return Sponsors.parse(await client.fetch("*[_type == 'sponsors'][0]"));
+	const sponsorTiers = new Map<string, z.infer<typeof Sponsor>[]>();
+	const sponsors = Sponsors.parse(
+		await client.fetch("*[_type == 'sponsors'][0]"),
+	);
+	sponsors.sponsors.forEach((sponsor) => {
+		const { tier } = sponsor;
+		sponsorTiers.set(tier, [...(sponsorTiers.get(tier) ?? []), sponsor]);
+	});
+	return sponsorTiers;
 });

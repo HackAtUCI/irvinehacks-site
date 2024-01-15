@@ -1,24 +1,19 @@
 "use client";
 
-import axios from "axios";
 import { useRouter } from "next/navigation";
 
 import { PropsWithChildren } from "react";
-import { SWRConfig } from "swr";
 
 import AppLayout from "@cloudscape-design/components/app-layout";
+import axios from "axios";
+import { SWRConfig } from "swr";
 
+import { isAdminRole } from "@/lib/admin/adminRole";
 import UserContext from "@/lib/admin/UserContext";
 import useUserIdentity from "@/lib/admin/useUserIdentity";
 
 import AdminSidebar from "./AdminSidebar";
 import Breadcrumbs from "./Breadcrumbs";
-
-const ADMIN_ROLES = ["director", "reviewer"];
-
-export function isAdminRole(role: string | null) {
-	return role !== null && ADMIN_ROLES.includes(role);
-}
 
 function AdminLayout({ children }: PropsWithChildren) {
 	const identity = useUserIdentity();

@@ -27,6 +27,9 @@ export default function Form() {
 		// Disable native post submission
 		event.preventDefault();
 
+		// On the chance that a user presses submit after the deadline,
+		// this check is to prevent the application from submitting
+		// and to show the message that applications have closed
 		if (hasDeadlinePassed()) {
 			window.location.reload();
 			return;

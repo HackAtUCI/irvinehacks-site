@@ -24,7 +24,7 @@ export default async function ConfirmationDetails({
 				and will be over the age of 18 by January 26th, 2024.
 			</p>
 			<strong className="text-lg text-[#FF2222]">
-				Applications are due on January 15th, 2024 at 12:01PM PST.
+				Applications are due on January 15th, 2024 at 12:01AM PST.
 			</strong>
 			<Button
 				text={isLoggedIn ? "Proceed to Application" : "Log in to Apply"}

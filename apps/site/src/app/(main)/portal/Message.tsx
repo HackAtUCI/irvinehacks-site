@@ -36,8 +36,8 @@ function Message({ status }: MessageProps) {
 			<p>
 				Congratulations on your acceptance to IrvineHacks 2024! Please look for
 				an email confirming your acceptance. It is crucial that you read through
-				the email's event logistics in its entirety. We look forward to seeing
-				you at IrvineHacks!
+				all additional info in your confirmation email. We look forward to
+				seeing you at IrvineHacks!
 			</p>
 		),
 		[PortalStatus.confirmed]: <></>,

@@ -11,7 +11,7 @@ async function ApplicationsClosed() {
 				Applications for IrvineHacks 2024 closed on January 14th.
 			</h1>
 			<hr className="my-10 w-full h-0.5 bg-[#432810]" />
-			{(identity.uid === null || identity.status !== null) && (
+			{identity.uid === null && (
 				<p className="text-lg">
 					If you already applied, please{" "}
 					<Link href="/login" className="text-blue-600 underline">

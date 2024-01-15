@@ -1,12 +1,20 @@
 import { ReactNode } from "react";
 
+import { isAdminRole } from "@/lib/admin/adminRole";
+import getUserIdentity from "@/lib/utils/getUserIdentity";
+
 import styles from "./Portal.module.scss";
 
+// TODO: include separate portals for Mentors and Volunteers
 interface PortalLayoutProps {
+	admin: ReactNode;
 	applicant: ReactNode;
 }
 
-function PortalLayout({ applicant }: PortalLayoutProps) {
+async function PortalLayout({ admin, applicant }: PortalLayoutProps) {
+	const { role } = await getUserIdentity();
+	const content = isAdminRole(role) ? admin : applicant;
+
 	return (
 		<section className=" w-full flex items-center flex-col min-h-screen">
 			<div className="m-24">
@@ -16,7 +24,7 @@ function PortalLayout({ applicant }: PortalLayoutProps) {
 					Portal
 				</h1>
 			</div>
-			{applicant}
+			{content}
 		</section>
 	);
 }

@@ -1,0 +1,8 @@
+User-Agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /demo/
+Disallow: /logout
+Disallow: /mentor
+Disallow: /volunteer

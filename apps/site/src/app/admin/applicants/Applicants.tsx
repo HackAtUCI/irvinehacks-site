@@ -48,6 +48,11 @@ function Applicants() {
 				header: CardHeader,
 				sections: [
 					{
+						id: "uid",
+						header: "UID",
+						content: ({ _id }) => _id,
+					},
+					{
 						id: "school",
 						header: "School",
 						content: ({ application_data }) => application_data.school,

@@ -18,7 +18,7 @@ log = getLogger(__name__)
 
 router = APIRouter()
 
-DEADLINE = datetime(2024, 1, 15, 7, 59, tzinfo=timezone.utc)
+DEADLINE = datetime(2024, 1, 15, 8, 1, tzinfo=timezone.utc)
 
 
 class IdentityResponse(BaseModel):

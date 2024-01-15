@@ -1,4 +1,4 @@
-import { PortalStatus } from "./Portal";
+import { PortalStatus } from "./ApplicantPortal";
 
 interface MessageProps {
 	status: PortalStatus;

@@ -4,4 +4,4 @@ export const metadata: Metadata = {
 	title: "Portal | IrvineHacks 2024",
 };
 
-export { default as default } from "./Portal";
+export { default as default } from "./ApplicantPortal";

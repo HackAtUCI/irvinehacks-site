@@ -20,7 +20,7 @@ const Stand: React.FC<StandProps> = ({
 	buttonHref,
 }) => {
 	return (
-		<div className="max-w-[450px] text-center flex flex-col items-stretch">
+		<div className="max-w-[450px] text-center flex flex-col items-stretch z-0">
 			<div className="relative aspect-[1/0.7] z-10">
 				<h2 className="absolute mt-[4.5%] text-2xl z-20 w-full text-[#FFDA7B]">
 					{header}

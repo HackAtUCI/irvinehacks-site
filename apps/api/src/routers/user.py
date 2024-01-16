@@ -9,11 +9,7 @@ from pydantic import BaseModel, EmailStr
 from auth import user_identity
 from auth.authorization import require_accepted_applicant
 from auth.user_identity import User, require_user_identity, use_user_identity
-from models.ApplicationData import (
-    Decision,
-    ProcessedApplicationData,
-    RawApplicationData,
-)
+from models.ApplicationData import ProcessedApplicationData, RawApplicationData
 from services import docusign_handler, mongodb_handler
 from services.mongodb_handler import Collection
 from utils import email_handler, resume_handler
@@ -184,15 +180,18 @@ async def rsvp(user: User = Depends(require_user_identity)) -> RedirectResponse:
     )
 
     if not user_record or "status" not in user_record:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST)
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "User must have a status.")
 
-    new_status: Union[Status, Decision]
-    if user_record["status"] == Decision.ACCEPTED:
+    new_status: Status
+    if user_record["status"] == Status.WAIVER_SIGNED:
         new_status = Status.CONFIRMED
     elif user_record["status"] == Status.CONFIRMED:
-        new_status = Decision.ACCEPTED
+        new_status = Status.WAIVER_SIGNED
     else:
-        raise HTTPException(status.HTTP_403_FORBIDDEN)
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN,
+            "Waiver must be signed before being able to RSVP.",
+        )
 
     await mongodb_handler.update_one(
         Collection.USERS, {"_id": user.uid}, {"status": new_status}

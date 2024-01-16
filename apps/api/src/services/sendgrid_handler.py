@@ -7,7 +7,10 @@ from typing import Iterable, Literal, Tuple, TypedDict, Union, overload
 
 import aiosendgrid
 from httpx import HTTPStatusError
+from pydantic import EmailStr
 from sendgrid.helpers.mail import Email, Mail, Personalization
+
+from models.ApplicationData import Decision
 
 log = getLogger(__name__)
 
@@ -17,9 +20,9 @@ SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
 class Template(str, Enum):
     CONFIRMATION_EMAIL = "d-83d42cc17b54456183eeb946ba58861a"
     GUEST_TOKEN = "d-1998e588ddf74c6d9ede36b778730176"
-    ACCEPTED_EMAIL = "d-9178c043de134a71a4fdbe513d35f89f"
+    ACCEPTED_EMAIL = "d-062e7106a0d64d49ad9f03325bbc7286"
     WAITLISTED_EMAIL = "d-9178c043de134a71a4fdbe513d35f89f"
-    REJECTED_EMAIL = "d-9178c043de134a71a4fdbe513d35f89f"
+    REJECTED_EMAIL = "d-71ef30ac91a941e0893b7680928d80b7"
 
 
 class PersonalizationData(TypedDict):
@@ -33,6 +36,10 @@ class ConfirmationPersonalization(PersonalizationData):
 
 class GuestTokenPersonalization(PersonalizationData):
     passphrase: str
+
+
+class ApplicationUpdatePersonalization(PersonalizationData):
+    first_name: str
 
 
 @overload
@@ -117,3 +124,31 @@ async def send_email(
     except HTTPStatusError as e:
         log.exception("During SendGrid processing: %s", e)
         raise RuntimeError("Could not send email with SendGrid")
+
+
+async def send_decision_email(
+    sender_email: Tuple[str, str], applicant_batch: dict[tuple[str, EmailStr], Decision]
+):
+    accepted_personalization_data = []
+    rejected_personalization_data = []
+    waitlisted_personalization_data = []
+
+    for (first_name, email), status in applicant_batch.items():
+        personalization = ApplicationUpdatePersonalization(
+            email=email, first_name=first_name
+        )
+        if status == Decision.ACCEPTED:
+            accepted_personalization_data.append(personalization)
+        elif status == Decision.REJECTED:
+            rejected_personalization_data.append(personalization)
+        elif status == Decision.WAITLISTED:
+            waitlisted_personalization_data.append(personalization)
+
+    template_data = [
+        (Template.ACCEPTED_EMAIL, accepted_personalization_data),
+        (Template.REJECTED_EMAIL, rejected_personalization_data),
+        (Template.WAITLISTED_EMAIL, waitlisted_personalization_data),
+    ]
+
+    for template, data in template_data:
+        await send_email(template, sender_email, data, True)

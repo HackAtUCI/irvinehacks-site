@@ -9,7 +9,11 @@ from pydantic import BaseModel, EmailStr
 from auth import user_identity
 from auth.authorization import require_accepted_applicant
 from auth.user_identity import User, require_user_identity, use_user_identity
-from models.ApplicationData import ProcessedApplicationData, RawApplicationData
+from models.ApplicationData import (
+    Decision,
+    ProcessedApplicationData,
+    RawApplicationData,
+)
 from services import docusign_handler, mongodb_handler
 from services.mongodb_handler import Collection
 from utils import email_handler, resume_handler
@@ -170,3 +174,28 @@ async def request_waiver(
 
     form_url = docusign_handler.waiver_form_url(user_data.email, user_name)
     return RedirectResponse(form_url, status.HTTP_303_SEE_OTHER)
+
+
+@router.post("/rsvp")
+async def rsvp(user: User = Depends(require_user_identity)) -> RedirectResponse:
+    """Change user status for RSVP"""
+    user_record = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": user.uid}, ["status"]
+    )
+
+    if not user_record or "status" not in user_record:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST)
+
+    new_status: Union[Status, Decision]
+    if user_record["status"] == Decision.ACCEPTED:
+        new_status = Status.CONFIRMED
+    elif user_record["status"] == Status.CONFIRMED:
+        new_status = Decision.ACCEPTED
+    else:
+        raise HTTPException(status.HTTP_403_FORBIDDEN)
+
+    await mongodb_handler.update_one(
+        Collection.USERS, {"_id": user.uid}, {"status": new_status}
+    )
+
+    return RedirectResponse("/portal", status.HTTP_303_SEE_OTHER)

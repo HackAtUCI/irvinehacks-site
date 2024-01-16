@@ -11,6 +11,7 @@ export const enum PortalStatus {
 	accepted = "ACCEPTED",
 	rejected = "REJECTED",
 	waitlisted = "WAITLISTED",
+	waived = "WAIVER_SIGNED",
 	confirmed = "CONFIRMED",
 }
 

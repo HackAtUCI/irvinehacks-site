@@ -75,6 +75,17 @@ async def send_email(
     ...
 
 
+@overload
+async def send_email(
+    template_id: Literal[Template.CONFIRMATION_EMAIL],
+    sender_email: Tuple[str, str],
+    receiver_data: Iterable[ApplicationUpdatePersonalization],
+    send_to_multiple: Literal[True],
+    reply_to: Union[Tuple[str, str], None] = None,
+) -> None:
+    ...
+
+
 async def send_email(
     template_id: Template,
     sender_email: Tuple[str, str],
@@ -128,7 +139,7 @@ async def send_email(
 
 async def send_decision_email(
     sender_email: Tuple[str, str], applicant_batch: dict[tuple[str, EmailStr], Decision]
-):
+) -> None:
     accepted_personalization_data = []
     rejected_personalization_data = []
     waitlisted_personalization_data = []

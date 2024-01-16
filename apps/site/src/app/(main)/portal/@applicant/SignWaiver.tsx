@@ -3,10 +3,12 @@ import Button from "@/lib/components/Button/Button";
 function SignWaiver() {
 	return (
 		<div>
-			<hr />
 			<h3 className="text-3xl my-4">Waiver</h3>
-			<p className="mt-4">
-				In order to attend IrvineHacks 2024, please fill out the waiver below
+			<p>
+				In order to attend IrvineHacks 2024, all participants must complete the
+				Participation Waiver and review the Code of Conduct. The button below
+				will take you to a DocuSign form to sign the waiver. After signing the
+				waiver, please return to this Portal to confirm your attendance.
 			</p>
 			<Button
 				text="Sign Waiver to attend IrvineHacks 2024"

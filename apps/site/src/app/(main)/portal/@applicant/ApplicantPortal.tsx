@@ -4,8 +4,8 @@ import getUserIdentity from "@/lib/utils/getUserIdentity";
 
 import ConfirmAttendance from "./ConfirmAttendance";
 import Message from "./Message";
-import VerticalTimeline from "./VerticalTimeline";
 import SignWaiver from "./SignWaiver";
+import VerticalTimeline from "./VerticalTimeline";
 
 export const enum PortalStatus {
 	pending = "PENDING_REVIEW",
@@ -30,11 +30,14 @@ async function Portal() {
 
 	const needsToSignWaiver = status === PortalStatus.accepted;
 
+	const moreContent = needsToSignWaiver || submittedWaiver;
+
 	return (
 		<div className="bg-white text-black max-w-4xl rounded-2xl p-6 flex flex-col mb-24 w-full">
 			<h2 className="text-4xl font-semibold">Status</h2>
 			<VerticalTimeline status={status as PortalStatus} />
 			<Message status={status as PortalStatus} />
+			{moreContent && <hr />}
 			{needsToSignWaiver && <SignWaiver />}
 			{submittedWaiver && <ConfirmAttendance status={status} />}
 		</div>

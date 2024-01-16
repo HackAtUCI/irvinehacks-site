@@ -36,25 +36,14 @@ function Message({ status }: MessageProps) {
 			<p>
 				Congratulations on your acceptance to IrvineHacks 2024! Please look for
 				an email confirming your acceptance. It is crucial that you read through
-				all additional info in your confirmation email. We look forward to
-				seeing you at IrvineHacks!
+				all additional info in your confirmation email.
 			</p>
 		),
-		[PortalStatus.waived]: (
-			<>
-				Thank you for signing the waiver! We look forward to seeing you at the
-				event!
-			</>
-		),
-		[PortalStatus.confirmed]: (
-			<p>
-				Thank you for confirming your attendance! We look forward to seeing you
-				at IrvineHacks!
-			</p>
-		),
+		[PortalStatus.waived]: <p>Thank you for signing the waiver!</p>,
+		[PortalStatus.confirmed]: <></>,
 	};
 
-	return <div>{messages[status]}</div>;
+	return messages[status];
 }
 
 export default Message;

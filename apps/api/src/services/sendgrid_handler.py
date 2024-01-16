@@ -17,6 +17,9 @@ SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
 class Template(str, Enum):
     CONFIRMATION_EMAIL = "d-83d42cc17b54456183eeb946ba58861a"
     GUEST_TOKEN = "d-1998e588ddf74c6d9ede36b778730176"
+    ACCEPTED_EMAIL = "d-062e7106a0d64d49ad9f03325bbc7286"
+    WAITLISTED_EMAIL = "d-9178c043de134a71a4fdbe513d35f89f"
+    REJECTED_EMAIL = "d-71ef30ac91a941e0893b7680928d80b7"
 
 
 class PersonalizationData(TypedDict):
@@ -30,6 +33,10 @@ class ConfirmationPersonalization(PersonalizationData):
 
 class GuestTokenPersonalization(PersonalizationData):
     passphrase: str
+
+
+class ApplicationUpdatePersonalization(PersonalizationData):
+    first_name: str
 
 
 @overload
@@ -59,6 +66,17 @@ async def send_email(
     template_id: Literal[Template.CONFIRMATION_EMAIL],
     sender_email: Tuple[str, str],
     receiver_data: Iterable[ConfirmationPersonalization],
+    send_to_multiple: Literal[True],
+    reply_to: Union[Tuple[str, str], None] = None,
+) -> None:
+    ...
+
+
+@overload
+async def send_email(
+    template_id: Template,
+    sender_email: Tuple[str, str],
+    receiver_data: Iterable[ApplicationUpdatePersonalization],
     send_to_multiple: Literal[True],
     reply_to: Union[Tuple[str, str], None] = None,
 ) -> None:

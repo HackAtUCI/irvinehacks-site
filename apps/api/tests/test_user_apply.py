@@ -1,16 +1,18 @@
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, Mock, call, patch
 
 import bson
 from aiogoogle import HTTPError
 from fastapi import FastAPI
 from pydantic import HttpUrl
+from test_sendgrid_handler import SAMPLE_SENDER
 
 from auth.user_identity import NativeUser, UserTestClient
-from models.ApplicationData import ProcessedApplicationData
+from models.ApplicationData import Decision, ProcessedApplicationData
 from routers import user
 from services.mongodb_handler import Collection
-from utils import resume_handler
+from services.sendgrid_handler import ApplicationUpdatePersonalization, Template
+from utils import email_handler, resume_handler
 from utils.user_record import Applicant, Status
 
 # Tests will break again next year, tech should notice and fix :P
@@ -289,3 +291,32 @@ def test_past_deadline_causes_403() -> None:
     assert res.status_code == 403
 
     user.DEADLINE = TEST_DEADLINE
+
+
+@patch("services.sendgrid_handler.send_email")
+async def test_send_decision_email(mock_sendgrid_handler_send_email: AsyncMock) -> None:
+    applicants = {
+        ("test1", "test1@uci.edu"): Decision.ACCEPTED,
+        ("test2", "test2@uci.edu"): Decision.REJECTED,
+        ("test3", "test3@uci.edu"): Decision.WAITLISTED,
+    }
+
+    accepted = [
+        ApplicationUpdatePersonalization(first_name="test1", email="test1@uci.edu")
+    ]
+    rejected = [
+        ApplicationUpdatePersonalization(first_name="test2", email="test2@uci.edu")
+    ]
+    waitlisted = [
+        ApplicationUpdatePersonalization(first_name="test3", email="test3@uci.edu")
+    ]
+
+    await email_handler.send_decision_email(SAMPLE_SENDER, applicants)
+
+    mock_sendgrid_handler_send_email.assert_has_calls(
+        [
+            call(Template.ACCEPTED_EMAIL, SAMPLE_SENDER, accepted, True),
+            call(Template.REJECTED_EMAIL, SAMPLE_SENDER, rejected, True),
+            call(Template.WAITLISTED_EMAIL, SAMPLE_SENDER, waitlisted, True),
+        ]
+    )

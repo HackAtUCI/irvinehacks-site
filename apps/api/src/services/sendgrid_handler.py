@@ -7,10 +7,7 @@ from typing import Iterable, Literal, Tuple, TypedDict, Union, overload
 
 import aiosendgrid
 from httpx import HTTPStatusError
-from pydantic import EmailStr
 from sendgrid.helpers.mail import Email, Mail, Personalization
-
-from models.ApplicationData import Decision
 
 log = getLogger(__name__)
 
@@ -77,7 +74,7 @@ async def send_email(
 
 @overload
 async def send_email(
-    template_id: Literal[Template.CONFIRMATION_EMAIL],
+    template_id: Template,
     sender_email: Tuple[str, str],
     receiver_data: Iterable[ApplicationUpdatePersonalization],
     send_to_multiple: Literal[True],
@@ -135,31 +132,3 @@ async def send_email(
     except HTTPStatusError as e:
         log.exception("During SendGrid processing: %s", e)
         raise RuntimeError("Could not send email with SendGrid")
-
-
-async def send_decision_email(
-    sender_email: Tuple[str, str], applicant_batch: dict[tuple[str, EmailStr], Decision]
-) -> None:
-    accepted_personalization_data = []
-    rejected_personalization_data = []
-    waitlisted_personalization_data = []
-
-    for (first_name, email), status in applicant_batch.items():
-        personalization = ApplicationUpdatePersonalization(
-            email=email, first_name=first_name
-        )
-        if status == Decision.ACCEPTED:
-            accepted_personalization_data.append(personalization)
-        elif status == Decision.REJECTED:
-            rejected_personalization_data.append(personalization)
-        elif status == Decision.WAITLISTED:
-            waitlisted_personalization_data.append(personalization)
-
-    template_data = [
-        (Template.ACCEPTED_EMAIL, accepted_personalization_data),
-        (Template.REJECTED_EMAIL, rejected_personalization_data),
-        (Template.WAITLISTED_EMAIL, waitlisted_personalization_data),
-    ]
-
-    for template, data in template_data:
-        await send_email(template, sender_email, data, True)

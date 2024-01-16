@@ -7,9 +7,10 @@ from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, EmailStr
 
 from auth import user_identity
+from auth.authorization import require_accepted_applicant
 from auth.user_identity import User, require_user_identity, use_user_identity
 from models.ApplicationData import ProcessedApplicationData, RawApplicationData
-from services import mongodb_handler
+from services import docusign_handler, mongodb_handler
 from services.mongodb_handler import Collection
 from utils import email_handler, resume_handler
 from utils.user_record import Applicant, Role, Status
@@ -152,3 +153,20 @@ async def apply(
         "Thank you for submitting an application to IrvineHacks 2024! Please "
         + "visit https://irvinehacks.com/portal to see your application status."
     )
+
+
+@router.get("/waiver")
+async def request_waiver(
+    user: Annotated[tuple[User, Applicant], Depends(require_accepted_applicant)]
+) -> RedirectResponse:
+    """Request to sign the participant waiver through DocuSign."""
+    user_data, applicant = user
+    application_data = applicant.application_data
+
+    if applicant.status in (Status.WAIVER_SIGNED, Status.CONFIRMED):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Already submitted a waiver.")
+
+    user_name = f"{application_data.first_name} {application_data.last_name}"
+
+    form_url = docusign_handler.waiver_form_url(user_data.email, user_name)
+    return RedirectResponse(form_url, status.HTTP_303_SEE_OTHER)

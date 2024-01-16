@@ -15,7 +15,7 @@ branch = true
 show_missing = true
 
 [tool.mypy]
-mypy_path = "src,stubs"
+mypy_path = "src,stubs,tests"
 explicit_package_bases = true
 strict = true
 plugins = ["pydantic.mypy"]

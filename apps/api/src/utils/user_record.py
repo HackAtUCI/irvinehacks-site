@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Union
+from typing import Literal, Union
 
 from pydantic import Field
 
@@ -20,6 +20,7 @@ class Role(str, Enum):
 class Status(str, Enum):
     PENDING_REVIEW = "PENDING_REVIEW"
     REVIEWED = "REVIEWED"
+    WAIVER_SIGNED = "WAIVER_SIGNED"
     CONFIRMED = "CONFIRMED"
 
 
@@ -29,6 +30,6 @@ class UserRecord(BaseRecord):
 
 
 class Applicant(UserRecord):
-    role: Role = Role.APPLICANT
+    role: Literal[Role.APPLICANT] = Role.APPLICANT
     status: Union[Status, Decision]
     application_data: ProcessedApplicationData

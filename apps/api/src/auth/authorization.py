@@ -1,11 +1,13 @@
-from typing import Any, Callable, Coroutine, Sequence
+from typing import Annotated, Any, Callable, Coroutine, Sequence
 
 from fastapi import Depends, HTTPException, status
+from pydantic import ValidationError
 
 from auth.user_identity import User, require_user_identity
+from models.ApplicationData import Decision
 from services import mongodb_handler
 from services.mongodb_handler import Collection
-from utils.user_record import Role, UserRecord
+from utils.user_record import Applicant, Role, Status, UserRecord
 
 
 def require_role(
@@ -23,3 +25,24 @@ def require_role(
         return user
 
     return require_allowed_role
+
+
+async def require_accepted_applicant(
+    user: Annotated[User, Depends(require_user_identity)]
+) -> tuple[User, Applicant]:
+    """Require a user who is an applicant and was accepted."""
+    record = await mongodb_handler.retrieve_one(Collection.USERS, {"_id": user.uid})
+
+    try:
+        applicant_record = Applicant.model_validate(record)
+
+        if applicant_record.status not in (
+            Decision.ACCEPTED,
+            Status.WAIVER_SIGNED,
+            Status.CONFIRMED,
+        ):
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "User was not accepted.")
+
+        return user, applicant_record
+    except ValidationError:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "User is not an applicant.")

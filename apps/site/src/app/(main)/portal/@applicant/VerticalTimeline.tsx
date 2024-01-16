@@ -26,6 +26,7 @@ function VerticalTimeline({ status }: VerticalTimelineProps) {
 
 	const verdict_component =
 		status === PortalStatus.accepted ||
+		status === PortalStatus.waived ||
 		status === PortalStatus.confirmed ? (
 			<li className="flex flex-row items-center border-t">
 				<Image
@@ -50,8 +51,33 @@ function VerticalTimeline({ status }: VerticalTimelineProps) {
 			</li>
 		) : null;
 
-	const rsvp_component =
+	const waiver_component =
 		status === PortalStatus.accepted ? (
+			<li className="flex flex-row items-center border-t">
+				<Image
+					src={BorderCircle}
+					alt="border-circle"
+					width={25}
+					height={25}
+					className="m-6 mr-12"
+				/>
+				Sign waiver
+			</li>
+		) : status === PortalStatus.waived || status === PortalStatus.confirmed ? (
+			<li className="flex flex-row items-center border-t">
+				<Image
+					src={CheckCircle}
+					alt="checked-circle"
+					width={25}
+					height={25}
+					className="m-6 mr-12"
+				/>
+				Waiver signed
+			</li>
+		) : null;
+
+	const rsvp_component =
+		status === PortalStatus.accepted || PortalStatus.waived ? (
 			<li className="flex flex-row items-center border-t">
 				<Image
 					src={BorderCircle}
@@ -80,6 +106,7 @@ function VerticalTimeline({ status }: VerticalTimelineProps) {
 			<ul className="border rounded-lg">
 				{submission_component}
 				{verdict_component}
+				{waiver_component}
 				{rsvp_component}
 			</ul>
 		</div>

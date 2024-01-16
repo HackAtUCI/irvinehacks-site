@@ -184,6 +184,33 @@ async def request_waiver(
     return RedirectResponse(form_url, status.HTTP_303_SEE_OTHER)
 
 
+@router.post("/waiver")
+async def waiver_webhook(
+    request: Request,
+    x_docusign_signature_1: Annotated[str, Header()],
+    payload: WebhookPayload,
+) -> None:
+    """Process webhook from DocuSign Connect."""
+    # Note: in practice there can be multiple keys to generate multiple signatures
+    # We assume there is only one key and thus pick the first signature
+    is_valid_signature = docusign_handler.verify_webhook_signature(
+        await request.body(), x_docusign_signature_1
+    )
+
+    if payload.event != "envelope-completed":
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Unable to process event type.")
+
+    if not is_valid_signature:
+        log.error("Waiver Webhook received invalid signature.")
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid signature")
+
+    try:
+        await docusign_handler.process_webhook_event(payload)
+    except ValueError as err:
+        log.exception("During waiver webhook processing: %s", err)
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid payload content.")
+
+
 @router.post("/rsvp")
 async def rsvp(
     user: Annotated[User, Depends(require_user_identity)]
@@ -212,30 +239,3 @@ async def rsvp(
     )
 
     return RedirectResponse("/portal", status.HTTP_303_SEE_OTHER)
-
-
-@router.post("/waiver")
-async def waiver_webhook(
-    request: Request,
-    x_docusign_signature_1: Annotated[str, Header()],
-    payload: WebhookPayload,
-) -> None:
-    """Process webhook from DocuSign Connect."""
-    # Note: in practice there can be multiple keys to generate multiple signatures
-    # We assume there is only one key and thus pick the first signature
-    is_valid_signature = docusign_handler.verify_webhook_signature(
-        await request.body(), x_docusign_signature_1
-    )
-
-    if payload.event != "envelope-completed":
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Unable to process event type.")
-
-    if not is_valid_signature:
-        log.error("Waiver Webhook received invalid signature.")
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid signature")
-
-    try:
-        await docusign_handler.process_webhook_event(payload)
-    except ValueError as err:
-        log.exception("During waiver webhook processing: %s", err)
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid payload content.")

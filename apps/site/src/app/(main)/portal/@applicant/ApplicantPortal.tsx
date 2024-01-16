@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import getUserIdentity from "@/lib/utils/getUserIdentity";
 
+import ConfirmAttendance from "./ConfirmAttendance";
 import Message from "./Message";
 import VerticalTimeline from "./VerticalTimeline";
 import SignWaiver from "./SignWaiver";
@@ -35,6 +36,7 @@ async function Portal() {
 			<VerticalTimeline status={status as PortalStatus} />
 			<Message status={status as PortalStatus} />
 			{isAccepted && <SignWaiver status={status as PortalStatus} />}
+			{isAccepted && <ConfirmAttendance status={status} />}
 		</div>
 	);
 }

@@ -5,7 +5,7 @@ import { SanityDocument, SanityImageReference } from "@/lib/sanity/types";
 
 const ResourceReference = SanityDocument.extend({
 	_type: z.literal("resourceCategory"),
-	icon: SanityImageReference ,
+	icon: SanityImageReference,
 	description: z.string(),
 	title: z.string(),
 });

@@ -2,7 +2,16 @@ from datetime import datetime, timezone
 from logging import getLogger
 from typing import Annotated, Optional, Union
 
-from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    Form,
+    Header,
+    HTTPException,
+    Request,
+    UploadFile,
+    status,
+)
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, EmailStr
 
@@ -11,6 +20,7 @@ from auth.authorization import require_accepted_applicant
 from auth.user_identity import User, require_user_identity, use_user_identity
 from models.ApplicationData import ProcessedApplicationData, RawApplicationData
 from services import docusign_handler, mongodb_handler
+from services.docusign_handler import WebhookPayload
 from services.mongodb_handler import Collection
 from utils import email_handler, resume_handler
 from utils.user_record import Applicant, Role, Status
@@ -160,6 +170,7 @@ async def request_waiver(
     user: Annotated[tuple[User, Applicant], Depends(require_accepted_applicant)]
 ) -> RedirectResponse:
     """Request to sign the participant waiver through DocuSign."""
+    # TODO: non-applicants might also want to request a waiver
     user_data, applicant = user
     application_data = applicant.application_data
 
@@ -168,6 +179,7 @@ async def request_waiver(
 
     user_name = f"{application_data.first_name} {application_data.last_name}"
 
+    # TODO: email may not match UCInetID format from `docusign_handler._acquire_uid`
     form_url = docusign_handler.waiver_form_url(user_data.email, user_name)
     return RedirectResponse(form_url, status.HTTP_303_SEE_OTHER)
 
@@ -200,3 +212,30 @@ async def rsvp(
     )
 
     return RedirectResponse("/portal", status.HTTP_303_SEE_OTHER)
+
+
+@router.post("/waiver")
+async def waiver_webhook(
+    request: Request,
+    x_docusign_signature_1: Annotated[str, Header()],
+    payload: WebhookPayload,
+) -> None:
+    """Process webhook from DocuSign Connect."""
+    # Note: in practice there can be multiple keys to generate multiple signatures
+    # We assume there is only one key and thus pick the first signature
+    is_valid_signature = docusign_handler.verify_webhook_signature(
+        await request.body(), x_docusign_signature_1
+    )
+
+    if payload.event != "envelope-completed":
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Unable to process event type.")
+
+    if not is_valid_signature:
+        log.error("Waiver Webhook received invalid signature.")
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid signature")
+
+    try:
+        await docusign_handler.process_webhook_event(payload)
+    except ValueError as err:
+        log.exception("During waiver webhook processing: %s", err)
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid payload content.")

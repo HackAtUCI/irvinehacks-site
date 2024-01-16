@@ -7,7 +7,7 @@ from typing import Any, Mapping, Optional, Union
 from bson import CodecOptions
 from motor.core import AgnosticClient
 from motor.motor_asyncio import AsyncIOMotorClient
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 log = getLogger(__name__)
 

@@ -40,6 +40,7 @@ function Message({ status }: MessageProps) {
 				seeing you at IrvineHacks!
 			</p>
 		),
+		[PortalStatus.waived]: <></>,
 		[PortalStatus.confirmed]: <></>,
 	};
 

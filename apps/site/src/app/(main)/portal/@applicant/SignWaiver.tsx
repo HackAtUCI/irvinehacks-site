@@ -3,7 +3,7 @@ import Button from "@/lib/components/Button/Button";
 import { PortalStatus } from "./ApplicantPortal";
 
 interface SignWaiverProps {
-	status: string;
+	status: PortalStatus;
 }
 
 function SignWaiver({ status }: SignWaiverProps) {
@@ -15,7 +15,7 @@ function SignWaiver({ status }: SignWaiverProps) {
 			</p>
 			<Button
 				text="Sign Waiver to attend IrvineHacks 2024"
-				href="/api/dev/waiver"
+				href="/api/user/waiver"
 			/>
 		</div>
 	);

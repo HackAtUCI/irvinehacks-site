@@ -77,7 +77,7 @@ function VerticalTimeline({ status }: VerticalTimelineProps) {
 		) : null;
 
 	const rsvp_component =
-		status === PortalStatus.waived ? (
+		status === PortalStatus.accepted || PortalStatus.waived ? (
 			<li className="flex flex-row items-center border-t">
 				<Image
 					src={BorderCircle}

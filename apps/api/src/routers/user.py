@@ -173,7 +173,9 @@ async def request_waiver(
 
 
 @router.post("/rsvp")
-async def rsvp(user: User = Depends(require_user_identity)) -> RedirectResponse:
+async def rsvp(
+    user: Annotated[User, Depends(require_user_identity)]
+) -> RedirectResponse:
     """Change user status for RSVP"""
     user_record = await mongodb_handler.retrieve_one(
         Collection.USERS, {"_id": user.uid}, ["status"]

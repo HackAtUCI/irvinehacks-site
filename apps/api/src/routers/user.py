@@ -170,3 +170,33 @@ async def request_waiver(
 
     form_url = docusign_handler.waiver_form_url(user_data.email, user_name)
     return RedirectResponse(form_url, status.HTTP_303_SEE_OTHER)
+
+
+@router.post("/rsvp")
+async def rsvp(
+    user: Annotated[User, Depends(require_user_identity)]
+) -> RedirectResponse:
+    """Change user status for RSVP"""
+    user_record = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": user.uid}, ["status"]
+    )
+
+    if not user_record or "status" not in user_record:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "User must have a status.")
+
+    new_status: Status
+    if user_record["status"] == Status.WAIVER_SIGNED:
+        new_status = Status.CONFIRMED
+    elif user_record["status"] == Status.CONFIRMED:
+        new_status = Status.WAIVER_SIGNED
+    else:
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN,
+            "Waiver must be signed before being able to RSVP.",
+        )
+
+    await mongodb_handler.update_one(
+        Collection.USERS, {"_id": user.uid}, {"status": new_status}
+    )
+
+    return RedirectResponse("/portal", status.HTTP_303_SEE_OTHER)

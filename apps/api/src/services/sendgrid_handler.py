@@ -17,6 +17,9 @@ SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
 class Template(str, Enum):
     CONFIRMATION_EMAIL = "d-83d42cc17b54456183eeb946ba58861a"
     GUEST_TOKEN = "d-1998e588ddf74c6d9ede36b778730176"
+    ACCEPTED_EMAIL = "d-9178c043de134a71a4fdbe513d35f89f"
+    WAITLISTED_EMAIL = "d-9178c043de134a71a4fdbe513d35f89f"
+    REJECTED_EMAIL = "d-9178c043de134a71a4fdbe513d35f89f"
 
 
 class PersonalizationData(TypedDict):

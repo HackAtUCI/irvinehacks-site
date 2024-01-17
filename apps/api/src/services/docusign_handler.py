@@ -49,8 +49,16 @@ class WebhookPayload(BaseModel):
 
 
 DOCUSIGN_HMAC_KEY = os.getenv("DOCUSIGN_HMAC_KEY", "")
-POWERFORM_ID = UUID("d5120219-dec1-41c5-b579-5e6b45c886e8")  # temporary
-ACCOUNT_ID = UUID("cc0e3157-358d-4e10-acb0-ef39db7e3071")  # temporary
+STAGING_ENV = os.getenv("DEPLOYMENT") == "STAGING"
+
+if STAGING_ENV:
+    POWERFORM_ID = UUID("d5120219-dec1-41c5-b579-5e6b45c886e8")  # temporary
+    ACCOUNT_ID = UUID("cc0e3157-358d-4e10-acb0-ef39db7e3071")
+    DOCUSIGN_ENV = "demo"
+else:
+    POWERFORM_ID = UUID("f2a69fce-a986-4ad5-9ce9-53f9b544816d")
+    ACCOUNT_ID = UUID("e6262c0d-c7c1-444b-99b1-e5c6ceaa4b40")
+    DOCUSIGN_ENV = "na3"
 
 
 def waiver_form_url(email: EmailStr, user_name: str) -> str:
@@ -58,7 +66,7 @@ def waiver_form_url(email: EmailStr, user_name: str) -> str:
     role_name = "Participant"
     query = urllib.parse.urlencode(
         {
-            "env": "demo",  # temporary
+            "env": DOCUSIGN_ENV,
             "PowerFormId": str(POWERFORM_ID),
             "acct": str(ACCOUNT_ID),
             f"{role_name}_Email": email,
@@ -67,9 +75,7 @@ def waiver_form_url(email: EmailStr, user_name: str) -> str:
         }
     )
 
-    return (
-        f"https://demo.docusign.net/Member/PowerFormSigning.aspx?{query}"  # temporary
-    )
+    return f"https://{DOCUSIGN_ENV}.docusign.net/Member/PowerFormSigning.aspx?{query}"
 
 
 def verify_webhook_signature(payload: bytes, signature: str) -> bool:

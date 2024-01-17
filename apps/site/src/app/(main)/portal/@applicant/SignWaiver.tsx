@@ -7,7 +7,8 @@ interface SignWaiverProps {
 }
 
 function SignWaiver({ status }: SignWaiverProps) {
-	return status === PortalStatus.waived ? null : (
+	return status === PortalStatus.waived ||
+		status === PortalStatus.confirmed ? null : (
 		<div>
 			<hr />
 			<h3 className="text-3xl my-4">Waiver</h3>

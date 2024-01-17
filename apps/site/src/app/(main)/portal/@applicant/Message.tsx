@@ -28,8 +28,8 @@ function Message({ status }: MessageProps) {
 			<p>
 				Thank you for applying to IrvineHacks this year. We have read through
 				many applications so far, and are able to offer you a spot on the event
-				waitlist. Once a spot for IrvineHacks opens up, we will contact you via
-				email to confirm.
+				waitlist. Please check your email for more info about the waitlist and
+				waitlist walk-ins!
 			</p>
 		),
 		[PortalStatus.accepted]: (

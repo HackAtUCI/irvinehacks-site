@@ -29,10 +29,10 @@ The development server runs at `http://localhost:3333`. If this port is taken, t
 
 ### Pnpm
 
-This repo used `pnpm`, a space efficient replacement to `npm`.
-You can learn more about it's advantages at <https://pnpm.io/>.
+This repo used `pnpm`, a space-efficient replacement to `npm`.
+You can learn more about its advantages at <https://pnpm.io/>.
 
-Install pnpm with the following command, or use an [alternative instalation method](https://pnpm.io/installation).
+Install pnpm with the following command, or use an [alternative installation method](https://pnpm.io/installation).
 
 ```shell
 npm install -g pnpm
@@ -99,7 +99,7 @@ To build all apps and packages, run the following command in the project root.
 pnpm build
 ```
 
-To build an individual app or package, first navigate to the corresponding directory and run the build command.
+To build an individual app or package, first, navigate to the corresponding directory and run the build command.
 
 ### Develop
 

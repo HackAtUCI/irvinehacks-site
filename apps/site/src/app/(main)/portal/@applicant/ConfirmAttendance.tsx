@@ -2,7 +2,7 @@ import { PortalStatus } from "./ApplicantPortal";
 import Button from "@/lib/components/Button/Button";
 
 interface ConfirmAttendanceProps {
-	status: string;
+	status: PortalStatus;
 }
 
 function ConfirmAttendance({ status }: ConfirmAttendanceProps) {

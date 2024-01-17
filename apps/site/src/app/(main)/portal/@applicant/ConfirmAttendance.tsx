@@ -8,8 +8,8 @@ interface ConfirmAttendanceProps {
 function ConfirmAttendance({ status }: ConfirmAttendanceProps) {
 	const buttonText =
 		status === PortalStatus.confirmed
-			? "I am no longer able to attend Hack at UCI 2023"
-			: "I will be attending Hack at UCI 2023";
+			? "I am no longer able to attend IrvineHacks 2024"
+			: "I will be attending IrvineHacks 2024";
 
 	return (
 		<div className="mt-4">

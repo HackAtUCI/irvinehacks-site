@@ -3,6 +3,7 @@ import Image from "next/image";
 import BorderCircle from "@/assets/icons/border-circle.svg";
 import CheckCircle from "@/assets/icons/check-circle-fill.svg";
 import XCircle from "@/assets/icons/x-circle-fill.svg";
+import HalfCircle from "@/assets/icons/circle-half.svg";
 
 import { PortalStatus } from "./ApplicantPortal";
 
@@ -48,6 +49,17 @@ function VerticalTimeline({ status }: VerticalTimelineProps) {
 					className="m-6 mr-12"
 				/>
 				Application rejected
+			</li>
+		) : status === PortalStatus.waitlisted ? (
+			<li className="flex flex-row items-center border-t">
+				<Image
+					src={HalfCircle}
+					alt="half-circle"
+					width={25}
+					height={25}
+					className="m-6 mr-12"
+				/>
+				Application waitlisted
 			</li>
 		) : null;
 

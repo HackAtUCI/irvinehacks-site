@@ -28,14 +28,14 @@ async function Portal() {
 	const submittedWaiver =
 		status === PortalStatus.waived || status === PortalStatus.confirmed;
 
-	const isAccepted = status === PortalStatus.accepted || submittedWaiver;
+	const needsToSignWaiver = status === PortalStatus.accepted;
 
 	return (
 		<div className="bg-white text-black max-w-4xl rounded-2xl p-6 flex flex-col mb-24 w-full">
 			<h2 className="text-4xl font-semibold">Status</h2>
 			<VerticalTimeline status={status as PortalStatus} />
 			<Message status={status as PortalStatus} />
-			{isAccepted && <SignWaiver status={status as PortalStatus} />}
+			{needsToSignWaiver && <SignWaiver />}
 			{submittedWaiver && <ConfirmAttendance status={status} />}
 		</div>
 	);

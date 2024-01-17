@@ -1,13 +1,7 @@
 import Button from "@/lib/components/Button/Button";
 
-import { PortalStatus } from "./ApplicantPortal";
-
-interface SignWaiverProps {
-	status: PortalStatus;
-}
-
-function SignWaiver({ status }: SignWaiverProps) {
-	return status === PortalStatus.waived ? null : (
+function SignWaiver() {
+	return (
 		<div>
 			<hr />
 			<h3 className="text-3xl my-4">Waiver</h3>

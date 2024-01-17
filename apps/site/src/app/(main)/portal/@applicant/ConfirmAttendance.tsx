@@ -13,17 +13,17 @@ function ConfirmAttendance({ status }: ConfirmAttendanceProps) {
 
 	return (
 		<div className="mt-4">
-			<hr />
 			<h3 className="text-3xl my-4">RSVP</h3>
 			{status === PortalStatus.confirmed ? (
 				<p>
-					Thank you for confirming your attendance. We look forward to seeing
-					you at the event!
+					Thank you for confirming your attendance! We look forward to seeing
+					you at IrvineHacks! If you are no longer able to attend, please let us
+					know using the button below.
 				</p>
 			) : (
 				<p>
 					If you plan on attending IrvineHacks 2024, please confirm your
-					attendance below!
+					attendance using the button below!
 				</p>
 			)}
 			<form method="post" action="/api/user/rsvp">

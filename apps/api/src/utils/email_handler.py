@@ -1,4 +1,4 @@
-from typing import Protocol
+from typing import Iterable, Protocol
 
 from pydantic import EmailStr
 
@@ -52,7 +52,7 @@ async def send_guest_login_email(email: EmailStr, passphrase: str) -> None:
 
 
 async def send_decision_email(
-    applicant_batch: list[tuple[str, EmailStr]], decision: Decision
+    applicant_batch: Iterable[tuple[str, EmailStr]], decision: Decision
 ) -> None:
     """Send a specific decision email to a group of applicants."""
     personalizations = [

@@ -46,7 +46,12 @@ function Message({ status }: MessageProps) {
 				event!
 			</>
 		),
-		[PortalStatus.confirmed]: <></>,
+		[PortalStatus.confirmed]: (
+			<p>
+				Thank you for confirming your attendance! We look forward to seeing you
+				at IrvineHacks!
+			</p>
+		),
 	};
 
 	return <div>{messages[status]}</div>;

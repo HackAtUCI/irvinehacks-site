@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import getUserIdentity from "@/lib/utils/getUserIdentity";
 
+import ConfirmAttendance from "./ConfirmAttendance";
 import Message from "./Message";
 import VerticalTimeline from "./VerticalTimeline";
 import SignWaiver from "./SignWaiver";
@@ -24,10 +25,10 @@ async function Portal() {
 		redirect("/apply");
 	}
 
-	const isAccepted =
-		status === PortalStatus.accepted ||
-		status === PortalStatus.waived ||
-		status === PortalStatus.confirmed;
+	const submittedWaiver =
+		status === PortalStatus.waived || status === PortalStatus.confirmed;
+
+	const isAccepted = status === PortalStatus.accepted || submittedWaiver;
 
 	return (
 		<div className="bg-white text-black max-w-4xl rounded-2xl p-6 flex flex-col mb-24 w-full">
@@ -35,6 +36,7 @@ async function Portal() {
 			<VerticalTimeline status={status as PortalStatus} />
 			<Message status={status as PortalStatus} />
 			{isAccepted && <SignWaiver status={status as PortalStatus} />}
+			{submittedWaiver && <ConfirmAttendance status={status} />}
 		</div>
 	);
 }

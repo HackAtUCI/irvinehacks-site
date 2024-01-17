@@ -10,7 +10,8 @@ function SignWaiver({ status }: SignWaiverProps) {
 	return status === PortalStatus.waived ? null : (
 		<div>
 			<hr />
-			<p>
+			<h3 className="text-3xl my-4">Waiver</h3>
+			<p className="mt-4">
 				In order to attend IrvineHacks 2024, please fill out the waiver below
 			</p>
 			<Button

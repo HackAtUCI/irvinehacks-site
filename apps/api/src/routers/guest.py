@@ -35,9 +35,6 @@ def guest_email(email: Annotated[EmailStr, Form()]) -> EmailStr:
 async def guest_login(
     email: Annotated[EmailStr, Depends(guest_email)]
 ) -> RedirectResponse:
-    query = urlencode({"email": email})
-    response = RedirectResponse(f"/guest-login?{query}", status.HTTP_303_SEE_OTHER)
-    return response
     """Generate login passphrase and set cookie with confirmation token.
     The initiation will send an email with the passphrase."""
     try:
@@ -46,11 +43,11 @@ async def guest_login(
         log.exception("During guest login: %s", err)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    if not confirmation:
-        raise HTTPException(
-            status.HTTP_429_TOO_MANY_REQUESTS,
-            "Please wait for the token to expire in 10 minutes.",
-        )
+    # if not confirmation:
+    #     raise HTTPException(
+    #         status.HTTP_429_TOO_MANY_REQUESTS,
+    #         "Please wait for the token to expire in 10 minutes.",
+    #     )
 
     # Redirect to guest login page on client
     # which displays a message to check email and enter passphrase

@@ -35,6 +35,9 @@ def guest_email(email: Annotated[EmailStr, Form()]) -> EmailStr:
 async def guest_login(
     email: Annotated[EmailStr, Depends(guest_email)]
 ) -> RedirectResponse:
+    query = urlencode({"email": email})
+    response = RedirectResponse(f"/guest-login?{query}", status.HTTP_303_SEE_OTHER)
+    return response
     """Generate login passphrase and set cookie with confirmation token.
     The initiation will send an email with the passphrase."""
     try:

@@ -32,6 +32,10 @@ class GuestRecord(BaseRecord):
 async def initiate_guest_login(email: EmailStr) -> Optional[str]:
     """Generate a login passphrase to be emailed, save the authentication key,
     and a confirmation token to be saved as a cookie."""
+    if await _get_existing_key(email):
+        # To prevent spammed requests, user must wait until previous key expires
+        return None
+
     confirmation = _generate_confirmation_token()
     passphrase = await _generate_passphrase(PASSPHRASE_LENGTH)
     auth_key = _generate_key(confirmation, passphrase)

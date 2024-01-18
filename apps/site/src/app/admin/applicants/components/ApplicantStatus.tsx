@@ -22,7 +22,7 @@ const StatusTypes: Record<Status, StatusIndicatorProps.Type> = {
 	[Status.pending]: "pending",
 	[Status.reviewed]: "in-progress",
 	[Status.released]: "success",
-	[Status.signed]: "pending",
+	[Status.signed]: "in-progress",
 	[Status.confirmed]: "success",
 };
 

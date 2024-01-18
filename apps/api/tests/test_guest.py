@@ -85,7 +85,7 @@ def test_requesting_login_when_previous_key_exists_redirects_to_guest_login(
 
     assert "Set-Cookie" not in res.headers
     assert res.status_code == 303
-    
+
 
 @patch("auth.guest_auth._remove_guest_key", autospec=True)
 @patch("auth.guest_auth._get_existing_key", autospec=True)

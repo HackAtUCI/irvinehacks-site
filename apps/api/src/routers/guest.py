@@ -43,16 +43,14 @@ async def guest_login(
         log.exception("During guest login: %s", err)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    if not confirmation:
-        raise HTTPException(
-            status.HTTP_429_TOO_MANY_REQUESTS,
-            "Please wait for the token to expire in 10 minutes.",
-        )
-
     # Redirect to guest login page on client
     # which displays a message to check email and enter passphrase
     query = urlencode({"email": email})
     response = RedirectResponse(f"/guest-login?{query}", status.HTTP_303_SEE_OTHER)
+
+    if not confirmation:
+        return response
+
     response.set_cookie(
         "guest_confirmation", confirmation, max_age=600, secure=True, httponly=True
     )

@@ -71,6 +71,7 @@ def test_guest_login_initiation(
     assert res.headers["location"] == "/guest-login?email=beaver%40caltech.edu"
     assert res.headers["Set-Cookie"].startswith("guest_confirmation=abcdef;")
 
+
 # Commenting out this test to disable 429 from existing, unexpired key
 # @patch("auth.guest_auth._get_existing_key", autospec=True)
 # def test_requesting_login_when_previous_key_exists_causes_429(

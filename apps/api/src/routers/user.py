@@ -228,6 +228,8 @@ async def rsvp(
         new_status = Status.CONFIRMED
     elif user_record["status"] == Status.CONFIRMED:
         new_status = Status.WAIVER_SIGNED
+    elif user_record["status"] == Status.ATTENDING:
+        new_status = Status.VOID
     else:
         raise HTTPException(
             status.HTTP_403_FORBIDDEN,

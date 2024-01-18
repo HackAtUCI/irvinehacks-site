@@ -6,7 +6,12 @@ import Multiselect, {
 	MultiselectProps,
 } from "@cloudscape-design/components/multiselect";
 
-import { Decision, ReviewStatus, Status } from "@/lib/admin/useApplicant";
+import {
+	Decision,
+	ReviewStatus,
+	Status,
+	WaiverStatus,
+} from "@/lib/admin/useApplicant";
 
 import { StatusLabels } from "./ApplicantStatus";
 
@@ -26,6 +31,8 @@ const StatusIcons: Record<Status, IconProps.Name> = {
 	[Decision.accepted]: "status-positive",
 	[Decision.rejected]: "status-pending",
 	[Decision.waitlisted]: "status-negative",
+	[WaiverStatus.signed]: "status-pending",
+	[WaiverStatus.confirmed]: "status-positive",
 };
 
 const statusOption = (status: Status): MultiselectProps.Option => ({

@@ -47,6 +47,10 @@ async def guest_login(
     # which displays a message to check email and enter passphrase
     query = urlencode({"email": email})
     response = RedirectResponse(f"/guest-login?{query}", status.HTTP_303_SEE_OTHER)
+
+    if not confirmation:
+        return response
+
     response.set_cookie(
         "guest_confirmation", confirmation, max_age=600, secure=True, httponly=True
     )

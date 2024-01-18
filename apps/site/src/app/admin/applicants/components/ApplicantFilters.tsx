@@ -31,7 +31,7 @@ const StatusIcons: Record<Status, IconProps.Name> = {
 	[Decision.accepted]: "status-positive",
 	[Decision.rejected]: "status-pending",
 	[Decision.waitlisted]: "status-negative",
-	[PostAcceptedStatus.signed]: "status-pending",
+	[PostAcceptedStatus.signed]: "status-in-progress",
 	[PostAcceptedStatus.confirmed]: "status-positive",
 };
 

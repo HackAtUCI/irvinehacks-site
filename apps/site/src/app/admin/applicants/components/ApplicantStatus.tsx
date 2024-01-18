@@ -11,6 +11,8 @@ export const StatusLabels = {
 	[Status.pending]: "needs review",
 	[Status.reviewed]: "reviewed",
 	[Status.released]: "released",
+	[Status.signed]: "Waiver Signed",
+	[Status.confirmed]: "Confirmed",
 };
 
 const StatusTypes: Record<Status, StatusIndicatorProps.Type> = {
@@ -20,6 +22,8 @@ const StatusTypes: Record<Status, StatusIndicatorProps.Type> = {
 	[Status.pending]: "pending",
 	[Status.reviewed]: "in-progress",
 	[Status.released]: "success",
+	[Status.signed]: "pending",
+	[Status.confirmed]: "success",
 };
 
 interface ApplicantStatusProps {
@@ -28,7 +32,10 @@ interface ApplicantStatusProps {
 
 function ApplicantStatus({ status }: ApplicantStatusProps) {
 	return (
-		<StatusIndicator type={StatusTypes[status]}>
+		<StatusIndicator
+			type={StatusTypes[status]}
+			colorOverride={status === Status.signed ? "blue" : undefined}
+		>
 			{StatusLabels[status]}
 		</StatusIndicator>
 	);

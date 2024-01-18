@@ -40,8 +40,13 @@ export enum ReviewStatus {
 	released = "RELEASED",
 }
 
-export const Status = { ...ReviewStatus, ...Decision };
-export type Status = ReviewStatus | Decision;
+export enum PostAcceptedStatus {
+	signed = "WAIVER_SIGNED",
+	confirmed = "CONFIRMED",
+}
+
+export const Status = { ...ReviewStatus, ...Decision, ...PostAcceptedStatus };
+export type Status = ReviewStatus | Decision | PostAcceptedStatus;
 
 export interface Applicant {
 	_id: Uid;

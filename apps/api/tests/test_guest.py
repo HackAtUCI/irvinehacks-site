@@ -81,7 +81,7 @@ def test_requesting_login_when_previous_key_exists_redirects_to_guest_login(
     modify cookie"""
 
     mock_get_existing_key.return_value = "some-existing-key"
-    res = client.post("/login", data=SAMPLE_LOGIN_DATA)
+    res = client.post("/login", data=SAMPLE_LOGIN_DATA, follow_redirects=False)
 
     assert "Set-Cookie" not in res.headers
     assert res.status_code == 303

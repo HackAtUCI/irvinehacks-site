@@ -105,7 +105,7 @@ def test_user_with_status_attending_un_rsvp_changes_status_to_void(
     mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_mongodb_handler_update_one: AsyncMock,
 ) -> None:
-    """Test user with WAIVER_SIGNED status has new status of VOID after RSVP."""
+    """Test user with ATTENDING status has new status of VOID after RSVP."""
     mock_mongodb_handler_retrieve_one.return_value = {"status": Status.ATTENDING}
 
     client = UserTestClient(GuestUser(email="tree@stanford.edu"), app)

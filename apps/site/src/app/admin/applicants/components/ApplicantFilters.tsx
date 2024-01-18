@@ -10,7 +10,7 @@ import {
 	Decision,
 	ReviewStatus,
 	Status,
-	WaiverStatus,
+	PostAcceptedStatus,
 } from "@/lib/admin/useApplicant";
 
 import { StatusLabels } from "./ApplicantStatus";
@@ -31,8 +31,8 @@ const StatusIcons: Record<Status, IconProps.Name> = {
 	[Decision.accepted]: "status-positive",
 	[Decision.rejected]: "status-pending",
 	[Decision.waitlisted]: "status-negative",
-	[WaiverStatus.signed]: "status-pending",
-	[WaiverStatus.confirmed]: "status-positive",
+	[PostAcceptedStatus.signed]: "status-pending",
+	[PostAcceptedStatus.confirmed]: "status-positive",
 };
 
 const statusOption = (status: Status): MultiselectProps.Option => ({

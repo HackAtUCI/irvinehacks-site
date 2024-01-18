@@ -11,8 +11,8 @@ export const StatusLabels = {
 	[Status.pending]: "needs review",
 	[Status.reviewed]: "reviewed",
 	[Status.released]: "released",
-	[Status.signed]: "Waiver Signed",
-	[Status.confirmed]: "Confirmed",
+	[Status.signed]: "waiver signed",
+	[Status.confirmed]: "confirmed",
 };
 
 const StatusTypes: Record<Status, StatusIndicatorProps.Type> = {

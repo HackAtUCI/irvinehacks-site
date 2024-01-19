@@ -15,6 +15,7 @@ export const enum PortalStatus {
 	waitlisted = "WAITLISTED",
 	waived = "WAIVER_SIGNED",
 	confirmed = "CONFIRMED",
+	attending = "ATTENDING",
 }
 
 async function Portal() {

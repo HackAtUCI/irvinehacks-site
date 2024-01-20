@@ -27,7 +27,9 @@ async function Portal() {
 	}
 
 	const submittedWaiver =
-		status === PortalStatus.waived || status === PortalStatus.confirmed;
+		status === PortalStatus.waived ||
+		status === PortalStatus.confirmed ||
+		status === PortalStatus.attending;
 
 	const needsToSignWaiver = status === PortalStatus.accepted;
 

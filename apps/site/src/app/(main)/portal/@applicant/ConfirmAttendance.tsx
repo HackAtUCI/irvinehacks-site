@@ -37,7 +37,7 @@ function ConfirmAttendance({ status }: ConfirmAttendanceProps) {
 			)}
 			<RsvpForm
 				buttonText={buttonText}
-				showMessage={status === PortalStatus.attending}
+				showWarning={status === PortalStatus.attending}
 			/>
 		</div>
 	);

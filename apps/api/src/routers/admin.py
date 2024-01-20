@@ -155,7 +155,9 @@ async def confirm_attendance() -> None:
     )
 
     for initial_status in (Status.WAIVER_SIGNED, Decision.ACCEPTED):
-        void_record = [record for record in records if record["status"] == initial_status]
+        void_record = [
+            record for record in records if record["status"] == initial_status
+        ]
 
         for record in void_record:
             record["status"] = Status.VOID

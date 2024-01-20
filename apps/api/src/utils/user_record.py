@@ -22,6 +22,8 @@ class Status(str, Enum):
     REVIEWED = "REVIEWED"
     WAIVER_SIGNED = "WAIVER_SIGNED"
     CONFIRMED = "CONFIRMED"
+    ATTENDING = "ATTENDING"
+    VOID = "VOID"
 
 
 class UserRecord(BaseRecord):

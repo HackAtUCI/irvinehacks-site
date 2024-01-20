@@ -127,6 +127,39 @@ def test_no_decision_from_no_reviews() -> None:
     admin._include_review_decision(record)
     assert record["decision"] is None
 
+def test_confirm_attendance_when_status_confirmed() -> None:
+    """Test that a decision is None for an applicant with no reviews."""
+    record = {
+        "_id": "edu.uci.Hey",
+        "status": "CONFIRMED",
+        "decision": "ACCEPTED",
+    }
+
+    admin._set_confirmations(record)
+    assert record["status"] == "ATTENDING"
+
+def test_confirm_attendance_when_status_accepted() -> None:
+    """Test that a decision is None for an applicant with no reviews."""
+    record = {
+        "_id": "edu.uci.Vsauce",
+        "status": "ACCEPTED",
+        "decision": "ACCEPTED",
+    }
+
+    admin._set_confirmations(record)
+    assert record["status"] == "VOID"
+
+def test_confirm_attendance_when_status_waiver_signed() -> None:
+    """Test that a decision is None for an applicant with no reviews."""
+    record = {
+        "_id": "edu.uci.Michael",
+        "status": "WAIVER_SIGNED",
+        "decision": "ACCEPTED",
+    }
+
+    admin._set_confirmations(record)
+    assert record["status"] == "VOID"
+
 
 @patch("services.mongodb_handler.raw_update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)

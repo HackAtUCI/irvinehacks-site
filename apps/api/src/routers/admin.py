@@ -129,7 +129,34 @@ async def release_decisions() -> None:
         await asyncio.gather(
             *(_process_batch(batch, decision) for batch in batched(group, 100))
         )
+        
+@router.post("/confirm-attendance", dependencies=[Depends(require_role([Role.DIRECTOR]))])
+async def confirm_attendance() -> None:
+    """Update applicant status to void or attending based on their current status."""
+    records = await mongodb_handler.retrieve(
+        Collection.USERS,
+        {"role": Role.APPLICANT},
+        ["_id", "status"],
+    )
 
+    for record in records:
+        _set_confirmations(record)
+
+    for status in (Status.ATTENDING, Status.VOID):
+
+        group = [record for record in records if record["status"] == status]
+
+        await asyncio.gather(
+            *(_process_status(batch, status) for batch in batched(group, 100))
+        )
+
+async def _process_status(batch: tuple[dict[str, Any], ...], status: Decision) -> None:
+    uids: list[str] = [record["_id"] for record in batch]
+    ok = await mongodb_handler.update(
+        Collection.USERS, {"_id": {"$in": uids}}, {"status": status}
+    )
+    if not ok:
+        raise RuntimeError("gg wp")
 
 async def _process_batch(batch: tuple[dict[str, Any], ...], decision: Decision) -> None:
     uids: list[str] = [record["_id"] for record in batch]
@@ -165,3 +192,15 @@ def _include_review_decision(applicant_record: dict[str, Any]) -> None:
     """Sets the applicant's decision as the last submitted review decision or None."""
     reviews = applicant_record["application_data"]["reviews"]
     applicant_record["decision"] = reviews[-1][2] if reviews else None
+
+
+def _set_confirmations(applicant_record: dict[str, Any]) -> None:
+    """Sets the applicant's status based on their RSVP status"""
+
+    status = applicant_record["status"]
+    if status == Status.CONFIRMED:
+        applicant_record["status"] = Status.ATTENDING
+    elif status == Status.WAIVER_SIGNED:
+        applicant_record["status"] = Status.VOID
+    elif status == Decision.ACCEPTED:
+        applicant_record["status"] = Status.VOID

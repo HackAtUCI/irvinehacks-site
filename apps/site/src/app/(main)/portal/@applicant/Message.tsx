@@ -41,6 +41,7 @@ function Message({ status }: MessageProps) {
 		),
 		[PortalStatus.waived]: <p>Thank you for signing the waiver!</p>,
 		[PortalStatus.confirmed]: <></>,
+		[PortalStatus.attending]: <></>,
 	};
 
 	return messages[status];

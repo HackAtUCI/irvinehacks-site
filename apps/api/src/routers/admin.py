@@ -148,9 +148,12 @@ async def confirm_attendance() -> None:
         record["status"] = Status.ATTENDING
 
     await asyncio.gather(
-        *(_process_status(batch, Status.ATTENDING) for batch in batched(confirmed_record, 100))
+        *(
+            _process_status(batch, Status.ATTENDING)
+            for batch in batched(confirmed_record, 100)
+        )
     )
-    
+
     for initial_status in (Status.WAIVER_SIGNED, Decision.ACCEPTED):
         void_record = [record for record in records if record["status"] == initial_status]
 

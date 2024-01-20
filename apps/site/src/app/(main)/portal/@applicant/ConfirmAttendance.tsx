@@ -1,5 +1,6 @@
 import { PortalStatus } from "./ApplicantPortal";
 import Button from "@/lib/components/Button/Button";
+import RsvpForm from "./RsvpForm";
 
 interface ConfirmAttendanceProps {
 	status: PortalStatus;
@@ -35,9 +36,10 @@ function ConfirmAttendance({ status }: ConfirmAttendanceProps) {
 					attendance using the button below!
 				</p>
 			)}
-			<form method="post" action="/api/user/rsvp">
-				<Button className="text-color-red" text={buttonText} />
-			</form>
+			<RsvpForm
+				buttonText={buttonText}
+				showMessage={status === PortalStatus.attending}
+			/>
 		</div>
 	);
 }

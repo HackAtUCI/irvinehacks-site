@@ -1,14 +1,18 @@
 {
-	"extends": [
-		"//"
-	],
+	"extends": ["//"],
 	"pipeline": {
 		"build": {
-			"outputs": [
-				".vercel/**",
-				".next/**",
-				"!.next/cache/**"
-			]
+			"inputs": [
+				"src/**",
+				"public/**",
+				".eslintrc.json",
+				"next.config.js",
+				"package.json",
+				"postcss.config.js",
+				"tailwind.config.ts",
+				"tsconfig.json"
+			],
+			"outputs": [".vercel/**", ".next/**", "!.next/cache/**"]
 		}
 	}
 }

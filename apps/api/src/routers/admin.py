@@ -161,7 +161,6 @@ async def confirm_attendance() -> None:
 
         for record in void_record:
             record["status"] = Status.VOID
-        
         await asyncio.gather(
             *(_process_status(batch, Status.VOID) for batch in batched(void_record, 100))
         )

@@ -1,5 +1,5 @@
 {
-	"buildCommand": "cd ../.. && turbo run build --filter={apps/site} && cd apps/site && ./copy-api.sh && ./vercel-lib.sh",
+	"buildCommand": "./vercel-lib.sh && cd ../.. && turbo run build --filter={apps/site} --filter={apps/api} && cd apps/site && ./copy-api.sh",
 	"functions": {
 		"api/index.py": {
 			"memory": 512,

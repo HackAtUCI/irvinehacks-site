@@ -21,12 +21,10 @@ lib_files=(
    libgpg-error.so.0.10.0
 )
 
+# These system libraries will be included in the Lambda deployment files
+# and accessible from Python through LD_LIBRARY_PATH
 mkdir lib
 for file in "${lib_files[@]}"
 do
    cp /usr/lib64/$file lib/
 done
-
-echo $PWD
-ls
-ls lib

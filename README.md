@@ -97,6 +97,8 @@ A local MongoDB application will start running at `http://localhost:8081` after 
 
 To build all apps and packages, run the following command in the project root.
 
+*Note*: You would run this BEFORE opening a PR as a sanity check for errors.
+
 ```bash
 pnpm build
 ```
@@ -110,6 +112,13 @@ To develop all apps and packages, run the following command in the project root.
 ```bash
 pnpm dev
 ```
+
+## Helpful VSCode Extensions
+- [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python) for Python linting, intellisense, etc.
+- [Mypy](https://marketplace.visualstudio.com/items?itemName=ms-python.mypy-type-checker) for Python type checking
+- [Black](https://marketplace.visualstudio.com/items?itemName=ms-python.black-formatter) for Python code formatting
+- [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) for code formatting on file save or set to a keybind
+- [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) for linting Javascript
 
 ## What's inside?
 
@@ -129,4 +138,3 @@ This Turborepo includes the following packages/apps:
 - [TypeScript](https://www.typescriptlang.org/) for static type checking
 - [ESLint](https://eslint.org/) for code linting
 - [Prettier](https://prettier.io) for code formatting
-- [Black](https://marketplace.visualstudio.com/items?itemName=ms-python.black-formatter) for Python code formatting

@@ -202,7 +202,5 @@ def _set_confirmations(applicant_record: dict[str, Any]) -> None:
     status = applicant_record["status"]
     if status == Status.CONFIRMED:
         applicant_record["status"] = Status.ATTENDING
-    elif status == Status.WAIVER_SIGNED:
-        applicant_record["status"] = Status.VOID
-    elif status == Decision.ACCEPTED:
+    elif status in (Status.WAIVER_SIGNED, Decision.ACCEPTED):
         applicant_record["status"] = Status.VOID

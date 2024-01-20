@@ -2,6 +2,7 @@
 	"extends": ["//"],
 	"pipeline": {
 		"build": {
+			"env": ["NEXT_PUBLIC_SANITY_*"],
 			"inputs": [
 				"src/**",
 				"public/**",

@@ -2,7 +2,7 @@ import axios from "axios";
 import { cookies } from "next/headers";
 
 const LOCAL_API_URL = "http://localhost:8000";
-const SERVER_HOST = process.env.NEXT_PUBLIC_VERCEL_URL;
+const SERVER_HOST = process.env.VERCEL_URL;
 
 // The Vercel Serverless Function for the API lives outside the scope of Next.js
 // so the publicly deployed URL must be used instead of a rewrite

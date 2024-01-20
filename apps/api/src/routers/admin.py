@@ -143,14 +143,20 @@ async def rsvp_reminder() -> None:
         {"status": {"$in": [Decision.ACCEPTED, Status.WAIVER_SIGNED]}},
         ["_id", "application_data.first_name"],
     )
-    log.info(f"Sending RSVP reminder emails to {len(not_yet_rsvpd)} applicants")
-    personalizations = [
-        ApplicationUpdatePersonalization(
-            email=_recover_email_from_uid(record["_id"]),
-            first_name=record["application_data"]["first_name"],
+
+    personalizations = []
+    for record in not_yet_rsvpd:
+        if "application_data" not in record:
+            continue
+        personalizations.append(
+            ApplicationUpdatePersonalization(
+                email=_recover_email_from_uid(record["_id"]),
+                first_name=record["application_data"]["first_name"],
+            )
         )
-        for record in not_yet_rsvpd
-    ]
+
+    log.info(f"Sending RSVP reminder emails to {len(not_yet_rsvpd)} applicants")
+
     await sendgrid_handler.send_email(
         Template.RSVP_REMINDER,
         IH_SENDER,

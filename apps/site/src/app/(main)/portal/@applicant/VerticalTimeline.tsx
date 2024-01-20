@@ -125,7 +125,7 @@ function VerticalTimeline({ status }: VerticalTimelineProps) {
 					height={25}
 					className="m-6 mr-12"
 				/>
-				Sorry, you can not RSVP at this time.
+				Can not RSVP at this time.
 			</li>
 		) : null;
 

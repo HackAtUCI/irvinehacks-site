@@ -9,10 +9,12 @@ from pydantic import BaseModel, EmailStr, Field, TypeAdapter, ValidationError
 from auth.authorization import require_role
 from auth.user_identity import User, utc_now
 from models.ApplicationData import Decision, Review
-from services import mongodb_handler
+from services import mongodb_handler, sendgrid_handler
 from services.mongodb_handler import BaseRecord, Collection
+from services.sendgrid_handler import ApplicationUpdatePersonalization, Template
 from utils import email_handler
 from utils.batched import batched
+from utils.email_handler import IH_SENDER, REPLY_TO_HACK_AT_UCI
 from utils.user_record import Applicant, Role, Status
 
 log = getLogger(__name__)
@@ -129,6 +131,29 @@ async def release_decisions() -> None:
         await asyncio.gather(
             *(_process_batch(batch, decision) for batch in batched(group, 100))
         )
+
+
+@router.post("/rsvp-reminder", dependencies=[Depends(require_role(Role.DIRECTOR))])
+async def rsvp_reminder():
+    not_yet_rsvpd = mongodb_handler.retrieve(
+        Collection,
+        {"status": {"$in": [Status.ACCEPTED, Status.WAIVER_SIGNED]}},
+        ["_id", "application_data.first_name"],
+    )
+    not_yet_rsvpd = [
+        ApplicationUpdatePersonalization(
+            email=_recover_email_from_uid(record["_id"]),
+            first_name=record["application_data.first_name"],
+        )
+        for record in not_yet_rsvpd
+    ]
+    await sendgrid_handler.send_email(
+        Template.RSVP_REMINDER,
+        IH_SENDER,
+        not_yet_rsvpd,
+        True,
+        reply_to=REPLY_TO_HACK_AT_UCI,
+    )
 
 
 async def _process_batch(batch: tuple[dict[str, Any], ...], decision: Decision) -> None:

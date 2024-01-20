@@ -184,8 +184,9 @@ def _extract_personalizations(decision_data: dict[str, Any]) -> tuple[str, Email
 
 def _recover_email_from_uid(uid: str) -> str:
     """For NativeUsers, the email should still delivery properly."""
+    uid = uid.replace("..", "\n")
     *reversed_domain, local = uid.split(".")
-    local = local.replace("..", ".")
+    local = local.replace("\n", ".")
     domain = ".".join(reversed(reversed_domain))
     return f"{local}@{domain}"
 

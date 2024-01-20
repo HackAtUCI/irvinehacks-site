@@ -127,6 +127,7 @@ def test_no_decision_from_no_reviews() -> None:
     admin._include_review_decision(record)
     assert record["decision"] is None
 
+
 def test_confirm_attendance_when_status_confirmed() -> None:
     """Test that a decision is None for an applicant with no reviews."""
     record = {
@@ -138,6 +139,7 @@ def test_confirm_attendance_when_status_confirmed() -> None:
     admin._set_confirmations(record)
     assert record["status"] == "ATTENDING"
 
+
 def test_confirm_attendance_when_status_accepted() -> None:
     """Test that a decision is None for an applicant with no reviews."""
     record = {
@@ -148,6 +150,7 @@ def test_confirm_attendance_when_status_accepted() -> None:
 
     admin._set_confirmations(record)
     assert record["status"] == "VOID"
+
 
 def test_confirm_attendance_when_status_waiver_signed() -> None:
     """Test that a decision is None for an applicant with no reviews."""

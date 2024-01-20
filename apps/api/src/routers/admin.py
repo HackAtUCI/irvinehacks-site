@@ -125,12 +125,15 @@ async def release_decisions() -> None:
         group = [record for record in records if record["decision"] == decision]
         if not group:
             continue
-
         await asyncio.gather(
             *(_process_batch(batch, decision) for batch in batched(group, 100))
         )
-        
-@router.post("/confirm-attendance", dependencies=[Depends(require_role([Role.DIRECTOR]))])
+
+
+@router.post(
+        "/confirm-attendance", dependencies=
+        [Depends(require_role([Role.DIRECTOR]))]
+        )
 async def confirm_attendance() -> None:
     """Update applicant status to void or attending based on their current status."""
     records = await mongodb_handler.retrieve(
@@ -142,21 +145,21 @@ async def confirm_attendance() -> None:
     for record in records:
         _set_confirmations(record)
 
-    for status in (Status.ATTENDING, Status.VOID):
-
-        group = [record for record in records if record["status"] == status]
-
+    for cur_status in (Status.ATTENDING, Status.VOID):
+        group = [record for record in records if record["status"] == cur_status]
         await asyncio.gather(
-            *(_process_status(batch, status) for batch in batched(group, 100))
+            *(_process_status(batch, cur_status) for batch in batched(group, 100))
         )
 
-async def _process_status(batch: tuple[dict[str, Any], ...], status: Decision) -> None:
+
+async def _process_status(batch: tuple[dict[str, Any], ...], status: Status) -> None:
     uids: list[str] = [record["_id"] for record in batch]
     ok = await mongodb_handler.update(
         Collection.USERS, {"_id": {"$in": uids}}, {"status": status}
     )
     if not ok:
         raise RuntimeError("gg wp")
+
 
 async def _process_batch(batch: tuple[dict[str, Any], ...], decision: Decision) -> None:
     uids: list[str] = [record["_id"] for record in batch]

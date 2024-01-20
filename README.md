@@ -17,7 +17,7 @@ This app contains the api for the IrvineHacks site.
 
 The development server runs at `http://localhost:8000`. If this port is taken, the next available port will be used.
 
-### `apps/studio`
+### `apps/sanity`
 
 A [Sanity Studio](https://www.sanity.io/studio) project.
 
@@ -73,7 +73,7 @@ When running commands, use `pnpm` rather than `npm`.
    and for Windows, run
 
    ```shell
-   .venv/scripts/activate
+   .\.venv\scripts\activate
    ```
 
 4. Install dependencies
@@ -83,11 +83,13 @@ When running commands, use `pnpm` rather than `npm`.
 
 ### Docker
 
-This project uses Docker for testing api methods locally.
+This project uses Docker for testing API methods locally.
 
 1. Install [Docker](https://docs.docker.com/get-docker/). The process varies greatly depending on the operating system, so please refer to this article.
 
 2. Open Docker Desktop.
+
+A local MongoDB application will start running at `http://localhost:8081` after running `pnpm dev`.
 
 *Note*: Because the Python files have been copied over to the Docker container, hot reload is no longer possible. Stopping the container and rerunning `pnpm dev` is the best option.
 
@@ -115,18 +117,16 @@ This Turborepo includes the following packages/apps:
 
 ### Apps and Packages
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `ui`: a stub React component library shared by both `web` and `docs` applications
+- `site`: a [Next.js](https://nextjs.org/) app
+- `api`: a [FastAPI](https://fastapi.tiangolo.com/) app
+- `sanity`: a [Sanity Studio](https://www.sanity.io/studio) app
 - `eslint-config-custom`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
 - `tsconfig`: `tsconfig.json`s used throughout the monorepo
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
 
 ### Utilities
-
-This Turborepo has some additional tools already setup for you:
 
 - [TypeScript](https://www.typescriptlang.org/) for static type checking
 - [ESLint](https://eslint.org/) for code linting
 - [Prettier](https://prettier.io) for code formatting
+- [Black](https://marketplace.visualstudio.com/items?itemName=ms-python.black-formatter) for Python code formatting

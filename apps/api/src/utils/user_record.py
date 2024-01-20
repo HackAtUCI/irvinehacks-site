@@ -13,7 +13,7 @@ class Role(str, Enum):
     HACKER = "hacker"
     MENTOR = "mentor"
     REVIEWER = "reviewer"
-    TECH_ORGANIZER = "tech_organizer"
+    ORGANIZER = "organizer"
     VOLUNTEER = "volunteer"
 
 

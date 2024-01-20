@@ -48,7 +48,7 @@ function VerticalTimeline({ status }: VerticalTimelineProps) {
 			<li className="flex flex-row items-center border-t">
 				<Image
 					src={XCircle}
-					alt="checked-circle"
+					alt="x-circle"
 					width={25}
 					height={25}
 					className="m-6 mr-12"
@@ -120,12 +120,12 @@ function VerticalTimeline({ status }: VerticalTimelineProps) {
 			<li className="flex flex-row items-center border-t">
 				<Image
 					src={XCircle}
-					alt="checked-circle"
+					alt="x-circle"
 					width={25}
 					height={25}
 					className="m-6 mr-12"
 				/>
-				Can not RSVP at this time.
+				No RSVP Indicated
 			</li>
 		) : null;
 

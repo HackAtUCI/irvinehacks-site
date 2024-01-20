@@ -141,7 +141,9 @@ async def confirm_attendance() -> None:
         ["_id", "status"],
     )
 
-    confirmed_record = [record for record in records if record["status"] == Status.CONFIRMED]
+    confirmed_record = [
+        record for record in records if record["status"] == Status.CONFIRMED
+    ]
     for record in confirmed_record:
         record["status"] = Status.ATTENDING
 

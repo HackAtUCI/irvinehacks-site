@@ -131,9 +131,8 @@ async def release_decisions() -> None:
 
 
 @router.post(
-        "/confirm-attendance", dependencies=
-        [Depends(require_role([Role.DIRECTOR]))]
-        )
+    "/confirm-attendance", dependencies=[Depends(require_role([Role.DIRECTOR]))]
+)
 async def confirm_attendance() -> None:
     """Update applicant status to void or attending based on their current status."""
     records = await mongodb_handler.retrieve(

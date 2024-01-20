@@ -133,24 +133,26 @@ async def release_decisions() -> None:
         )
 
 
-@router.post("/rsvp-reminder", dependencies=[Depends(require_role(Role.DIRECTOR))])
-async def rsvp_reminder():
-    not_yet_rsvpd = mongodb_handler.retrieve(
-        Collection,
-        {"status": {"$in": [Status.ACCEPTED, Status.WAIVER_SIGNED]}},
+@router.post("/rsvp-reminder", dependencies=[Depends(require_role([Role.DIRECTOR]))])
+async def rsvp_reminder() -> None:
+    """Send email to applicants who have a status of ACCEPTED or WAIVER_SIGNED
+    reminding them to RSVP."""
+    not_yet_rsvpd = await mongodb_handler.retrieve(
+        Collection.USERS,
+        {"status": {"$in": [Decision.ACCEPTED, Status.WAIVER_SIGNED]}},
         ["_id", "application_data.first_name"],
     )
-    not_yet_rsvpd = [
+    personalizations = [
         ApplicationUpdatePersonalization(
-            email=_recover_email_from_uid(record["_id"]),
-            first_name=record["application_data.first_name"],
+            email=_recover_email_from_uid(str(record["_id"])),
+            first_name=str(record["application_data.first_name"]),
         )
         for record in not_yet_rsvpd
     ]
     await sendgrid_handler.send_email(
         Template.RSVP_REMINDER,
         IH_SENDER,
-        not_yet_rsvpd,
+        personalizations,
         True,
         reply_to=REPLY_TO_HACK_AT_UCI,
     )

@@ -1,5 +1,4 @@
 import { PortalStatus } from "./ApplicantPortal";
-import Button from "@/lib/components/Button/Button";
 import RsvpForm from "./RsvpForm";
 
 interface ConfirmAttendanceProps {

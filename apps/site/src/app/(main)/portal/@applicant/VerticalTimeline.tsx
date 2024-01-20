@@ -77,8 +77,8 @@ function VerticalTimeline({ status }: VerticalTimelineProps) {
 				Sign waiver
 			</li>
 		) : status === PortalStatus.waived ||
-		  status === PortalStatus.confirmed ||
-		  status === PortalStatus.attending ? (
+			status === PortalStatus.confirmed ||
+			status === PortalStatus.attending ? (
 			<li className="flex flex-row items-center border-t">
 				<Image
 					src={CheckCircle}
@@ -104,7 +104,7 @@ function VerticalTimeline({ status }: VerticalTimelineProps) {
 				Confirm attendance
 			</li>
 		) : status === PortalStatus.confirmed ||
-		  status === PortalStatus.attending ? (
+			status === PortalStatus.attending ? (
 			<li className="flex flex-row items-center border-t">
 				<Image
 					src={CheckCircle}

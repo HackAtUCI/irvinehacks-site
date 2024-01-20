@@ -137,11 +137,13 @@ async def release_decisions() -> None:
 async def rsvp_reminder() -> None:
     """Send email to applicants who have a status of ACCEPTED or WAIVER_SIGNED
     reminding them to RSVP."""
+    # TODO: Consider using Pydantic model validation instead of type annotations
     not_yet_rsvpd: list[dict[str, Any]] = await mongodb_handler.retrieve(
         Collection.USERS,
         {"status": {"$in": [Decision.ACCEPTED, Status.WAIVER_SIGNED]}},
         ["_id", "application_data.first_name"],
     )
+    log.info(f"Sending RSVP reminder emails to {len(not_yet_rsvpd)} applicants")
     personalizations = [
         ApplicationUpdatePersonalization(
             email=_recover_email_from_uid(record["_id"]),

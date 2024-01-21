@@ -8,6 +8,7 @@ from auth.user_identity import NativeUser, UserTestClient
 from models.ApplicationData import Decision
 from routers import admin
 from services.mongodb_handler import Collection
+from services.sendgrid_handler import Template
 from utils.user_record import Status
 
 user_identity.JWT_SECRET = "not a good idea"
@@ -230,3 +231,51 @@ def test_confirm_attendance_route(
     )
 
     assert res.status_code == 200
+
+
+@patch("services.sendgrid_handler.send_email", autospec=True)
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_waitlisted_applicant_can_be_released(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_update_one: AsyncMock,
+    mock_sendgrid_handler_send_email: AsyncMock,
+) -> None:
+    """Test waitlisted applicant can be promoted to accepted."""
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        {
+            "status": Decision.WAITLISTED,
+            "application_data": {"first_name": "Peter"},
+        },
+    ]
+    mock_mongodb_handler_update_one.return_value = True
+
+    res = director_client.post("/waitlist-release/edu.uci.petr")
+    assert res.status_code == 200
+
+    mock_mongodb_handler_update_one.assert_awaited_once_with(
+        Collection.USERS, {"_id": "edu.uci.petr"}, {"status": Decision.ACCEPTED}
+    )
+    mock_sendgrid_handler_send_email.assert_awaited_once_with(
+        Template.WAITLIST_RELEASE_EMAIL,
+        ANY,
+        {"email": "petr@uci.edu", "first_name": "Peter"},
+        False,
+        ANY,
+    )
+
+
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_non_waitlisted_applicant_cannot_be_released(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_update_one: AsyncMock,
+) -> None:
+    """Test non-waitlisted applicant cannot be promoted to accepted."""
+    mock_mongodb_handler_retrieve_one.side_effect = [DIRECTOR_IDENTITY, None]
+
+    res = director_client.post("/waitlist-release/who.am.i")
+    assert res.status_code == 404
+
+    mock_mongodb_handler_update_one.assert_not_awaited()

@@ -45,7 +45,7 @@ export default async function Resources() {
 											key={_id}
 											text={title}
 											href={link}
-											className="w-[100%!important]"
+											className="w-[100%!important] text-center"
 										/>
 									))}
 								</div>

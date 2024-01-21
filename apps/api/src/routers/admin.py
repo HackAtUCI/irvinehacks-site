@@ -163,7 +163,7 @@ async def confirm_attendance() -> None:
         )
 
 
-async def _process_status(uids: tuple[str, ...], status: Status) -> None:
+async def _process_status(uids: tuple[object, ...], status: Status) -> None:
     ok = await mongodb_handler.update(
         Collection.USERS, {"_id": {"$in": uids}}, {"status": status}
     )

@@ -1,11 +1,12 @@
 import asyncio
 from datetime import datetime
 from logging import getLogger
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, Field, TypeAdapter, ValidationError
 
+from admin import summary_handler
 from auth.authorization import require_role
 from auth.user_identity import User, utc_now
 from models.ApplicationData import Decision, Review
@@ -84,6 +85,15 @@ async def applicant(
         return Applicant.model_validate(record)
     except ValidationError:
         raise RuntimeError("Could not parse applicant data.")
+
+
+@router.get(
+    "/summary/applicants",
+    dependencies=[Depends(require_role(ADMIN_ROLES))],
+)
+async def applicant_summary() -> dict[Union[Status, Decision], int]:
+    """Provide summary of statuses of applicants."""
+    return await summary_handler.applicant_summary()
 
 
 @router.post("/review")

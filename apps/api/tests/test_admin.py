@@ -179,7 +179,7 @@ def test_confirm_attendance_when_status_waiver_signed(
     mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_mognodb_handler_update: AsyncMock,
 ) -> None:
-    """Test that confirmed status changes to attending."""
+    """Test that confirmed status changes to void."""
 
     mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
     mock_mongodb_handler_retrieve.return_value = [
@@ -210,7 +210,7 @@ def test_confirm_attendance_when_status_accepted(
     mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_mognodb_handler_update: AsyncMock,
 ) -> None:
-    """Test that confirmed status changes to attending."""
+    """Test that confirmed status changes to void."""
 
     mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
     mock_mongodb_handler_retrieve.return_value = [

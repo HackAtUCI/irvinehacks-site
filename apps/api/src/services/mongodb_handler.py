@@ -33,7 +33,7 @@ class BaseRecord(BaseModel):
 
     uid: str = Field(alias="_id")
 
-    def dict(self, *args: Any, **kwargs: Any) -> dict[str, Any]:
+    def model_dump(self, *args: Any, **kwargs: Any) -> dict[str, Any]:
         if "by_alias" in kwargs:
             return BaseModel.model_dump(self, *args, **kwargs)
         return BaseModel.model_dump(self, by_alias=True, *args, **kwargs)

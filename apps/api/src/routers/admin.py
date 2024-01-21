@@ -1,7 +1,7 @@
 import asyncio
 from datetime import datetime
 from logging import getLogger
-from typing import Any, Optional
+from typing import Any, Optional, Sequence
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, Field, TypeAdapter, ValidationError
@@ -165,7 +165,7 @@ async def confirm_attendance() -> None:
         )
 
 
-async def _process_status(uids: tuple[object, ...], status: Status) -> None:
+async def _process_status(uids: Sequence[str], status: Status) -> None:
     ok = await mongodb_handler.update(
         Collection.USERS, {"_id": {"$in": uids}}, {"status": status}
     )

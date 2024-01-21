@@ -148,89 +148,36 @@ def test_confirm_attendance_when_status_confirmed(
     mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_mognodb_handler_update: AsyncMock,
 ) -> None:
-    """Test that confirmed status changes to attending with confirmed."""
+    """Test that confirmed statuses change according to the rules set
+    that confirmed will become attending, accepted and waiver signed
+    will become void."""
 
-    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
-    mock_mongodb_handler_retrieve.return_value = [
-        {
-            "_id": "edu.uc.tester",
-            "role": "applicant",
-            "status": Status.CONFIRMED,
-        }
-    ]
+    statuses = {
+        Status.CONFIRMED: Status.ATTENDING,
+        Decision.ACCEPTED: Status.VOID,
+        Status.WAIVER_SIGNED: Status.VOID,
+    }
 
-    res = director_client.post("/confirm-attendance")
+    for current_status in (Status.CONFIRMED, Status.WAIVER_SIGNED, Decision.ACCEPTED):
+        mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
+        mock_mongodb_handler_retrieve.return_value = [
+            {
+                "_id": "edu.uc.tester",
+                "role": "applicant",
+                "status": current_status,
+            },
+        ]
 
-    mock_mongodb_handler_retrieve.assert_awaited_once()
-    mock_mognodb_handler_update.assert_awaited_once_with(
-        Collection.USERS,
-        {"_id": {"$in": ("edu.uc.tester",)}},
-        {"status": Status.ATTENDING},
-    )
+        res = director_client.post("/confirm-attendance")
 
-    assert res.status_code == 200
+        mock_mognodb_handler_update.assert_awaited()
+        mock_mognodb_handler_update.assert_awaited_with(
+            Collection.USERS,
+            {"_id": {"$in": ("edu.uc.tester",)}},
+            {"status": statuses[current_status]},
+        )
 
-
-@patch("services.mongodb_handler.update", autospec=True)
-@patch("services.mongodb_handler.retrieve_one", autospec=True)
-@patch("services.mongodb_handler.retrieve", autospec=True)
-def test_confirm_attendance_when_status_waiver_signed(
-    mock_mongodb_handler_retrieve: AsyncMock,
-    mock_mongodb_handler_retrieve_one: AsyncMock,
-    mock_mognodb_handler_update: AsyncMock,
-) -> None:
-    """Test that confirmed status changes to void with waiver signed."""
-
-    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
-    mock_mongodb_handler_retrieve.return_value = [
-        {
-            "_id": "edu.uc.tester",
-            "role": "applicant",
-            "status": Status.WAIVER_SIGNED,
-        }
-    ]
-
-    res = director_client.post("/confirm-attendance")
-
-    mock_mongodb_handler_retrieve.assert_awaited_once()
-    mock_mognodb_handler_update.assert_awaited_once_with(
-        Collection.USERS,
-        {"_id": {"$in": ("edu.uc.tester",)}},
-        {"status": Status.VOID},
-    )
-
-    assert res.status_code == 200
-
-
-@patch("services.mongodb_handler.update", autospec=True)
-@patch("services.mongodb_handler.retrieve_one", autospec=True)
-@patch("services.mongodb_handler.retrieve", autospec=True)
-def test_confirm_attendance_when_status_accepted(
-    mock_mongodb_handler_retrieve: AsyncMock,
-    mock_mongodb_handler_retrieve_one: AsyncMock,
-    mock_mognodb_handler_update: AsyncMock,
-) -> None:
-    """Test that confirmed status changes to void with accepted."""
-
-    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
-    mock_mongodb_handler_retrieve.return_value = [
-        {
-            "_id": "edu.uc.tester",
-            "role": "applicant",
-            "status": Decision.ACCEPTED,
-        }
-    ]
-
-    res = director_client.post("/confirm-attendance")
-
-    mock_mongodb_handler_retrieve.assert_awaited_once()
-    mock_mognodb_handler_update.assert_awaited_once_with(
-        Collection.USERS,
-        {"_id": {"$in": ("edu.uc.tester",)}},
-        {"status": Status.VOID},
-    )
-
-    assert res.status_code == 200
+        assert res.status_code == 200
 
 
 @patch("services.mongodb_handler.raw_update_one", autospec=True)

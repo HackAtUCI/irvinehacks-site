@@ -132,6 +132,39 @@ async def release_decisions() -> None:
         )
 
 
+@router.post("/rsvp-reminder", dependencies=[Depends(require_role([Role.DIRECTOR]))])
+async def rsvp_reminder() -> None:
+    """Send email to applicants who have a status of ACCEPTED or WAIVER_SIGNED
+    reminding them to RSVP."""
+    # TODO: Consider using Pydantic model validation instead of type annotations
+    not_yet_rsvpd: list[dict[str, Any]] = await mongodb_handler.retrieve(
+        Collection.USERS,
+        {"status": {"$in": [Decision.ACCEPTED, Status.WAIVER_SIGNED]}},
+        ["_id", "application_data.first_name"],
+    )
+
+    personalizations = []
+    for record in not_yet_rsvpd:
+        if "application_data" not in record:
+            continue
+        personalizations.append(
+            ApplicationUpdatePersonalization(
+                email=_recover_email_from_uid(record["_id"]),
+                first_name=record["application_data"]["first_name"],
+            )
+        )
+
+    log.info(f"Sending RSVP reminder emails to {len(not_yet_rsvpd)} applicants")
+
+    await sendgrid_handler.send_email(
+        Template.RSVP_REMINDER,
+        IH_SENDER,
+        personalizations,
+        True,
+        reply_to=REPLY_TO_HACK_AT_UCI,
+    )
+
+
 @router.post(
     "/confirm-attendance", dependencies=[Depends(require_role([Role.DIRECTOR]))]
 )
@@ -173,39 +206,6 @@ async def _process_status(uids: Sequence[str], status: Status) -> None:
     )
     if not ok:
         raise RuntimeError("gg wp")
-
-
-@router.post("/rsvp-reminder", dependencies=[Depends(require_role([Role.DIRECTOR]))])
-async def rsvp_reminder() -> None:
-    """Send email to applicants who have a status of ACCEPTED or WAIVER_SIGNED
-    reminding them to RSVP."""
-    # TODO: Consider using Pydantic model validation instead of type annotations
-    not_yet_rsvpd: list[dict[str, Any]] = await mongodb_handler.retrieve(
-        Collection.USERS,
-        {"status": {"$in": [Decision.ACCEPTED, Status.WAIVER_SIGNED]}},
-        ["_id", "application_data.first_name"],
-    )
-
-    personalizations = []
-    for record in not_yet_rsvpd:
-        if "application_data" not in record:
-            continue
-        personalizations.append(
-            ApplicationUpdatePersonalization(
-                email=_recover_email_from_uid(record["_id"]),
-                first_name=record["application_data"]["first_name"],
-            )
-        )
-
-    log.info(f"Sending RSVP reminder emails to {len(not_yet_rsvpd)} applicants")
-
-    await sendgrid_handler.send_email(
-        Template.RSVP_REMINDER,
-        IH_SENDER,
-        personalizations,
-        True,
-        reply_to=REPLY_TO_HACK_AT_UCI,
-    )
 
 
 async def _process_batch(batch: tuple[dict[str, Any], ...], decision: Decision) -> None:

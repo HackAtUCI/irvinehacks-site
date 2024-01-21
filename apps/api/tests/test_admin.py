@@ -203,9 +203,13 @@ def test_confirm_attendance_route(
         },
     ]
 
+    # Not doing this will result in the return value acting as a mock, which would be
+    # tracked in the assert_has_calls below.
+    mock_mognodb_handler_update.side_effect = [True, True, True]
+
     res = director_client.post("/confirm-attendance")
 
-    mock_mongodb_handler_retrieve.assert_awaited()
+    mock_mongodb_handler_retrieve.assert_awaited_once()
     mock_mognodb_handler_update.assert_has_calls(
         [
             call(
@@ -213,19 +217,16 @@ def test_confirm_attendance_route(
                 {"_id": {"$in": ("edu.uc.tester3",)}},
                 {"status": Status.ATTENDING},
             ),
-            call().__bool__(),
             call(
                 Collection.USERS,
                 {"_id": {"$in": ("edu.uc.tester",)}},
                 {"status": Status.VOID},
             ),
-            call().__bool__(),
             call(
                 Collection.USERS,
                 {"_id": {"$in": ("edu.uc.tester2",)}},
                 {"status": Status.VOID},
             ),
-            call().__bool__(),
         ]
     )
 

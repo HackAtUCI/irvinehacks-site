@@ -193,18 +193,20 @@ async def confirm_attendance() -> None:
     }
 
     for status_from, status_to in statuses.items():
-        current_record = [
-            record for record in records if record["status"] == status_from
-        ]
+        curr_records = [record for record in records if record["status"] == status_from]
 
-        for record in current_record:
+        for record in curr_records:
             record["status"] = status_to
+
+        log.info(
+            f"Changing status of {len(curr_records)} from {status_from} to {status_to}"
+        )
 
         await asyncio.gather(
             *(
                 _process_status(batch, status_to)
                 for batch in batched(
-                    [str(record["_id"]) for record in current_record], 100
+                    [str(record["_id"]) for record in curr_records], 100
                 )
             )
         )

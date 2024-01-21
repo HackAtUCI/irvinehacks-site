@@ -231,7 +231,6 @@ async def rsvp(
     elif user_record["status"] == Status.ATTENDING:
         new_status = Status.VOID
     else:
-        print(f"User {user.uid} has not signed waiver. Status has not changed.")
         log.warning(f"User {user.uid} has not signed waiver. Status has not changed.")
         raise HTTPException(
             status.HTTP_403_FORBIDDEN,
@@ -243,7 +242,6 @@ async def rsvp(
     )
 
     old_status = user_record["status"]
-    print(f"User {user.uid} changed status from {old_status} to {new_status}.")
     log.info(
         f"User {user.uid} changed status from {old_status} to {new_status}."
     )

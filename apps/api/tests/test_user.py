@@ -116,3 +116,19 @@ def test_user_with_status_attending_un_rsvp_changes_status_to_void(
     )
 
     assert res.status_code == 303
+
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_user_with_status_reviewed_un_rsvp_returns_403(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_update_one: AsyncMock,
+) -> None:
+    """Test user with REVIEWED status has no status change after RSVP."""
+    mock_mongodb_handler_retrieve_one.return_value = {"status": Status.REVIEWED}
+
+    client = UserTestClient(GuestUser(email="tree@stanford.edu"), app)
+    res = client.post("/rsvp", follow_redirects=False)
+
+    mock_mongodb_handler_update_one.assert_not_awaited()
+
+    assert res.status_code == 403

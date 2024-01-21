@@ -6,6 +6,7 @@ from typing import Any, Optional, Sequence
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, Field, TypeAdapter, ValidationError
 
+from admin import summary_handler
 from auth.authorization import require_role
 from auth.user_identity import User, utc_now
 from models.ApplicationData import Decision, Review
@@ -15,7 +16,7 @@ from services.sendgrid_handler import ApplicationUpdatePersonalization, Template
 from utils import email_handler
 from utils.batched import batched
 from utils.email_handler import IH_SENDER, REPLY_TO_HACK_AT_UCI
-from utils.user_record import Applicant, Role, Status
+from utils.user_record import Applicant, ApplicantStatus, Role, Status
 
 log = getLogger(__name__)
 
@@ -84,6 +85,15 @@ async def applicant(
         return Applicant.model_validate(record)
     except ValidationError:
         raise RuntimeError("Could not parse applicant data.")
+
+
+@router.get(
+    "/summary/applicants",
+    dependencies=[Depends(require_role(ADMIN_ROLES))],
+)
+async def applicant_summary() -> dict[ApplicantStatus, int]:
+    """Provide summary of statuses of applicants."""
+    return await summary_handler.applicant_summary()
 
 
 @router.post("/review")

@@ -40,12 +40,13 @@ export default async function Resources() {
 									<p>{description}</p>
 								</div>
 								<div className="flex flex-col gap-3 lg:gap-4">
-									{resources.map(({ _id, title, link }) => (
+									{resources.map(({ _id, title, link }, i) => (
 										<Button
 											key={_id}
 											text={title}
 											href={link}
 											className="w-[100%!important] text-center"
+											// color={i % 2 === 0 ? "light" : "dark"}
 										/>
 									))}
 								</div>

@@ -1,5 +1,5 @@
 from datetime import datetime
-from unittest.mock import ANY, AsyncMock, patch
+from unittest.mock import ANY, AsyncMock, call, patch
 
 from fastapi import FastAPI
 
@@ -143,69 +143,7 @@ def test_no_decision_from_no_reviews() -> None:
 @patch("services.mongodb_handler.update", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 @patch("services.mongodb_handler.retrieve", autospec=True)
-def test_confirm_attendance_when_status_confirmed(
-    mock_mongodb_handler_retrieve: AsyncMock,
-    mock_mongodb_handler_retrieve_one: AsyncMock,
-    mock_mognodb_handler_update: AsyncMock,
-) -> None:
-    """Test that confirmed status changes to attending with confirmed."""
-
-    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
-    mock_mongodb_handler_retrieve.return_value = [
-        {
-            "_id": "edu.uc.tester",
-            "role": "applicant",
-            "status": Status.CONFIRMED,
-        }
-    ]
-
-    res = director_client.post("/confirm-attendance")
-
-    mock_mongodb_handler_retrieve.assert_awaited_once()
-    mock_mognodb_handler_update.assert_awaited_once_with(
-        Collection.USERS,
-        {"_id": {"$in": ("edu.uc.tester",)}},
-        {"status": Status.ATTENDING},
-    )
-
-    assert res.status_code == 200
-
-
-@patch("services.mongodb_handler.update", autospec=True)
-@patch("services.mongodb_handler.retrieve_one", autospec=True)
-@patch("services.mongodb_handler.retrieve", autospec=True)
-def test_confirm_attendance_when_status_waiver_signed(
-    mock_mongodb_handler_retrieve: AsyncMock,
-    mock_mongodb_handler_retrieve_one: AsyncMock,
-    mock_mognodb_handler_update: AsyncMock,
-) -> None:
-    """Test that confirmed status changes to void with waiver signed."""
-
-    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
-    mock_mongodb_handler_retrieve.return_value = [
-        {
-            "_id": "edu.uc.tester",
-            "role": "applicant",
-            "status": Status.WAIVER_SIGNED,
-        }
-    ]
-
-    res = director_client.post("/confirm-attendance")
-
-    mock_mongodb_handler_retrieve.assert_awaited_once()
-    mock_mognodb_handler_update.assert_awaited_once_with(
-        Collection.USERS,
-        {"_id": {"$in": ("edu.uc.tester",)}},
-        {"status": Status.VOID},
-    )
-
-    assert res.status_code == 200
-
-
-@patch("services.mongodb_handler.update", autospec=True)
-@patch("services.mongodb_handler.retrieve_one", autospec=True)
-@patch("services.mongodb_handler.retrieve", autospec=True)
-def test_confirm_attendance_when_status_accepted(
+def test_confirm_attendance_route(
     mock_mongodb_handler_retrieve: AsyncMock,
     mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_mognodb_handler_update: AsyncMock,
@@ -218,16 +156,48 @@ def test_confirm_attendance_when_status_accepted(
             "_id": "edu.uc.tester",
             "role": "applicant",
             "status": Decision.ACCEPTED,
-        }
+        },
+        {
+            "_id": "edu.uc.tester2",
+            "role": "applicant",
+            "status": Status.WAIVER_SIGNED,
+        },
+        {
+            "_id": "edu.uc.tester3",
+            "role": "applicant",
+            "status": Status.CONFIRMED,
+        },
+        {
+            "_id": "edu.uc.tester4",
+            "role": "applicant",
+            "status": Decision.WAITLISTED,
+        },
     ]
 
     res = director_client.post("/confirm-attendance")
 
-    mock_mongodb_handler_retrieve.assert_awaited_once()
-    mock_mognodb_handler_update.assert_awaited_once_with(
-        Collection.USERS,
-        {"_id": {"$in": ("edu.uc.tester",)}},
-        {"status": Status.VOID},
+    mock_mongodb_handler_retrieve.assert_awaited()
+    mock_mognodb_handler_update.assert_has_calls(
+        [
+            call(
+                Collection.USERS,
+                {"_id": {"$in": ("edu.uc.tester3",)}},
+                {"status": Status.ATTENDING},
+            ),
+            call().__bool__(),
+            call(
+                Collection.USERS,
+                {"_id": {"$in": ("edu.uc.tester",)}},
+                {"status": Status.VOID},
+            ),
+            call().__bool__(),
+            call(
+                Collection.USERS,
+                {"_id": {"$in": ("edu.uc.tester2",)}},
+                {"status": Status.VOID},
+            ),
+            call().__bool__(),
+        ]
     )
 
     assert res.status_code == 200

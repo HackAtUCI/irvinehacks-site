@@ -242,8 +242,6 @@ async def rsvp(
     )
 
     old_status = user_record["status"]
-    log.info(
-        f"User {user.uid} changed status from {old_status} to {new_status}."
-    )
+    log.info(f"User {user.uid} changed status from {old_status} to {new_status}.")
 
     return RedirectResponse("/portal", status.HTTP_303_SEE_OTHER)

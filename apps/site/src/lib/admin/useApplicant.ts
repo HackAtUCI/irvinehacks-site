@@ -43,6 +43,8 @@ export enum ReviewStatus {
 export enum PostAcceptedStatus {
 	signed = "WAIVER_SIGNED",
 	confirmed = "CONFIRMED",
+	attending = "ATTENDING",
+	void = "VOID",
 }
 
 export const Status = { ...ReviewStatus, ...Decision, ...PostAcceptedStatus };

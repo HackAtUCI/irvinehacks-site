@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+import { useContext, useState } from "react";
 
 import Box from "@cloudscape-design/components/box";
 import Cards from "@cloudscape-design/components/cards";
@@ -13,7 +15,18 @@ import useApplicants, { ApplicantSummary } from "@/lib/admin/useApplicants";
 import ApplicantFilters, { Options } from "./components/ApplicantFilters";
 import ApplicantStatus from "./components/ApplicantStatus";
 
+import UserContext from "@/lib/admin/UserContext";
+import { isApplicationManager } from "@/lib/admin/authorization";
+
 function Applicants() {
+	const router = useRouter();
+
+	const { role } = useContext(UserContext);
+
+	if (!isApplicationManager(role)) {
+		router.push("/admin/dashboard");
+	}
+
 	const [selectedStatuses, setSelectedStatuses] = useState<Options>([]);
 	const [selectedDecisions, setSelectedDecisions] = useState<Options>([]);
 	const { applicantList, loading } = useApplicants();

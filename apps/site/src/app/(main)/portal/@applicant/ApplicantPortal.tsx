@@ -15,6 +15,8 @@ export const enum PortalStatus {
 	waitlisted = "WAITLISTED",
 	waived = "WAIVER_SIGNED",
 	confirmed = "CONFIRMED",
+	attending = "ATTENDING",
+	void = "VOID",
 }
 
 async function Portal() {
@@ -26,7 +28,9 @@ async function Portal() {
 	}
 
 	const submittedWaiver =
-		status === PortalStatus.waived || status === PortalStatus.confirmed;
+		status === PortalStatus.waived ||
+		status === PortalStatus.confirmed ||
+		status === PortalStatus.attending;
 
 	const needsToSignWaiver = status === PortalStatus.accepted;
 

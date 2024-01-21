@@ -20,6 +20,8 @@ class Template(str, Enum):
     ACCEPTED_EMAIL = "d-062e7106a0d64d49ad9f03325bbc7286"
     WAITLISTED_EMAIL = "d-9178c043de134a71a4fdbe513d35f89f"
     REJECTED_EMAIL = "d-71ef30ac91a941e0893b7680928d80b7"
+    WAITLIST_RELEASE_EMAIL = "d-19af50295ac14e82a7810791a175b8e9"
+    RSVP_REMINDER = "d-0c2642268c404c138359ac1b9d41e78c"
 
 
 class PersonalizationData(TypedDict):

@@ -12,6 +12,11 @@ interface VerticalTimelineProps {
 }
 
 function VerticalTimeline({ status }: VerticalTimelineProps) {
+	const attendanceConfirmed =
+		status === PortalStatus.confirmed || status === PortalStatus.attending;
+
+	const signedWaiver = status === PortalStatus.waived || attendanceConfirmed;
+
 	const submission_component = (
 		<li className="flex flex-row items-center">
 			<Image
@@ -27,8 +32,8 @@ function VerticalTimeline({ status }: VerticalTimelineProps) {
 
 	const verdict_component =
 		status === PortalStatus.accepted ||
-		status === PortalStatus.waived ||
-		status === PortalStatus.confirmed ? (
+		status === PortalStatus.void ||
+		signedWaiver ? (
 			<li className="flex flex-row items-center border-t">
 				<Image
 					src={CheckCircle}
@@ -43,7 +48,7 @@ function VerticalTimeline({ status }: VerticalTimelineProps) {
 			<li className="flex flex-row items-center border-t">
 				<Image
 					src={XCircle}
-					alt="checked-circle"
+					alt="x-circle"
 					width={25}
 					height={25}
 					className="m-6 mr-12"
@@ -75,7 +80,7 @@ function VerticalTimeline({ status }: VerticalTimelineProps) {
 				/>
 				Sign waiver
 			</li>
-		) : status === PortalStatus.waived || status === PortalStatus.confirmed ? (
+		) : signedWaiver ? (
 			<li className="flex flex-row items-center border-t">
 				<Image
 					src={CheckCircle}
@@ -100,7 +105,7 @@ function VerticalTimeline({ status }: VerticalTimelineProps) {
 				/>
 				Confirm attendance
 			</li>
-		) : status === PortalStatus.confirmed ? (
+		) : attendanceConfirmed ? (
 			<li className="flex flex-row items-center border-t">
 				<Image
 					src={CheckCircle}
@@ -110,6 +115,17 @@ function VerticalTimeline({ status }: VerticalTimelineProps) {
 					className="m-6 mr-12"
 				/>
 				Attendance confirmed
+			</li>
+		) : status === PortalStatus.void ? (
+			<li className="flex flex-row items-center border-t">
+				<Image
+					src={XCircle}
+					alt="x-circle"
+					width={25}
+					height={25}
+					className="m-6 mr-12"
+				/>
+				No RSVP Indicated
 			</li>
 		) : null;
 

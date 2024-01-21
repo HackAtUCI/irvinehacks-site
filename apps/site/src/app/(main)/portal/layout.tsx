@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 
-import { isAdminRole } from "@/lib/admin/adminRole";
+import { isAdminRole } from "@/lib/admin/authorization";
 import getUserIdentity from "@/lib/utils/getUserIdentity";
 
 import styles from "./Portal.module.scss";

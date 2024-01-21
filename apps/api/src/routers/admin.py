@@ -1,7 +1,7 @@
 import asyncio
 from datetime import datetime
 from logging import getLogger
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, Field, TypeAdapter, ValidationError
@@ -16,7 +16,7 @@ from services.sendgrid_handler import ApplicationUpdatePersonalization, Template
 from utils import email_handler
 from utils.batched import batched
 from utils.email_handler import IH_SENDER, REPLY_TO_HACK_AT_UCI
-from utils.user_record import Applicant, Role, Status
+from utils.user_record import Applicant, ApplicantStatus, Role, Status
 
 log = getLogger(__name__)
 
@@ -91,7 +91,7 @@ async def applicant(
     "/summary/applicants",
     dependencies=[Depends(require_role(ADMIN_ROLES))],
 )
-async def applicant_summary() -> dict[Union[Status, Decision], int]:
+async def applicant_summary() -> dict[ApplicantStatus, int]:
     """Provide summary of statuses of applicants."""
     return await summary_handler.applicant_summary()
 

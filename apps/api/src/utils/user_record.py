@@ -2,6 +2,7 @@ from enum import Enum
 from typing import Literal, Union
 
 from pydantic import Field
+from typing_extensions import TypeAlias
 
 from models.ApplicationData import Decision, ProcessedApplicationData
 from services.mongodb_handler import BaseRecord
@@ -31,7 +32,10 @@ class UserRecord(BaseRecord):
     role: Role
 
 
+ApplicantStatus: TypeAlias = Union[Status, Decision]
+
+
 class Applicant(UserRecord):
     role: Literal[Role.APPLICANT] = Role.APPLICANT
-    status: Union[Status, Decision]
+    status: ApplicantStatus
     application_data: ProcessedApplicationData

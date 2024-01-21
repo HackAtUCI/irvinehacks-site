@@ -38,11 +38,7 @@ USER_DIRECTOR = NativeUser(
     affiliations=["student"],
 )
 
-DIRECTOR_IDENTITY = {
-    "_id": "edu.uci.dir",
-    "role": "director",
-    "status": "CONFIRMED"
-}
+DIRECTOR_IDENTITY = {"_id": "edu.uci.dir", "role": "director", "status": "CONFIRMED"}
 
 app = FastAPI()
 app.include_router(admin.router)
@@ -173,42 +169,6 @@ def test_confirm_attendance_when_status_confirmed(
     )
 
     assert res.status_code == 200
-
-
-# def test_confirm_attendance_when_status_confirmed() -> None:
-#     """Test that a decision is None for an applicant with no reviews."""
-#     record = {
-#         "_id": "edu.uci.Hey",
-#         "status": "CONFIRMED",
-#         "decision": "ACCEPTED",
-#     }
-
-#     admin._set_confirmations(record)
-#     assert record["status"] == "ATTENDING"
-
-
-# def test_confirm_attendance_when_status_accepted() -> None:
-#     """Test that a decision is None for an applicant with no reviews."""
-#     record = {
-#         "_id": "edu.uci.Vsauce",
-#         "status": "ACCEPTED",
-#         "decision": "ACCEPTED",
-#     }
-
-#     admin._set_confirmations(record)
-#     assert record["status"] == "VOID"
-
-
-# def test_confirm_attendance_when_status_waiver_signed() -> None:
-#     """Test that a decision is None for an applicant with no reviews."""
-#     record = {
-#         "_id": "edu.uci.Michael",
-#         "status": "WAIVER_SIGNED",
-#         "decision": "ACCEPTED",
-#     }
-
-#     admin._set_confirmations(record)
-#     assert record["status"] == "VOID"
 
 
 @patch("services.mongodb_handler.raw_update_one", autospec=True)

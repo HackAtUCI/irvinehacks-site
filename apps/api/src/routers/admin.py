@@ -141,45 +141,29 @@ async def confirm_attendance() -> None:
         ["_id", "status"],
     )
 
-    confirmed_record = [
-        record for record in records if record["status"] == Status.CONFIRMED
-    ]
-    for record in confirmed_record:
-        record["status"] = Status.ATTENDING
+    statuses = {
+        Status.CONFIRMED: Status.ATTENDING,
+        Decision.ACCEPTED: Status.VOID,
+        Status.WAIVER_SIGNED: Status.VOID,
+    }
 
-    await asyncio.gather(
-        *(
-            _process_status(batch, Status.ATTENDING)
-            for batch in batched(confirmed_record, 100)
-        )
-    )
-
-    for initial_status in (Status.WAIVER_SIGNED, Decision.ACCEPTED):
-        void_record = [
-            record for record in records if record["status"] == initial_status
+    for status_from, status_to in statuses.items():
+        current_record = [
+            record for record in records if record["status"] == status_from
         ]
 
-        for record in void_record:
-            record["status"] = Status.VOID
+        for record in current_record:
+            record["status"] = status_to
+
         await asyncio.gather(
             *(
-                _process_status(batch, Status.VOID)
-                for batch in batched(void_record, 100)
+                _process_status(batch, status_to)
+                for batch in batched([record["_id"] for record in current_record], 100)
             )
         )
 
-    # for record in records:
-    #     _set_confirmations(record)
 
-    # for cur_status in (Status.ATTENDING, Status.VOID):
-    #     group = [record for record in records if record["status"] == cur_status]
-    #     await asyncio.gather(
-    #         *(_process_status(batch, cur_status) for batch in batched(group, 100))
-    #     )
-
-
-async def _process_status(batch: tuple[dict[str, Any], ...], status: Status) -> None:
-    uids: list[str] = [record["_id"] for record in batch]
+async def _process_status(uids: tuple[str, ...], status: Status) -> None:
     ok = await mongodb_handler.update(
         Collection.USERS, {"_id": {"$in": uids}}, {"status": status}
     )
@@ -222,13 +206,3 @@ def _include_review_decision(applicant_record: dict[str, Any]) -> None:
     """Sets the applicant's decision as the last submitted review decision or None."""
     reviews = applicant_record["application_data"]["reviews"]
     applicant_record["decision"] = reviews[-1][2] if reviews else None
-
-
-# def _set_confirmations(applicant_record: dict[str, Any]) -> None:
-#     """Sets the applicant's status based on their RSVP status"""
-
-#     status = applicant_record["status"]
-#     if status == Status.CONFIRMED:
-#         applicant_record["status"] = Status.ATTENDING
-#     elif status in (Status.WAIVER_SIGNED, Decision.ACCEPTED):
-#         applicant_record["status"] = Status.VOID

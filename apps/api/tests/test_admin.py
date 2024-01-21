@@ -8,6 +8,7 @@ from auth.user_identity import NativeUser, UserTestClient
 from models.ApplicationData import Decision
 from routers import admin
 from services.mongodb_handler import Collection
+from utils.user_record import Status
 
 user_identity.JWT_SECRET = "not a good idea"
 
@@ -144,32 +145,34 @@ def test_no_decision_from_no_reviews() -> None:
 
 
 @patch("services.mongodb_handler.update", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
 @patch("services.mongodb_handler.retrieve", autospec=True)
 def test_confirm_attendance_when_status_confirmed(
-    mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_mongodb_handler_retrieve: AsyncMock,
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mognodb_handler_update: AsyncMock,
 ) -> None:
     """Test that confirmed status changes to attending."""
 
     mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
-    mock_mongodb_handler_retrieve.return_value = {
-        "_id": "edu.uc.dir",
-        "role": "director",
-        "status": "CONFIRMED",
-    }
+    mock_mongodb_handler_retrieve.return_value = [
+        {
+            "_id": "edu.uc.tester",
+            "role": "applicant",
+            "status": Status.CONFIRMED,
+        }
+    ]
 
     res = director_client.post("/confirm-attendance")
 
-    # # mock_mongodb_handler_retrieve.assert_awaited_once()
+    mock_mongodb_handler_retrieve.assert_awaited_once()
+    mock_mognodb_handler_update.assert_awaited_once_with(
+        Collection.USERS,
+        {"_id": {"$in": ["edu.uc.tester"]}},
+        {"status": Status.ATTENDING},
+    )
+
     assert res.status_code == 200
-    data = res.json()
-    print(data)
-    assert data == [
-        {
-            "_id": "edu.uci.dir",
-            "status": "ATTENDING",
-        },
-    ]
 
 
 # def test_confirm_attendance_when_status_confirmed() -> None:

@@ -2,11 +2,17 @@
 
 import Container from "@cloudscape-design/components/container";
 import ContentLayout from "@cloudscape-design/components/content-layout";
+import SpaceBetween from "@cloudscape-design/components/space-between";
+
+import ApplicantSummary from "./components/ApplicantSummary";
 
 function AdminDashboard() {
 	return (
 		<ContentLayout>
-			<Container>Admin Dashboard</Container>
+			<SpaceBetween size="l">
+				<Container>Admin Dashboard</Container>
+				<ApplicantSummary />
+			</SpaceBetween>
 		</ContentLayout>
 	);
 }

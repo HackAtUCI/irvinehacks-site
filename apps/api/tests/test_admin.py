@@ -30,10 +30,25 @@ REVIEWER_IDENTITY = {
     "role": "reviewer",
 }
 
+USER_DIRECTOR = NativeUser(
+    ucinetid="dir",
+    display_name="Dir",
+    email="dir@uci.edu",
+    affiliations=["student"],
+)
+
+DIRECTOR_IDENTITY = {
+    "_id": "edu.uci.dir",
+    "role": "director",
+    "status": "CONFIRMED"
+}
+
 app = FastAPI()
 app.include_router(admin.router)
 
 reviewer_client = UserTestClient(USER_REVIEWER, app)
+
+director_client = UserTestClient(USER_DIRECTOR, app)
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
@@ -126,6 +141,35 @@ def test_no_decision_from_no_reviews() -> None:
 
     admin._include_review_decision(record)
     assert record["decision"] is None
+
+
+@patch("services.mongodb_handler.update", autospec=True)
+@patch("services.mongodb_handler.retrieve", autospec=True)
+def test_confirm_attendance_when_status_confirmed(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_retrieve: AsyncMock,
+) -> None:
+    """Test that confirmed status changes to attending."""
+
+    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
+    mock_mongodb_handler_retrieve.return_value = {
+        "_id": "edu.uc.dir",
+        "role": "director",
+        "status": "CONFIRMED",
+    }
+
+    res = director_client.post("/confirm-attendance")
+
+    # # mock_mongodb_handler_retrieve.assert_awaited_once()
+    assert res.status_code == 200
+    data = res.json()
+    print(data)
+    assert data == [
+        {
+            "_id": "edu.uci.dir",
+            "status": "ATTENDING",
+        },
+    ]
 
 
 # def test_confirm_attendance_when_status_confirmed() -> None:

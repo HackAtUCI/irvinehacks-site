@@ -210,7 +210,12 @@ async def confirm_attendance() -> None:
         )
 
 
-@router.get("/attending", dependencies=[Depends(require_role([Role.DIRECTOR, Role.ORGANIZER, Role.VOLUNTEER]))])
+@router.get(
+    "/attending",
+    dependencies=[
+        Depends(require_role([Role.DIRECTOR, Role.ORGANIZER, Role.VOLUNTEER]))
+    ],
+)
 async def attending() -> list[dict[str, object]]:
     records = await mongodb_handler.retrieve(
         Collection.USERS,
@@ -222,9 +227,30 @@ async def attending() -> list[dict[str, object]]:
             "application_data.first_name",
             "application_data.last_name",
         ],
-    )    
+    )
 
     return records
+
+
+@router.post("/checkin/{uid}")
+async def checkin(
+    uid: str,
+    associate: User = Depends(
+        require_role([Role.DIRECTOR, Role.ORGANIZER, Role.VOLUNTEER])
+    ),
+) -> None:
+    new_checkin_entry = {"uid": associate.uid, "time": datetime.now()}
+
+    update_status = await mongodb_handler.raw_update_one(
+        Collection.USERS,
+        {"_id": uid},
+        {
+            "$push": {"checkins": new_checkin_entry},
+        },
+    )
+
+    if not update_status:
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
 
 
 async def _process_status(uids: Sequence[str], status: Status) -> None:

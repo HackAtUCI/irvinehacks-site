@@ -210,6 +210,23 @@ async def confirm_attendance() -> None:
         )
 
 
+@router.get("/attending", dependencies=[Depends(require_role([Role.DIRECTOR, Role.ORGANIZER, Role.VOLUNTEER]))])
+async def attending() -> list[dict[str, object]]:
+    records = await mongodb_handler.retrieve(
+        Collection.USERS,
+        {"role": Role.APPLICANT, "status": Status.ATTENDING},
+        [
+            "_id",
+            "status",
+            "role",
+            "application_data.first_name",
+            "application_data.last_name",
+        ],
+    )    
+
+    return records
+
+
 async def _process_status(uids: Sequence[str], status: Status) -> None:
     ok = await mongodb_handler.update(
         Collection.USERS, {"_id": {"$in": uids}}, {"status": status}

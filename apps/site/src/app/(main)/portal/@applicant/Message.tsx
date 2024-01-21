@@ -42,6 +42,13 @@ function Message({ status }: MessageProps) {
 		[PortalStatus.waived]: <p>Thank you for signing the waiver!</p>,
 		[PortalStatus.confirmed]: <></>,
 		[PortalStatus.attending]: <></>,
+		[PortalStatus.void]: (
+			<p>
+				Unfortunately, you are not able to RSVP for IrvineHacks at this time and
+				will not be able to come to the event. However, we would love to see you
+				apply again next year!
+			</p>
+		),
 	};
 
 	return messages[status];

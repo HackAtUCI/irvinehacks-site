@@ -31,7 +31,9 @@ function VerticalTimeline({ status }: VerticalTimelineProps) {
 	);
 
 	const verdict_component =
-		status === PortalStatus.accepted || signedWaiver ? (
+		status === PortalStatus.accepted ||
+		status === PortalStatus.void ||
+		signedWaiver ? (
 			<li className="flex flex-row items-center border-t">
 				<Image
 					src={CheckCircle}
@@ -46,7 +48,7 @@ function VerticalTimeline({ status }: VerticalTimelineProps) {
 			<li className="flex flex-row items-center border-t">
 				<Image
 					src={XCircle}
-					alt="checked-circle"
+					alt="x-circle"
 					width={25}
 					height={25}
 					className="m-6 mr-12"
@@ -113,6 +115,17 @@ function VerticalTimeline({ status }: VerticalTimelineProps) {
 					className="m-6 mr-12"
 				/>
 				Attendance confirmed
+			</li>
+		) : status === PortalStatus.void ? (
+			<li className="flex flex-row items-center border-t">
+				<Image
+					src={XCircle}
+					alt="x-circle"
+					width={25}
+					height={25}
+					className="m-6 mr-12"
+				/>
+				No RSVP Indicated
 			</li>
 		) : null;
 

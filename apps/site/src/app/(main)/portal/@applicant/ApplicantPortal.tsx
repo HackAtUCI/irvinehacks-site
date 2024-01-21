@@ -16,6 +16,7 @@ export const enum PortalStatus {
 	waived = "WAIVER_SIGNED",
 	confirmed = "CONFIRMED",
 	attending = "ATTENDING",
+	void = "VOID",
 }
 
 async function Portal() {

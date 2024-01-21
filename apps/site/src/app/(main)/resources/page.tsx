@@ -26,7 +26,7 @@ export default async function Resources() {
 				</div>
 				<div className="mb-40 mx-4 ">
 					{resources.order.map(
-						({ _id, iconUrl, title, description, resources }) => (
+						({ _id, iconUrl, title, description, resources }, i) => (
 							<div
 								key={_id}
 								className="max-w-5xl w-full mx-auto mb-12 bg-[var(--color-cream)] text-[#2F1C00] p-12 rounded-2xl lg:grid lg:gap-20 lg:grid-cols-2"
@@ -40,7 +40,7 @@ export default async function Resources() {
 									<p>{description}</p>
 								</div>
 								<div className="flex flex-col gap-3 lg:gap-4">
-									{resources.map(({ _id, title, link }, i) => (
+									{resources.map(({ _id, title, link }) => (
 										<Button
 											key={_id}
 											text={title}

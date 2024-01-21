@@ -9,8 +9,8 @@ export const metadata: Metadata = {
 	title: "Resources | IrvineHacks 2024",
 };
 
-export default async function Schedule() {
-	if (process.env.MAINTENANCE_MODE_SCHEDULE) {
+export default async function Resources() {
+	if (process.env.MAINTENANCE_MODE_RESOURCES) {
 		redirect("/");
 	}
 

@@ -12,6 +12,7 @@ interface PathTitles {
 
 const pathTitles: PathTitles = {
 	applicants: "Applicants",
+	participants: "Participants",
 };
 
 const DEFAULT_ITEMS = [{ text: "IrvineHacks 2024", href: BASE_PATH }];

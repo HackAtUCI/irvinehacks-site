@@ -231,6 +231,7 @@ async def rsvp(
     elif user_record["status"] == Status.ATTENDING:
         new_status = Status.VOID
     else:
+        log.warning(f"User {user.uid} has not signed waiver. Status has not changed.")
         raise HTTPException(
             status.HTTP_403_FORBIDDEN,
             "Waiver must be signed before being able to RSVP.",
@@ -239,5 +240,8 @@ async def rsvp(
     await mongodb_handler.update_one(
         Collection.USERS, {"_id": user.uid}, {"status": new_status}
     )
+
+    old_status = user_record["status"]
+    log.info(f"User {user.uid} changed status from {old_status} to {new_status}.")
 
     return RedirectResponse("/portal", status.HTTP_303_SEE_OTHER)

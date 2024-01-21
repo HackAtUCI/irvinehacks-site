@@ -160,7 +160,9 @@ async def confirm_attendance() -> None:
         await asyncio.gather(
             *(
                 _process_status(batch, status_to)
-                for batch in batched([record["_id"] for record in current_record], 100)
+                for batch in batched(
+                    [str(record["_id"]) for record in current_record], 100
+                )
             )
         )
 

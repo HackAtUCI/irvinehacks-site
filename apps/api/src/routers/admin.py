@@ -210,6 +210,36 @@ async def confirm_attendance() -> None:
         )
 
 
+@router.post(
+    "/waitlist-release/{uid}",
+    # TODO: allow check-in leads to release
+    dependencies=[Depends(require_role([Role.DIRECTOR]))],
+)
+async def waitlist_release(uid: str) -> None:
+    """Release an applicant from the waitlist and send email."""
+    record = await mongodb_handler.retrieve_one(
+        Collection.USERS,
+        {"_id": uid, "role": Role.APPLICANT, "status": Decision.WAITLISTED},
+        ["status", "application_data.first_name"],
+    )
+    if not record:
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
+
+    first_name = record["application_data"]["first_name"]
+
+    ok = await mongodb_handler.update_one(
+        Collection.USERS, {"_id": uid}, {"status": Decision.ACCEPTED}
+    )
+    if not ok:
+        raise RuntimeError("gg wp")
+
+    await email_handler.send_waitlist_release_email(
+        first_name, _recover_email_from_uid(uid)
+    )
+
+    log.info(f"Accepted {uid} off the waitlist and sent email.")
+
+
 async def _process_status(uids: Sequence[str], status: Status) -> None:
     ok = await mongodb_handler.update(
         Collection.USERS, {"_id": {"$in": uids}}, {"status": status}

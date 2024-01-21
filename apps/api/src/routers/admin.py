@@ -1,7 +1,7 @@
 import asyncio
 from datetime import datetime
 from logging import getLogger
-from typing import Any, Optional
+from typing import Any, Optional, Sequence
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, Field, TypeAdapter, ValidationError
@@ -127,7 +127,6 @@ async def release_decisions() -> None:
         group = [record for record in records if record["decision"] == decision]
         if not group:
             continue
-
         await asyncio.gather(
             *(_process_batch(batch, decision) for batch in batched(group, 100))
         )
@@ -164,6 +163,49 @@ async def rsvp_reminder() -> None:
         True,
         reply_to=REPLY_TO_HACK_AT_UCI,
     )
+
+
+@router.post(
+    "/confirm-attendance", dependencies=[Depends(require_role([Role.DIRECTOR]))]
+)
+async def confirm_attendance() -> None:
+    """Update applicant status to void or attending based on their current status."""
+    records = await mongodb_handler.retrieve(
+        Collection.USERS,
+        {"role": Role.APPLICANT},
+        ["_id", "status"],
+    )
+
+    statuses = {
+        Status.CONFIRMED: Status.ATTENDING,
+        Decision.ACCEPTED: Status.VOID,
+        Status.WAIVER_SIGNED: Status.VOID,
+    }
+
+    for status_from, status_to in statuses.items():
+        current_record = [
+            record for record in records if record["status"] == status_from
+        ]
+
+        for record in current_record:
+            record["status"] = status_to
+
+        await asyncio.gather(
+            *(
+                _process_status(batch, status_to)
+                for batch in batched(
+                    [str(record["_id"]) for record in current_record], 100
+                )
+            )
+        )
+
+
+async def _process_status(uids: Sequence[str], status: Status) -> None:
+    ok = await mongodb_handler.update(
+        Collection.USERS, {"_id": {"$in": uids}}, {"status": status}
+    )
+    if not ok:
+        raise RuntimeError("gg wp")
 
 
 async def _process_batch(batch: tuple[dict[str, Any], ...], decision: Decision) -> None:

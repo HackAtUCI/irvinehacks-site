@@ -1,5 +1,5 @@
 from datetime import datetime
-from unittest.mock import ANY, AsyncMock, patch
+from unittest.mock import ANY, AsyncMock, call, patch
 
 from fastapi import FastAPI
 
@@ -8,6 +8,7 @@ from auth.user_identity import NativeUser, UserTestClient
 from models.ApplicationData import Decision
 from routers import admin
 from services.mongodb_handler import Collection
+from utils.user_record import Status
 
 user_identity.JWT_SECRET = "not a good idea"
 
@@ -30,10 +31,21 @@ REVIEWER_IDENTITY = {
     "role": "reviewer",
 }
 
+USER_DIRECTOR = NativeUser(
+    ucinetid="dir",
+    display_name="Dir",
+    email="dir@uci.edu",
+    affiliations=["student"],
+)
+
+DIRECTOR_IDENTITY = {"_id": "edu.uci.dir", "role": "director", "status": "CONFIRMED"}
+
 app = FastAPI()
 app.include_router(admin.router)
 
 reviewer_client = UserTestClient(USER_REVIEWER, app)
+
+director_client = UserTestClient(USER_DIRECTOR, app)
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
@@ -154,4 +166,67 @@ def test_can_submit_review(
             "$set": {"status": "REVIEWED"},
         },
     )
+    assert res.status_code == 200
+
+
+@patch("services.mongodb_handler.update", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+@patch("services.mongodb_handler.retrieve", autospec=True)
+def test_confirm_attendance_route(
+    mock_mongodb_handler_retrieve: AsyncMock,
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mognodb_handler_update: AsyncMock,
+) -> None:
+    """Test that confirmed status changes to void with accepted."""
+
+    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
+    mock_mongodb_handler_retrieve.return_value = [
+        {
+            "_id": "edu.uc.tester",
+            "role": "applicant",
+            "status": Decision.ACCEPTED,
+        },
+        {
+            "_id": "edu.uc.tester2",
+            "role": "applicant",
+            "status": Status.WAIVER_SIGNED,
+        },
+        {
+            "_id": "edu.uc.tester3",
+            "role": "applicant",
+            "status": Status.CONFIRMED,
+        },
+        {
+            "_id": "edu.uc.tester4",
+            "role": "applicant",
+            "status": Decision.WAITLISTED,
+        },
+    ]
+
+    res = director_client.post("/confirm-attendance")
+
+    mock_mongodb_handler_retrieve.assert_awaited()
+    mock_mognodb_handler_update.assert_has_calls(
+        [
+            call(
+                Collection.USERS,
+                {"_id": {"$in": ("edu.uc.tester3",)}},
+                {"status": Status.ATTENDING},
+            ),
+            call().__bool__(),
+            call(
+                Collection.USERS,
+                {"_id": {"$in": ("edu.uc.tester",)}},
+                {"status": Status.VOID},
+            ),
+            call().__bool__(),
+            call(
+                Collection.USERS,
+                {"_id": {"$in": ("edu.uc.tester2",)}},
+                {"status": Status.VOID},
+            ),
+            call().__bool__(),
+        ]
+    )
+
     assert res.status_code == 200

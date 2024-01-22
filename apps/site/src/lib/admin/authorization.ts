@@ -1,4 +1,4 @@
-const ADMIN_ROLES = ["director", "reviewer"];
+const ADMIN_ROLES = ["director", "reviewer", "checkin_lead"];
 const ORGANIZER_ROLES = ["organizer", "volunteer"];
 
 export function isApplicationManager(role: string | null) {

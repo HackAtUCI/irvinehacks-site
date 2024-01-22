@@ -22,7 +22,7 @@ log = getLogger(__name__)
 
 router = APIRouter()
 
-ADMIN_ROLES = (Role.DIRECTOR, Role.REVIEWER)
+ADMIN_ROLES = (Role.DIRECTOR, Role.REVIEWER, Role.CHECKIN_LEAD)
 
 
 class ApplicationDataSummary(BaseModel):
@@ -212,8 +212,7 @@ async def confirm_attendance() -> None:
 
 @router.post(
     "/waitlist-release/{uid}",
-    # TODO: allow check-in leads to release
-    dependencies=[Depends(require_role([Role.DIRECTOR]))],
+    dependencies=[Depends(require_role([Role.DIRECTOR, Role.CHECKIN_LEAD]))],
 )
 async def waitlist_release(uid: str) -> None:
     """Release an applicant from the waitlist and send email."""

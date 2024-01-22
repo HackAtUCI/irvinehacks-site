@@ -6,7 +6,7 @@ from typing import Any, Optional, Sequence
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, Field, TypeAdapter, ValidationError
 
-from admin import summary_handler
+from admin import participant_manager, summary_handler
 from auth.authorization import require_role
 from auth.user_identity import User, utc_now
 from models.ApplicationData import Decision, Review
@@ -238,6 +238,36 @@ async def waitlist_release(uid: str) -> None:
     )
 
     log.info(f"Accepted {uid} off the waitlist and sent email.")
+
+
+@router.get(
+    "/attending",
+    dependencies=[
+        Depends(require_role([Role.DIRECTOR, Role.ORGANIZER, Role.VOLUNTEER]))
+    ],
+)
+async def attending() -> list[dict[str, object]]:
+    """Get list of attending participants."""
+    # TODO: non-hackers
+    return await participant_manager.get_attending_applicants()
+
+
+@router.post("/checkin/{uid}")
+async def checkin(
+    uid: str,
+    associate: User = Depends(
+        require_role([Role.DIRECTOR, Role.ORGANIZER, Role.VOLUNTEER])
+    ),
+) -> None:
+    """Check in participant at IrvineHacks."""
+    try:
+        # TODO: non-hackers
+        await participant_manager.check_in_applicant(uid, associate)
+    except ValueError:
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
+    except RuntimeError as err:
+        log.exception("During participant check-in: %s", err)
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 async def _process_status(uids: Sequence[str], status: Status) -> None:

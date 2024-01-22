@@ -1,7 +1,7 @@
 import asyncio
 from datetime import datetime
 from logging import getLogger
-from typing import Any, Optional, Sequence
+from typing import Annotated, Any, Optional, Sequence
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, Field, TypeAdapter, ValidationError
@@ -23,6 +23,9 @@ log = getLogger(__name__)
 router = APIRouter()
 
 ADMIN_ROLES = (Role.DIRECTOR, Role.REVIEWER, Role.CHECKIN_LEAD)
+ORGANIZER_ROLES = (Role.ORGANIZER,)
+
+require_checkin_associate = require_role(ADMIN_ROLES + ORGANIZER_ROLES)
 
 
 class ApplicationDataSummary(BaseModel):
@@ -239,12 +242,7 @@ async def waitlist_release(uid: str) -> None:
     log.info(f"Accepted {uid} off the waitlist and sent email.")
 
 
-@router.get(
-    "/attending",
-    dependencies=[
-        Depends(require_role([Role.DIRECTOR, Role.ORGANIZER, Role.VOLUNTEER]))
-    ],
-)
+@router.get("/attending", dependencies=[Depends(require_checkin_associate)])
 async def attending() -> list[dict[str, object]]:
     """Get list of attending participants."""
     # TODO: non-hackers
@@ -253,10 +251,7 @@ async def attending() -> list[dict[str, object]]:
 
 @router.post("/checkin/{uid}")
 async def checkin(
-    uid: str,
-    associate: User = Depends(
-        require_role([Role.DIRECTOR, Role.ORGANIZER, Role.VOLUNTEER])
-    ),
+    uid: str, associate: Annotated[User, Depends(require_checkin_associate)]
 ) -> None:
     """Check in participant at IrvineHacks."""
     try:

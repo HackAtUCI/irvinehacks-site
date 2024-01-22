@@ -1,5 +1,5 @@
 const ADMIN_ROLES = ["director", "reviewer", "checkin_lead"];
-const ORGANIZER_ROLES = ["organizer", "volunteer"];
+const ORGANIZER_ROLES = ["organizer"];
 
 export function isApplicationManager(role: string | null) {
 	return role !== null && ADMIN_ROLES.includes(role);

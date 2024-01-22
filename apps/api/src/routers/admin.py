@@ -22,7 +22,7 @@ log = getLogger(__name__)
 
 router = APIRouter()
 
-ADMIN_ROLES = (Role.DIRECTOR, Role.REVIEWER)
+ADMIN_ROLES = (Role.DIRECTOR, Role.REVIEWER, Role.CHECKIN_LEAD)
 
 
 class ApplicationDataSummary(BaseModel):

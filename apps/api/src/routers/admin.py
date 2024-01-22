@@ -6,7 +6,7 @@ from typing import Any, Optional, Sequence
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, Field, TypeAdapter, ValidationError
 
-from admin import summary_handler
+from admin import participant_manager, summary_handler
 from auth.authorization import require_role
 from auth.user_identity import User, utc_now
 from models.ApplicationData import Decision, Review
@@ -247,20 +247,9 @@ async def waitlist_release(uid: str) -> None:
     ],
 )
 async def attending() -> list[dict[str, object]]:
-    """Fetch all applicants who have a status of ATTENDING"""
-    records = await mongodb_handler.retrieve(
-        Collection.USERS,
-        {"role": Role.APPLICANT, "status": Status.ATTENDING},
-        [
-            "_id",
-            "status",
-            "role",
-            "application_data.first_name",
-            "application_data.last_name",
-        ],
-    )
-
-    return records
+    """Get list of attending participants."""
+    # TODO: non-hackers
+    return await participant_manager.get_attending_applicants()
 
 
 @router.post("/checkin/{uid}")
@@ -270,27 +259,14 @@ async def checkin(
         require_role([Role.DIRECTOR, Role.ORGANIZER, Role.VOLUNTEER])
     ),
 ) -> None:
-    """Check in applicant at IrvineHacks"""
-    record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": uid, "role": Role.APPLICANT}
-    )
-    if not record:
+    """Check in participant at IrvineHacks."""
+    try:
+        # TODO: non-hackers
+        await participant_manager.check_in_applicant(uid, associate)
+    except ValueError:
         raise HTTPException(status.HTTP_404_NOT_FOUND)
-    elif record["status"] != Status.ATTENDING:
-        raise HTTPException(status.HTTP_403_FORBIDDEN)
-
-    new_checkin_entry = {"uid": associate.uid, "time": utc_now()}
-
-    update_status = await mongodb_handler.raw_update_one(
-        Collection.USERS,
-        {"_id": uid},
-        {
-            "$push": {"checkins": new_checkin_entry},
-        },
-    )
-    log.info(f"Applicant {uid} checked in by {associate.uid}")
-
-    if not update_status:
+    except RuntimeError as err:
+        log.exception("During participant check-in: %s", err)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

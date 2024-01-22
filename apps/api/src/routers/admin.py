@@ -212,7 +212,6 @@ async def confirm_attendance() -> None:
 
 @router.post(
     "/waitlist-release/{uid}",
-    # TODO: allow check-in leads to release
     dependencies=[Depends(require_role([Role.DIRECTOR, Role.CHECKIN_LEAD]))],
 )
 async def waitlist_release(uid: str) -> None:

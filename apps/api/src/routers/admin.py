@@ -217,6 +217,7 @@ async def confirm_attendance() -> None:
     ],
 )
 async def attending() -> list[dict[str, object]]:
+    """Fetch all applicants who have a status of ATTENDING"""
     records = await mongodb_handler.retrieve(
         Collection.USERS,
         {"role": Role.APPLICANT, "status": Status.ATTENDING},
@@ -239,7 +240,16 @@ async def checkin(
         require_role([Role.DIRECTOR, Role.ORGANIZER, Role.VOLUNTEER])
     ),
 ) -> None:
-    new_checkin_entry = {"uid": associate.uid, "time": datetime.now()}
+    """Check-in applicant at IrvineHacks"""
+    record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": uid, "role": Role.APPLICANT}
+    )
+    if not record:
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
+    elif record["status"] != Status.ATTENDING:
+        raise RuntimeError("Applicant status must be ATTENDING")
+
+    new_checkin_entry = {"uid": associate.uid, "time": utc_now()}
 
     update_status = await mongodb_handler.raw_update_one(
         Collection.USERS,
@@ -251,6 +261,8 @@ async def checkin(
 
     if not update_status:
         raise HTTPException(status.HTTP_404_NOT_FOUND)
+    else:
+        log.info(f"Applicant {uid} checked in by {associate.uid}")
 
 
 async def _process_status(uids: Sequence[str], status: Status) -> None:

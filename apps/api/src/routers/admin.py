@@ -240,14 +240,14 @@ async def checkin(
         require_role([Role.DIRECTOR, Role.ORGANIZER, Role.VOLUNTEER])
     ),
 ) -> None:
-    """Check-in applicant at IrvineHacks"""
+    """Check in applicant at IrvineHacks"""
     record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
         Collection.USERS, {"_id": uid, "role": Role.APPLICANT}
     )
     if not record:
         raise HTTPException(status.HTTP_404_NOT_FOUND)
     elif record["status"] != Status.ATTENDING:
-        raise RuntimeError("Applicant status must be ATTENDING")
+        raise HTTPException(status.HTTP_403_FORBIDDEN)
 
     new_checkin_entry = {"uid": associate.uid, "time": utc_now()}
 
@@ -258,11 +258,10 @@ async def checkin(
             "$push": {"checkins": new_checkin_entry},
         },
     )
+    log.info(f"Applicant {uid} checked in by {associate.uid}")
 
     if not update_status:
-        raise HTTPException(status.HTTP_404_NOT_FOUND)
-    else:
-        log.info(f"Applicant {uid} checked in by {associate.uid}")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 async def _process_status(uids: Sequence[str], status: Status) -> None:

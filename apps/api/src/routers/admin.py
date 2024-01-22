@@ -23,7 +23,7 @@ log = getLogger(__name__)
 router = APIRouter()
 
 ADMIN_ROLES = (Role.DIRECTOR, Role.REVIEWER, Role.CHECKIN_LEAD)
-ORGANIZER_ROLES = (Role.ORGANIZER, Role.VOLUNTEER)
+ORGANIZER_ROLES = (Role.ORGANIZER,)
 
 require_checkin_associate = require_role(ADMIN_ROLES + ORGANIZER_ROLES)
 

@@ -52,9 +52,7 @@ function EventMomentComponent({
 		const dEnd = dayjs(endTimeInPST);
 		const timeAfterEnd = dEnd.from(now);
 		return (
-			<p className="text-white/50 text-right mb-0">
-				Ended {timeAfterEnd}
-			</p>
+			<p className="text-white/50 text-right mb-0">Ended {timeAfterEnd}</p>
 		);
 	} else {
 		if (now > startTimeInPST) {
@@ -93,13 +91,15 @@ export default function EventRegular({
 				</h3>
 				<EventTypeComponent eventType={eventType} />
 			</div>
+			{hosts && (
+				<p className="mb-2">
+					Hosted by:{" "}
+					{organization === undefined ? hosts?.join(", ") : organization}
+				</p>
+			)}
 			<p className="mb-2">
-				Hosted by:{" "}
-				{organization === undefined ? hosts?.join(", ") : organization}
-			</p>
-			<p className="mb-2">
-				{dateTimeFormat.formatRange(startTimeInPST, endTimeInPST)} PST |{" "}
-				<a href={virtual}>Meeting Link</a>
+				{dateTimeFormat.formatRange(startTimeInPST, endTimeInPST)} PST{" "}
+				{virtual && <a href={virtual}>| Meeting Link</a>}
 			</p>
 			{description}
 			<EventMomentComponent

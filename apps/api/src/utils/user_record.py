@@ -17,6 +17,9 @@ class Role(str, Enum):
     ORGANIZER = "organizer"
     VOLUNTEER = "volunteer"
     CHECKIN_LEAD = "checkin_lead"
+    SPONSOR = "sponsor"
+    JUDGE = "judge"
+    WORKSHOP_LEAD = "workshop_lead"
 
 
 class Status(str, Enum):

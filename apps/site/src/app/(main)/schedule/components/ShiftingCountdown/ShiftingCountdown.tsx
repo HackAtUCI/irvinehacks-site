@@ -86,6 +86,12 @@ const ShiftingCountdown = () => {
 					</div>
 				) : (
 					<>
+						<div className="w-full mx-auto flex items-center justify-center gap-x-3">
+							<CountdownItem num={countdown.days} text="days" />
+							<CountdownItem num={countdown.hours} text="hours" />
+							<CountdownItem num={countdown.minutes} text="minutes" />
+							<CountdownItem num={countdown.seconds} text="seconds" />
+						</div>
 						<span
 							className={clsx(
 								"w-full flex justify-center text-3xl p-4 md:text-5xl flex-wrap whitespace-nowrap lg:mb-5",
@@ -94,18 +100,6 @@ const ShiftingCountdown = () => {
 						>
 							{countdown.label}
 						</span>
-						<div className="w-full mx-auto flex items-center justify-center gap-x-3">
-							<CountdownItem num={countdown.days} text="days" />
-							<CountdownItem num={countdown.hours} text="hours" />
-							<CountdownItem
-								num={countdown.minutes}
-								text="minutes"
-							/>
-							<CountdownItem
-								num={countdown.seconds}
-								text="seconds"
-							/>
-						</div>
 					</>
 				)}
 			</div>

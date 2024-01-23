@@ -91,7 +91,7 @@ export default function EventRegular({
 				</h3>
 				<EventTypeComponent eventType={eventType} />
 			</div>
-			{hosts && (
+			{(organization !== undefined || hosts) && (
 				<p className="mb-2">
 					Hosted by:{" "}
 					{organization === undefined ? hosts?.join(", ") : organization}

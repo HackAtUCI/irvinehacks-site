@@ -47,24 +47,28 @@ async def get_hackers() -> list[Participant]:
     return [Participant(**user, **user["application_data"]) for user in records]
 
 
-async def check_in_applicant(uid: str, associate: User) -> None:
+async def check_in_applicant(
+    record: Optional[dict[str, object]], associate: User
+) -> None:
     """Check in applicant at IrvineHacks"""
-    record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": uid, "role": Role.APPLICANT}
-    )
-    if not record or record["status"] not in (Status.ATTENDING, Status.CONFIRMED):
+    if not record or record["status"] != Status.ATTENDING:
         raise ValueError
 
+    await check_in(record, associate)
+
+
+async def check_in(record: dict[str, object], associate: User) -> None:
+    """Check in applicant at IrvineHacks"""
     new_checkin_entry = (utc_now(), associate.uid)
 
     update_status = await mongodb_handler.raw_update_one(
         Collection.USERS,
-        {"_id": uid},
+        {"_id": record["uid"]},
         {
             "$push": {"checkins": new_checkin_entry},
         },
     )
     if not update_status:
-        raise RuntimeError(f"Could not update check-in record for {uid}.")
+        raise RuntimeError(f"Could not update check-in record for {record['uid']}.")
 
-    log.info(f"Applicant {uid} checked in by {associate.uid}")
+    log.info(f"User {record['uid']} checked in by {associate.uid}")

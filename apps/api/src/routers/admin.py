@@ -256,15 +256,56 @@ async def participants() -> list[Participant]:
 async def checkin(
     uid: str, associate: Annotated[User, Depends(require_checkin_associate)]
 ) -> None:
-    """Check in participant at IrvineHacks."""
+    """Check in user at IrvineHacks."""
+    non_hacker_roles = [
+        Role.DIRECTOR,
+        Role.MENTOR,
+        Role.REVIEWER,
+        Role.ORGANIZER,
+        Role.VOLUNTEER,
+        Role.CHECKIN_LEAD,
+        Role.SPONSOR,
+        Role.JUDGE,
+        Role.WORKSHOP_LEAD,
+    ]
+
     try:
-        # TODO: non-hackers
-        await participant_manager.check_in_applicant(uid, associate)
-    except ValueError:
-        raise HTTPException(status.HTTP_404_NOT_FOUND)
-    except RuntimeError as err:
-        log.exception("During participant check-in: %s", err)
+        record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
+            Collection.USERS,
+            {
+                "_id": uid,
+                "role": {
+                    "$in": [
+                        Role.APPLICANT,
+                    ]
+                    + non_hacker_roles,
+                },
+            },
+        )
+    except Exception as err:
+        log.exception("During user check-in: %s", err)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    # If user with provided uid is not found, raise 404.
+    if not record:
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
+
+    if record["role"] == Role.APPLICANT:
+        try:
+            await participant_manager.check_in_applicant(record, associate)
+        except RuntimeError as err:
+            log.exception("During participant check-in: %s", err)
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    elif record["role"] in non_hacker_roles:
+        try:
+            await participant_manager.check_in(record, associate)
+        except RuntimeError as err:
+            log.exception("During non-participant check-in: %s", err)
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    else:
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
 
 
 async def _process_status(uids: Sequence[str], status: Status) -> None:

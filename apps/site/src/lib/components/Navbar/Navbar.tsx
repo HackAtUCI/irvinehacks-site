@@ -75,8 +75,24 @@ function Navbar({ identity }: NavbarProps) {
 					<NavLinkItem href="/">Schedule</NavLinkItem>
 					<NavLinkItem href="/">Resources</NavLinkItem>
 					<NavLinkItem href="/">Stage</NavLinkItem> */}
+					<NavLinkItem
+						href="http://tinyurl.com/ih24-incident-form"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						Report Incident
+					</NavLinkItem>
+					<NavLinkItem
+						href="https://irvinehacks-2024.devpost.com/"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						Devpost
+					</NavLinkItem>
 					{!status && !deadlinePassed && (
-						<NavLinkItem href="/apply">Apply</NavLinkItem>
+						<>
+							<NavLinkItem href="/apply">Apply</NavLinkItem>
+						</>
 					)}
 
 					{status !== null && <NavLinkItem href="/portal">Portal</NavLinkItem>}

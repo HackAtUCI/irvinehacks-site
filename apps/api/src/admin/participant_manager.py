@@ -1,17 +1,25 @@
 from logging import getLogger
-from typing import Optional
+from typing import Any, Optional
 
 from auth.user_identity import User, utc_now
 from services import mongodb_handler
 from services.mongodb_handler import Collection
-from utils.user_record import Role, Status
+from utils.user_record import Role, Status, UserRecord
 
 log = getLogger(__name__)
 
 
-async def get_attending_applicants() -> list[dict[str, object]]:
+class Participant(UserRecord):
+    """Participants attending the event."""
+
+    first_name: str
+    last_name: str
+    status: Status
+
+
+async def get_attending_applicants() -> list[Participant]:
     """Fetch all applicants who have a status of ATTENDING"""
-    records = await mongodb_handler.retrieve(
+    records: list[dict[str, Any]] = await mongodb_handler.retrieve(
         Collection.USERS,
         {"role": Role.APPLICANT, "status": Status.ATTENDING},
         [
@@ -23,7 +31,7 @@ async def get_attending_applicants() -> list[dict[str, object]]:
         ],
     )
 
-    return records
+    return [Participant(**user, **user["application_data"]) for user in records]
 
 
 async def check_in_applicant(uid: str, associate: User) -> None:

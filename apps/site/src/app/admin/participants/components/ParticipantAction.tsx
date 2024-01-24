@@ -6,7 +6,7 @@ import UserContext from "@/lib/admin/UserContext";
 import { isCheckinLead } from "@/lib/admin/authorization";
 import { Decision, PostAcceptedStatus } from "@/lib/admin/useApplicant";
 import { Participant } from "@/lib/admin/useParticipants";
-import ParticipantActionPopover from "./ParticipantActionPopver";
+import ParticipantActionPopover from "./ParticipantActionPopover";
 
 interface ParticipantActionProps {
 	participant: Participant;
@@ -29,7 +29,7 @@ function ParticipantAction({
 			variant="inline-link"
 			ariaLabel={`Promote ${participant._id} off waitlist`}
 			onClick={() => initiatePromotion(participant)}
-			disabled={isCheckin}
+			disabled={!isCheckin}
 		>
 			Promote
 		</Button>
@@ -47,7 +47,7 @@ function ParticipantAction({
 	);
 
 	if (participant.status === Decision.waitlisted) {
-		if (isCheckin) {
+		if (!isCheckin) {
 			return (
 				<ParticipantActionPopover content="Only check-in leads are allowed to promote walk-ins.">
 					{promoteButton}

@@ -38,7 +38,7 @@ function Participants() {
 		participant: Participant,
 	): Promise<void> => {
 		await releaseParticipantFromWaitlist(participant);
-		setCheckinParticipant(null);
+		setPromoteParticipant(null);
 		// TODO: Flashbar notification
 	};
 

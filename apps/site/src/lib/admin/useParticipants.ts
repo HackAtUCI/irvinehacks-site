@@ -34,8 +34,18 @@ function useParticipants() {
 		fetcher,
 	);
 
-	// TODO: implement check-in mutation
-	return { participants: data ?? [], loading: isLoading, error };
+	const checkInParticipant = async (participant: Participant) => {
+		console.log("Checking in", participant);
+		// TODO: implement mutation for showing checked in on each day
+		await axios.post(`/api/admin/checkin/${participant._id}`);
+	};
+
+	return {
+		participants: data ?? [],
+		loading: isLoading,
+		error,
+		checkInParticipant,
+	};
 }
 
 export default useParticipants;

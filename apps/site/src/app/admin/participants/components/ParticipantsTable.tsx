@@ -1,3 +1,5 @@
+import { useCallback } from "react";
+
 import Box from "@cloudscape-design/components/box";
 import Header from "@cloudscape-design/components/header";
 import SpaceBetween from "@cloudscape-design/components/space-between";
@@ -13,12 +15,27 @@ import RoleBadge from "./RoleBadge";
 interface ParticipantsTableProps {
 	participants: Participant[];
 	loading: boolean;
+	initiateCheckIn: (participant: Participant) => void;
 }
 
-function ParticipantsTable({ participants, loading }: ParticipantsTableProps) {
+function ParticipantsTable({
+	participants,
+	loading,
+	initiateCheckIn,
+}: ParticipantsTableProps) {
 	// TODO: sorting
 	// TODO: search functionality
 	// TODO: role and status filters
+
+	const ActionCell = useCallback(
+		(participant: Participant) => (
+			<ParticipantAction
+				participant={participant}
+				initiateCheckIn={initiateCheckIn}
+			/>
+		),
+		[initiateCheckIn],
+	);
 
 	const emptyMessage = (
 		<Box margin={{ vertical: "xs" }} textAlign="center" color="inherit">
@@ -66,7 +83,7 @@ function ParticipantsTable({ participants, loading }: ParticipantsTableProps) {
 				{
 					id: "action",
 					header: "Action",
-					cell: ParticipantAction,
+					cell: ActionCell,
 				},
 			]}
 			header={

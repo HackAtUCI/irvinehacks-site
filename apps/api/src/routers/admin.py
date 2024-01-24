@@ -249,7 +249,7 @@ async def waitlist_release(uid: str) -> None:
 async def participants() -> list[Participant]:
     """Get list of participants."""
     # TODO: non-hackers
-    return await participant_manager.get_attending_applicants()
+    return await participant_manager.get_hackers()
 
 
 @router.post("/checkin/{uid}")

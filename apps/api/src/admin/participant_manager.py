@@ -18,8 +18,8 @@ class Participant(UserRecord):
     status: Status
 
 
-async def get_attending_applicants() -> list[Participant]:
-    """Fetch all applicants who have a status of ATTENIDNG, WAIVER_SIGNED, CONFIRMED,
+async def get_hackers() -> list[Participant]:
+    """Fetch all applicants who have a status of ATTENDING, WAIVER_SIGNED, CONFIRMED,
     or WAITLISTED."""
     records: list[dict[str, Any]] = await mongodb_handler.retrieve(
         Collection.USERS,

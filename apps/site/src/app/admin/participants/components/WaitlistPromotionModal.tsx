@@ -4,15 +4,13 @@ import Modal from "@cloudscape-design/components/modal";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import TextContent from "@cloudscape-design/components/text-content";
 
-import { Participant } from "@/lib/admin/useParticipants";
+import { ActionModalProps } from "./CheckInModal";
 
-export interface ActionModalProps {
-	onDismiss: () => void;
-	onConfirm: (participant: Participant) => void;
-	participant: Participant | null;
-}
-
-function CheckInModal({ onDismiss, onConfirm, participant }: ActionModalProps) {
+function WaitlistPromotionModal({
+	onDismiss,
+	onConfirm,
+	participant,
+}: ActionModalProps) {
 	if (participant === null) {
 		return <Modal visible={false} />;
 	}
@@ -28,19 +26,20 @@ function CheckInModal({ onDismiss, onConfirm, participant }: ActionModalProps) {
 							Cancel
 						</Button>
 						<Button variant="primary" onClick={() => onConfirm(participant)}>
-							Check In
+							Promote
 						</Button>
 					</SpaceBetween>
 				</Box>
 			}
-			header={`Check In ${participant?.first_name} ${participant?.last_name}`}
+			header={`Promote ${participant?.first_name} ${participant?.last_name} Off Waitlist`}
 		>
 			<SpaceBetween size="m">
 				<TextContent>
 					<ul>
-						{/* TODO: actual instructions for check-in associates */}
-						<li>Create a badge for the participant ...</li>
-						<li>Ask participant to sign the SPFB sheet ...</li>
+						{/* TODO: actual instructions for check-in leads */}
+						<li>Log into the portal</li>
+						<li>Sign waiver</li>
+						<li>Confirm attendance</li>
 					</ul>
 				</TextContent>
 				{/* TODO: badge barcode input */}
@@ -48,5 +47,4 @@ function CheckInModal({ onDismiss, onConfirm, participant }: ActionModalProps) {
 		</Modal>
 	);
 }
-
-export default CheckInModal;
+export default WaitlistPromotionModal;

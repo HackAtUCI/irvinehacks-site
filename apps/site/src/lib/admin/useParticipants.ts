@@ -3,7 +3,7 @@ import useSWR from "swr";
 
 import { Status, Uid } from "@/lib/admin/useApplicant";
 
-const enum Role {
+export const enum Role {
 	Director = "director",
 	Organizer = "organizer",
 	CheckInLead = "checkin_lead",
@@ -40,11 +40,18 @@ function useParticipants() {
 		await axios.post(`/api/admin/checkin/${participant._id}`);
 	};
 
+	const releaseParticipantFromWaitlist = async (participant: Participant) => {
+		console.log(`Promoted to waitlist`, participant);
+		// TODO: implement mutation for showing checked in on each day
+		await axios.post(`/api/admin/waitlist-release/${participant._id}`);
+	};
+
 	return {
 		participants: data ?? [],
 		loading: isLoading,
 		error,
 		checkInParticipant,
+		releaseParticipantFromWaitlist,
 	};
 }
 

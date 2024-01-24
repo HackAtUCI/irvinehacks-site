@@ -1,17 +1,19 @@
 import { useContext } from "react";
 
 import Button from "@cloudscape-design/components/button";
-import Popover from "@cloudscape-design/components/popover";
 
-import { Decision, PostAcceptedStatus } from "@/lib/admin/useApplicant";
-import { Participant, Role } from "@/lib/admin/useParticipants";
 import UserContext from "@/lib/admin/UserContext";
+import { isCheckinLead } from "@/lib/admin/authorization";
+import { Decision, PostAcceptedStatus } from "@/lib/admin/useApplicant";
+import { Participant } from "@/lib/admin/useParticipants";
+import ParticipantActionPopover from "./ParticipantActionPopver";
 
 interface ParticipantActionProps {
 	participant: Participant;
 	initiateCheckIn: (participant: Participant) => void;
 	initiatePromotion: (participant: Participant) => void;
 }
+
 function ParticipantAction({
 	participant,
 	initiateCheckIn,
@@ -19,7 +21,7 @@ function ParticipantAction({
 }: ParticipantActionProps) {
 	const { role } = useContext(UserContext);
 
-	const isNotCheckinLead = role !== Role.CheckInLead;
+	const isCheckin = isCheckinLead(role);
 	const isWaiverSigned = participant.status === PostAcceptedStatus.signed;
 
 	const promoteButton = (
@@ -27,7 +29,7 @@ function ParticipantAction({
 			variant="inline-link"
 			ariaLabel={`Promote ${participant._id} off waitlist`}
 			onClick={() => initiatePromotion(participant)}
-			disabled={isNotCheckinLead}
+			disabled={isCheckin}
 		>
 			Promote
 		</Button>
@@ -45,31 +47,19 @@ function ParticipantAction({
 	);
 
 	if (participant.status === Decision.waitlisted) {
-		if (isNotCheckinLead) {
+		if (isCheckin) {
 			return (
-				<Popover
-					dismissButton={false}
-					position="top"
-					size="medium"
-					triggerType="custom"
-					content="Only check-in leads are allowed to promote walk-ins."
-				>
+				<ParticipantActionPopover content="Only check-in leads are allowed to promote walk-ins.">
 					{promoteButton}
-				</Popover>
+				</ParticipantActionPopover>
 			);
 		}
 		return promoteButton;
 	} else if (isWaiverSigned) {
 		return (
-			<Popover
-				dismissButton={false}
-				position="top"
-				size="medium"
-				triggerType="custom"
-				content="Must confirm attendance in portal first"
-			>
+			<ParticipantActionPopover content="Must confirm attendance in portal first">
 				{checkinButton}
-			</Popover>
+			</ParticipantActionPopover>
 		);
 	}
 	return checkinButton;

@@ -7,6 +7,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, Field, TypeAdapter, ValidationError
 
 from admin import participant_manager, summary_handler
+from admin.participant_manager import Participant
 from auth.authorization import require_role
 from auth.user_identity import User, utc_now
 from models.ApplicationData import Decision, Review
@@ -244,9 +245,9 @@ async def waitlist_release(uid: str) -> None:
     log.info(f"Accepted {uid} off the waitlist and sent email.")
 
 
-@router.get("/attending", dependencies=[Depends(require_checkin_associate)])
-async def attending() -> list[dict[str, object]]:
-    """Get list of attending participants."""
+@router.get("/participants", dependencies=[Depends(require_checkin_associate)])
+async def participants() -> list[Participant]:
+    """Get list of participants."""
     # TODO: non-hackers
     return await participant_manager.get_attending_applicants()
 

@@ -2,6 +2,7 @@ from logging import getLogger
 from typing import Any, Optional
 
 from auth.user_identity import User, utc_now
+from models.ApplicationData import Decision
 from services import mongodb_handler
 from services.mongodb_handler import Collection
 from utils.user_record import Role, Status, UserRecord
@@ -18,10 +19,21 @@ class Participant(UserRecord):
 
 
 async def get_attending_applicants() -> list[Participant]:
-    """Fetch all applicants who have a status of ATTENDING"""
+    """Fetch all applicants who have a status of ATTENIDNG, WAIVER_SIGNED, CONFIRMED,
+    or WAITLISTED."""
     records: list[dict[str, Any]] = await mongodb_handler.retrieve(
         Collection.USERS,
-        {"role": Role.APPLICANT, "status": Status.ATTENDING},
+        {
+            "role": Role.APPLICANT,
+            "status": {
+                "$in": [
+                    Status.ATTENDING,
+                    Status.WAIVER_SIGNED,
+                    Status.CONFIRMED,
+                    Decision.WAITLISTED,
+                ]
+            },
+        },
         [
             "_id",
             "status",
@@ -39,7 +51,7 @@ async def check_in_applicant(uid: str, associate: User) -> None:
     record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
         Collection.USERS, {"_id": uid, "role": Role.APPLICANT}
     )
-    if not record or record["status"] != Status.ATTENDING:
+    if not record or record["status"] not in (Status.ATTENDING, Status.CONFIRMED):
         raise ValueError
 
     new_checkin_entry = (utc_now(), associate.uid)

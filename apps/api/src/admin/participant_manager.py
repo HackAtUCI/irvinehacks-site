@@ -1,5 +1,5 @@
 from logging import getLogger
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 from auth.user_identity import User, utc_now
 from models.ApplicationData import Decision
@@ -15,7 +15,7 @@ class Participant(UserRecord):
 
     first_name: str
     last_name: str
-    status: Status
+    status: Union[Status, Decision]
 
 
 async def get_hackers() -> list[Participant]:
@@ -30,6 +30,7 @@ async def get_hackers() -> list[Participant]:
                     Status.ATTENDING,
                     Status.WAIVER_SIGNED,
                     Status.CONFIRMED,
+                    Decision.ACCEPTED,
                     Decision.WAITLISTED,
                 ]
             },

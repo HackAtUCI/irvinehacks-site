@@ -4,7 +4,7 @@ import Button from "@cloudscape-design/components/button";
 
 import UserContext from "@/lib/admin/UserContext";
 import { isCheckinLead } from "@/lib/admin/authorization";
-import { Decision, PostAcceptedStatus } from "@/lib/admin/useApplicant";
+import { Status } from "@/lib/admin/useApplicant";
 import { Participant } from "@/lib/admin/useParticipants";
 import ParticipantActionPopover from "./ParticipantActionPopover";
 
@@ -22,7 +22,8 @@ function ParticipantAction({
 	const { role } = useContext(UserContext);
 
 	const isCheckin = isCheckinLead(role);
-	const isWaiverSigned = participant.status === PostAcceptedStatus.signed;
+	const isWaiverSigned = participant.status === Status.signed;
+	const isAccepted = participant.status === Status.accepted;
 
 	const promoteButton = (
 		<Button
@@ -40,13 +41,13 @@ function ParticipantAction({
 			variant="inline-link"
 			ariaLabel={`Check in ${participant._id}`}
 			onClick={() => initiateCheckIn(participant)}
-			disabled={isWaiverSigned}
+			disabled={isWaiverSigned || isAccepted}
 		>
 			Check In
 		</Button>
 	);
 
-	if (participant.status === Decision.waitlisted) {
+	if (participant.status === Status.waitlisted) {
 		if (!isCheckin) {
 			return (
 				<ParticipantActionPopover content="Only check-in leads are allowed to promote walk-ins.">
@@ -55,9 +56,12 @@ function ParticipantAction({
 			);
 		}
 		return promoteButton;
-	} else if (isWaiverSigned) {
+	} else if (isWaiverSigned || isAccepted) {
+		const content = isWaiverSigned
+			? "Must confirm attendance in portal first"
+			: "Must sign waiver and confirm attendance in portal";
 		return (
-			<ParticipantActionPopover content="Must confirm attendance in portal first">
+			<ParticipantActionPopover content={content}>
 				{checkinButton}
 			</ParticipantActionPopover>
 		);

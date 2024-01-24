@@ -1,9 +1,8 @@
 import Popover from "@cloudscape-design/components/popover";
-import { PropsWithChildren, ReactNode } from "react";
+import { PropsWithChildren } from "react";
 
 interface ParticipantActionPopoverProps {
 	content: string;
-	children?: ReactNode;
 }
 
 function ParticipantActionPopover({

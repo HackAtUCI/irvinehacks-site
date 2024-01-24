@@ -3,7 +3,7 @@ import useSWR from "swr";
 
 import { Status, Uid } from "@/lib/admin/useApplicant";
 
-export const enum Role {
+const enum Role {
 	Director = "director",
 	Organizer = "organizer",
 	CheckInLead = "checkin_lead",

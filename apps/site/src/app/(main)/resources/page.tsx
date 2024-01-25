@@ -19,7 +19,7 @@ export default async function Resources() {
 	return (
 		<>
 			<section className="h-full w-full mb-12">
-				<div className="m-36">
+				<div className="my-36">
 					<h1 className="font-display text-4xl md:text-5xl font-bold mb-2 text-center">
 						Resources
 					</h1>

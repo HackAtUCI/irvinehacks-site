@@ -72,9 +72,9 @@ function Navbar({ identity }: NavbarProps) {
 				>
 					{/* <NavLinkItem href="/">Home</NavLinkItem>
 					<NavLinkItem href="/">Sponsor</NavLinkItem>
-					<NavLinkItem href="/">Schedule</NavLinkItem>
 					<NavLinkItem href="/">Resources</NavLinkItem>
 					<NavLinkItem href="/">Stage</NavLinkItem> */}
+					<NavLinkItem href="/schedule">Schedule</NavLinkItem>
 					{!status && !deadlinePassed && (
 						<NavLinkItem href="/apply">Apply</NavLinkItem>
 					)}

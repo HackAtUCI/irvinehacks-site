@@ -9,12 +9,12 @@ import { Fireworks } from "@fireworks-js/react";
 import styles from "./ShiftingCountdown.module.scss";
 
 // NOTE: Change this date to whatever date you want to countdown to :)
-const HACKING_STARTS = "2024-01-26T18:00:00.000";
-const HACKING_ENDS = "2024-01-28T24:00:00.000";
+const HACKING_STARTS = Date.UTC(2024, 0, 27, 2, 0, 0); // 1/26 at 6pm PST
+const HACKING_ENDS = Date.UTC(2024, 0, 28, 20, 0, 0); // 1/28 at 12pm PST
 
 // Testing:
-// const HACKING_STARTS = "2023-12-09T21:42:00.000";
-// const HACKING_ENDS = "2023-12-09T21:44:00.000";
+// const HACKING_STARTS = "2024-01-25T01:18:00.000";
+// const HACKING_ENDS = "2024-01-25T01:19:00.000";
 
 const SECOND = 1000;
 const MINUTE = SECOND * 60;
@@ -56,8 +56,14 @@ const ShiftingCountdown = () => {
 		const minutes = Math.floor((distance % HOUR) / MINUTE);
 		const seconds = Math.floor((distance % MINUTE) / SECOND);
 
-		if (days === 0 && hours === 0 && minutes === 0 && seconds === 0) {
-			// triggers when HACKING_STARTS timer ends and HACKING_ENDS timer ends
+		if (
+			days === 0 &&
+			hours === 0 &&
+			minutes === 0 &&
+			seconds === 0 &&
+			now >= new Date(HACKING_ENDS)
+		) {
+			// triggers when HACKING_ENDS timer ends
 			setCountdown((prev) => {
 				return { ...prev, showFireworks: true };
 			});
@@ -104,7 +110,7 @@ const ShiftingCountdown = () => {
 				)}
 			</div>
 			{countdown.showFireworks && (
-				<div className="flex justify-center z-20">
+				<div className="flex justify-center">
 					<Fireworks
 						className="w-full h-full absolute"
 						options={{

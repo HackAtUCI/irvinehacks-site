@@ -100,29 +100,29 @@ async def applicant_summary() -> dict[ApplicantStatus, int]:
     return await summary_handler.applicant_summary()
 
 
-@router.post("/review")
-async def submit_review(
-    applicant: str = Body(),
-    decision: Decision = Body(),
-    reviewer: User = Depends(require_role([Role.REVIEWER])),
-) -> None:
-    """Submit a review decision from the reviewer for the given applicant."""
-    log.info("%s reviewed applicant %s", reviewer, applicant)
+# @router.post("/review")
+# async def submit_review(
+#     applicant: str = Body(),
+#     decision: Decision = Body(),
+#     reviewer: User = Depends(require_role([Role.REVIEWER])),
+# ) -> None:
+#     """Submit a review decision from the reviewer for the given applicant."""
+#     log.info("%s reviewed applicant %s", reviewer, applicant)
 
-    review: Review = (utc_now(), reviewer.uid, decision)
+#     review: Review = (utc_now(), reviewer.uid, decision)
 
-    try:
-        await mongodb_handler.raw_update_one(
-            Collection.USERS,
-            {"_id": applicant},
-            {
-                "$push": {"application_data.reviews": review},
-                "$set": {"status": "REVIEWED"},
-            },
-        )
-    except RuntimeError:
-        log.error("Could not submit review for %s", applicant)
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+#     try:
+#         await mongodb_handler.raw_update_one(
+#             Collection.USERS,
+#             {"_id": applicant},
+#             {
+#                 "$push": {"application_data.reviews": review},
+#                 "$set": {"status": "REVIEWED"},
+#             },
+#         )
+#     except RuntimeError:
+#         log.error("Could not submit review for %s", applicant)
+#         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @router.post("/release", dependencies=[Depends(require_role([Role.DIRECTOR]))])

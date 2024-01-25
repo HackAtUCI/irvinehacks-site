@@ -46,8 +46,7 @@ const nextConfig = {
 			},
 			{
 				source: "/incident",
-				destination:
-					"https://docs.google.com/forms/d/e/1FAIpQLSehTGeZxoYy5-zQ-dBeEXjvAzy2kc25X8-74LBWbYbW-xMJNQ/viewform",
+				destination: "https://forms.gle/A6BdsSzYSiyeTP8Y6",
 				permanent: true,
 			},
 			{

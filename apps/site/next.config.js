@@ -44,6 +44,16 @@ const nextConfig = {
 				destination: DOCUSIGN_FORM_URL,
 				permanent: true,
 			},
+			{
+				source: "/incident",
+				destination: "https://forms.gle/A6BdsSzYSiyeTP8Y6",
+				permanent: true,
+			},
+			{
+				source: "/devpost",
+				destination: "https://irvinehacks-2024.devpost.com",
+				permanent: true,
+			},
 		];
 	},
 };

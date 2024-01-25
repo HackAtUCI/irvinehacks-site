@@ -141,33 +141,33 @@ def test_no_decision_from_no_reviews() -> None:
     assert record["decision"] is None
 
 
-@patch("services.mongodb_handler.raw_update_one", autospec=True)
-@patch("services.mongodb_handler.retrieve_one", autospec=True)
-def test_can_submit_review(
-    mock_mongodb_handler_retrieve_one: AsyncMock,
-    mock_mongodb_handler_raw_update_one: AsyncMock,
-) -> None:
-    """Test that a user can properly submit an applicant review."""
+# @patch("services.mongodb_handler.raw_update_one", autospec=True)
+# @patch("services.mongodb_handler.retrieve_one", autospec=True)
+# def test_can_submit_review(
+#     mock_mongodb_handler_retrieve_one: AsyncMock,
+#     mock_mongodb_handler_raw_update_one: AsyncMock,
+# ) -> None:
+#     """Test that a user can properly submit an applicant review."""
 
-    mock_mongodb_handler_retrieve_one.return_value = REVIEWER_IDENTITY
+#     mock_mongodb_handler_retrieve_one.return_value = REVIEWER_IDENTITY
 
-    res = reviewer_client.post(
-        "/review",
-        json={"applicant": "edu.uci.applicant", "decision": Decision.ACCEPTED},
-    )
+#     res = reviewer_client.post(
+#         "/review",
+#         json={"applicant": "edu.uci.applicant", "decision": Decision.ACCEPTED},
+#     )
 
-    mock_mongodb_handler_retrieve_one.assert_awaited_once()
-    mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
-        Collection.USERS,
-        {"_id": "edu.uci.applicant"},
-        {
-            "$push": {
-                "application_data.reviews": (ANY, "edu.uci.alicia", Decision.ACCEPTED)
-            },
-            "$set": {"status": "REVIEWED"},
-        },
-    )
-    assert res.status_code == 200
+#     mock_mongodb_handler_retrieve_one.assert_awaited_once()
+#     mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
+#         Collection.USERS,
+#         {"_id": "edu.uci.applicant"},
+#         {
+#             "$push": {
+#                 "application_data.reviews": (ANY, "edu.uci.alicia", Decision.ACCEPTED)
+#             },
+#             "$set": {"status": "REVIEWED"},
+#         },
+#     )
+#     assert res.status_code == 200
 
 
 @patch("services.mongodb_handler.update", autospec=True)

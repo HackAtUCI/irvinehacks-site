@@ -1,13 +1,13 @@
 "use client";
 
-import Image from "next/image";
-import { useState, useEffect } from "react";
-import clsx from "clsx";
 import * as NavMenu from "@radix-ui/react-navigation-menu";
+import clsx from "clsx";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 
-import NavLinkItem from "./NavbarHelpers";
 import Button from "@/lib/components/Button/Button";
 import HackLogo from "@/lib/components/HackLogo/HackLogo";
+import NavLinkItem from "./NavbarHelpers";
 
 import hamburger from "@/assets/icons/navigation-icon.svg";
 import { Identity } from "@/lib/utils/getUserIdentity";
@@ -70,10 +70,8 @@ function Navbar({ identity }: NavbarProps) {
 					}
 					onTransitionEnd={() => setHidden(!listShown)}
 				>
-					{/* <NavLinkItem href="/">Home</NavLinkItem>
-					<NavLinkItem href="/">Sponsor</NavLinkItem>
-					<NavLinkItem href="/">Resources</NavLinkItem>
-					<NavLinkItem href="/">Stage</NavLinkItem> */}
+					<NavLinkItem href="/">Home</NavLinkItem>
+					<NavLinkItem href="/resources">Resources</NavLinkItem>
 					<NavLinkItem href="/schedule">Schedule</NavLinkItem>
 					<NavLinkItem
 						href="/incident"

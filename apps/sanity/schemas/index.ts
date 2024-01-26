@@ -3,6 +3,7 @@ import event from "./event";
 import partners from "./partners";
 import resource from "./resource";
 import resourceCategory from "./resourceCategory";
+import resourceCategoryOrder from "./resourceCategoryOrder";
 import sponsors from "./sponsors";
 
 export const schemaTypes = [
@@ -11,5 +12,6 @@ export const schemaTypes = [
 	partners,
 	resource,
 	resourceCategory,
+	resourceCategoryOrder,
 	sponsors,
 ];

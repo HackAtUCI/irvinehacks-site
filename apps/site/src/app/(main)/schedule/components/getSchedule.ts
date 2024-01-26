@@ -48,7 +48,9 @@ const Events = z.array(
 
 export const getSchedule = cache(async () => {
 	const events = Events.parse(
-		await client.fetch("*[_type == 'event'] | order(startTime asc)"),
+		await client.fetch(
+			"*[_type == 'event'] | order(startTime asc, endTime asc)",
+		),
 	);
 	const eventsByDay = new Map<string, z.infer<typeof Events>>();
 

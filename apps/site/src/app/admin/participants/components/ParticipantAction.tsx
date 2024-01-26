@@ -4,7 +4,7 @@ import Button from "@cloudscape-design/components/button";
 
 import UserContext from "@/lib/admin/UserContext";
 import { isCheckinLead, isNonHacker } from "@/lib/admin/authorization";
-import { Status } from "@/lib/admin/useApplicant";
+import { ReviewStatus, Status } from "@/lib/admin/useApplicant";
 import { Participant } from "@/lib/admin/useParticipants";
 import ParticipantActionPopover from "./ParticipantActionPopover";
 
@@ -61,10 +61,13 @@ function ParticipantAction({
 		</Button>
 	);
 
-	if (nonHacker && isWaiverSigned) {
-		if (role !== "director") {
+	if (nonHacker) {
+		const content = !isCheckinLead
+			? "Only check-in leads can confirm non-hackers."
+			: "Must sign waiver first.";
+		if (!isCheckinLead || participant.status === ReviewStatus.reviewed) {
 			return (
-				<ParticipantActionPopover content="Only directors are allowed to confirm non-hackers.">
+				<ParticipantActionPopover content={content}>
 					{confirmButton}
 				</ParticipantActionPopover>
 			);

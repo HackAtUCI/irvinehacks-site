@@ -1,5 +1,5 @@
 import axios from "axios";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 
 import { Status, Uid } from "@/lib/admin/useApplicant";
 
@@ -38,17 +38,20 @@ function useParticipants() {
 		console.log("Checking in", participant);
 		// TODO: implement mutation for showing checked in on each day
 		await axios.post(`/api/admin/checkin/${participant._id}`);
+		mutate(data);
 	};
 
 	const releaseParticipantFromWaitlist = async (participant: Participant) => {
 		console.log(`Promoted to waitlist`, participant);
 		// TODO: implement mutation for showing checked in on each day
 		await axios.post(`/api/admin/waitlist-release/${participant._id}`);
+		mutate(data);
 	};
 
 	const confirmNonHacker = async (participant: Participant) => {
 		console.log("Confirmed attendance for non-hacker", participant);
 		await axios.post(`/api/admin/update-attendance/${participant._id}`);
+		mutate(data);
 	};
 
 	return {

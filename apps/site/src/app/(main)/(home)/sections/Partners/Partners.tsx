@@ -21,14 +21,14 @@ export default async function Sponsors() {
 			>
 				Partners
 			</h2>
-			<div className="flex flex-wrap gap-8 justify-center pb-32">
+			<div className="flex flex-wrap gap-8 justify-center pb-32 items-center">
 				{partners.partners.map(({ _key, name, url, logo }) => (
 					<a
 						key={_key}
 						href={url}
 						target="_blank"
 						rel="noopener noreferrer"
-						className="max-w-xs"
+						className="max-w-xs flex-grow"
 					>
 						{/* eslint-disable-next-line @next/next/no-img-element*/}
 						<img

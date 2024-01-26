@@ -39,8 +39,10 @@ function CheckInModal({ onDismiss, onConfirm, participant }: ActionModalProps) {
 				<TextContent>
 					<ul>
 						{/* TODO: actual instructions for check-in associates */}
-						<li>Create a badge for the participant ...</li>
-						<li>Ask participant to sign the SPFB sheet ...</li>
+						<li>Ask for a photo ID and verify name is under attendee list.</li>
+						<li>Have participant sign the SPFB sheet.</li>
+						<li>Scan badge barcode with webcam or type in digits.</li>
+						<li>Fill in badge and give to participant.</li>
 					</ul>
 				</TextContent>
 				{/* TODO: badge barcode input */}

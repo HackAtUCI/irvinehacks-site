@@ -4,18 +4,17 @@ import { useCollection } from "@cloudscape-design/collection-hooks";
 import Box from "@cloudscape-design/components/box";
 import Button from "@cloudscape-design/components/button";
 import CollectionPreferences from "@cloudscape-design/components/collection-preferences";
-import FormField from "@cloudscape-design/components/form-field";
 import Header from "@cloudscape-design/components/header";
+import { MultiselectProps } from "@cloudscape-design/components/multiselect";
 import Pagination from "@cloudscape-design/components/pagination";
-import Select from "@cloudscape-design/components/select";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import Table from "@cloudscape-design/components/table";
-import TextFilter from "@cloudscape-design/components/text-filter";
 
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
 import { Participant } from "@/lib/admin/useParticipants";
 
 import ParticipantAction from "./ParticipantAction";
+import ParticipantsFilters from "./ParticipantsFilters";
 import RoleBadge from "./RoleBadge";
 
 interface EmptyStateProps {
@@ -31,9 +30,8 @@ interface ParticipantsTableProps {
 	initiatePromotion: (participant: Participant) => void;
 }
 
-const ALL_ROLES = { value: "0", label: "All roles" };
-const ALL_STATUSES = { value: "0", label: "All roles" };
-const SEARCHABLE_COLUMNS = ["_id", "first_name", "last_name", "role", "status"];
+export type Options = ReadonlyArray<MultiselectProps.Option>;
+const SEARCHABLE_COLUMNS: (keyof Participant)[] = ["_id", "first_name", "last_name", "role", "status"];
 
 function createLabelFunction(columnName: string) {
 	return ({ sorted, descending }: { sorted: boolean; descending: boolean }) => {
@@ -75,10 +73,10 @@ function ParticipantsTable({
 			"action",
 		],
 	});
-	const [filterRole, setFilterRole] = useState(ALL_ROLES);
-	const [filterStatus, setFilterStatus] = useState(ALL_STATUSES);
-	const matchesRole = (p: Participant) => filterRole === ALL_ROLES || p.role === filterRole.label;
-	const matchesStatus = (p: Participant) => filterStatus === ALL_STATUSES || p.status === filterStatus.label;
+	const [filterRole, setFilterRole] = useState<Options>([]);
+	const [filterStatus, setFilterStatus] = useState<Options>([]);
+	const matchesRole = (p: Participant) => filterRole.length === 0 || filterRole.map(r => r.value).includes(p.role);
+	const matchesStatus = (p: Participant) => filterStatus.length === 0 || filterStatus.map(s => s.value).includes(p.status);
 
 	const {
 		items,
@@ -104,8 +102,8 @@ function ParticipantsTable({
 					const filteringTextLC = filteringText.toLowerCase();
 
 					return SEARCHABLE_COLUMNS.map(key => item[key]).some(
-						value => typeof value === 'string' && value.toLowerCase().indexOf(filteringTextLC) > -1
-					)
+						value => typeof value === 'string' && value.toLowerCase().includes(filteringTextLC)
+					) || `${item.first_name} ${item.last_name}`.toLowerCase().includes(filteringTextLC)
 				},
 			},
 			pagination: { pageSize: preferences.pageSize },
@@ -113,9 +111,9 @@ function ParticipantsTable({
 			selection: {},
 		}
 	);
-	const allRoles = new Set(items.map(p => p.role));
+	const allRoles = new Set(participants.map(p => p.role));
 	const roleOptions = Array.from(allRoles).map(r => ({ value: r, label: r }));
-	const allStatuses = new Set(items.map(p => p.status));
+	const allStatuses = new Set(participants.map(p => p.status));
 	const statusOptions = Array.from(allStatuses).map(s => ({ value: s, label: s }));
 
 	const ActionCell = useCallback(
@@ -198,33 +196,16 @@ function ParticipantsTable({
 			trackBy="_id"
 			empty={emptyMessage}
 			filter={
-				<>
-					<TextFilter
-						{...filterProps}
-						countText={filteredItemsCount === 1 ? '1 participant' : `${filteredItemsCount} participants`}
-						filteringAriaLabel="Filter participants"
-					/>
-					<FormField label="Role">
-						<Select
-							data-testid="role-filter"
-							options={[ALL_ROLES].concat(roleOptions)}
-							selectedAriaLabel="Selected"
-							selectedOption={filterRole}
-							onChange={event => setFilterRole(event.detail.selectedOption as { value: string, label: string })}
-							expandToViewport={true}
-						/>
-					</FormField>
-					<FormField label="Status">
-						<Select
-							data-testid="status-filter"
-							options={[ALL_STATUSES].concat(statusOptions)}
-							selectedAriaLabel="Selected"
-							selectedOption={filterStatus}
-							onChange={event => setFilterStatus(event.detail.selectedOption as { value: string, label: string })}
-							expandToViewport={true}
-						/>
-					</FormField>
-				</>
+				<ParticipantsFilters
+					filteredItemsCount={filteredItemsCount}
+					filterProps={filterProps}
+					roles={roleOptions}
+					selectedRoles={filterRole}
+					setSelectedRoles={setFilterRole}
+					statuses={statusOptions}
+					selectedStatuses={filterStatus}
+					setSelectedStatuses={setFilterStatus}
+				/>
 			}
 			pagination={
 				<Pagination

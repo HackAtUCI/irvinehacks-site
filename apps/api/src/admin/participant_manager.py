@@ -1,5 +1,8 @@
+from datetime import datetime
 from logging import getLogger
 from typing import Any, Optional, Union
+
+from typing_extensions import TypeAlias
 
 from auth.user_identity import User, utc_now
 from models.ApplicationData import Decision
@@ -9,10 +12,13 @@ from utils.user_record import Role, Status, UserRecord
 
 log = getLogger(__name__)
 
+CheckIn: TypeAlias = tuple[datetime, str]
+
 
 class Participant(UserRecord):
     """Participants attending the event."""
 
+    checkins: list[CheckIn] = []
     first_name: str
     last_name: str
     status: Union[Status, Decision]
@@ -39,6 +45,7 @@ async def get_hackers() -> list[Participant]:
             "_id",
             "status",
             "role",
+            "checkins",
             "application_data.first_name",
             "application_data.last_name",
         ],
@@ -55,7 +62,7 @@ async def check_in_applicant(uid: str, associate: User) -> None:
     if not record or record["status"] not in (Status.ATTENDING, Status.CONFIRMED):
         raise ValueError
 
-    new_checkin_entry = (utc_now(), associate.uid)
+    new_checkin_entry: CheckIn = (utc_now(), associate.uid)
 
     update_status = await mongodb_handler.raw_update_one(
         Collection.USERS,

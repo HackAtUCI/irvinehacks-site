@@ -9,8 +9,13 @@ import TextFilter from "@cloudscape-design/components/text-filter";
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
 import { Participant } from "@/lib/admin/useParticipants";
 
+import CheckinDayIcon from "./CheckinDayIcon";
 import ParticipantAction from "./ParticipantAction";
 import RoleBadge from "./RoleBadge";
+
+const FRIDAY = new Date("2024-01-26T12:00:00");
+const SATURDAY = new Date("2024-01-27T12:00:00");
+const SUNDAY = new Date("2024-01-28T12:00:00");
 
 interface ParticipantsTableProps {
 	participants: Participant[];
@@ -84,6 +89,24 @@ function ParticipantsTable({
 					sortingField: "status",
 				},
 				{
+					id: "friday",
+					header: "Fri",
+					cell: FridayCheckin,
+					sortingField: "friday",
+				},
+				{
+					id: "saturday",
+					header: "Sat",
+					cell: SaturdayCheckin,
+					sortingField: "saturday",
+				},
+				{
+					id: "sunday",
+					header: "Sun",
+					cell: SundayCheckin,
+					sortingField: "sunday",
+				},
+				{
 					id: "action",
 					header: "Action",
 					cell: ActionCell,
@@ -95,7 +118,6 @@ function ParticipantsTable({
 			items={participants}
 			loading={loading}
 			loadingText="Loading participants"
-			resizableColumns
 			variant="full-page"
 			stickyColumns={{ first: 1, last: 0 }}
 			trackBy="_id"
@@ -108,5 +130,17 @@ function ParticipantsTable({
 		/>
 	);
 }
+
+const FridayCheckin = ({ checkins }: Participant) => (
+	<CheckinDayIcon checkins={checkins} date={FRIDAY} />
+);
+
+const SaturdayCheckin = ({ checkins }: Participant) => (
+	<CheckinDayIcon checkins={checkins} date={SATURDAY} />
+);
+
+const SundayCheckin = ({ checkins }: Participant) => (
+	<CheckinDayIcon checkins={checkins} date={SUNDAY} />
+);
 
 export default ParticipantsTable;

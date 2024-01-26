@@ -89,8 +89,10 @@ function ParticipantsTable({
 	});
 	const [filterRole, setFilterRole] = useState<Options>([]);
 	const [filterStatus, setFilterStatus] = useState<Options>([]);
-	const matchesRole = (p: Participant) => filterRole.length === 0 || filterRole.map(r => r.value).includes(p.role);
-	const matchesStatus = (p: Participant) => filterStatus.length === 0 || filterStatus.map(s => s.value).includes(p.status);
+	const matchesRole = (p: Participant) =>
+		filterRole.length === 0 || filterRole.map(r => r.value).includes(p.role);
+	const matchesStatus = (p: Participant) => 
+		filterStatus.length === 0 || filterStatus.map(s => s.value).includes(p.status);
 
 	const {
 		items,

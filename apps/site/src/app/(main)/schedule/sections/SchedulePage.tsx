@@ -117,19 +117,11 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 					className="flex flex-col justify-center items-center w-full"
 				>
 					<Tabs.Content
-						value={weekdayFormat.format(
-							convertToPST(day[0].startTime),
-						)}
+						value={weekdayFormat.format(convertToPST(day[0].startTime))}
 						className="w-full"
 					>
 						{day.map((event) => {
-							return (
-								<EventCard
-									key={event.title}
-									now={now}
-									{...event}
-								/>
-							);
+							return <EventCard key={event.title} now={now} {...event} />;
 						})}
 					</Tabs.Content>
 				</div>

@@ -4,12 +4,16 @@ from pydantic import EmailStr
 
 from models.ApplicationData import Decision
 from services import sendgrid_handler
-from services.sendgrid_handler import ApplicationUpdatePersonalization, Template
+from services.sendgrid_handler import (
+    ApplicationUpdatePersonalization,
+    ApplicationUpdateTemplates,
+    Template,
+)
 
 IH_SENDER = ("apply@irvinehacks.com", "IrvineHacks 2024 Applications")
 REPLY_TO_HACK_AT_UCI = ("hack@uci.edu", "Hack at UCI")
 
-DECISION_TEMPLATES = {
+DECISION_TEMPLATES: dict[Decision, ApplicationUpdateTemplates] = {
     Decision.ACCEPTED: Template.ACCEPTED_EMAIL,
     Decision.REJECTED: Template.REJECTED_EMAIL,
     Decision.WAITLISTED: Template.WAITLISTED_EMAIL,
@@ -62,3 +66,18 @@ async def send_decision_email(
 
     template = DECISION_TEMPLATES[decision]
     await sendgrid_handler.send_email(template, IH_SENDER, personalizations, True)
+
+
+async def send_waitlist_release_email(first_name: str, email: EmailStr) -> None:
+    """Send the waitlist release email to an applicant."""
+    personalization = ApplicationUpdatePersonalization(
+        email=email, first_name=first_name
+    )
+
+    await sendgrid_handler.send_email(
+        Template.WAITLIST_RELEASE_EMAIL,
+        IH_SENDER,
+        personalization,
+        send_to_multiple=False,
+        reply_to=REPLY_TO_HACK_AT_UCI,
+    )

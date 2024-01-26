@@ -1,4 +1,4 @@
-import { ComponentProps } from "react";
+import { CSSProperties, ComponentProps } from "react";
 import Link from "next/link";
 import clsx from "clsx";
 
@@ -11,12 +11,14 @@ interface ButtonProps {
 	isLightVersion?: boolean;
 	usePrefetch?: boolean;
 	disabled?: boolean;
+	style?: CSSProperties;
 }
 
 const Button: React.FC<ButtonProps> = ({
 	text,
 	href,
 	className,
+	style,
 	isLightVersion,
 	disabled,
 	usePrefetch = true,
@@ -42,6 +44,7 @@ const Button: React.FC<ButtonProps> = ({
 			type="submit"
 			className={styles.button + " font-body"}
 			disabled={disabled}
+			style={style ? style : { width: "max-content" }}
 		>
 			{text}
 		</button>

@@ -70,12 +70,23 @@ function Navbar({ identity }: NavbarProps) {
 					}
 					onTransitionEnd={() => setHidden(!listShown)}
 				>
-					{/* 
-					<NavLinkItem href="/">Sponsor</NavLinkItem>
-					<NavLinkItem href="/">Schedule</NavLinkItem>
-					<NavLinkItem href="/">Stage</NavLinkItem> */}
 					<NavLinkItem href="/">Home</NavLinkItem>
 					<NavLinkItem href="/resources">Resources</NavLinkItem>
+					<NavLinkItem href="/schedule">Schedule</NavLinkItem>
+					<NavLinkItem
+						href="/incident"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						Report Incident
+					</NavLinkItem>
+					<NavLinkItem
+						href="/devpost"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						Devpost
+					</NavLinkItem>
 					{!status && !deadlinePassed && (
 						<NavLinkItem href="/apply">Apply</NavLinkItem>
 					)}

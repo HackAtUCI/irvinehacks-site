@@ -1,5 +1,5 @@
 from datetime import datetime
-from unittest.mock import ANY, AsyncMock, patch
+from unittest.mock import ANY, AsyncMock, call, patch
 
 from fastapi import FastAPI
 
@@ -8,6 +8,8 @@ from auth.user_identity import NativeUser, UserTestClient
 from models.ApplicationData import Decision
 from routers import admin
 from services.mongodb_handler import Collection
+from services.sendgrid_handler import Template
+from utils.user_record import Status
 
 user_identity.JWT_SECRET = "not a good idea"
 
@@ -30,10 +32,21 @@ REVIEWER_IDENTITY = {
     "role": "reviewer",
 }
 
+USER_DIRECTOR = NativeUser(
+    ucinetid="dir",
+    display_name="Dir",
+    email="dir@uci.edu",
+    affiliations=["student"],
+)
+
+DIRECTOR_IDENTITY = {"_id": "edu.uci.dir", "role": "director", "status": "CONFIRMED"}
+
 app = FastAPI()
 app.include_router(admin.router)
 
 reviewer_client = UserTestClient(USER_REVIEWER, app)
+
+director_client = UserTestClient(USER_DIRECTOR, app)
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
@@ -155,3 +168,115 @@ def test_can_submit_review(
         },
     )
     assert res.status_code == 200
+
+
+@patch("services.mongodb_handler.update", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+@patch("services.mongodb_handler.retrieve", autospec=True)
+def test_confirm_attendance_route(
+    mock_mongodb_handler_retrieve: AsyncMock,
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mognodb_handler_update: AsyncMock,
+) -> None:
+    """Test that confirmed status changes to void with accepted."""
+
+    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
+    mock_mongodb_handler_retrieve.return_value = [
+        {
+            "_id": "edu.uc.tester",
+            "role": "applicant",
+            "status": Decision.ACCEPTED,
+        },
+        {
+            "_id": "edu.uc.tester2",
+            "role": "applicant",
+            "status": Status.WAIVER_SIGNED,
+        },
+        {
+            "_id": "edu.uc.tester3",
+            "role": "applicant",
+            "status": Status.CONFIRMED,
+        },
+        {
+            "_id": "edu.uc.tester4",
+            "role": "applicant",
+            "status": Decision.WAITLISTED,
+        },
+    ]
+
+    # Not doing this will result in the return value acting as a mock, which would be
+    # tracked in the assert_has_calls below.
+    mock_mognodb_handler_update.side_effect = [True, True, True]
+
+    res = director_client.post("/confirm-attendance")
+
+    mock_mongodb_handler_retrieve.assert_awaited_once()
+    mock_mognodb_handler_update.assert_has_calls(
+        [
+            call(
+                Collection.USERS,
+                {"_id": {"$in": ("edu.uc.tester3",)}},
+                {"status": Status.ATTENDING},
+            ),
+            call(
+                Collection.USERS,
+                {"_id": {"$in": ("edu.uc.tester",)}},
+                {"status": Status.VOID},
+            ),
+            call(
+                Collection.USERS,
+                {"_id": {"$in": ("edu.uc.tester2",)}},
+                {"status": Status.VOID},
+            ),
+        ]
+    )
+
+    assert res.status_code == 200
+
+
+@patch("services.sendgrid_handler.send_email", autospec=True)
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_waitlisted_applicant_can_be_released(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_update_one: AsyncMock,
+    mock_sendgrid_handler_send_email: AsyncMock,
+) -> None:
+    """Test waitlisted applicant can be promoted to accepted."""
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        {
+            "status": Decision.WAITLISTED,
+            "application_data": {"first_name": "Peter"},
+        },
+    ]
+    mock_mongodb_handler_update_one.return_value = True
+
+    res = director_client.post("/waitlist-release/edu.uci.petr")
+    assert res.status_code == 200
+
+    mock_mongodb_handler_update_one.assert_awaited_once_with(
+        Collection.USERS, {"_id": "edu.uci.petr"}, {"status": Decision.ACCEPTED}
+    )
+    mock_sendgrid_handler_send_email.assert_awaited_once_with(
+        Template.WAITLIST_RELEASE_EMAIL,
+        ANY,
+        {"email": "petr@uci.edu", "first_name": "Peter"},
+        False,
+        ANY,
+    )
+
+
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_non_waitlisted_applicant_cannot_be_released(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_update_one: AsyncMock,
+) -> None:
+    """Test non-waitlisted applicant cannot be promoted to accepted."""
+    mock_mongodb_handler_retrieve_one.side_effect = [DIRECTOR_IDENTITY, None]
+
+    res = director_client.post("/waitlist-release/who.am.i")
+    assert res.status_code == 404
+
+    mock_mongodb_handler_update_one.assert_not_awaited()

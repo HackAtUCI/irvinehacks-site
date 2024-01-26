@@ -8,6 +8,7 @@ from typing import Iterable, Literal, Tuple, TypedDict, Union, overload
 import aiosendgrid
 from httpx import HTTPStatusError
 from sendgrid.helpers.mail import Email, Mail, Personalization
+from typing_extensions import TypeAlias
 
 log = getLogger(__name__)
 
@@ -20,8 +21,8 @@ class Template(str, Enum):
     ACCEPTED_EMAIL = "d-062e7106a0d64d49ad9f03325bbc7286"
     WAITLISTED_EMAIL = "d-9178c043de134a71a4fdbe513d35f89f"
     REJECTED_EMAIL = "d-71ef30ac91a941e0893b7680928d80b7"
-    WAITLIST_RELEASE_EMAIL = "d-19af50295ac14e82a7810791a175b8e9"
     RSVP_REMINDER = "d-0c2642268c404c138359ac1b9d41e78c"
+    WAITLIST_RELEASE_EMAIL = "d-19af50295ac14e82a7810791a175b8e9"
 
 
 class PersonalizationData(TypedDict):
@@ -39,6 +40,15 @@ class GuestTokenPersonalization(PersonalizationData):
 
 class ApplicationUpdatePersonalization(PersonalizationData):
     first_name: str
+
+
+ApplicationUpdateTemplates: TypeAlias = Literal[
+    Template.ACCEPTED_EMAIL,
+    Template.WAITLISTED_EMAIL,
+    Template.REJECTED_EMAIL,
+    Template.RSVP_REMINDER,
+    Template.WAITLIST_RELEASE_EMAIL,
+]
 
 
 @overload
@@ -76,10 +86,21 @@ async def send_email(
 
 @overload
 async def send_email(
-    template_id: Template,
+    template_id: ApplicationUpdateTemplates,
     sender_email: Tuple[str, str],
     receiver_data: Iterable[ApplicationUpdatePersonalization],
     send_to_multiple: Literal[True],
+    reply_to: Union[Tuple[str, str], None] = None,
+) -> None:
+    ...
+
+
+@overload
+async def send_email(
+    template_id: ApplicationUpdateTemplates,
+    sender_email: Tuple[str, str],
+    receiver_data: ApplicationUpdatePersonalization,
+    send_to_multiple: Literal[False],
     reply_to: Union[Tuple[str, str], None] = None,
 ) -> None:
     ...

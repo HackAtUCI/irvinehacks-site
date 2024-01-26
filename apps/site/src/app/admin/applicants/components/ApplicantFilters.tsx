@@ -33,6 +33,8 @@ const StatusIcons: Record<Status, IconProps.Name> = {
 	[Decision.waitlisted]: "status-negative",
 	[PostAcceptedStatus.signed]: "status-in-progress",
 	[PostAcceptedStatus.confirmed]: "status-positive",
+	[PostAcceptedStatus.attending]: "status-positive",
+	[PostAcceptedStatus.void]: "status-negative",
 };
 
 const statusOption = (status: Status): MultiselectProps.Option => ({

@@ -2,6 +2,7 @@ from enum import Enum
 from typing import Literal, Union
 
 from pydantic import Field
+from typing_extensions import TypeAlias
 
 from models.ApplicationData import Decision, ProcessedApplicationData
 from services.mongodb_handler import BaseRecord
@@ -13,8 +14,12 @@ class Role(str, Enum):
     HACKER = "hacker"
     MENTOR = "mentor"
     REVIEWER = "reviewer"
-    TECH_ORGANIZER = "tech_organizer"
+    ORGANIZER = "organizer"
     VOLUNTEER = "volunteer"
+    CHECKIN_LEAD = "checkin_lead"
+    SPONSOR = "sponsor"
+    JUDGE = "judge"
+    WORKSHOP_LEAD = "workshop_lead"
 
 
 class Status(str, Enum):
@@ -31,7 +36,10 @@ class UserRecord(BaseRecord):
     role: Role
 
 
+ApplicantStatus: TypeAlias = Union[Status, Decision]
+
+
 class Applicant(UserRecord):
     role: Literal[Role.APPLICANT] = Role.APPLICANT
-    status: Union[Status, Decision]
+    status: ApplicantStatus
     application_data: ProcessedApplicationData

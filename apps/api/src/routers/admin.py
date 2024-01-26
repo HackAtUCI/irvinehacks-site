@@ -1,11 +1,13 @@
 import asyncio
 from datetime import datetime
 from logging import getLogger
-from typing import Any, Optional
+from typing import Annotated, Any, Optional, Sequence
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, Field, TypeAdapter, ValidationError
 
+from admin import participant_manager, summary_handler
+from admin.participant_manager import Participant
 from auth.authorization import require_role
 from auth.user_identity import User, utc_now
 from models.ApplicationData import Decision, Review
@@ -15,13 +17,16 @@ from services.sendgrid_handler import ApplicationUpdatePersonalization, Template
 from utils import email_handler
 from utils.batched import batched
 from utils.email_handler import IH_SENDER, REPLY_TO_HACK_AT_UCI
-from utils.user_record import Applicant, Role, Status
+from utils.user_record import Applicant, ApplicantStatus, Role, Status
 
 log = getLogger(__name__)
 
 router = APIRouter()
 
-ADMIN_ROLES = (Role.DIRECTOR, Role.REVIEWER)
+ADMIN_ROLES = (Role.DIRECTOR, Role.REVIEWER, Role.CHECKIN_LEAD)
+ORGANIZER_ROLES = (Role.ORGANIZER,)
+
+require_checkin_associate = require_role(ADMIN_ROLES + ORGANIZER_ROLES)
 
 
 class ApplicationDataSummary(BaseModel):
@@ -86,6 +91,15 @@ async def applicant(
         raise RuntimeError("Could not parse applicant data.")
 
 
+@router.get(
+    "/summary/applicants",
+    dependencies=[Depends(require_role(ADMIN_ROLES))],
+)
+async def applicant_summary() -> dict[ApplicantStatus, int]:
+    """Provide summary of statuses of applicants."""
+    return await summary_handler.applicant_summary()
+
+
 @router.post("/review")
 async def submit_review(
     applicant: str = Body(),
@@ -127,7 +141,6 @@ async def release_decisions() -> None:
         group = [record for record in records if record["decision"] == decision]
         if not group:
             continue
-
         await asyncio.gather(
             *(_process_batch(batch, decision) for batch in batched(group, 100))
         )
@@ -164,6 +177,102 @@ async def rsvp_reminder() -> None:
         True,
         reply_to=REPLY_TO_HACK_AT_UCI,
     )
+
+
+@router.post(
+    "/confirm-attendance", dependencies=[Depends(require_role([Role.DIRECTOR]))]
+)
+async def confirm_attendance() -> None:
+    """Update applicant status to void or attending based on their current status."""
+    records = await mongodb_handler.retrieve(
+        Collection.USERS,
+        {"role": Role.APPLICANT},
+        ["_id", "status"],
+    )
+
+    statuses = {
+        Status.CONFIRMED: Status.ATTENDING,
+        Decision.ACCEPTED: Status.VOID,
+        Status.WAIVER_SIGNED: Status.VOID,
+    }
+
+    for status_from, status_to in statuses.items():
+        curr_records = [record for record in records if record["status"] == status_from]
+
+        for record in curr_records:
+            record["status"] = status_to
+
+        log.info(
+            f"Changing status of {len(curr_records)} from {status_from} to {status_to}"
+        )
+
+        await asyncio.gather(
+            *(
+                _process_status(batch, status_to)
+                for batch in batched(
+                    [str(record["_id"]) for record in curr_records], 100
+                )
+            )
+        )
+
+
+@router.post(
+    "/waitlist-release/{uid}",
+    dependencies=[Depends(require_role([Role.DIRECTOR, Role.CHECKIN_LEAD]))],
+)
+async def waitlist_release(uid: str) -> None:
+    """Release an applicant from the waitlist and send email."""
+    record = await mongodb_handler.retrieve_one(
+        Collection.USERS,
+        {"_id": uid, "role": Role.APPLICANT, "status": Decision.WAITLISTED},
+        ["status", "application_data.first_name"],
+    )
+    if not record:
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
+
+    first_name = record["application_data"]["first_name"]
+
+    ok = await mongodb_handler.update_one(
+        Collection.USERS, {"_id": uid}, {"status": Decision.ACCEPTED}
+    )
+    if not ok:
+        raise RuntimeError("gg wp")
+
+    await email_handler.send_waitlist_release_email(
+        first_name, _recover_email_from_uid(uid)
+    )
+
+    log.info(f"Accepted {uid} off the waitlist and sent email.")
+
+
+@router.get("/participants", dependencies=[Depends(require_checkin_associate)])
+async def participants() -> list[Participant]:
+    """Get list of participants."""
+    # TODO: non-hackers
+    return await participant_manager.get_hackers()
+
+
+@router.post("/checkin/{uid}")
+async def checkin(
+    uid: str, associate: Annotated[User, Depends(require_checkin_associate)]
+) -> None:
+    """Check in participant at IrvineHacks."""
+    try:
+        # TODO: non-hackers
+        await participant_manager.check_in_applicant(uid, associate)
+    except ValueError:
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
+    except RuntimeError as err:
+        log.exception("During participant check-in: %s", err)
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+async def _process_status(uids: Sequence[str], status: Status) -> None:
+    ok = await mongodb_handler.update(
+        Collection.USERS, {"_id": {"$in": uids}}, {"status": status}
+    )
+    if not ok:
+        raise RuntimeError("gg wp")
 
 
 async def _process_batch(batch: tuple[dict[str, Any], ...], decision: Decision) -> None:

@@ -9,6 +9,7 @@
 		"lint": "next lint"
 	},
 	"dependencies": {
+		"@cloudscape-design/collection-hooks": "^1.0.34",
 		"@cloudscape-design/components": "^3.0.475",
 		"@cloudscape-design/global-styles": "^1.0.20",
 		"@fireworks-js/react": "^2.10.7",

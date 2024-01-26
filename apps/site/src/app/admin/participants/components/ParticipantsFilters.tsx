@@ -2,13 +2,15 @@ import { Dispatch, SetStateAction } from "react";
 
 import FormField from "@cloudscape-design/components/form-field";
 import { IconProps } from "@cloudscape-design/components/icon";
-import Multiselect from "@cloudscape-design/components/multiselect";
+import Multiselect, { MultiselectProps } from "@cloudscape-design/components/multiselect";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import TextFilter, {
     TextFilterProps
 } from "@cloudscape-design/components/text-filter";
 
 import type { Options } from "./ParticipantsTable";
+import { Decision, PostAcceptedStatus, ReviewStatus, Status } from "@/lib/admin/useApplicant";
+import { StatusLabels } from "../../applicants/components/ApplicantStatus";
 
 interface ParticipantsFiltersProps {
     filteredItemsCount: number | undefined;
@@ -33,6 +35,12 @@ const StatusIcons: Record<Status, IconProps.Name> = {
 	[PostAcceptedStatus.attending]: "status-positive",
 	[PostAcceptedStatus.void]: "status-negative",
 };
+
+const statusOption = (status: MultiselectProps.Option) => ({
+	label: StatusLabels[status.value],
+	value: status.value,
+	iconName: StatusIcons[status.value],
+});
 
 function ParticipantsFilters({
     filteredItemsCount,
@@ -69,7 +77,7 @@ function ParticipantsFilters({
                 <Multiselect
                     data-testid="status-filter"
                     placeholder="Filter by status"
-                    options={statuses}
+                    options={statuses.map(statusOption)}
                     selectedAriaLabel="Selected"
                     selectedOptions={selectedStatuses}
                     onChange={(event) => setSelectedStatuses(event.detail.selectedOptions)}

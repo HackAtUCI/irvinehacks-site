@@ -14,10 +14,10 @@ interface ParticipantsFiltersProps {
     filterProps: TextFilterProps;
     roles: Options;
     selectedRoles: Options;
-    setSelectedRoles: Dispatch<SetStateAction<Options>>; // can't figure out how to get this one right
+    setSelectedRoles: Dispatch<SetStateAction<Options>>;
     statuses: Options;
     selectedStatuses: Options;
-    setSelectedStatuses: Dispatch<SetStateAction<Options>>; // can't figure out how to get this one right
+    setSelectedStatuses: Dispatch<SetStateAction<Options>>;
 }
 
 function ParticipantsFilters({

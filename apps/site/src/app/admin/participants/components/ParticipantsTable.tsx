@@ -31,7 +31,13 @@ interface ParticipantsTableProps {
 }
 
 export type Options = ReadonlyArray<MultiselectProps.Option>;
-const SEARCHABLE_COLUMNS: (keyof Participant)[] = ["_id", "first_name", "last_name", "role", "status"];
+const SEARCHABLE_COLUMNS: (keyof Participant)[] = [
+	"_id",
+	"first_name",
+	"last_name",
+	"role",
+	"status"
+];
 
 function createLabelFunction(columnName: string) {
 	return ({ sorted, descending }: { sorted: boolean; descending: boolean }) => {

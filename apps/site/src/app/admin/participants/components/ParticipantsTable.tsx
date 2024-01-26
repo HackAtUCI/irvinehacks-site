@@ -19,9 +19,9 @@ import ParticipantAction from "./ParticipantAction";
 import RoleBadge from "./RoleBadge";
 
 interface EmptyStateProps {
-	title: string,
-	subtitle?: string,
-	action?: ReactElement,
+	title: string;
+	subtitle?: string;
+	action?: ReactElement;
 }
 
 interface ParticipantsTableProps {
@@ -31,13 +31,15 @@ interface ParticipantsTableProps {
 	initiatePromotion: (participant: Participant) => void;
 }
 
-const ALL_ROLES = { value: '0', label: 'All roles' };
-const ALL_STATUSES = { value: '0', label: 'All statuses' };
-const SEARCHABLE_COLUMNS = ['_id', 'first_name', 'last_name', 'role', 'status']
+const ALL_ROLES = { value: "0", label: "All roles" };
+const ALL_STATUSES = { value: "0", label: "All roles" };
+const SEARCHABLE_COLUMNS = ["_id", "first_name", "last_name", "role", "status"]
 
 function createLabelFunction(columnName: string) {
-	return ({ sorted, descending }: { sorted: boolean, descending: boolean }) => {
-		const sortState = sorted ? `sorted ${descending ? 'descending' : 'ascending'}` : 'not sorted';
+	return ({ sorted, descending }: { sorted: boolean; descending: boolean }) => {
+		const sortState = sorted
+			? `sorted ${descending ? "descending" : "ascending"}`
+			: "not sorted";
 		return `${columnName}, ${sortState}.`;
 	};
 }
@@ -48,7 +50,7 @@ function EmptyState({ title, subtitle, action }: EmptyStateProps) {
 			<Box variant="strong" textAlign="center" color="inherit">
 				{title}
 			</Box>
-			<Box variant="p" padding={{ bottom: 's' }} color="inherit">
+			<Box variant="p" padding={{ bottom: "s" }} color="inherit">
 				{subtitle}
 			</Box>
 			{action}
@@ -64,7 +66,14 @@ function ParticipantsTable({
 }: ParticipantsTableProps) {
 	const [preferences, setPreferences] = useState({
 		pageSize: 20,
-		visibleContent: ['uid', 'firstName', 'lastName', 'role', 'status', 'action'],
+		visibleContent: [
+			"uid",
+			"firstName",
+			"lastName",
+			"role",
+			"status",
+			"action",
+		],
 	});
 	const [filterRole, setFilterRole] = useState(ALL_ROLES);
 	const [filterStatus, setFilterStatus] = useState(ALL_STATUSES);
@@ -222,12 +231,12 @@ function ParticipantsTable({
 					{...paginationProps}
 					ariaLabels={{
 						nextPageLabel: "Next page",
-						pageLabel: pageNumber => `Go to page ${pageNumber}`,
+						pageLabel: (pageNumber) => `Go to page ${pageNumber}`,
 						previousPageLabel: "Previous page",
 					}}
 				/>
 			)}
-			preferences={(
+			preferences={
 				<CollectionPreferences
 					pageSizePreference={{
 						title: "Select page size",
@@ -242,7 +251,10 @@ function ParticipantsTable({
 						options: [
 							{
 								label: "Participant info",
-								options: columnDefinitions.map(({ id, header }) => ({ id, label: header }))
+								options: columnDefinitions.map(({ id, header }) => ({
+									id,
+									label: header,
+								}))
 							}
 						],
 					}}
@@ -252,7 +264,7 @@ function ParticipantsTable({
 					preferences={preferences}
 					onConfirm={({ detail }) => setPreferences(detail as { pageSize: number, visibleContent: Array<string> })}
 				/>
-			)}
+			}
 		/>
 	);
 }

@@ -12,16 +12,24 @@ from utils.user_record import Role, Status, UserRecord
 
 log = getLogger(__name__)
 
-CheckIn: TypeAlias = tuple[datetime, str]
+Checkin: TypeAlias = tuple[datetime, str]
+
+NON_HACKER_ROLES = (
+    Role.MENTOR,
+    Role.VOLUNTEER,
+    Role.SPONSOR,
+    Role.JUDGE,
+    Role.WORKSHOP_LEAD,
+)
 
 
 class Participant(UserRecord):
     """Participants attending the event."""
 
-    checkins: list[CheckIn] = []
+    checkins: list[Checkin] = []
     first_name: str
     last_name: str
-    status: Union[Status, Decision]
+    status: Union[Status, Decision] = Status.REVIEWED
 
 
 async def get_hackers() -> list[Participant]:
@@ -54,15 +62,29 @@ async def get_hackers() -> list[Participant]:
     return [Participant(**user, **user["application_data"]) for user in records]
 
 
-async def check_in_applicant(uid: str, associate: User) -> None:
-    """Check in applicant at IrvineHacks"""
-    record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": uid, "role": Role.APPLICANT}
+async def get_non_hackers() -> list[Participant]:
+    """Fetch all non-hackers participating in the event."""
+    records: list[dict[str, Any]] = await mongodb_handler.retrieve(
+        Collection.USERS,
+        {"role": {"$in": NON_HACKER_ROLES}},
+        ["_id", "status", "role", "checkins", "first_name", "last_name"],
     )
-    if not record or record["status"] not in (Status.ATTENDING, Status.CONFIRMED):
+    return [Participant(**user) for user in records]
+
+
+async def check_in_participant(uid: str, associate: User) -> None:
+    """Check in participant at IrvineHacks"""
+    record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": uid, "role": {"$exists": True}}
+    )
+
+    if not record or record.get("status", "") not in (
+        Status.ATTENDING,
+        Status.CONFIRMED,
+    ):
         raise ValueError
 
-    new_checkin_entry: CheckIn = (utc_now(), associate.uid)
+    new_checkin_entry: Checkin = (utc_now(), associate.uid)
 
     update_status = await mongodb_handler.raw_update_one(
         Collection.USERS,
@@ -75,3 +97,25 @@ async def check_in_applicant(uid: str, associate: User) -> None:
         raise RuntimeError(f"Could not update check-in record for {uid}.")
 
     log.info(f"Applicant {uid} checked in by {associate.uid}")
+
+
+async def confirm_attendance_non_hacker(uid: str, director: User) -> None:
+    """Update status for Role.Attending for non-hackers."""
+
+    record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": uid, "status": Status.WAIVER_SIGNED}
+    )
+
+    if not record or record["role"] not in NON_HACKER_ROLES:
+        raise ValueError
+
+    update_status = await mongodb_handler.raw_update_one(
+        Collection.USERS,
+        {"_id": uid},
+        {"status": Status.ATTENDING},
+    )
+
+    if not update_status:
+        raise RuntimeError(f"Could not update status to ATTENDING for {uid}.")
+
+    log.info(f"Non-hacker {uid} status updated to attending by {director.uid}")

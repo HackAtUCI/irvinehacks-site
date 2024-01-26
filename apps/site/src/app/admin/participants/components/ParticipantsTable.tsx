@@ -90,9 +90,10 @@ function ParticipantsTable({
 	const [filterRole, setFilterRole] = useState<Options>([]);
 	const [filterStatus, setFilterStatus] = useState<Options>([]);
 	const matchesRole = (p: Participant) =>
-		filterRole.length === 0 || filterRole.map(r => r.value).includes(p.role);
-	const matchesStatus = (p: Participant) => 
-		filterStatus.length === 0 || filterStatus.map(s => s.value).includes(p.status);
+		filterRole.length === 0 || filterRole.map((r) => r.value).includes(p.role);
+	const matchesStatus = (p: Participant) =>
+		filterStatus.length === 0 ||
+		filterStatus.map((s) => s.value).includes(p.status);
 
 	const {
 		items,
@@ -101,45 +102,50 @@ function ParticipantsTable({
 		collectionProps,
 		filterProps,
 		paginationProps,
-	} = useCollection(
-		participants,
-		{
-			filtering: {
-				empty: <EmptyState title="No participants" />,
-				noMatch: (
-					<EmptyState
-						title="No matches"
-						action={<Button onClick={() => actions.setFiltering('')}>Clear filter</Button>}
-					/>
-				),
-				filteringFunction: (item, filteringText) => {
-					if (!matchesRole(item)) { return false; }
-					if (!matchesStatus(item)) { return false; }
-					const filteringTextLC = filteringText.toLowerCase();
+	} = useCollection(participants, {
+		filtering: {
+			empty: <EmptyState title="No participants" />,
+			noMatch: (
+				<EmptyState
+					title="No matches"
+					action={
+						<Button onClick={() => actions.setFiltering("")}>
+							Clear filter
+						</Button>
+					}
+				/>
+			),
+			filteringFunction: (item, filteringText) => {
+				if (!matchesRole(item)) {
+					return false;
+				}
+				if (!matchesStatus(item)) {
+					return false;
+				}
+				const filteringTextLC = filteringText.toLowerCase();
 
-					return (
-						SEARCHABLE_COLUMNS.map((key) => item[key]).some(
-							(value) =>
-								typeof value === "string" &&
-								value.toLowerCase().includes(filteringTextLC),
-						) ||
-						`${item.first_name} ${item.last_name}`
-							.toLowerCase()
-							.includes(filteringTextLC)
-					);
-				},
+				return (
+					SEARCHABLE_COLUMNS.map((key) => item[key]).some(
+						(value) =>
+							typeof value === "string" &&
+							value.toLowerCase().includes(filteringTextLC),
+					) ||
+					`${item.first_name} ${item.last_name}`
+						.toLowerCase()
+						.includes(filteringTextLC)
+				);
 			},
-			pagination: { pageSize: preferences.pageSize },
-			sorting: {},
-			selection: {},
-		}
-	);
-	const allRoles = new Set(participants.map(p => p.role));
-	const roleOptions = Array.from(allRoles).map(r => ({ value: r, label: r }));
-	const allStatuses = new Set(participants.map(p => p.status));
-	const statusOptions = Array.from(allStatuses).map(s => ({
+		},
+		pagination: { pageSize: preferences.pageSize },
+		sorting: {},
+		selection: {},
+	});
+	const allRoles = new Set(participants.map((p) => p.role));
+	const roleOptions = Array.from(allRoles).map((r) => ({ value: r, label: r }));
+	const allStatuses = new Set(participants.map((p) => p.status));
+	const statusOptions = Array.from(allStatuses).map((s) => ({
 		value: s,
-		label: s
+		label: s,
 	}));
 
 	const ActionCell = useCallback(
@@ -286,7 +292,11 @@ function ParticipantsTable({
 					confirmLabel="Confirm"
 					title="Preferences"
 					preferences={preferences}
-					onConfirm={({ detail }) => setPreferences(detail as { pageSize: number, visibleContent: Array<string> })}
+					onConfirm={({ detail }) =>
+						setPreferences(
+							detail as { pageSize: number; visibleContent: Array<string> },
+						)
+					}
 				/>
 			}
 		/>

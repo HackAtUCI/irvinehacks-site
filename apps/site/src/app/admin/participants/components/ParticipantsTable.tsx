@@ -81,6 +81,9 @@ function ParticipantsTable({
 			"lastName",
 			"role",
 			"status",
+			"friday",
+			"saturday",
+			"sunday",
 			"action",
 		],
 	});

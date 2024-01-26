@@ -1,9 +1,13 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
+
 import Box from "@cloudscape-design/components/box";
 import Button from "@cloudscape-design/components/button";
+import Input from "@cloudscape-design/components/input";
 import Modal from "@cloudscape-design/components/modal";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import TextContent from "@cloudscape-design/components/text-content";
 
+import BadgeScanner from "@/lib/admin/BadgeScanner";
 import { Participant } from "@/lib/admin/useParticipants";
 
 export interface ActionModalProps {
@@ -13,7 +17,31 @@ export interface ActionModalProps {
 }
 
 function CheckInModal({ onDismiss, onConfirm, participant }: ActionModalProps) {
+	const [badgeNumber, setBadgeNumber] = useState(
+		participant?.badge_number ?? "",
+	);
+	const [showScanner, setShowScanner] = useState(true);
+
+	const onScanSuccess = useCallback((decodedText: string) => {
+		setBadgeNumber(decodedText);
+		setShowScanner(false);
+	}, []);
+
+	useEffect(() => {
+		console.log("new participant", participant);
+		setBadgeNumber(participant?.badge_number ?? "");
+		setShowScanner(participant?.badge_number === null);
+	}, [participant]);
+
+	const badgeScanner = useMemo(
+		() => <BadgeScanner onSuccess={onScanSuccess} onError={() => null} />,
+		[onScanSuccess],
+	);
+
 	if (participant === null) {
+		if (showScanner) {
+			setShowScanner(false);
+		}
 		return <Modal visible={false} />;
 	}
 
@@ -27,7 +55,15 @@ function CheckInModal({ onDismiss, onConfirm, participant }: ActionModalProps) {
 						<Button variant="link" onClick={onDismiss}>
 							Cancel
 						</Button>
-						<Button variant="primary" onClick={() => onConfirm(participant)}>
+						<Button
+							variant="primary"
+							onClick={() =>
+								onConfirm({
+									...participant,
+									badge_number: badgeNumber,
+								})
+							}
+						>
 							Check In
 						</Button>
 					</SpaceBetween>
@@ -45,7 +81,19 @@ function CheckInModal({ onDismiss, onConfirm, participant }: ActionModalProps) {
 						<li>Fill in badge and give to participant.</li>
 					</ul>
 				</TextContent>
-				{/* TODO: badge barcode input */}
+				{showScanner && badgeScanner}
+				<SpaceBetween direction="horizontal" size="xs">
+					<Input
+						onChange={({ detail }) => setBadgeNumber(detail.value)}
+						value={badgeNumber}
+					/>
+					<Button
+						iconName="video-on"
+						variant="icon"
+						onClick={() => setShowScanner(true)}
+						iconAlt="Scan with camera"
+					/>
+				</SpaceBetween>
 			</SpaceBetween>
 		</Modal>
 	);

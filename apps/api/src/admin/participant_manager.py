@@ -30,6 +30,10 @@ class Participant(UserRecord):
     first_name: str
     last_name: str
     status: Union[Status, Decision] = Status.REVIEWED
+    badge_number: Union[str, None] = None
+
+
+PARTICIPANT_FIELDS = ["_id", "status", "role", "checkins", "badge_number"]
 
 
 async def get_hackers() -> list[Participant]:
@@ -49,14 +53,8 @@ async def get_hackers() -> list[Participant]:
                 ]
             },
         },
-        [
-            "_id",
-            "status",
-            "role",
-            "checkins",
-            "application_data.first_name",
-            "application_data.last_name",
-        ],
+        PARTICIPANT_FIELDS
+        + ["application_data.first_name", "application_data.last_name"],
     )
 
     return [Participant(**user, **user["application_data"]) for user in records]
@@ -67,12 +65,12 @@ async def get_non_hackers() -> list[Participant]:
     records: list[dict[str, Any]] = await mongodb_handler.retrieve(
         Collection.USERS,
         {"role": {"$in": NON_HACKER_ROLES}},
-        ["_id", "status", "role", "checkins", "first_name", "last_name"],
+        PARTICIPANT_FIELDS + ["first_name", "last_name"],
     )
     return [Participant(**user) for user in records]
 
 
-async def check_in_participant(uid: str, associate: User) -> None:
+async def check_in_participant(uid: str, badge_number: str, associate: User) -> None:
     """Check in participant at IrvineHacks"""
     record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
         Collection.USERS, {"_id": uid, "role": {"$exists": True}}
@@ -91,13 +89,13 @@ async def check_in_participant(uid: str, associate: User) -> None:
         {"_id": uid},
         {
             "$push": {"checkins": new_checkin_entry},
+            "$set": {"badge_number": badge_number},
         },
     )
     if not update_status:
         raise RuntimeError(f"Could not update check-in record for {uid}.")
 
-    log.info(f"Applicant {uid} checked in by {associate.uid}")
-
+    log.info(f"Applicant {uid} ({badge_number}) checked in by {associate.uid}")
 
 async def confirm_attendance_non_hacker(uid: str, director: User) -> None:
     """Update status for Role.Attending for non-hackers."""

@@ -36,7 +36,7 @@ const SEARCHABLE_COLUMNS: (keyof Participant)[] = [
 	"first_name",
 	"last_name",
 	"role",
-	"status"
+	"status",
 ];
 
 function createLabelFunction(columnName: string) {
@@ -107,9 +107,16 @@ function ParticipantsTable({
 					if (!matchesStatus(item)) { return false; }
 					const filteringTextLC = filteringText.toLowerCase();
 
-					return SEARCHABLE_COLUMNS.map(key => item[key]).some(
-						value => typeof value === 'string' && value.toLowerCase().includes(filteringTextLC)
-					) || `${item.first_name} ${item.last_name}`.toLowerCase().includes(filteringTextLC)
+					return (
+						SEARCHABLE_COLUMNS.map((key) => item[key]).some(
+							(value) =>
+								typeof value === "string" &&
+								value.toLowerCase().includes(filteringTextLC),
+						) ||
+						`${item.first_name} ${item.last_name}`
+							.toLowerCase()
+							.includes(filteringTextLC)
+					);
 				},
 			},
 			pagination: { pageSize: preferences.pageSize },

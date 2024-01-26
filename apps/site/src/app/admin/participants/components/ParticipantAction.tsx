@@ -61,7 +61,7 @@ function ParticipantAction({
 		</Button>
 	);
 
-	if (nonHacker) {
+	if (nonHacker && isWaiverSigned) {
 		if (role !== "director") {
 			return (
 				<ParticipantActionPopover content="Only directors are allowed to confirm non-hackers.">

@@ -24,6 +24,7 @@ export interface Participant {
 	role: Role;
 	checkins: Checkin[];
 	status: Status;
+	badge_number: string | null;
 }
 
 const fetcher = async (url: string) => {
@@ -40,7 +41,12 @@ function useParticipants() {
 	const checkInParticipant = async (participant: Participant) => {
 		console.log("Checking in", participant);
 		// TODO: implement mutation for showing checked in on each day
-		await axios.post(`/api/admin/checkin/${participant._id}`);
+		// Note: Will cause 422 if badge number is null, but in practice,
+		// this should never happen
+		await axios.post(
+			`/api/admin/checkin/${participant._id}`,
+			participant.badge_number,
+		);
 	};
 
 	const releaseParticipantFromWaitlist = async (participant: Participant) => {

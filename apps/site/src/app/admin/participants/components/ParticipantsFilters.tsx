@@ -38,7 +38,6 @@ function ParticipantsFilters({
                     countText={filteredItemsCount === 1 ? '1 participant' : `${filteredItemsCount} participants`}
                     filteringAriaLabel="Filter participants"
                     filteringPlaceholder="Search participants"
-                    filteringText=""
                 />
             </div>
             <FormField label="Role">

@@ -15,7 +15,7 @@ class Participant(UserRecord):
 
     first_name: str
     last_name: str
-    status: Union[Status, Decision]
+    status: Optional[Union[Status, Decision]] = None
 
 
 async def get_hackers() -> list[Participant]:
@@ -45,6 +45,35 @@ async def get_hackers() -> list[Participant]:
     )
 
     return [Participant(**user, **user["application_data"]) for user in records]
+
+
+async def get_non_hackers() -> list[Participant]:
+    """Fetch all non-hackers participating in the event."""
+    records: list[dict[str, Any]] = await mongodb_handler.retrieve(
+        Collection.USERS,
+        {
+            "$and": [
+                {"role": {"$exists": True}},
+                {
+                    "role": {
+                        "$not": {
+                            "$regex": "applicant|"
+                            + "|".join(
+                                (
+                                    Role.DIRECTOR,
+                                    Role.REVIEWER,
+                                    Role.CHECKIN_LEAD,
+                                    Role.ORGANIZER,
+                                )
+                            )
+                        }
+                    }
+                },
+            ]
+        },
+        ["_id", "status", "role", "first_name", "last_name"],
+    )
+    return [Participant(**user) for user in records]
 
 
 async def check_in_participant(uid: str, associate: User) -> None:

@@ -47,12 +47,16 @@ async def get_hackers() -> list[Participant]:
     return [Participant(**user, **user["application_data"]) for user in records]
 
 
-async def check_in_applicant(uid: str, associate: User) -> None:
-    """Check in applicant at IrvineHacks"""
+async def check_in_participant(uid: str, associate: User) -> None:
+    """Check in participant at IrvineHacks"""
     record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": uid, "role": Role.APPLICANT}
+        Collection.USERS, {"_id": uid, "role": {"$exists": True}}
     )
-    if not record or record["status"] not in (Status.ATTENDING, Status.CONFIRMED):
+
+    if not record or record.get("status", "") not in (
+        Status.ATTENDING,
+        Status.CONFIRMED,
+    ):
         raise ValueError
 
     new_checkin_entry = (utc_now(), associate.uid)

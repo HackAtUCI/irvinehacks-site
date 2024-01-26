@@ -248,9 +248,9 @@ async def waitlist_release(uid: str) -> None:
 @router.get("/participants", dependencies=[Depends(require_checkin_associate)])
 async def participants() -> list[Participant]:
     """Get list of participants."""
-    return (await participant_manager.get_hackers()) + (
-        await participant_manager.get_non_hackers()
-    )
+    hackers = await participant_manager.get_hackers()
+    non_hackers = await participant_manager.get_non_hackers()
+    return hackers + non_hackers
 
 
 @router.post("/checkin/{uid}")

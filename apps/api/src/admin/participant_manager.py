@@ -52,24 +52,15 @@ async def get_non_hackers() -> list[Participant]:
     records: list[dict[str, Any]] = await mongodb_handler.retrieve(
         Collection.USERS,
         {
-            "$and": [
-                {"role": {"$exists": True}},
-                {
-                    "role": {
-                        "$not": {
-                            "$regex": "applicant|"
-                            + "|".join(
-                                (
-                                    Role.DIRECTOR,
-                                    Role.REVIEWER,
-                                    Role.CHECKIN_LEAD,
-                                    Role.ORGANIZER,
-                                )
-                            )
-                        }
-                    }
-                },
-            ]
+            "role": {
+                "$in": [
+                    Role.JUDGE,
+                    Role.SPONSOR,
+                    Role.MENTOR,
+                    Role.VOLUNTEER,
+                    Role.WORKSHOP_LEAD,
+                ]
+            }
         },
         ["_id", "status", "role", "first_name", "last_name"],
     )

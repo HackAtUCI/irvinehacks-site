@@ -135,7 +135,10 @@ function ParticipantsTable({
 	const allRoles = new Set(participants.map(p => p.role));
 	const roleOptions = Array.from(allRoles).map(r => ({ value: r, label: r }));
 	const allStatuses = new Set(participants.map(p => p.status));
-	const statusOptions = Array.from(allStatuses).map(s => ({ value: s, label: s }));
+	const statusOptions = Array.from(allStatuses).map(s => ({
+		value: s,
+		label: s
+	}));
 
 	const ActionCell = useCallback(
 		(participant: Participant) => (

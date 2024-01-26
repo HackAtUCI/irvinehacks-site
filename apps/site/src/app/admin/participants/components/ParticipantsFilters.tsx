@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction } from "react";
 
 import FormField from "@cloudscape-design/components/form-field";
+import { IconProps } from "@cloudscape-design/components/icon";
 import Multiselect from "@cloudscape-design/components/multiselect";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import TextFilter, {
@@ -19,6 +20,19 @@ interface ParticipantsFiltersProps {
     selectedStatuses: Options;
     setSelectedStatuses: Dispatch<SetStateAction<Options>>;
 }
+
+const StatusIcons: Record<Status, IconProps.Name> = {
+	[ReviewStatus.pending]: "status-pending",
+	[ReviewStatus.reviewed]: "status-in-progress",
+	[ReviewStatus.released]: "status-positive",
+	[Decision.accepted]: "status-positive",
+	[Decision.rejected]: "status-pending",
+	[Decision.waitlisted]: "status-negative",
+	[PostAcceptedStatus.signed]: "status-in-progress",
+	[PostAcceptedStatus.confirmed]: "status-positive",
+	[PostAcceptedStatus.attending]: "status-positive",
+	[PostAcceptedStatus.void]: "status-negative",
+};
 
 function ParticipantsFilters({
     filteredItemsCount,

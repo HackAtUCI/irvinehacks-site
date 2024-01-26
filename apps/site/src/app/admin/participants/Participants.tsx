@@ -14,6 +14,7 @@ function Participants() {
 		loading,
 		checkInParticipant,
 		releaseParticipantFromWaitlist,
+		confirmNonHacker,
 	} = useParticipants();
 	const [checkinParticipant, setCheckinParticipant] =
 		useState<Participant | null>(null);
@@ -49,6 +50,7 @@ function Participants() {
 				loading={loading}
 				initiateCheckIn={initiateCheckIn}
 				initiatePromotion={initiatePromotion}
+				initiateConfirm={confirmNonHacker}
 			/>
 			<CheckInModal
 				onDismiss={() => setCheckinParticipant(null)}
@@ -60,7 +62,6 @@ function Participants() {
 				onConfirm={sendWaitlistPromote}
 				participant={promoteParticipant}
 			/>
-			{/* TODO: walk-in promotion modal */}
 		</>
 	);
 }

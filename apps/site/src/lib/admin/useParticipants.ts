@@ -46,12 +46,18 @@ function useParticipants() {
 		await axios.post(`/api/admin/waitlist-release/${participant._id}`);
 	};
 
+	const confirmNonHacker = async (participant: Participant) => {
+		console.log("Confirmed attendance for non-hacker", participant);
+		await axios.post(`/api/admin/update-attendance/${participant._id}`);
+	};
+
 	return {
 		participants: data ?? [],
 		loading: isLoading,
 		error,
 		checkInParticipant,
 		releaseParticipantFromWaitlist,
+		confirmNonHacker,
 	};
 }
 

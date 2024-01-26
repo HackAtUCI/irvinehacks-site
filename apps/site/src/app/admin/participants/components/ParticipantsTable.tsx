@@ -33,7 +33,7 @@ interface ParticipantsTableProps {
 
 const ALL_ROLES = { value: "0", label: "All roles" };
 const ALL_STATUSES = { value: "0", label: "All roles" };
-const SEARCHABLE_COLUMNS = ["_id", "first_name", "last_name", "role", "status"]
+const SEARCHABLE_COLUMNS = ["_id", "first_name", "last_name", "role", "status"];
 
 function createLabelFunction(columnName: string) {
 	return ({ sorted, descending }: { sorted: boolean; descending: boolean }) => {
@@ -226,7 +226,7 @@ function ParticipantsTable({
 					</FormField>
 				</>
 			)}
-			pagination={(
+			pagination={
 				<Pagination
 					{...paginationProps}
 					ariaLabels={{
@@ -235,7 +235,7 @@ function ParticipantsTable({
 						previousPageLabel: "Previous page",
 					}}
 				/>
-			)}
+			}
 			preferences={
 				<CollectionPreferences
 					pageSizePreference={{
@@ -254,8 +254,8 @@ function ParticipantsTable({
 								options: columnDefinitions.map(({ id, header }) => ({
 									id,
 									label: header,
-								}))
-							}
+								})),
+							},
 						],
 					}}
 					cancelLabel="Cancel"

@@ -55,7 +55,7 @@ function ParticipantAction({
 			variant="inline-link"
 			ariaLabel={`Confirm attendance for ${participant._id}`}
 			onClick={() => initiateConfirm(participant)}
-			disabled={!isCheckin}
+			disabled={nonHacker && isWaiverSigned && role !== "director"}
 		>
 			Confirm
 		</Button>

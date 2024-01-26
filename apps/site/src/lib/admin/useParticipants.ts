@@ -15,11 +15,14 @@ const enum Role {
 	WorkshopLead = "workshop_lead",
 }
 
+export type Checkin = [string, Uid];
+
 export interface Participant {
 	_id: Uid;
 	first_name: string;
 	last_name: string;
 	role: Role;
+	checkins: Checkin[];
 	status: Status;
 }
 

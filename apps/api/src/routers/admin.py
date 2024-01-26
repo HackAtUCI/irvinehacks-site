@@ -248,22 +248,38 @@ async def waitlist_release(uid: str) -> None:
 @router.get("/participants", dependencies=[Depends(require_checkin_associate)])
 async def participants() -> list[Participant]:
     """Get list of participants."""
-    # TODO: non-hackers
-    return await participant_manager.get_hackers()
+    hackers = await participant_manager.get_hackers()
+    non_hackers = await participant_manager.get_non_hackers()
+    return hackers + non_hackers
 
 
 @router.post("/checkin/{uid}")
-async def checkin(
+async def check_in_participant(
     uid: str, associate: Annotated[User, Depends(require_checkin_associate)]
 ) -> None:
     """Check in participant at IrvineHacks."""
     try:
-        # TODO: non-hackers
-        await participant_manager.check_in_applicant(uid, associate)
+        await participant_manager.check_in_participant(uid, associate)
     except ValueError:
         raise HTTPException(status.HTTP_404_NOT_FOUND)
     except RuntimeError as err:
         log.exception("During participant check-in: %s", err)
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@router.post(
+    "/update-attendance/{uid}",
+)
+async def update_attendance(
+    uid: str, director: Annotated[User, Depends(require_role([Role.DIRECTOR]))]
+) -> None:
+    """Update status to Role.ATTENDING for non-hackers."""
+    try:
+        await participant_manager.confirm_attendance_non_hacker(uid, director)
+    except ValueError:
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
+    except RuntimeError as err:
+        log.exception("While updating participant attendance: %s", err)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

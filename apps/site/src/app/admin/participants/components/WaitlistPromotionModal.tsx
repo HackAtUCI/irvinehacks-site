@@ -37,9 +37,16 @@ function WaitlistPromotionModal({
 				<TextContent>
 					<ul>
 						{/* TODO: actual instructions for check-in leads */}
-						<li>Log into the portal</li>
-						<li>Sign waiver</li>
-						<li>Confirm attendance</li>
+						<li>Ask for a photo ID and verify name is under waitlist.</li>
+						<li>Promote participant.</li>
+						<li>
+							Have participant log into the portal, sign the waiver, and confirm
+							attendance.
+						</li>
+						<li>Follow normal check-in procedures.</li>
+						<li>
+							Direct participant to info booth for Slack and event onboarding.
+						</li>
 					</ul>
 				</TextContent>
 				{/* TODO: badge barcode input */}

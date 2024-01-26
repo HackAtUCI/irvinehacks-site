@@ -13,9 +13,14 @@ import Table from "@cloudscape-design/components/table";
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
 import { Participant } from "@/lib/admin/useParticipants";
 
+import CheckinDayIcon from "./CheckinDayIcon";
 import ParticipantAction from "./ParticipantAction";
 import ParticipantsFilters from "./ParticipantsFilters";
 import RoleBadge from "./RoleBadge";
+
+const FRIDAY = new Date("2024-01-26T12:00:00");
+const SATURDAY = new Date("2024-01-27T12:00:00");
+const SUNDAY = new Date("2024-01-28T12:00:00");
 
 interface EmptyStateProps {
 	title: string;
@@ -203,7 +208,6 @@ function ParticipantsTable({
 			items={items}
 			loading={loading}
 			loadingText="Loading participants"
-			resizableColumns
 			variant="full-page"
 			stickyColumns={{ first: 1, last: 0 }}
 			trackBy="_id"
@@ -262,5 +266,17 @@ function ParticipantsTable({
 		/>
 	);
 }
+
+const FridayCheckin = ({ checkins }: Participant) => (
+	<CheckinDayIcon checkins={checkins} date={FRIDAY} />
+);
+
+const SaturdayCheckin = ({ checkins }: Participant) => (
+	<CheckinDayIcon checkins={checkins} date={SATURDAY} />
+);
+
+const SundayCheckin = ({ checkins }: Participant) => (
+	<CheckinDayIcon checkins={checkins} date={SUNDAY} />
+);
 
 export default ParticipantsTable;

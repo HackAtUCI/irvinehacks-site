@@ -55,18 +55,17 @@ function ParticipantAction({
 			variant="inline-link"
 			ariaLabel={`Confirm attendance for ${participant._id}`}
 			onClick={() => initiateConfirm(participant)}
-			disabled={nonHacker && isWaiverSigned && role !== "director"}
+			disabled={!isCheckin}
 		>
 			Confirm
 		</Button>
 	);
 
 	if (nonHacker) {
-		const content =
-			role !== "director"
-				? "Only directors are allowed to confirm non-hackers."
-				: "Must sign waiver first.";
-		if (role !== "director" || participant.status === ReviewStatus.reviewed) {
+		const content = !isCheckinLead
+			? "Only check-in leads can confirm non-hackers."
+			: "Must sign waiver first.";
+		if (!isCheckinLead || participant.status === ReviewStatus.reviewed) {
 			return (
 				<ParticipantActionPopover content={content}>
 					{confirmButton}

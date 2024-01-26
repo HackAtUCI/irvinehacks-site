@@ -24,6 +24,7 @@ export function isCheckinLead(role: string | null) {
 	return role !== null && CHECKIN_ROLES.includes(role);
 }
 
+// refactor: this function should be placed elsewhere later
 export function isNonHacker(role: string | null) {
 	return role !== null && NONHACKER_ROLES.includes(role);
 }

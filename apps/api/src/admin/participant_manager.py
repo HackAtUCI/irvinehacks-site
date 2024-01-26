@@ -9,6 +9,14 @@ from utils.user_record import Role, Status, UserRecord
 
 log = getLogger(__name__)
 
+NON_HACKER_ROLES = (
+    Role.MENTOR,
+    Role.VOLUNTEER,
+    Role.SPONSOR,
+    Role.JUDGE,
+    Role.WORKSHOP_LEAD,
+)
+
 
 class Participant(UserRecord):
     """Participants attending the event."""
@@ -51,17 +59,7 @@ async def get_non_hackers() -> list[Participant]:
     """Fetch all non-hackers participating in the event."""
     records: list[dict[str, Any]] = await mongodb_handler.retrieve(
         Collection.USERS,
-        {
-            "role": {
-                "$in": [
-                    Role.JUDGE,
-                    Role.SPONSOR,
-                    Role.MENTOR,
-                    Role.VOLUNTEER,
-                    Role.WORKSHOP_LEAD,
-                ]
-            }
-        },
+        {"role": {"$in": NON_HACKER_ROLES}},
         ["_id", "status", "role", "first_name", "last_name"],
     )
     return [Participant(**user) for user in records]
@@ -96,20 +94,12 @@ async def check_in_participant(uid: str, associate: User) -> None:
 
 async def confirm_attendance_non_hacker(uid: str, director: User) -> None:
     """Update status for Role.Attending for non-hackers."""
-    allowed_roles = (
-        Role.MENTOR,
-        Role.ORGANIZER,
-        Role.VOLUNTEER,
-        Role.SPONSOR,
-        Role.JUDGE,
-        Role.WORKSHOP_LEAD,
-    )
 
     record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
         Collection.USERS, {"_id": uid, "status": Status.WAIVER_SIGNED}
     )
 
-    if not record or record["role"] not in allowed_roles:
+    if not record or record["role"] not in NON_HACKER_ROLES:
         raise ValueError
 
     update_status = await mongodb_handler.raw_update_one(

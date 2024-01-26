@@ -23,7 +23,7 @@ class Participant(UserRecord):
 
     first_name: str
     last_name: str
-    status: Optional[Union[Status, Decision]] = None
+    status: Union[Status, Decision] = Status.REVIEWED
 
 
 async def get_hackers() -> list[Participant]:

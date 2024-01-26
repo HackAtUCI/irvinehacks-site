@@ -3,7 +3,9 @@ import { Dispatch, SetStateAction } from "react";
 import FormField from "@cloudscape-design/components/form-field";
 import Multiselect from "@cloudscape-design/components/multiselect";
 import SpaceBetween from "@cloudscape-design/components/space-between";
-import TextFilter, { TextFilterProps } from "@cloudscape-design/components/text-filter";
+import TextFilter, {
+    TextFilterProps
+} from "@cloudscape-design/components/text-filter";
 
 import type { Options } from "./ParticipantsTable";
 

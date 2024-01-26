@@ -267,6 +267,22 @@ async def checkin(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+@router.post(
+    "/update-attendance/{uid}",
+)
+async def update_attendance(
+    uid: str, director: Annotated[User, Depends(require_role([Role.DIRECTOR]))]
+) -> None:
+    """Update status to Role.ATTENDING for non-hackers."""
+    try:
+        await participant_manager.confirm_attendance_non_hacker(uid, director)
+    except ValueError:
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
+    except RuntimeError as err:
+        log.exception("While updating participant attendance: %s", err)
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 async def _process_status(uids: Sequence[str], status: Status) -> None:
     ok = await mongodb_handler.update(
         Collection.USERS, {"_id": {"$in": uids}}, {"status": status}

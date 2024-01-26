@@ -68,3 +68,33 @@ async def check_in_applicant(uid: str, associate: User) -> None:
         raise RuntimeError(f"Could not update check-in record for {uid}.")
 
     log.info(f"Applicant {uid} checked in by {associate.uid}")
+
+
+async def confirm_attendance_non_hacker(uid: str, director: User) -> None:
+    """Update status for Role.Attending for non-hackers."""
+    allowed_roles = (
+        Role.MENTOR,
+        Role.ORGANIZER,
+        Role.VOLUNTEER,
+        Role.SPONSOR,
+        Role.JUDGE,
+        Role.WORKSHOP_LEAD,
+    )
+
+    record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": uid, "status": Status.WAIVER_SIGNED}
+    )
+
+    if not record or record["role"] not in allowed_roles:
+        raise ValueError
+
+    update_status = await mongodb_handler.raw_update_one(
+        Collection.USERS,
+        {"_id": uid},
+        {"status": Status.ATTENDING},
+    )
+
+    if not update_status:
+        raise RuntimeError(f"Could not update status to ATTENDING for {uid}.")
+
+    log.info(f"Non-hacker {uid} status updated to attending by {director.uid}")

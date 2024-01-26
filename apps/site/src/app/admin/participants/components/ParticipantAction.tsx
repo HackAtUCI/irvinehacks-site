@@ -71,8 +71,10 @@ function ParticipantAction({
 					{confirmButton}
 				</ParticipantActionPopover>
 			);
+		} else if (participant.status === Status.signed) {
+			return confirmButton;
 		}
-		return confirmButton;
+		return checkinButton;
 	} else if (participant.status === Status.waitlisted) {
 		if (!isCheckin) {
 			return (

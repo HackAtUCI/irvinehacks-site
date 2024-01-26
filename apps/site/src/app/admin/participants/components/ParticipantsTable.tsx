@@ -183,6 +183,24 @@ function ParticipantsTable({
 			sortingField: "status",
 		},
 		{
+			id: "friday",
+			header: "Fri",
+			cell: FridayCheckin,
+			sortingField: "friday",
+		},
+		{
+			id: "saturday",
+			header: "Sat",
+			cell: SaturdayCheckin,
+			sortingField: "saturday",
+		},
+		{
+			id: "sunday",
+			header: "Sun",
+			cell: SundayCheckin,
+			sortingField: "sunday",
+		},
+		{
 			id: "action",
 			header: "Action",
 			cell: ActionCell,

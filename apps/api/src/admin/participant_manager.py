@@ -1,5 +1,8 @@
+from datetime import datetime
 from logging import getLogger
 from typing import Any, Optional, Union
+
+from typing_extensions import TypeAlias
 
 from auth.user_identity import User, utc_now
 from models.ApplicationData import Decision
@@ -8,6 +11,8 @@ from services.mongodb_handler import Collection
 from utils.user_record import Role, Status, UserRecord
 
 log = getLogger(__name__)
+
+Checkin: TypeAlias = tuple[datetime, str]
 
 NON_HACKER_ROLES = (
     Role.MENTOR,
@@ -21,6 +26,7 @@ NON_HACKER_ROLES = (
 class Participant(UserRecord):
     """Participants attending the event."""
 
+    checkins: list[Checkin] = []
     first_name: str
     last_name: str
     status: Union[Status, Decision] = Status.REVIEWED
@@ -47,6 +53,7 @@ async def get_hackers() -> list[Participant]:
             "_id",
             "status",
             "role",
+            "checkins",
             "application_data.first_name",
             "application_data.last_name",
         ],
@@ -60,7 +67,7 @@ async def get_non_hackers() -> list[Participant]:
     records: list[dict[str, Any]] = await mongodb_handler.retrieve(
         Collection.USERS,
         {"role": {"$in": NON_HACKER_ROLES}},
-        ["_id", "status", "role", "first_name", "last_name"],
+        ["_id", "status", "role", "checkins", "first_name", "last_name"],
     )
     return [Participant(**user) for user in records]
 
@@ -77,7 +84,7 @@ async def check_in_participant(uid: str, associate: User) -> None:
     ):
         raise ValueError
 
-    new_checkin_entry = (utc_now(), associate.uid)
+    new_checkin_entry: Checkin = (utc_now(), associate.uid)
 
     update_status = await mongodb_handler.raw_update_one(
         Collection.USERS,

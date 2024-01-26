@@ -197,7 +197,7 @@ function ParticipantsTable({
 			stickyColumns={{ first: 1, last: 0 }}
 			trackBy="_id"
 			empty={emptyMessage}
-			filter={(
+			filter={
 				<>
 					<TextFilter
 						{...filterProps}
@@ -225,7 +225,7 @@ function ParticipantsTable({
 						/>
 					</FormField>
 				</>
-			)}
+			}
 			pagination={
 				<Pagination
 					{...paginationProps}

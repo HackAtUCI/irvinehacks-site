@@ -22,6 +22,7 @@ interface ParticipantsTableProps {
 	loading: boolean;
 	initiateCheckIn: (participant: Participant) => void;
 	initiatePromotion: (participant: Participant) => void;
+	initiateConfirm: (participant: Participant) => void;
 }
 
 function ParticipantsTable({
@@ -29,6 +30,7 @@ function ParticipantsTable({
 	loading,
 	initiateCheckIn,
 	initiatePromotion,
+	initiateConfirm,
 }: ParticipantsTableProps) {
 	// TODO: sorting
 	// TODO: search functionality
@@ -40,9 +42,10 @@ function ParticipantsTable({
 				participant={participant}
 				initiateCheckIn={initiateCheckIn}
 				initiatePromotion={initiatePromotion}
+				initiateConfirm={initiateConfirm}
 			/>
 		),
-		[initiateCheckIn, initiatePromotion],
+		[initiateCheckIn, initiatePromotion, initiateConfirm],
 	);
 
 	const emptyMessage = (

@@ -107,7 +107,7 @@ async def confirm_attendance_non_hacker(uid: str, director: User) -> None:
     if not record or record["role"] not in NON_HACKER_ROLES:
         raise ValueError
 
-    update_status = await mongodb_handler.raw_update_one(
+    update_status = await mongodb_handler.update_one(
         Collection.USERS,
         {"_id": uid},
         {"status": Status.ATTENDING},

@@ -112,7 +112,7 @@ const ShiftingCountdown = () => {
 			{countdown.showFireworks && (
 				<div className="flex justify-center">
 					<Fireworks
-						className="w-full h-full absolute"
+						className="w-full h-full absolute pointer-events-none"
 						options={{
 							opacity: 0.1,
 						}}

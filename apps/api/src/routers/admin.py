@@ -273,7 +273,10 @@ async def check_in_participant(
     "/update-attendance/{uid}",
 )
 async def update_attendance(
-    uid: str, director: Annotated[User, Depends(require_role([Role.DIRECTOR]))]
+    uid: str,
+    director: Annotated[
+        User, Depends(require_role([Role.DIRECTOR, Role.CHECKIN_LEAD]))
+    ],
 ) -> None:
     """Update status to Role.ATTENDING for non-hackers."""
     try:

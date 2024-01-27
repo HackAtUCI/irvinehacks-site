@@ -22,7 +22,7 @@ function BadgeScanner(props: BadgeScannerProps) {
 	useEffect(() => {
 		const {
 			fps,
-			qrbox,
+			// qrbox,
 			aspectRatio,
 			disableFlip,
 			verbose,
@@ -34,7 +34,7 @@ function BadgeScanner(props: BadgeScannerProps) {
 			scannerRegionId,
 			{
 				fps: fps ?? 5,
-				qrbox: qrbox ?? 300,
+				// qrbox: qrbox ?? 300,
 				aspectRatio: aspectRatio ?? 1,
 				disableFlip: disableFlip ?? true,
 			},

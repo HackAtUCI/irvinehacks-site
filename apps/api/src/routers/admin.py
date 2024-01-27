@@ -288,6 +288,12 @@ async def update_attendance(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+@router.get("/events", dependencies=[Depends(require_checkin_associate)])
+async def events() -> list[dict[str, object]]:
+    """Get list of events"""
+    return await mongodb_handler.retrieve(Collection.EVENTS, {})
+
+
 @router.post("/event-checkin/{event}")
 async def subevent_checkin(
     event: str,

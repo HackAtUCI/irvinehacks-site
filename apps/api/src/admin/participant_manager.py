@@ -120,8 +120,9 @@ async def confirm_attendance_non_hacker(uid: str, director: User) -> None:
 
 
 async def subevent_checkin(event_id: str, uid: str, organizer: User) -> None:
-    res = await mongodb_handler.update_one(
-        Collection.EVENTS, {"_id": event_id}, {"checkins": {"$push": uid}}
+    checkin = (uid, utc_now())
+    res = await mongodb_handler.raw_update_one(
+        Collection.EVENTS, {"_id": event_id}, {"$push": {"checkins": checkin}}
     )
     if not res:
         raise RuntimeError(f"Could not update events table for {event_id} with {uid}")

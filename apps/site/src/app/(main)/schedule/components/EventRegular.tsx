@@ -73,6 +73,7 @@ export default function EventRegular({
 	now,
 	title,
 	eventType,
+	location,
 	virtual,
 	startTime,
 	endTime,
@@ -97,6 +98,7 @@ export default function EventRegular({
 					{organization === undefined ? hosts?.join(", ") : organization}
 				</p>
 			)}
+			{location !== undefined && <p className="mb-2">Location: {location}</p>}
 			<p className="mb-2">
 				{dateTimeFormat.formatRange(startTimeInPST, endTimeInPST)} PST{" "}
 				{virtual && <a href={virtual}>| Meeting Link</a>}

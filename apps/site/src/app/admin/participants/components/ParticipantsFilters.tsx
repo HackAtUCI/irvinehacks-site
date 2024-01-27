@@ -10,7 +10,6 @@ import TextFilter, {
 	TextFilterProps,
 } from "@cloudscape-design/components/text-filter";
 
-import type { Options } from "./ParticipantsTable";
 import {
 	Decision,
 	PostAcceptedStatus,
@@ -18,6 +17,7 @@ import {
 	Status,
 } from "@/lib/admin/useApplicant";
 import { StatusLabels } from "../../applicants/components/ApplicantStatus";
+import type { Options } from "./ParticipantsTable";
 
 interface ParticipantsFiltersProps {
 	filteredItemsCount: number | undefined;
@@ -43,11 +43,16 @@ const StatusIcons: Record<Status, IconProps.Name> = {
 	[PostAcceptedStatus.void]: "status-negative",
 };
 
-const statusOption = (status: MultiselectProps.Option) => ({
-	label: StatusLabels[status.value],
-	value: status.value,
-	iconName: StatusIcons[status.value],
-});
+const statusOption = (status: MultiselectProps.Option) => {
+	if (status.value === undefined) {
+		throw Error();
+	}
+	return {
+		label: StatusLabels[status.value as Status],
+		value: status.value,
+		iconName: StatusIcons[status.value as Status],
+	};
+};
 
 function ParticipantsFilters({
 	filteredItemsCount,

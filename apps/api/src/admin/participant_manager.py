@@ -97,6 +97,7 @@ async def check_in_participant(uid: str, badge_number: str, associate: User) -> 
 
     log.info(f"Applicant {uid} ({badge_number}) checked in by {associate.uid}")
 
+
 async def confirm_attendance_non_hacker(uid: str, director: User) -> None:
     """Update status for Role.Attending for non-hackers."""
 

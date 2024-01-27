@@ -10,6 +10,7 @@ import { isApplicationManager } from "@/lib/admin/authorization";
 import UserContext from "@/lib/admin/UserContext";
 
 import ApplicantSummary from "./components/ApplicantSummary";
+import HackerCount from "./components/HackerCount";
 
 function AdminDashboard() {
 	const { role } = useContext(UserContext);
@@ -19,6 +20,7 @@ function AdminDashboard() {
 			<SpaceBetween size="l">
 				<Container>Admin Dashboard</Container>
 				{isApplicationManager(role) && <ApplicantSummary />}
+				<HackerCount />
 			</SpaceBetween>
 		</ContentLayout>
 	);

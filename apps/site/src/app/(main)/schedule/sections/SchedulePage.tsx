@@ -18,7 +18,7 @@ interface ScheduleProps {
 	schedule: {
 		title: string;
 		eventType: string;
-		location?: string | undefined;
+		location?: string;
 		virtual?: string | undefined;
 		startTime: Date;
 		endTime: Date;

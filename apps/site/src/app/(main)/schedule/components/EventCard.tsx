@@ -7,6 +7,7 @@ export default function EventCard({
 	now,
 	title,
 	eventType,
+	location,
 	virtual,
 	startTime,
 	endTime,
@@ -39,6 +40,7 @@ export default function EventCard({
 				now={now}
 				title={title}
 				eventType={eventType}
+				location={location}
 				virtual={virtual}
 				startTime={startTime}
 				endTime={endTime}

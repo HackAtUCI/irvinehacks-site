@@ -84,6 +84,9 @@ importers:
 
   apps/site:
     dependencies:
+      '@cloudscape-design/collection-hooks':
+        specifier: ^1.0.34
+        version: 1.0.34(react@18.2.0)
       '@cloudscape-design/components':
         specifier: ^3.0.475
         version: 3.0.475(react-dom@18.2.0)(react@18.2.0)
@@ -1518,8 +1521,8 @@ packages:
       '@babel/helper-validator-identifier': 7.22.20
       to-fast-properties: 2.0.0
 
-  /@cloudscape-design/collection-hooks@1.0.32(react@18.2.0):
-    resolution: {integrity: sha512-wdOGW+W8+5rYYSGPab/v7BOy0P8mC6aUtwwN3w2AWE3n3LrK/Wqzsx77r/m4zlLdtkhZFnsnSBpT14OIw8ve/Q==}
+  /@cloudscape-design/collection-hooks@1.0.34(react@18.2.0):
+    resolution: {integrity: sha512-8ggOJRX4PpiT6YCv7cHSjyx27VUgJX7s25KiLaUbVvm5EeWBpKxrwDwE6w9JjNxrkXeepjs4xyNjaNie2ZiCeQ==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
     dependencies:
@@ -1539,7 +1542,7 @@ packages:
       react: ^16.8 || ^17 || ^18
       react-dom: ^16.8 || ^17 || ^18
     dependencies:
-      '@cloudscape-design/collection-hooks': 1.0.32(react@18.2.0)
+      '@cloudscape-design/collection-hooks': 1.0.34(react@18.2.0)
       '@cloudscape-design/component-toolkit': 1.0.0-beta.30
       '@cloudscape-design/test-utils-core': 1.0.21
       '@cloudscape-design/theming-runtime': 1.0.39
@@ -1566,6 +1569,7 @@ packages:
   /@cloudscape-design/global-styles@1.0.20:
     resolution: {integrity: sha512-eEU3o7fZSRtIQVcFj1vRtheDFktRdAMMIidihrpNHqWVZzazFe0Z22vll684Yzy9TQ5R0HXKKupZLgKyC+Ia8w==}
     dev: false
+    bundledDependencies: false
 
   /@cloudscape-design/test-utils-core@1.0.21:
     resolution: {integrity: sha512-Kjxtl1ImQLmJ5SJ3PNF0hrtEbKidcZqk3E+iY4dLbJOI3sWh2TwoEpH5i4QEfO2GMtkMNzi41V4mmI4e4sydAw==}
@@ -5415,6 +5419,7 @@ packages:
       loose-envify: 1.4.0
       object-assign: 4.1.1
     dev: false
+    bundledDependencies: false
 
   /create-require@1.1.1:
     resolution: {integrity: sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==}

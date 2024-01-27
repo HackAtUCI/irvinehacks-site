@@ -1,6 +1,6 @@
 import { ReactElement, useCallback, useState } from "react";
-import { useCollection } from "@cloudscape-design/collection-hooks";
 
+import { useCollection } from "@cloudscape-design/collection-hooks";
 import Box from "@cloudscape-design/components/box";
 import Button from "@cloudscape-design/components/button";
 import CollectionPreferences from "@cloudscape-design/components/collection-preferences";
@@ -43,6 +43,7 @@ const SEARCHABLE_COLUMNS: (keyof Participant)[] = [
 	"last_name",
 	"role",
 	"status",
+	"badge_number",
 ];
 
 function createLabelFunction(columnName: string) {
@@ -83,6 +84,7 @@ function ParticipantsTable({
 			"lastName",
 			"role",
 			"status",
+			"badgeNumber",
 			"friday",
 			"saturday",
 			"sunday",
@@ -198,6 +200,13 @@ function ParticipantsTable({
 			cell: ApplicantStatus,
 			ariaLabel: createLabelFunction("status"),
 			sortingField: "status",
+		},
+		{
+			id: "badgeNumber",
+			header: "Badge Number",
+			cell: (item: Participant) => item.badge_number,
+			ariaLabel: createLabelFunction("Badge Number"),
+			sortingField: "badge_number",
 		},
 		{
 			id: "friday",

@@ -1,8 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
-import Image from "next/image";
-
 import { getSponsors } from "./getSponsors";
-import fishingBoat from "@/assets/images/fishing-boat.png";
 import SponsorTier from "./components/SponsorTier/SponsorTier";
 
 import styles from "./Sponsors.module.scss";
@@ -40,7 +36,6 @@ export default async function Sponsors() {
 					<SponsorTier sponsors={sponsors.get(tier)} className={styles[tier]} />
 				</div>
 			))}
-			<Image src={fishingBoat} alt="boat" width="400" height="400" />
 		</section>
 	);
 }

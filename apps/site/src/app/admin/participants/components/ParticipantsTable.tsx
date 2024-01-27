@@ -8,7 +8,7 @@ import Header from "@cloudscape-design/components/header";
 import { MultiselectProps } from "@cloudscape-design/components/multiselect";
 import Pagination from "@cloudscape-design/components/pagination";
 import SpaceBetween from "@cloudscape-design/components/space-between";
-import Table from "@cloudscape-design/components/table";
+import Table, { TableProps } from "@cloudscape-design/components/table";
 
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
 import { Participant } from "@/lib/admin/useParticipants";
@@ -45,6 +45,11 @@ const SEARCHABLE_COLUMNS: (keyof Participant)[] = [
 	"status",
 	"badge_number",
 ];
+
+type StrictColumnDefinition = TableProps.ColumnDefinition<Participant> & {
+	id: string;
+	header: string;
+};
 
 function createLabelFunction(columnName: string) {
 	return ({ sorted, descending }: { sorted: boolean; descending: boolean }) => {
@@ -164,7 +169,7 @@ function ParticipantsTable({
 		[initiateCheckIn, initiatePromotion, initiateConfirm],
 	);
 
-	const columnDefinitions = [
+	const columnDefinitions: StrictColumnDefinition[] = [
 		{
 			id: "uid",
 			header: "UID",
@@ -230,6 +235,7 @@ function ParticipantsTable({
 			id: "action",
 			header: "Action",
 			cell: ActionCell,
+			minWidth: 108,
 		},
 	];
 

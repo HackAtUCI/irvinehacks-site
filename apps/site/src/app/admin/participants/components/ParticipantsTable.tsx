@@ -17,6 +17,7 @@ import CheckinDayIcon from "./CheckinDayIcon";
 import ParticipantAction from "./ParticipantAction";
 import ParticipantsFilters from "./ParticipantsFilters";
 import RoleBadge from "./RoleBadge";
+import SearchScannerModal from "./SearchScannerModal";
 
 const FRIDAY = new Date("2024-01-26T12:00:00");
 const SATURDAY = new Date("2024-01-27T12:00:00");
@@ -149,6 +150,7 @@ function ParticipantsTable({
 		sorting: {},
 		selection: {},
 	});
+
 	const allRoles = new Set(participants.map((p) => p.role));
 	const roleOptions = Array.from(allRoles).map((r) => ({ value: r, label: r }));
 	const allStatuses = new Set(participants.map((p) => p.status));
@@ -247,77 +249,104 @@ function ParticipantsTable({
 		</Box>
 	);
 
+	const [showScanner, setShowScanner] = useState(false);
+
+	const openScanner = () => {
+		setShowScanner(true);
+	};
+
+	const cancelScanner = () => {
+		setShowScanner(false);
+	};
+
+	const useScannerValue = (value: string) => {
+		actions.setFiltering(value);
+		setShowScanner(false);
+	};
+
 	return (
-		<Table
-			{...collectionProps}
-			header={
-				<Header counter={`(${participants.length})`}>Participants</Header>
-			}
-			columnDefinitions={columnDefinitions}
-			visibleColumns={preferences.visibleContent}
-			items={items}
-			loading={loading}
-			loadingText="Loading participants"
-			variant="full-page"
-			stickyColumns={{ first: 1, last: 0 }}
-			trackBy="_id"
-			empty={emptyMessage}
-			filter={
-				<ParticipantsFilters
-					filteredItemsCount={filteredItemsCount}
-					filterProps={filterProps}
-					roles={roleOptions}
-					selectedRoles={filterRole}
-					setSelectedRoles={setFilterRole}
-					statuses={statusOptions}
-					selectedStatuses={filterStatus}
-					setSelectedStatuses={setFilterStatus}
-				/>
-			}
-			pagination={
-				<Pagination
-					{...paginationProps}
-					ariaLabels={{
-						nextPageLabel: "Next page",
-						pageLabel: (pageNumber) => `Go to page ${pageNumber}`,
-						previousPageLabel: "Previous page",
-					}}
-				/>
-			}
-			preferences={
-				<CollectionPreferences
-					pageSizePreference={{
-						title: "Select page size",
-						options: [
-							{ value: 20, label: "20 people" },
-							{ value: 50, label: "50 people" },
-							{ value: 100, label: "100 people" },
-						],
-					}}
-					visibleContentPreference={{
-						title: "Select visible columns",
-						options: [
-							{
-								label: "Participant info",
-								options: columnDefinitions.map(({ id, header }) => ({
-									id,
-									label: header,
-								})),
-							},
-						],
-					}}
-					cancelLabel="Cancel"
-					confirmLabel="Confirm"
-					title="Preferences"
-					preferences={preferences}
-					onConfirm={({ detail }) =>
-						setPreferences(
-							detail as { pageSize: number; visibleContent: Array<string> },
-						)
-					}
-				/>
-			}
-		/>
+		<>
+			<SearchScannerModal
+				onDismiss={cancelScanner}
+				onConfirm={useScannerValue}
+				show={showScanner}
+			/>
+			<Table
+				{...collectionProps}
+				header={
+					<Header
+						counter={`(${participants.length})`}
+						actions={<Button onClick={openScanner}>Scan Badge</Button>}
+					>
+						Participants
+					</Header>
+				}
+				columnDefinitions={columnDefinitions}
+				visibleColumns={preferences.visibleContent}
+				items={items}
+				loading={loading}
+				loadingText="Loading participants"
+				variant="full-page"
+				stickyColumns={{ first: 1, last: 0 }}
+				trackBy="_id"
+				empty={emptyMessage}
+				filter={
+					<ParticipantsFilters
+						filteredItemsCount={filteredItemsCount}
+						filterProps={filterProps}
+						roles={roleOptions}
+						selectedRoles={filterRole}
+						setSelectedRoles={setFilterRole}
+						statuses={statusOptions}
+						selectedStatuses={filterStatus}
+						setSelectedStatuses={setFilterStatus}
+					/>
+				}
+				pagination={
+					<Pagination
+						{...paginationProps}
+						ariaLabels={{
+							nextPageLabel: "Next page",
+							pageLabel: (pageNumber) => `Go to page ${pageNumber}`,
+							previousPageLabel: "Previous page",
+						}}
+					/>
+				}
+				preferences={
+					<CollectionPreferences
+						pageSizePreference={{
+							title: "Select page size",
+							options: [
+								{ value: 20, label: "20 people" },
+								{ value: 50, label: "50 people" },
+								{ value: 100, label: "100 people" },
+							],
+						}}
+						visibleContentPreference={{
+							title: "Select visible columns",
+							options: [
+								{
+									label: "Participant info",
+									options: columnDefinitions.map(({ id, header }) => ({
+										id,
+										label: header,
+									})),
+								},
+							],
+						}}
+						cancelLabel="Cancel"
+						confirmLabel="Confirm"
+						title="Preferences"
+						preferences={preferences}
+						onConfirm={({ detail }) =>
+							setPreferences(
+								detail as { pageSize: number; visibleContent: Array<string> },
+							)
+						}
+					/>
+				}
+			/>
+		</>
 	);
 }
 

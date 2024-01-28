@@ -87,6 +87,13 @@ function Navbar({ identity }: NavbarProps) {
 					>
 						Devpost
 					</NavLinkItem>
+					<NavLinkItem
+						href="/feedback"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						Feedback
+					</NavLinkItem>
 					{!status && !deadlinePassed && (
 						<NavLinkItem href="/apply">Apply</NavLinkItem>
 					)}

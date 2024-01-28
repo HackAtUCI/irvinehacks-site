@@ -54,6 +54,11 @@ const nextConfig = {
 				destination: "https://irvinehacks-2024.devpost.com",
 				permanent: true,
 			},
+			{
+				source: "/feedback",
+				destination: "https://forms.gle/c154z45wRx7ARnrE9",
+				permanent: true,
+			},
 		];
 	},
 };

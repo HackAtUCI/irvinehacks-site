@@ -1,14 +1,124 @@
-# Turborepo starter
+# irvinehacks-site-2024
 
-This is an official starter Turborepo.
+## Overview
+This monorepo uses [turborepo](https://turbo.build/repo) with [pnpm](https://pnpm.io/) as a package manager. It contains the following:
 
-## Using this example
+### `apps/site`
+A [Next.js](https://nextjs.org/) 13 project that uses the new app router.
 
-Run the following command:
+This app contains the IrvineHacks site.
 
-```sh
-npx create-turbo@latest
+The development server runs at `http://localhost:3000`. If this port is taken, the next available port will be used.
+
+### `apps/api`
+A [FastAPI](https://fastapi.tiangolo.com/) project.
+
+This app contains the api for the IrvineHacks site.
+
+The development server runs at `http://localhost:8000`. If this port is taken, the next available port will be used.
+
+### `apps/sanity`
+
+A [Sanity Studio](https://www.sanity.io/studio) project.
+
+This app contains the dashboard used to view and edit content stored in [Sanity](https://www.sanity.io/).
+
+The development server runs at `http://localhost:3333`. If this port is taken, the project will error.
+
+## First-Time Setup
+
+### Pnpm
+
+This repo used `pnpm`, a space-efficient replacement to `npm`.
+You can learn more about its advantages at <https://pnpm.io/>.
+
+Install pnpm with the following command, or use an [alternative installation method](https://pnpm.io/installation).
+
+```shell
+npm install -g pnpm
 ```
+
+When running commands, use `pnpm` rather than `npm`.
+
+### Next.js
+
+1. Ensure you are in the project root.
+
+2. Install dependencies
+   ```shell
+   pnpm i
+   ```
+
+### Python API
+
+1. Ensure you are in `apps/api` with
+   ```shell
+   cd apps/api
+   ```
+
+2. Create a virtual environment. This isolates the libraries you install in this environment from the libraries on your actual machine.
+
+   ```shell
+   python3 -m venv .venv
+   ```
+
+3. Activate virtual environment
+
+   VS Code may prompt to automatically select the newly created virtual environment.
+   Otherwise, for Mac/Linux, run
+
+   ```shell
+   source .venv/bin/activate
+   ```
+   and for Windows, run
+
+   ```shell
+   .\.venv\scripts\activate
+   ```
+
+4. Install dependencies
+   ```shell
+   pip install -r requirements.txt -r requirements-dev.txt
+   ```
+
+### Docker
+
+This project uses Docker for testing API methods locally.
+
+1. Install [Docker](https://docs.docker.com/get-docker/). The process varies greatly depending on the operating system, so please refer to this article.
+
+2. Open Docker Desktop.
+
+A local MongoDB application will start running at `http://localhost:8081` after running `pnpm dev`.
+
+*Note*: Because the Python files have been copied over to the Docker container, hot reload is no longer possible. Stopping the container and rerunning `pnpm dev` is the best option.
+
+### Build
+
+To build all apps and packages, run the following command in the project root.
+
+*Note*: You would run this BEFORE opening a PR as a sanity check for errors.
+
+```bash
+pnpm build
+```
+
+To build an individual app or package, first, navigate to the corresponding directory and run the build command.
+
+### Develop
+
+To develop all apps and packages, run the following command in the project root.
+
+```bash
+pnpm dev
+```
+
+## Helpful VSCode Extensions
+- [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python) for Python linting, intellisense, etc.
+- [Mypy](https://marketplace.visualstudio.com/items?itemName=ms-python.mypy-type-checker) for Python type checking
+- [Black](https://marketplace.visualstudio.com/items?itemName=ms-python.black-formatter) for Python code formatting
+- [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) for code formatting on file save or set to a keybind
+- [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) for linting Javascript
 
 ## What's inside?
 
@@ -16,66 +126,15 @@ This Turborepo includes the following packages/apps:
 
 ### Apps and Packages
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `ui`: a stub React component library shared by both `web` and `docs` applications
+- `site`: a [Next.js](https://nextjs.org/) app
+- `api`: a [FastAPI](https://fastapi.tiangolo.com/) app
+- `sanity`: a [Sanity Studio](https://www.sanity.io/studio) app
 - `eslint-config-custom`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
 - `tsconfig`: `tsconfig.json`s used throughout the monorepo
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
 
 ### Utilities
-
-This Turborepo has some additional tools already setup for you:
 
 - [TypeScript](https://www.typescriptlang.org/) for static type checking
 - [ESLint](https://eslint.org/) for code linting
 - [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```
-cd my-turborepo
-pnpm build
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-pnpm dev
-```
-
-### Remote Caching
-
-Turborepo can use a technique known as [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup), then enter the following commands:
-
-```
-cd my-turborepo
-npx turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-npx turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turbo.build/repo/docs/core-concepts/monorepos/running-tasks)
-- [Caching](https://turbo.build/repo/docs/core-concepts/caching)
-- [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching)
-- [Filtering](https://turbo.build/repo/docs/core-concepts/monorepos/filtering)
-- [Configuration Options](https://turbo.build/repo/docs/reference/configuration)
-- [CLI Usage](https://turbo.build/repo/docs/reference/command-line-reference)

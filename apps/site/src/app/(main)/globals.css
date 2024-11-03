@@ -1,19 +1,22 @@
-@import url("https://fonts.googleapis.com/css2?family=Alegreya:wght@400;500;600;700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cantarell:ital,wght@0,400;0,700;1,400;1,700&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-	--color-cream: #fffce2;
+	--color-white: #fff;
+	--color-black: #0c071b;
 	--color-brown: #432810;
-	--color-dark-blue: #090c31;
+	--color-light-blue: #39befd;
+	--color-blue: #006fb2;
+	--color-dark-blue: #0b004c;
 }
 
 body {
-	color: var(--color-cream);
-	background-color: var(--color-brown);
+	color: var(--color-white);
+	background-color: var(--color-dark-blue);
 }
 
 /* based on Bootstrap Reboot */

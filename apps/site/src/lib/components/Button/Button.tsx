@@ -42,7 +42,7 @@ const Button: React.FC<ButtonProps> = ({
 	return (
 		<button
 			type="submit"
-			className={styles.button + " font-body"}
+			className={styles.button + " font-display"}
 			disabled={disabled}
 			style={style ? style : { width: "max-content" }}
 		>

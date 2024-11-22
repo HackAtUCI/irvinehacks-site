@@ -1,13 +1,10 @@
-fastapi==0.104.1
-httpx==0.25.2
-python-multipart==0.0.5
+fastapi==0.115.5
+httpx==0.27.2
+python-multipart==0.0.12
 python3-saml==1.16.0
 python-jose[cryptography]==3.3.0
-motor==3.3.2
-pydantic[email]==2.5.2
+motor==3.6.0
+pydantic[email]==2.9.2
 aiosendgrid==0.1.0
 sendgrid==6.11.0
-aiogoogle==5.6.0
-
-# To avoid breaking xmlsec for python3-saml
-lxml<5.0.0
+aiogoogle==5.13.2

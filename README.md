@@ -1,9 +1,11 @@
-# irvinehacks-site-2024
+# irvinehacks-site
 
 ## Overview
+
 This monorepo uses [turborepo](https://turbo.build/repo) with [pnpm](https://pnpm.io/) as a package manager. It contains the following:
 
 ### `apps/site`
+
 A [Next.js](https://nextjs.org/) 13 project that uses the new app router.
 
 This app contains the IrvineHacks site.
@@ -11,6 +13,7 @@ This app contains the IrvineHacks site.
 The development server runs at `http://localhost:3000`. If this port is taken, the next available port will be used.
 
 ### `apps/api`
+
 A [FastAPI](https://fastapi.tiangolo.com/) project.
 
 This app contains the api for the IrvineHacks site.
@@ -52,6 +55,7 @@ When running commands, use `pnpm` rather than `npm`.
 ### Python API
 
 1. Ensure you are in `apps/api` with
+
    ```shell
    cd apps/api
    ```
@@ -70,6 +74,7 @@ When running commands, use `pnpm` rather than `npm`.
    ```shell
    source .venv/bin/activate
    ```
+
    and for Windows, run
 
    ```shell
@@ -91,13 +96,13 @@ This project uses Docker for testing API methods locally.
 
 A local MongoDB application will start running at `http://localhost:8081` after running `pnpm dev`.
 
-*Note*: Because the Python files have been copied over to the Docker container, hot reload is no longer possible. Stopping the container and rerunning `pnpm dev` is the best option.
+_Note_: Because the Python files have been copied over to the Docker container, hot reload is no longer possible. Stopping the container and rerunning `pnpm dev` is the best option.
 
 ### Build
 
 To build all apps and packages, run the following command in the project root.
 
-*Note*: You would run this BEFORE opening a PR as a sanity check for errors.
+_Note_: You would run this BEFORE opening a PR as a sanity check for errors.
 
 ```bash
 pnpm build
@@ -114,6 +119,7 @@ pnpm dev
 ```
 
 ## Helpful VSCode Extensions
+
 - [Python](https://marketplace.visualstudio.com/items?itemName=ms-python.python) for Python linting, intellisense, etc.
 - [Mypy](https://marketplace.visualstudio.com/items?itemName=ms-python.mypy-type-checker) for Python type checking
 - [Black](https://marketplace.visualstudio.com/items?itemName=ms-python.black-formatter) for Python code formatting
@@ -131,7 +137,6 @@ This Turborepo includes the following packages/apps:
 - `sanity`: a [Sanity Studio](https://www.sanity.io/studio) app
 - `eslint-config-custom`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
 - `tsconfig`: `tsconfig.json`s used throughout the monorepo
-
 
 ### Utilities
 

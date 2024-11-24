@@ -6,7 +6,7 @@ import { getResources } from "./getResources";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-	title: "Resources | IrvineHacks 2024",
+	title: "Resources | IrvineHacks 2025",
 };
 
 export default async function Resources() {

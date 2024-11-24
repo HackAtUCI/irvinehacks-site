@@ -9,7 +9,7 @@ import SchedulePage from "./sections/SchedulePage";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-	title: "Schedule | IrvineHacks 2024",
+	title: "Schedule | IrvineHacks 2025",
 };
 
 export default async function Schedule() {

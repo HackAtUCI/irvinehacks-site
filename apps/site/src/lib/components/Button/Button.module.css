@@ -8,9 +8,14 @@
 	display: block;
 	width: max-content;
 	margin: 0 auto;
+}
 
-	&:hover {
-		box-shadow: 8px 8px 0px var(--color-white);
+.buttonBox {
+	display: inline-block;
+	background-color: white;
+
+	&:hover > .button {
+		transform: translate(-8px, -8px);
 		filter: brightness(1.05);
 	}
 }

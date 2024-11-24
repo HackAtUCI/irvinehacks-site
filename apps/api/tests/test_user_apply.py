@@ -14,7 +14,7 @@ from utils import resume_handler
 from utils.user_record import Applicant, Status
 
 # Tests will break again next year, tech should notice and fix :P
-TEST_DEADLINE = datetime(2024, 10, 1, 8, 0, 0, tzinfo=timezone.utc)
+TEST_DEADLINE = datetime(2025, 10, 1, 8, 0, 0, tzinfo=timezone.utc)
 user.DEADLINE = TEST_DEADLINE
 
 USER_EMAIL = "pkfire@uci.edu"
@@ -49,7 +49,7 @@ EMPTY_RESUME = ("", b"", "application/octet-stream")
 
 EXPECTED_RESUME_UPLOAD = ("pk-fire-69f2afc2.pdf", b"resume", "application/pdf")
 SAMPLE_RESUME_URL = HttpUrl("https://drive.google.com/file/d/...")
-SAMPLE_SUBMISSION_TIME = datetime(2023, 1, 12, 8, 1, 21, tzinfo=timezone.utc)
+SAMPLE_SUBMISSION_TIME = datetime(2024, 1, 12, 8, 1, 21, tzinfo=timezone.utc)
 SAMPLE_VERDICT_TIME = None
 
 EXPECTED_APPLICATION_DATA = ProcessedApplicationData(
@@ -88,6 +88,7 @@ client = UserTestClient(USER_PKFIRE, app)
 
 @patch("utils.email_handler.send_application_confirmation_email", autospec=True)
 @patch("services.mongodb_handler.update_one", autospec=True)
+@patch("routers.user._is_past_deadline", autospec=True)
 @patch("routers.user.datetime", autospec=True)
 @patch("services.gdrive_handler.upload_file", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
@@ -95,6 +96,7 @@ def test_apply_successfully(
     mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_gdrive_handler_upload_file: AsyncMock,
     mock_datetime: Mock,
+    mock_is_past_deadline: Mock,
     mock_mongodb_handler_update_one: AsyncMock,
     mock_send_application_confirmation_email: AsyncMock,
 ) -> None:
@@ -102,6 +104,7 @@ def test_apply_successfully(
     mock_mongodb_handler_retrieve_one.return_value = None
     mock_gdrive_handler_upload_file.return_value = SAMPLE_RESUME_URL
     mock_datetime.now.return_value = SAMPLE_SUBMISSION_TIME
+    mock_is_past_deadline.return_value = False
     res = client.post("/apply", data=SAMPLE_APPLICATION, files=SAMPLE_FILES)
 
     mock_gdrive_handler_upload_file.assert_awaited_once_with(

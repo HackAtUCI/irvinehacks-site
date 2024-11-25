@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { PerspectiveCamera } from "@react-three/drei";
 
 import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
+import haveApplicationsOpened from "@/lib/utils/haveApplicationsOpened";
 import View from "@/components/canvas/View";
 import Button from "@/lib/components/Button/Button";
 
@@ -11,6 +12,7 @@ import styles from "./Landing.module.css";
 
 const Landing = () => {
 	const deadlinePassed = hasDeadlinePassed();
+	const applicationsOpened = haveApplicationsOpened();
 
 	return (
 		<section className={styles.landingBackground}>
@@ -25,9 +27,11 @@ const Landing = () => {
 					IrvineHacks 2025
 				</h1>
 				{deadlinePassed ? (
-					<Button className="z-10" text="Coming Soon..." disabled />
-				) : (
+					<Button className="z-10" text="Applications have closed!" disabled />
+				) : applicationsOpened ? (
 					<Button className="z-10" text="Apply" href="/apply" />
+				) : (
+					<Button className="z-10" text="Coming Soon..." disabled />
 				)}
 			</div>
 		</section>

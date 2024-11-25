@@ -1,14 +1,14 @@
 import clsx from "clsx";
 import React from "react";
-import Link from "next/link";
+import Link, { LinkProps } from "next/link";
 import * as NavMenu from "@radix-ui/react-navigation-menu";
 
 import styles from "./Navbar.module.scss";
 
 const NavLinkItem = React.forwardRef<
 	React.ElementRef<typeof NavMenu.Link>,
-	React.ComponentPropsWithoutRef<typeof NavMenu.Link>
->(({ children, className, href, ...props }, forwardedRef) => {
+	React.ComponentPropsWithoutRef<typeof NavMenu.Link> & LinkProps
+>(({ children, className, href, prefetch, ...props }, forwardedRef) => {
 	return (
 		<NavMenu.Item>
 			<NavMenu.Link
@@ -17,7 +17,9 @@ const NavLinkItem = React.forwardRef<
 				ref={forwardedRef}
 				asChild
 			>
-				<Link href={href as string}>{children}</Link>
+				<Link href={href as string} prefetch={prefetch}>
+					{children}
+				</Link>
 			</NavMenu.Link>
 		</NavMenu.Item>
 	);

@@ -84,6 +84,7 @@ function Navbar({ identity }: NavbarProps) {
 						href="/devpost"
 						target="_blank"
 						rel="noopener noreferrer"
+						prefetch={false}
 					>
 						Devpost
 					</NavLinkItem>

@@ -40,7 +40,7 @@ const Stand: React.FC<StandProps> = ({
 			>
 				<p className="text-base pt-[16%] pb-4 px-12">{description}</p>
 				<div className="mb-8">
-					<Button text={buttonText} href={buttonHref} />
+					<Button text={buttonText} href={buttonHref} usePrefetch={false} />
 				</div>
 			</div>
 		</div>

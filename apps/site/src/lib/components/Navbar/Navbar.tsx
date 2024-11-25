@@ -70,8 +70,8 @@ function Navbar({ identity }: NavbarProps) {
 					}
 					onTransitionEnd={() => setHidden(!listShown)}
 				>
-					<NavLinkItem href="/">Home</NavLinkItem>
-					<NavLinkItem href="/resources">Resources</NavLinkItem>
+					{/* <NavLinkItem href="/">Home</NavLinkItem> */}
+					{/* <NavLinkItem href="/resources">Resources</NavLinkItem>
 					<NavLinkItem href="/schedule">Schedule</NavLinkItem>
 					<NavLinkItem
 						href="/incident"
@@ -93,12 +93,12 @@ function Navbar({ identity }: NavbarProps) {
 						rel="noopener noreferrer"
 					>
 						Feedback
-					</NavLinkItem>
-					{!status && !deadlinePassed && (
+					</NavLinkItem> */}
+					{/* {!status && !deadlinePassed && (
 						<NavLinkItem href="/apply">Apply</NavLinkItem>
-					)}
+					)} */}
 
-					{status !== null && <NavLinkItem href="/portal">Portal</NavLinkItem>}
+					{/* {status !== null && <NavLinkItem href="/portal">Portal</NavLinkItem>}
 					{isLoggedIn ? (
 						<Button
 							text="Log In"
@@ -113,7 +113,7 @@ function Navbar({ identity }: NavbarProps) {
 						>
 							Log Out
 						</a>
-					)}
+					)} */}
 				</NavMenu.List>
 			</div>
 		</NavMenu.Root>

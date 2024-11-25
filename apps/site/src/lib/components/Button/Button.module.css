@@ -1,25 +1,21 @@
 .button {
-	background-image: radial-gradient(
-		50% 50% at 50% 50%,
-		#fff3d6 0%,
-		#ffda7b 51.04%,
-		#ffa700 100%
-	);
-	box-shadow: 0px 0px 20px rgba(255, 252, 226, 0.5);
-	border-radius: 15px;
-	color: var(--color-brown);
+	background-color: var(--color-dark-blue);
+	color: var(--color-white);
+	border: 5px solid var(--color-white);
 	font-size: calc(13px + 1vw);
 	font-weight: 700;
 	padding: 0.55rem 1.25rem;
-	transition:
-		filter 0.1s ease,
-		box-shadow 0.1s ease;
 	display: block;
 	width: max-content;
 	margin: 0 auto;
+}
 
-	&:hover {
-		box-shadow: 0px 0px 20px #fffce2;
+.buttonBox {
+	display: inline-block;
+	background-color: white;
+
+	&:hover > .button {
+		transform: translate(-8px, -8px);
 		filter: brightness(1.05);
 	}
 }
@@ -28,7 +24,7 @@
 	padding: 0.15rem 1.15rem;
 	border-radius: 10px;
 	background-image: none;
-	background-color: var(--color-cream);
+	background-color: var(--color-white);
 	margin: 0;
 
 	font-size: 28px;

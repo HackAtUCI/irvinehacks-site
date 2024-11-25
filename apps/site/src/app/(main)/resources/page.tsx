@@ -6,7 +6,7 @@ import { getResources } from "./getResources";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-	title: "Resources | IrvineHacks 2024",
+	title: "Resources | IrvineHacks 2025",
 };
 
 export default async function Resources() {
@@ -29,7 +29,7 @@ export default async function Resources() {
 						({ _id, iconUrl, title, description, resources }, i) => (
 							<div
 								key={_id}
-								className="max-w-5xl w-full mx-auto mb-12 bg-[var(--color-cream)] text-[#2F1C00] p-12 rounded-2xl lg:grid lg:gap-20 lg:grid-cols-2 lg:items-center"
+								className="max-w-5xl w-full mx-auto mb-12 bg-[var(--color-white)] text-[#2F1C00] p-12 rounded-2xl lg:grid lg:gap-20 lg:grid-cols-2 lg:items-center"
 							>
 								<div>
 									<div className="flex gap-2 lg:flex-col">

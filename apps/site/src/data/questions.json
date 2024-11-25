@@ -1,0 +1,326 @@
+{
+	"_id": "81f6988f-07ed-41f3-984b-c83f2fe8fe65",
+	"_createdAt": "2023-11-14T23:36:36Z",
+	"_updatedAt": "2023-11-30T21:20:36Z",
+	"_rev": "vaY77LEg614a4lukAKRNfo",
+	"faqs": [
+		{
+			"answer": [
+				{
+					"_key": "f35c3a8a697e",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "We at IrvineHacks like to believe that a hack-a-thon is very much like an invent-a-thon where like-minded individuals with various different backgrounds and skill sets come together for a weekend to “invent” something from the ground up. The only thing limiting what you build is your own creativity — we’ll provide the rest.",
+							"_key": "37a255ee50050",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			],
+			"question": "What is a hackathon?",
+			"_type": "faq",
+			"_key": "864e0944a35e"
+		},
+		{
+			"answer": [
+				{
+					"_key": "10f8acee7ee1",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "Any college, university, or high school student over the age of 18 by January 26th, 2024 with residence in the United States of America. ",
+							"_key": "c188deae273c0",
+							"_type": "span",
+							"marks": []
+						},
+						{
+							"text": "Please note that all attendees are responsible for their own transportation to UC Irvine and overnight stay during the event.",
+							"_key": "c188deae273c1",
+							"_type": "span",
+							"marks": ["strong"]
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			],
+			"question": "Who can attend?",
+			"_type": "faq",
+			"_key": "a88139c73d2f"
+		},
+		{
+			"answer": [
+				{
+					"_key": "d215ee3304a5",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "You can build whatever you can dream of, whether that be a website with an amazing feature, a phone app, or a rad piece of hardware! Our only rule is that all code must be written during the hackathon itself. Feel free to use open source libraries and APIs; companies attending may provide their own as well. Impress us!",
+							"_key": "b18e97ee54dc0",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			],
+			"question": "What should I create?",
+			"_type": "faq",
+			"_key": "e524b1a3fd2e"
+		},
+		{
+			"answer": [
+				{
+					"_key": "38eb26b72aba",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "For this year's iteration, please bring a positive attitude, a device to connect and collaborate with your team, and a willingness to try new technologies! Additional recommended items are: your device’s charger, a refillable water bottle, earphones, any desired peripherals, and some scratch paper for whiteboarding.",
+							"_key": "fe8898eab39f0",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			],
+			"question": "What should I bring?",
+			"_type": "faq",
+			"_key": "0d1792de5d01"
+		},
+		{
+			"answer": [
+				{
+					"_key": "08de5a56712b",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "IrvineHacks 2024 is a multi-day in-person event! Please note that we will not be providing overnight accommodations, and that hackers must be present for check-in on all three event days in order to be eligible to win prizes. When applying, please be sure you’ll be available Friday evening, all-day Saturday, and Sunday morning and afternoon!",
+							"_key": "72f1928bd9c50",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			],
+			"question": "Is IrvineHacks a virtual or in-person hackathon? What is the schedule like?",
+			"_type": "faq",
+			"_key": "2b521816ace6"
+		},
+		{
+			"answer": [
+				{
+					"_key": "2a01625d8a70",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "We will be reviewing applications until the end of day, Sunday, January 14th, 2024.",
+							"_key": "1e7411589be00",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			],
+			"question": "When do applications close?",
+			"_type": "faq",
+			"_key": "1b01623b8e37"
+		},
+		{
+			"answer": [
+				{
+					"_key": "c0d5462f09f8",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "IrvineHacks 2024 acceptances will be released during mid to late January.",
+							"_key": "2691c7df72110",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			],
+			"question": "When will application decisions be released?",
+			"_type": "faq",
+			"_key": "d27bf04608aa"
+		},
+		{
+			"answer": [
+				{
+					"_key": "94b93bdfa018",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "You will apply as an individual. We will be personally reviewing each application and accepting on an individual basis.",
+							"_key": "fd110ee89ba70",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			],
+			"question": "Do I sign up as a team or individual?",
+			"_type": "faq",
+			"_key": "a5bea6abe918"
+		},
+		{
+			"answer": [
+				{
+					"_key": "76222b0b5826",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "We will be helping with team formation prior to the event. There can be up to a maximum of 4 hackers on a team.",
+							"_key": "e11687d778f80",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			],
+			"question": "How will team formations work for admitted students?",
+			"_type": "faq",
+			"_key": "1677b85e7466"
+		},
+		{
+			"answer": [
+				{
+					"_key": "7b90c1311260",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "We don’t expect hackers to have any prior experience. We will be providing starter packs and workshops to help new hackers get started on projects and learn new technologies.",
+							"_key": "35bc84b119120",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			],
+			"question": "What if I have no prior experience in programming, coding, or hackathons?",
+			"_type": "faq",
+			"_key": "5736e4b6a18a"
+		},
+		{
+			"answer": [
+				{
+					"_key": "126baba18ab8",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "You will be building projects from scratch, although we will be offering starter packs to help you get started if you are a beginner hacker. You are encouraged to come with ideas of what you want to build; however, participants that start working on their projects before the hacking period begins will be immediately disqualified from the competition.",
+							"_key": "ed87dfcf69210",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			],
+			"question": "Am I allowed to come with a project pre-built or will I be building the project from scratch?",
+			"_type": "faq",
+			"_key": "b0f2f057818d"
+		},
+		{
+			"answer": [
+				{
+					"_key": "d339317ffe4b",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "No, all attendees (UCI and non-UCI students) are responsible for their own transportation to UC Irvine.",
+							"_key": "5854a11bfb180",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			],
+			"question": "Will transportation to the event be provided?",
+			"_type": "faq",
+			"_key": "27f5a185bfc8"
+		},
+		{
+			"answer": [
+				{
+					"_key": "3a9763254b54",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "No, all attendees (UCI and non-UCI students) are responsible for their own overnight stay between event days.",
+							"_key": "ba20fd6b58240",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			],
+			"question": "Will overnight accommodations be provided, given that IrvineHacks is a multi-day event?",
+			"_type": "faq",
+			"_key": "2e20b0759e2b"
+		},
+		{
+			"answer": [
+				{
+					"_key": "002b84e6ca81",
+					"markDefs": [
+						{
+							"_type": "link",
+							"href": "mailto:hack@uci.edu",
+							"_key": "0605117e5dd9"
+						}
+					],
+					"children": [
+						{
+							"text": "Please email us at ",
+							"_key": "f7ddad6826620",
+							"_type": "span",
+							"marks": []
+						},
+						{
+							"text": "hack@uci.edu",
+							"_key": "8adc55ea83bf",
+							"_type": "span",
+							"marks": ["0605117e5dd9"]
+						},
+						{
+							"text": " if you have any additional questions! We look forward to hearing from you.",
+							"_key": "700d7eca83c7",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			],
+			"question": "I have another question!",
+			"_type": "faq",
+			"_key": "aec995565ae5"
+		}
+	]
+}

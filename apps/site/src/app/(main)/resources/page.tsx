@@ -1,20 +1,19 @@
 import Button from "@/lib/components/Button/Button";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getResources } from "./getResources";
 
-export const revalidate = 60;
+import resources from "@/data/resources.json";
+
+// export const revalidate = 60;
 
 export const metadata: Metadata = {
 	title: "Resources | IrvineHacks 2024",
 };
 
-export default async function Resources() {
+export default function Resources() {
 	if (process.env.MAINTENANCE_MODE_RESOURCES) {
 		redirect("/");
 	}
-
-	const resources = await getResources();
 
 	return (
 		<>

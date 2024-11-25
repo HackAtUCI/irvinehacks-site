@@ -8,7 +8,7 @@ export const SanityDocument = z.object({
 });
 
 export const SanityReference = z.object({
-	_type: z.literal("reference"),
+	// _type: z.literal("reference"),
 	_ref: z.string(),
 });
 export const SanityImageCrop = z.object({
@@ -26,7 +26,7 @@ export const SanityImageHotspot = z.object({
 	width: z.number(),
 });
 export const SanityImageReference = z.object({
-	_type: z.literal("image"),
+	// _type: z.literal("image"),
 	asset: SanityReference,
 	crop: SanityImageCrop.optional(),
 	hotspot: SanityImageHotspot.optional(),

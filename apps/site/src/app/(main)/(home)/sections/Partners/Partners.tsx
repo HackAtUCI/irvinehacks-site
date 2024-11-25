@@ -1,8 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 import Image from "next/image";
 
-import { getPartners } from "./getPartners";
 import fishingBoat from "@/assets/images/fishing-boat.png";
+import partners from "@/data/partners.json";
 
 import { client } from "@/lib/sanity/client";
 import imageUrlBuilder from "@sanity/image-url";
@@ -11,9 +11,7 @@ import styles from "./Partners.module.scss";
 
 const builder = imageUrlBuilder(client);
 
-export default async function Sponsors() {
-	const partners = await getPartners();
-
+export default function Sponsors() {
 	return (
 		<section className="container py-24 md:my-16 relative items-center flex flex-col md:p-8 w-3/4 mx-auto text-center">
 			<h2

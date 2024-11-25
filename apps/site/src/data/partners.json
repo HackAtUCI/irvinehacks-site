@@ -1,0 +1,99 @@
+{
+	"_id": "partners",
+	"_createdAt": "2024-01-25T09:52:30Z",
+	"_updatedAt": "2024-01-26T02:47:25Z",
+	"_rev": "NkIvNulb1UqlIiQIOZWwhx",
+	"partners": [
+		{
+			"_type": "partner",
+			"_key": "f851ec65d57b",
+			"name": "ICSSC",
+			"url": "https://icssc.club",
+			"logo": {
+				"_type": "image",
+				"asset": {
+					"_type": "reference",
+					"_ref": "image-ca5b56d26a9b7dcb03a7de216e88413ad5ca4e26-848x848-svg"
+				}
+			}
+		},
+		{
+			"_type": "partner",
+			"_key": "a61e3c2f05c8",
+			"name": "ACM@UCI",
+			"url": "https://acm-uci.org",
+			"logo": {
+				"_type": "image",
+				"asset": {
+					"_type": "reference",
+					"_ref": "image-6fb6eff24e594bb0fa3dc0236f5a55bf6dbe00dd-502x512-webp"
+				}
+			}
+		},
+		{
+			"_type": "partner",
+			"_key": "cb664ecb7c33",
+			"name": "Design at UCI",
+			"url": "https://designatuci.com/",
+			"logo": {
+				"_type": "image",
+				"asset": {
+					"_type": "reference",
+					"_ref": "image-6bf66e109a69933f29444b4a98cabc82e7dd3af8-225x225-webp"
+				}
+			}
+		},
+		{
+			"_type": "partner",
+			"_key": "2b7bf9261e90",
+			"name": "MAISS",
+			"url": "https://www.maissuci.com/",
+			"logo": {
+				"_type": "image",
+				"asset": {
+					"_type": "reference",
+					"_ref": "image-a6b89718c9c11e0b45ad701252731eba13ddc4f6-1500x513-png"
+				}
+			}
+		},
+		{
+			"_type": "partner",
+			"_key": "7605f8a2d633",
+			"name": "Engineering Student Council",
+			"url": "https://esc.eng.uci.edu/",
+			"logo": {
+				"_type": "image",
+				"asset": {
+					"_type": "reference",
+					"_ref": "image-f9c6179f7c8397982bbd468dad5d10bb0583c73b-816x535-png"
+				}
+			}
+		},
+		{
+			"_type": "partner",
+			"_key": "def5843fbc25",
+			"name": "Blockchain at UCI",
+			"url": "https://www.blockchainuci.org/",
+			"logo": {
+				"_type": "image",
+				"asset": {
+					"_type": "reference",
+					"_ref": "image-f70ceece062cb15801c3e69fa31c53ce7b22775e-500x500-webp"
+				}
+			}
+		},
+		{
+			"_type": "partner",
+			"_key": "b86b35fdd3c2",
+			"name": "Women in Information and Computer Sciences (WICS)",
+			"url": "https://wics.ics.uci.edu/",
+			"logo": {
+				"_type": "image",
+				"asset": {
+					"_type": "reference",
+					"_ref": "image-fb50d8bd14f94dd1f5112a01e71cc5d075fd216f-290x70-png"
+				}
+			}
+		}
+	]
+}

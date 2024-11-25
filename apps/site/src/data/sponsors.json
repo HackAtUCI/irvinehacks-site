@@ -1,0 +1,182 @@
+{
+	"platinum": [
+		{
+			"_type": "sponsor",
+			"_key": "40de42303581",
+			"name": "Glenair",
+			"url": "https://www.glenair.com/",
+			"tier": "platinum",
+			"logo": {
+				"_type": "image",
+				"asset": {
+					"_type": "reference",
+					"_ref": "image-14c85f03b7fa41c6bfe2f8c367111b40e598a5c1-7198x3493-png"
+				}
+			}
+		},
+		{
+			"_type": "sponsor",
+			"_key": "de4fcebe9587",
+			"name": "UCI Office of Data and Information Technology",
+			"url": "https://odit.uci.edu/",
+			"tier": "platinum",
+			"logo": {
+				"_type": "image",
+				"asset": {
+					"_type": "reference",
+					"_ref": "image-b5b574483a47b70a9018204cc01a7c2d910dffdc-410x75-png"
+				}
+			}
+		},
+		{
+			"_type": "sponsor",
+			"_key": "d5175b7631e7",
+			"name": "WEMADE",
+			"url": "https://www.wemade.com/",
+			"tier": "platinum",
+			"logo": {
+				"_type": "image",
+				"asset": {
+					"_type": "reference",
+					"_ref": "image-34d966af7a5cc46f880cf522f7b00100c9ff5664-1200x671-png"
+				}
+			}
+		},
+		{
+			"_type": "sponsor",
+			"_key": "ad84c67ac288",
+			"name": "Student Programming Funding Board",
+			"url": "https://asuci.uci.edu/president/spfb/",
+			"tier": "platinum",
+			"logo": {
+				"_type": "image",
+				"asset": {
+					"_type": "reference",
+					"_ref": "image-54df6cd74af8bdcd7f6143a9ee86868d303fb230-2250x2250-png"
+				}
+			}
+		}
+	],
+	"gold": [
+		{
+			"_type": "sponsor",
+			"_key": "8b75fc328eeb",
+			"name": "First American",
+			"url": "https://www.firstam.com/",
+			"tier": "gold",
+			"logo": {
+				"_type": "image",
+				"asset": {
+					"_type": "reference",
+					"_ref": "image-b76e99c2760704d3c22d78bd3f7cc1b804fd6750-745x238-png"
+				}
+			}
+		}
+	],
+	"silver": [
+		{
+			"_type": "sponsor",
+			"_key": "57bc50df9a87",
+			"name": "Menlo Micro",
+			"url": "https://menlomicro.com/",
+			"tier": "silver",
+			"logo": {
+				"_type": "image",
+				"asset": {
+					"_type": "reference",
+					"_ref": "image-69574c8bdccd6794dcb07abdc366ef8bb139f69a-2500x452-png"
+				}
+			}
+		},
+		{
+			"_type": "sponsor",
+			"_key": "04669406197b",
+			"name": "Melissa",
+			"url": "https://www.melissa.com/",
+			"tier": "silver",
+			"logo": {
+				"_type": "image",
+				"asset": {
+					"_type": "reference",
+					"_ref": "image-fa4945f9186ce76dcf62910b8238f532aa64b27f-653x247-png"
+				}
+			}
+		},
+		{
+			"_type": "sponsor",
+			"_key": "73c9b75e6679",
+			"name": "Pimco",
+			"url": "https://www.pimco.com/en-us/",
+			"tier": "silver",
+			"logo": {
+				"_type": "image",
+				"asset": {
+					"_type": "reference",
+					"_ref": "image-321076ba9ea5fa5a172abed297e21a2c829b2e21-150x150-jpg"
+				}
+			}
+		},
+		{
+			"_type": "sponsor",
+			"_key": "57137c0eaa33",
+			"name": "Roblox",
+			"url": "https://corp.roblox.com/",
+			"tier": "silver",
+			"logo": {
+				"_type": "image",
+				"asset": {
+					"_type": "reference",
+					"_ref": "image-07f73c244aa19f4f23e0cfcb958f0163a1f9294b-2971x549-svg"
+				}
+			}
+		}
+	],
+	"bronze": [
+		{
+			"_type": "sponsor",
+			"_key": "9017e5bbe20a",
+			"name": "CoreLogic",
+			"url": "https://www.corelogic.com/",
+			"tier": "bronze",
+			"logo": {
+				"_type": "image",
+				"asset": {
+					"_type": "reference",
+					"_ref": "image-47b78836ab5dcf0d886527c89150b7e09c66bfcb-492x185-png"
+				}
+			}
+		}
+	],
+	"sponsored-prize": [
+		{
+			"_type": "sponsor",
+			"_key": "d9fa7cc8e4ed",
+			"name": "Patient Safety Technology Challenge",
+			"url": "https://www.patientsafetytech.com/",
+			"tier": "sponsored-prize",
+			"logo": {
+				"_type": "image",
+				"asset": {
+					"_type": "reference",
+					"_ref": "image-1c25ad1092c1d495885948724330b379fafdf22b-8391x4317-png"
+				}
+			}
+		}
+	],
+	"in-kind": [
+		{
+			"_type": "sponsor",
+			"_key": "2d9140f6cc37",
+			"name": "Google Cloud",
+			"url": "https://cloud.google.com/",
+			"tier": "in-kind",
+			"logo": {
+				"_type": "image",
+				"asset": {
+					"_type": "reference",
+					"_ref": "image-fa1347cff291c482dabcef00ddce6ec052ec3c1e-250x83-svg"
+				}
+			}
+		}
+	]
+}

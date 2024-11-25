@@ -1,0 +1,995 @@
+[
+	[
+		{
+			"_id": "35854dd4-ecac-441f-bd47-235c315cb4fd",
+			"_createdAt": "2024-01-23T18:23:12Z",
+			"_updatedAt": "2024-01-23T18:23:12Z",
+			"_rev": "r8QI4XsJMHUG6h19GyjGOg",
+			"_type": "event",
+			"title": "Hacker Check-In (3:30) Waitlist Check-In (4:30)",
+			"eventType": "Main",
+			"location": "Pacific Ballroom",
+			"startTime": "2024-01-26T23:30:00.000Z",
+			"endTime": "2024-01-27T01:00:00.000Z",
+			"description": [
+				{
+					"_key": "3c049435cbac",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "It's time for IrvineHacks! Check in at the front desk in the Pacific Ballroom Lobby. Bring a photo ID so we can confirm your identity and give you your badge!",
+							"_key": "c81cc6bc07130",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "4c5cf538-2783-46f7-9b12-b9719e8b784e",
+			"_createdAt": "2024-01-23T18:24:47Z",
+			"_updatedAt": "2024-01-23T18:24:47Z",
+			"_rev": "WkusdRigYzh6VdJ4efG0tE",
+			"_type": "event",
+			"title": "Sponsor Boothing",
+			"eventType": "Main",
+			"location": "Pacific Ballroom",
+			"startTime": "2024-01-27T00:00:00.000Z",
+			"endTime": "2024-01-27T01:00:00.000Z",
+			"description": [
+				{
+					"_key": "b9c715ea8f34",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "Meet the sponsors who helped put this event together!",
+							"_key": "b5b787e5e6b60",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "d19ae595-a39e-4c7e-ac32-a51ba81c6bd3",
+			"_createdAt": "2024-01-23T04:24:28Z",
+			"_updatedAt": "2024-01-23T18:23:35Z",
+			"_rev": "NkIvNulb1UqlIiQIOGhCGa",
+			"_type": "event",
+			"title": "Opening Ceremony",
+			"eventType": "Main",
+			"location": "Pacific Ballroom",
+			"startTime": "2024-01-27T01:00:00.000Z",
+			"endTime": "2024-01-27T02:00:00.000Z",
+			"hosts": ["Ru", "Emma"],
+			"description": [
+				{
+					"_key": "094fa85643d0",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "Join us at our opening ceremony to learn more about rules, prizes, and events we have planned during IrvineHacks 2024!",
+							"_key": "a3c09cbf41530",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "9c0c69f7-abd4-422b-ad03-3b8426f81b07",
+			"_createdAt": "2023-12-14T18:44:36Z",
+			"_updatedAt": "2024-01-23T04:17:32Z",
+			"_rev": "WkusdRigYzh6VdJ4ebNTnq",
+			"_type": "event",
+			"title": "Hacking Begins!",
+			"eventType": "Announcement",
+			"location": "Pacific Ballroom",
+			"startTime": "2024-01-27T02:00:00.000Z",
+			"endTime": "2024-01-27T02:00:00.000Z",
+			"organization": "Friday Org",
+			"description": [
+				{
+					"_key": "55bfa7635ade",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "Hacking Begins! Start working on your projects!",
+							"_key": "a808ea6734c1",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "5426728b-d46a-4892-9cf7-8d43eb7cb8d9",
+			"_createdAt": "2024-01-23T04:08:23Z",
+			"_updatedAt": "2024-01-23T18:21:14Z",
+			"_rev": "r8QI4XsJMHUG6h19Gyj4K8",
+			"_type": "event",
+			"title": "Team Formation",
+			"eventType": "Social",
+			"location": "Moss Cove A, Pacific Ballroom",
+			"startTime": "2024-01-27T02:00:00.000Z",
+			"endTime": "2024-01-27T03:00:00.000Z",
+			"hosts": ["Connie, Alana, Grace"],
+			"description": [
+				{
+					"_key": "b95719434e25",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "Want to find your perfect team to make your dream hackathon project? Come to the Team Formation event where you'll get to fill out a fun bingo and meet other hackers!",
+							"_key": "2ffb5185042b0",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "c1d19c1d-2abe-4699-982e-f56cf992e5ff",
+			"_createdAt": "2024-01-23T04:21:53Z",
+			"_updatedAt": "2024-01-23T18:20:57Z",
+			"_rev": "WkusdRigYzh6VdJ4efFdDq",
+			"_type": "event",
+			"title": "Dinner",
+			"eventType": "Main",
+			"location": "Pacific Ballroom",
+			"startTime": "2024-01-27T02:30:00.000Z",
+			"endTime": "2024-01-27T04:00:00.000Z",
+			"description": [
+				{
+					"_key": "b63a2deefefa",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "Sit and chow down with your fellow hackers! The best ideas can spring from delicious dining.",
+							"_key": "c84d6bc544240",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "15bc04b9-3c98-4e2e-9be0-d4f5f9c2fce1",
+			"_createdAt": "2024-01-23T04:23:18Z",
+			"_updatedAt": "2024-01-23T04:23:18Z",
+			"_rev": "r8QI4XsJMHUG6h19GuzPXE",
+			"_type": "event",
+			"title": "Product Development & Design Workshop",
+			"eventType": "Workshop",
+			"location": "Moss Cove B",
+			"startTime": "2024-01-27T03:00:00.000Z",
+			"endTime": "2024-01-27T04:00:00.000Z",
+			"organization": "Design at UCI",
+			"hosts": ["Elise Alinsug", "Jasmine Wu", "Ryan Yang"],
+			"description": [
+				{
+					"_key": "7f9362f6c1b3",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "Introducing the end-to-end product development process from coming up with an innovative idea to iterative development and a final product! We will be briefing through the design thinking process and user interface design techniques to develop both a visually appealing, functional, and innovative product.",
+							"_key": "7e373e54026c0",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "2e85f0b4-ac54-481c-acb6-408e3b599855",
+			"_createdAt": "2023-12-29T19:40:57Z",
+			"_updatedAt": "2024-01-23T04:05:03Z",
+			"_rev": "r8QI4XsJMHUG6h19GuuWdi",
+			"_type": "event",
+			"title": "Intro to PeterPortal API",
+			"eventType": "Workshop",
+			"location": "Moss Cove B",
+			"startTime": "2024-01-27T04:00:00.000Z",
+			"endTime": "2024-01-27T05:00:00.000Z",
+			"organization": "ICSSC",
+			"description": [
+				{
+					"_key": "e216a50c4b12",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "Come to our introduction to APIs! We will help you learn how to utilize APIs into your project and get well-formatted UCI data.",
+							"_key": "c2702890c42c0",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "dd918862-a0ad-4704-85bf-e1f6ee74583e",
+			"_createdAt": "2024-01-23T18:20:41Z",
+			"_updatedAt": "2024-01-23T18:20:41Z",
+			"_rev": "NkIvNulb1UqlIiQIOGgnWi",
+			"_type": "event",
+			"title": "Patient Safety 101",
+			"eventType": "Workshop",
+			"location": "Moss Cove B",
+			"startTime": "2024-01-27T05:00:00.000Z",
+			"endTime": "2024-01-27T06:00:00.000Z",
+			"hosts": ["Vanessa Lindsay"],
+			"description": [
+				{
+					"_key": "41b2e7a52e04",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "Interested in going for the patient safety tech prize but want to know more about the problem that kills more than 200,000 Americans each year and harms millions? Join Vanessa Lindsay, Patient Safety Lead at Hoag Hospital, who is passionate about improving patient safety. She will give you a crash course on patient safety and the 5 problem categories you can pick from to hack this weekend.",
+							"_key": "9806a767692b0",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "b86b3cef-3b03-4ad9-b747-5c982b537b8c",
+			"_createdAt": "2024-01-23T22:46:13Z",
+			"_updatedAt": "2024-01-27T01:47:31Z",
+			"_rev": "WkusdRigYzh6VdJ4f1vvPj",
+			"_type": "event",
+			"title": "WEMADE Workshop",
+			"eventType": "Workshop",
+			"location": "Moss Cove B",
+			"startTime": "2024-01-27T06:00:00.000Z",
+			"endTime": "2024-01-27T07:00:00.000Z",
+			"hosts": ["Doyi Kim"],
+			"description": [
+				{
+					"_key": "9a84a434f421",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "This workshop is designed to offer you an in-depth understanding of how blockchain technology is revolutionizing the business world and learn how to enhance your hack ideas with blockchain technology. ",
+							"_key": "5cd01006829b0",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "330498ce-b526-4bf2-b4a9-da8e4aa783f6",
+			"_createdAt": "2023-12-29T19:41:33Z",
+			"_updatedAt": "2024-01-25T09:45:58Z",
+			"_rev": "r8QI4XsJMHUG6h19H9Y8eT",
+			"_type": "event",
+			"title": "Lantern-making Social",
+			"eventType": "Social",
+			"location": "Moss Cove A",
+			"startTime": "2024-01-27T07:00:00.000Z",
+			"endTime": "2024-01-27T07:59:00.000Z",
+			"hosts": ["Connie", "Angelina", "Grace"],
+			"description": [
+				{
+					"_key": "ae854266b0fe",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "Lantern making: Learn how to make your own lantern to match with IrvineHack's lantern theme, and win prizes!",
+							"_key": "e682b823b1d70",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		}
+	],
+	[
+		{
+			"_id": "a8ead3b8-ecda-4329-a55a-e55889271915",
+			"_createdAt": "2024-01-23T04:19:18Z",
+			"_updatedAt": "2024-01-23T04:19:18Z",
+			"_rev": "r8QI4XsJMHUG6h19Guy25o",
+			"_type": "event",
+			"title": "Nighttime Hacking Period",
+			"eventType": "Miscellaneous",
+			"location": "Virtual",
+			"startTime": "2024-01-27T09:00:00.000Z",
+			"endTime": "2024-01-27T15:00:00.000Z",
+			"description": [
+				{
+					"_key": "f7cec0f828d8",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "Get some rest! Big day tomorrow...",
+							"_key": "edcfa0ec95b20",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "e9c83964-c1c3-46e1-ab8b-3565a7bed091",
+			"_createdAt": "2024-01-23T18:27:30Z",
+			"_updatedAt": "2024-01-25T09:52:14Z",
+			"_rev": "r8QI4XsJMHUG6h19H9aApD",
+			"_type": "event",
+			"title": "Day 2 Check-In",
+			"eventType": "Announcement",
+			"location": "Pacific Ballroom Lobby",
+			"startTime": "2024-01-27T16:00:00.000Z",
+			"endTime": "2024-01-27T16:59:00.000Z",
+			"description": [
+				{
+					"_key": "43716cd1f951",
+					"markDefs": [],
+					"children": [
+						{ "text": "Day 2 Check-In", "_key": "8ddc8ebe911f0", "_type": "span", "marks": [] }
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "8812eb43-aae8-4ab8-abd0-89de8306afa1",
+			"_createdAt": "2024-01-23T18:28:25Z",
+			"_updatedAt": "2024-01-25T09:51:39Z",
+			"_rev": "r8QI4XsJMHUG6h19H9a4vA",
+			"_type": "event",
+			"title": "Breakfast",
+			"eventType": "Main",
+			"location": "Pacific Ballroom",
+			"startTime": "2024-01-27T16:00:00.000Z",
+			"endTime": "2024-01-27T17:00:00.000Z",
+			"description": [
+				{
+					"_key": "81678eb874f2",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "Rise and hack! But wait, its dangerous to go alone, take some bagels and muffins with you!",
+							"_key": "9e05ba9d2d410",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "19e60f10-8d01-49e2-b767-1eb08d197f05",
+			"_createdAt": "2024-01-23T18:29:53Z",
+			"_updatedAt": "2024-01-23T18:29:53Z",
+			"_rev": "WkusdRigYzh6VdJ4efH3oB",
+			"_type": "event",
+			"title": "Intro to Sveltekit",
+			"eventType": "Workshop",
+			"location": "Moss Cove B",
+			"startTime": "2024-01-27T19:00:00.000Z",
+			"endTime": "2024-01-27T20:00:00.000Z",
+			"organization": "ACM",
+			"hosts": ["Sam Der"],
+			"description": [
+				{
+					"_key": "1db475e0d6ee",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "Looking for ways to go beyond React and supercharge your website? Take a dive into SvelteKit, a web development framework that provides many of the functionalities of other frameworks but in a simpler and more intuitive format!",
+							"_key": "7b014826f9ac0",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "c7f09ef3-76ad-44bb-be0e-504238592853",
+			"_createdAt": "2024-01-23T18:30:54Z",
+			"_updatedAt": "2024-01-23T18:30:54Z",
+			"_rev": "r8QI4XsJMHUG6h19GylzYa",
+			"_type": "event",
+			"title": "Lunch",
+			"eventType": "Main",
+			"location": "Pacific Ballroom",
+			"startTime": "2024-01-27T20:00:00.000Z",
+			"endTime": "2024-01-27T21:00:00.000Z",
+			"description": [
+				{
+					"_key": "cf5c33b2e4ac",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "The peak of the day requires peak food.. Fortunately we got you covered with Banh Mi!",
+							"_key": "8e871aa66e6c0",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "b75e33bd-83c3-4405-8a30-a39856981872",
+			"_createdAt": "2024-01-23T18:47:19Z",
+			"_updatedAt": "2024-01-27T20:38:02Z",
+			"_rev": "WkusdRigYzh6VdJ4f63zNj",
+			"_type": "event",
+			"title": "First American Workshop",
+			"eventType": "Workshop",
+			"location": "Moss Cove B",
+			"startTime": "2024-01-27T21:00:00.000Z",
+			"endTime": "2024-01-27T22:00:00.000Z",
+			"hosts": ["Colleen Kirtland"],
+			"description": [
+				{
+					"_key": "33dcc06037f1",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "Own your destiny: Take Charge of your career and create a fulfilling life! A formal education may give us marketable/specialized skills, but taking charge of life and career involves much more! Alvin Troffler, author and futurist said: \"The illiterate of the future are not those who can't read or write, but those who cannot learn, unlearn, and relearn.\" During this workshop we will explore a continuous learning career that is both rewarding and fulfilling. Walk out of the workshop with ideas, insights, and practical tips for success that are guided by Colleen and co-created with our group.",
+							"_key": "6a2a1e6184990",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "68bfb60c-34e6-4bd4-9f49-7908613e5caf",
+			"_createdAt": "2024-01-23T18:47:38Z",
+			"_updatedAt": "2024-01-23T18:48:53Z",
+			"_rev": "NkIvNulb1UqlIiQIOGohmv",
+			"_type": "event",
+			"title": "SQL For Web Developers",
+			"eventType": "Workshop",
+			"location": "Moss Cove B",
+			"startTime": "2024-01-27T22:00:00.000Z",
+			"endTime": "2024-01-27T23:00:00.000Z",
+			"organization": "MAISS",
+			"hosts": ["Caleb Vergene", "Maggie Zhang", "Maryam Mussa", "Tannvi Banerjee"],
+			"description": [
+				{
+					"_key": "429036fa616a",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "Want to build a dynamic, data-driven web application? Our workshop is separated into three main sections: understanding the relevance of databases and SQL in web applications (foundations of SQL), an overview of common/essential SQL queries for updating, inserting, and deleting data (data manipulation and advanced query techniques), and hands-on practice with using SQL in conjunction with backend technologies (integration with web development). Whether you are a backend developer looking to enhance your database skills or a frontend developer aiming to understand the backend infrastructure, this workshop will provide everyone with the SQL expertise necessary for building robust, scalable web applications.",
+							"_key": "88339d0bd9660",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "b1dc4bf5-974c-4275-9449-f54e9d0d0c43",
+			"_createdAt": "2024-01-23T18:56:51Z",
+			"_updatedAt": "2024-01-23T18:56:51Z",
+			"_rev": "r8QI4XsJMHUG6h19GyrjSJ",
+			"_type": "event",
+			"title": "Roblox Social",
+			"eventType": "Social",
+			"location": "Moss Cove A",
+			"startTime": "2024-01-27T23:00:00.000Z",
+			"endTime": "2024-01-28T00:00:00.000Z",
+			"hosts": ["Zion"],
+			"description": [
+				{
+					"_key": "b0febfa9936d",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "Come join us as we play an assortment of epic Roblox games to find out who is an OG gamer. The festivities include obbies, horror maps, and other chill social games to have fun!",
+							"_key": "160b5f38c9d00",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "de852aec-d176-408f-8087-11d16e093879",
+			"_createdAt": "2024-01-23T18:58:28Z",
+			"_updatedAt": "2024-01-23T18:58:28Z",
+			"_rev": "WkusdRigYzh6VdJ4efOKta",
+			"_type": "event",
+			"title": "Google Cloud Serverless",
+			"eventType": "Workshop",
+			"location": "Moss Cove B",
+			"startTime": "2024-01-28T00:00:00.000Z",
+			"endTime": "2024-01-28T01:00:00.000Z",
+			"organization": "ESC",
+			"hosts": ["Yasper De Jong", "Vrushang Anand", "Sri Gubbala"],
+			"description": [
+				{
+					"_key": "e60f3afdb5f4",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "Learn to build a web service with the help of Google Cloud's serverless functions!",
+							"_key": "4af99469499a0",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "7c58198b-1a7a-49cc-a850-6fbf5b20cbbf",
+			"_createdAt": "2024-01-23T19:00:02Z",
+			"_updatedAt": "2024-01-23T19:00:02Z",
+			"_rev": "NkIvNulb1UqlIiQIOGrv1h",
+			"_type": "event",
+			"title": "Intro to 3D Web Development",
+			"eventType": "Workshop",
+			"location": "Moss Cove B",
+			"startTime": "2024-01-28T01:00:00.000Z",
+			"endTime": "2024-01-28T02:00:00.000Z",
+			"hosts": ["Ryan Yang"],
+			"description": [
+				{
+					"_key": "8a9908e1cd0c",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "Come to this beginner friendly introduction to doing 3d web development! Start from scratch and learn the basics of how to set up a basic three dimensional scene. We'll also cover adding custom objects and attaching user events to create an interactive experience.",
+							"_key": "91ac10e5b23f0",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "2280d0b3-295a-431a-9dba-676bed80c808",
+			"_createdAt": "2024-01-23T19:00:47Z",
+			"_updatedAt": "2024-01-23T19:00:47Z",
+			"_rev": "r8QI4XsJMHUG6h19Gyt7IP",
+			"_type": "event",
+			"title": "Dinner",
+			"eventType": "Main",
+			"location": "Pacific Ballroom",
+			"startTime": "2024-01-28T02:00:00.000Z",
+			"endTime": "2024-01-28T03:00:00.000Z",
+			"description": [
+				{
+					"_key": "d8e90b9acea8",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "Stay winnin' with chicken, keep drippin' with chips, rice, and beans, and join us for a champion's dinner!",
+							"_key": "101c3db26abf0",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "f757d639-e69b-4307-b91b-25d7f2066f73",
+			"_createdAt": "2024-01-23T21:05:07Z",
+			"_updatedAt": "2024-01-25T09:39:31Z",
+			"_rev": "r8QI4XsJMHUG6h19H9V86z",
+			"_type": "event",
+			"title": "Themed Skribblio + Gartic Phone",
+			"eventType": "Social",
+			"location": "Moss Cove A",
+			"startTime": "2024-01-28T03:00:00.000Z",
+			"endTime": "2024-01-28T04:00:00.000Z",
+			"hosts": ["Alana", "Zion", "Angelina"],
+			"description": [
+				{
+					"_key": "7458926accd7",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "Take a break, relax, and indulge your creativity! Come out and play themed Skribblio, a drawing guessing game, and Gartic Phone, a game of telephone but with art.",
+							"_key": "5d07d46a15570",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "895add20-9b38-41ae-a8a1-e905721f59b4",
+			"_createdAt": "2024-01-23T21:15:10Z",
+			"_updatedAt": "2024-01-23T21:15:10Z",
+			"_rev": "NkIvNulb1UqlIiQIOHouOx",
+			"_type": "event",
+			"title": "Web3 Wallet Integration: Elevating Your Web App",
+			"eventType": "Workshop",
+			"location": "Moss Cove B",
+			"startTime": "2024-01-28T04:00:00.000Z",
+			"endTime": "2024-01-28T05:00:00.000Z",
+			"organization": "Blockchain at UCI",
+			"hosts": ["Daniel Lee", "Anish Lathker"],
+			"description": [
+				{
+					"_key": "2ccbe8d3772d",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "Ideal for beginners and seasoned web developers alike, this session offers hands-on experience in integrating blockchain wallets like MetaMask into web applications. Learn to use cutting-edge libraries for seamless user authentication and crypto interactions. Whether you're just starting out or looking to enhance your web app with blockchain features, join us to unlock the potential of blockchain technology in just one hour. No prior blockchain experience required – just bring your enthusiasm and be ready to code!",
+							"_key": "b757f9b8ea5b0",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "12057116-a4d7-4bbf-aba2-66944d2f83d0",
+			"_createdAt": "2024-01-23T21:21:49Z",
+			"_updatedAt": "2024-01-23T21:21:49Z",
+			"_rev": "r8QI4XsJMHUG6h19Gzgrhx",
+			"_type": "event",
+			"title": "Presenting Your Project 101",
+			"eventType": "Workshop",
+			"location": "Moss Cove B",
+			"startTime": "2024-01-28T05:00:00.000Z",
+			"endTime": "2024-01-28T06:00:00.000Z",
+			"organization": "WICS",
+			"hosts": ["Celine Trieu", "Sharon Ma"],
+			"description": [
+				{
+					"_key": "86bc01a7431a",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "Want to know how to best prepare yourself when presenting your project to others? We will teach you how to set up your devpost, how to screenrecord your project demo, how to talk to viewers, and if we have time, how to make a linkedin post about your participation/project in IrvineHacks.",
+							"_key": "c986dea490900",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "0492f94f-ca46-4f1f-af7e-c01abba417f9",
+			"_createdAt": "2024-01-23T21:25:02Z",
+			"_updatedAt": "2024-01-23T21:25:02Z",
+			"_rev": "r8QI4XsJMHUG6h19GzhBoA",
+			"_type": "event",
+			"title": "Cup Stacking Social",
+			"eventType": "Social",
+			"location": "Moss Cove A",
+			"startTime": "2024-01-28T06:00:00.000Z",
+			"endTime": "2024-01-28T07:00:00.000Z",
+			"hosts": ["Grace", "Connie"],
+			"description": [
+				{
+					"_key": "3fa016ee5165",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "Join a round of cup speed stacking, or get creative and build or do anything you want with stackable cups!",
+							"_key": "18dc7bce2afc0",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "e474afc3-a606-4d96-a08c-47232b0e6b8d",
+			"_createdAt": "2024-01-25T09:47:20Z",
+			"_updatedAt": "2024-01-25T09:47:20Z",
+			"_rev": "r8QI4XsJMHUG6h19H9YK80",
+			"_type": "event",
+			"title": "Late Night Snack (Surprise)",
+			"eventType": "Main",
+			"location": "Pacific Ballroom",
+			"startTime": "2024-01-28T07:00:00.000Z",
+			"endTime": "2024-01-28T07:59:00.000Z",
+			"hosts": ["Ryan", "Zion"],
+			"description": [
+				{
+					"_key": "6a1ba4a28725",
+					"markDefs": [],
+					"children": [
+						{ "text": "Surprise!", "_key": "820554d71a8f", "_type": "span", "marks": [] }
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		}
+	],
+	[
+		{
+			"_id": "b8b395b9-4301-4286-a0f8-ec5b55ca236e",
+			"_createdAt": "2024-01-23T21:26:06Z",
+			"_updatedAt": "2024-01-23T21:37:25Z",
+			"_rev": "WkusdRigYzh6VdJ4egGkO8",
+			"_type": "event",
+			"title": "Nighttime Hacking Period",
+			"eventType": "Miscellaneous",
+			"location": "Virtual",
+			"startTime": "2024-01-28T09:00:00.000Z",
+			"endTime": "2024-01-28T15:00:00.000Z",
+			"description": [
+				{
+					"_key": "3b1bd21d1481",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "Is it time to sleep? Or time to hack?",
+							"_key": "e9bbe75cb1700",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "99ed29d7-4aec-49bc-a87c-a481dbc77546",
+			"_createdAt": "2024-01-23T21:29:47Z",
+			"_updatedAt": "2024-01-23T21:29:47Z",
+			"_rev": "WkusdRigYzh6VdJ4egD7gF",
+			"_type": "event",
+			"title": "Check In",
+			"eventType": "Announcement",
+			"location": "Pacific Ballroom Lobby",
+			"startTime": "2024-01-28T16:00:00.000Z",
+			"endTime": "2024-01-28T17:00:00.000Z",
+			"description": [
+				{
+					"_key": "c3a6d3771ae5",
+					"markDefs": [],
+					"children": [
+						{ "text": "Check In", "_key": "b310fc6d2001", "_type": "span", "marks": [] }
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "d8425775-4499-4dc2-8410-f466519d9d51",
+			"_createdAt": "2024-01-23T21:30:28Z",
+			"_updatedAt": "2024-01-23T21:30:28Z",
+			"_rev": "WkusdRigYzh6VdJ4egDZQU",
+			"_type": "event",
+			"title": "Light Breakfast Refreshments",
+			"eventType": "Main",
+			"location": "Pacific Ballroom",
+			"startTime": "2024-01-28T16:00:00.000Z",
+			"endTime": "2024-01-28T17:00:00.000Z",
+			"description": [
+				{
+					"_key": "662d660cdb32",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "Swing by check in at Pacific Ballroom lobby for the final day of hacking!",
+							"_key": "5c146fe4307d0",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "438002f5-b835-4097-8e72-65d14ef231a9",
+			"_createdAt": "2024-01-23T21:31:39Z",
+			"_updatedAt": "2024-01-23T21:31:39Z",
+			"_rev": "WkusdRigYzh6VdJ4egEp31",
+			"_type": "event",
+			"title": "Hacking Period",
+			"eventType": "Miscellaneous",
+			"location": "Pacific Ballroom",
+			"startTime": "2024-01-28T17:00:00.000Z",
+			"endTime": "2024-01-28T20:00:00.000Z",
+			"description": [
+				{
+					"_key": "fe40da352f6a",
+					"markDefs": [],
+					"children": [
+						{ "text": "It's grind time!", "_key": "a9e25ddda0880", "_type": "span", "marks": [] }
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "4e302689-b9a4-4826-ac1e-a2b6af01c6d8",
+			"_createdAt": "2024-01-23T21:32:33Z",
+			"_updatedAt": "2024-01-23T21:32:33Z",
+			"_rev": "r8QI4XsJMHUG6h19GzirxQ",
+			"_type": "event",
+			"title": "Brunch",
+			"eventType": "Main",
+			"location": "Pacific Ballroom",
+			"startTime": "2024-01-28T19:30:00.000Z",
+			"endTime": "2024-01-28T20:30:00.000Z",
+			"description": [
+				{
+					"_key": "fdaf69f2c757",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "Even though hacking's almost ending, it's still dangerous to go alone. Take some breakfast burritos with you!",
+							"_key": "6b5015b607eb0",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "2cc68afe-9b19-41ee-bd51-8ec0e8a4e8df",
+			"_createdAt": "2023-12-15T07:45:39Z",
+			"_updatedAt": "2024-01-23T21:33:00Z",
+			"_rev": "NkIvNulb1UqlIiQIOHuDRR",
+			"_type": "event",
+			"title": "Hacking Ends!",
+			"eventType": "Announcement",
+			"location": "Pacific Ballroom",
+			"startTime": "2024-01-28T20:00:00.000Z",
+			"endTime": "2024-01-28T20:00:00.000Z",
+			"description": [
+				{
+					"_key": "e9dd691263fb",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "Hacking Ends! Great job on all of your projects, hackers! ",
+							"_key": "2777e1b000da",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "b0ca098f-d130-4597-ae37-ec8adc4e7579",
+			"_createdAt": "2023-12-15T07:46:03Z",
+			"_updatedAt": "2024-01-23T04:12:48Z",
+			"_rev": "NkIvNulb1UqlIiQIOBf2CD",
+			"_type": "event",
+			"title": "Project Expo",
+			"eventType": "Main",
+			"location": "Pacific Ballroom",
+			"startTime": "2024-01-28T20:30:00.000Z",
+			"endTime": "2024-01-28T23:00:00.000Z",
+			"hosts": ["Ashley", "Nathan C."],
+			"description": [
+				{
+					"_key": "10b13d633bdc",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "Congratulations on finishing IrvineHacks 2024! We're so excited to see all of your project submissions, so make sure to come to the Pacific Ballroom for our project expo where you can look at other teams' projects!",
+							"_key": "8c7244a02974",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		},
+		{
+			"_id": "48606bf5-704c-427d-971d-fba9654bd233",
+			"_createdAt": "2024-01-23T21:35:55Z",
+			"_updatedAt": "2024-01-23T21:35:55Z",
+			"_rev": "r8QI4XsJMHUG6h19Gzkj7Q",
+			"_type": "event",
+			"title": "Closing Ceremony",
+			"eventType": "Main",
+			"location": "Pacific Ballroom",
+			"startTime": "2024-01-28T23:00:00.000Z",
+			"endTime": "2024-01-29T00:00:00.000Z",
+			"hosts": ["Riley", "Olivia"],
+			"description": [
+				{
+					"_key": "6fd191d5b8ad",
+					"markDefs": [],
+					"children": [
+						{
+							"text": "Come out to our closing ceremony for our final wrap-up of IrvineHacks 2024! Find out if your team came out on top and celebrate everyone's hard work over the weekend ❤️",
+							"_key": "8eb9b9e63ff60",
+							"_type": "span",
+							"marks": []
+						}
+					],
+					"_type": "block",
+					"style": "normal"
+				}
+			]
+		}
+	]
+]

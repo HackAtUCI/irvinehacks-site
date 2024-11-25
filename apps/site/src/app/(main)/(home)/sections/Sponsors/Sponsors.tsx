@@ -1,4 +1,5 @@
-import { getSponsors } from "./getSponsors";
+import sponsorsData from "@/data/sponsors.json";
+
 import SponsorTier from "./components/SponsorTier/SponsorTier";
 
 import styles from "./Sponsors.module.scss";
@@ -13,7 +14,7 @@ const TIERS = [
 ];
 
 export default async function Sponsors() {
-	const sponsors = await getSponsors();
+	const sponsors = new Map(Object.entries(sponsorsData));
 
 	return (
 		<section className="container py-24 md:my-16 relative items-center flex flex-col md:p-8 w-3/4 mx-auto text-center">

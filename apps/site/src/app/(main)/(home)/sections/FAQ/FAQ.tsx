@@ -1,12 +1,12 @@
-import { getQuestions } from "./getQuestions";
 import FAQAccordion from "./FAQAccordion";
 
 import { PortableText } from "@portabletext/react";
 import styles from "./FAQ.module.scss";
 
+import questions from "@/data/questions.json";
+
 const FAQ = async () => {
-	const questions = await getQuestions();
-	const faq = questions[0]["faqs"].map(({ _key, question, answer }) => ({
+	const faq = questions["faqs"].map(({ _key, question, answer }) => ({
 		_key,
 		question: <strong className="w-10/12">{question}</strong>,
 		answer: <PortableText value={answer} />,

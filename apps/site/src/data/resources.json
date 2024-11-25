@@ -1,0 +1,270 @@
+{
+	"order": [
+		{
+			"_id": "b0a959ea-f7bd-494d-a1c7-aab02c67beaa",
+			"iconUrl": "https://cdn.sanity.io/images/fosuyru0/production/f132cf8d5c41a8d197bf51348afabcfa47d75736-64x58.svg",
+			"title": "User Interface",
+			"description": "Build a frontend you can interact with!",
+			"resources": [
+				{
+					"_id": "411679cd-0b71-45e5-b7d2-18357859742f",
+					"_createdAt": "2024-01-23T00:00:53Z",
+					"_updatedAt": "2024-01-23T00:00:53Z",
+					"_rev": "r8QI4XsJMHUG6h19GthsUn",
+					"_type": "resource",
+					"link": "https://developer.android.com/studio",
+					"title": "Android Studio",
+					"resourceType": {
+						"_type": "reference",
+						"_ref": "b0a959ea-f7bd-494d-a1c7-aab02c67beaa"
+					}
+				},
+				{
+					"_id": "93ae2601-3e06-40c4-9df1-5a293fa255e4",
+					"_createdAt": "2024-01-23T00:01:33Z",
+					"_updatedAt": "2024-01-23T00:01:33Z",
+					"_rev": "NkIvNulb1UqlIiQIOA4NvW",
+					"_type": "resource",
+					"link": "https://docs.flutter.dev/",
+					"title": "Flutter SDK",
+					"resourceType": {
+						"_type": "reference",
+						"_ref": "b0a959ea-f7bd-494d-a1c7-aab02c67beaa"
+					}
+				},
+				{
+					"_id": "dd3cedc3-bbc6-4c0e-992d-1c26182a0d82",
+					"_createdAt": "2023-12-28T19:37:03Z",
+					"_updatedAt": "2023-12-28T19:40:19Z",
+					"_rev": "Fovhr43E33CsodAANWymGm",
+					"_type": "resource",
+					"link": "https://github.com/HackAtUCI/zothacks-frontend-startercode",
+					"title": "Frontend Starter Code",
+					"resourceType": {
+						"_type": "reference",
+						"_ref": "b0a959ea-f7bd-494d-a1c7-aab02c67beaa"
+					}
+				},
+				{
+					"_id": "ccb3df14-a2c3-4634-8756-991eaa180680",
+					"_createdAt": "2024-01-26T23:18:26Z",
+					"_updatedAt": "2024-01-26T23:18:26Z",
+					"_rev": "NkIvNulb1UqlIiQIOfmtXK",
+					"_type": "resource",
+					"link": "https://react.dev/",
+					"title": "React",
+					"resourceType": {
+						"_type": "reference",
+						"_ref": "b0a959ea-f7bd-494d-a1c7-aab02c67beaa"
+					}
+				},
+				{
+					"_id": "4570deba-f781-40ee-bb1d-1c6fcc1f4b4b",
+					"_createdAt": "2024-01-23T00:00:24Z",
+					"_updatedAt": "2024-01-23T00:00:24Z",
+					"_rev": "NkIvNulb1UqlIiQIOA3fo7",
+					"_type": "resource",
+					"link": "https://reactnative.dev/",
+					"title": "React Native",
+					"resourceType": {
+						"_type": "reference",
+						"_ref": "b0a959ea-f7bd-494d-a1c7-aab02c67beaa"
+					}
+				},
+				{
+					"_id": "a947c8db-e124-4c8d-b756-77cf20fc2c0f",
+					"_createdAt": "2024-01-22T23:58:38Z",
+					"_updatedAt": "2024-01-22T23:58:38Z",
+					"_rev": "NkIvNulb1UqlIiQIOA1MEY",
+					"_type": "resource",
+					"link": "https://github.com/nmpham2/hack-at-uci-react-intro",
+					"title": "React Workshop",
+					"resourceType": {
+						"_type": "reference",
+						"_ref": "b0a959ea-f7bd-494d-a1c7-aab02c67beaa"
+					}
+				}
+			]
+		},
+		{
+			"_id": "23ba2825-c047-44a5-8ce4-5272753bb741",
+			"iconUrl": "https://cdn.sanity.io/images/fosuyru0/production/1b8afca8e31c2ff64b8b242635e9a3810bc4d466-64x52.svg",
+			"title": "Backend",
+			"description": "Build an API for data management and processing!",
+			"resources": [
+				{
+					"_id": "9fbd9f3a-6b23-4d7f-b4fe-56b4ea64b3e5",
+					"_createdAt": "2024-01-23T00:23:03Z",
+					"_updatedAt": "2024-01-23T00:23:03Z",
+					"_rev": "WkusdRigYzh6VdJ4eaBXBh",
+					"_type": "resource",
+					"link": "https://fastapi.tiangolo.com/",
+					"title": "FastAPI",
+					"resourceType": {
+						"_type": "reference",
+						"_ref": "23ba2825-c047-44a5-8ce4-5272753bb741"
+					}
+				},
+				{
+					"_id": "b56c8ebc-4a28-4e9b-9bcd-ad77cd9fb5b9",
+					"_createdAt": "2024-01-23T00:22:41Z",
+					"_updatedAt": "2024-01-23T00:22:41Z",
+					"_rev": "r8QI4XsJMHUG6h19GtpSQb",
+					"_type": "resource",
+					"link": "https://github.com/public-apis/public-apis",
+					"title": "Free Public API’s",
+					"resourceType": {
+						"_type": "reference",
+						"_ref": "23ba2825-c047-44a5-8ce4-5272753bb741"
+					}
+				},
+				{
+					"_id": "b767d377-2a1c-48e2-95a3-86572ffb8a98",
+					"_createdAt": "2024-01-23T00:23:42Z",
+					"_updatedAt": "2024-01-27T01:41:24Z",
+					"_rev": "NkIvNulb1UqlIiQIOgZmKk",
+					"_type": "resource",
+					"link": "https://docs.icssc.club/ppapi",
+					"title": "PeterPortal Public API",
+					"resourceType": {
+						"_type": "reference",
+						"_ref": "23ba2825-c047-44a5-8ce4-5272753bb741"
+					}
+				},
+				{
+					"_id": "c60689fd-2aec-4dc7-9a1a-11ab5b9c51a0",
+					"_createdAt": "2024-01-23T00:21:40Z",
+					"_updatedAt": "2024-01-23T00:21:40Z",
+					"_rev": "NkIvNulb1UqlIiQIOAENZs",
+					"_type": "resource",
+					"link": "https://github.com/HackAtUCI/zothacks-backend-startercode",
+					"title": "Simple Flask Example",
+					"resourceType": {
+						"_type": "reference",
+						"_ref": "23ba2825-c047-44a5-8ce4-5272753bb741"
+					}
+				},
+				{
+					"_id": "79479dc7-a00e-43b1-bbcc-5a021ab78b37",
+					"_createdAt": "2024-01-23T00:21:59Z",
+					"_updatedAt": "2024-01-23T00:21:59Z",
+					"_rev": "NkIvNulb1UqlIiQIOAES1y",
+					"_type": "resource",
+					"link": "https://github.com/will-hou/hackatuci-learn-webscraping-2023",
+					"title": "Webscraping Workshop",
+					"resourceType": {
+						"_type": "reference",
+						"_ref": "23ba2825-c047-44a5-8ce4-5272753bb741"
+					}
+				}
+			]
+		},
+		{
+			"_id": "78cd2df9-0e93-4fe3-a2d5-bcb17d8cb9f4",
+			"iconUrl": "https://cdn.sanity.io/images/fosuyru0/production/25117354cd7d0a93e8a7267ac805155a71a6e180-64x52.svg",
+			"title": "Gaming",
+			"description": "Build the next chart topping indie game!",
+			"resources": [
+				{
+					"_id": "25285918-0a54-4acd-918a-e471774f8496",
+					"_createdAt": "2024-01-21T02:54:11Z",
+					"_updatedAt": "2024-01-22T23:53:36Z",
+					"_rev": "WkusdRigYzh6VdJ4eZxmgk",
+					"_type": "resource",
+					"link": "https://godotengine.org/",
+					"title": "Godot",
+					"resourceType": {
+						"_type": "reference",
+						"_ref": "78cd2df9-0e93-4fe3-a2d5-bcb17d8cb9f4"
+					}
+				},
+				{
+					"_id": "5656f777-494a-4c2e-b810-f520d73b7d9f",
+					"_createdAt": "2024-01-23T00:25:57Z",
+					"_updatedAt": "2024-01-23T00:25:57Z",
+					"_rev": "WkusdRigYzh6VdJ4eaCRHU",
+					"_type": "resource",
+					"link": "https://www.pygame.org/wiki/GettingStarted",
+					"title": "Pygame",
+					"resourceType": {
+						"_type": "reference",
+						"_ref": "78cd2df9-0e93-4fe3-a2d5-bcb17d8cb9f4"
+					}
+				},
+				{
+					"_id": "2e539fa5-17c9-40cd-ade3-5becfdc63a36",
+					"_createdAt": "2024-01-21T02:54:09Z",
+					"_updatedAt": "2024-01-22T23:52:58Z",
+					"_rev": "r8QI4XsJMHUG6h19GtdLIC",
+					"_type": "resource",
+					"link": "https://docs.unity3d.com/Manual/index.html",
+					"title": "Unity",
+					"resourceType": {
+						"_type": "reference",
+						"_ref": "78cd2df9-0e93-4fe3-a2d5-bcb17d8cb9f4"
+					}
+				}
+			]
+		},
+		{
+			"_id": "32978cb3-49e4-4ae3-869a-d34f05a29be8",
+			"iconUrl": "https://cdn.sanity.io/images/fosuyru0/production/811de06f2204d611418672a39a87eea465c99277-64x64.svg",
+			"title": "Tools",
+			"description": "Gotta build your projects with something!",
+			"resources": [
+				{
+					"_id": "3c4a835d-8a8b-4385-b861-7ff23891fe48",
+					"_createdAt": "2024-01-23T00:28:15Z",
+					"_updatedAt": "2024-01-23T00:28:15Z",
+					"_rev": "r8QI4XsJMHUG6h19Gtqmx3",
+					"_type": "resource",
+					"link": "https://github.com/HackAtUCI/starter-pack-full-stack-web-app",
+					"title": "Full Stack Starter Pack",
+					"resourceType": {
+						"_type": "reference",
+						"_ref": "32978cb3-49e4-4ae3-869a-d34f05a29be8"
+					}
+				},
+				{
+					"_id": "51ba616f-7bb9-4528-83d2-502e807b0238",
+					"_createdAt": "2024-01-21T02:54:35Z",
+					"_updatedAt": "2024-01-22T23:54:48Z",
+					"_rev": "WkusdRigYzh6VdJ4eZyAgr",
+					"_type": "resource",
+					"link": "https://docs.google.com/presentation/d/1Omd_azmTLQqrIjc6Bkva7PetFeQosLpfyLox8xDA5Mg/edit",
+					"title": "Git",
+					"resourceType": {
+						"_type": "reference",
+						"_ref": "32978cb3-49e4-4ae3-869a-d34f05a29be8"
+					}
+				},
+				{
+					"_id": "1773ab2b-f05f-4f89-93a7-bfeb7b8b6e6e",
+					"_createdAt": "2024-01-21T02:54:16Z",
+					"_updatedAt": "2024-01-22T23:57:20Z",
+					"_rev": "r8QI4XsJMHUG6h19GteEQ1",
+					"_type": "resource",
+					"link": "https://ngrok.io/",
+					"title": "Ngrok",
+					"resourceType": {
+						"_type": "reference",
+						"_ref": "32978cb3-49e4-4ae3-869a-d34f05a29be8"
+					}
+				},
+				{
+					"_id": "47753ec2-8a51-4f40-a708-0f8cb790a4e2",
+					"_createdAt": "2024-01-21T02:54:39Z",
+					"_updatedAt": "2024-01-22T23:57:32Z",
+					"_rev": "WkusdRigYzh6VdJ4eZzlRG",
+					"_type": "resource",
+					"link": "https://www.getpostman.com/",
+					"title": "Postman",
+					"resourceType": {
+						"_type": "reference",
+						"_ref": "32978cb3-49e4-4ae3-869a-d34f05a29be8"
+					}
+				}
+			]
+		}
+	]
+}

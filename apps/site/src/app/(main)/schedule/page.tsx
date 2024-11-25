@@ -2,22 +2,28 @@ import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { PortableText } from "@portabletext/react";
 
+import rawEvents from "@/data/schedule.json";
+const events = rawEvents.map((day) =>
+	day.map((event) => ({
+		...event,
+		startTime: new Date(event.startTime),
+		endTime: new Date(event.endTime),
+	})),
+);
+
 import ShiftingCountdown from "./components/ShiftingCountdown/ShiftingCountdown";
-import { getSchedule } from "./components/getSchedule";
 import SchedulePage from "./sections/SchedulePage";
 
-export const revalidate = 60;
+// export const revalidate = 60;
 
 export const metadata: Metadata = {
 	title: "Schedule | IrvineHacks 2024",
 };
 
-export default async function Schedule() {
+export default function Schedule() {
 	if (process.env.MAINTENANCE_MODE_SCHEDULE) {
 		redirect("/");
 	}
-
-	const events = await getSchedule();
 
 	const schedule = events.map((days) =>
 		days.map(({ description, ...day }) => ({

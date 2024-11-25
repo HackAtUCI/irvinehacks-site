@@ -16,9 +16,9 @@ const config: Config = {
 					"conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
 			},
 			fontFamily: {
-				display: ["Alegreya"],
-				body: ["Mulish"],
-				sans: ["Mulish"],
+				display: ["Aref Ruqaa"],
+				body: ["Cantarell"],
+				sans: ["Cantarell"],
 			},
 		},
 		screens: {

@@ -2,6 +2,7 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 
 import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
+import haveApplicationsOpened from "@/lib/utils/haveApplicationsOpened";
 
 import ApplyConfirm from "./sections/ApplyConfirmation/ApplyConfirm";
 import Form from "./sections/Form/Form";
@@ -36,6 +37,7 @@ export default async function Apply({
 	}
 
 	const deadlinePassed = hasDeadlinePassed();
+	const applicationsOpened = haveApplicationsOpened();
 
 	const applyBody = hasAcceptedQueryParam ? (
 		<>
@@ -73,7 +75,11 @@ export default async function Apply({
 	);
 	return (
 		<div className="flex flex-col items-center gap-10 my-32 min-h-[calc(100vh-8rem)]">
-			{deadlinePassed ? <ApplicationsClosed /> : applyBody}
+			{!applicationsOpened || deadlinePassed ? (
+				<ApplicationsClosed />
+			) : (
+				applyBody
+			)}
 		</div>
 	);
 }

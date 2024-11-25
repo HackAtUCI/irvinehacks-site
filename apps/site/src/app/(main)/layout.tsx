@@ -10,7 +10,7 @@ import NavbarParent from "@/lib/components/Navbar/NavbarParent";
 import "./globals.css";
 
 export const metadata: Metadata = {
-	title: "IrvineHacks 2024",
+	title: "IrvineHacks 2025",
 	description:
 		"IrvineHacks is Hack at UCI's premier hackathon for collegiate students.",
 };
@@ -24,7 +24,7 @@ export default function Layout({ children }: PropsWithChildren) {
 			{/* reference: https://github.com/pmndrs/react-three-next */}
 			<NavbarParent />
 			<SceneLayout>{children}</SceneLayout>
-			<Footer />
+			{/* <Footer /> */}
 		</div>
 	);
 }

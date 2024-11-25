@@ -29,36 +29,36 @@ const nextConfig = {
 	},
 	async redirects() {
 		return [
-			{
-				source: "/mentor",
-				destination: "https://forms.gle/yCmXvG89ygvxUSCd7",
-				permanent: true,
-			},
-			{
-				source: "/volunteer",
-				destination: "https://forms.gle/erpJjErKLJkEZMw48",
-				permanent: true,
-			},
-			{
-				source: "/waiver",
-				destination: DOCUSIGN_FORM_URL,
-				permanent: true,
-			},
-			{
-				source: "/incident",
-				destination: "https://forms.gle/A6BdsSzYSiyeTP8Y6",
-				permanent: true,
-			},
-			{
-				source: "/devpost",
-				destination: "https://irvinehacks-2024.devpost.com",
-				permanent: true,
-			},
-			{
-				source: "/feedback",
-				destination: "https://forms.gle/c154z45wRx7ARnrE9",
-				permanent: true,
-			},
+			// {
+			// 	source: "/mentor",
+			// 	destination: "https://forms.gle/yCmXvG89ygvxUSCd7",
+			// 	permanent: true,
+			// },
+			// {
+			// 	source: "/volunteer",
+			// 	destination: "https://forms.gle/erpJjErKLJkEZMw48",
+			// 	permanent: true,
+			// },
+			// {
+			// 	source: "/waiver",
+			// 	destination: DOCUSIGN_FORM_URL,
+			// 	permanent: true,
+			// },
+			// {
+			// 	source: "/incident",
+			// 	destination: "https://forms.gle/A6BdsSzYSiyeTP8Y6",
+			// 	permanent: true,
+			// },
+			// {
+			// 	source: "/devpost",
+			// 	destination: "https://irvinehacks-2024.devpost.com",
+			// 	permanent: true,
+			// },
+			// {
+			// 	source: "/feedback",
+			// 	destination: "https://forms.gle/c154z45wRx7ARnrE9",
+			// 	permanent: true,
+			// },
 		];
 	},
 };

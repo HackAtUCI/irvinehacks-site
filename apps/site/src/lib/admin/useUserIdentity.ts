@@ -14,7 +14,7 @@ function useUserIdentity(): Identity | undefined {
 			setIdentity(identity);
 		};
 
-		getIdentity();
+		// getIdentity();
 	}, []);
 
 	return identity;

@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 import water from "@/assets/backgrounds/water.jpg";
 import SceneLayout from "@/components/dom/SceneLayout";
 import Footer from "@/lib/components/Footer/Footer";
-import NavbarParent from "@/lib/components/Navbar/NavbarParent";
+import Navbar from "@/lib/components/Navbar/Navbar";
 
 import "./globals.css";
 
@@ -22,7 +22,7 @@ export default function Layout({ children }: PropsWithChildren) {
 			className="overflow-x-hidden bg-top bg-repeat-y bg-[length:100%]"
 		>
 			{/* reference: https://github.com/pmndrs/react-three-next */}
-			<NavbarParent />
+			<Navbar identity={{ uid: null, role: null, status: null }} />
 			<SceneLayout>{children}</SceneLayout>
 			<Footer />
 		</div>

@@ -73,13 +73,13 @@ function Navbar({ identity }: NavbarProps) {
 					<NavLinkItem href="/">Home</NavLinkItem>
 					<NavLinkItem href="/resources">Resources</NavLinkItem>
 					<NavLinkItem href="/schedule">Schedule</NavLinkItem>
-					<NavLinkItem
+					{/* <NavLinkItem
 						href="/incident"
 						target="_blank"
 						rel="noopener noreferrer"
 					>
 						Report Incident
-					</NavLinkItem>
+					</NavLinkItem> */}
 					<NavLinkItem
 						href="/devpost"
 						target="_blank"
@@ -87,19 +87,19 @@ function Navbar({ identity }: NavbarProps) {
 					>
 						Devpost
 					</NavLinkItem>
-					<NavLinkItem
+					{/* <NavLinkItem
 						href="/feedback"
 						target="_blank"
 						rel="noopener noreferrer"
 					>
 						Feedback
-					</NavLinkItem>
+					</NavLinkItem> */}
 					{!status && !deadlinePassed && (
 						<NavLinkItem href="/apply">Apply</NavLinkItem>
 					)}
 
 					{status !== null && <NavLinkItem href="/portal">Portal</NavLinkItem>}
-					{isLoggedIn ? (
+					{/* {isLoggedIn ? (
 						<Button
 							text="Log In"
 							href="/login"
@@ -113,7 +113,7 @@ function Navbar({ identity }: NavbarProps) {
 						>
 							Log Out
 						</a>
-					)}
+					)} */}
 				</NavMenu.List>
 			</div>
 		</NavMenu.Root>

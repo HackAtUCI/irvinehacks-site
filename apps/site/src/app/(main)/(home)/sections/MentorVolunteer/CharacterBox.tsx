@@ -5,6 +5,9 @@ import Link from "next/link";
 import leftChatBox from "./left_chat_box.svg";
 import centerChatBox from "./chat_center_box.svg";
 import rightChatBox from "./right_chat_box.svg";
+import leftChatBG from "./left_chat_box_bg.svg";
+import centerChatBG from "./chat_center_box_bg.svg";
+import rightChatBG from "./right_chat_box_bg.svg";
 
 import styles from "./CharacterBox.module.scss";
 
@@ -34,6 +37,13 @@ export default function CharacterBox({
 			  ? centerChatBox
 			  : rightChatBox;
 
+	const bgImageSrc =
+		chatBoxType === ChatBoxType.LEFT
+			? leftChatBG
+			: chatBoxType === ChatBoxType.CENTER
+			  ? centerChatBG
+			  : rightChatBG;
+
 	const textAlign =
 		chatBoxType === ChatBoxType.LEFT
 			? "text-left"
@@ -43,7 +53,7 @@ export default function CharacterBox({
 	return (
 		<div className="flex flex-col items-center justify-center">
 			<div className="relative">
-				<Image className="absolute" src={chatBoxImageSrc} alt="" />
+				<Image className="absolute" src={bgImageSrc} alt="" />
 				<div className={styles.chatBox + " relative"}>
 					<p
 						className={`absolute h-full w-full z-10 ${textAlign} text-[1.375rem] text-wrap mb-0 mt-4 p-6 pointer-events-none`}

@@ -18,6 +18,7 @@ export enum ChatBoxType {
 }
 
 interface CharacterBoxProps {
+	className?: string;
 	imageSrc: ComponentProps<typeof Image>["src"];
 	chatText: string;
 	titleText: string;
@@ -25,6 +26,7 @@ interface CharacterBoxProps {
 }
 
 export default function CharacterBox({
+	className,
 	imageSrc,
 	chatText,
 	titleText,
@@ -50,22 +52,29 @@ export default function CharacterBox({
 			: chatBoxType === ChatBoxType.CENTER
 			  ? "text-center"
 			  : "text-right";
+	console.log(className);
 	return (
-		<div className="flex flex-col items-center justify-center">
+		<div
+			className={`${className} flex flex-col items-center justify-center mb-20 lg:mb-0`}
+		>
 			<div className="relative">
-				<Image className="absolute" src={bgImageSrc} alt="" />
+				<Image className="absolute hidden lg:block" src={bgImageSrc} alt="" />
+				<Image className="absolute lg:hidden" src={centerChatBG} alt="" />
 				<div className={styles.chatBox + " relative"}>
 					<p
 						className={`absolute h-full w-full z-10 ${textAlign} text-[1.375rem] text-wrap mb-0 mt-4 p-6 pointer-events-none`}
 					>
 						{chatText}
 					</p>
-					<Image className="" src={chatBoxImageSrc} alt="" />
+					<Image className="hidden lg:block" src={chatBoxImageSrc} alt="" />
+					<Image className="lg:hidden" src={centerChatBox} alt="" />
 				</div>
 			</div>
 
 			<Image src={imageSrc} alt="" />
-			<h2 className="font-display text-4xl">{titleText}</h2>
+			<h3 className="font-display text-4xl -translate-y-8 lg:translate-y-0">
+				{titleText}
+			</h3>
 		</div>
 	);
 }

@@ -6,6 +6,8 @@ import leftChatBox from "./left_chat_box.svg";
 import centerChatBox from "./chat_center_box.svg";
 import rightChatBox from "./right_chat_box.svg";
 
+import styles from "./CharacterBox.module.scss";
+
 export enum ChatBoxType {
 	LEFT,
 	CENTER,
@@ -41,16 +43,19 @@ export default function CharacterBox({
 	return (
 		<div className="flex flex-col items-center justify-center">
 			<div className="relative">
-				<p
-					className={`absolute h-full w-full z-10 ${textAlign} text-[1.375rem] text-wrap mb-0 mt-4 p-6`}
-				>
-					{chatText}
-				</p>
-				<Image className="" src={chatBoxImageSrc} alt="" />
+				<Image className="absolute" src={chatBoxImageSrc} alt="" />
+				<div className={styles.chatBox + " relative"}>
+					<p
+						className={`absolute h-full w-full z-10 ${textAlign} text-[1.375rem] text-wrap mb-0 mt-4 p-6 pointer-events-none`}
+					>
+						{chatText}
+					</p>
+					<Image className="" src={chatBoxImageSrc} alt="" />
+				</div>
 			</div>
 
 			<Image src={imageSrc} alt="" />
-			<h2 className="text-5xl">{titleText}</h2>
+			<h2 className="font-display text-4xl">{titleText}</h2>
 		</div>
 	);
 }

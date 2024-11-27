@@ -1,23 +1,30 @@
-import Stand from "./Stand";
-import stand1 from "./stand-1.png";
-import stand2 from "./stand-2.png";
+import CharacterBox from "./CharacterBox";
+import { ChatBoxType } from "./CharacterBox";
+
+import hackerSprite from "./hacker_sprite.png";
+import mentorSprite from "./mentor_sprite.png";
+import volunteerSprite from "./volunteer_sprite.png";
 
 const MentorVolunteer = () => {
 	return (
-		<div className="grid max-w-lg lg:max-w-none lg:grid-cols-[repeat(2,450px)] lg:items-stretch justify-center m-auto gap-y-8 gap-x-24 my-24 pl-3 pr-4">
-			<Stand
-				imageSrc={stand1}
-				header="Apply to be a Mentor"
-				description="Interested in inspiring the next generation of developers? Our mentors are vital to making IrvineHacks 2024 successful and enjoyable for our hackers."
-				buttonText="Mentor Application"
-				buttonHref="/mentor"
+		<div className="flex items-center justify-center">
+			<CharacterBox
+				imageSrc={mentorSprite}
+				chatText="Inspire the next generation of developers and help Hackers on their Journey!"
+				titleText="Mentor"
+				chatBoxType={ChatBoxType.LEFT}
 			/>
-			<Stand
-				imageSrc={stand2}
-				header="Become a Volunteer"
-				description="Want a peek behind the scenes? Join our team of event volunteers that make IrvineHacks run as smoothly as possible! Get access to all the free food and all our hackathon swag."
-				buttonText="Volunteer Form"
-				buttonHref="/volunteer"
+			<CharacterBox
+				imageSrc={hackerSprite}
+				chatText="Face the challenge along with other party members to hone your skills"
+				titleText="Hacker"
+				chatBoxType={ChatBoxType.CENTER}
+			/>
+			<CharacterBox
+				imageSrc={volunteerSprite}
+				chatText="Get a peek behind the scenes with free food and swag"
+				titleText="Volunteer"
+				chatBoxType={ChatBoxType.RIGHT}
 			/>
 		</div>
 	);

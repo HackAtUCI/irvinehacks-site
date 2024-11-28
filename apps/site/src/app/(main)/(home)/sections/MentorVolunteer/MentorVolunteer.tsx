@@ -14,24 +14,27 @@ const MentorVolunteer = () => {
 			<div className="flex flex-col lg:flex-row items-center justify-center gap-x-4 mx-auto">
 				<CharacterBox
 					className="order-2 lg:order-1"
-					imageSrc={mentorSprite}
 					chatText="Inspire the next generation of developers and help Hackers on their Journey!"
 					titleText="Mentor"
+					imageSrc={mentorSprite}
 					chatBoxType={ChatBoxType.LEFT}
+					href="/mentor"
 				/>
 				<CharacterBox
 					className="order-1 lg:order-2"
-					imageSrc={hackerSprite}
 					chatText="Face the challenge along with other party members to hone your skills"
 					titleText="Hacker"
+					imageSrc={hackerSprite}
 					chatBoxType={ChatBoxType.CENTER}
+					href="/apply"
 				/>
 				<CharacterBox
 					className="order-3"
-					imageSrc={volunteerSprite}
 					chatText="Get a peek behind the scenes with free food and swag"
 					titleText="Volunteer"
+					imageSrc={volunteerSprite}
 					chatBoxType={ChatBoxType.RIGHT}
+					href="/volunteer"
 				/>
 			</div>
 		</section>

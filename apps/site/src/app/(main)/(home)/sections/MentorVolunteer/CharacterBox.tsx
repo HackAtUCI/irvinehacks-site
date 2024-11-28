@@ -23,6 +23,7 @@ interface CharacterBoxProps {
 	chatText: string;
 	titleText: string;
 	chatBoxType: ChatBoxType;
+	href: string;
 }
 
 export default function CharacterBox({
@@ -31,6 +32,7 @@ export default function CharacterBox({
 	chatText,
 	titleText,
 	chatBoxType,
+	href,
 }: CharacterBoxProps) {
 	const chatBoxImageSrc =
 		chatBoxType === ChatBoxType.LEFT
@@ -52,7 +54,6 @@ export default function CharacterBox({
 			: chatBoxType === ChatBoxType.CENTER
 			  ? "text-center"
 			  : "text-right";
-	console.log(className);
 	return (
 		<div
 			className={`${className} flex flex-col items-center justify-center mb-20 lg:mb-0`}
@@ -61,13 +62,15 @@ export default function CharacterBox({
 				<Image className="absolute hidden lg:block" src={bgImageSrc} alt="" />
 				<Image className="absolute lg:hidden" src={centerChatBG} alt="" />
 				<div className={styles.chatBox + " relative"}>
-					<p
-						className={`absolute h-full w-full z-10 ${textAlign} text-[1.375rem] text-wrap mb-0 mt-4 p-6 pointer-events-none`}
-					>
-						{chatText}
-					</p>
-					<Image className="hidden lg:block" src={chatBoxImageSrc} alt="" />
-					<Image className="lg:hidden" src={centerChatBox} alt="" />
+					<Link href={href}>
+						<p
+							className={`absolute h-full w-full z-10 ${textAlign} text-[1.375rem] text-wrap mb-0 mt-4 p-6 pointer-events-none`}
+						>
+							{chatText}
+						</p>
+						<Image className="hidden lg:block" src={chatBoxImageSrc} alt="" />
+						<Image className="lg:hidden" src={centerChatBox} alt="" />
+					</Link>
 				</div>
 			</div>
 

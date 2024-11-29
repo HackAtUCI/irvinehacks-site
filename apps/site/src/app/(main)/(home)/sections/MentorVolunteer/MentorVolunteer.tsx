@@ -1,9 +1,9 @@
 import CharacterBox from "./CharacterBox";
 import { ChatBoxType } from "./CharacterBox";
 
-import hackerSprite from "./hacker_sprite.png";
-import mentorSprite from "./mentor_sprite.png";
-import volunteerSprite from "./volunteer_sprite.png";
+import hackerSprite from "@/assets/images/hacker_sprite.png";
+import mentorSprite from "@/assets/images/mentor_sprite.png";
+import volunteerSprite from "@/assets/images/volunteer_sprite.png";
 
 import styles from "./CharacterBox.module.scss";
 

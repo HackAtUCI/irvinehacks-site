@@ -2,12 +2,12 @@ import type { ComponentProps } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import leftChatBox from "./left_chat_box.svg";
-import centerChatBox from "./chat_center_box.svg";
-import rightChatBox from "./right_chat_box.svg";
-import leftChatBG from "./left_chat_box_bg.svg";
-import centerChatBG from "./chat_center_box_bg.svg";
-import rightChatBG from "./right_chat_box_bg.svg";
+import leftChatBox from "@/assets/images/left_chat_box.svg";
+import centerChatBox from "@/assets/images/center_chat_box.svg";
+import rightChatBox from "@/assets/images/right_chat_box.svg";
+import leftChatBG from "@/assets/images/left_chat_box_bg.svg";
+import centerChatBG from "@/assets/images/center_chat_box_bg.svg";
+import rightChatBG from "@/assets/images/right_chat_box_bg.svg";
 
 import styles from "./CharacterBox.module.scss";
 

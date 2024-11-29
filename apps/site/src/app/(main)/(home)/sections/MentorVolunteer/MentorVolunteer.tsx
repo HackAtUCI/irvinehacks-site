@@ -1,25 +1,48 @@
-import Stand from "./Stand";
-import stand1 from "./stand-1.png";
-import stand2 from "./stand-2.png";
+import CharacterBox from "./CharacterBox";
+import { ChatBoxType } from "./CharacterBox";
+
+import hackerSprite from "@/assets/images/hacker_sprite.png";
+import mentorSprite from "@/assets/images/mentor_sprite.png";
+import volunteerSprite from "@/assets/images/volunteer_sprite.png";
+
+import styles from "./CharacterBox.module.scss";
 
 const MentorVolunteer = () => {
 	return (
-		<div className="grid max-w-lg lg:max-w-none lg:grid-cols-[repeat(2,450px)] lg:items-stretch justify-center m-auto gap-y-8 gap-x-24 my-24 pl-3 pr-4">
-			<Stand
-				imageSrc={stand1}
-				header="Apply to be a Mentor"
-				description="Interested in inspiring the next generation of developers? Our mentors are vital to making IrvineHacks 2024 successful and enjoyable for our hackers."
-				buttonText="Mentor Application"
-				buttonHref="/mentor"
-			/>
-			<Stand
-				imageSrc={stand2}
-				header="Become a Volunteer"
-				description="Want a peek behind the scenes? Join our team of event volunteers that make IrvineHacks run as smoothly as possible! Get access to all the free food and all our hackathon swag."
-				buttonText="Volunteer Form"
-				buttonHref="/volunteer"
-			/>
-		</div>
+		<section className="flex flex-col justify-center my-14">
+			<h2 className="font-display text-5xl text-center mb-12">
+				Choose your Character
+			</h2>
+			<div className="flex flex-col lg:flex-row items-center justify-center gap-x-4 mx-auto">
+				<CharacterBox
+					className="order-2 lg:order-1"
+					chatText="Inspire the next generation of developers and help Hackers on their Journey!"
+					titleText="Mentor"
+					clipClass={styles.glasses}
+					imageSrc={mentorSprite}
+					chatBoxType={ChatBoxType.LEFT}
+					href="/mentor"
+				/>
+				<CharacterBox
+					className="order-1 lg:order-2"
+					chatText="Face the challenge along with other party members to hone your skills"
+					titleText="Hacker"
+					clipClass={styles.sword}
+					imageSrc={hackerSprite}
+					chatBoxType={ChatBoxType.CENTER}
+					href="/apply"
+				/>
+				<CharacterBox
+					className="order-3"
+					chatText="Get a peek behind the scenes with free food and swag"
+					titleText="Volunteer"
+					clipClass={styles.orb}
+					imageSrc={volunteerSprite}
+					chatBoxType={ChatBoxType.RIGHT}
+					href="/volunteer"
+				/>
+			</div>
+		</section>
 	);
 };
 

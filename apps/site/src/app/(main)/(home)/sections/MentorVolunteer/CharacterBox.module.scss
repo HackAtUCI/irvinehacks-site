@@ -1,72 +1,33 @@
-.chatBox:hover {
-	transform: translate(-8px, -8px);
-	filter: brightness(1.05);
-}
+$animation-time: 0.15s;
 
-.sprite {
-	&:hover {
-		transform: scale(1.1);
+.hoverGroup {
+	.chatBox {
+		transition: all $animation-time ease-out;
 	}
-}
 
-.volunteerClip {
-	clip-path: polygon(
-		10.72% 36.3%,
-		41.72% 22.45%,
-		62.7% 32.19%,
-		68.51% 36.3%,
-		71.16% 28.63%,
-		61.21% 18.37%,
-		76.22% 15.43%,
-		90.82% 23.62%,
-		89.06% 27.93%,
-		79.69% 30.47%,
-		74.41% 51.17%,
-		83.59% 71.29%,
-		71.88% 79.49%,
-		49.41% 87.5%,
-		34.28% 82.77%,
-		14.75% 60.16%,
-		24.61% 49.8%,
-		12.5% 46.09%
-	);
-}
+	.spriteTitle {
+		transition: all $animation-time ease-out;
+		filter: drop-shadow(0 0 0 #ffffff00);
+	}
 
-.mentorClip {
-	clip-path: polygon(
-		26.56% 24.8%,
-		38.28% 18.75%,
-		51.56% 25%,
-		69.92% 22.66%,
-		75.78% 32.62%,
-		84.38% 38.09%,
-		77.15% 44.73%,
-		74.41% 74.61%,
-		60.74% 85.55%,
-		38.09% 85.94%,
-		28.91% 78.71%,
-		14.26% 77.54%,
-		22.66% 66.21%,
-		24.02% 53.32%,
-		20.9% 45.51%,
-		24.61% 38.87%
-	);
-}
+	.sprite {
+		transition: all $animation-time ease-out;
+		filter: drop-shadow(0 0 0 #ffffff00);
+	}
 
-.hackerClip {
-	clip-path: polygon(
-		30.27% 9.18%,
-		51.56% 9.18%,
-		51.76% 20.31%,
-		84.57% 29.1%,
-		84.38% 83.98%,
-		62.89% 84.57%,
-		58.4% 77.93%,
-		17.97% 79.69%,
-		16.6% 61.91%,
-		31.45% 50.78%,
-		31.84% 42.77%,
-		39.26% 26.17%,
-		30.47% 18.36%
-	);
+	&:hover {
+		.chatBox {
+			transform: translate(-8px, -8px);
+		}
+
+		.spriteTitle {
+			transform: scale(1.05);
+			filter: drop-shadow(0 0 8px #fff8a7);
+		}
+
+		.sprite {
+			transform: scale(1.05);
+			filter: drop-shadow(0 0 8px #fff8a7);
+		}
+	}
 }

@@ -5,8 +5,6 @@ import hackerSprite from "./hacker_sprite.png";
 import mentorSprite from "./mentor_sprite.png";
 import volunteerSprite from "./volunteer_sprite.png";
 
-import styles from "./CharacterBox.module.scss";
-
 const MentorVolunteer = () => {
 	return (
 		<section className="flex flex-col justify-center my-14">
@@ -19,7 +17,6 @@ const MentorVolunteer = () => {
 					chatText="Inspire the next generation of developers and help Hackers on their Journey!"
 					titleText="Mentor"
 					imageSrc={mentorSprite}
-					clipClass={styles.mentorClip}
 					chatBoxType={ChatBoxType.LEFT}
 					href="/mentor"
 				/>
@@ -28,7 +25,6 @@ const MentorVolunteer = () => {
 					chatText="Face the challenge along with other party members to hone your skills"
 					titleText="Hacker"
 					imageSrc={hackerSprite}
-					clipClass={styles.hackerClip}
 					chatBoxType={ChatBoxType.CENTER}
 					href="/apply"
 				/>
@@ -37,7 +33,6 @@ const MentorVolunteer = () => {
 					chatText="Get a peek behind the scenes with free food and swag"
 					titleText="Volunteer"
 					imageSrc={volunteerSprite}
-					clipClass={styles.volunteerClip}
 					chatBoxType={ChatBoxType.RIGHT}
 					href="/volunteer"
 				/>

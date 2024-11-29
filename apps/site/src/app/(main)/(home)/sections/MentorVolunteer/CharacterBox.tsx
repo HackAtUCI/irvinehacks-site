@@ -22,7 +22,6 @@ interface CharacterBoxProps {
 	imageSrc: ComponentProps<typeof Image>["src"];
 	chatText: string;
 	titleText: string;
-	clipClass: string;
 	chatBoxType: ChatBoxType;
 	href: string;
 }
@@ -32,7 +31,6 @@ export default function CharacterBox({
 	imageSrc,
 	chatText,
 	titleText,
-	clipClass,
 	chatBoxType,
 	href,
 }: CharacterBoxProps) {
@@ -46,11 +44,13 @@ export default function CharacterBox({
 			bgImageSrc = leftChatBG;
 			textAlign = "text-left";
 			break;
+
 		case ChatBoxType.CENTER:
 			chatBoxImageSrc = centerChatBox;
 			bgImageSrc = centerChatBG;
 			textAlign = "text-center";
 			break;
+
 		case ChatBoxType.RIGHT:
 			chatBoxImageSrc = rightChatBox;
 			bgImageSrc = rightChatBG;
@@ -59,35 +59,34 @@ export default function CharacterBox({
 	}
 
 	return (
-		<>
-			<div
-				className={`${className} flex flex-col items-center justify-center mb-20 lg:mb-0`}
-			>
-				<div className="relative">
-					<Image className="absolute hidden lg:block" src={bgImageSrc} alt="" />
-					<Image className="absolute lg:hidden" src={centerChatBG} alt="" />
-					<div className={styles.chatBox + " relative"}>
-						<Link href={href}>
-							<p
-								className={`absolute h-full w-full z-10 ${textAlign} text-[1.375rem] text-wrap mb-0 mt-4 p-6 pointer-events-none`}
-							>
-								{chatText}
-							</p>
-							<Image className="hidden lg:block" src={chatBoxImageSrc} alt="" />
-							<Image className="lg:hidden" src={centerChatBox} alt="" />
-						</Link>
-					</div>
+		<div
+			className={`${className} ${styles.hoverGroup} flex flex-col items-center justify-center mb-20 lg:mb-0`}
+		>
+			<div className="relative">
+				<Image className="absolute hidden lg:block" src={bgImageSrc} alt="" />
+				<Image className="absolute lg:hidden" src={centerChatBG} alt="" />
+				<div className={styles.chatBox + " relative"}>
+					<Link href={href}>
+						<p
+							className={`absolute h-full w-full z-10 ${textAlign} text-[1.375rem] text-wrap mb-0 mt-4 p-6 pointer-events-none`}
+						>
+							{chatText}
+						</p>
+						<Image className="hidden lg:block" src={chatBoxImageSrc} alt="" />
+						<Image className="lg:hidden" src={centerChatBox} alt="" />
+					</Link>
 				</div>
+			</div>
 
-				<Image
-					className={`${styles.sprite} ${clipClass} relative`}
-					src={imageSrc}
-					alt=""
-				/>
-				<h3 className="font-display text-4xl -translate-y-8 lg:translate-y-0">
+			<Link className="relative w-5/6" href={href}>
+				<Image className={`${styles.sprite} relative`} src={imageSrc} alt="" />
+			</Link>
+
+			<Link href={href}>
+				<h3 className={`${styles.spriteTitle} font-display text-4xl relative`}>
 					{titleText}
 				</h3>
-			</div>
-		</>
+			</Link>
+		</div>
 	);
 }

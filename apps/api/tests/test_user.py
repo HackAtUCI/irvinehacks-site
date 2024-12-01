@@ -140,7 +140,7 @@ def test_user_with_status_accepted_un_rsvp_returns_403(
 def test_user_me_route_returns_correct_type(
     mock_mongodb_handler_retrieve_one: AsyncMock,
 ) -> None:
-    """Test user with WAIVER_SIGNED status has new status of CONFIRMED after RSVP."""
+    """Test user me route returns correct fields as listed in user.IdentityResponse"""
     mock_mongodb_handler_retrieve_one.return_value = {
         "status": Status.WAIVER_SIGNED,
         "role": Role.VOLUNTEER,

@@ -69,11 +69,11 @@ async def me(
     user_record = await mongodb_handler.retrieve_one(
         Collection.USERS, {"_id": user.uid}, ["role", "status"]
     )
+    
     if not user_record:
         return IdentityResponse(uid=user.uid)
-    return IdentityResponse(
-        uid=user.uid, role=user_record.role, status=user_record.status
-    )
+
+    return IdentityResponse(uid=user.uid, **user_record)
 
 
 @router.post("/apply", status_code=status.HTTP_201_CREATED)

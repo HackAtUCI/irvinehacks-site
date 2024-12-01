@@ -59,10 +59,10 @@ async def logout() -> RedirectResponse:
     return response
 
 
-@router.get("/me", response_model=IdentityResponse)
+@router.get("/me")
 async def me(
     user: Annotated[Union[User, None], Depends(use_user_identity)]
-) -> dict[str, object]:
+) -> IdentityResponse:
     log.info(user)
     if not user:
         return dict()
@@ -70,8 +70,10 @@ async def me(
         Collection.USERS, {"_id": user.uid}, ["role", "status"]
     )
     if not user_record:
-        return {"uid": user.uid}
-    return {**user_record, "uid": user.uid}
+        return IdentityResponse(uid=user.uid)
+    return IdentityResponse(
+        uid=user.uid, role=user_record.role, status=user_record.status
+    )
 
 
 @router.post("/apply", status_code=status.HTTP_201_CREATED)

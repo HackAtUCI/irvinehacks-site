@@ -6,6 +6,7 @@ import water from "@/assets/backgrounds/water.jpg";
 import SceneLayout from "@/components/dom/SceneLayout";
 import Footer from "@/lib/components/Footer/Footer";
 import NavbarParent from "@/lib/components/Navbar/NavbarParent";
+import stars from "@/assets/backgrounds/starry_repeatable.png";
 
 import "./globals.css";
 
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
 export default function Layout({ children }: PropsWithChildren) {
 	return (
 		<div
-			style={{ backgroundImage: `url(${water.src})` }}
+			style={{ backgroundImage: `url(${stars.src})` }}
 			className="overflow-x-hidden bg-top bg-repeat-y bg-[length:100%]"
 		>
 			{/* reference: https://github.com/pmndrs/react-three-next */}

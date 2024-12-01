@@ -12,11 +12,12 @@
 	--color-light-blue: #39befd;
 	--color-blue: #006fb2;
 	--color-dark-blue: #0b004c;
+	--color-midnight: #0c071b;
 }
 
 body {
 	color: var(--color-white);
-	background-color: var(--color-dark-blue);
+	background-color: var(--color-midnight);
 }
 
 /* based on Bootstrap Reboot */

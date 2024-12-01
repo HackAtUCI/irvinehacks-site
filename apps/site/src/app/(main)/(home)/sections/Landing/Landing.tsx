@@ -18,7 +18,7 @@ const Landing = () => {
 
 	if (deadlinePassed) return <LandingUnopened />;
 	if (applicationsOpened) return <LandingUnlocked />;
-	return <LandingUnopened />;
+	return <LandingUnlocked />;
 };
 
 export default Landing;

@@ -5,6 +5,22 @@
 	background-size: cover;
 }
 
+.cloudAnim {
+	animation: clouds 2s ease-in-out 0.5s;
+	animation-fill-mode: forwards;
+}
+
+.titleAnim {
+	animation: title 2s ease-in-out 1s;
+	animation-fill-mode: forwards;
+}
+
+.textDropshadow {
+	background: radial-gradient(#000, transparent);
+	border-radius: 50%;
+	filter: blur(1.5rem);
+}
+
 @keyframes slideOutLeft {
 	from {
 		transform: none;
@@ -21,5 +37,22 @@
 	}
 	to {
 		transform: translate(100%, 0);
+	}
+}
+
+@keyframes clouds {
+	from {
+	}
+	to {
+		opacity: 0;
+	}
+}
+
+@keyframes title {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
 	}
 }

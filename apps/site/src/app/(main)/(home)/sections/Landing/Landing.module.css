@@ -5,6 +5,14 @@
 	background-size: cover;
 }
 
+.landingUnlockedBackground {
+	background-image: url("~@/assets/backgrounds/starry_repeatable.png");
+	background-color: #0c071b;
+	background-position: center bottom;
+	background-repeat: no-repeat;
+	background-size: cover;
+}
+
 .cloudAnim {
 	animation: clouds 2s ease-in-out 0.5s;
 	animation-fill-mode: forwards;
@@ -19,6 +27,11 @@
 	background: radial-gradient(#000, transparent);
 	border-radius: 50%;
 	filter: blur(1.5rem);
+}
+
+.cliffMask {
+	-webkit-mask-image: linear-gradient(black, transparent);
+	mask-image: linear-gradient(black, transparent);
 }
 
 @keyframes slideOutLeft {

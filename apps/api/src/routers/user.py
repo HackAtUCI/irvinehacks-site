@@ -69,7 +69,7 @@ async def me(
     user_record = await mongodb_handler.retrieve_one(
         Collection.USERS, {"_id": user.uid}, ["role", "status"]
     )
-    
+
     if not user_record:
         return IdentityResponse(uid=user.uid)
 

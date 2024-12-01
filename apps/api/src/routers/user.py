@@ -67,7 +67,7 @@ async def me(
     if not user:
         return dict()
     user_record = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": user.uid}
+        Collection.USERS, {"_id": user.uid}, ["role", "status"]
     )
     if not user_record:
         return {"uid": user.uid}

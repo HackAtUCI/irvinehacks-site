@@ -56,7 +56,7 @@ def test_plain_identity_when_no_user_record(
     res = client.get("/me")
 
     mock_mongodb_handler_retrieve_one.assert_awaited_once_with(
-        Collection.USERS, {"_id": "edu.stanford.tree"}
+        Collection.USERS, {"_id": "edu.stanford.tree"}, ["role", "status"]
     )
     data = res.json()
     assert data == {"uid": "edu.stanford.tree", "status": None, "role": None}

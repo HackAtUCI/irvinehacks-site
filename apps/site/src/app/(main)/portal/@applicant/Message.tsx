@@ -34,7 +34,7 @@ function Message({ status }: MessageProps) {
 		),
 		[PortalStatus.accepted]: (
 			<p>
-				Congratulations on your acceptance to IrvineHacks 2024! Please look for
+				Congratulations on your acceptance to IrvineHacks 2025! Please look for
 				an email confirming your acceptance. It is crucial that you read through
 				all additional info in your confirmation email.
 			</p>
@@ -51,7 +51,11 @@ function Message({ status }: MessageProps) {
 		),
 	};
 
-	return messages[status];
+	return (
+		<div className="mt-4 font-body text-[var(--color-white)] text-xs sm:text-base md:text-2xl">
+			{messages[status]}
+		</div>
+	);
 }
 
 export default Message;

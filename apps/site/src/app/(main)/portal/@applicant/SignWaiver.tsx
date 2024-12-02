@@ -2,18 +2,24 @@ import Button from "@/lib/components/Button/Button";
 
 function SignWaiver() {
 	return (
-		<div>
-			<h3 className="text-3xl my-4">Waiver</h3>
-			<p>
-				In order to attend IrvineHacks 2024, all participants must complete the
+		<div className="text-[var(--color-white)]">
+			<h3 className="font-bold font-display mb-[9px] md:mb-[20px] text-[15px] sm:text-2xl md:text-[40px] md:leading-10">
+				Waiver
+			</h3>
+			<p className="font-body text-xs sm:text-base md:text-2xl">
+				In order to attend IrvineHacks 2025, all participants must complete the
 				Participation Waiver and review the Code of Conduct. The button below
 				will take you to a DocuSign form to sign the waiver. After signing the
 				waiver, please return to this Portal to confirm your attendance.
 			</p>
-			<Button
-				text="Sign Waiver to attend IrvineHacks 2024"
-				href="/api/user/waiver"
-			/>
+			<div className="mt-12">
+				<Button
+					text="Sign Waiver to attend IrvineHacks 2025"
+					href="/api/user/waiver"
+					isLightVersion={true}
+					className="text-xs sm:text-base md:text-4xl"
+				/>
+			</div>
 		</div>
 	);
 }

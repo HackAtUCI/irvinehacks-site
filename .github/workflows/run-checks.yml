@@ -43,6 +43,7 @@ jobs:
           workdir: apps/api
           level: warning
           reporter: github-pr-review
+          filter_mode: nofilter
 
       - name: Lint with flake8
         uses: reviewdog/action-flake8@v3
@@ -50,6 +51,7 @@ jobs:
           workdir: apps/api
           level: warning
           reporter: github-pr-review
+          filter_mode: nofilter
 
       - name: Cache `.mypy_cache`
         uses: actions/cache@v3
@@ -58,12 +60,13 @@ jobs:
           key: ${{ runner.os }}-python3.9-mypy-cache
 
       - name: Lint with mypy (review)
-        uses: tsuyoshicho/action-mypy@v4
+        uses: tsuyoshicho/action-mypy@v5
         if: github.event_name == 'pull_request'
         with:
           workdir: apps/api
           level: error
           reporter: github-pr-review
+          filter_mode: nofilter
 
       - name: Run mypy (check)
         uses: tsuyoshicho/action-mypy@v4
@@ -106,6 +109,7 @@ jobs:
         with:
           level: warning
           reporter: github-pr-review
+          filter_mode: nofilter
           prettier_flags: apps/site/src
 
       - name: Lint with ESLint (review)
@@ -114,6 +118,7 @@ jobs:
         with:
           level: error
           reporter: github-pr-review
+          filter_mode: nofilter
           eslint_flags: apps/site/src
 
       - name: Lint with ESLint (check)

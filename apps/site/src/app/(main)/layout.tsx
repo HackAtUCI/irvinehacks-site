@@ -24,7 +24,7 @@ export default function Layout({ children }: PropsWithChildren) {
 			{/* reference: https://github.com/pmndrs/react-three-next */}
 			<NavbarParent />
 			<SceneLayout>{children}</SceneLayout>
-			{/* <Footer /> */}
+			<Footer />
 		</div>
 	);
 }

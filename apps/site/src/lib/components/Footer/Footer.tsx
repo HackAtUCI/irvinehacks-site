@@ -1,32 +1,32 @@
-import hack from "@/assets/logos/hack.svg";
 import mail from "@/assets/logos/mail.svg";
-import facebook from "@/assets/logos/facebook.svg";
+import discord from "@/assets/logos/discord.svg";
 import instagram from "@/assets/logos/instagram.svg";
 import Image from "next/image";
-
+import tiktok from "@/assets/logos/tiktok.svg";
 import styles from "./Footer.module.scss";
 
 const imageArray = [
-	{
-		"logo": hack,
-		"alt": "Hack Logo that links to Hack at UCI's website",
-		"link": "https://hack.ics.uci.edu"
-	},
 	{
 		"logo": mail,
 		"alt": "Email that directs to hack@uci.edu",
 		"link": "mailto:hack@uci.edu"
 	},
 	{
-		"logo": facebook,
-		"alt": "Facebook logo that links to Hack at UCI's facebook",
-		"link": "https://www.facebook.com/groups/HackAtUCI/"
+		"logo": discord,
+		"alt": "Discord logo that links to Hack at UCI's Discord invite",
+		"link": "https://discord.com/invite/pvkGxq2AWM"
 	},
 	{
 		"logo": instagram,
 		"alt": "Instagram logo that links to Hack at UCI's instagram",
 		"link": "https://www.instagram.com/hackatuci/"
 	},
+	{
+		"logo": tiktok,
+		"alt": "Tiktok logo that links to Hack at UCI's tiktok",
+		"link": "https://www.tiktok.com/@hackatuci"
+	},
+
 ]
 
 const Footer = () => {
@@ -50,7 +50,12 @@ const Footer = () => {
 		<div className="flex flex-row gap-1 items-center mt-2 max-[600px]:flex-col max-[210px]:gap-0 max-[210px]:mt-0">
 			<div className="flex flex-row gap-1 items-center max-[210px]:flex-col max-[210px]:gap-0">
 				<p className="m-0">Made with</p>
-				<svg className=" fill-white" xmlns="http://www.w3.org/2000/svg" height="16" width="16" viewBox="0 0 512 512"><path d="M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z"/></svg>
+				<svg width="20" height="19" viewBox="0 0 20 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path d="M7.55321 0H2.96878V1.4339H1.4339V2.96878H0V9.14868H1.4339V10.5422H2.96878V12.0771H4.58444V13.7735H6.09912V15.167H7.55321V16.6817H9.14868V18.2974H10.6836V16.6817H12.1578V15.167H13.7331V13.7735H15.2478V12.0771H16.8231V10.5422H18.2974V9.14868H19.8322V2.96878H18.2974V1.4339H16.8231V0H12.1578V1.4339H10.6836V2.96878H9.14868V1.4339H7.55321V0Z" fill="#FF0000"/>
+					<rect x="2.98877" y="4.52344" width="1.57527" height="4.64502" fill="white"/>
+					<rect x="4.56445" y="2.98926" width="1.53488" height="1.53488" fill="white"/>
+				</svg>
+
 				<p className="m-0">in Irvine, CA <span className="max-[600px]:hidden">•</span></p>
 			</div>
 
@@ -58,7 +63,8 @@ const Footer = () => {
 		</div>
 
 	</footer>
-	);
+	)
+	// ;#2878A6
 };
 
 export default Footer;

@@ -17,9 +17,9 @@ async function PortalLayout({ admin, applicant }: PortalLayoutProps) {
 
 	return (
 		<section className="w-full flex items-center flex-col min-h-screen">
-			<div className="m-24">
+			<div className="mt-32 mb-24">
 				<h1
-					className={`${styles.title} font-display sm:text-[3rem] text-[#fffce2] text-6xl text-center`}
+					className={`${styles.title} font-display sm:text-[3rem] text-6xl text-center`}
 				>
 					Portal
 				</h1>

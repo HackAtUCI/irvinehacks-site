@@ -1,7 +1,11 @@
+/* eslint-disable @next/next/no-img-element */
 import { getSponsors } from "./getSponsors";
+import styles from "./Sponsors.module.scss";
+import { client } from "@/lib/sanity/client";
+import imageUrlBuilder from "@sanity/image-url";
 import SponsorTier from "./components/SponsorTier/SponsorTier";
 
-import styles from "./Sponsors.module.scss";
+const builder = imageUrlBuilder(client);
 
 const TIERS = [
 	"platinum",
@@ -12,30 +16,49 @@ const TIERS = [
 	"in-kind",
 ];
 
-export default async function Sponsors() {
+const Sponsors = async () => {
 	const sponsors = await getSponsors();
 
 	return (
-		<section className="container py-24 md:my-16 relative items-center flex flex-col md:p-8 w-3/4 mx-auto text-center">
+		<section className="container py-24 md:my-16 relative items-center flex flex-col md:p-8 w-4/5 mx-auto text-center">
 			<h2
-				className={`${styles.title} my-12 font-display sm:text-[3rem] text-[#fffce2] text-4xl text-center`}
+				className={`my-12 font-display font-bold sm:text-[3rem] text-white text-3xl text-center`}
 			>
 				Sponsors
 			</h2>
-			<p className="max-w-md mb-12">
-				Interested in sponsoring IrvineHacks 2024? Check out our information
-				above to learn more about our event! For more information, please email
-				us at{" "}
-				<a href="mailto:hack@uci.edu" className="hover:underline font-bold">
-					hack@uci.edu
-				</a>
-				.
-			</p>
-			{TIERS.map((tier) => (
-				<div key={tier}>
-					<SponsorTier sponsors={sponsors.get(tier)} className={styles[tier]} />
+
+			<div className={styles.sponsorsContainer}>
+				<div className="absolute w-full left-0 top-[1rem] flex gap-4 px-8 ">
+					<div className="h-[2px] bg-white flex-grow  ml-[2rem] mt-[0.5rem]" />
+					<p className="text-xs lg:text-sm text-center">
+						Interested in sponsoring IrvineHacks 2025? Email us at{" "}
+						<a href="mailto:hack@uci.edu" className="underline">
+							hack@uci.edu
+						</a>
+						.
+					</p>
+					<div className="h-[2px] bg-white flex-grow mr-[2rem] mt-[0.5rem]" />
 				</div>
-			))}
+
+				{TIERS.map((tier) => (
+					<div key={tier}>
+						<SponsorTier
+							sponsors={sponsors.get(tier)}
+							className={styles[tier]}
+						/>
+					</div>
+				))}
+
+				<div className={`${styles.horizontalLine} ${styles.bottom}`} />
+				<div className={styles.cornerSquares}>
+					<div className={styles.topLeft} />
+					<div className={styles.topRight} />
+					<div className={styles.bottomLeft} />
+					<div className={styles.bottomRight} />
+				</div>
+			</div>
 		</section>
 	);
-}
+};
+
+export default Sponsors;

@@ -59,19 +59,21 @@ async def logout() -> RedirectResponse:
     return response
 
 
-@router.get("/me", response_model=IdentityResponse)
+@router.get("/me")
 async def me(
     user: Annotated[Union[User, None], Depends(use_user_identity)]
-) -> dict[str, object]:
+) -> IdentityResponse:
     log.info(user)
     if not user:
-        return dict()
+        return IdentityResponse()
     user_record = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": user.uid}
+        Collection.USERS, {"_id": user.uid}, ["role", "status"]
     )
+
     if not user_record:
-        return {"uid": user.uid}
-    return {**user_record, "uid": user.uid}
+        return IdentityResponse(uid=user.uid)
+
+    return IdentityResponse(uid=user.uid, **user_record)
 
 
 @router.post("/apply", status_code=status.HTTP_201_CREATED)

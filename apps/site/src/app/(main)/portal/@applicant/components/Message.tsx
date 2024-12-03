@@ -1,4 +1,3 @@
-import clsx from "clsx";
 import { PortalStatus } from "../ApplicantPortal";
 
 interface MessageProps {

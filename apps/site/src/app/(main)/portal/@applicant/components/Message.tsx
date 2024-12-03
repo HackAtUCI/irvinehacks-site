@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import { PortalStatus } from "../ApplicantPortal";
 
 interface MessageProps {
@@ -16,7 +17,7 @@ function Message({ status }: MessageProps) {
 		[PortalStatus.pending]: submittedMessage,
 		[PortalStatus.reviewed]: submittedMessage,
 		[PortalStatus.rejected]: (
-			<p>
+			<p className = "mt-4">
 				Thank you for applying to IrvineHacks this year. We have read through
 				many applications so far, and unfortunately are unable to offer you a
 				spot at our event. We highly encourage you to continue developing your
@@ -25,25 +26,19 @@ function Message({ status }: MessageProps) {
 			</p>
 		),
 		[PortalStatus.waitlisted]: (
-			<p>
+			<p className = "mt-4">
 				Thank you for applying to IrvineHacks this year. We have read through
 				many applications so far, and are able to offer you a spot on the event
 				waitlist. Please check your email for more info about the waitlist and
 				waitlist walk-ins!
 			</p>
 		),
-		[PortalStatus.accepted]: (
-			<p>
-				Congratulations on your acceptance to IrvineHacks 2025! Please look for
-				an email confirming your acceptance. It is crucial that you read through
-				all additional info in your confirmation email.
-			</p>
-		),
-		[PortalStatus.waived]: <p>Thank you for signing the waiver!</p>,
+		[PortalStatus.accepted]: <></>,
+		[PortalStatus.waived]: <></>,
 		[PortalStatus.confirmed]: <></>,
 		[PortalStatus.attending]: <></>,
 		[PortalStatus.void]: (
-			<p>
+			<p className = "mt-4">
 				Unfortunately, you are not able to RSVP for IrvineHacks at this time and
 				will not be able to come to the event. However, we would love to see you
 				apply again next year!
@@ -52,7 +47,7 @@ function Message({ status }: MessageProps) {
 	};
 
 	return (
-		<div className="mt-4 font-body text-[var(--color-white)] text-xs sm:text-base md:text-2xl">
+		<div className="font-body text-[var(--color-white)] text-xs sm:text-base md:text-2xl">
 			{messages[status]}
 		</div>
 	);

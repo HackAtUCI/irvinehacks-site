@@ -4,7 +4,7 @@ import instagram from "@/assets/logos/instagram.svg";
 import Image from "next/image";
 import tiktok from "@/assets/logos/tiktok.svg";
 import redHeart from "@/assets/icons/red-heart.svg";
-import hack from "@/assets/logos/hack.svg"
+import hack from "@/assets/logos/hack.svg";
 import styles from "./Footer.module.scss";
 
 const imageArray = [
@@ -32,7 +32,7 @@ const imageArray = [
 		logo: tiktok,
 		alt: "Tiktok logo that links to Hack at UCI's tiktok",
 		link: "https://www.tiktok.com/@hackatuci",
-	}
+	},
 ];
 
 const Footer = () => {

@@ -10,12 +10,15 @@ export interface StatusImageProps {
 }
 
 const statusIcons = {
-	"Accepted": { src: Checkmark, alt: "Confirmed checkmark" },
-	"Rejected": { src: Xmark, alt: "Rejected X mark" },
-	"Pending": { src: PendingDots, alt: "Pending dots" },
+	Accepted: { src: Checkmark, alt: "Confirmed checkmark" },
+	Rejected: { src: Xmark, alt: "Rejected X mark" },
+	Pending: { src: PendingDots, alt: "Pending dots" },
 };
 
-export const StatusImage: React.FC<StatusImageProps> = ({ statusIcon, finished }) => {
+export const StatusImage: React.FC<StatusImageProps> = ({
+	statusIcon,
+	finished,
+}) => {
 	const { src, alt } = statusIcons[statusIcon];
 
 	return (

@@ -16,7 +16,7 @@ function Message({ status }: MessageProps) {
 		[PortalStatus.pending]: submittedMessage,
 		[PortalStatus.reviewed]: submittedMessage,
 		[PortalStatus.rejected]: (
-			<p className = "mt-4">
+			<p className="mt-4">
 				Thank you for applying to IrvineHacks this year. We have read through
 				many applications so far, and unfortunately are unable to offer you a
 				spot at our event. We highly encourage you to continue developing your
@@ -25,7 +25,7 @@ function Message({ status }: MessageProps) {
 			</p>
 		),
 		[PortalStatus.waitlisted]: (
-			<p className = "mt-4">
+			<p className="mt-4">
 				Thank you for applying to IrvineHacks this year. We have read through
 				many applications so far, and are able to offer you a spot on the event
 				waitlist. Please check your email for more info about the waitlist and
@@ -37,7 +37,7 @@ function Message({ status }: MessageProps) {
 		[PortalStatus.confirmed]: <></>,
 		[PortalStatus.attending]: <></>,
 		[PortalStatus.void]: (
-			<p className = "mt-4">
+			<p className="mt-4">
 				Unfortunately, you are not able to RSVP for IrvineHacks at this time and
 				will not be able to come to the event. However, we would love to see you
 				apply again next year!

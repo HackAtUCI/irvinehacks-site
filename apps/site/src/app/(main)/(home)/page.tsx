@@ -1,7 +1,7 @@
 import {
 	About,
 	Landing,
-	MentorVolunteer,
+	ChooseCharacter,
 	FAQ,
 	Sponsors,
 	Partners,
@@ -18,7 +18,7 @@ export default function Home() {
 		<>
 			<Landing />
 			<About />
-			<MentorVolunteer />
+			<ChooseCharacter />
 			<FAQ />
 			<Sponsors />
 			<Partners />

@@ -26,7 +26,7 @@ const LandingUnlocked = () => {
 	return (
 		<section className={`${styles.landingUnlockedBackground} min-h-screen`}>
 			<div
-				className={`flex flex-col items-center overflow-hidden relative w-screen aspect-[3/4] max-h-[1750px] max-lg:h-[1100px] max-sm:h-[850px]`}
+				className={`flex flex-col items-center relative w-screen aspect-[3/4] max-h-[1750px] max-lg:h-[1100px] max-sm:h-[850px]`}
 			>
 				<View className="absolute w-full h-full">
 					<Suspense fallback={null}>
@@ -109,7 +109,7 @@ const LandingUnlocked = () => {
 				<Image
 					src={Cloud2}
 					alt="clouds"
-					className={`absolute bottom-[-300px] min-w-[1800px] max-lg:min-w-[150%]`}
+					className={`absolute bottom-[-25%] min-w-[1800px] max-lg:min-w-[150%]`}
 				/>
 				<div className="w-full absolute bottom-0 flex justify-center aspect-[12/5]">
 					<Image src={LgStar} alt="*" className="absolute top-[30%] left-10" />

@@ -10,8 +10,8 @@ from services.sendgrid_handler import (
     Template,
 )
 
-IH_SENDER = ("apply@irvinehacks.com", "IrvineHacks 2024 Applications")
-REPLY_TO_HACK_AT_UCI = ("hack@uci.edu", "Hack at UCI")
+IH_SENDER = ("apply@irvinehacks.com", "IrvineHacks 2025 Applications")
+REPLY_TO_HACK_AT_UCI = ("irvinehacks2025@gmail.com", "Hack at UCI")
 
 DECISION_TEMPLATES: dict[Decision, ApplicationUpdateTemplates] = {
     Decision.ACCEPTED: Template.ACCEPTED_EMAIL,

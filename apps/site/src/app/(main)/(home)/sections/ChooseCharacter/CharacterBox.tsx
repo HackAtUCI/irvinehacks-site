@@ -35,8 +35,16 @@ export default function CharacterBox({
 			className={`${className} ${styles.hoverGroup} flex flex-col items-center justify-center mb-20 lg:mb-0`}
 		>
 			<div className="relative">
-				<Image className="absolute hidden lg:block" src={bgImageSrc} alt="" />
-				<Image className="absolute lg:hidden" src={centerChatBG} alt="" />
+				<Image
+					className="absolute hidden lg:block"
+					src={bgImageSrc}
+					alt="app description chat box background"
+				/>
+				<Image
+					className="absolute lg:hidden"
+					src={centerChatBG}
+					alt="center app description chat box background"
+				/>
 				<div className={styles.chatBox + " relative"}>
 					<Link href={href}>
 						<p
@@ -44,15 +52,27 @@ export default function CharacterBox({
 						>
 							{chatText}
 						</p>
-						<Image className="hidden lg:block" src={chatBoxImageSrc} alt="" />
-						<Image className="lg:hidden" src={centerChatBox} alt="" />
+						<Image
+							className="hidden lg:block"
+							src={chatBoxImageSrc}
+							alt="app description chat box"
+						/>
+						<Image
+							className="lg:hidden"
+							src={centerChatBox}
+							alt="center app description chat box"
+						/>
 					</Link>
 				</div>
 			</div>
 
 			<Link className="relative w-5/6" href={href}>
 				<div className={`${clipClass} absolute w-full h-full z-10`} />
-				<Image className={`${styles.sprite} relative`} src={imageSrc} alt="" />
+				<Image
+					className={`${styles.sprite} relative`}
+					src={imageSrc}
+					alt="app sprite"
+				/>
 			</Link>
 
 			<Link href={href}>

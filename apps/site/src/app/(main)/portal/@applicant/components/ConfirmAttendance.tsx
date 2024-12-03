@@ -1,4 +1,4 @@
-import { PortalStatus } from "./ApplicantPortal";
+import { PortalStatus } from "../ApplicantPortal";
 import RsvpForm from "./RsvpForm";
 
 interface ConfirmAttendanceProps {
@@ -37,7 +37,7 @@ function ConfirmAttendance({ status }: ConfirmAttendanceProps) {
 					attendance using the button below!
 				</p>
 			)}
-			<div className = "mt-12">
+			<div className="mt-12">
 				<RsvpForm
 					buttonText={buttonText}
 					showWarning={status === PortalStatus.attending}

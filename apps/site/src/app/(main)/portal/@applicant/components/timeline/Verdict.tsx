@@ -1,5 +1,5 @@
 import { TimelineComponent } from "./TimelineComponent";
-import { PortalStatus } from ".././ApplicantPortal";
+import { PortalStatus } from "../.././ApplicantPortal";
 import { StatusImageProps } from "./StatusImage";
 
 export const VerdictComponent = ({ status }: { status: PortalStatus }) => {

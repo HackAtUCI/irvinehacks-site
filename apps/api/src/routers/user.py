@@ -65,7 +65,7 @@ async def me(
 ) -> IdentityResponse:
     log.info(user)
     if not user:
-        return dict()
+        return IdentityResponse()
     user_record = await mongodb_handler.retrieve_one(
         Collection.USERS, {"_id": user.uid}, ["role", "status"]
     )

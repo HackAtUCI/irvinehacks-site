@@ -1,13 +1,18 @@
 import CharacterBox from "./CharacterBox";
-import { ChatBoxType } from "./CharacterBox";
 
 import hackerSprite from "@/assets/images/hacker_sprite.png";
 import mentorSprite from "@/assets/images/mentor_sprite.png";
 import volunteerSprite from "@/assets/images/volunteer_sprite.png";
+import leftChatBox from "@/assets/images/left_chat_box.svg";
+import centerChatBox from "@/assets/images/center_chat_box.svg";
+import rightChatBox from "@/assets/images/right_chat_box.svg";
+import leftChatBG from "@/assets/images/left_chat_box_bg.svg";
+import centerChatBG from "@/assets/images/center_chat_box_bg.svg";
+import rightChatBG from "@/assets/images/right_chat_box_bg.svg";
 
 import styles from "./CharacterBox.module.scss";
 
-const MentorVolunteer = () => {
+const ChooseCharacter = () => {
 	return (
 		<section className="flex flex-col justify-center my-14">
 			<h2 className="font-display text-5xl text-center mb-12">
@@ -20,7 +25,9 @@ const MentorVolunteer = () => {
 					titleText="Mentor"
 					clipClass={styles.glasses}
 					imageSrc={mentorSprite}
-					chatBoxType={ChatBoxType.LEFT}
+					chatBoxImageSrc={leftChatBox}
+					bgImageSrc={leftChatBG}
+					textAlign={"text-left"}
 					href="/mentor"
 				/>
 				<CharacterBox
@@ -29,7 +36,9 @@ const MentorVolunteer = () => {
 					titleText="Hacker"
 					clipClass={styles.sword}
 					imageSrc={hackerSprite}
-					chatBoxType={ChatBoxType.CENTER}
+					chatBoxImageSrc={centerChatBox}
+					bgImageSrc={centerChatBG}
+					textAlign={"text-center"}
 					href="/apply"
 				/>
 				<CharacterBox
@@ -38,7 +47,9 @@ const MentorVolunteer = () => {
 					titleText="Volunteer"
 					clipClass={styles.orb}
 					imageSrc={volunteerSprite}
-					chatBoxType={ChatBoxType.RIGHT}
+					chatBoxImageSrc={rightChatBox}
+					bgImageSrc={rightChatBG}
+					textAlign="text-right"
 					href="/volunteer"
 				/>
 			</div>
@@ -46,4 +57,4 @@ const MentorVolunteer = () => {
 	);
 };
 
-export default MentorVolunteer;
+export default ChooseCharacter;

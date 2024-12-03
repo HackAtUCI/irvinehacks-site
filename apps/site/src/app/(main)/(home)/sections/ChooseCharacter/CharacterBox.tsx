@@ -1,21 +1,11 @@
 import type { ComponentProps } from "react";
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 import Link from "next/link";
 
-import leftChatBox from "@/assets/images/left_chat_box.svg";
 import centerChatBox from "@/assets/images/center_chat_box.svg";
-import rightChatBox from "@/assets/images/right_chat_box.svg";
-import leftChatBG from "@/assets/images/left_chat_box_bg.svg";
 import centerChatBG from "@/assets/images/center_chat_box_bg.svg";
-import rightChatBG from "@/assets/images/right_chat_box_bg.svg";
 
 import styles from "./CharacterBox.module.scss";
-
-export enum ChatBoxType {
-	LEFT,
-	CENTER,
-	RIGHT,
-}
 
 interface CharacterBoxProps {
 	className?: string;
@@ -23,7 +13,9 @@ interface CharacterBoxProps {
 	chatText: string;
 	titleText: string;
 	clipClass: string;
-	chatBoxType: ChatBoxType;
+	chatBoxImageSrc: StaticImageData;
+	bgImageSrc: StaticImageData;
+	textAlign: string;
 	href: string;
 }
 
@@ -33,33 +25,11 @@ export default function CharacterBox({
 	chatText,
 	titleText,
 	clipClass,
-	chatBoxType,
+	chatBoxImageSrc,
+	bgImageSrc,
+	textAlign,
 	href,
 }: CharacterBoxProps) {
-	let chatBoxImageSrc;
-	let bgImageSrc;
-	let textAlign;
-
-	switch (chatBoxType) {
-		case ChatBoxType.LEFT:
-			chatBoxImageSrc = leftChatBox;
-			bgImageSrc = leftChatBG;
-			textAlign = "text-left";
-			break;
-
-		case ChatBoxType.CENTER:
-			chatBoxImageSrc = centerChatBox;
-			bgImageSrc = centerChatBG;
-			textAlign = "text-center";
-			break;
-
-		case ChatBoxType.RIGHT:
-			chatBoxImageSrc = rightChatBox;
-			bgImageSrc = rightChatBG;
-			textAlign = "text-right";
-			break;
-	}
-
 	return (
 		<div
 			className={`${className} ${styles.hoverGroup} flex flex-col items-center justify-center mb-20 lg:mb-0`}

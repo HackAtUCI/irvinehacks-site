@@ -22,9 +22,10 @@ export default function RsvpForm({ buttonText, showWarning }: RsvpFormProps) {
 			}}
 		>
 			<Button
-				className="text-color-red"
-				style={{ width: "100%" }}
 				text={buttonText}
+				isLightVersion={true}
+				className="text-xs sm:text-base md:text-4xl"
+				
 			/>
 		</form>
 	);

@@ -14,12 +14,12 @@
 }
 
 .cloudAnim {
-	animation: clouds 2s ease-in-out 0.5s;
+	animation: clouds 3s ease-in-out 0.5s;
 	animation-fill-mode: forwards;
 }
 
 .titleAnim {
-	animation: title 2s ease-in-out 1s;
+	animation: title 3s ease-in-out 1s;
 	animation-fill-mode: forwards;
 }
 
@@ -32,6 +32,10 @@
 .cliffMask {
 	-webkit-mask-image: linear-gradient(black, transparent);
 	mask-image: linear-gradient(black, transparent);
+}
+
+.bottomCloud {
+	transform: translateY(30%);
 }
 
 @keyframes slideOutLeft {

@@ -66,9 +66,7 @@ export default function RadioSelect({
 									key={`option-${i}`}
 									name={name}
 									value={item.value}
-									onChange={(e) =>
-										setIsOtherChecked(e.target.checked)
-									}
+									onChange={(e) => setIsOtherChecked(e.target.checked)}
 									required
 								/>
 								<label className="text-lg" htmlFor={keyandId}>

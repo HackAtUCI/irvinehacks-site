@@ -2,11 +2,10 @@
 
 import { Suspense, useState } from "react";
 import { PerspectiveCamera } from "@react-three/drei";
-
+import { motion } from "framer-motion";
+import Image from "next/image";
 import View from "@/components/canvas/View";
 import Button from "@/lib/components/Button/Button";
-
-import { motion } from "framer-motion";
 
 import Cliff from "@/assets/images/Desktop/anteater_cliff.png";
 import Castle from "@/assets/images/Desktop/castle_island.png";
@@ -20,18 +19,17 @@ import LgStar from "@/assets/images/Desktop/large_star.svg";
 import SmStar from "@/assets/images/Desktop/small_star.svg";
 
 import styles from "./Landing.module.css";
-import Image from "next/image";
 
 const LandingUnlocked = () => {
 	const [loaded, setLoaded] = useState(0);
-
-	console.log(loaded);
 
 	return (
 		<section
 			className={`${
 				styles.landingUnlockedBackground
-			} min-h-screen relative max-lg:h-[1500px] ${loaded < 8 ? "blur-sm" : ""} duration-500`}
+			} min-h-screen relative max-lg:h-[1500px] ${
+				loaded < 8 ? "blur-sm" : ""
+			} duration-500`}
 		>
 			<div
 				className={`flex flex-col items-center relative w-screen aspect-[3/4] max-h-[1750px] max-lg:h-[1100px] max-sm:h-[850px]`}

@@ -15,8 +15,8 @@ const imageArray = [
 	},
 	{
 		logo: mail,
-		alt: "Email that directs to hack@uci.edu",
-		link: "mailto:hack@uci.edu",
+		alt: "Email that directs to contact@irvinehacks.com",
+		link: "mailto:contact@irvinehacks.com",
 	},
 	{
 		logo: discord,
@@ -75,7 +75,6 @@ const Footer = () => {
 			</div>
 		</footer>
 	);
-	// ;#2878A6
 };
 
 export default Footer;

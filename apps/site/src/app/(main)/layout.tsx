@@ -2,7 +2,6 @@ import { PropsWithChildren } from "react";
 
 import type { Metadata } from "next";
 
-import water from "@/assets/backgrounds/water.jpg";
 import SceneLayout from "@/components/dom/SceneLayout";
 import Footer from "@/lib/components/Footer/Footer";
 import NavbarParent from "@/lib/components/Navbar/NavbarParent";

@@ -16,7 +16,6 @@ export default async function Partners() {
 
 	return (
 		<section className="container py-24 relative mx-auto w-full ">
-			{/* Stars with increased sizes */}
 			<Image
 				src={SmallStar}
 				alt=""
@@ -27,7 +26,7 @@ export default async function Partners() {
 			<Image
 				src={SmallStar}
 				alt=""
-				className="absolute left-32 top-48 hidden lg:block"
+				className="absolute left-32 top-48 hidden xl:block"
 				width={42}
 				height={42}
 			/>

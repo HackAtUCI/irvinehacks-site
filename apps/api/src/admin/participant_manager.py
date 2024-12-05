@@ -27,13 +27,20 @@ class Participant(UserRecord):
     """Participants attending the event."""
 
     checkins: list[Checkin] = []
-    first_name: str
-    last_name: str
     status: Union[Status, Decision] = Status.REVIEWED
     badge_number: Union[str, None] = None
 
 
-PARTICIPANT_FIELDS = ["_id", "status", "role", "checkins", "badge_number"]
+PARTICIPANT_FIELDS = [
+    "_id",
+    "first_name",
+    "last_name",
+    "role",
+    "status",
+    "role",
+    "checkins",
+    "badge_number",
+]
 
 
 async def get_hackers() -> list[Participant]:
@@ -53,19 +60,16 @@ async def get_hackers() -> list[Participant]:
                 ]
             },
         },
-        PARTICIPANT_FIELDS
-        + ["application_data.first_name", "application_data.last_name"],
+        PARTICIPANT_FIELDS,
     )
 
-    return [Participant(**user, **user["application_data"]) for user in records]
+    return [Participant(**user) for user in records]
 
 
 async def get_non_hackers() -> list[Participant]:
     """Fetch all non-hackers participating in the event."""
     records: list[dict[str, Any]] = await mongodb_handler.retrieve(
-        Collection.USERS,
-        {"role": {"$in": NON_HACKER_ROLES}},
-        PARTICIPANT_FIELDS + ["first_name", "last_name"],
+        Collection.USERS, {"role": {"$in": NON_HACKER_ROLES}}, PARTICIPANT_FIELDS
     )
     return [Participant(**user) for user in records]
 

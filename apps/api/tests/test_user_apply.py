@@ -68,14 +68,18 @@ EXPECTED_APPLICATION_DATA_WITHOUT_RESUME = ProcessedApplicationData(
 
 EXPECTED_USER = Applicant(
     uid="edu.uci.pkfire",
+    first_name="pk",
+    last_name="fire",
     status=Status.PENDING_REVIEW,
     application_data=EXPECTED_APPLICATION_DATA,
 )
 
 EXPECTED_USER_WITHOUT_RESUME = Applicant(
     uid="edu.uci.pkfire",
-    application_data=EXPECTED_APPLICATION_DATA_WITHOUT_RESUME,
+    first_name="pk",
+    last_name="fire",
     status=Status.PENDING_REVIEW,
+    application_data=EXPECTED_APPLICATION_DATA_WITHOUT_RESUME,
 )
 
 resume_handler.RESUMES_FOLDER_ID = "RESUMES_FOLDER_ID"
@@ -117,7 +121,7 @@ def test_apply_successfully(
         upsert=True,
     )
     mock_send_application_confirmation_email.assert_awaited_once_with(
-        USER_EMAIL, EXPECTED_APPLICATION_DATA
+        USER_EMAIL, EXPECTED_USER
     )
     assert res.status_code == 201
 
@@ -261,7 +265,7 @@ def test_apply_successfully_without_resume(
         upsert=True,
     )
     mock_send_application_confirmation_email.assert_awaited_once_with(
-        USER_EMAIL, EXPECTED_APPLICATION_DATA_WITHOUT_RESUME
+        USER_EMAIL, EXPECTED_USER_WITHOUT_RESUME
     )
     assert res.status_code == 201
 
@@ -271,7 +275,7 @@ def test_application_data_is_bson_encodable() -> None:
     data = EXPECTED_APPLICATION_DATA.model_copy()
     data.linkedin = HttpUrl("https://linkedin.com")
     encoded = bson.encode(EXPECTED_APPLICATION_DATA.model_dump())
-    assert len(encoded) == 415
+    assert len(encoded) == 376
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)

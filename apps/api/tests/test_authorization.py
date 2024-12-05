@@ -1,9 +1,7 @@
-from datetime import datetime
 from unittest.mock import AsyncMock, patch
 
 import pytest
 from fastapi.exceptions import HTTPException
-from test_user_apply import SAMPLE_APPLICATION
 
 from auth import authorization
 from auth.user_identity import GuestUser, User
@@ -36,7 +34,8 @@ async def test_rejected_applicant_is_unapplied(
         "_id": "edu.ucsd.tritons",
         "status": Decision.REJECTED,
         "role": Role.APPLICANT,
-        "application_data": {**SAMPLE_APPLICATION, "submission_time": datetime.now()},
+        "first_name": "King",
+        "last_name": "Triton",
     }
 
     with pytest.raises(HTTPException) as excinfo:
@@ -55,7 +54,8 @@ async def test_accepted_applicant_is_fine(
         "_id": "edu.berkeley.oski",
         "status": Decision.ACCEPTED,
         "role": Role.APPLICANT,
-        "application_data": {**SAMPLE_APPLICATION, "submission_time": datetime.now()},
+        "first_name": "Oski",
+        "last_name": "Bear",
     }
 
     user, applicant = await authorization.require_accepted_applicant(

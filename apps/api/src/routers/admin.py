@@ -30,14 +30,14 @@ require_checkin_associate = require_role(ADMIN_ROLES + ORGANIZER_ROLES)
 
 
 class ApplicationDataSummary(BaseModel):
-    first_name: str
-    last_name: str
     school: str
     submission_time: datetime
 
 
 class ApplicantSummary(BaseRecord):
     uid: str = Field(alias="_id")
+    first_name: str
+    last_name: str
     status: str
     decision: Optional[Decision] = None
     application_data: ApplicationDataSummary
@@ -56,8 +56,8 @@ async def applicants(
         [
             "_id",
             "status",
-            "application_data.first_name",
-            "application_data.last_name",
+            "first_name",
+            "last_name",
             "application_data.school",
             "application_data.submission_time",
             "application_data.reviews",
@@ -131,7 +131,7 @@ async def release_decisions() -> None:
     records = await mongodb_handler.retrieve(
         Collection.USERS,
         {"status": Status.REVIEWED},
-        ["_id", "application_data.reviews", "application_data.first_name"],
+        ["_id", "application_data.reviews", "first_name"],
     )
 
     for record in records:
@@ -153,18 +153,19 @@ async def rsvp_reminder() -> None:
     # TODO: Consider using Pydantic model validation instead of type annotations
     not_yet_rsvpd: list[dict[str, Any]] = await mongodb_handler.retrieve(
         Collection.USERS,
-        {"status": {"$in": [Decision.ACCEPTED, Status.WAIVER_SIGNED]}},
-        ["_id", "application_data.first_name"],
+        {
+            "role": Role.APPLICANT,
+            "status": {"$in": [Decision.ACCEPTED, Status.WAIVER_SIGNED]},
+        },
+        ["_id", "first_name"],
     )
 
     personalizations = []
     for record in not_yet_rsvpd:
-        if "application_data" not in record:
-            continue
         personalizations.append(
             ApplicationUpdatePersonalization(
                 email=_recover_email_from_uid(record["_id"]),
-                first_name=record["application_data"]["first_name"],
+                first_name=record["first_name"],
             )
         )
 
@@ -184,6 +185,7 @@ async def rsvp_reminder() -> None:
 )
 async def confirm_attendance() -> None:
     """Update applicant status to void or attending based on their current status."""
+    # TODO: consider using Pydantic model, maybe BareApplicant
     records = await mongodb_handler.retrieve(
         Collection.USERS,
         {"role": Role.APPLICANT},
@@ -225,12 +227,10 @@ async def waitlist_release(uid: str) -> None:
     record = await mongodb_handler.retrieve_one(
         Collection.USERS,
         {"_id": uid, "role": Role.APPLICANT, "status": Decision.WAITLISTED},
-        ["status", "application_data.first_name"],
+        ["status", "first_name"],
     )
     if not record:
         raise HTTPException(status.HTTP_404_NOT_FOUND)
-
-    first_name = record["application_data"]["first_name"]
 
     ok = await mongodb_handler.update_one(
         Collection.USERS, {"_id": uid}, {"status": Decision.ACCEPTED}
@@ -239,7 +239,7 @@ async def waitlist_release(uid: str) -> None:
         raise RuntimeError("gg wp")
 
     await email_handler.send_waitlist_release_email(
-        first_name, _recover_email_from_uid(uid)
+        record["first_name"], _recover_email_from_uid(uid)
     )
 
     log.info(f"Accepted {uid} off the waitlist and sent email.")
@@ -248,6 +248,7 @@ async def waitlist_release(uid: str) -> None:
 @router.get("/participants", dependencies=[Depends(require_checkin_associate)])
 async def participants() -> list[Participant]:
     """Get list of participants."""
+    # TODO: consider combining the two functions into one
     hackers = await participant_manager.get_hackers()
     non_hackers = await participant_manager.get_non_hackers()
     return hackers + non_hackers
@@ -328,7 +329,7 @@ async def _process_batch(batch: tuple[dict[str, Any], ...], decision: Decision) 
 
 
 def _extract_personalizations(decision_data: dict[str, Any]) -> tuple[str, EmailStr]:
-    name = decision_data["application_data"]["first_name"]
+    name = decision_data["first_name"]
     email = _recover_email_from_uid(decision_data["_id"])
     return name, email
 

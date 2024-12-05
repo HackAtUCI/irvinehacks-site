@@ -1,6 +1,6 @@
 from test_user_apply import EXPECTED_APPLICATION_DATA
 
-from utils.user_record import Applicant, Status
+from models.user_record import Applicant, Status
 
 
 def test_key_uid_not_in_applicant_model_dump() -> None:

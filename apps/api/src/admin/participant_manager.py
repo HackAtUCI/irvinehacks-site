@@ -6,9 +6,9 @@ from typing_extensions import TypeAlias
 
 from auth.user_identity import User, utc_now
 from models.ApplicationData import Decision
+from models.user_record import Role, Status, UserRecord
 from services import mongodb_handler
 from services.mongodb_handler import Collection
-from utils.user_record import Role, Status, UserRecord
 
 log = getLogger(__name__)
 

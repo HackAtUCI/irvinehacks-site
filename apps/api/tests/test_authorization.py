@@ -8,7 +8,7 @@ from test_user_apply import SAMPLE_APPLICATION
 from auth import authorization
 from auth.user_identity import GuestUser, User
 from models.ApplicationData import Decision
-from utils.user_record import Role
+from models.user_record import Role
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)

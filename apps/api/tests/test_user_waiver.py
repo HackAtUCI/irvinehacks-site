@@ -11,9 +11,9 @@ from test_user_apply import SAMPLE_APPLICATION
 from auth.authorization import require_accepted_applicant
 from auth.user_identity import User
 from models.ApplicationData import Decision
+from models.user_record import Applicant, Role, Status
 from routers import user
 from services import docusign_handler
-from utils.user_record import Applicant, Role, Status
 
 app = FastAPI()
 app.include_router(user.router)

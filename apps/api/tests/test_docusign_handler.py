@@ -3,10 +3,10 @@ from unittest.mock import AsyncMock, patch
 from test_user_apply import EXPECTED_APPLICATION_DATA
 
 from models.ApplicationData import Decision
+from models.user_record import Role, Status
 from services import docusign_handler
 from services.docusign_handler import ACCOUNT_ID, POWERFORM_ID, WebhookPayload
 from services.mongodb_handler import Collection
-from utils.user_record import Role, Status
 
 SAMPLE_WEBHOOK_PAYLOAD = {
     "event": "envelope-completed",

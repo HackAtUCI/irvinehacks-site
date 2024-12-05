@@ -19,11 +19,11 @@ from auth import user_identity
 from auth.authorization import require_accepted_applicant
 from auth.user_identity import User, require_user_identity, use_user_identity
 from models.ApplicationData import ProcessedApplicationData, RawApplicationData
+from models.user_record import Applicant, Role, Status
 from services import docusign_handler, mongodb_handler
 from services.docusign_handler import WebhookPayload
 from services.mongodb_handler import Collection
 from utils import email_handler, resume_handler
-from utils.user_record import Applicant, Role, Status
 
 log = getLogger(__name__)
 

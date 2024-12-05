@@ -3,9 +3,9 @@ from logging import getLogger
 from pydantic import EmailStr
 
 from models.ApplicationData import Decision
+from models.user_record import Applicant, Role, Status, UserRecord
 from services import mongodb_handler
 from services.mongodb_handler import Collection
-from utils.user_record import Applicant, Role, Status, UserRecord
 
 log = getLogger(__name__)
 

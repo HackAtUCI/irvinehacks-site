@@ -6,10 +6,10 @@ from fastapi import FastAPI
 from auth import user_identity
 from auth.user_identity import NativeUser, UserTestClient
 from models.ApplicationData import Decision
+from models.user_record import Status
 from routers import admin
 from services.mongodb_handler import Collection
 from services.sendgrid_handler import Template
-from utils.user_record import Status
 
 user_identity.JWT_SECRET = "not a good idea"
 

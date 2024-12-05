@@ -8,10 +8,10 @@ from pydantic import HttpUrl
 
 from auth.user_identity import NativeUser, UserTestClient
 from models.ApplicationData import ProcessedApplicationData
+from models.user_record import Applicant, Status
 from routers import user
 from services.mongodb_handler import Collection
 from utils import resume_handler
-from utils.user_record import Applicant, Status
 
 # Tests will break again next year, tech should notice and fix :P
 TEST_DEADLINE = datetime(2025, 10, 1, 8, 0, 0, tzinfo=timezone.utc)

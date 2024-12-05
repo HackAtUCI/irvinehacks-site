@@ -5,9 +5,9 @@ from pydantic import ValidationError
 
 from auth.user_identity import User, require_user_identity
 from models.ApplicationData import Decision
+from models.user_record import Applicant, Role, Status, UserRecord
 from services import mongodb_handler
 from services.mongodb_handler import Collection
-from utils.user_record import Applicant, Role, Status, UserRecord
 
 
 def require_role(

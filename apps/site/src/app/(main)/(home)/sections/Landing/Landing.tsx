@@ -7,6 +7,8 @@ import Image from "next/image";
 import View from "@/components/canvas/View";
 import Button from "@/lib/components/Button/Button";
 
+import About from "./About/About";
+
 import Cliff from "@/assets/images/anteater_cliff.png";
 import Castle from "@/assets/images/castle_island.png";
 import Cloud1 from "@/assets/images/cloud_bg_1.png";
@@ -16,7 +18,6 @@ import FarPillars from "@/assets/images/clouds_distance_pillars.png";
 import BgCastle from "@/assets/images/background_castle.png";
 
 import styles from "./Landing.module.css";
-import About from "./About/About";
 
 const Landing = () => {
 	const [loaded, setLoaded] = useState(0);

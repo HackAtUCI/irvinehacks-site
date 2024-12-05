@@ -31,12 +31,13 @@ function ValidatingForm(props: PropsWithChildren<FormProps>) {
 		<form
 			onSubmit={handleSubmit}
 			noValidate // use custom validation feedback
-			className={validated ? styles.validated : styles.notYetValidated}
-			// validated={validated}
+			className={`${
+				validated ? styles.validated : styles.notYetValidated
+			} flex flex-col items-center`}
 			{...rest}
 		>
 			{children}
-			<Button text="Continue" disabled={submitting} />
+			<Button text="Login" disabled={submitting} />
 		</form>
 	);
 }

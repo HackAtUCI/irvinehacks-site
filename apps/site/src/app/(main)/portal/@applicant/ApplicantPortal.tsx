@@ -5,6 +5,7 @@ import getUserIdentity from "@/lib/utils/getUserIdentity";
 import ConfirmAttendance from "./components/ConfirmAttendance";
 import Message from "./components/Message";
 import SignWaiver from "./components/SignWaiver";
+import ReturnHome from "./components/ReturnHome";
 import VerticalTimeline from "./components/timeline/VerticalTimeline";
 
 export const enum PortalStatus {
@@ -33,6 +34,7 @@ async function Portal() {
 		status === PortalStatus.attending;
 
 	const needsToSignWaiver = status === PortalStatus.accepted;
+	const rejected = status === PortalStatus.rejected;
 
 	return (
 		<div className="bg-transparent text-black max-w-6xl rounded-2xl p-6 flex flex-col mb-24 w-full">
@@ -43,6 +45,7 @@ async function Portal() {
 			<Message status={status as PortalStatus} />
 			{needsToSignWaiver && <SignWaiver />}
 			{submittedWaiver && <ConfirmAttendance status={status as PortalStatus} />}
+			{rejected && <ReturnHome />}
 		</div>
 	);
 }

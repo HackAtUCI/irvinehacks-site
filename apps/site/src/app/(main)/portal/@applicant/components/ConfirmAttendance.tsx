@@ -13,7 +13,7 @@ function ConfirmAttendance({ status }: ConfirmAttendanceProps) {
 
 	return (
 		<div className="mt-2 md:mt-8 text-[var(--color-white)]">
-			<h3 className="font-bold font-display mb-[9px] md:mb-[20px] text-[15px] sm:text-2xl md:text-[40px] md:leading-10">
+			<h3 className="font-bold font-display mb-[9px] md:mb-[20px] text-[0.9375rem] sm:text-2xl md:text-[2.5rem] md:leading-10">
 				RSVP
 			</h3>
 			{status === PortalStatus.confirmed ||

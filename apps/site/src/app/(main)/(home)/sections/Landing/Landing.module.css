@@ -1,11 +1,4 @@
 .landingBackground {
-	background-image: url("~@/assets/backgrounds/landing-background.png");
-	background-position: center bottom;
-	background-repeat: no-repeat;
-	background-size: cover;
-}
-
-.landingUnlockedBackground {
 	background-image: url("~@/assets/backgrounds/starry_repeatable.png");
 	background-color: #0c071b;
 	background-position: center bottom;

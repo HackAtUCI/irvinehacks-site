@@ -10,7 +10,7 @@ const LOGIN_PATH = "/api/user/login";
 
 function LoginForm() {
 	return (
-		<div className="mx-8 md:m-0 p-6 md:p-16 border-[2px] md:border-[5px] border-[var(--color-white)] text-[var(--color-white)] bg-[var(--color-black)]">
+		<div className="mx-8 md:m-0 p-6 md:px-10 md:py-8 border-[2px] md:border-[5px] border-[var(--color-white)] text-[var(--color-white)] bg-[var(--color-black)]">
 			<ValidatingForm method="post" action={LOGIN_PATH}>
 				<div className="flex flex-col mb-12 gap-2">
 					<label htmlFor="email">

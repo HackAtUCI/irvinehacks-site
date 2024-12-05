@@ -37,7 +37,14 @@ function ValidatingForm(props: PropsWithChildren<FormProps>) {
 			{...rest}
 		>
 			{children}
-			<Button text="Login" disabled={submitting} />
+			<div className="w-1/3">
+				<Button
+					className="text-xs sm:text-base md:text-2xl"
+					text="Login"
+					disabled={submitting}
+					isLightVersion
+				/>
+			</div>
 		</form>
 	);
 }

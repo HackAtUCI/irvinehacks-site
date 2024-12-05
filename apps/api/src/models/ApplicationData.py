@@ -1,10 +1,16 @@
 from datetime import datetime
 from enum import Enum
-from typing import Union
+from typing import Annotated, Union
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_serializer
-
-from .utils import form_body
+from fastapi import UploadFile
+from pydantic import (
+    BaseModel,
+    BeforeValidator,
+    ConfigDict,
+    Field,
+    HttpUrl,
+    field_serializer,
+)
 
 
 class Decision(str, Enum):
@@ -14,6 +20,16 @@ class Decision(str, Enum):
 
 
 Review = tuple[datetime, str, Decision]
+
+
+def make_empty_none(val: Union[str, None]) -> Union[str, None]:
+    """Browser will send empty strings for unspecified form inputs."""
+    if val == "":
+        return None
+    return val
+
+
+NullableHttpUrl = Annotated[Union[None, HttpUrl], BeforeValidator(make_empty_none)]
 
 
 class BaseApplicationData(BaseModel):
@@ -26,18 +42,18 @@ class BaseApplicationData(BaseModel):
     education_level: str
     major: str
     is_first_hackathon: bool
-    linkedin: Union[HttpUrl, None] = None
-    portfolio: Union[HttpUrl, None] = None
+    linkedin: NullableHttpUrl = None
+    portfolio: NullableHttpUrl = None
     frq_collaboration: Union[str, None] = Field(None, max_length=2048)
     frq_dream_job: str = Field(max_length=2048)
 
 
-@form_body
 class RawApplicationData(BaseApplicationData):
     """Expected to be sent by the form on the site."""
 
     first_name: str
     last_name: str
+    resume: Union[UploadFile, None] = None
 
 
 class ProcessedApplicationData(BaseApplicationData):

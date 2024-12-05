@@ -35,6 +35,7 @@ SAMPLE_APPLICATION = {
     "education_level": "Fifth+ Year Undergraduate",
     "major": "Computer Science",
     "is_first_hackathon": "false",
+    "linkedin": "",
     "portfolio": "https://github.com",
     "frq_collaboration": "I am pkfire",
     "frq_dream_job": "I am pkfire",
@@ -45,7 +46,13 @@ SAMPLE_RESUME = ("my-resume.pdf", b"resume", "application/pdf")
 SAMPLE_FILES = {"resume": SAMPLE_RESUME}
 BAD_RESUME = ("bad-resume.doc", b"resume", "application/msword")
 LARGE_RESUME = ("large-resume.pdf", b"resume" * 100_000, "application/pdf")
-EMPTY_RESUME = ("", b"", "application/octet-stream")
+# The browser will send an empty file if not selected
+EMPTY_RESUME = (
+    "",
+    b"",
+    "application/octet-stream",
+    {"content-disposition": 'form-data; name="resume"; filename=""'},
+)
 
 EXPECTED_RESUME_UPLOAD = ("pk-fire-69f2afc2.pdf", b"resume", "application/pdf")
 SAMPLE_RESUME_URL = HttpUrl("https://drive.google.com/file/d/...")
@@ -58,6 +65,7 @@ EXPECTED_APPLICATION_DATA = ProcessedApplicationData(
     submission_time=SAMPLE_SUBMISSION_TIME,
     verdict_time=SAMPLE_VERDICT_TIME,
 )
+assert EXPECTED_APPLICATION_DATA.linkedin is None
 
 EXPECTED_APPLICATION_DATA_WITHOUT_RESUME = ProcessedApplicationData(
     **SAMPLE_APPLICATION,  # type: ignore[arg-type]
@@ -190,6 +198,7 @@ def test_apply_with_resume_upload_issue_causes_500(
     """Test that an issue with the resume upload causes status 500."""
     mock_mongodb_handler_retrieve_one.return_value = None
     mock_gdrive_handler_upload_file.side_effect = HTTPError("Google Drive error")
+
     res = client.post("/apply", data=SAMPLE_APPLICATION, files=SAMPLE_FILES)
 
     assert res.status_code == 500
@@ -211,9 +220,9 @@ def test_apply_with_user_insert_issue_causes_500(
     mock_mongodb_handler_update_one.side_effect = RuntimeError
     res = client.post("/apply", data=SAMPLE_APPLICATION, files=SAMPLE_FILES)
 
+    assert res.status_code == 500
     mock_mongodb_handler_update_one.assert_awaited_once()
     mock_send_application_confirmation_email.assert_not_called()
-    assert res.status_code == 500
 
 
 @patch("utils.email_handler.send_application_confirmation_email", autospec=True)
@@ -230,11 +239,12 @@ def test_apply_with_confirmation_email_issue_causes_500(
     mock_mongodb_handler_retrieve_one.return_value = None
     mock_gdrive_handler_upload_file.return_value = SAMPLE_RESUME_URL
     mock_send_application_confirmation_email.side_effect = RuntimeError
+
     res = client.post("/apply", data=SAMPLE_APPLICATION, files=SAMPLE_FILES)
 
+    assert res.status_code == 500
     mock_mongodb_handler_update_one.assert_awaited_once()
     mock_send_application_confirmation_email.assert_awaited_once()
-    assert res.status_code == 500
 
 
 @patch("utils.email_handler.send_application_confirmation_email", autospec=True)
@@ -255,8 +265,10 @@ def test_apply_successfully_without_resume(
     mock_mongodb_handler_retrieve_one.return_value = None
     mock_datetime.now.return_value = SAMPLE_SUBMISSION_TIME
     mock_is_past_deadline.return_value = False
+
     res = client.post("/apply", data=SAMPLE_APPLICATION, files={"resume": EMPTY_RESUME})
 
+    assert res.status_code == 201
     mock_gdrive_handler_upload_file.assert_not_called()
     mock_mongodb_handler_update_one.assert_awaited_once_with(
         Collection.USERS,
@@ -267,7 +279,6 @@ def test_apply_successfully_without_resume(
     mock_send_application_confirmation_email.assert_awaited_once_with(
         USER_EMAIL, EXPECTED_USER_WITHOUT_RESUME
     )
-    assert res.status_code == 201
 
 
 def test_application_data_is_bson_encodable() -> None:

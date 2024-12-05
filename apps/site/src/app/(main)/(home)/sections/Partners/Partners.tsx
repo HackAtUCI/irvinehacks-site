@@ -52,9 +52,7 @@ export default async function Partners() {
 				height={42}
 			/>
 
-			<h2
-				className={`text-center text-4xl sm:text-[3rem] text-[#fffce2] font-display mb-16`}
-			>
+			<h2 className={`text-center text-4xl sm:text-[3rem] font-display mb-16`}>
 				Partners
 			</h2>
 

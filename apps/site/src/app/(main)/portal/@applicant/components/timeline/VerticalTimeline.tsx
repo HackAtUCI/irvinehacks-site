@@ -11,7 +11,7 @@ interface VerticalTimelineProps {
 
 function VerticalTimeline({ status }: VerticalTimelineProps) {
 	return (
-		<div className="">
+		<div>
 			<SubmissionComponent />
 			<VerdictComponent status={status} />
 			<WaiverComponent status={status} />

@@ -12,7 +12,7 @@ export const TimelineComponent: React.FC<TimelineComponentProps> = ({
 	finished,
 	statusIcon,
 }) => {
-	const baseStyles = `flex items-center justify-between mb-4 md:mb-8 border-[2px] md:border-[5px] border-[var(--color-white)]`;
+	const baseStyles = "flex items-center justify-between mb-4 md:mb-8 border-[2px] md:border-[5px] border-[var(--color-white)]";
 	const colorStyles = finished
 		? "text-[var(--color-white)] bg-[var(--color-black)]"
 		: "text-[var(--color-black)] bg-[var(--color-white)]";

@@ -5,8 +5,6 @@ import { getPartners } from "./getPartners";
 import { client } from "@/lib/sanity/client";
 import imageUrlBuilder from "@sanity/image-url";
 
-import LargeStar from "@/assets/icons/large_star.svg";
-import MediumStar from "@/assets/icons/medium_star.svg";
 import SmallStar from "@/assets/icons/small_star.svg";
 
 const builder = imageUrlBuilder(client);

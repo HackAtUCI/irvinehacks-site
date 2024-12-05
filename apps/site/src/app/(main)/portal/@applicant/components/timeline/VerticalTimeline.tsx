@@ -1,9 +1,9 @@
 import React from "react";
 import { PortalStatus } from "../../ApplicantPortal";
-import { SubmissionComponent } from "./Submission";
-import { VerdictComponent } from "./Verdict";
-import { WaiverComponent } from "./Waiver";
-import { RSVPComponent } from "./RSVP";
+import { SubmissionComponent } from "./SubmissionComponent";
+import { VerdictComponent } from "./VerdictComponent";
+import { WaiverComponent } from "./WaiverComponent";
+import { RSVPComponent } from "./RSVPComponent";
 
 interface VerticalTimelineProps {
 	status: PortalStatus;

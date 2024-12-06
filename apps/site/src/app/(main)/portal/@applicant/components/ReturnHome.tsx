@@ -1,6 +1,6 @@
 import Button from "@/lib/components/Button/Button";
 
-export default function SignWaiver() {
+export default function ReturnHome() {
 	return (
 		<div className="mt-6 md:mt-12">
 			<Button

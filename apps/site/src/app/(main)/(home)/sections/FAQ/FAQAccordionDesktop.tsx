@@ -30,7 +30,6 @@ const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 
 	return (
 		<div className="flex flex-1 justify-center sm:h-auto mt-16 sm:mt-8 mb-[-250px] sm:mb-0">
-			
 			{/* Desktop View */}
 			<Image
 				src={SpeechDesktop}

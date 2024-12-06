@@ -23,7 +23,7 @@ const FAQAccordionMobile: React.FC<FAQAccordion> = ({ faq }) => {
 	}>(null);
 
 	return (
-		<div className="flex flex-1 justify-center pt-48 sm:h-auto mt-16 sm:mt-8 mb-[-250px] sm:mb-0">
+		<div className="flex flex-1 justify-center sm:h-auto mt-60 sm:mt-8 mb-[-250px] sm:mb-0">
 			{/* Changes size of parent component */}
 			<div
 				className={`z-0 ${

@@ -17,9 +17,9 @@ const FAQ = async () => {
 	}));
 
 	return (
-		<section className="flex justify-center bg-no-repeat bg-cover bg-center bg-top">
+		<section className="flex justify-center bg-no-repeat bg-cover bg-center bg-top mt-20 lg:mt-40">
 			<div className="relative flex flex-col w-4/5 pb-7 justify-center">
-				<h2 className="my-6 font-display sm:text-[2.5rem] text-[#fffce2] text-4xl text-center">
+				<h2 className="my-6 font-display sm:text-[2.5rem] text-white text-4xl xl:text-5xl text-center">
 					Frequently Asked Questions
 				</h2>
 				<div className="mt-8 sm:mt-0 sm:flex sm:gap-6 sm:items-center sm:justify-center">

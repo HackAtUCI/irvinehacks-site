@@ -35,7 +35,7 @@ export default async function Apply({
 	const applyBody = hasAcceptedQueryParam ? (
 		<>
 			<Title />
-			<div className="relative w-full flex flex-col items-center">
+			<div className="flex justify-center">
 				<Form />
 			</div>
 		</>

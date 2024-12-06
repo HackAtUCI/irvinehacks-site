@@ -16,12 +16,9 @@ class Decision(str, Enum):
 Review = tuple[datetime, str, Decision]
 
 
-@form_body
-class RawApplicationData(BaseModel):
+class BaseApplicationData(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, str_max_length=254)
 
-    first_name: str
-    last_name: str
     pronouns: str
     ethnicity: str
     is_18_older: bool
@@ -35,7 +32,15 @@ class RawApplicationData(BaseModel):
     frq_dream_job: str = Field(max_length=2048)
 
 
-class ProcessedApplicationData(RawApplicationData):
+@form_body
+class RawApplicationData(BaseApplicationData):
+    """Expected to be sent by the form on the site."""
+
+    first_name: str
+    last_name: str
+
+
+class ProcessedApplicationData(BaseApplicationData):
     resume_url: Union[HttpUrl, None] = None
     submission_time: datetime
     reviews: list[Review] = []

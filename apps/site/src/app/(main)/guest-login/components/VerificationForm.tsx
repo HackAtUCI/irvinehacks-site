@@ -21,13 +21,7 @@ function VerificationForm() {
 		<div className="bg-white p-5 md:p-10 rounded-2xl mx-5 text-black">
 			<ValidatingForm method="post" action={VERIFICATION_PATH}>
 				<div className="flex flex-col mb-5">
-					<input
-						type="email"
-						name="email"
-						value={email}
-						readOnly
-						hidden
-					/>
+					<input type="email" name="email" value={email} readOnly hidden />
 					<label htmlFor="passphrase">Passphrase</label>
 					<input
 						id="passphrase"
@@ -40,8 +34,8 @@ function VerificationForm() {
 						aria-describedby="passphrase-description"
 					/>
 					<small id="passphrase-description">
-						A login passphrase was sent to your email. Please enter
-						the passphrase.
+						A login passphrase was sent to your email. Please enter the
+						passphrase.
 					</small>
 					<p className={clsx(styles.invalidFeedback, "text-red-500")}>
 						Sorry, that passphrase is invalid.

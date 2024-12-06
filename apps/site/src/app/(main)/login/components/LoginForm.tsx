@@ -24,8 +24,8 @@ function LoginForm() {
 						required
 					/>
 					<small id="email-description">
-						UCI students will log in with UCI SSO. Please make sure
-						to use your school email address if you have one.
+						UCI students will log in with UCI SSO. Please make sure to use your
+						school email address if you have one.
 					</small>
 					<p className={clsx(styles.invalidFeedback, "text-red-500")}>
 						Sorry, that email address is invalid.

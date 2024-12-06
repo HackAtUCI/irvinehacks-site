@@ -70,19 +70,9 @@ export default function ResumeInformation() {
 				{!hasUploaded ? (
 					<FileText className="m-auto" width={50} height={50} />
 				) : errorMessage === "" ? (
-					<FileCheck
-						className="m-auto"
-						width={50}
-						height={50}
-						color="green"
-					/>
+					<FileCheck className="m-auto" width={50} height={50} color="green" />
 				) : (
-					<FileWarning
-						className="m-auto"
-						width={50}
-						height={50}
-						color="red"
-					/>
+					<FileWarning className="m-auto" width={50} height={50} color="red" />
 				)}
 				<h2 className="text-center">Upload file</h2>
 			</label>
@@ -95,10 +85,7 @@ export default function ResumeInformation() {
 				accept="application/pdf"
 				onChange={handleFileUpload}
 			/>
-			<OutputFeedBack
-				errorMessage={errorMessage}
-				resumePath={resumePath}
-			/>
+			<OutputFeedBack errorMessage={errorMessage} resumePath={resumePath} />
 		</div>
 	);
 }

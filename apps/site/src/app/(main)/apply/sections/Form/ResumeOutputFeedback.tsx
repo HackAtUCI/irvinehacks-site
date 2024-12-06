@@ -12,8 +12,6 @@ export default function OutputFeedBack({
 	}
 
 	return (
-		<span className="italic">
-			{resumePath ? "Selected " + resumePath : ""}
-		</span>
+		<span className="italic">{resumePath ? "Selected " + resumePath : ""}</span>
 	);
 }

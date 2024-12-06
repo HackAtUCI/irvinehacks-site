@@ -74,7 +74,7 @@ const Landing = () => {
 							onLoad={() => setLoaded((loaded) => loaded + 1)}
 						/>
 
-						<div className="absolute min-w-[570px] w-full max-h-[2000px]">
+						<div className="absolute min-w-[570px] w-full">
 							<Image
 								src={FarPillars}
 								priority
@@ -114,7 +114,7 @@ const Landing = () => {
 								src={Castle}
 								priority
 								alt="castle"
-								className="w-full max-w-6xl mt-[100px] min-w-[520px]"
+								className="w-full h-full mt-[50px] sm:mt-[100px] min-w-[520px]"
 								onLoad={() => setLoaded((loaded) => loaded + 1)}
 							/>
 						</motion.div>

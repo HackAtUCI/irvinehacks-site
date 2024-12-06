@@ -99,7 +99,8 @@ export default function Form() {
 			<ResumeInformation />
 			<AgeInformation />
 			<Button
-				text="Submit Application"
+				text="Submit"
+				className="text-2xl !px-11 !py-2"
 				isLightVersion={true}
 				disabled={submitting}
 			/>

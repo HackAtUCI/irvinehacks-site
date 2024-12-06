@@ -8,9 +8,7 @@ async function Login() {
 	if (identity.uid !== null) redirect("/portal");
 
 	return (
-		<div
-			className="min-h-screen flex flex-col items-center justify-center"
-		>
+		<div className="min-h-screen flex flex-col items-center justify-center">
 			<h1 className="font-display text-3xl md:text-5xl mb-20">
 				Login to Portal
 			</h1>

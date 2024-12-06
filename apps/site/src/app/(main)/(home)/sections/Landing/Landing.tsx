@@ -74,7 +74,7 @@ const Landing = () => {
 							onLoad={() => setLoaded((loaded) => loaded + 1)}
 						/>
 
-						<div className="absolute min-w-[570px] w-full max-h-[2000px] overflow-hidden">
+						<div className="absolute min-w-[570px] w-full max-h-[2000px]">
 							<Image
 								src={FarPillars}
 								priority

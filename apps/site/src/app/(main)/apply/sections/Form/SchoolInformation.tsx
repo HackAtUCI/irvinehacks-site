@@ -1,6 +1,5 @@
 import styles from "./Form.module.scss";
 import DropdownSelect from "@/lib/components/forms/DropdownSelect";
-import SimpleRadio from "@/lib/components/forms/SimpleRadio";
 
 //these values can be edited if backend needs it later on
 
@@ -46,43 +45,21 @@ const majorOptions = [
 	{ value: "other", text: "Other" },
 ];
 
-const yesNoOptions = [
-	{
-		id: "hack-yes",
-		labelText: "Yes",
-		inputValue: "Yes",
-	},
-	{
-		id: "hack-no",
-		labelText: "No",
-		inputValue: "No",
-	},
-];
-
 export default function SchoolInformation() {
 	return (
 		<div className="flex flex-col gap-5 w-11/12">
-			<p className="text-4xl m-0 font-bold text-center max-[700px]:text-3xl">
-				Education
+			<p className="text-4xl m-0 font-bold max-[700px]:text-3xl">
+				School Information
 			</p>
 
 			<div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
 				<DropdownSelect
 					labelStyle={styles.label}
 					inputStyle={styles.input}
-					name="education_level"
-					labelText="Current Education Level"
-					values={educationLevels}
-					containerClass="flex flex-col w-6/12 max-[1000px]:w-full"
-				/>
-
-				<DropdownSelect
-					labelStyle={styles.label}
-					inputStyle={styles.input}
 					name="school"
-					labelText="School Name"
+					labelText="School"
 					values={universityOptions}
-					containerClass="flex flex-col w-6/12 max-[1000px]:w-full"
+					containerClass="flex flex-col w-full max-[1000px]:w-full"
 				/>
 			</div>
 
@@ -91,21 +68,17 @@ export default function SchoolInformation() {
 					labelStyle={styles.label}
 					inputStyle={styles.input}
 					name="major"
-					labelText="What is your major?"
+					labelText="Major"
 					values={majorOptions}
 					containerClass="flex flex-col w-6/12 max-[1000px]:w-full"
 				/>
-
-				<SimpleRadio
-					name="is_first_hackathon"
-					values={yesNoOptions}
-					title="Is this your first Hackathon?"
-					titleClass="text-lg mb-0 p-0"
-					containerClassTotal="flex gap-5 w-6/12 max-[1000px]:w-full mb-2 max-[1300px]:mb-0 max-[1300px]:flex-col max-[1300px]:gap-1 items-center text-center"
-					isRequired={true}
-					labelClass="font-bold"
-					containerClassInputLabels="flex gap-2 items-center"
-					containerClassValues="flex gap-3"
+				<DropdownSelect
+					labelStyle={styles.label}
+					inputStyle={styles.input}
+					name="education_level"
+					labelText="Education Level"
+					values={educationLevels}
+					containerClass="flex flex-col w-6/12 max-[1000px]:w-full"
 				/>
 			</div>
 		</div>

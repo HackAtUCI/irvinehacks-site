@@ -5,11 +5,11 @@ import { Status } from "./useApplicant";
 
 export interface ApplicantSummary {
 	_id: string;
+	first_name: string;
+	last_name: string;
 	status: Status;
 	decision: Status | null;
 	application_data: {
-		first_name: string;
-		last_name: string;
 		school: string;
 		submission_time: string;
 	};

@@ -34,13 +34,13 @@ export default async function Apply({
 	const applicationsOpened = haveApplicationsOpened();
 	const applyBody = hasAcceptedQueryParam ? (
 		<>
-			<Title applicationType="Hacker"/>
+			<Title applicationType="Hacker" />
 			<div className="flex justify-center">
 				<Form />
 			</div>
 		</>
 	) : (
-		<ApplyConfirm />
+		<ApplyConfirm continueHREF="/apply" isHacker={true} />
 	);
 	return (
 		<div className="flex flex-col items-center gap-10 my-32 min-h-[calc(100vh-8rem)]">

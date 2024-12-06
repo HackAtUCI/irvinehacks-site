@@ -1,8 +1,7 @@
 .button {
-	background-color: var(--color-dark-blue);
+	background-color: var(--color-black);
 	color: var(--color-white);
 	border: 5px solid var(--color-white);
-	font-size: calc(13px + 1vw);
 	font-weight: 700;
 	padding: 0.55rem 1.25rem;
 	display: block;
@@ -21,11 +20,28 @@
 }
 
 .lightButton {
-	padding: 0.15rem 1.15rem;
-	border-radius: 10px;
-	background-image: none;
+	padding-top: 0.5rem;
+	padding-bottom: 0.5rem;
+	border: 0px;
+	font-weight: 400;
+	color: var(--color-black);
 	background-color: var(--color-white);
-	margin: 0;
+	transition: transform 0.17s;
+	width: 100%;
+	display: block;
+	text-align: center;
 
-	font-size: 28px;
+	@media (min-width: 640px) {
+		padding-top: 0.75rem;
+		padding-bottom: 0.75rem;
+	}
+
+	@media (min-width: 768px) {
+		padding-top: 1.125rem;
+		padding-bottom: 1.125rem;
+	}
+
+	&:hover {
+		transform: scale(1.017);
+	}
 }

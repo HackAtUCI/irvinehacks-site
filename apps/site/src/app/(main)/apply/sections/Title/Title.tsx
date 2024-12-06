@@ -1,15 +1,11 @@
-import styles from "./Title.module.scss";
-
 export default function Title() {
 	return (
 		<>
-			<h1
-				className={`${styles.title} font-display text-[#fffce2] text-8xl text-center max-[500px]:text-7xl`}
-			>
-				Apply
+			<h1 className="text-[var(--color-white)] text-center font-display font-bold text-3xl md:text-5xl ">
+				Apply as a Hacker
 			</h1>
-			<h2 className="text-[#fffce2] text-4xl font-bold m-5 text-center max-[900px]:text-3xl max-[500px]:text-2xl">
-				Applications close on January 14th, 2024 at 11:59PM PST
+			<h2 className="text-[var(--color-offwhite)] text-center font-body text-xl sm:text-2xl md:text-4xl lg:my-6">
+				Applications close on January 10th, 11:59PM PST
 			</h2>
 		</>
 	);

@@ -88,7 +88,7 @@ export default function Form() {
 	return (
 		<form
 			method="post"
-			className={`${styles.form} text-[#000000] w-8/12 flex flex-col items-center py-12 gap-10 z-1 max-[800px]:w-9/12 max-[400px]:w-11/12`}
+			className={`${styles.form} text-[var(--color-white)] w-8/12 flex flex-col items-center py-12 gap-14 z-1 max-[800px]:w-9/12 max-[400px]:w-11/12`}
 			action="/api/user/apply"
 			encType="multipart/form-data"
 			onSubmit={handleSubmit}
@@ -98,7 +98,11 @@ export default function Form() {
 			<ProfileInformation />
 			<ResumeInformation />
 			<AgeInformation />
-			<Button text="Submit Application" disabled={submitting} />
+			<Button
+				text="Submit Application"
+				isLightVersion={true}
+				disabled={submitting}
+			/>
 			{sessionExpired && sessionExpiredMessage}
 		</form>
 	);

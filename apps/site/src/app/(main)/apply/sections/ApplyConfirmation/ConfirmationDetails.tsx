@@ -12,7 +12,7 @@ export default async function ConfirmationDetails({
 	roleText,
 }: ConfirmationDetailsProps) {
 	return (
-		<div className="flex flex-col items-center gap-8 mx-20 p-6 md:px-10 md:py-8 border-[2px] md:border-[5px] border-[var(--color-white)] text-[var(--color-white)] bg-[var(--color-black)]">
+		<div className="flex flex-col items-center gap-8 p-10 md:p-6 md:px-10 md:py-8 border-[2px] md:border-[5px] border-[var(--color-white)] text-[var(--color-white)] bg-[var(--color-black)]">
 			<h1 className="text-5xl">Before Applying</h1>
 			<p className="text-lg">
 				By submitting an application for IrvineHacks 2024, I understand that

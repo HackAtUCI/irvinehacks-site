@@ -15,7 +15,7 @@ export default async function ApplyConfirm({
 		? "In addition, I understand that I must check in at certain times on all three event days in order to be eligible to win prizes."
 		: "In addition, I understand that I must show up for my scheduled shifts.";
 	return (
-		<div className="flex items-center w-screen h-screen">
+		<div className="flex items-center py-16 px-10 min-w-screen min-h-screen">
 			<ConfirmationDetails
 				continueHREF={continueHREF}
 				roleText={roleText}

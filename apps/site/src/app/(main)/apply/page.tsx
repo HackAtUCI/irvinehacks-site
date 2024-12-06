@@ -34,7 +34,7 @@ export default async function Apply({
 	const applicationsOpened = haveApplicationsOpened();
 	const applyBody = hasAcceptedQueryParam ? (
 		<>
-			<Title applicationType="Hacker"/>
+			<Title applicationType="Hacker" />
 			<div className="flex justify-center">
 				<Form />
 			</div>

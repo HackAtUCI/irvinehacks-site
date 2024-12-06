@@ -43,7 +43,7 @@ jobs:
           workdir: apps/api
           level: warning
           reporter: github-pr-review
-          filter_mode: nofilter
+          filter_mode: file
 
       - name: Lint with flake8
         uses: reviewdog/action-flake8@v3
@@ -109,7 +109,7 @@ jobs:
         with:
           level: warning
           reporter: github-pr-review
-          filter_mode: nofilter
+          filter_mode: file
           prettier_flags: apps/site/src
 
       - name: Lint with ESLint (review)

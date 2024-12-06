@@ -1,7 +1,6 @@
 from enum import Enum
 from typing import Literal, Union
 
-from pydantic import Field
 from typing_extensions import TypeAlias
 
 from models.ApplicationData import Decision, ProcessedApplicationData
@@ -32,14 +31,31 @@ class Status(str, Enum):
 
 
 class UserRecord(BaseRecord):
-    uid: str = Field(alias="_id")
+    """
+    Represents any user with an intent to participate in the event.
+    This does not include people who have logged in but not applied.
+    - Anybody with a role should have a name
+    - Organizers do not have statuses
+    - `uid` is inherited from `BaseRecord`
+    """
+
+    first_name: str
+    last_name: str
     role: Role
 
 
 ApplicantStatus: TypeAlias = Union[Status, Decision]
 
 
-class Applicant(UserRecord):
-    role: Literal[Role.APPLICANT] = Role.APPLICANT
+class BareApplicant(UserRecord):
+    """Applicant without the application data."""
+
+    role: Literal[Role.APPLICANT]
     status: ApplicantStatus
+
+
+class Applicant(BareApplicant):
+    """Applicant with application data."""
+
+    role: Literal[Role.APPLICANT] = Role.APPLICANT
     application_data: ProcessedApplicationData

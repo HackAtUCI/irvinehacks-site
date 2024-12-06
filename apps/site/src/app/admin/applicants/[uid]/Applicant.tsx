@@ -28,8 +28,7 @@ function Applicant({ params }: ApplicantProps) {
 		);
 	}
 
-	const { application_data } = applicant;
-	const { first_name, last_name } = application_data;
+	const { first_name, last_name } = applicant;
 
 	return (
 		<ContentLayout

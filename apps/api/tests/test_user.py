@@ -4,10 +4,10 @@ from fastapi import FastAPI, status
 from fastapi.testclient import TestClient
 
 from auth.user_identity import GuestUser, UserTestClient
+from models.ApplicationData import Decision
+from models.user_record import Role, Status
 from routers import user
 from services.mongodb_handler import Collection
-from utils.user_record import Status, Role
-from models.ApplicationData import Decision
 
 app = FastAPI()
 app.include_router(user.router)

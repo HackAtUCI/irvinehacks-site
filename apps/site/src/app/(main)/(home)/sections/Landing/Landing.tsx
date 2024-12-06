@@ -114,7 +114,7 @@ const Landing = () => {
 								src={Castle}
 								priority
 								alt="castle"
-								className="w-full h-full mt-[50px] sm:mt-[100px] min-w-[520px]"
+								className="w-full 2xl:w-[75vw] h-full mt-[50px] sm:mt-[100px] min-w-[520px]"
 								onLoad={() => setLoaded((loaded) => loaded + 1)}
 							/>
 						</motion.div>

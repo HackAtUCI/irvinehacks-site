@@ -1,7 +1,6 @@
 import getUserIdentity from "@/lib/utils/getUserIdentity";
 import LoginForm from "./components/LoginForm";
 
-import water from "@/assets/backgrounds/water.jpg";
 import { redirect } from "next/navigation";
 
 async function Login() {
@@ -11,7 +10,6 @@ async function Login() {
 	return (
 		<div
 			className="min-h-screen flex flex-col items-center justify-center"
-			style={{ backgroundImage: `url("${water.src}")` }}
 		>
 			<h1 className="font-display text-3xl md:text-5xl mb-20">
 				Login to Portal

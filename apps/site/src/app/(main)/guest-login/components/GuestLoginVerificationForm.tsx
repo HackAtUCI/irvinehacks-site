@@ -40,6 +40,9 @@ export default function GuestLoginVerificationForm() {
 						A login passphrase was sent to your email. Please enter the
 						passphrase.
 					</small>
+					<span className="text-[#FF2222]">
+						If you cannot find the passphrase, please check your spam.
+					</span>
 					<p className={clsx(styles.invalidFeedback, "text-red-500")}>
 						Sorry, that passphrase is invalid.
 					</p>

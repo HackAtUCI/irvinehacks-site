@@ -37,7 +37,7 @@ const Landing = () => {
 				} duration-500`}
 			>
 				<div
-					className={`flex flex-col items-center relative w-screen aspect-[3/4] max-h-[1750px] max-lg:h-[1100px] max-sm:h-[850px]`}
+					className={`flex flex-col items-center relative w-screen aspect-[3/4] max-h-[240vh] max-lg:h-[1100px] max-sm:h-[850px]`}
 				>
 					<View className="absolute w-full h-full">
 						<Suspense fallback={null}>
@@ -144,8 +144,8 @@ const Landing = () => {
 					<Image
 						src={Cloud2}
 						priority
-						alt="clouds"
-						className={`${styles.bottomCloud} absolute bottom-0 min-w-[1800px] w-full`}
+						alt="foreground clouds"
+						className={`${styles.bottomCloud} absolute bottom-[200px] md:bottom-16 xxl:bottom-0 w-full`}
 						onLoad={() => setLoaded((loaded) => loaded + 1)}
 					/>
 				</div>

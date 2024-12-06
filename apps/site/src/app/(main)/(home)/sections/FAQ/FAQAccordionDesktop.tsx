@@ -3,13 +3,10 @@
 import React, { useState } from "react";
 import Image from "next/image";
 
-import SpeechMobile from "./speech-mobile.svg";
-import SpeechDesktop from "./speech-desktop.svg";
+import SpeechDesktop from "./assets/speech-desktop.svg";
 
-import ListItemButton from "./ListItemButton";
-import TriangleIcon from "./TriangleIcon";
-
-import styles from "./FAQ.module.scss";
+import ListItemButton from "./components/ListItemButton";
+import TriangleIcon from "./components/TriangleIcon";
 
 interface FAQAccordion {
 	faq: {
@@ -19,7 +16,7 @@ interface FAQAccordion {
 	}[];
 }
 
-const FAQAccordion: React.FC<FAQAccordion> = ({ faq }) => {
+const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 	const faqGroup1 = faq.slice(0, 8);
 	const faqGroup2 = faq.slice(8);
 
@@ -33,74 +30,8 @@ const FAQAccordion: React.FC<FAQAccordion> = ({ faq }) => {
 
 	return (
 		<div className="flex flex-1 justify-center sm:h-auto mt-16 sm:mt-8 mb-[-250px] sm:mb-0">
-			{/* Changes size of parent component */}
-			<div
-				className={`z-0 ${
-					focusedQuestion ? "h-[520px]" : "h-[965px]"
-				} duration-200 transition-transform sm:hidden`}
-			/>
-			<div className="relative flex justify-center sm:hidden">
-				<Image
-					src={SpeechMobile}
-					alt="Dialuge box background"
-					className={`${styles.backgroundImage} ${
-						focusedQuestion ? "mt-[-160px]" : "mt-[-275px]"
-					}`}
-					layout="responsive"
-				/>
-
-				{/* No question is focused. */}
-				<div
-					className={`${
-						focusedQuestion
-							? "opacity-0 pointer-events-none"
-							: "opacity-100 z-50"
-					} duration-200 w-[320px] absolute mx-4 mt-2 h-fit`}
-				>
-					<div>
-						{faq.map((F) => (
-							<ListItemButton
-								key={F._key}
-								onClick={() => setFocusedQuestion(F)}
-								text={F.question}
-								inverted={false}
-								displace={4}
-							/>
-						))}
-					</div>
-				</div>
-
-				{/* Question is focused. */}
-				<div
-					className={`${
-						focusedQuestion
-							? "opacity-100 z-50"
-							: "opacity-0 pointer-events-none"
-					} duration-200 absolute w-[320px] h-[350px] mt-2`}
-				>
-					<ListItemButton
-						onClick={() => setFocusedQuestion(null)}
-						className="mb-3"
-						text={focusedQuestion?.question}
-						rotate="rotate-90"
-						displace={4}
-						inverted
-					/>
-
-					<p>{focusedQuestion?.answer}</p>
-
-					<div className="-bottom-2 absolute">
-						<ListItemButton
-							onClick={() => setFocusedQuestion(null)}
-							text="Ask another question"
-							rotate="rotate-180"
-							displace={4}
-							inverted={false}
-						/>
-					</div>
-				</div>
-			</div>
-
+			
+			{/* Desktop View */}
 			<Image
 				src={SpeechDesktop}
 				alt="Dialuge box background"
@@ -222,4 +153,4 @@ const FAQAccordion: React.FC<FAQAccordion> = ({ faq }) => {
 	);
 };
 
-export default FAQAccordion;
+export default FAQAccordionDesktop;

@@ -14,17 +14,17 @@ export default async function ConfirmationDetails({
 		>
 			<h1 className={`${styles.header} text-5xl`}>Before Applying</h1>
 			<p className={`${styles.policy} text-lg`}>
-				By submitting an application for IrvineHacks 2024, I understand that
-				IrvineHacks will take place in person during the day from January 26 to
-				28, and that IrvineHacks will not be providing transportation or
+				By submitting an application for IrvineHacks 2025, I understand that
+				IrvineHacks will take place in person during the day from January 24 to
+				26, and that IrvineHacks will not be providing transportation or
 				overnight accommodations. In addition, I understand that I must check in
 				at certain times on all three event days in order to be eligible to win
 				prizes. Lastly, I acknowledge that I am currently a student enrolled in
 				an accredited high school, college, or university in the United States
-				and will be over the age of 18 by January 26th, 2024.
+				and will be over the age of 18 by January 24th, 2025.
 			</p>
 			<strong className="text-lg text-[#FF2222]">
-				Applications are due on January 14th, 2024 at 11:59PM PST.
+				Applications are due on January 10th, 2025 at 11:59PM PST.
 			</strong>
 			<Button
 				text={isLoggedIn ? "Proceed to Application" : "Log in to Apply"}

@@ -48,7 +48,7 @@ const About = () => {
 				</p>
 				<p>
 					This year, IrvineHacks will take place the weekend of
-					January 26th to 28th. The event will be 100% in-person
+					January 24th to 26th. The event will be 100% in-person
 					during the day (not overnight). Free workshops, socials,
 					food, and swag will be provided!
 				</p>

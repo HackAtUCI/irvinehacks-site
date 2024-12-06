@@ -13,13 +13,13 @@ import ApplicantSummary from "./components/ApplicantSummary";
 import HackerCount from "./components/HackerCount";
 
 function AdminDashboard() {
-	const { role } = useContext(UserContext);
+	const { roles } = useContext(UserContext);
 
 	return (
 		<ContentLayout>
 			<SpaceBetween size="l">
 				<Container>Admin Dashboard</Container>
-				{isApplicationManager(role) && <ApplicantSummary />}
+				{isApplicationManager(roles) && <ApplicantSummary />}
 				<HackerCount />
 			</SpaceBetween>
 		</ContentLayout>

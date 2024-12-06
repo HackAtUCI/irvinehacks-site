@@ -29,7 +29,7 @@ USER_REVIEWER = NativeUser(
 
 REVIEWER_IDENTITY = {
     "_id": "edu.uci.alicia",
-    "role": "reviewer",
+    "roles": ["Organizer", "Reviewer"],
 }
 
 USER_DIRECTOR = NativeUser(
@@ -39,7 +39,7 @@ USER_DIRECTOR = NativeUser(
     affiliations=["student"],
 )
 
-DIRECTOR_IDENTITY = {"_id": "edu.uci.dir", "role": "director", "status": "CONFIRMED"}
+DIRECTOR_IDENTITY = {"_id": "edu.uci.dir", "roles": ["Organizer", "Director"]}
 
 app = FastAPI()
 app.include_router(admin.router)
@@ -58,7 +58,7 @@ def test_restricted_admin_route_is_forbidden(
 
     mock_mongodb_handler_retrieve_one.return_value = {
         "_id": "edu.uci.icssc",
-        "role": "mentor",
+        "roles": ["Mentor"],
     }
     res = unauthorized_client.get("/applicants")
 
@@ -91,8 +91,8 @@ def test_can_retrieve_applicants(
 
     res = reviewer_client.get("/applicants")
 
-    mock_mongodb_handler_retrieve.assert_awaited_once()
     assert res.status_code == 200
+    mock_mongodb_handler_retrieve.assert_awaited_once()
     data = res.json()
     assert data == [
         {
@@ -180,22 +180,18 @@ def test_confirm_attendance_route(
     mock_mongodb_handler_retrieve.return_value = [
         {
             "_id": "edu.uc.tester",
-            "role": "applicant",
             "status": Decision.ACCEPTED,
         },
         {
             "_id": "edu.uc.tester2",
-            "role": "applicant",
             "status": Status.WAIVER_SIGNED,
         },
         {
             "_id": "edu.uc.tester3",
-            "role": "applicant",
             "status": Status.CONFIRMED,
         },
         {
             "_id": "edu.uc.tester4",
-            "role": "applicant",
             "status": Decision.WAITLISTED,
         },
     ]

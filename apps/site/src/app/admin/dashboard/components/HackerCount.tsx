@@ -16,7 +16,7 @@ function HackerCount() {
 	const { participants, loading } = useParticipants();
 
 	const checkedIn = participants
-		.filter((participant) => participant.role === Role.Applicant)
+		.filter((participant) => participant.roles.includes(Role.Applicant))
 		.filter((participant) =>
 			participant.checkins.some(([datetime]) =>
 				FRIDAY.isSame(dayjs(datetime).tz(EVENT_TIMEZONE), "date"),

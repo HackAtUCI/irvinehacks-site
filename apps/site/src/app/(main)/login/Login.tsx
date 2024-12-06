@@ -1,7 +1,6 @@
+import { redirect } from "next/navigation";
 import getUserIdentity from "@/lib/utils/getUserIdentity";
 import LoginForm from "./components/LoginForm";
-
-import { redirect } from "next/navigation";
 
 async function Login() {
 	const identity = await getUserIdentity();

@@ -6,8 +6,9 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import View from "@/components/canvas/View";
 import Button from "@/lib/components/Button/Button";
-
 import About from "./About/About";
+import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
+import haveApplicationsOpened from "@/lib/utils/haveApplicationsOpened";
 
 import Cliff from "@/assets/images/anteater_cliff.png";
 import Castle from "@/assets/images/castle_island.png";
@@ -20,6 +21,8 @@ import BgCastle from "@/assets/images/background_castle.png";
 import styles from "./Landing.module.css";
 
 const Landing = () => {
+	const deadlinePassed = hasDeadlinePassed();
+	const applicationsOpened = haveApplicationsOpened();
 	const [loaded, setLoaded] = useState(0);
 	const scrollTo = useRef<null | HTMLDivElement>(null);
 
@@ -45,7 +48,7 @@ const Landing = () => {
 						</Suspense>
 					</View>
 					<div
-						className={`${styles.titleAnim} absolute z-10 w-full h-[50%] flex flex-col items-center justify-center opacity-0`}
+						className={`${styles.titleAnim} absolute z-10 w-full h-[50%] sm:h-[40%] flex flex-col items-center justify-center opacity-0`}
 					>
 						<div className="text-center relative p-10 flex flex-col items-center justify-center min-w-[200px]">
 							<div
@@ -58,9 +61,20 @@ const Landing = () => {
 								IrvineHacks
 							</h1>
 						</div>
-						<div onClick={applyClick}>
-							<Button className="font-display" text="Apply" />
-						</div>
+
+						{deadlinePassed ? (
+							<Button
+								className="font-display"
+								text="Applications have closed!"
+								disabled
+							/>
+						) : applicationsOpened ? (
+							<div onClick={applyClick}>
+								<Button className="font-display" text="Apply" href="/apply" />
+							</div>
+						) : (
+							<Button className="font-display" text="Coming Soon..." disabled />
+						)}
 					</div>
 					<div
 						className={`absolute w-full h-full flex flex-col items-center max-h-[1500px]`}

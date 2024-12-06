@@ -148,7 +148,7 @@ def test_apply_when_user_exists_causes_400(
     """Test that applying when a user already exists causes status 400."""
     mock_mongodb_handler_retrieve_one.return_value = {
         "_id": "edu.uci.pkfire",
-        "status": "pending review",
+        "roles": ["applicant"],
     }
     res = client.post("/apply", data=SAMPLE_APPLICATION, files=SAMPLE_FILES)
 
@@ -282,6 +282,7 @@ def test_application_data_is_bson_encodable() -> None:
 def test_application_data_with_other_throws_422(
     mock_mongodb_handler_retrieve_one: AsyncMock,
 ) -> None:
+    mock_mongodb_handler_retrieve_one.return_value = None
     contains_other = SAMPLE_APPLICATION.copy()
     contains_other["pronouns"] = "other"
     res = client.post("/apply", data=contains_other, files=SAMPLE_FILES)

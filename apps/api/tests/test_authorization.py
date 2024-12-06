@@ -32,8 +32,8 @@ async def test_rejected_applicant_is_unapplied(
     """User with applicant role and rejected status is not accepted."""
     mock_mongodb_handler_retrieve_one.return_value = {
         "_id": "edu.ucsd.tritons",
+        "roles": [Role.APPLICANT],
         "status": Decision.REJECTED,
-        "role": Role.APPLICANT,
         "first_name": "King",
         "last_name": "Triton",
     }
@@ -52,8 +52,8 @@ async def test_accepted_applicant_is_fine(
     """User with applicant role and accepted status is fine."""
     mock_mongodb_handler_retrieve_one.return_value = {
         "_id": "edu.berkeley.oski",
+        "roles": [Role.APPLICANT],
         "status": Decision.ACCEPTED,
-        "role": Role.APPLICANT,
         "first_name": "Oski",
         "last_name": "Bear",
     }
@@ -72,7 +72,7 @@ async def test_non_applicant_is_unapplied(
     """User with other role is not considered applicant."""
     mock_mongodb_handler_retrieve_one.return_value = {
         "_id": "edu.uci.hack",
-        "role": Role.DIRECTOR,
+        "roles": [Role.DIRECTOR],
     }
 
     with pytest.raises(HTTPException) as excinfo:

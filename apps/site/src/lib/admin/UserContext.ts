@@ -4,7 +4,7 @@ import { Identity } from "@/lib/utils/getUserIdentity";
 
 const UserContext = createContext<Identity>({
 	uid: null,
-	role: null,
+	roles: [],
 	status: null,
 });
 

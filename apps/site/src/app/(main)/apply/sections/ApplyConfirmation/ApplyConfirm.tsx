@@ -4,7 +4,7 @@ import ConfirmationDetails from "./ConfirmationDetails";
 export default async function ApplyConfirm() {
 	const identity = await getUserIdentity();
 	return (
-		<div className="flex flex-col items-center gap-10">
+		<div className="flex items-center w-screen h-screen">
 			<ConfirmationDetails isLoggedIn={identity.uid !== null} />
 		</div>
 	);

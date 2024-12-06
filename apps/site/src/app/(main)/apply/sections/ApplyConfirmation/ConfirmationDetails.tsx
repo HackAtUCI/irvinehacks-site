@@ -1,5 +1,4 @@
 import Button from "@/lib/components/Button/Button";
-import styles from "./ConfirmationDetails.module.scss";
 
 interface ConfirmationDetailsProps {
 	isLoggedIn: boolean;
@@ -9,11 +8,9 @@ export default async function ConfirmationDetails({
 	isLoggedIn,
 }: ConfirmationDetailsProps) {
 	return (
-		<div
-			className={`${styles.details} w-8/12 flex flex-col items-center p-12 gap-10 z-1 max-[800px]:w-9/12 max-[400px]:w-11/12`}
-		>
-			<h1 className={`${styles.header} text-5xl`}>Before Applying</h1>
-			<p className={`${styles.policy} text-lg`}>
+		<div className="flex flex-col items-center gap-8 mx-20 p-6 md:px-10 md:py-8 border-[2px] md:border-[5px] border-[var(--color-white)] text-[var(--color-white)] bg-[var(--color-black)]">
+			<h1 className="text-5xl">Before Applying</h1>
+			<p className="text-lg">
 				By submitting an application for IrvineHacks 2024, I understand that
 				IrvineHacks will take place in person during the day from January 26 to
 				28, and that IrvineHacks will not be providing transportation or

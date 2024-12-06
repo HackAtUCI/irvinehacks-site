@@ -79,7 +79,7 @@ const Landing = () => {
 								src={FarPillars}
 								priority
 								alt="background pillars"
-								className="absolute min-w-[570px] w-full"
+								className="absolute min-w-[570px] w-full 2xl:max-h-[2500px]"
 								onLoad={() => setLoaded((loaded) => loaded + 1)}
 							/>
 						</div>

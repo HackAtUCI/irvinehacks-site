@@ -39,7 +39,7 @@ export default function BasicInformation() {
 					containerClass="flex flex-col w-[37.5%] max-[1000px]:w-full"
 					isRequired={true}
 					type="text"
-					placeholder=""
+					placeholder="Peter"
 				/>
 				<TextInput
 					name="last_name"
@@ -49,7 +49,7 @@ export default function BasicInformation() {
 					containerClass="flex flex-col w-[37.5%] max-[1000px]:w-full"
 					isRequired={true}
 					type="text"
-					placeholder=""
+					placeholder="Anteater"
 				/>
 				<DropdownSelect
 					name="pronoun"

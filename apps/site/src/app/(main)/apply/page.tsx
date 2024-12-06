@@ -71,7 +71,7 @@ export default async function Apply({
 			</div>
 		</>
 	) : (
-		<ApplyConfirm continueHREF="/apply" isNotHacker={false} />
+		<ApplyConfirm continueHREF="/apply" isHacker={true} />
 	);
 	return (
 		<div className="flex flex-col items-center gap-10 my-32 min-h-[calc(100vh-8rem)]">

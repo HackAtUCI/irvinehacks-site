@@ -3,18 +3,17 @@ import ConfirmationDetails from "./ConfirmationDetails";
 
 interface ApplyConfirmInterface {
 	continueHREF: string;
-	isNotHacker: boolean;
+	isHacker: boolean;
 }
 
 export default async function ApplyConfirm({
 	continueHREF,
-	isNotHacker,
+	isHacker,
 }: ApplyConfirmInterface) {
 	const identity = await getUserIdentity();
-	const roleText = isNotHacker
-		? "In addition, I understand that I must show up for my scheduled shifts."
-		: "In addition, I understand that I must check in at certain times on all three event days in order to be eligible to win prizes.";
-
+	const roleText = isHacker
+		? "In addition, I understand that I must check in at certain times on all three event days in order to be eligible to win prizes."
+		: "In addition, I understand that I must show up for my scheduled shifts.";
 	return (
 		<div className="flex items-center w-screen h-screen">
 			<ConfirmationDetails

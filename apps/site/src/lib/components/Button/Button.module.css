@@ -2,7 +2,7 @@
 	background-color: var(--color-dark-blue);
 	color: var(--color-white);
 	border: 5px solid var(--color-white);
-	font-size: calc(13px + 1vw);
+	font-size: 1.5rem;
 	font-weight: 700;
 	padding: 0.55rem 1.25rem;
 	display: block;

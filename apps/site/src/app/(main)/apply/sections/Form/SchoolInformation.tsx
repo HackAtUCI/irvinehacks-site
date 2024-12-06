@@ -1,6 +1,5 @@
 import styles from "./Form.module.scss";
 import DropdownSelect from "@/lib/components/forms/DropdownSelect";
-import SimpleRadio from "@/lib/components/forms/SimpleRadio";
 
 //these values can be edited if backend needs it later on
 

@@ -20,7 +20,7 @@ export default function AgeInformation() {
 				<p className="m-0 text-lg">
 					Because of limitations imposed by UCI, we are legally not allowed to
 					host minors (those under 18) for IrvineHacks 2025. By answering yes,
-					you affirm that you are and will be 18 years or older by January 10,
+					you affirm that you are and will be 18 years or older by January 24th,
 					2025.
 				</p>
 				<p className="text-[#FF2222] m-0 text-lg">
@@ -32,7 +32,7 @@ export default function AgeInformation() {
 			<SimpleRadio
 				name="is_18_older"
 				values={yesNoOptions}
-				title="Will you be 18 years or older by January 10th, 2025?"
+				title="Will you be 18 years or older by January 24th, 2025?"
 				titleClass="text-xl font-bold m-0 text-center"
 				containerClassTotal="flex flex-col gap-1 w-full items-center"
 				isRequired={true}

@@ -1,8 +1,6 @@
 import TextInput from "@/lib/components/forms/TextInput";
 import styles from "./Form.module.scss";
 
-const FRQ_MAX_LENGTH = 2000;
-
 export default function ProfileInformation() {
 	return (
 		<div className="flex flex-col gap-5 w-11/12">

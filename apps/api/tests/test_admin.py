@@ -6,10 +6,10 @@ from fastapi import FastAPI
 from auth import user_identity
 from auth.user_identity import NativeUser, UserTestClient
 from models.ApplicationData import Decision
+from models.user_record import Status
 from routers import admin
 from services.mongodb_handler import Collection
 from services.sendgrid_handler import Template
-from utils.user_record import Status
 
 user_identity.JWT_SECRET = "not a good idea"
 
@@ -78,10 +78,10 @@ def test_can_retrieve_applicants(
     mock_mongodb_handler_retrieve.return_value = [
         {
             "_id": "edu.uci.petr",
+            "first_name": "Peter",
+            "last_name": "Anteater",
             "status": "REVIEWED",
             "application_data": {
-                "first_name": "Peter",
-                "last_name": "Anteater",
                 "school": "UC Irvine",
                 "submission_time": datetime(2023, 1, 12, 9, 0, 0),
                 "reviews": [[datetime(2023, 1, 18), "edu.uci.alicia", "ACCEPTED"]],
@@ -97,11 +97,11 @@ def test_can_retrieve_applicants(
     assert data == [
         {
             "_id": "edu.uci.petr",
+            "first_name": "Peter",
+            "last_name": "Anteater",
             "status": "REVIEWED",
             "decision": "ACCEPTED",
             "application_data": {
-                "first_name": "Peter",
-                "last_name": "Anteater",
                 "school": "UC Irvine",
                 "submission_time": "2023-01-12T09:00:00",
             },
@@ -115,8 +115,6 @@ def test_can_include_decision_from_reviews() -> None:
         "_id": "edu.uci.sydnee",
         "status": "REVIEWED",
         "application_data": {
-            "first_name": "Sydnee",
-            "last_name": "Tan",
             "reviews": [[datetime(2023, 1, 19), "edu.uci.alicia", "ACCEPTED"]],
         },
     }
@@ -131,8 +129,6 @@ def test_no_decision_from_no_reviews() -> None:
         "_id": "edu.uci.pham",
         "status": "PENDING_REVIEW",
         "application_data": {
-            "first_name": "Nicole",
-            "last_name": "Pham",
             "reviews": [],
         },
     }
@@ -247,7 +243,7 @@ def test_waitlisted_applicant_can_be_released(
         DIRECTOR_IDENTITY,
         {
             "status": Decision.WAITLISTED,
-            "application_data": {"first_name": "Peter"},
+            "first_name": "Peter",
         },
     ]
     mock_mongodb_handler_update_one.return_value = True

@@ -22,12 +22,7 @@ async function Demo() {
 				<button type="submit">Search Name</button>
 			</form>
 			<form method="post" action="/api/demo/add-user">
-				<input
-					type="text"
-					required
-					name="name"
-					style={{ color: "black" }}
-				/>
+				<input type="text" required name="name" style={{ color: "black" }} />
 				<br />
 				<br />
 				<input

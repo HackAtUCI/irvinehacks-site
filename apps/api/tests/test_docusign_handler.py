@@ -1,12 +1,10 @@
 from unittest.mock import AsyncMock, patch
 
-from test_user_apply import EXPECTED_APPLICATION_DATA
-
 from models.ApplicationData import Decision
+from models.user_record import Role, Status
 from services import docusign_handler
 from services.docusign_handler import ACCOUNT_ID, POWERFORM_ID, WebhookPayload
 from services.mongodb_handler import Collection
-from utils.user_record import Role, Status
 
 SAMPLE_WEBHOOK_PAYLOAD = {
     "event": "envelope-completed",
@@ -45,9 +43,10 @@ async def test_new_waiver_submission_can_be_processed(
     """Waiver signing event from accepted participant can be processed properly."""
     mock_mongodb_handler_retrieve_one.return_value = {
         "_id": SAMPLE_UID,
+        "first_name": "Nicole",
+        "last_name": "Pham",
         "role": Role.APPLICANT,
         "status": Decision.ACCEPTED,
-        "application_data": EXPECTED_APPLICATION_DATA,
     }
     await docusign_handler.process_webhook_event(SAMPLE_WEBHOOK_DATA)
     mock_mongodb_handler_update_one.assert_awaited_once_with(
@@ -64,9 +63,10 @@ async def test_no_op_when_user_already_signed_waiver(
     """If user has already signed waiver, ignore so RSVP status is maintained."""
     mock_mongodb_handler_retrieve_one.return_value = {
         "_id": SAMPLE_UID,
+        "first_name": "John",
+        "last_name": "Hancock",
         "role": Role.APPLICANT,
         "status": Status.CONFIRMED,
-        "application_data": EXPECTED_APPLICATION_DATA,
     }
     await docusign_handler.process_webhook_event(SAMPLE_WEBHOOK_DATA)
     mock_mongodb_handler_update_one.assert_not_awaited()
@@ -81,9 +81,10 @@ async def test_no_op_for_rejected_applicant(
     """If applicant was not accepted, ignore waiv.r signing"""
     mock_mongodb_handler_retrieve_one.return_value = {
         "_id": SAMPLE_UID,
+        "first_name": "King",
+        "last_name": "Triton",
         "role": Role.APPLICANT,
         "status": Decision.REJECTED,
-        "application_data": EXPECTED_APPLICATION_DATA,
     }
     await docusign_handler.process_webhook_event(SAMPLE_WEBHOOK_DATA)
     mock_mongodb_handler_update_one.assert_not_awaited()
@@ -112,6 +113,8 @@ async def test_user_record_updated_even_for_non_applicant(
     """Test waiver status stored even for external participants with user record."""
     mock_mongodb_handler_retrieve_one.return_value = {
         "_id": SAMPLE_UID,
+        "first_name": "Community",
+        "last_name": "Service",
         "role": Role.VOLUNTEER,
     }
     await docusign_handler.process_webhook_event(SAMPLE_WEBHOOK_DATA)

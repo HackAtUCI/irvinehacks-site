@@ -4,10 +4,10 @@ from fastapi import FastAPI, status
 from fastapi.testclient import TestClient
 
 from auth.user_identity import GuestUser, UserTestClient
+from models.ApplicationData import Decision
+from models.user_record import Role, Status
 from routers import user
 from services.mongodb_handler import Collection
-from utils.user_record import Status
-from models.ApplicationData import Decision
 
 app = FastAPI()
 app.include_router(user.router)
@@ -56,7 +56,7 @@ def test_plain_identity_when_no_user_record(
     res = client.get("/me")
 
     mock_mongodb_handler_retrieve_one.assert_awaited_once_with(
-        Collection.USERS, {"_id": "edu.stanford.tree"}
+        Collection.USERS, {"_id": "edu.stanford.tree"}, ["role", "status"]
     )
     data = res.json()
     assert data == {"uid": "edu.stanford.tree", "status": None, "role": None}
@@ -134,3 +134,24 @@ def test_user_with_status_accepted_un_rsvp_returns_403(
     mock_mongodb_handler_update_one.assert_not_awaited()
 
     assert res.status_code == 403
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_user_me_route_returns_correct_type(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test user me route returns correct fields as listed in user.IdentityResponse"""
+    mock_mongodb_handler_retrieve_one.return_value = {
+        "status": Status.WAIVER_SIGNED,
+        "role": Role.VOLUNTEER,
+    }
+
+    client = UserTestClient(GuestUser(email="tree@stanford.edu"), app)
+    res = client.get("/me")
+    data = res.json()
+
+    assert data == {
+        "uid": "edu.stanford.tree",
+        "status": Status.WAIVER_SIGNED,
+        "role": Role.VOLUNTEER,
+    }

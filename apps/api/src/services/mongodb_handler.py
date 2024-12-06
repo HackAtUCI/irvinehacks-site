@@ -29,6 +29,8 @@ DB = MONGODB_CLIENT[DATABASE_NAME].with_options(
 
 
 class BaseRecord(BaseModel):
+    """Represents any object in the users collection."""
+
     model_config = ConfigDict(populate_by_name=True)
 
     uid: str = Field(alias="_id")

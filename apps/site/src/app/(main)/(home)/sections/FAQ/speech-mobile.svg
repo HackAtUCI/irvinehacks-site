@@ -1,0 +1,10 @@
+<svg id="svg2" viewBox="0 0 500 670" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+  <desc>Source: openclipart.org/detail/209545</desc>
+  <defs>
+    <radialGradient id="radialGradient50" gradientUnits="userSpaceOnUse" cy="13.127" cx="23.404" gradientTransform="matrix(9.477364, 10.273408, 9.367074, -10.407683, -215.77565, 326.421863)" r="14.286">
+      <stop id="stop52" style="stop-color: #ff0008" offset="0"></stop>
+      <stop id="stop54" style="stop-color: #800005" offset="1"></stop>
+    </radialGradient>
+  </defs>
+  <path d="M 261.585 142.94 L 456.424 142.94 L 456.424 537.561 L 57.578 537.561 L 45.101 537.561 L 45.101 474.35 L 45.101 142.94 L 236.459 142.94 L 237.456 142.94 L 238.064 142.108 L 248.77 127.503 L 260.006 142.146 L 260.617 142.94 L 261.585 142.94 Z" fill="#0C071B" stroke="white" stroke-width="3" style=""></path>
+</svg>

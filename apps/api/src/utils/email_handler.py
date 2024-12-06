@@ -11,7 +11,6 @@ from services.sendgrid_handler import (
 )
 
 IH_SENDER = ("apply@irvinehacks.com", "IrvineHacks 2025 Applications")
-REPLY_TO_HACK_AT_UCI = ("irvinehacks2025@gmail.com", "Hack at UCI")
 
 DECISION_TEMPLATES: dict[Decision, ApplicationUpdateTemplates] = {
     Decision.ACCEPTED: Template.ACCEPTED_EMAIL,
@@ -38,7 +37,6 @@ async def send_application_confirmation_email(
             "first_name": user.first_name,
             "last_name": user.last_name,
         },
-        reply_to=REPLY_TO_HACK_AT_UCI,
     )
 
 
@@ -51,7 +49,6 @@ async def send_guest_login_email(email: EmailStr, passphrase: str) -> None:
             "email": email,
             "passphrase": passphrase,
         },
-        reply_to=REPLY_TO_HACK_AT_UCI,
     )
 
 
@@ -79,5 +76,4 @@ async def send_waitlist_release_email(first_name: str, email: EmailStr) -> None:
         IH_SENDER,
         personalization,
         send_to_multiple=False,
-        reply_to=REPLY_TO_HACK_AT_UCI,
     )

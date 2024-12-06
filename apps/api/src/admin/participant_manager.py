@@ -37,7 +37,6 @@ PARTICIPANT_FIELDS = [
     "last_name",
     "role",
     "status",
-    "role",
     "checkins",
     "badge_number",
 ]

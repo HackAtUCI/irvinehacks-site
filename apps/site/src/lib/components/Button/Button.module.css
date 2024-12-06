@@ -21,6 +21,16 @@
 }
 
 .lightButton {
+	padding: 0.15rem 1.15rem;
+	border-radius: 10px;
+	background-image: none;
+	background-color: var(--color-white);
+	margin: 0;
+
+	font-size: 28px;
+}
+
+.navButton {
 	border: 3px solid #fff;
 	background: #0c071b;
 	padding: 0.3rem 0.75rem;

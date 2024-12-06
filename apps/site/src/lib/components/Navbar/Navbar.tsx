@@ -35,7 +35,7 @@ function Navbar({ identity }: NavbarProps) {
 		window.addEventListener("scroll", scrollHandler);
 	}, []);
 
-	const goToChooseChar = (e:React.MouseEvent) => {
+	const goToChooseChar = (e: React.MouseEvent) => {
 		e.preventDefault();
 
 		if (window.location.pathname !== "/") {
@@ -102,7 +102,7 @@ function Navbar({ identity }: NavbarProps) {
 						text="Login"
 						href="/login"
 						usePrefetch={false}
-						isLightVersion
+						isNavButton
 					/>
 				</NavMenu.List>
 			</div>

@@ -25,15 +25,16 @@ const Button: React.FC<ButtonProps> = ({
 }) => {
 	if (href) {
 		return (
-			<div className={styles.buttonBox}>
+			<div className={clsx(!isLightVersion && styles.buttonBox)}>
 				<Link
 					href={href}
 					className={clsx(
 						styles.button,
 						isLightVersion && styles.lightButton,
-						isLightVersion ? "font-display" : "font-body",
+						isLightVersion ? "font-body" : "font-display",
 						className,
 					)}
+					style={style}
 					prefetch={usePrefetch}
 				>
 					{text}
@@ -42,12 +43,17 @@ const Button: React.FC<ButtonProps> = ({
 		);
 	}
 	return (
-		<div className={styles.buttonBox}>
+		<div className={clsx(!isLightVersion && styles.buttonBox)}>
 			<button
 				type="submit"
-				className={styles.button + " font-display"}
+				className={clsx(
+					styles.button,
+					isLightVersion && styles.lightButton,
+					isLightVersion ? "font-body" : "font-display",
+					className,
+				)}
 				disabled={disabled}
-				style={style ? style : { width: "max-content" }}
+				style={style}
 			>
 				{text}
 			</button>

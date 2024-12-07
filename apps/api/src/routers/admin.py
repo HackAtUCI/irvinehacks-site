@@ -16,7 +16,7 @@ from services.mongodb_handler import BaseRecord, Collection
 from services.sendgrid_handler import ApplicationUpdatePersonalization, Template
 from utils import email_handler
 from utils.batched import batched
-from utils.email_handler import IH_SENDER, REPLY_TO_HACK_AT_UCI
+from utils.email_handler import IH_SENDER
 from utils.user_record import Applicant, ApplicantStatus, Role, Status
 
 log = getLogger(__name__)
@@ -175,7 +175,6 @@ async def rsvp_reminder() -> None:
         IH_SENDER,
         personalizations,
         True,
-        reply_to=REPLY_TO_HACK_AT_UCI,
     )
 
 

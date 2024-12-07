@@ -1,19 +1,23 @@
 .form {
-	background-color: #ffffff;
-	border-radius: 10px;
+	background-color: black;
+	border-width: 4px;
+	border-color: white;
+	box-shadow: 1rem 1.5rem white;
 }
 
 .input {
-	background-color: #e1e1e1;
+	background-color: #ffffff;
 	height: 38px;
 	padding: 5px;
 	border-radius: 4px;
 	font-size: 18px;
+	color: black;
 }
 
 .label {
 	font-size: 18px;
 	margin-bottom: 8px;
+	color: white;
 }
 
 .upload {

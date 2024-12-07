@@ -6,7 +6,7 @@ const FRQ_MAX_LENGTH = 2000;
 
 export default function ProfileInformation() {
 	return (
-		<div className="flex flex-col gap-5 w-11/12">
+		<div className="text-white flex flex-col gap-5 w-11/12">
 			<p className="text-4xl m-0 font-bold text-center max-[700px]:text-3xl">
 				Profile Information
 			</p>
@@ -35,20 +35,20 @@ export default function ProfileInformation() {
 			</div>
 
 			<Textfield
-				name="frq_collaboration"
+				name="frq_change"
 				labelClass={`${styles.label} mt-7`}
-				labelText="Why is collaboration important to being a programmer or technologist, and what does it mean to you? (150 words)"
-				inputClass={`bg-[#E1E1E1] p-3 h-48 resize-none rounded-xl`}
+				labelText="Give an example of a time when you experienced a lot of change. What did you learn from it, and how would you apply what you learned to future experiences? (150 words)"
+				inputClass={`bg-[#ffffff] text-black p-3 h-48 resize-none rounded-xl`}
 				containerClass="flex flex-col w-full"
 				isRequired={true}
 				maxLength={FRQ_MAX_LENGTH}
 			/>
 
 			<Textfield
-				name="frq_dream_job"
+				name="frq_video_game"
 				labelClass={`${styles.label} mt-7`}
-				labelText="If you could have any job in the world, what would it be? (ex. YouTuber, Body Builder, etc.) (100 words)"
-				inputClass={`bg-[#E1E1E1] p-3 h-48 resize-none rounded-xl`}
+				labelText="If you could design your own video game world, what would it look like, and what features would you add to make it unique?  (100 words)"
+				inputClass={`bg-[#ffffff] text-black p-3 h-48 resize-none rounded-xl`}
 				containerClass="flex flex-col w-full"
 				isRequired={true}
 				maxLength={FRQ_MAX_LENGTH}

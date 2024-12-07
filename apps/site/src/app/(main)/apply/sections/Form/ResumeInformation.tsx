@@ -65,7 +65,7 @@ export default function ResumeInformation() {
 			<label className={styles.label}>Resume (PDF, 0.5 MB max)</label>
 			<label
 				htmlFor="resume_upload"
-				className={`${styles.upload} cursor-pointer mb-3 p-5 rounded-xl bg-[#e1e1e1]`}
+				className={`${styles.upload} cursor-pointer mb-3 p-5 rounded-xl bg-white`}
 			>
 				{!hasUploaded ? (
 					<FileText className="m-auto" width={50} height={50} />

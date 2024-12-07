@@ -1,7 +1,7 @@
 .button {
-	background-color: var(--color-dark-blue);
+	background-color: #000000;
 	color: var(--color-white);
-	border: 5px solid var(--color-white);
+	border: 3px solid #ffffff;
 	font-size: calc(13px + 1vw);
 	font-weight: 700;
 	padding: 0.55rem 1.25rem;

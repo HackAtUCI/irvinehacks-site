@@ -23,7 +23,7 @@ const ethnicity = [
 
 export default function BasicInformation() {
 	return (
-		<div className="flex flex-col gap-5 w-11/12">
+		<div className="text-white flex flex-col gap-5 w-11/12">
 			<p className="text-4xl m-0 font-bold text-center max-[700px]:text-3xl">
 				Basic Information
 			</p>

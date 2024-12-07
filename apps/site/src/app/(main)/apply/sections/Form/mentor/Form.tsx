@@ -85,8 +85,8 @@ export default function Form() {
 			JSON.stringify(experienceList),
 		);
 
-		const formEntries = Object.fromEntries(formData.entries());
-		console.log(formEntries);
+		// const formEntries = Object.fromEntries(formData.entries());
+		// console.log(formEntries);
 
 		try {
 			const res = await axios.post(APPLY_PATH, formData);

@@ -16,14 +16,14 @@ const selectOptions = [
 	},
 	{ name: "data_science", value: "data_science", text: "Data Science" },
 	{ name: "cybersecurity", value: "cybersecurity", text: "Cybersecurity" },
-	{ name: "other", value: "ignore_this", text: "Other:" },
+	{ name: "other_mentor_experience", value: "other", text: "Other:" },
 ];
 
 export default function ExperienceInformation() {
 	return (
 		<div className="flex flex-col gap-20 w-11/12">
 			<Slider
-				containerClass="w-11/12"
+				containerClass="w-full"
 				labelText="Rate your experience with Git:"
 				pretext="No Experience"
 				postText="Expert"
@@ -32,7 +32,7 @@ export default function ExperienceInformation() {
 			<MultipleSelect
 				labelText="What types of projects would you be comfortable mentoring?"
 				identifierId="mentor_comfortable_select"
-				containerClass="w-11/12"
+				containerClass="w-full"
 				values={selectOptions}
 			/>
 		</div>

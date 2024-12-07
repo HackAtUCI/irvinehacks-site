@@ -19,7 +19,13 @@ import ExperienceInformation from "./ExperienceInformation";
 import Textfield from "@/lib/components/forms/Textfield";
 
 const APPLY_PATH = "/api/user/apply";
-const FIELDS_WITH_OTHER = ["pronouns", "ethnicity", "school", "major"];
+const FIELDS_WITH_OTHER = [
+	"pronouns",
+	"ethnicity",
+	"school",
+	"major",
+	"other_mentor_experience",
+];
 const SELECT_OPTIONS = [
 	"frontend",
 	"backend",
@@ -31,7 +37,6 @@ const SELECT_OPTIONS = [
 	"embedded",
 	"data_science",
 	"cybersecurity",
-	"other",
 ];
 
 export default function Form() {
@@ -65,7 +70,7 @@ export default function Form() {
 				formData.delete(otherField);
 			}
 		}
-		
+
 		// Compile all technologies the mentor is comfortable with into one array
 		const experienceList: Array<string> = [];
 		for (const fieldName of Array.from(formData.keys())) {
@@ -74,10 +79,13 @@ export default function Form() {
 				formData.delete(fieldName);
 			}
 		}
-		formData.set("mentor_experience_working_with", JSON.stringify(experienceList));
+		formData.set(
+			"mentor_experience_working_with",
+			JSON.stringify(experienceList),
+		);
 
-		// const formEntries = Object.fromEntries(formData.entries());
-		// console.log(formEntries);
+		const formEntries = Object.fromEntries(formData.entries());
+		console.log(formEntries);
 
 		try {
 			const res = await axios.post(APPLY_PATH, formData);
@@ -124,7 +132,7 @@ export default function Form() {
 			<SchoolInformation />
 			<ShortAnswers />
 			<ExperienceInformation />
-			<ResumeInformation />
+			<ResumeInformation isRequired />
 			<RadioSelect
 				name="resume_share_to_sponsors"
 				containerClass="w-11/12"

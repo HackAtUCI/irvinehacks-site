@@ -30,8 +30,11 @@ export default async function Apply({
 	// 	redirect("/login");
 	// }
 
-	const deadlinePassed = hasDeadlinePassed();
-	const applicationsOpened = haveApplicationsOpened();
+	// const deadlinePassed = hasDeadlinePassed();
+	// const applicationsOpened = haveApplicationsOpened();
+
+	const deadlinePassed = false;
+	const applicationsOpened = true;
 	const applyBody = hasAcceptedQueryParam ? (
 		<>
 			<Title applicationType="Mentor" />
@@ -43,19 +46,19 @@ export default async function Apply({
 		<ApplyConfirm continueHREF="/mentor" isHacker={false} />
 	);
 	return (
-		// <div className="flex flex-col items-center gap-10 my-32 min-h-[calc(100vh-8rem)]">
-		// 	{!applicationsOpened || deadlinePassed ? (
-		// 		<ApplicationsClosed />
-		// 	) : (
-		// 		applyBody
-		// 	)}
-		// </div>
+		<div className="flex flex-col items-center gap-10 my-32 min-h-[calc(100vh-8rem)]">
+			{!applicationsOpened || deadlinePassed ? (
+				<ApplicationsClosed />
+			) : (
+				applyBody
+			)}
+		</div>
 
-		<>
-			<Title applicationType="Mentor" />
-			<div className="flex justify-center">
-				<Form />
-			</div>
-		</>
+		// 	<>
+		// 		<Title applicationType="Mentor" />
+		// 		<div className="flex justify-center">
+		// 			<Form />
+		// 		</div>
+		// 	</>
 	);
 }

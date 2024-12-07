@@ -33,8 +33,8 @@ export default function Slider({
 				{labelText} <RequiredAsterisk />
 			</p>
 			<div className="flex gap-4 w-full">
-				<p className="text-center">{pretext}</p>
-				<div className="relative flex items-center w-full">
+				<p className="hidden md:block text-center m-0">{pretext}</p>
+				<div className="relative flex items-center min-h-[50px] w-full">
 					<SliderTick leftPercentage="0.7%" label="1" />
 					<SliderTick leftPercentage="25.2%" label="2" />
 					<SliderTick leftPercentage="49.7%" label="3" />
@@ -49,10 +49,14 @@ export default function Slider({
 						id={name}
 					/>
 				</div>
-
-				<div className="flex items-center">
+				<div className="hidden md:block flex items-center">
 					<p className="text-center m-0">{postText}</p>
 				</div>
+			</div>
+
+			<div className="visible md:hidden flex justify-between w-full mt-14">
+				<p className="text-center m-0">{pretext}</p>
+				<p className="text-center m-0">{postText}</p>
 			</div>
 		</div>
 	);

@@ -3,16 +3,18 @@ import useSWR from "swr";
 
 import { Status, Uid } from "@/lib/admin/useApplicant";
 
+// These should match `user_record.Role` in the API
+// TODO: move to common `userRecord` file
 export const enum Role {
-	Director = "director",
-	Organizer = "organizer",
-	CheckInLead = "checkin_lead",
-	Applicant = "applicant",
-	Mentor = "mentor",
-	Volunteer = "volunteer",
-	Sponsor = "sponsor",
-	Judge = "judge",
-	WorkshopLead = "workshop_lead",
+	Director = "Director",
+	Organizer = "Organizer",
+	CheckInLead = "Check-in Lead",
+	Applicant = "Applicant",
+	Mentor = "Mentor",
+	Volunteer = "Volunteer",
+	Sponsor = "Sponsor",
+	Judge = "Judge",
+	WorkshopLead = "Workshop Lead",
 }
 
 export type Checkin = [string, Uid];
@@ -21,7 +23,7 @@ export interface Participant {
 	_id: Uid;
 	first_name: string;
 	last_name: string;
-	role: Role;
+	roles: ReadonlyArray<Role>;
 	checkins: Checkin[];
 	status: Status;
 	badge_number: string | null;

@@ -19,11 +19,11 @@ from auth import user_identity
 from auth.authorization import require_accepted_applicant
 from auth.user_identity import User, require_user_identity, use_user_identity
 from models.ApplicationData import ProcessedApplicationData, RawApplicationData
+from models.user_record import Applicant, BareApplicant, Role, Status
 from services import docusign_handler, mongodb_handler
 from services.docusign_handler import WebhookPayload
 from services.mongodb_handler import Collection
 from utils import email_handler, resume_handler
-from utils.user_record import Applicant, Role, Status
 
 log = getLogger(__name__)
 
@@ -35,7 +35,7 @@ DEADLINE = datetime(2025, 1, 11, 8, 1, tzinfo=timezone.utc)
 class IdentityResponse(BaseModel):
     uid: Union[str, None] = None
     status: Union[str, None] = None
-    role: Union[Role, None] = None
+    roles: list[Role] = []
 
 
 def _is_past_deadline(now: datetime) -> bool:
@@ -59,19 +59,21 @@ async def logout() -> RedirectResponse:
     return response
 
 
-@router.get("/me", response_model=IdentityResponse)
+@router.get("/me")
 async def me(
     user: Annotated[Union[User, None], Depends(use_user_identity)]
-) -> dict[str, object]:
+) -> IdentityResponse:
     log.info(user)
     if not user:
-        return dict()
+        return IdentityResponse()
     user_record = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": user.uid}
+        Collection.USERS, {"_id": user.uid}, ["roles", "status"]
     )
+
     if not user_record:
-        return {"uid": user.uid}
-    return {**user_record, "uid": user.uid}
+        return IdentityResponse(uid=user.uid)
+
+    return IdentityResponse(uid=user.uid, **user_record)
 
 
 @router.post("/apply", status_code=status.HTTP_201_CREATED)
@@ -87,13 +89,17 @@ async def apply(
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Applications have closed.")
 
     # check if email is already in database
-    EXISTING_RECORD = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": user.uid}
+    existing_record = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": user.uid, "roles": {"exists": True}}, ["roles"]
     )
 
-    if EXISTING_RECORD and "status" in EXISTING_RECORD:
-        log.error("User %s has already applied.", user)
-        raise HTTPException(status.HTTP_400_BAD_REQUEST)
+    if existing_record and existing_record.get("roles"):
+        log.error(
+            "User %s already has role %s but tried to apply.",
+            user,
+            existing_record["roles"],
+        )
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "User already has a role.")
 
     raw_app_data_dump = raw_application_data.model_dump()
 
@@ -132,6 +138,8 @@ async def apply(
     )
     applicant = Applicant(
         uid=user.uid,
+        first_name=raw_application_data.first_name,
+        last_name=raw_application_data.last_name,
         application_data=processed_application_data,
         status=Status.PENDING_REVIEW,
     )
@@ -149,9 +157,7 @@ async def apply(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     try:
-        await email_handler.send_application_confirmation_email(
-            user.email, applicant.application_data
-        )
+        await email_handler.send_application_confirmation_email(user.email, applicant)
     except RuntimeError:
         log.error("Could not send confirmation email with SendGrid to %s.", user.uid)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -167,17 +173,16 @@ async def apply(
 
 @router.get("/waiver")
 async def request_waiver(
-    user: Annotated[tuple[User, Applicant], Depends(require_accepted_applicant)]
+    user: Annotated[tuple[User, BareApplicant], Depends(require_accepted_applicant)]
 ) -> RedirectResponse:
     """Request to sign the participant waiver through DocuSign."""
     # TODO: non-applicants might also want to request a waiver
     user_data, applicant = user
-    application_data = applicant.application_data
 
     if applicant.status in (Status.WAIVER_SIGNED, Status.CONFIRMED):
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Already submitted a waiver.")
 
-    user_name = f"{application_data.first_name} {application_data.last_name}"
+    user_name = f"{applicant.first_name} {applicant.last_name}"
 
     # TODO: email may not match UCInetID format from `docusign_handler._acquire_uid`
     form_url = docusign_handler.waiver_form_url(user_data.email, user_name)

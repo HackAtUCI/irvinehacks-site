@@ -21,9 +21,9 @@ import { isApplicationManager } from "@/lib/admin/authorization";
 function Applicants() {
 	const router = useRouter();
 
-	const { role } = useContext(UserContext);
+	const { roles } = useContext(UserContext);
 
-	if (!isApplicationManager(role)) {
+	if (!isApplicationManager(roles)) {
 		router.push("/admin/dashboard");
 	}
 
@@ -108,7 +108,7 @@ function Applicants() {
 	);
 }
 
-const CardHeader = ({ _id, application_data }: ApplicantSummary) => {
+const CardHeader = ({ _id, first_name, last_name }: ApplicantSummary) => {
 	const followWithNextLink = useFollowWithNextLink();
 	return (
 		<Link
@@ -116,7 +116,7 @@ const CardHeader = ({ _id, application_data }: ApplicantSummary) => {
 			fontSize="inherit"
 			onFollow={followWithNextLink}
 		>
-			{application_data.first_name} {application_data.last_name}
+			{first_name} {last_name}
 		</Link>
 	);
 };

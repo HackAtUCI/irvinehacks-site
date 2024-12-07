@@ -21,19 +21,19 @@ function ParticipantAction({
 	initiatePromotion,
 	initiateConfirm,
 }: ParticipantActionProps) {
-	const { role } = useContext(UserContext);
+	const { roles } = useContext(UserContext);
 
-	const isCheckin = isCheckinLead(role);
+	const canPromote = isCheckinLead(roles);
 	const isWaiverSigned = participant.status === Status.signed;
 	const isAccepted = participant.status === Status.accepted;
-	const nonHacker = isNonHacker(participant.role);
+	const nonHacker = isNonHacker(participant.roles);
 
 	const promoteButton = (
 		<Button
 			variant="inline-link"
 			ariaLabel={`Promote ${participant._id} off waitlist`}
 			onClick={() => initiatePromotion(participant)}
-			disabled={!isCheckin}
+			disabled={!canPromote}
 		>
 			Promote
 		</Button>
@@ -55,17 +55,17 @@ function ParticipantAction({
 			variant="inline-link"
 			ariaLabel={`Confirm attendance for ${participant._id}`}
 			onClick={() => initiateConfirm(participant)}
-			disabled={!isCheckin}
+			disabled={!canPromote}
 		>
 			Confirm
 		</Button>
 	);
 
 	if (nonHacker) {
-		const content = !isCheckinLead
+		const content = !canPromote
 			? "Only check-in leads can confirm non-hackers."
 			: "Must sign waiver first.";
-		if (!isCheckinLead || participant.status === ReviewStatus.reviewed) {
+		if (!canPromote || participant.status === ReviewStatus.reviewed) {
 			return (
 				<ParticipantActionPopover content={content}>
 					{confirmButton}
@@ -76,7 +76,7 @@ function ParticipantAction({
 		}
 		return checkinButton;
 	} else if (participant.status === Status.waitlisted) {
-		if (!isCheckin) {
+		if (!canPromote) {
 			return (
 				<ParticipantActionPopover content="Only check-in leads are allowed to promote walk-ins.">
 					{promoteButton}

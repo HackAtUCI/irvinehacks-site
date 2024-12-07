@@ -8,10 +8,10 @@ from pydantic import HttpUrl
 
 from auth.user_identity import NativeUser, UserTestClient
 from models.ApplicationData import ProcessedApplicationData
+from models.user_record import Applicant, Status
 from routers import user
 from services.mongodb_handler import Collection
 from utils import resume_handler
-from utils.user_record import Applicant, Status
 
 # Tests will break again next year, tech should notice and fix :P
 TEST_DEADLINE = datetime(2025, 10, 1, 8, 0, 0, tzinfo=timezone.utc)
@@ -68,14 +68,18 @@ EXPECTED_APPLICATION_DATA_WITHOUT_RESUME = ProcessedApplicationData(
 
 EXPECTED_USER = Applicant(
     uid="edu.uci.pkfire",
+    first_name="pk",
+    last_name="fire",
     status=Status.PENDING_REVIEW,
     application_data=EXPECTED_APPLICATION_DATA,
 )
 
 EXPECTED_USER_WITHOUT_RESUME = Applicant(
     uid="edu.uci.pkfire",
-    application_data=EXPECTED_APPLICATION_DATA_WITHOUT_RESUME,
+    first_name="pk",
+    last_name="fire",
     status=Status.PENDING_REVIEW,
+    application_data=EXPECTED_APPLICATION_DATA_WITHOUT_RESUME,
 )
 
 resume_handler.RESUMES_FOLDER_ID = "RESUMES_FOLDER_ID"
@@ -117,7 +121,7 @@ def test_apply_successfully(
         upsert=True,
     )
     mock_send_application_confirmation_email.assert_awaited_once_with(
-        USER_EMAIL, EXPECTED_APPLICATION_DATA
+        USER_EMAIL, EXPECTED_USER
     )
     assert res.status_code == 201
 
@@ -144,7 +148,7 @@ def test_apply_when_user_exists_causes_400(
     """Test that applying when a user already exists causes status 400."""
     mock_mongodb_handler_retrieve_one.return_value = {
         "_id": "edu.uci.pkfire",
-        "status": "pending review",
+        "roles": ["applicant"],
     }
     res = client.post("/apply", data=SAMPLE_APPLICATION, files=SAMPLE_FILES)
 
@@ -261,7 +265,7 @@ def test_apply_successfully_without_resume(
         upsert=True,
     )
     mock_send_application_confirmation_email.assert_awaited_once_with(
-        USER_EMAIL, EXPECTED_APPLICATION_DATA_WITHOUT_RESUME
+        USER_EMAIL, EXPECTED_USER_WITHOUT_RESUME
     )
     assert res.status_code == 201
 
@@ -271,13 +275,14 @@ def test_application_data_is_bson_encodable() -> None:
     data = EXPECTED_APPLICATION_DATA.model_copy()
     data.linkedin = HttpUrl("https://linkedin.com")
     encoded = bson.encode(EXPECTED_APPLICATION_DATA.model_dump())
-    assert len(encoded) == 415
+    assert len(encoded) == 376
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 def test_application_data_with_other_throws_422(
     mock_mongodb_handler_retrieve_one: AsyncMock,
 ) -> None:
+    mock_mongodb_handler_retrieve_one.return_value = None
     contains_other = SAMPLE_APPLICATION.copy()
     contains_other["pronouns"] = "other"
     res = client.post("/apply", data=contains_other, files=SAMPLE_FILES)

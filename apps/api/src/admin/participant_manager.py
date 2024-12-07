@@ -6,9 +6,9 @@ from typing_extensions import TypeAlias
 
 from auth.user_identity import User, utc_now
 from models.ApplicationData import Decision
+from models.user_record import Role, Status, UserRecord
 from services import mongodb_handler
 from services.mongodb_handler import Collection
-from utils.user_record import Role, Status, UserRecord
 
 log = getLogger(__name__)
 
@@ -27,13 +27,19 @@ class Participant(UserRecord):
     """Participants attending the event."""
 
     checkins: list[Checkin] = []
-    first_name: str
-    last_name: str
     status: Union[Status, Decision] = Status.REVIEWED
     badge_number: Union[str, None] = None
 
 
-PARTICIPANT_FIELDS = ["_id", "status", "role", "checkins", "badge_number"]
+PARTICIPANT_FIELDS = [
+    "_id",
+    "first_name",
+    "last_name",
+    "roles",
+    "status",
+    "checkins",
+    "badge_number",
+]
 
 
 async def get_hackers() -> list[Participant]:
@@ -42,7 +48,7 @@ async def get_hackers() -> list[Participant]:
     records: list[dict[str, Any]] = await mongodb_handler.retrieve(
         Collection.USERS,
         {
-            "role": Role.APPLICANT,
+            "roles": Role.APPLICANT,
             "status": {
                 "$in": [
                     Status.ATTENDING,
@@ -53,19 +59,16 @@ async def get_hackers() -> list[Participant]:
                 ]
             },
         },
-        PARTICIPANT_FIELDS
-        + ["application_data.first_name", "application_data.last_name"],
+        PARTICIPANT_FIELDS,
     )
 
-    return [Participant(**user, **user["application_data"]) for user in records]
+    return [Participant(**user) for user in records]
 
 
 async def get_non_hackers() -> list[Participant]:
     """Fetch all non-hackers participating in the event."""
     records: list[dict[str, Any]] = await mongodb_handler.retrieve(
-        Collection.USERS,
-        {"role": {"$in": NON_HACKER_ROLES}},
-        PARTICIPANT_FIELDS + ["first_name", "last_name"],
+        Collection.USERS, {"roles": {"$in": NON_HACKER_ROLES}}, PARTICIPANT_FIELDS
     )
     return [Participant(**user) for user in records]
 
@@ -73,7 +76,7 @@ async def get_non_hackers() -> list[Participant]:
 async def check_in_participant(uid: str, badge_number: str, associate: User) -> None:
     """Check in participant at IrvineHacks"""
     record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": uid, "role": {"$exists": True}}
+        Collection.USERS, {"_id": uid, "roles": {"$exists": True}}, ["status"]
     )
 
     if not record or record.get("status", "") not in (
@@ -99,13 +102,20 @@ async def check_in_participant(uid: str, badge_number: str, associate: User) -> 
 
 
 async def confirm_attendance_non_hacker(uid: str, director: User) -> None:
-    """Update status for Role.Attending for non-hackers."""
+    """Update status from WAIVER_SIGNED to ATTENDING for non-hackers."""
 
     record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": uid, "status": Status.WAIVER_SIGNED}
+        Collection.USERS,
+        {"_id": uid, "roles": {"$in": NON_HACKER_ROLES}},
+        ["status"],
     )
 
-    if not record or record["role"] not in NON_HACKER_ROLES:
+    if not record:
+        raise ValueError
+
+    status = record.get("status")
+    if status != Status.WAIVER_SIGNED:
+        log.error("Cannot confirm attendance for %s with status %s", uid, status)
         raise ValueError
 
     update_status = await mongodb_handler.update_one(

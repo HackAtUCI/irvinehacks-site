@@ -1,5 +1,5 @@
-import styles from "../Form.module.scss";
 import Textfield from "@/lib/components/forms/Textfield";
+import styles from "@/lib/components/forms/shared/Form.module.scss";
 
 export default function ShortAnswers() {
 	return (

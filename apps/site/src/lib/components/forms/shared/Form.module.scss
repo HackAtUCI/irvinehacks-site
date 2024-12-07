@@ -11,3 +11,10 @@
 	font-size: 1.125rem;
 	margin-bottom: 8px;
 }
+
+.upload {
+	& > * {
+		// prevents child elements from interfering with drag & drop
+		pointer-events: none;
+	}
+}

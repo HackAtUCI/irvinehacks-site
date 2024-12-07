@@ -1,5 +1,5 @@
 import TextInput from "@/lib/components/forms/TextInput";
-import styles from "../Form.module.scss";
+import styles from "@/lib/components/forms/shared/Form.module.scss";
 
 export default function ProfileInformation() {
 	return (

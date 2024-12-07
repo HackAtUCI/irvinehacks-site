@@ -4,7 +4,7 @@ import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
 import haveApplicationsOpened from "@/lib/utils/haveApplicationsOpened";
 
 import ApplyConfirm from "../apply/sections/ApplyConfirmation/ApplyConfirm";
-import Form from "../apply/sections/Form/mentor/Form";
+import Form from "./Form/Form";
 import Title from "../apply/sections/Title/Title";
 import getUserIdentity from "@/lib/utils/getUserIdentity";
 
@@ -22,13 +22,13 @@ export default async function Apply({
 	const hasAcceptedQueryParam = searchParams?.prefaceAccepted === "true";
 	const identity = await getUserIdentity();
 
-	if (identity.status !== null) {
-		redirect("/portal");
-	}
+	// if (identity.status !== null) {
+	// 	redirect("/portal");
+	// }
 
-	if (hasAcceptedQueryParam && identity.uid === null) {
-		redirect("/login");
-	}
+	// if (hasAcceptedQueryParam && identity.uid === null) {
+	// 	redirect("/login");
+	// }
 
 	const deadlinePassed = hasDeadlinePassed();
 	const applicationsOpened = haveApplicationsOpened();

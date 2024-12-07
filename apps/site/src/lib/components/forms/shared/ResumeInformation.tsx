@@ -7,7 +7,7 @@ import { FileCheck, FileText, FileWarning } from "lucide-react";
 import OutputFeedBack from "./ResumeOutputFeedback";
 import RequiredAsterisk from "@/lib/components/forms/RequiredAsterisk";
 
-import styles from "./HackerForm.module.scss";
+import styles from "./Form.module.scss";
 
 class InvalidFile extends Error {
 	constructor(message: string) {

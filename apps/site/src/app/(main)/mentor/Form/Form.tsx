@@ -3,21 +3,21 @@
 import { FormEvent, useState } from "react";
 import axios from "axios";
 
+import Textfield from "@/lib/components/forms/Textfield";
 import Button from "@/lib/components/Button/Button";
 
+import AgeInformation from "@/lib/components/forms/shared/AgeInformation";
+import SchoolInformation from "@/lib/components/forms/shared/SchoolInformation";
+import ResumeInformation from "@/lib/components/forms/shared/ResumeInformation";
 import BasicInformation from "./BasicInformation";
-import AgeInformation from "../AgeInformation";
-import SchoolInformation from "../SchoolInformation";
 import ProfileInformation from "./ProfileInformation";
-import ResumeInformation from "../ResumeInformation";
 import ShortAnswers from "./ShortAnswers";
+import ExperienceInformation from "./ExperienceInformation";
 
 import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
 import RadioSelect from "@/lib/components/forms/RadioSelect";
-import ExperienceInformation from "./ExperienceInformation";
-import Textfield from "@/lib/components/forms/Textfield";
 
-import styles from "../Form.module.scss";
+import styles from "@/lib/components/forms/shared/Form.module.scss";
 
 const APPLY_PATH = "/api/user/apply";
 const FIELDS_WITH_OTHER = [
@@ -124,7 +124,7 @@ export default function Form() {
 	return (
 		<form
 			method="post"
-			className={`${styles.form} text-[var(--color-white)] w-8/12 flex flex-col items-center py-12 gap-12 z-1 max-[800px]:w-9/12 max-[400px]:w-11/12 drop-shadow-[25px_33px_0px_rgba(255,255,255,1)]`}
+			className="bg-black border-[5px] border-white text-[var(--color-white)] w-8/12 flex flex-col items-center py-12 gap-14 z-1 max-[800px]:w-9/12 max-[400px]:w-11/12 drop-shadow-[25px_33px_0px_rgba(255,255,255,1)]"
 			action="/api/user/apply"
 			encType="multipart/form-data"
 			onSubmit={handleSubmit}
@@ -143,6 +143,7 @@ export default function Form() {
 					{ value: "yes", text: "Yes" },
 					{ value: "no", text: "No" },
 				]}
+				horizontal={false}
 			/>
 			<ProfileInformation />
 			<Textfield

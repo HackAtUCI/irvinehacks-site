@@ -15,6 +15,7 @@ import ShortAnswers from "./ShortAnswers";
 import styles from "../../apply/sections/Form/Form.module.scss";
 import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
 import RadioSelect from "@/lib/components/forms/RadioSelect";
+import MultipleSelect from "@/lib/components/forms/MultipleSelect";
 
 // TODO: Whats the path for backend
 
@@ -89,6 +90,24 @@ export default function Form() {
 		</p>
 	);
 
+	const selectOptions = [
+		{ name: "frontend", value: "frontend", text: "Frontend Web Development" },
+		{ name: "backend", value: "backend", text: "Backend Web Development" },
+		{ name: "mobile", value: "mobile", text: "Mobile App Development" },
+		{ name: "databases", value: "databases", text: "Databases" },
+		{ name: "ai/ml", value: "ai/ml", text: "AI / Machine Learning" },
+		{ name: "vr", value: "vr", text: "Virtual Reality" },
+		{ name: "blockchain", value: "blockchain", text: "Blockchain" },
+		{
+			name: "embedded",
+			value: "embedded",
+			text: "Embedded Systems / Hardware",
+		},
+		{ name: "data_science", value: "data_science", text: "Data Science" },
+		{ name: "cybersecurity", value: "cybersecurity", text: "Cybersecurity" },
+		{ name: "other", value: "other", text: "Other:" },
+	];
+
 	return (
 		<form
 			method="post"
@@ -100,6 +119,12 @@ export default function Form() {
 			<BasicInformation />
 			<SchoolInformation />
 			<ShortAnswers />
+			<MultipleSelect
+				labelText="What types of projects would you be comfortable mentoring?"
+				identifierId="mentor_comfortable_select"
+				containerClass="w-11/12"
+				values={selectOptions}
+			/>
 			<ResumeInformation />
 			<AgeInformation />
 			<Button

@@ -8,12 +8,12 @@ import Button from "@/lib/components/Button/Button";
 import BasicInformation from "./BasicInformation";
 import AgeInformation from "./AgeInformation";
 import SchoolInformation from "./SchoolInformation";
-import ProfileInformation from "./ProfileInformation";
-import ResumeInformation from "./ResumeInformation";
-import ShiftAvailability from "./ShiftAvailability";
+import ShiftAvailability from "./volunteer/ShiftAvailability";
 
 import styles from "./Form.module.scss";
 import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
+import VolunteerFRQ from "./volunteer/VolunteerFRQ";
+import ExtraQuestions from "./ExtraQuestions";
 
 const APPLY_PATH = "/api/user/apply";
 const FIELDS_WITH_OTHER = ["pronouns", "ethnicity", "school", "major"];
@@ -51,7 +51,7 @@ export default function VolunteerForm() {
 		}
 
 		// const formEntries = Object.fromEntries(formData.entries());
-		// console.debug(formEntries);
+		// console.log(formEntries);
 
 		try {
 			const res = await axios.post(APPLY_PATH, formData);
@@ -96,8 +96,9 @@ export default function VolunteerForm() {
 		>
 			<BasicInformation />
 			<SchoolInformation />
-			<ProfileInformation />
+			<VolunteerFRQ />
 			<ShiftAvailability />
+			<ExtraQuestions />
 			<AgeInformation />
 			<Button
 				text="Submit"

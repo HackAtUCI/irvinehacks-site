@@ -1,14 +1,25 @@
 "use client";
 
 import React from "react";
-import { useState, useRef } from "react";
+import { useState } from "react";
 
-const NUM_HOURS = 12;
-const HOURS_START = 7;
+interface ShiftInputs {
+	shiftText: string;
+	startHour: number;
+	endHour: number;
+	shiftLabel: string;
+}
 
-export default function DayShift({ shiftText }) {
-	const [avaBefore, setAvaBefore] = useState(Array(NUM_HOURS).fill(false));
-	const [available, setAvailable] = useState(Array(NUM_HOURS).fill(false));
+export default function DayShift({
+	shiftText,
+	startHour,
+	endHour,
+	shiftLabel,
+}: ShiftInputs) {
+	const num_hours = endHour - startHour;
+
+	const [avaBefore, setAvaBefore] = useState(Array(num_hours).fill(false));
+	const [available, setAvailable] = useState(Array(num_hours).fill(false));
 	const [isMouseDown, setIsMouseDown] = useState(false);
 	const [firstClicked, setFirstClicked] = useState(false);
 
@@ -50,24 +61,34 @@ export default function DayShift({ shiftText }) {
 		setAvaBefore(available);
 	}
 
-	const times = Array(12).fill(false);
-
 	return (
 		<div className="flex flex-col items-start w-11/12">
 			<div className="flex flex-col relative w-full">
-				<div className="w-full text-xl text-center">{shiftText}</div>
-				{times.map((_, i) => {
+				<input
+					className="hidden"
+					readOnly
+					value={`{${available.reduce(
+						(acc, cur, ind) =>
+							(acc = `"${ToAMPM(startHour + ind)}" : ${cur.toString()}${
+								ind > 0 ? ", " : ""
+							}${acc}`),
+						"",
+					)}}`}
+					name={shiftLabel}
+				/>
+				<div className="w-full text-2xl text-center pb-5">{shiftText}</div>
+				{available.map((_, i) => {
 					return (
 						<div
 							key={`shift_${i}`}
 							className="relative w-full flex justify-end"
 						>
 							<div className=" top-[-7px] text-xs left-0 pr-2 mt-[-7px] min-w-[45px]">
-								{ToAMPM(i + HOURS_START)}
+								{ToAMPM(i + startHour)}
 							</div>
 							<div
 								className={`h-[30px] w-full ${
-									i === NUM_HOURS ? "" : "border-black border-b-2"
+									i === endHour - startHour ? "" : "border-black border-b-2"
 								} ${available[i] ? "bg-blue-500" : "bg-gray-200"}`}
 								onMouseDown={(e) => onMouseDown(e, i)}
 								onMouseUp={onMouseUp}

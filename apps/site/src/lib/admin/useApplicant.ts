@@ -13,8 +13,6 @@ export type Review = [string, Uid, Decision];
 
 // The application responses submitted by an applicant
 export interface ApplicationData {
-	first_name: string;
-	last_name: string;
 	email: string;
 	pronouns: string[];
 	ethnicity: string;
@@ -52,7 +50,9 @@ export type Status = ReviewStatus | Decision | PostAcceptedStatus;
 
 export interface Applicant {
 	_id: Uid;
-	role: string;
+	first_name: string;
+	last_name: string;
+	roles: ReadonlyArray<string>;
 	status: Status;
 	application_data: ApplicationData;
 }

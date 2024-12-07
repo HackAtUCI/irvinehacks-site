@@ -36,10 +36,7 @@ export default function SimpleRadio({
 			<div className={containerClassValues}>
 				{values.map((value, i) => {
 					return (
-						<div
-							key={`${name}-${i}`}
-							className={containerClassInputLabels}
-						>
+						<div key={`${name}-${i}`} className={containerClassInputLabels}>
 							<input
 								type="radio"
 								id={value.id}

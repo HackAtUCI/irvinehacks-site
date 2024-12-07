@@ -4,10 +4,10 @@ from fastapi import FastAPI, status
 from fastapi.testclient import TestClient
 
 from auth.user_identity import GuestUser, UserTestClient
+from models.ApplicationData import Decision
+from models.user_record import Role, Status
 from routers import user
 from services.mongodb_handler import Collection
-from utils.user_record import Status, Role
-from models.ApplicationData import Decision
 
 app = FastAPI()
 app.include_router(user.router)
@@ -43,7 +43,7 @@ def test_no_identity_when_unauthenticated() -> None:
     """Test that identity is empty when not authenticated."""
     res = client.get("/me")
     data = res.json()
-    assert data == {"uid": None, "status": None, "role": None}
+    assert data == {"uid": None, "status": None, "roles": []}
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
@@ -56,10 +56,10 @@ def test_plain_identity_when_no_user_record(
     res = client.get("/me")
 
     mock_mongodb_handler_retrieve_one.assert_awaited_once_with(
-        Collection.USERS, {"_id": "edu.stanford.tree"}, ["role", "status"]
+        Collection.USERS, {"_id": "edu.stanford.tree"}, ["roles", "status"]
     )
     data = res.json()
-    assert data == {"uid": "edu.stanford.tree", "status": None, "role": None}
+    assert data == {"uid": "edu.stanford.tree", "status": None, "roles": []}
 
 
 @patch("services.mongodb_handler.update_one", autospec=True)
@@ -143,7 +143,7 @@ def test_user_me_route_returns_correct_type(
     """Test user me route returns correct fields as listed in user.IdentityResponse"""
     mock_mongodb_handler_retrieve_one.return_value = {
         "status": Status.WAIVER_SIGNED,
-        "role": Role.VOLUNTEER,
+        "roles": [Role.VOLUNTEER],
     }
 
     client = UserTestClient(GuestUser(email="tree@stanford.edu"), app)
@@ -153,5 +153,5 @@ def test_user_me_route_returns_correct_type(
     assert data == {
         "uid": "edu.stanford.tree",
         "status": Status.WAIVER_SIGNED,
-        "role": Role.VOLUNTEER,
+        "roles": [Role.VOLUNTEER],
     }

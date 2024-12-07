@@ -6,7 +6,7 @@ import { FileCheck, FileText, FileWarning } from "lucide-react";
 
 import OutputFeedBack from "./ResumeOutputFeedback";
 
-import styles from "./Form.module.scss";
+import styles from "./HackerForm.module.scss";
 
 class InvalidFile extends Error {
 	constructor(message: string) {
@@ -65,24 +65,14 @@ export default function ResumeInformation() {
 			<label className={styles.label}>Resume (PDF, 0.5 MB max)</label>
 			<label
 				htmlFor="resume_upload"
-				className={`${styles.upload} cursor-pointer mb-3 p-5 rounded-xl bg-[#e1e1e1]`}
+				className={`${styles.upload} cursor-pointer mb-3 p-5 rounded-xl text-[#000] bg-[#e1e1e1]`}
 			>
 				{!hasUploaded ? (
 					<FileText className="m-auto" width={50} height={50} />
 				) : errorMessage === "" ? (
-					<FileCheck
-						className="m-auto"
-						width={50}
-						height={50}
-						color="green"
-					/>
+					<FileCheck className="m-auto" width={50} height={50} color="green" />
 				) : (
-					<FileWarning
-						className="m-auto"
-						width={50}
-						height={50}
-						color="red"
-					/>
+					<FileWarning className="m-auto" width={50} height={50} color="red" />
 				)}
 				<h2 className="text-center">Upload file</h2>
 			</label>
@@ -95,10 +85,7 @@ export default function ResumeInformation() {
 				accept="application/pdf"
 				onChange={handleFileUpload}
 			/>
-			<OutputFeedBack
-				errorMessage={errorMessage}
-				resumePath={resumePath}
-			/>
+			<OutputFeedBack errorMessage={errorMessage} resumePath={resumePath} />
 		</div>
 	);
 }

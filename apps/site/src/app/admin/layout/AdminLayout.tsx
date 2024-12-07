@@ -8,7 +8,7 @@ import AppLayout from "@cloudscape-design/components/app-layout";
 import axios from "axios";
 import { SWRConfig } from "swr";
 
-import { isAdminRole } from "@/lib/admin/authorization";
+import { hasAdminRole } from "@/lib/admin/authorization";
 import UserContext from "@/lib/admin/UserContext";
 import useUserIdentity from "@/lib/admin/useUserIdentity";
 
@@ -23,9 +23,9 @@ function AdminLayout({ children }: PropsWithChildren) {
 		return "Loading...";
 	}
 
-	const { uid, role } = identity;
+	const { uid, roles } = identity;
 	const loggedIn = uid !== null;
-	const authorized = isAdminRole(role);
+	const authorized = hasAdminRole(roles);
 
 	if (!loggedIn) {
 		router.push("/login");

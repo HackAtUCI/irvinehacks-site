@@ -11,33 +11,33 @@ from admin.participant_manager import Participant
 from auth.authorization import require_role
 from auth.user_identity import User, utc_now
 from models.ApplicationData import Decision, Review
+from models.user_record import Applicant, ApplicantStatus, Role, Status
 from services import mongodb_handler, sendgrid_handler
 from services.mongodb_handler import BaseRecord, Collection
 from services.sendgrid_handler import ApplicationUpdatePersonalization, Template
 from utils import email_handler
 from utils.batched import batched
-from utils.email_handler import IH_SENDER, REPLY_TO_HACK_AT_UCI
-from utils.user_record import Applicant, ApplicantStatus, Role, Status
+from utils.email_handler import IH_SENDER
 
 log = getLogger(__name__)
 
 router = APIRouter()
 
-ADMIN_ROLES = (Role.DIRECTOR, Role.REVIEWER, Role.CHECKIN_LEAD)
-ORGANIZER_ROLES = (Role.ORGANIZER,)
-
-require_checkin_associate = require_role(ADMIN_ROLES + ORGANIZER_ROLES)
+require_manager = require_role({Role.DIRECTOR, Role.REVIEWER, Role.CHECKIN_LEAD})
+require_checkin_lead = require_role({Role.DIRECTOR, Role.CHECKIN_LEAD})
+require_director = require_role({Role.DIRECTOR})
+require_organizer = require_role({Role.ORGANIZER})
 
 
 class ApplicationDataSummary(BaseModel):
-    first_name: str
-    last_name: str
     school: str
     submission_time: datetime
 
 
 class ApplicantSummary(BaseRecord):
     uid: str = Field(alias="_id")
+    first_name: str
+    last_name: str
     status: str
     decision: Optional[Decision] = None
     application_data: ApplicationDataSummary
@@ -45,19 +45,19 @@ class ApplicantSummary(BaseRecord):
 
 @router.get("/applicants")
 async def applicants(
-    user: User = Depends(require_role(ADMIN_ROLES)),
+    user: Annotated[User, Depends(require_manager)]
 ) -> list[ApplicantSummary]:
     """Get records of all applicants."""
     log.info("%s requested applicants", user)
 
     records: list[dict[str, object]] = await mongodb_handler.retrieve(
         Collection.USERS,
-        {"role": Role.APPLICANT},
+        {"roles": Role.APPLICANT},
         [
             "_id",
             "status",
-            "application_data.first_name",
-            "application_data.last_name",
+            "first_name",
+            "last_name",
             "application_data.school",
             "application_data.submission_time",
             "application_data.reviews",
@@ -73,13 +73,13 @@ async def applicants(
         raise RuntimeError("Could not parse applicant data.")
 
 
-@router.get("/applicant/{uid}", dependencies=[Depends(require_role(ADMIN_ROLES))])
+@router.get("/applicant/{uid}", dependencies=[Depends(require_manager)])
 async def applicant(
     uid: str,
 ) -> Applicant:
     """Get record of an applicant by uid."""
     record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": uid, "role": Role.APPLICANT}
+        Collection.USERS, {"_id": uid, "roles": Role.APPLICANT}
     )
 
     if not record:
@@ -91,10 +91,7 @@ async def applicant(
         raise RuntimeError("Could not parse applicant data.")
 
 
-@router.get(
-    "/summary/applicants",
-    dependencies=[Depends(require_role(ADMIN_ROLES))],
-)
+@router.get("/summary/applicants", dependencies=[Depends(require_manager)])
 async def applicant_summary() -> dict[ApplicantStatus, int]:
     """Provide summary of statuses of applicants."""
     return await summary_handler.applicant_summary()
@@ -104,7 +101,7 @@ async def applicant_summary() -> dict[ApplicantStatus, int]:
 async def submit_review(
     applicant: str = Body(),
     decision: Decision = Body(),
-    reviewer: User = Depends(require_role([Role.REVIEWER])),
+    reviewer: User = Depends(require_role({Role.REVIEWER})),
 ) -> None:
     """Submit a review decision from the reviewer for the given applicant."""
     log.info("%s reviewed applicant %s", reviewer, applicant)
@@ -125,13 +122,13 @@ async def submit_review(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@router.post("/release", dependencies=[Depends(require_role([Role.DIRECTOR]))])
+@router.post("/release", dependencies=[Depends(require_director)])
 async def release_decisions() -> None:
     """Update applicant status based on decision and send decision emails."""
     records = await mongodb_handler.retrieve(
         Collection.USERS,
         {"status": Status.REVIEWED},
-        ["_id", "application_data.reviews", "application_data.first_name"],
+        ["_id", "application_data.reviews", "first_name"],
     )
 
     for record in records:
@@ -146,25 +143,26 @@ async def release_decisions() -> None:
         )
 
 
-@router.post("/rsvp-reminder", dependencies=[Depends(require_role([Role.DIRECTOR]))])
+@router.post("/rsvp-reminder", dependencies=[Depends(require_director)])
 async def rsvp_reminder() -> None:
     """Send email to applicants who have a status of ACCEPTED or WAIVER_SIGNED
     reminding them to RSVP."""
     # TODO: Consider using Pydantic model validation instead of type annotations
     not_yet_rsvpd: list[dict[str, Any]] = await mongodb_handler.retrieve(
         Collection.USERS,
-        {"status": {"$in": [Decision.ACCEPTED, Status.WAIVER_SIGNED]}},
-        ["_id", "application_data.first_name"],
+        {
+            "roles": Role.APPLICANT,
+            "status": {"$in": [Decision.ACCEPTED, Status.WAIVER_SIGNED]},
+        },
+        ["_id", "first_name"],
     )
 
     personalizations = []
     for record in not_yet_rsvpd:
-        if "application_data" not in record:
-            continue
         personalizations.append(
             ApplicationUpdatePersonalization(
                 email=_recover_email_from_uid(record["_id"]),
-                first_name=record["application_data"]["first_name"],
+                first_name=record["first_name"],
             )
         )
 
@@ -175,19 +173,15 @@ async def rsvp_reminder() -> None:
         IH_SENDER,
         personalizations,
         True,
-        reply_to=REPLY_TO_HACK_AT_UCI,
     )
 
 
-@router.post(
-    "/confirm-attendance", dependencies=[Depends(require_role([Role.DIRECTOR]))]
-)
+@router.post("/confirm-attendance", dependencies=[Depends(require_director)])
 async def confirm_attendance() -> None:
     """Update applicant status to void or attending based on their current status."""
+    # TODO: consider using Pydantic model, maybe BareApplicant
     records = await mongodb_handler.retrieve(
-        Collection.USERS,
-        {"role": Role.APPLICANT},
-        ["_id", "status"],
+        Collection.USERS, {"roles": Role.APPLICANT}, ["_id", "status"]
     )
 
     statuses = {
@@ -216,21 +210,19 @@ async def confirm_attendance() -> None:
         )
 
 
-@router.post(
-    "/waitlist-release/{uid}",
-    dependencies=[Depends(require_role([Role.DIRECTOR, Role.CHECKIN_LEAD]))],
-)
-async def waitlist_release(uid: str) -> None:
+@router.post("/waitlist-release/{uid}")
+async def waitlist_release(
+    uid: str,
+    associate: Annotated[User, Depends(require_checkin_lead)],
+) -> None:
     """Release an applicant from the waitlist and send email."""
     record = await mongodb_handler.retrieve_one(
         Collection.USERS,
-        {"_id": uid, "role": Role.APPLICANT, "status": Decision.WAITLISTED},
-        ["status", "application_data.first_name"],
+        {"_id": uid, "roles": Role.APPLICANT, "status": Decision.WAITLISTED},
+        ["status", "first_name"],
     )
     if not record:
         raise HTTPException(status.HTTP_404_NOT_FOUND)
-
-    first_name = record["application_data"]["first_name"]
 
     ok = await mongodb_handler.update_one(
         Collection.USERS, {"_id": uid}, {"status": Decision.ACCEPTED}
@@ -238,16 +230,16 @@ async def waitlist_release(uid: str) -> None:
     if not ok:
         raise RuntimeError("gg wp")
 
+    log.info("%s accepted %s off the waitlist. Sending email.", associate, uid)
     await email_handler.send_waitlist_release_email(
-        first_name, _recover_email_from_uid(uid)
+        record["first_name"], _recover_email_from_uid(uid)
     )
 
-    log.info(f"Accepted {uid} off the waitlist and sent email.")
 
-
-@router.get("/participants", dependencies=[Depends(require_checkin_associate)])
+@router.get("/participants", dependencies=[Depends(require_organizer)])
 async def participants() -> list[Participant]:
     """Get list of participants."""
+    # TODO: consider combining the two functions into one
     hackers = await participant_manager.get_hackers()
     non_hackers = await participant_manager.get_non_hackers()
     return hackers + non_hackers
@@ -257,7 +249,7 @@ async def participants() -> list[Participant]:
 async def check_in_participant(
     uid: str,
     badge_number: Annotated[str, Body()],
-    associate: Annotated[User, Depends(require_checkin_associate)],
+    associate: Annotated[User, Depends(require_organizer)],
 ) -> None:
     """Check in participant at IrvineHacks."""
     try:
@@ -275,7 +267,7 @@ async def check_in_participant(
 async def update_attendance(
     uid: str,
     director: Annotated[
-        User, Depends(require_role([Role.DIRECTOR, Role.CHECKIN_LEAD]))
+        User, Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))
     ],
 ) -> None:
     """Update status to Role.ATTENDING for non-hackers."""
@@ -288,7 +280,7 @@ async def update_attendance(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@router.get("/events", dependencies=[Depends(require_checkin_associate)])
+@router.get("/events", dependencies=[Depends(require_organizer)])
 async def events() -> list[dict[str, object]]:
     """Get list of events"""
     return await mongodb_handler.retrieve(Collection.EVENTS, {})
@@ -298,7 +290,7 @@ async def events() -> list[dict[str, object]]:
 async def subevent_checkin(
     event: str,
     uid: Annotated[str, Body()],
-    organizer: Annotated[User, Depends(require_checkin_associate)],
+    organizer: Annotated[User, Depends(require_organizer)],
 ) -> None:
     await participant_manager.subevent_checkin(event, uid, organizer)
 
@@ -328,7 +320,7 @@ async def _process_batch(batch: tuple[dict[str, Any], ...], decision: Decision) 
 
 
 def _extract_personalizations(decision_data: dict[str, Any]) -> tuple[str, EmailStr]:
-    name = decision_data["application_data"]["first_name"]
+    name = decision_data["first_name"]
     email = _recover_email_from_uid(decision_data["_id"])
     return name, email
 

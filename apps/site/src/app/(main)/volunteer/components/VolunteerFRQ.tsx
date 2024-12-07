@@ -1,5 +1,3 @@
-"use client";
-
 import RadioSelect from "@/lib/components/forms/RadioSelect";
 import Textfield from "@/lib/components/forms/Textfield";
 

@@ -5,19 +5,17 @@ import axios from "axios";
 
 import Button from "@/lib/components/Button/Button";
 
-import BasicInformation from "./BasicInformation";
-import AgeInformation from "./AgeInformation";
-import SchoolInformation from "./SchoolInformation";
-import ProfileInformation from "./ProfileInformation";
-import ResumeInformation from "./ResumeInformation";
-
 import styles from "./Form.module.scss";
 import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
 
 const APPLY_PATH = "/api/user/apply";
 const FIELDS_WITH_OTHER = ["pronouns", "ethnicity", "school", "major"];
 
-export default function Form() {
+interface FormProps {
+	children: React.ReactNode;
+}
+
+export default function Form({ children }: FormProps) {
 	const [submitting, setSubmitting] = useState(false);
 	const [sessionExpired, setSessionExpired] = useState(false);
 
@@ -93,11 +91,7 @@ export default function Form() {
 			encType="multipart/form-data"
 			onSubmit={handleSubmit}
 		>
-			<BasicInformation />
-			<SchoolInformation />
-			<ProfileInformation />
-			<ResumeInformation />
-			<AgeInformation />
+			{children}
 			<Button
 				text="Submit"
 				className="text-2xl !px-11 !py-2"

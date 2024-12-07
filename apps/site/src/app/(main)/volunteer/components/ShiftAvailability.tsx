@@ -1,5 +1,3 @@
-"use client";
-
 import DayShift from "./DayShift";
 
 export default function ShiftAvailability() {

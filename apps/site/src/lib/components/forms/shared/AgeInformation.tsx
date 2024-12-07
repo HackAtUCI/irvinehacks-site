@@ -26,8 +26,6 @@ export default function AgeInformation() {
 				<p className="text-[#FF2222] m-0 text-lg">
 					We will be checking ID. If you are a minor, you will be turned away at
 					the door.
-					We will be checking ID. If you are a minor, you will be turned away at
-					the door.
 				</p>
 			</div>
 

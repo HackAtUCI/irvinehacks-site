@@ -45,7 +45,7 @@ async def test_new_waiver_submission_can_be_processed(
         "_id": SAMPLE_UID,
         "first_name": "Nicole",
         "last_name": "Pham",
-        "role": Role.APPLICANT,
+        "roles": [Role.APPLICANT],
         "status": Decision.ACCEPTED,
     }
     await docusign_handler.process_webhook_event(SAMPLE_WEBHOOK_DATA)
@@ -65,7 +65,7 @@ async def test_no_op_when_user_already_signed_waiver(
         "_id": SAMPLE_UID,
         "first_name": "John",
         "last_name": "Hancock",
-        "role": Role.APPLICANT,
+        "roles": [Role.APPLICANT],
         "status": Status.CONFIRMED,
     }
     await docusign_handler.process_webhook_event(SAMPLE_WEBHOOK_DATA)
@@ -83,7 +83,7 @@ async def test_no_op_for_rejected_applicant(
         "_id": SAMPLE_UID,
         "first_name": "King",
         "last_name": "Triton",
-        "role": Role.APPLICANT,
+        "roles": [Role.APPLICANT],
         "status": Decision.REJECTED,
     }
     await docusign_handler.process_webhook_event(SAMPLE_WEBHOOK_DATA)
@@ -115,7 +115,8 @@ async def test_user_record_updated_even_for_non_applicant(
         "_id": SAMPLE_UID,
         "first_name": "Community",
         "last_name": "Service",
-        "role": Role.VOLUNTEER,
+        "roles": [Role.VOLUNTEER],
+        # Note: no status
     }
     await docusign_handler.process_webhook_event(SAMPLE_WEBHOOK_DATA)
     mock_mongodb_handler_update_one.assert_awaited_once_with(

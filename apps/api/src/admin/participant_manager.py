@@ -35,7 +35,7 @@ PARTICIPANT_FIELDS = [
     "_id",
     "first_name",
     "last_name",
-    "role",
+    "roles",
     "status",
     "checkins",
     "badge_number",
@@ -48,7 +48,7 @@ async def get_hackers() -> list[Participant]:
     records: list[dict[str, Any]] = await mongodb_handler.retrieve(
         Collection.USERS,
         {
-            "role": Role.APPLICANT,
+            "roles": Role.APPLICANT,
             "status": {
                 "$in": [
                     Status.ATTENDING,
@@ -68,7 +68,7 @@ async def get_hackers() -> list[Participant]:
 async def get_non_hackers() -> list[Participant]:
     """Fetch all non-hackers participating in the event."""
     records: list[dict[str, Any]] = await mongodb_handler.retrieve(
-        Collection.USERS, {"role": {"$in": NON_HACKER_ROLES}}, PARTICIPANT_FIELDS
+        Collection.USERS, {"roles": {"$in": NON_HACKER_ROLES}}, PARTICIPANT_FIELDS
     )
     return [Participant(**user) for user in records]
 
@@ -76,7 +76,7 @@ async def get_non_hackers() -> list[Participant]:
 async def check_in_participant(uid: str, badge_number: str, associate: User) -> None:
     """Check in participant at IrvineHacks"""
     record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": uid, "role": {"$exists": True}}
+        Collection.USERS, {"_id": uid, "roles": {"$exists": True}}, ["status"]
     )
 
     if not record or record.get("status", "") not in (
@@ -102,13 +102,20 @@ async def check_in_participant(uid: str, badge_number: str, associate: User) -> 
 
 
 async def confirm_attendance_non_hacker(uid: str, director: User) -> None:
-    """Update status for Role.Attending for non-hackers."""
+    """Update status from WAIVER_SIGNED to ATTENDING for non-hackers."""
 
     record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": uid, "status": Status.WAIVER_SIGNED}
+        Collection.USERS,
+        {"_id": uid, "roles": {"$in": NON_HACKER_ROLES}},
+        ["status"],
     )
 
-    if not record or record["role"] not in NON_HACKER_ROLES:
+    if not record:
+        raise ValueError
+
+    status = record.get("status")
+    if status != Status.WAIVER_SIGNED:
+        log.error("Cannot confirm attendance for %s with status %s", uid, status)
         raise ValueError
 
     update_status = await mongodb_handler.update_one(

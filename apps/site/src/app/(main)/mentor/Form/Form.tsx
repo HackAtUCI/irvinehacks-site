@@ -16,6 +16,7 @@ import styles from "../../apply/sections/Form/Form.module.scss";
 import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
 import RadioSelect from "@/lib/components/forms/RadioSelect";
 import MultipleSelect from "@/lib/components/forms/MultipleSelect";
+import Slider from "@/lib/components/forms/Slider";
 
 // TODO: Whats the path for backend
 
@@ -119,6 +120,7 @@ export default function Form() {
 			<BasicInformation />
 			<SchoolInformation />
 			<ShortAnswers />
+			<Slider pretext="No Experience" postText="Expert" name="git_experience" />
 			<MultipleSelect
 				labelText="What types of projects would you be comfortable mentoring?"
 				identifierId="mentor_comfortable_select"

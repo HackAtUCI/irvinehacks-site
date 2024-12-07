@@ -5,9 +5,9 @@ import { useState, useEffect, useRef, forwardRef } from "react";
 import RequiredAsterisk from "./RequiredAsterisk";
 
 interface MultipleInputs {
+	name: string;
 	labelText: string;
-	identifierId: string;
-	values: Array<{ name: string; value: string; text: string }>;
+	values: Array<{ value: string; text: string }>;
 	containerClass: string;
 }
 
@@ -35,8 +35,8 @@ const OtherInput = forwardRef<HTMLInputElement, OtherInputProps>(
 OtherInput.displayName = "OtherInput";
 
 export default function MultipleSelect({
+	name,
 	labelText,
-	identifierId,
 	values,
 	containerClass,
 }: MultipleInputs) {
@@ -56,39 +56,39 @@ export default function MultipleSelect({
 			</p>
 			<div className="w-10/12 flex flex-col gap-2">
 				{values.map((item, i) => {
-					const keyAndId = `${identifierId}-${i}`;
+					const inputId = `${name}-${i}`;
 					if (item.value === "other") {
 						return (
-							<div key={keyAndId} className="flex gap-2">
+							<div key={i} className="flex gap-2">
 								<input
-									id={keyAndId}
+									id={inputId}
 									type="checkbox"
 									key={`option-${i}`}
-									name={item.name}
+									name={name}
 									value={item.value}
 									onChange={(e) => setIsOtherChecked(e.target.checked)}
 								/>
-								<label className="text-lg" htmlFor={keyAndId}>
+								<label className="text-lg" htmlFor={inputId}>
 									{item.text}
 								</label>
 								<OtherInput
 									isChecked={isOtherChecked}
-									name={`other_${item.name}`}
+									name={`other_${name}`}
 									ref={otherRef}
 								/>
 							</div>
 						);
 					}
 					return (
-						<div key={keyAndId} className="flex gap-2">
+						<div key={i} className="flex gap-2">
 							<input
-								id={keyAndId}
+								id={inputId}
 								type="checkbox"
 								key={`option-${i}`}
-								name={item.name}
+								name={name}
 								value={item.value}
 							/>
-							<label className="text-lg" htmlFor={keyAndId}>
+							<label className="text-lg" htmlFor={inputId}>
 								{item.text}
 							</label>
 						</div>

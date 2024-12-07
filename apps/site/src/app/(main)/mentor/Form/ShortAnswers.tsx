@@ -10,7 +10,7 @@ export default function ShortAnswers() {
 			<Textfield
 				name="mentor_previous_experience"
 				labelClass={styles.label}
-				labelText="Have you participated or mentored at a hackathon before? If so, please list which ones. e.g. Hack at UCI 2024 (Hacker), ZotHacks 2024 (Mentor)"
+				labelText="Have you participated or mentored at a hackathon before? If so, please list which ones. e.g. IrvineHacks 2024 (Hacker), ZotHacks 2024 (Mentor)"
 				inputClass="text-[var(--color-black)] bg-[#E1E1E1] p-3 h-48 resize-none rounded-xl"
 				containerClass="flex flex-col w-full"
 				isRequired={false}

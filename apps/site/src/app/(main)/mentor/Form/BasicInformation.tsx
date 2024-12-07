@@ -1,4 +1,4 @@
-import DropdownSelect from "@/lib/components/forms/DropdownSelect";
+import MultipleSelect from "@/lib/components/forms/MultipleSelect";
 import TextInput from "@/lib/components/forms/TextInput";
 import styles from "@/lib/components/forms/shared/Form.module.scss";
 
@@ -38,23 +38,11 @@ export default function BasicInformation() {
 			</div>
 
 			<div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
-				<DropdownSelect
-					name="pronoun"
-					labelStyle={styles.label}
+				<MultipleSelect
+					name="pronouns"
 					labelText="Preferred Pronouns"
-					inputStyle={styles.input}
-					containerClass="flex flex-col w-5/12 max-[1000px]:w-full"
+					containerClass="flex flex-col w-full"
 					values={pronouns}
-				/>
-				<TextInput
-					name="email"
-					labelClass={styles.label}
-					labelText="School or Company Email"
-					inputClass={styles.input}
-					containerClass="flex flex-col w-7/12 max-[1000px]:w-full"
-					isRequired={true}
-					type="email"
-					placeholder="peter.anteater@uci.edu"
 				/>
 			</div>
 		</div>

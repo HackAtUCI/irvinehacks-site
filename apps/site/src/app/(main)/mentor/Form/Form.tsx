@@ -25,20 +25,9 @@ const FIELDS_WITH_OTHER = [
 	"ethnicity",
 	"school",
 	"major",
-	"other_mentor_experience",
+	"other_experienced_technologies",
 ];
-const SELECT_OPTIONS = [
-	"frontend",
-	"backend",
-	"mobile",
-	"databases",
-	"ai/ml",
-	"vr",
-	"blockchain",
-	"embedded",
-	"data_science",
-	"cybersecurity",
-];
+const SELECT_FIELDS = ["pronouns", "experienced_technologies"];
 
 export default function Form() {
 	const [submitting, setSubmitting] = useState(false);
@@ -72,21 +61,14 @@ export default function Form() {
 			}
 		}
 
-		// Compile all technologies the mentor is comfortable with into one array
-		const experienceList: Array<string> = [];
-		for (const fieldName of Array.from(formData.keys())) {
-			if (SELECT_OPTIONS.includes(fieldName)) {
-				experienceList.push(fieldName);
-				formData.delete(fieldName);
+		const formEntries = Object.fromEntries(formData.entries());
+		console.log(formEntries);
+
+		if (SELECT_FIELDS) {
+			for (const field of SELECT_FIELDS) {
+				console.log(field, formData.getAll(field));
 			}
 		}
-		formData.set(
-			"mentor_experience_working_with",
-			JSON.stringify(experienceList),
-		);
-
-		// const formEntries = Object.fromEntries(formData.entries());
-		// console.log(formEntries);
 
 		try {
 			const res = await axios.post(APPLY_PATH, formData);

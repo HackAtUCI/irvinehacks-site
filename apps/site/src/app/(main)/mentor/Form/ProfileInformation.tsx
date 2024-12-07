@@ -9,7 +9,7 @@ export default function ProfileInformation() {
 			<TextInput
 				name="linkedin"
 				labelClass={styles.label}
-				labelText="LinkedIn"
+				labelText="LinkedIn Profile"
 				inputClass={styles.input}
 				containerClass="flex flex-col w-full"
 				isRequired={false}
@@ -19,7 +19,7 @@ export default function ProfileInformation() {
 			<TextInput
 				name="github"
 				labelClass={styles.label}
-				labelText="Github"
+				labelText="GitHub Profile"
 				inputClass={styles.input}
 				containerClass="flex flex-col w-full"
 				isRequired={false}

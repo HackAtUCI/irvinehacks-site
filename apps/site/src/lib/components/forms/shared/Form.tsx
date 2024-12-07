@@ -5,7 +5,6 @@ import axios from "axios";
 
 import Button from "@/lib/components/Button/Button";
 
-import styles from "./Form.module.scss";
 import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
 
 const APPLY_PATH = "/api/user/apply";
@@ -86,7 +85,7 @@ export default function Form({ children }: FormProps) {
 	return (
 		<form
 			method="post"
-			className={`${styles.form} text-[var(--color-white)] w-8/12 flex flex-col items-center py-12 gap-14 z-1 max-[800px]:w-9/12 max-[400px]:w-11/12 drop-shadow-[25px_33px_0px_rgba(255,255,255,1)]`}
+			className="bg-black border-[5px] border-white text-[var(--color-white)] w-8/12 flex flex-col items-center py-12 gap-14 z-1 max-[800px]:w-9/12 max-[400px]:w-11/12 drop-shadow-[25px_33px_0px_rgba(255,255,255,1)]"
 			action="/api/user/apply"
 			encType="multipart/form-data"
 			onSubmit={handleSubmit}

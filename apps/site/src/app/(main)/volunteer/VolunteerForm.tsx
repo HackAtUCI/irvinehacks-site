@@ -1,10 +1,11 @@
-import BasicInformation from "../apply/sections/Form/BasicInformation";
-import AgeInformation from "../apply/sections/Form/AgeInformation";
-import SchoolInformation from "../apply/sections/Form/SchoolInformation";
+import BasicInformation from "@/lib/components/forms/shared/BasicInformation";
+import AgeInformation from "@/lib/components/forms/shared/AgeInformation";
+import SchoolInformation from "@/lib/components/forms/shared/SchoolInformation";
+import Form from "@/lib/components/forms/shared/Form";
+
 import ShiftAvailability from "./components/ShiftAvailability";
 import VolunteerFRQ from "./components/VolunteerFRQ";
-import ExtraQuestions from "../apply/sections/Form/ExtraQuestions";
-import Form from "../apply/sections/Form/Form";
+import ExtraQuestions from "./components/ExtraQuestions";
 
 export default function VolunteerForm() {
 	return (

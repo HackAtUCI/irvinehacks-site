@@ -1,9 +1,10 @@
-import AgeInformation from "./AgeInformation";
-import BasicInformation from "./BasicInformation";
-import Form from "./Form";
+import AgeInformation from "@/lib/components/forms/shared/AgeInformation";
+import Form from "@/lib/components/forms/shared/Form";
+import SchoolInformation from "@/lib/components/forms/shared/SchoolInformation";
+
+import BasicInformation from "./HackerBasicInformation";
 import ProfileInformation from "./ProfileInformation";
 import ResumeInformation from "./ResumeInformation";
-import SchoolInformation from "./SchoolInformation";
 
 export default function HackerForm() {
 	return (

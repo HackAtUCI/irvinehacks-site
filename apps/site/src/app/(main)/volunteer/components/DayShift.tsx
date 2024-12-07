@@ -18,7 +18,6 @@ export default function DayShift({
 }: ShiftInputs) {
 	const num_hours = endHour - startHour;
 
-	const [avaBefore, setAvaBefore] = useState(Array(num_hours).fill(false));
 	const [available, setAvailable] = useState(Array(num_hours).fill(false));
 	const [isMouseDown, setIsMouseDown] = useState(false);
 	const [firstClicked, setFirstClicked] = useState(false);
@@ -38,7 +37,6 @@ export default function DayShift({
 		e.preventDefault();
 		setIsMouseDown(true);
 		setFirstClicked(available[i]);
-		setAvaBefore(available);
 		setAvailable((available) => [
 			...available.slice(0, i),
 			!available[i],
@@ -58,7 +56,6 @@ export default function DayShift({
 
 	function onMouseUp() {
 		setIsMouseDown(false);
-		setAvaBefore(available);
 	}
 
 	return (

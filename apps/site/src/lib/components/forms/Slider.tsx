@@ -46,7 +46,7 @@ export default function Slider({
 						min="1"
 						max="5"
 						step="1"
-						id={name}
+						name={name}
 					/>
 				</div>
 				<div className="hidden md:block flex items-center">

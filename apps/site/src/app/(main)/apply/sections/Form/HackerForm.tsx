@@ -6,7 +6,6 @@ import ResumeInformation from "@/lib/components/forms/shared/ResumeInformation";
 import BasicInformation from "./HackerBasicInformation";
 import ProfileInformation from "./ProfileInformation";
 
-
 export default function HackerForm() {
 	return (
 		<Form>

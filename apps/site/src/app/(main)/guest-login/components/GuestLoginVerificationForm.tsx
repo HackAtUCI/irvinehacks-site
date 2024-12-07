@@ -29,7 +29,7 @@ export default function GuestLoginVerificationForm() {
 					</label>
 					<input
 						id="passphrase"
-						className="bg-[#e1e1e1] p-1 rounded-2"
+						className="bg-[#e1e1e1] p-1 rounded-2 text-black placeholder-gray-500"
 						type="text"
 						pattern={PASSPHRASE_REGEX.source}
 						required

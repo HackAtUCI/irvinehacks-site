@@ -1,5 +1,5 @@
 import TextInput from "@/lib/components/forms/TextInput";
-import styles from "./Form.module.scss";
+import styles from "./HackerForm.module.scss";
 
 export default function ProfileInformation() {
 	return (

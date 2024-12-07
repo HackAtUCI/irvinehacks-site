@@ -8,6 +8,7 @@ interface RadioInputs {
 	IdentifierId: string;
 	values: Array<{ value: string; text: string }>;
 	containerClass: string;
+	horizontal: boolean;
 }
 
 interface OtherInputProps {
@@ -39,6 +40,7 @@ export default function RadioSelect({
 	IdentifierId,
 	values,
 	containerClass,
+	horizontal,
 }: RadioInputs) {
 	const [isOtherChecked, setIsOtherChecked] = useState(false);
 	const otherRef = useRef<HTMLInputElement>(null);
@@ -54,7 +56,11 @@ export default function RadioSelect({
 			<p className="m-0 text-lg mb-4">
 				{labelText} <span className="text-[#FF2222]">*</span>
 			</p>
-			<div className="w-10/12 flex flex-col gap-2">
+			<div
+				className={`w-10/12 flex ${
+					horizontal ? "flex-wrap gap-10" : "flex-col gap-2"
+				}`}
+			>
 				{values.map((item, i) => {
 					const keyandId = `${IdentifierId}-${i}`;
 					if (item.value === "other") {

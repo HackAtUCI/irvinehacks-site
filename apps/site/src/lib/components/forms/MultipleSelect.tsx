@@ -67,14 +67,13 @@ export default function MultipleSelect({
 									name={item.name}
 									value={item.value}
 									onChange={(e) => setIsOtherChecked(e.target.checked)}
-									required
 								/>
 								<label className="text-lg" htmlFor={keyAndId}>
 									{item.text}
 								</label>
 								<OtherInput
 									isChecked={isOtherChecked}
-									name={`mentor_other_${item.name}`}
+									name={`mentor_multiple_select_${item.name}`}
 									ref={otherRef}
 								/>
 							</div>
@@ -89,7 +88,6 @@ export default function MultipleSelect({
 								name={item.name}
 								value={item.value}
 								onChange={() => setIsOtherChecked(false)}
-								required
 							/>
 							<label className="text-lg" htmlFor={keyAndId}>
 								{item.text}

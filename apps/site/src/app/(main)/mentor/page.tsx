@@ -4,7 +4,7 @@ import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
 import haveApplicationsOpened from "@/lib/utils/haveApplicationsOpened";
 
 import ApplyConfirm from "../apply/sections/ApplyConfirmation/ApplyConfirm";
-import Form from "./Form/Form";
+import Form from "../apply/sections/Form/mentor/Form";
 import Title from "../apply/sections/Title/Title";
 import getUserIdentity from "@/lib/utils/getUserIdentity";
 

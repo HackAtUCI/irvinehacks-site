@@ -5,23 +5,34 @@ import axios from "axios";
 
 import Button from "@/lib/components/Button/Button";
 
-import BasicInformation from "../../apply/sections/Form/BasicInformation";
-import AgeInformation from "../../apply/sections/Form/AgeInformation";
-import SchoolInformation from "../../apply/sections/Form/SchoolInformation";
-import ProfileInformation from "../../apply/sections/Form/ProfileInformation";
-import ResumeInformation from "../../apply/sections/Form/ResumeInformation";
+import BasicInformation from "./BasicInformation";
+import AgeInformation from "../AgeInformation";
+import SchoolInformation from "../SchoolInformation";
+import ProfileInformation from "./ProfileInformation";
+import ResumeInformation from "../ResumeInformation";
 import ShortAnswers from "./ShortAnswers";
 
-import styles from "../../apply/sections/Form/Form.module.scss";
+import styles from "../Form.module.scss";
 import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
 import RadioSelect from "@/lib/components/forms/RadioSelect";
-import MultipleSelect from "@/lib/components/forms/MultipleSelect";
-import Slider from "@/lib/components/forms/Slider";
-
-// TODO: Whats the path for backend
+import ExperienceInformation from "./ExperienceInformation";
+import Textfield from "@/lib/components/forms/Textfield";
 
 const APPLY_PATH = "/api/user/apply";
 const FIELDS_WITH_OTHER = ["pronouns", "ethnicity", "school", "major"];
+const SELECT_OPTIONS = [
+	"frontend",
+	"backend",
+	"mobile",
+	"databases",
+	"ai/ml",
+	"vr",
+	"blockchain",
+	"embedded",
+	"data_science",
+	"cybersecurity",
+	"other",
+];
 
 export default function Form() {
 	const [submitting, setSubmitting] = useState(false);
@@ -54,9 +65,19 @@ export default function Form() {
 				formData.delete(otherField);
 			}
 		}
+		
+		// Compile all technologies the mentor is comfortable with into one array
+		const experienceList: Array<string> = [];
+		for (const fieldName of Array.from(formData.keys())) {
+			if (SELECT_OPTIONS.includes(fieldName)) {
+				experienceList.push(fieldName);
+				formData.delete(fieldName);
+			}
+		}
+		formData.set("mentor_experience_working_with", JSON.stringify(experienceList));
 
 		// const formEntries = Object.fromEntries(formData.entries());
-		// console.debug(formEntries);
+		// console.log(formEntries);
 
 		try {
 			const res = await axios.post(APPLY_PATH, formData);
@@ -91,28 +112,10 @@ export default function Form() {
 		</p>
 	);
 
-	const selectOptions = [
-		{ name: "frontend", value: "frontend", text: "Frontend Web Development" },
-		{ name: "backend", value: "backend", text: "Backend Web Development" },
-		{ name: "mobile", value: "mobile", text: "Mobile App Development" },
-		{ name: "databases", value: "databases", text: "Databases" },
-		{ name: "ai/ml", value: "ai/ml", text: "AI / Machine Learning" },
-		{ name: "vr", value: "vr", text: "Virtual Reality" },
-		{ name: "blockchain", value: "blockchain", text: "Blockchain" },
-		{
-			name: "embedded",
-			value: "embedded",
-			text: "Embedded Systems / Hardware",
-		},
-		{ name: "data_science", value: "data_science", text: "Data Science" },
-		{ name: "cybersecurity", value: "cybersecurity", text: "Cybersecurity" },
-		{ name: "other", value: "other", text: "Other:" },
-	];
-
 	return (
 		<form
 			method="post"
-			className={`${styles.form} text-[var(--color-white)] w-8/12 flex flex-col items-center py-12 gap-14 z-1 max-[800px]:w-9/12 max-[400px]:w-11/12 drop-shadow-[25px_33px_0px_rgba(255,255,255,1)]`}
+			className={`${styles.form} text-[var(--color-white)] w-8/12 flex flex-col items-center py-12 gap-12 z-1 max-[800px]:w-9/12 max-[400px]:w-11/12 drop-shadow-[25px_33px_0px_rgba(255,255,255,1)]`}
 			action="/api/user/apply"
 			encType="multipart/form-data"
 			onSubmit={handleSubmit}
@@ -120,14 +123,27 @@ export default function Form() {
 			<BasicInformation />
 			<SchoolInformation />
 			<ShortAnswers />
-			<Slider pretext="No Experience" postText="Expert" name="git_experience" />
-			<MultipleSelect
-				labelText="What types of projects would you be comfortable mentoring?"
-				identifierId="mentor_comfortable_select"
-				containerClass="w-11/12"
-				values={selectOptions}
-			/>
+			<ExperienceInformation />
 			<ResumeInformation />
+			<RadioSelect
+				name="resume_share_to_sponsors"
+				containerClass="w-11/12"
+				labelText="Would you like us to share your resume with our sponsors?"
+				IdentifierId="resume_share"
+				values={[
+					{ value: "yes", text: "Yes" },
+					{ value: "no", text: "No" },
+				]}
+			/>
+			<ProfileInformation />
+			<Textfield
+				name="other_questions"
+				labelClass={styles.label}
+				labelText="Questions/comments/concerns?"
+				inputClass="text-[var(--color-black)] bg-[#E1E1E1] p-3 h-48 resize-none rounded-xl"
+				containerClass="flex flex-col w-11/12"
+				isRequired={false}
+			/>
 			<AgeInformation />
 			<Button
 				text="Submit"

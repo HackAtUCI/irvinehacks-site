@@ -1,5 +1,5 @@
 import TextInput from "@/lib/components/forms/TextInput";
-import styles from "../../apply/sections/Form/Form.module.scss";
+import styles from "../Form.module.scss";
 import Textfield from "@/lib/components/forms/Textfield";
 
 export default function ShortAnswers() {
@@ -19,7 +19,7 @@ export default function ShortAnswers() {
 			<Textfield
 				name="mentor_interest"
 				labelClass={styles.label}
-				labelText="Why are you interested in being a mentor for IrvineHacks 2024? (100+ words recommended)"
+				labelText="Why are you interested in being a mentor for IrvineHacks 2025? (100+ words recommended)"
 				inputClass="text-[var(--color-black)] bg-[#E1E1E1] p-3 h-48 resize-none rounded-xl"
 				containerClass="flex flex-col w-full"
 				isRequired={true}

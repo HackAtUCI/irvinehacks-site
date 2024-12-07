@@ -4,9 +4,7 @@ import styles from "../Form.module.scss";
 export default function ProfileInformation() {
 	return (
 		<div className="flex flex-col gap-5 w-11/12">
-			<p className="text-4xl m-0 font-bold max-[700px]:text-3xl">
-				Links
-			</p>
+			<p className="text-4xl m-0 font-bold max-[700px]:text-3xl">Links</p>
 
 			<TextInput
 				name="linkedin"

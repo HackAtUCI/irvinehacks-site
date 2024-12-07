@@ -4,9 +4,9 @@ import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
 import haveApplicationsOpened from "@/lib/utils/haveApplicationsOpened";
 
 import ApplyConfirm from "./sections/ApplyConfirmation/ApplyConfirm";
-import Form from "./sections/Form/Form";
 import Title from "./sections/Title/Title";
 import getUserIdentity from "@/lib/utils/getUserIdentity";
+import HackerForm from "./sections/Form/HackerForm";
 
 import ApplicationsClosed from "./sections/ApplicationsClosed/ApplicationsClosed";
 
@@ -34,9 +34,9 @@ export default async function Apply({
 	const applicationsOpened = haveApplicationsOpened();
 	const applyBody = hasAcceptedQueryParam ? (
 		<>
-			<Title applicationType="Hacker"/>
+			<Title applicationType="Hacker" />
 			<div className="flex justify-center">
-				<Form />
+				<HackerForm />
 			</div>
 		</>
 	) : (

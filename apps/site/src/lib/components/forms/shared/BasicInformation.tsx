@@ -24,7 +24,9 @@ const ethnicity = [
 export default function BasicInformation() {
 	return (
 		<div className="flex flex-col gap-5 w-11/12">
-			<p className="text-4xl m-0 max-[700px]:text-3xl font-bold">Basic Information</p>
+			<p className="text-4xl m-0 max-[700px]:text-3xl font-bold">
+				Basic Information
+			</p>
 			<div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
 				<TextInput
 					name="first_name"

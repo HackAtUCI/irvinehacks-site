@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, PropsWithChildren, useState } from "react";
 import axios from "axios";
 
 import Button from "@/lib/components/Button/Button";
@@ -10,11 +10,7 @@ import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
 const APPLY_PATH = "/api/user/apply";
 const FIELDS_WITH_OTHER = ["pronouns", "ethnicity", "school", "major"];
 
-interface FormProps {
-	children: React.ReactNode;
-}
-
-export default function Form({ children }: FormProps) {
+export default function Form({ children }: PropsWithChildren) {
 	const [submitting, setSubmitting] = useState(false);
 	const [sessionExpired, setSessionExpired] = useState(false);
 

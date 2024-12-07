@@ -1,7 +1,6 @@
 "use client";
 
 import * as NavMenu from "@radix-ui/react-navigation-menu";
-import clsx from "clsx";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
@@ -21,8 +20,8 @@ interface NavbarProps {
 }
 
 function Navbar({ identity }: NavbarProps) {
-	const { uid, status } = identity;
-	const isLoggedIn = uid === null;
+	// const { uid, status } = identity;
+	// const isLoggedIn = uid === null;
 
 	const [listShown, setListShown] = useState(false);
 	const [hasScrolled, setHasScrolled] = useState(false);
@@ -48,7 +47,7 @@ function Navbar({ identity }: NavbarProps) {
 		}
 	};
 
-	const deadlinePassed = hasDeadlinePassed();
+	// const deadlinePassed = hasDeadlinePassed();
 
 	return (
 		<NavMenu.Root
@@ -98,12 +97,7 @@ function Navbar({ identity }: NavbarProps) {
 						Resources
 					</NavLinkItem>
 
-					<Button
-						text="Login"
-						href="/login"
-						usePrefetch={false}
-						isNavButton
-					/>
+					<Button text="Login" href="/login" usePrefetch={false} isNavButton />
 				</NavMenu.List>
 			</div>
 		</NavMenu.Root>

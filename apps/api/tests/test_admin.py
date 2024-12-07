@@ -255,7 +255,6 @@ def test_waitlisted_applicant_can_be_released(
         ANY,
         {"email": "petr@uci.edu", "first_name": "Peter"},
         False,
-        ANY,
     )
 
 

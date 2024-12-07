@@ -1,6 +1,6 @@
 import DropdownSelect from "@/lib/components/forms/DropdownSelect";
 import TextInput from "@/lib/components/forms/TextInput";
-import styles from "./HackerForm.module.scss";
+import styles from "@/lib/components/forms/shared/Form.module.scss";
 
 const pronouns = [
 	{ value: "he", text: "He/him/his" },

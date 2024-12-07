@@ -12,11 +12,12 @@ import ProfileInformation from "./ProfileInformation";
 import ResumeInformation from "../ResumeInformation";
 import ShortAnswers from "./ShortAnswers";
 
-import styles from "../Form.module.scss";
 import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
 import RadioSelect from "@/lib/components/forms/RadioSelect";
 import ExperienceInformation from "./ExperienceInformation";
 import Textfield from "@/lib/components/forms/Textfield";
+
+import styles from "../Form.module.scss";
 
 const APPLY_PATH = "/api/user/apply";
 const FIELDS_WITH_OTHER = [

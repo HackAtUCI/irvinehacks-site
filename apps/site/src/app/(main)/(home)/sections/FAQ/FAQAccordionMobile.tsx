@@ -33,7 +33,7 @@ const FAQAccordionMobile: React.FC<FAQAccordion> = ({ faq }) => {
 			<div className="relative flex justify-center sm:hidden">
 				<Image
 					src={SpeechMobile}
-					alt="Dialuge box background"
+					alt="Dialogue box background"
 					className={`${
 						focusedQuestion ? "mt-[-160px]" : "mt-[-275px]"
 					} min-w-[450px] object-fill`}

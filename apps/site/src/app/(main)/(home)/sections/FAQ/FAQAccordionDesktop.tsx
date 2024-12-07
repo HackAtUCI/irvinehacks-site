@@ -33,7 +33,7 @@ const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 			{/* Desktop View */}
 			<Image
 				src={SpeechDesktop}
-				alt="Dialuge box background"
+				alt="Dialogue box background"
 				className="hidden sm:block h-fit sm:max-w-[425px] sm:h-[205px] md:max-w-[520px] md:h-[245px] lg:max-w-[630px] lg:h-[292px] xl:max-w-[775px] xl:h-[350px] duration-300"
 			/>
 			<div className="hidden sm:block absolute sm:w-[380px] md:w-[460px] lg:w-[555px] xl:w-[685px] text-[.6rem] md:text-[.75rem] lg:text-[.85rem] xl:text-[1rem] mt-3">

@@ -84,9 +84,9 @@ async def apply(
 ) -> str:
     if raw_application_data.application_type not in Role.__members__:
         raise HTTPException(
-                status.HTTP_422_UNPROCESSABLE_ENTITY,
-                "Invalid application type.",
-            )
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            "Invalid application type.",
+        )
 
     # Check if current datetime is past application deadline
     now = datetime.now(timezone.utc)

@@ -38,7 +38,7 @@ SAMPLE_APPLICATION = {
     "portfolio": "https://github.com",
     "frq_collaboration": "I am pkfire",
     "frq_dream_job": "I am pkfire",
-    "application_type": "HACKER"
+    "application_type": "HACKER",
 }
 
 

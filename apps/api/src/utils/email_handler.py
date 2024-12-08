@@ -36,7 +36,7 @@ async def send_application_confirmation_email(
             "email": email,
             "first_name": user.first_name,
             "last_name": user.last_name,
-            "application_type": application_type
+            "application_type": application_type,
         },
     )
 

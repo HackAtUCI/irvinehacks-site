@@ -1,5 +1,5 @@
 import ApplicationFlow from "@/lib/components/forms/shared/ApplicationFlow";
-import VolunteerForm from "./VolunteerForm";
+import HackerForm from "./Form/HackerForm";
 
 export const revalidate = 60;
 
@@ -13,11 +13,11 @@ export default async function Apply({
 	return (
 		<ApplicationFlow
 			searchParams={searchParams}
-			applicationType="Volunteer"
-			continueHREF="/volunteer"
-			isHacker={false}
+			applicationType="Hacker"
+			continueHREF="/apply"
+			isHacker={true}
 		>
-			<VolunteerForm />
+			<HackerForm />
 		</ApplicationFlow>
 	);
 }

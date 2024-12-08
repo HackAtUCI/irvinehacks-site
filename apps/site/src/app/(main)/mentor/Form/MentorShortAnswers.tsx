@@ -22,7 +22,14 @@ export default function ShortAnswers() {
 			/>
 			<Textfield
 				name="mentor_team_help_saq3"
-				labelText="How would you go about helping a team that is struggling with a bug? How would you go about helping a team that is struggling to work together?"
+				labelText="How would you go about helping a team that is struggling with a bug?"
+				containerClass="flex flex-col w-full"
+				isRequired={true}
+				maxLength={1500}
+			/>
+			<Textfield
+				name="mentor_team_help_saq4"
+				labelText="How would you go about helping a team that is struggling to work together?"
 				containerClass="flex flex-col w-full"
 				isRequired={true}
 				maxLength={1500}

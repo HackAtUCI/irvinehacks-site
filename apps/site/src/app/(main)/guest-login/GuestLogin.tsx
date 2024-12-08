@@ -3,9 +3,20 @@ import { redirect } from "next/navigation";
 import GuestLoginVerificationForm from "./components/GuestLoginVerificationForm";
 import getUserIdentity from "@/lib/utils/getUserIdentity";
 
-async function GuestLogin() {
+async function GuestLogin({
+	searchParams,
+}: {
+	searchParams?: {
+		application?: string;
+	};
+}) {
 	const identity = await getUserIdentity();
-	if (identity.uid !== null) redirect("/portal");
+	if (identity.uid !== null) {
+		if (searchParams === undefined || searchParams.application === undefined) {
+			redirect("/portal");
+		}
+		redirect(`/portal?application=${searchParams.application}`);
+	}
 
 	return (
 		<div className="min-h-screen flex flex-col items-center justify-center">

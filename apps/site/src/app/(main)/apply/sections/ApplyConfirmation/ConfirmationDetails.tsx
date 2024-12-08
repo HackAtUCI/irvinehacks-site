@@ -29,7 +29,11 @@ export default async function ConfirmationDetails({
 			<Button
 				className="text-2xl"
 				text={isLoggedIn ? "Proceed to Application" : "Log in to Apply"}
-				href={isLoggedIn ? `${continueHREF}?prefaceAccepted=true` : "/login"}
+				href={
+					isLoggedIn
+						? `${continueHREF}?prefaceAccepted=true`
+						: `/login?application=${continueHREF.substring(1)}`
+				}
 				isLightVersion
 			/>
 		</div>

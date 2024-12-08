@@ -156,11 +156,11 @@ async def apply(
         log.error("Could not insert applicant %s to MongoDB.", user.uid)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    try:
-        await email_handler.send_application_confirmation_email(user.email, applicant)
-    except RuntimeError:
-        log.error("Could not send confirmation email with SendGrid to %s.", user.uid)
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+    # try:
+    #     await email_handler.send_application_confirmation_email(user.email, applicant)
+    # except RuntimeError:
+    #     log.error("Could not send confirmation email with SendGrid to %s.", user.uid)
+    #     raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     # TODO: handle inconsistent results if one service fails
 

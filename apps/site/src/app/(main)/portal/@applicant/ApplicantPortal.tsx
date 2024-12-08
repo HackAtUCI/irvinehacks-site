@@ -21,12 +21,21 @@ export const enum PortalStatus {
 	void = "VOID",
 }
 
-async function Portal() {
+async function Portal({
+	searchParams,
+}: {
+	searchParams?: {
+		application?: string;
+	};
+}) {
 	const identity = await getUserIdentity();
 	const status = identity.status;
 
 	if (status === null) {
-		redirect("/apply");
+		if (searchParams === undefined || searchParams.application === undefined) {
+			redirect("/");
+		}
+		redirect(`/${searchParams.application}`);
 	}
 
 	const submittedWaiver =

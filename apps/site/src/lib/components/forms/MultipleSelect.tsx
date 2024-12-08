@@ -2,13 +2,16 @@
 
 import { useState, useEffect, useRef, forwardRef } from "react";
 
-interface RadioInputs {
+import RequiredAsterisk from "./RequiredAsterisk";
+
+interface MultipleSelectProps {
 	name: string;
 	labelText: string;
-	IdentifierId: string;
 	values: Array<{ value: string; text: string }>;
 	containerClass: string;
-	horizontal: boolean;
+	inputType: "radio" | "checkbox";
+	horizontal?: boolean;
+	isRequired?: boolean;
 }
 
 interface OtherInputProps {
@@ -24,8 +27,8 @@ const OtherInput = forwardRef<HTMLInputElement, OtherInputProps>(
 			name={name}
 			className={
 				isChecked
-					? "border-b-2 p-1 h-6 border-black w-6/12"
-					: "border-b-2 p-1 h-6 border-black w-6/12 bg-transparent"
+					? "text-[var(--color-black)] border-b-2 p-1 h-6 border-black w-6/12"
+					: "text-[var(--color-white)]border-b-2 p-1 h-6 border-black w-6/12 bg-transparent"
 			}
 			required={isChecked}
 			disabled={!isChecked}
@@ -34,14 +37,15 @@ const OtherInput = forwardRef<HTMLInputElement, OtherInputProps>(
 );
 OtherInput.displayName = "OtherInput";
 
-export default function RadioSelect({
+export default function MultipleSelect({
 	name,
 	labelText,
-	IdentifierId,
+	inputType,
 	values,
 	containerClass,
 	horizontal,
-}: RadioInputs) {
+	isRequired,
+}: MultipleSelectProps) {
 	const [isOtherChecked, setIsOtherChecked] = useState(false);
 	const otherRef = useRef<HTMLInputElement>(null);
 
@@ -54,7 +58,7 @@ export default function RadioSelect({
 	return (
 		<div className={containerClass}>
 			<p className="m-0 text-lg mb-4">
-				{labelText} <span className="text-[#FF2222]">*</span>
+				{labelText} {isRequired && <RequiredAsterisk />}
 			</p>
 			<div
 				className={`w-10/12 flex ${
@@ -62,20 +66,19 @@ export default function RadioSelect({
 				}`}
 			>
 				{values.map((item, i) => {
-					const keyandId = `${IdentifierId}-${i}`;
+					const inputId = `${name}-${i}`;
 					if (item.value === "other") {
 						return (
-							<div key={keyandId} className="flex gap-2">
+							<div key={item.value} className="flex gap-2">
 								<input
-									id={keyandId}
-									type="radio"
+									id={inputId}
+									type={inputType}
 									key={`option-${i}`}
 									name={name}
 									value={item.value}
 									onChange={(e) => setIsOtherChecked(e.target.checked)}
-									required
 								/>
-								<label className="text-lg" htmlFor={keyandId}>
+								<label className="text-lg" htmlFor={inputId}>
 									{item.text}
 								</label>
 								<OtherInput
@@ -87,17 +90,15 @@ export default function RadioSelect({
 						);
 					}
 					return (
-						<div key={keyandId} className="flex gap-2">
+						<div key={i} className="flex gap-2">
 							<input
-								id={keyandId}
-								type="radio"
+								id={inputId}
+								type={inputType}
 								key={`option-${i}`}
 								name={name}
 								value={item.value}
-								onChange={() => setIsOtherChecked(false)}
-								required
 							/>
-							<label className="text-lg" htmlFor={keyandId}>
+							<label className="text-lg" htmlFor={inputId}>
 								{item.text}
 							</label>
 						</div>

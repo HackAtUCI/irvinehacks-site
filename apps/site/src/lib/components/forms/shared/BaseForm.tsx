@@ -10,7 +10,7 @@ import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
 const APPLY_PATH = "/api/user/apply";
 const FIELDS_WITH_OTHER = ["pronouns", "ethnicity", "school", "major"];
 
-export default function Form({ children }: PropsWithChildren) {
+export default function BaseForm({ children }: PropsWithChildren) {
 	const [submitting, setSubmitting] = useState(false);
 	const [sessionExpired, setSessionExpired] = useState(false);
 
@@ -41,9 +41,6 @@ export default function Form({ children }: PropsWithChildren) {
 				formData.delete(otherField);
 			}
 		}
-
-		const formEntries = Object.fromEntries(formData.entries());
-		console.log(formEntries);
 
 		try {
 			const res = await axios.post(APPLY_PATH, formData);

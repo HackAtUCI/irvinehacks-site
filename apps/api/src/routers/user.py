@@ -9,7 +9,11 @@ from pydantic import BaseModel, EmailStr
 from auth import user_identity
 from auth.authorization import require_accepted_applicant
 from auth.user_identity import User, require_user_identity, use_user_identity
-from models.ApplicationData import ProcessedApplicationData, RawApplicationData
+from models.ApplicationData import (
+    ProcessedApplicationData,
+    RawApplicationData,
+    RawMentorApplicationData,
+)
 from models.user_record import Applicant, BareApplicant, Role, Status
 from services import docusign_handler, mongodb_handler
 from services.docusign_handler import WebhookPayload
@@ -72,7 +76,8 @@ async def apply(
     user: Annotated[User, Depends(require_user_identity)],
     # media type should be automatically detected but seems like a bug as of now
     raw_application_data: Annotated[
-        RawApplicationData, Form(media_type="multipart/form-data")
+        Union[RawApplicationData, RawMentorApplicationData],
+        Form(media_type="multipart/form-data"),
     ],
 ) -> str:
     if raw_application_data.application_type not in Role.__members__:

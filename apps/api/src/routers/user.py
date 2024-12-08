@@ -26,7 +26,7 @@ DEADLINE = datetime(2025, 1, 11, 8, 1, tzinfo=timezone.utc)
 class IdentityResponse(BaseModel):
     uid: Union[str, None] = None
     status: Union[str, None] = None
-    role: Union[Role, None] = None
+    roles: list[Role] = []
 
 
 def _is_past_deadline(now: datetime) -> bool:
@@ -58,7 +58,7 @@ async def me(
     if not user:
         return IdentityResponse()
     user_record = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": user.uid}, ["role", "status"]
+        Collection.USERS, {"_id": user.uid}, ["roles", "status"]
     )
 
     if not user_record:
@@ -75,6 +75,12 @@ async def apply(
         RawApplicationData, Form(media_type="multipart/form-data")
     ],
 ) -> str:
+    if raw_application_data.application_type not in Role.__members__:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            "Invalid application type.",
+        )
+
     # Check if current datetime is past application deadline
     now = datetime.now(timezone.utc)
 
@@ -82,13 +88,17 @@ async def apply(
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Applications have closed.")
 
     # check if email is already in database
-    EXISTING_RECORD = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": user.uid}
+    existing_record = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": user.uid, "roles": {"exists": True}}, ["roles"]
     )
 
-    if EXISTING_RECORD and "status" in EXISTING_RECORD:
-        log.error("User %s has already applied.", user)
-        raise HTTPException(status.HTTP_400_BAD_REQUEST)
+    if existing_record and existing_record.get("roles"):
+        log.error(
+            "User %s already has role %s but tried to apply.",
+            user,
+            existing_record["roles"],
+        )
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "User already has a role.")
 
     raw_app_data_dump = raw_application_data.model_dump()
 
@@ -130,6 +140,7 @@ async def apply(
         uid=user.uid,
         first_name=raw_application_data.first_name,
         last_name=raw_application_data.last_name,
+        roles=(Role.APPLICANT, Role[raw_application_data.application_type]),
         application_data=processed_application_data,
         status=Status.PENDING_REVIEW,
     )
@@ -147,7 +158,9 @@ async def apply(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     try:
-        await email_handler.send_application_confirmation_email(user.email, applicant)
+        await email_handler.send_application_confirmation_email(
+            user.email, applicant, Role[raw_application_data.application_type]
+        )
     except RuntimeError:
         log.error("Could not send confirmation email with SendGrid to %s.", user.uid)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -50,6 +50,7 @@ const Button: React.FC<ButtonProps> = ({
 					styles.button,
 					isLightVersion && styles.lightButton,
 					isLightVersion ? "font-body" : "font-display",
+					"text-2xl",
 					className,
 				)}
 				disabled={disabled}

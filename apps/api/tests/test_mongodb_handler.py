@@ -55,8 +55,8 @@ async def test_retrieve_one_existing_document(mock_DB: MagicMock) -> None:
 async def test_retrieve_existing_documents(mock_DB: MagicMock) -> None:
     """Test that multiple existing documents can be retrieved"""
     SAMPLE_DOCUMENTS = [
-        {"_id": 0, "role": "hacker"},
-        {"_id": 1, "role": "hacker"},
+        {"_id": 0, "roles": ["Hacker"]},
+        {"_id": 1, "roles": ["Hacker"]},
     ]
 
     mock_collection = Mock()
@@ -65,7 +65,7 @@ async def test_retrieve_existing_documents(mock_DB: MagicMock) -> None:
     mock_collection.find.return_value = mock_cursor
     mock_DB.__getitem__.return_value = mock_collection
 
-    query = {"role": "hacker"}
+    query = {"roles": "Hacker"}
     result = await mongodb_handler.retrieve(Collection.TESTING, query)
     mock_collection.find.assert_called_once_with(query, [])
     assert result == SAMPLE_DOCUMENTS
@@ -146,7 +146,7 @@ async def test_update_existing_documents(mock_DB: MagicMock) -> None:
     mock_DB.__getitem__.return_value = mock_collection
 
     query = {"_id": "my-id"}
-    update = {"role": "hacker"}
+    update = {"status": "ACCEPTED"}
     result = await mongodb_handler.update(Collection.TESTING, query, update)
     mock_collection.update_many.assert_awaited_once_with(query, {"$set": update})
     assert result is True
@@ -159,7 +159,7 @@ async def test_update_existing_documents_failure(mock_DB: MagicMock) -> None:
     mock_collection.update_many.return_value = UpdateResult(dict(), False)
     mock_DB.__getitem__.return_value = mock_collection
 
-    update = {"role": "hacker"}
+    update = {"status": "ACCEPTED"}
     with pytest.raises(RuntimeError):
         query = {"_id": "my-id"}
         await mongodb_handler.update(Collection.TESTING, query, update)

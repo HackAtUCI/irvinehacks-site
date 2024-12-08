@@ -32,6 +32,7 @@ def make_empty_none(val: Union[str, None]) -> Union[str, None]:
 NullableHttpUrl = Annotated[Union[None, HttpUrl], BeforeValidator(make_empty_none)]
 
 
+# hacker application model
 class BaseApplicationData(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, str_max_length=254)
 
@@ -54,6 +55,7 @@ class RawApplicationData(BaseApplicationData):
     first_name: str
     last_name: str
     resume: Union[UploadFile, None] = None
+    application_type: str
 
 
 class ProcessedApplicationData(BaseApplicationData):

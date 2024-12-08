@@ -1,23 +1,16 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, PropsWithChildren, useState } from "react";
 import axios from "axios";
 
 import Button from "@/lib/components/Button/Button";
 
-import BasicInformation from "./BasicInformation";
-import AgeInformation from "./AgeInformation";
-import SchoolInformation from "./SchoolInformation";
-import ProfileInformation from "./ProfileInformation";
-import ResumeInformation from "./ResumeInformation";
-
-import styles from "./Form.module.scss";
 import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
 
 const APPLY_PATH = "/api/user/apply";
 const FIELDS_WITH_OTHER = ["pronouns", "ethnicity", "school", "major"];
 
-export default function Form() {
+export default function Form({ children }: PropsWithChildren) {
 	const [submitting, setSubmitting] = useState(false);
 	const [sessionExpired, setSessionExpired] = useState(false);
 
@@ -88,17 +81,18 @@ export default function Form() {
 	return (
 		<form
 			method="post"
-			className={`${styles.form} text-[#000000] w-8/12 flex flex-col items-center py-12 gap-10 z-1 max-[800px]:w-9/12 max-[400px]:w-11/12`}
+			className="bg-black border-[5px] border-white text-[var(--color-white)] w-8/12 flex flex-col items-center py-12 gap-14 z-1 max-[800px]:w-9/12 max-[400px]:w-11/12 drop-shadow-[25px_33px_0px_rgba(255,255,255,1)]"
 			action="/api/user/apply"
 			encType="multipart/form-data"
 			onSubmit={handleSubmit}
 		>
-			<BasicInformation />
-			<SchoolInformation />
-			<ProfileInformation />
-			<ResumeInformation />
-			<AgeInformation />
-			<Button text="Submit Application" disabled={submitting} />
+			{children}
+			<Button
+				text="Submit"
+				className="text-2xl !px-11 !py-2"
+				isLightVersion={true}
+				disabled={submitting}
+			/>
 			{sessionExpired && sessionExpiredMessage}
 		</form>
 	);

@@ -4,7 +4,7 @@ import api from "./api";
 
 export interface Identity {
 	uid: string | null;
-	role: string | null;
+	roles: ReadonlyArray<string>;
 	status: string | null;
 }
 
@@ -19,6 +19,6 @@ export default async function getUserIdentity(): Promise<Identity> {
 			// Don't think this case is possible/relevant but for completeness
 			console.error(err);
 		}
-		return { uid: null, role: null, status: null };
+		return { uid: null, roles: [], status: null };
 	}
 }

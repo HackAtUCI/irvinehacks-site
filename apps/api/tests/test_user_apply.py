@@ -8,7 +8,7 @@ from pydantic import HttpUrl
 
 from auth.user_identity import NativeUser, UserTestClient
 from models.ApplicationData import ProcessedApplicationData
-from models.user_record import Applicant, Status
+from models.user_record import Applicant, Status, Role
 from routers import user
 from services.mongodb_handler import Collection
 from utils import resume_handler
@@ -39,6 +39,7 @@ SAMPLE_APPLICATION = {
     "portfolio": "https://github.com",
     "frq_collaboration": "I am pkfire",
     "frq_dream_job": "I am pkfire",
+    "application_type": "HACKER",
 }
 
 
@@ -78,6 +79,7 @@ EXPECTED_USER = Applicant(
     uid="edu.uci.pkfire",
     first_name="pk",
     last_name="fire",
+    roles=(Role.APPLICANT, Role.HACKER),
     status=Status.PENDING_REVIEW,
     application_data=EXPECTED_APPLICATION_DATA,
 )
@@ -86,6 +88,7 @@ EXPECTED_USER_WITHOUT_RESUME = Applicant(
     uid="edu.uci.pkfire",
     first_name="pk",
     last_name="fire",
+    roles=(Role.APPLICANT, Role.HACKER),
     status=Status.PENDING_REVIEW,
     application_data=EXPECTED_APPLICATION_DATA_WITHOUT_RESUME,
 )
@@ -129,7 +132,7 @@ def test_apply_successfully(
         upsert=True,
     )
     mock_send_application_confirmation_email.assert_awaited_once_with(
-        USER_EMAIL, EXPECTED_USER
+        USER_EMAIL, EXPECTED_USER, Role.HACKER
     )
     assert res.status_code == 201
 
@@ -147,6 +150,19 @@ def test_apply_with_invalid_data_causes_422(
     assert res.status_code == 422
 
 
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_apply_with_invalid_application_type_causes_422(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test that applying with invalid data is unprocessable."""
+    bad_application = SAMPLE_APPLICATION.copy()
+    bad_application["application_type"] = "NotValid"
+    res = client.post("/apply", data=bad_application, files=SAMPLE_FILES)
+
+    mock_mongodb_handler_retrieve_one.assert_not_called()
+    assert res.status_code == 422
+
+
 @patch("services.gdrive_handler.upload_file", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 def test_apply_when_user_exists_causes_400(
@@ -156,7 +172,7 @@ def test_apply_when_user_exists_causes_400(
     """Test that applying when a user already exists causes status 400."""
     mock_mongodb_handler_retrieve_one.return_value = {
         "_id": "edu.uci.pkfire",
-        "status": "pending review",
+        "roles": ["applicant"],
     }
     res = client.post("/apply", data=SAMPLE_APPLICATION, files=SAMPLE_FILES)
 
@@ -277,7 +293,7 @@ def test_apply_successfully_without_resume(
         upsert=True,
     )
     mock_send_application_confirmation_email.assert_awaited_once_with(
-        USER_EMAIL, EXPECTED_USER_WITHOUT_RESUME
+        USER_EMAIL, EXPECTED_USER_WITHOUT_RESUME, Role.HACKER
     )
 
 
@@ -293,6 +309,7 @@ def test_application_data_is_bson_encodable() -> None:
 def test_application_data_with_other_throws_422(
     mock_mongodb_handler_retrieve_one: AsyncMock,
 ) -> None:
+    mock_mongodb_handler_retrieve_one.return_value = None
     contains_other = SAMPLE_APPLICATION.copy()
     contains_other["pronouns"] = "other"
     res = client.post("/apply", data=contains_other, files=SAMPLE_FILES)

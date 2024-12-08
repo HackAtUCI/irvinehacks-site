@@ -1,6 +1,7 @@
 from enum import Enum
-from typing import Literal, Union
+from typing import Annotated, Union
 
+from pydantic import AfterValidator, Field
 from typing_extensions import TypeAlias
 
 from models.ApplicationData import Decision, ProcessedApplicationData
@@ -8,17 +9,22 @@ from services.mongodb_handler import BaseRecord
 
 
 class Role(str, Enum):
-    APPLICANT = "applicant"
-    DIRECTOR = "director"
-    HACKER = "hacker"
-    MENTOR = "mentor"
-    REVIEWER = "reviewer"
-    ORGANIZER = "organizer"
-    VOLUNTEER = "volunteer"
-    CHECKIN_LEAD = "checkin_lead"
-    SPONSOR = "sponsor"
-    JUDGE = "judge"
-    WORKSHOP_LEAD = "workshop_lead"
+    """
+    Possible roles of organizers and participants.
+    The values are the display labels to be shown on the Admin site.
+    """
+
+    APPLICANT = "Applicant"
+    DIRECTOR = "Director"
+    HACKER = "Hacker"
+    MENTOR = "Mentor"
+    REVIEWER = "Reviewer"
+    ORGANIZER = "Organizer"
+    VOLUNTEER = "Volunteer"
+    CHECKIN_LEAD = "Check-in Lead"
+    SPONSOR = "Sponsor"
+    JUDGE = "Judge"
+    WORKSHOP_LEAD = "Workshop Lead"
 
 
 class Status(str, Enum):
@@ -41,21 +47,29 @@ class UserRecord(BaseRecord):
 
     first_name: str
     last_name: str
-    role: Role
+    roles: Annotated[tuple[Role, ...], Field(min_length=1)]
 
 
+def has_applicant_role(val: tuple[Role, ...]) -> tuple[Role, ...]:
+    if Role.APPLICANT not in val:
+        raise ValueError
+    return val
+
+
+RoleWithApplicant = Annotated[tuple[Role, ...], AfterValidator(has_applicant_role)]
 ApplicantStatus: TypeAlias = Union[Status, Decision]
 
 
 class BareApplicant(UserRecord):
     """Applicant without the application data."""
 
-    role: Literal[Role.APPLICANT]
+    roles: RoleWithApplicant
     status: ApplicantStatus
 
 
 class Applicant(BareApplicant):
     """Applicant with application data."""
 
-    role: Literal[Role.APPLICANT] = Role.APPLICANT
+    # Note validators not run on default values
+    roles: RoleWithApplicant = (Role.APPLICANT,)
     application_data: ProcessedApplicationData

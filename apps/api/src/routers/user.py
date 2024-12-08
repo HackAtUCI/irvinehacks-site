@@ -1,17 +1,8 @@
 from datetime import datetime, timezone
 from logging import getLogger
-from typing import Annotated, Optional, Union
+from typing import Annotated, Union
 
-from fastapi import (
-    APIRouter,
-    Depends,
-    Form,
-    Header,
-    HTTPException,
-    Request,
-    UploadFile,
-    status,
-)
+from fastapi import APIRouter, Depends, Form, Header, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, EmailStr
 
@@ -79,8 +70,10 @@ async def me(
 @router.post("/apply", status_code=status.HTTP_201_CREATED)
 async def apply(
     user: Annotated[User, Depends(require_user_identity)],
-    raw_application_data: Annotated[RawApplicationData, Depends(RawApplicationData)],
-    resume: Optional[UploadFile] = None,
+    # media type should be automatically detected but seems like a bug as of now
+    raw_application_data: Annotated[
+        RawApplicationData, Form(media_type="multipart/form-data")
+    ],
 ) -> str:
     if raw_application_data.application_type not in Role.__members__:
         raise HTTPException(
@@ -116,6 +109,7 @@ async def apply(
                 "Please enable JavaScript on your browser.",
             )
 
+    resume = raw_application_data.resume
     if resume is not None and resume.size and resume.size > 0:
         try:
             resume_url = await resume_handler.upload_resume(

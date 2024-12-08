@@ -42,8 +42,8 @@ export default function Form({ children }: PropsWithChildren) {
 			}
 		}
 
-		// const formEntries = Object.fromEntries(formData.entries());
-		// console.debug(formEntries);
+		const formEntries = Object.fromEntries(formData.entries());
+		console.log(formEntries);
 
 		try {
 			const res = await axios.post(APPLY_PATH, formData);

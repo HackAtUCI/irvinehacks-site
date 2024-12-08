@@ -49,6 +49,26 @@ class BaseApplicationData(BaseModel):
     frq_dream_job: str = Field(max_length=2048)
 
 
+# volunteer application model
+class VolunteerApplicationData(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, str_max_length=254)
+
+    pronouns: str
+    ethnicity: str
+    is_18_older: bool
+    school: str
+    education_level: str
+    major: str
+    applied_before: bool
+    friday_availability: str
+    saturday_availability: str
+    sunday_availability: str
+    frq_volunteer: str = Field(max_length=2048)
+    frq_utensil: str = Field(max_length=2048)
+    allergies: Union[str, None] = Field(None, max_length=2048)
+    extra_questions: Union[str, None] = Field(None, max_length=2048)
+
+
 class RawApplicationData(BaseApplicationData):
     """Expected to be sent by the form on the site."""
 

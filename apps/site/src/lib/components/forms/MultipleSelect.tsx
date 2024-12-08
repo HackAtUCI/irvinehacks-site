@@ -4,11 +4,14 @@ import { useState, useEffect, useRef, forwardRef } from "react";
 
 import RequiredAsterisk from "./RequiredAsterisk";
 
-interface MultipleInputs {
+interface MultipleSelectProps {
 	name: string;
 	labelText: string;
 	values: Array<{ value: string; text: string }>;
 	containerClass: string;
+	inputType: "radio" | "checkbox";
+	horizontal?: boolean;
+	isRequired?: boolean;
 }
 
 interface OtherInputProps {
@@ -37,9 +40,12 @@ OtherInput.displayName = "OtherInput";
 export default function MultipleSelect({
 	name,
 	labelText,
+	inputType,
 	values,
 	containerClass,
-}: MultipleInputs) {
+	horizontal,
+	isRequired,
+}: MultipleSelectProps) {
 	const [isOtherChecked, setIsOtherChecked] = useState(false);
 	const otherRef = useRef<HTMLInputElement>(null);
 
@@ -52,9 +58,13 @@ export default function MultipleSelect({
 	return (
 		<div className={containerClass}>
 			<p className="m-0 text-lg mb-4">
-				{labelText} <RequiredAsterisk />
+				{labelText} {isRequired && <RequiredAsterisk />}
 			</p>
-			<div className="w-10/12 flex flex-col gap-2">
+			<div
+				className={`w-10/12 flex ${
+					horizontal ? "flex-wrap gap-10" : "flex-col gap-2"
+				}`}
+			>
 				{values.map((item, i) => {
 					const inputId = `${name}-${i}`;
 					if (item.value === "other") {
@@ -62,7 +72,7 @@ export default function MultipleSelect({
 							<div key={i} className="flex gap-2">
 								<input
 									id={inputId}
-									type="checkbox"
+									type={inputType}
 									key={`option-${i}`}
 									name={name}
 									value={item.value}
@@ -83,7 +93,7 @@ export default function MultipleSelect({
 						<div key={i} className="flex gap-2">
 							<input
 								id={inputId}
-								type="checkbox"
+								type={inputType}
 								key={`option-${i}`}
 								name={name}
 								value={item.value}

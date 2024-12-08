@@ -1,5 +1,4 @@
 import TextInput from "@/lib/components/forms/TextInput";
-import styles from "@/lib/components/forms/shared/Form.module.scss";
 
 export default function ProfileInformation() {
 	return (
@@ -10,9 +9,7 @@ export default function ProfileInformation() {
 			<div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
 				<TextInput
 					name="linkedin"
-					labelClass={styles.label}
 					labelText="LinkedIn"
-					inputClass={styles.input}
 					containerClass="flex flex-col w-6/12 max-[1000px]:w-full"
 					isRequired={false}
 					type="url"
@@ -20,9 +17,7 @@ export default function ProfileInformation() {
 				/>
 				<TextInput
 					name="portfolio"
-					labelClass={styles.label}
 					labelText="Portfolio (Github, website, etc.)"
-					inputClass={styles.input}
 					containerClass="flex flex-col w-6/12 max-[1000px]:w-full"
 					isRequired={false}
 					type="url"

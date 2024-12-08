@@ -7,8 +7,6 @@ import { FileCheck, FileText, FileWarning } from "lucide-react";
 import OutputFeedBack from "./ResumeOutputFeedback";
 import RequiredAsterisk from "@/lib/components/forms/RequiredAsterisk";
 
-import styles from "./Form.module.scss";
-
 class InvalidFile extends Error {
 	constructor(message: string) {
 		super(message);
@@ -69,12 +67,12 @@ export default function ResumeInformation({
 
 	return (
 		<div className="flex flex-col items-start w-11/12">
-			<label className={styles.label}>
+			<label className="text-lg mb-2">
 				Resume (PDF, 0.5 MB max) {isRequired && <RequiredAsterisk />}
 			</label>
 			<label
 				htmlFor="resume_upload"
-				className={`${styles.upload} cursor-pointer mb-3 p-5 rounded-xl text-[#000] bg-[#e1e1e1]`}
+				className="cursor-pointer mb-3 p-5 rounded-xl text-[#000] bg-[#e1e1e1]"
 			>
 				{!hasUploaded ? (
 					<FileText className="m-auto" width={50} height={50} />

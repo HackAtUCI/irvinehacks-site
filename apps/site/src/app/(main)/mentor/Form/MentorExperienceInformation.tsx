@@ -29,6 +29,7 @@ export default function ExperienceInformation() {
 				name="experienced_technologies"
 				labelText="What types of projects would you be comfortable mentoring?"
 				containerClass="w-full"
+				inputType="checkbox"
 				values={selectOptions}
 			/>
 		</div>

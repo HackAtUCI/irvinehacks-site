@@ -1,6 +1,5 @@
 import MultipleSelect from "@/lib/components/forms/MultipleSelect";
 import TextInput from "@/lib/components/forms/TextInput";
-import styles from "@/lib/components/forms/shared/Form.module.scss";
 
 const pronouns = [
 	{ value: "he", text: "He/him/his" },
@@ -10,16 +9,14 @@ const pronouns = [
 	{ value: "other", text: "Other:" },
 ];
 
-export default function BasicInformation() {
+export default function MentorBasicInformation() {
 	return (
 		<div className="flex flex-col gap-5 w-11/12">
 			<p className="text-4xl m-0 max-[700px]:text-3xl">Basic Information</p>
 			<div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
 				<TextInput
 					name="first_name"
-					labelClass={styles.label}
 					labelText="First Name"
-					inputClass={styles.input}
 					containerClass="flex flex-col w-6/12 max-[1000px]:w-full"
 					isRequired={true}
 					type="text"
@@ -27,9 +24,7 @@ export default function BasicInformation() {
 				/>
 				<TextInput
 					name="last_name"
-					labelClass={styles.label}
 					labelText="Last Name"
-					inputClass={styles.input}
 					containerClass="flex flex-col w-6/12 max-[1000px]:w-full"
 					isRequired={true}
 					type="text"
@@ -42,6 +37,7 @@ export default function BasicInformation() {
 					name="pronouns"
 					labelText="Preferred Pronouns"
 					containerClass="flex flex-col w-full"
+					inputType="checkbox"
 					values={pronouns}
 				/>
 			</div>

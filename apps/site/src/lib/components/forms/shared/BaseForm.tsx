@@ -10,7 +10,7 @@ import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
 const APPLY_PATH = "/api/user/apply";
 const FIELDS_WITH_OTHER = ["pronouns", "ethnicity", "school", "major"];
 
-export default function Form({ children }: PropsWithChildren) {
+export default function BaseForm({ children }: PropsWithChildren) {
 	const [submitting, setSubmitting] = useState(false);
 	const [sessionExpired, setSessionExpired] = useState(false);
 
@@ -42,8 +42,15 @@ export default function Form({ children }: PropsWithChildren) {
 			}
 		}
 
-		// const formEntries = Object.fromEntries(formData.entries());
-		// console.debug(formEntries);
+		const formEntries = Object.fromEntries(formData.entries());
+		console.log(formEntries);
+
+		const FIELDS_USING_MULTI_SELECT = ["pronouns", "experienced_technologies"];
+		if (FIELDS_USING_MULTI_SELECT) {
+			for (const field of FIELDS_USING_MULTI_SELECT) {
+				console.log(field, formData.getAll(field));
+			}
+		}
 
 		try {
 			const res = await axios.post(APPLY_PATH, formData);

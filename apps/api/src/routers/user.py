@@ -82,6 +82,12 @@ async def apply(
     raw_application_data: Annotated[RawApplicationData, Depends(RawApplicationData)],
     resume: Optional[UploadFile] = None,
 ) -> str:
+    if raw_application_data.application_type not in Role.__members__:
+        raise HTTPException(
+                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                "Invalid application type.",
+            )
+
     # Check if current datetime is past application deadline
     now = datetime.now(timezone.utc)
 
@@ -140,6 +146,7 @@ async def apply(
         uid=user.uid,
         first_name=raw_application_data.first_name,
         last_name=raw_application_data.last_name,
+        roles=(Role.APPLICANT, Role[raw_application_data.application_type]),
         application_data=processed_application_data,
         status=Status.PENDING_REVIEW,
     )
@@ -157,7 +164,9 @@ async def apply(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     try:
-        await email_handler.send_application_confirmation_email(user.email, applicant)
+        await email_handler.send_application_confirmation_email(
+            user.email, applicant, Role[raw_application_data.application_type]
+        )
     except RuntimeError:
         log.error("Could not send confirmation email with SendGrid to %s.", user.uid)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)

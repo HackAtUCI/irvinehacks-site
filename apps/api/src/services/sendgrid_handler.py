@@ -32,6 +32,7 @@ class PersonalizationData(TypedDict):
 class ConfirmationPersonalization(PersonalizationData):
     first_name: str
     last_name: str
+    application_type: str
 
 
 class GuestTokenPersonalization(PersonalizationData):

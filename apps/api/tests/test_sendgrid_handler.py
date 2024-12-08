@@ -13,11 +13,13 @@ SAMPLE_RECIPIENTS: list[ConfirmationPersonalization] = [
         "email": "hacker0@uci.edu",
         "first_name": "Hacker",
         "last_name": "Zero",
+        "application_type": "Hacker"
     },
     {
         "email": "hacker1@uci.edu",
         "first_name": "Hacker",
         "last_name": "One",
+        "application_type": "Hacker"
     },
 ]
 

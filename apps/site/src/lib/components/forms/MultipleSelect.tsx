@@ -69,7 +69,7 @@ export default function MultipleSelect({
 					const inputId = `${name}-${i}`;
 					if (item.value === "other") {
 						return (
-							<div key={i} className="flex gap-2">
+							<div key={item.value} className="flex gap-2">
 								<input
 									id={inputId}
 									type={inputType}

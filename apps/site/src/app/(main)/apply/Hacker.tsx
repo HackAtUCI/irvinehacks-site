@@ -3,7 +3,7 @@ import HackerForm from "./Form/HackerForm";
 
 export const revalidate = 60;
 
-export default async function Apply({
+export default async function Hacker({
 	searchParams,
 }: {
 	searchParams?: {

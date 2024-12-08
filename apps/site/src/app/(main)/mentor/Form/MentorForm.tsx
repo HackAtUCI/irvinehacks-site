@@ -1,13 +1,5 @@
 "use client";
 
-// const formEntries = Object.fromEntries(formData.entries());
-// 		console.log(formEntries);
-
-// 		if (SELECT_FIELDS) {
-// 			for (const field of SELECT_FIELDS) {
-// 				console.log(field, formData.getAll(field));
-// 			}
-// 		}
 import Textfield from "@/lib/components/forms/Textfield";
 
 import BaseForm from "@/lib/components/forms/shared/BaseForm";

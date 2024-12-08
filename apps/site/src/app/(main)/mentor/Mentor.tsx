@@ -3,7 +3,7 @@ import MentorForm from "./Form/MentorForm";
 
 export const revalidate = 60;
 
-export default async function Apply({
+export default async function Mentor({
 	searchParams,
 }: {
 	searchParams?: {

@@ -20,7 +20,7 @@ interface ApplicationFlowProps {
 	isHacker: boolean;
 }
 
-export default async function Apply({
+export default async function ApplicationFlow({
 	searchParams,
 	applicationType,
 	continueHREF,

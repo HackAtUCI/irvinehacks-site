@@ -42,16 +42,6 @@ export default function BaseForm({ children }: PropsWithChildren) {
 			}
 		}
 
-		// const formEntries = Object.fromEntries(formData.entries());
-		// console.log(formEntries);
-
-		// const FIELDS_USING_MULTI_SELECT = ["pronouns", "experienced_technologies"];
-		// if (FIELDS_USING_MULTI_SELECT) {
-		// 	for (const field of FIELDS_USING_MULTI_SELECT) {
-		// 		console.log(field, formData.getAll(field));
-		// 	}
-		// }
-
 		try {
 			const res = await axios.post(APPLY_PATH, formData);
 			if (res.status === 201) {

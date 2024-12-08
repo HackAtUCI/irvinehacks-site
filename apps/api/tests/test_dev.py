@@ -21,6 +21,7 @@ def test_impersonate() -> None:
     assert identity is not None
     assert identity.uid == "edu.uci.stuffed"
 
+
 def test_impersonate_with_application_type() -> None:
     """Test the dev token can provide a valid user identity."""
     res = client.get("/impersonate/stuffed?application=apply", follow_redirects=False)

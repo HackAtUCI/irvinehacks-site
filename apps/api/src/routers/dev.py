@@ -9,7 +9,9 @@ router = APIRouter()
 
 
 @router.get("/impersonate/{ucinetid}")
-async def impersonate(ucinetid: str, application: Optional[str] = None) -> RedirectResponse:
+async def impersonate(
+    ucinetid: str, application: Optional[str] = None
+) -> RedirectResponse:
     """Simulate a user identity during local development (does not require https)."""
     user = NativeUser(
         ucinetid=ucinetid,

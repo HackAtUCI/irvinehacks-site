@@ -16,7 +16,7 @@ const FIELDS_WITH_OTHER = [
 ];
 
 interface BaseFormProps {
-	applicationType: string;
+	applicationType: "HACKER" | "MENTOR" | "VOLUNTEER";
 	applyPath: string;
 }
 
@@ -65,9 +65,6 @@ export default function BaseForm({
 			if (otherFieldValue) formData.append(field, otherFieldValue);
 		}
 
-		// attach application type to formData
-		formData.append("application_type", applicationType);
-
 		try {
 			const res = await axios.post(applyPath, formData);
 			if (res.status === 201) {
@@ -109,6 +106,13 @@ export default function BaseForm({
 			encType="multipart/form-data"
 			onSubmit={handleSubmit}
 		>
+			<input
+				type="text"
+				name="application_type"
+				value={applicationType}
+				readOnly
+				hidden
+			/>
 			{children}
 			<Button
 				text="Submit"

@@ -127,6 +127,7 @@ def get_discriminator_value(v: Any) -> str:
         return "hacker"
     if "mentor_prev_experience_saq1" in dir(v):
         return "mentor"
+    return ""
 
 
 ProcessedApplicationDataUnion = Annotated[

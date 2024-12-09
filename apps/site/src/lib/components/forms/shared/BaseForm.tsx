@@ -8,7 +8,13 @@ import Button from "@/lib/components/Button/Button";
 import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
 
 const APPLY_PATH = "/api/user/apply";
-const FIELDS_WITH_OTHER = ["pronouns", "ethnicity", "school", "major"];
+const FIELDS_WITH_OTHER = [
+	"pronouns",
+	"ethnicity",
+	"school",
+	"major",
+	"experienced_technologies",
+];
 
 export default function BaseForm({
 	applicationType,
@@ -40,11 +46,20 @@ export default function BaseForm({
 
 		// Use other values when selected
 		for (const field of FIELDS_WITH_OTHER) {
-			const otherField = `other_${field}`;
-			if (formData.get(field) === "other") {
-				formData.set(field, formData.get(otherField)!);
-				formData.delete(otherField);
-			}
+			const otherField = `_other_${field}`;
+			const otherFieldValue = formData.get(otherField);
+
+			formData.delete(otherField);
+
+			const valuesWithoutOther = formData
+				.getAll(field)
+				.filter((value) => value !== "other");
+
+			formData.delete(field);
+
+			for (const value of valuesWithoutOther) formData.append(field, value);
+
+			if (otherFieldValue) formData.append(field, otherFieldValue);
 		}
 
 		// attach application type to formData

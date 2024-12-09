@@ -1,4 +1,7 @@
+import Textfield from "@/lib/components/forms/Textfield";
 import TextInput from "@/lib/components/forms/TextInput";
+
+const FRQ_MAX_LENGTH = 2000;
 
 export default function ProfileInformation() {
 	return (
@@ -24,9 +27,21 @@ export default function ProfileInformation() {
 					placeholder="https://"
 				/>
 			</div>
-			{/*
-			TODO Add SAQs here using Textfield
-			*/}
+			<Textfield
+				name="frq_change"
+				labelText="Give an example of a time when you experienced a lot of change. What did you learn from it, and how would you apply what you learned to future experiences? (150 words)"
+				containerClass="flex flex-col w-full"
+				isRequired={true}
+				maxLength={FRQ_MAX_LENGTH}
+			/>
+
+			<Textfield
+				name="frq_video_game"
+				labelText="If you could design your own video game world, what would it look like, and what features would you add to make it unique?  (100 words)"
+				containerClass="flex flex-col w-full"
+				isRequired={true}
+				maxLength={FRQ_MAX_LENGTH}
+			/>
 		</div>
 	);
 }

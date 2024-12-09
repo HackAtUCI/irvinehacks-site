@@ -47,7 +47,7 @@ export default function BasicInformation() {
 					placeholder="Anteater"
 				/>
 				<DropdownSelect
-					name="pronoun"
+					name="pronouns"
 					labelText="Pronouns"
 					containerClass="flex flex-col w-3/12 max-[1000px]:w-full"
 					values={pronouns}

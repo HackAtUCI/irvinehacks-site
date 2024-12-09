@@ -1,6 +1,9 @@
 import Textfield from "@/lib/components/forms/Textfield";
 import TextInput from "@/lib/components/forms/TextInput";
 
+// The length here is different from the length specified in API data models.
+// This was originally done because different browsers used to count newline characters slightly differently
+// Currently unsure if this is still the case
 const FRQ_MAX_LENGTH = 2000;
 
 export default function ProfileInformation() {

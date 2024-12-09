@@ -1,14 +1,16 @@
 from datetime import datetime
 from enum import Enum
-from typing import Annotated, List, Optional, Union
+from typing import Annotated, Any, List, Literal, Optional, Union
 
 from fastapi import UploadFile
 from pydantic import (
     BaseModel,
     BeforeValidator,
     ConfigDict,
+    Discriminator,
     Field,
     HttpUrl,
+    Tag,
     field_serializer,
 )
 
@@ -76,7 +78,7 @@ class RawHackerApplicationData(BaseApplicationData):
     first_name: str
     last_name: str
     resume: Union[UploadFile, None] = None
-    application_type: str
+    application_type: Literal["HACKER"]
 
 
 class RawMentorApplicationData(BaseMentorApplicationData):
@@ -85,7 +87,7 @@ class RawMentorApplicationData(BaseMentorApplicationData):
     first_name: str
     last_name: str
     resume: Union[UploadFile, None] = None
-    application_type: str
+    application_type: Literal["MENTOR"]
 
 
 class ProcessedHackerApplicationData(BaseApplicationData):
@@ -110,3 +112,27 @@ class ProcessedMentorApplicationData(BaseMentorApplicationData):
         if val is not None:
             return str(val)
         return val
+
+
+# To add more discriminating values, add a string
+# that doesn't appear in any other form
+def get_discriminator_value(v: Any) -> str:
+    if isinstance(v, dict):
+        if "frq_video_game" in v:
+            return "hacker"
+        if "mentor_prev_experience_saq1" in v:
+            return "mentor"
+
+    if "frq_video_game" in dir(v):
+        return "hacker"
+    if "mentor_prev_experience_saq1" in dir(v):
+        return "mentor"
+
+
+ProcessedApplicationDataUnion = Annotated[
+    Union[
+        Annotated[ProcessedHackerApplicationData, Tag("hacker")],
+        Annotated[ProcessedMentorApplicationData, Tag("mentor")],
+    ],
+    Discriminator(get_discriminator_value),
+]

@@ -15,14 +15,16 @@ const FIELDS_WITH_OTHER = [
 	"experienced_technologies",
 ];
 
+interface BaseFormProps {
+	applicationType: string;
+	applyPath: string;
+}
+
 export default function BaseForm({
 	applicationType,
 	applyPath,
 	children,
-}: {
-	applicationType: string;
-	applyPath: string;
-} & PropsWithChildren) {
+}: PropsWithChildren<BaseFormProps>) {
 	const [submitting, setSubmitting] = useState(false);
 	const [sessionExpired, setSessionExpired] = useState(false);
 

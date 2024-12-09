@@ -73,7 +73,7 @@ async def me(
 
 async def _apply_flow(
     user: User,
-    raw_application_data: Union[RawHackerApplicationData, RawMentorApplicationData],
+    raw_application_data: ProcessedApplicationDataUnion,
 ) -> str:
     # Check if current datetime is past application deadline
     now = datetime.now(timezone.utc)

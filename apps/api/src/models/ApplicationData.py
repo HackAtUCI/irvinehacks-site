@@ -58,15 +58,15 @@ class BaseMentorApplicationData(BaseModel):
     school: str
     major: str
     education_level: str
-    is_18_older: str
+    is_18_older: bool
     git_experience: str
     github: NullableHttpUrl = None
     portfolio: NullableHttpUrl = None
     linkedin: NullableHttpUrl = None
     mentor_prev_experience_saq1: Union[str, None] = Field(None, max_length=2048)
-    mentor_interest_saq2: Union[str, None] = Field(None, max_length=2048)
-    mentor_team_help_saq3: Union[str, None] = Field(None, max_length=2048)
-    mentor_team_help_saq4: Union[str, None] = Field(None, max_length=2048)
+    mentor_interest_saq2: str = Field(max_length=2048)
+    mentor_team_help_saq3: str = Field(max_length=2048)
+    mentor_team_help_saq4: str = Field(max_length=2048)
     other_questions: Union[str, None] = Field(None, max_length=2048)
 
 
@@ -105,7 +105,7 @@ class ProcessedMentorApplicationData(BaseMentorApplicationData):
     submission_time: datetime
     reviews: list[Review] = []
 
-    @field_serializer("linkedin", "portfolio", "resume_url")
+    @field_serializer("linkedin", "github", "portfolio", "resume_url")
     def url2str(self, val: Union[HttpUrl, None]) -> Union[str, None]:
         if val is not None:
             return str(val)

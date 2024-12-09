@@ -37,8 +37,8 @@ SAMPLE_APPLICATION = {
     "is_first_hackathon": "false",
     "linkedin": "",
     "portfolio": "https://github.com",
-    "frq_collaboration": "I am pkfire",
-    "frq_dream_job": "I am pkfire",
+    "frq_change": "I am pkfire",
+    "frq_video_game": "I am pkfire",
     "application_type": "HACKER",
 }
 
@@ -302,7 +302,7 @@ def test_application_data_is_bson_encodable() -> None:
     data = EXPECTED_APPLICATION_DATA.model_copy()
     data.linkedin = HttpUrl("https://linkedin.com")
     encoded = bson.encode(EXPECTED_APPLICATION_DATA.model_dump())
-    assert len(encoded) == 376
+    assert len(encoded) == 370
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)

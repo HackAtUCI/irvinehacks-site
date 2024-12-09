@@ -76,4 +76,6 @@ class Applicant(BareApplicant):
 
     # Note validators not run on default values
     roles: RoleWithApplicant = (Role.APPLICANT,)
-    application_data: Union[ProcessedHackerApplicationData, ProcessedMentorApplicationData]
+    application_data: Union[
+        ProcessedHackerApplicationData, ProcessedMentorApplicationData
+    ]

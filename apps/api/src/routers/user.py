@@ -76,7 +76,6 @@ async def apply_flow(
     user: User,
     raw_application_data: Union[RawHackerApplicationData, RawMentorApplicationData],
 ) -> str:
-    print("apply_flow called")
     if raw_application_data.application_type not in Role.__members__:
         raise HTTPException(
             status.HTTP_422_UNPROCESSABLE_ENTITY,

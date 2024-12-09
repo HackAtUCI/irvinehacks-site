@@ -3,7 +3,7 @@
 	"private": true,
 	"scripts": {
 		"dev": "run-script-os",
-		"dev:win32": ".\\run-docker.bat",
+		"dev:win32": "./run-docker.bat",
 		"dev:default": "./run-docker.sh",
 		"test": "pytest",
 		"lint": "flake8 src tests && mypy src tests",

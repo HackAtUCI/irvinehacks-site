@@ -47,7 +47,7 @@ export default function BasicInformation() {
 
 			<div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
 				<DropdownSelect
-					name="pronoun"
+					name="pronouns"
 					labelText="Preferred Pronouns"
 					containerClass="flex flex-col w-5/12 max-[1000px]:w-full"
 					values={pronouns}

@@ -69,6 +69,17 @@ class VolunteerApplicationData(BaseModel):
     extra_questions: Union[str, None] = Field(None, max_length=2048)
 
 
+class RawVolunteerData(VolunteerApplicationData):
+    first_name: str
+    last_name: str
+    application_type: str
+
+
+class ProcessedVolunteerData(BaseApplicationData):
+    submission_time: datetime
+    reviews: list[Review] = []
+
+
 class RawApplicationData(BaseApplicationData):
     """Expected to be sent by the form on the site."""
 

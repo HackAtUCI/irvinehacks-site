@@ -9,7 +9,7 @@ from pydantic import BaseModel, EmailStr
 from auth import user_identity
 from auth.authorization import require_accepted_applicant
 from auth.user_identity import User, require_user_identity, use_user_identity
-from models.ApplicationData import ProcessedApplicationData, RawApplicationData
+from models.ApplicationData import RawVolunteerData, ProcessedVolunteerData
 from models.user_record import Applicant, BareApplicant, Role, Status
 from services import docusign_handler, mongodb_handler
 from services.docusign_handler import WebhookPayload
@@ -72,9 +72,10 @@ async def apply(
     user: Annotated[User, Depends(require_user_identity)],
     # media type should be automatically detected but seems like a bug as of now
     raw_application_data: Annotated[
-        RawApplicationData, Form(media_type="multipart/form-data")
+        RawVolunteerData, Form(media_type="multipart/form-data")
     ],
 ) -> str:
+    log.info("hiiiii")
     if raw_application_data.application_type not in Role.__members__:
         raise HTTPException(
             status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -83,6 +84,8 @@ async def apply(
 
     # Check if current datetime is past application deadline
     now = datetime.now(timezone.utc)
+
+    log.info("hiiiii")
 
     if _is_past_deadline(now):
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Applications have closed.")
@@ -102,6 +105,8 @@ async def apply(
 
     raw_app_data_dump = raw_application_data.model_dump()
 
+    log.info(raw_app_data_dump)
+
     for field in ["pronouns", "ethnicity", "school", "major"]:
         if raw_app_data_dump[field] == "other":
             raise HTTPException(
@@ -109,7 +114,7 @@ async def apply(
                 "Please enable JavaScript on your browser.",
             )
 
-    resume = raw_application_data.resume
+    resume = None
     if resume is not None and resume.size and resume.size > 0:
         try:
             resume_url = await resume_handler.upload_resume(
@@ -131,7 +136,7 @@ async def apply(
     else:
         resume_url = None
 
-    processed_application_data = ProcessedApplicationData(
+    processed_application_data = ProcessedVolunteerData(
         **raw_app_data_dump,
         resume_url=resume_url,
         submission_time=now,
@@ -157,13 +162,13 @@ async def apply(
         log.error("Could not insert applicant %s to MongoDB.", user.uid)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    try:
-        await email_handler.send_application_confirmation_email(
-            user.email, applicant, Role[raw_application_data.application_type]
-        )
-    except RuntimeError:
-        log.error("Could not send confirmation email with SendGrid to %s.", user.uid)
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+    # try:
+    #     await email_handler.send_application_confirmation_email(
+    #         user.email, applicant, Role[raw_application_data.application_type]
+    #     )
+    # except RuntimeError:
+    #     log.error("Could not send confirmation email with SendGrid to %s.", user.uid)
+    #     raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     # TODO: handle inconsistent results if one service fails
 

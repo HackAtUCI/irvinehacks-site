@@ -46,10 +46,8 @@ export default function BaseForm({ children }: PropsWithChildren) {
 
 			formData.delete(otherField);
 
-			const entriesWithoutOther = Array.from(
-				formData
-					.entries()
-					.filter(([key, value]) => key === field && value !== "other"),
+			const entriesWithoutOther = Array.from(formData.entries()).filter(
+				([key, value]) => key === field && value !== "other",
 			);
 
 			formData.delete(field);
@@ -59,6 +57,9 @@ export default function BaseForm({ children }: PropsWithChildren) {
 
 			if (otherFieldValue) formData.append(field, otherFieldValue);
 		}
+
+		const entries = Array.from(formData.entries());
+		for (const e of entries) console.log(e);
 
 		try {
 			const res = await axios.post(APPLY_PATH, formData);

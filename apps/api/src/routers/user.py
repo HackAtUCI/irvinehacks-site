@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from logging import getLogger
-from typing import Annotated, Union
+from typing import Annotated, Type, Union
 
 from fastapi import APIRouter, Depends, Form, Header, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
@@ -73,8 +73,8 @@ async def me(
 async def apply_flow(
     user: User,
     raw_application_data: Union[RawApplicationData],
-    processed_application_type: Union[RawApplicationData],
-):
+    processed_application_type: Union[Type[ProcessedApplicationData]],
+) -> str:
     if raw_application_data.application_type not in Role.__members__:
         raise HTTPException(
             status.HTTP_422_UNPROCESSABLE_ENTITY,

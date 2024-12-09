@@ -46,14 +46,13 @@ export default function BaseForm({ children }: PropsWithChildren) {
 
 			formData.delete(otherField);
 
-			const entriesWithoutOther = Array.from(formData.entries()).filter(
-				([key, value]) => key === field && value !== "other",
-			);
+			const valuesWithoutOther = formData
+				.getAll(field)
+				.filter((value) => value !== "other");
 
 			formData.delete(field);
 
-			for (const [key, value] of entriesWithoutOther)
-				formData.append(key, value);
+			for (const value of valuesWithoutOther) formData.append(field, value);
 
 			if (otherFieldValue) formData.append(field, otherFieldValue);
 		}

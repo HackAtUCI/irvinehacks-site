@@ -32,7 +32,7 @@ export default function MentorForm() {
 			/>
 			<ProfileInformation />
 			<Textfield
-				name="other_questions"
+				name="_other_questions"
 				labelText="Questions/comments/concerns?"
 				containerClass="flex flex-col w-11/12"
 				isRequired={false}

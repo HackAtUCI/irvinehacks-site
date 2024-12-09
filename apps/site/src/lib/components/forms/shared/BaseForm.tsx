@@ -57,9 +57,6 @@ export default function BaseForm({ children }: PropsWithChildren) {
 			if (otherFieldValue) formData.append(field, otherFieldValue);
 		}
 
-		const entries = Array.from(formData.entries());
-		for (const e of entries) console.log(e);
-
 		try {
 			const res = await axios.post(APPLY_PATH, formData);
 			if (res.status === 201) {

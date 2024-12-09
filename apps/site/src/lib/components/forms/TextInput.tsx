@@ -2,9 +2,7 @@ import RequiredAsterisk from "./RequiredAsterisk";
 
 interface TextProps {
 	name: string;
-	labelClass: string;
 	labelText: string;
-	inputClass: string;
 	containerClass: string;
 	type: string;
 	placeholder: string;
@@ -13,9 +11,7 @@ interface TextProps {
 
 export default function TextInput({
 	name,
-	labelClass,
 	labelText,
-	inputClass,
 	containerClass,
 	placeholder,
 	type,
@@ -23,11 +19,11 @@ export default function TextInput({
 }: TextProps) {
 	return (
 		<div className={containerClass}>
-			<label className={labelClass} htmlFor={name}>
+			<label className="text-lg mb-2" htmlFor={name}>
 				{`${labelText} `} {isRequired && <RequiredAsterisk />}
 			</label>
 			<input
-				className={inputClass}
+				className="bg-[#e1e1e1] text-[var(--color-black)] text-lg h-10 p-1.5 rounded-md"
 				type={type}
 				name={name}
 				id={name}

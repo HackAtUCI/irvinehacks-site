@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from pydantic import HttpUrl
 
 from auth.user_identity import NativeUser, UserTestClient
-from models.ApplicationData import ProcessedApplicationData
+from models.ApplicationData import ProcessedHackerApplicationData
 from models.user_record import Applicant, Status, Role
 from routers import user
 from services.mongodb_handler import Collection
@@ -60,7 +60,7 @@ SAMPLE_RESUME_URL = HttpUrl("https://drive.google.com/file/d/...")
 SAMPLE_SUBMISSION_TIME = datetime(2024, 1, 12, 8, 1, 21, tzinfo=timezone.utc)
 SAMPLE_VERDICT_TIME = None
 
-EXPECTED_APPLICATION_DATA = ProcessedApplicationData(
+EXPECTED_APPLICATION_DATA = ProcessedHackerApplicationData(
     **SAMPLE_APPLICATION,  # type: ignore[arg-type]
     resume_url=SAMPLE_RESUME_URL,
     submission_time=SAMPLE_SUBMISSION_TIME,
@@ -68,7 +68,7 @@ EXPECTED_APPLICATION_DATA = ProcessedApplicationData(
 )
 assert EXPECTED_APPLICATION_DATA.linkedin is None
 
-EXPECTED_APPLICATION_DATA_WITHOUT_RESUME = ProcessedApplicationData(
+EXPECTED_APPLICATION_DATA_WITHOUT_RESUME = ProcessedHackerApplicationData(
     **SAMPLE_APPLICATION,  # type: ignore[arg-type]
     resume_url=None,
     submission_time=SAMPLE_SUBMISSION_TIME,

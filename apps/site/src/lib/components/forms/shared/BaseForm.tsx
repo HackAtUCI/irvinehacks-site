@@ -10,7 +10,12 @@ import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
 const APPLY_PATH = "/api/user/apply";
 const FIELDS_WITH_OTHER = ["pronouns", "ethnicity", "school", "major"];
 
-export default function BaseForm({ children }: PropsWithChildren) {
+export default function BaseForm({
+	applicationType,
+	children,
+}: {
+	applicationType: string;
+} & PropsWithChildren) {
 	const [submitting, setSubmitting] = useState(false);
 	const [sessionExpired, setSessionExpired] = useState(false);
 
@@ -41,6 +46,9 @@ export default function BaseForm({ children }: PropsWithChildren) {
 				formData.delete(otherField);
 			}
 		}
+
+		// attach application type to formData
+		formData.append("application_type", applicationType);
 
 		try {
 			const res = await axios.post(APPLY_PATH, formData);

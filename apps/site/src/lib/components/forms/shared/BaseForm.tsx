@@ -41,7 +41,7 @@ export default function BaseForm({ children }: PropsWithChildren) {
 
 		// Use other values when selected
 		for (const field of FIELDS_WITH_OTHER) {
-			const otherField = `other_${field}`;
+			const otherField = `_other_${field}`;
 			const otherFieldValue = formData.get(otherField);
 
 			formData.delete(otherField);

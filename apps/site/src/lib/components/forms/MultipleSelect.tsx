@@ -83,7 +83,7 @@ export default function MultipleSelect({
 								</label>
 								<OtherInput
 									isChecked={isOtherChecked}
-									name={`other_${name}`}
+									name={`_other_${name}`}
 									ref={otherRef}
 								/>
 							</div>

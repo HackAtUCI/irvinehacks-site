@@ -3,6 +3,7 @@ from typing import Annotated
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Cookie, Depends, Form, HTTPException, status
+from fastapi.datastructures import URL
 from fastapi.responses import RedirectResponse
 from pydantic import EmailStr
 
@@ -33,7 +34,7 @@ def guest_email(email: Annotated[EmailStr, Form()]) -> EmailStr:
 
 @router.post("/login")
 async def guest_login(
-    email: Annotated[EmailStr, Depends(guest_email)]
+    email: Annotated[EmailStr, Depends(guest_email)], return_to: str = "/portal"
 ) -> RedirectResponse:
     """Generate login passphrase and set cookie with confirmation token.
     The initiation will send an email with the passphrase."""
@@ -45,8 +46,10 @@ async def guest_login(
 
     # Redirect to guest login page on client
     # which displays a message to check email and enter passphrase
-    query = urlencode({"email": email})
-    response = RedirectResponse(f"/guest-login?{query}", status.HTTP_303_SEE_OTHER)
+    query = urlencode({"email": email, "return_to": return_to})
+    response = RedirectResponse(
+        URL(path="/guest-login", query=query), status.HTTP_303_SEE_OTHER
+    )
 
     if not confirmation:
         return response

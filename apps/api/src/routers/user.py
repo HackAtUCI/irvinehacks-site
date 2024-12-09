@@ -75,12 +75,6 @@ async def _apply_flow(
     user: User,
     raw_application_data: Union[RawHackerApplicationData, RawMentorApplicationData],
 ) -> str:
-    if raw_application_data.application_type not in Role.__members__:
-        raise HTTPException(
-            status.HTTP_422_UNPROCESSABLE_ENTITY,
-            "Invalid application type.",
-        )
-
     # Check if current datetime is past application deadline
     now = datetime.now(timezone.utc)
 

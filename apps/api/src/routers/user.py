@@ -126,7 +126,7 @@ async def _apply_flow(
     else:
         resume_url = None
 
-    processed_application_data: ProcessedApplicationDataUnion = {
+    processed_application_data = {
         **raw_app_data_dump,
         "resume_url": resume_url,
         "submission_time": now,

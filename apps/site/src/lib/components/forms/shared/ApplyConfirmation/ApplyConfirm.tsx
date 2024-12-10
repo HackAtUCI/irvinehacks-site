@@ -4,11 +4,13 @@ import ConfirmationDetails from "./ConfirmationDetails";
 interface ApplyConfirmProps {
 	applicationURL: string;
 	isHacker: boolean;
+	role: "Hacker" | "Mentor" | "Volunteer";
 }
 
 export default async function ApplyConfirm({
 	applicationURL,
 	isHacker,
+	role,
 }: ApplyConfirmProps) {
 	const identity = await getUserIdentity();
 	const roleText = isHacker
@@ -18,6 +20,7 @@ export default async function ApplyConfirm({
 		<div className="flex items-center py-16 px-10 min-w-screen min-h-screen">
 			<ConfirmationDetails
 				applicationURL={applicationURL}
+				role={role}
 				roleText={roleText}
 				isLoggedIn={identity.uid !== null}
 			/>

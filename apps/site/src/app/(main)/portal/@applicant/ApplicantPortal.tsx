@@ -39,6 +39,8 @@ async function Portal({
 			searchParams.return_to !== "/portal"
 		) {
 			redirect(searchParams.return_to);
+		} else {
+			redirect("/");
 		}
 	}
 

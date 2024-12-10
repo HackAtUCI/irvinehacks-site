@@ -1,6 +1,5 @@
 from fastapi import APIRouter
 from fastapi.responses import RedirectResponse
-from typing import Optional
 
 from auth import user_identity
 from auth.user_identity import COOKIE_NAME, NativeUser

@@ -32,7 +32,7 @@ export default async function ConfirmationDetails({
 				href={
 					isLoggedIn
 						? `${continueHREF}?prefaceAccepted=true`
-						: `/login?return_to=${continueHREF}`
+						: `/login?return_to=%2F${continueHREF.substring(1)}`
 				}
 				isLightVersion
 			/>

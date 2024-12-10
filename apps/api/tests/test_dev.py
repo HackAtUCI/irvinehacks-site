@@ -11,7 +11,7 @@ def test_impersonate() -> None:
     res = client.get("/impersonate/stuffed", follow_redirects=False)
 
     assert res.status_code == 303
-    assert res.headers["location"] == "/portal"
+    assert res.headers["location"] == "/portal?return_to=/portal"
     set_cookie = res.headers["Set-Cookie"].split(";")[0]
     cookie_name, cookie_value = set_cookie.split("=")
     assert cookie_name == "irvinehacks_auth"
@@ -24,10 +24,10 @@ def test_impersonate() -> None:
 
 def test_impersonate_with_application_type() -> None:
     """Test the dev token can provide a valid user identity."""
-    res = client.get("/impersonate/stuffed?application=apply", follow_redirects=False)
+    res = client.get("/impersonate/stuffed?return_to=/apply", follow_redirects=False)
 
     assert res.status_code == 303
-    assert res.headers["location"] == "/portal?application=apply"
+    assert res.headers["location"] == "/portal?return_to=/apply"
     set_cookie = res.headers["Set-Cookie"].split(";")[0]
     cookie_name, cookie_value = set_cookie.split("=")
     assert cookie_name == "irvinehacks_auth"

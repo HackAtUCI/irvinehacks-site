@@ -102,13 +102,13 @@ def test_successful_guest_verification_provides_identity(
     )
 
     res = client.post(
-        "/verify",
+        "/verify?return_to=%2FJPL",
         data={"email": SAMPLE_EMAIL, "passphrase": SAMPLE_PASSPHRASE},
         cookies={"guest_confirmation": "some-confirmation"},
     )
-
     assert res.status_code == 303
     assert res.headers["Set-Cookie"].startswith("irvinehacks_auth=")
+    assert res.headers["location"] == "/portal?return_to=%2FJPL"
 
     mock_remove_guest_key.assert_awaited_once_with("edu.caltech.beaver")
 
@@ -124,7 +124,7 @@ def test_invalid_guest_verification_is_unauthorized(
 
     res = client.post(
         "/verify",
-        data={"email": SAMPLE_EMAIL, "passphrase": "bad-passphrase"},
+        data={"email": SAMPLE_EMAIL, "passphrase": "bad-passphrase", "return_to": "%2FJPL"},
         cookies={"guest_confirmation": "not-a-confirmation"},
     )
 

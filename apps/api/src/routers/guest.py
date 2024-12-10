@@ -65,6 +65,7 @@ async def verify_guest(
     email: Annotated[EmailStr, Depends(guest_email)],
     passphrase: Annotated[str, Form()],
     guest_confirmation: Annotated[str, Cookie()],
+    return_to: str = "/portal",
 ) -> RedirectResponse:
     """Verify guest token"""
     if not await guest_auth.verify_guest_credentials(
@@ -75,6 +76,9 @@ async def verify_guest(
     log.info("%s authenticated as guest.", email)
     guest = guest_auth.acquire_guest_identity(email)
 
-    res = RedirectResponse("/portal", status_code=status.HTTP_303_SEE_OTHER)
+    query = urlencode({"return_to": return_to})
+    res = RedirectResponse(
+        URL(path="/portal", query=query), status_code=status.HTTP_303_SEE_OTHER
+    )
     user_identity.issue_user_identity(guest, res)
     return res

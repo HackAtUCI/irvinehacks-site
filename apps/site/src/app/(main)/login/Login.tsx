@@ -6,16 +6,15 @@ async function Login({
 	searchParams,
 }: {
 	searchParams?: {
-		application?: string;
+		return_to?: string;
 	};
 }) {
-	console.log(searchParams);
 	const identity = await getUserIdentity();
 	if (identity.uid !== null) {
-		if (searchParams === undefined || searchParams.application === undefined) {
+		if (searchParams?.return_to === undefined) {
 			redirect("/portal");
 		}
-		redirect(`/portal?application=${searchParams.application}`);
+		redirect(`/portal?return_to=${searchParams.return_to}`);
 	}
 
 	return (
@@ -23,7 +22,7 @@ async function Login({
 			<h1 className="font-display text-3xl md:text-5xl mb-20">
 				Login to Portal
 			</h1>
-			<LoginForm />
+			<LoginForm return_to={searchParams?.return_to} />
 		</div>
 	);
 }

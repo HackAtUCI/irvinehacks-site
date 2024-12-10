@@ -25,17 +25,21 @@ async function Portal({
 	searchParams,
 }: {
 	searchParams?: {
-		application?: string;
+		return_to?: string;
 	};
 }) {
 	const identity = await getUserIdentity();
 	const status = identity.status;
 
 	if (status === null) {
-		if (searchParams === undefined || searchParams.application === undefined) {
+		if (searchParams?.return_to === undefined) {
 			redirect("/");
+		} else if (
+			searchParams?.return_to !== undefined &&
+			searchParams.return_to !== "/portal"
+		) {
+			redirect(searchParams.return_to);
 		}
-		redirect(`/${searchParams.application}`);
 	}
 
 	const submittedWaiver =

@@ -57,6 +57,7 @@ class BaseMentorApplicationData(BaseModel):
     experienced_technologies: list[str] = []
     pronouns: list[str] = []
 
+    ethnicity: str
     school: str
     major: str
     education_level: str

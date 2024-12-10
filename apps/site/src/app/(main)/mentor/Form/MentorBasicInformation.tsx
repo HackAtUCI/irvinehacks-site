@@ -1,3 +1,4 @@
+import DropdownSelect from "@/lib/components/forms/DropdownSelect";
 import MultipleSelect from "@/lib/components/forms/MultipleSelect";
 import TextInput from "@/lib/components/forms/TextInput";
 
@@ -9,6 +10,17 @@ const pronouns = [
 	{ value: "other", text: "Other:" },
 ];
 
+const ethnicity = [
+	{ value: "American", text: "American Indian or Alaskan" },
+	{ value: "Asian", text: "Asian or Pacific Islander" },
+	{ value: "Black", text: "Black or African American" },
+	{ value: "Hispanic", text: "Hispanic" },
+	{ value: "White", text: "White or Caucasian" },
+	{ value: "Two-or-more", text: "Two or more races" },
+	{ value: "Prefer not to answer", text: "Prefer not to answer" },
+	{ value: "other", text: "Other:" },
+];
+
 export default function MentorBasicInformation() {
 	return (
 		<div className="flex flex-col gap-5 w-11/12">
@@ -17,7 +29,7 @@ export default function MentorBasicInformation() {
 				<TextInput
 					name="first_name"
 					labelText="First Name"
-					containerClass="flex flex-col w-6/12 max-[1000px]:w-full"
+					containerClass="flex flex-col w-1/2 max-[1000px]:w-full"
 					isRequired={true}
 					type="text"
 					placeholder="Peter"
@@ -25,7 +37,7 @@ export default function MentorBasicInformation() {
 				<TextInput
 					name="last_name"
 					labelText="Last Name"
-					containerClass="flex flex-col w-6/12 max-[1000px]:w-full"
+					containerClass="flex flex-col w-1/2 max-[1000px]:w-full"
 					isRequired={true}
 					type="text"
 					placeholder="Anteater"
@@ -36,9 +48,15 @@ export default function MentorBasicInformation() {
 				<MultipleSelect
 					name="pronouns"
 					labelText="Preferred Pronouns"
-					containerClass="flex flex-col w-full"
+					containerClass="flex flex-col w-1/2"
 					inputType="checkbox"
 					values={pronouns}
+				/>
+				<DropdownSelect
+					name="ethnicity"
+					labelText="Race / Ethnicity"
+					containerClass="flex flex-col w-1/2 max-[1000px]:w-full"
+					values={ethnicity}
 				/>
 			</div>
 		</div>

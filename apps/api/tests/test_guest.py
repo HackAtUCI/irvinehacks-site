@@ -123,11 +123,10 @@ def test_invalid_guest_verification_is_unauthorized(
     mock_get_existing_key.return_value = "some-existing-key"
 
     res = client.post(
-        "/verify",
+        "/verify?return_to=%2FJPL",
         data={
             "email": SAMPLE_EMAIL,
             "passphrase": "bad-passphrase",
-            "return_to": "%2FJPL",
         },
         cookies={"guest_confirmation": "not-a-confirmation"},
     )
@@ -135,3 +134,27 @@ def test_invalid_guest_verification_is_unauthorized(
     assert res.status_code == 401
 
     mock_remove_guest_key.assert_not_awaited()
+
+
+@patch("auth.guest_auth._remove_guest_key", autospec=True)
+@patch("auth.user_identity.issue_user_identity", autospec=True)
+@patch("auth.guest_auth._get_existing_key", autospec=True)
+def test_unsuccessful_guest_verification_redirect(
+    mock_get_existing_key: AsyncMock,
+    mock_issue_user_identity: AsyncMock,
+    mock_remove_guest_key: AsyncMock,
+) -> None:
+    """Test a guest successfully verifying guest credentials."""
+    mock_get_existing_key.return_value = guest_auth._generate_key(
+        "some-confirmation", SAMPLE_PASSPHRASE
+    )
+
+    res = client.post(
+        "/verify?return_to=MIT",
+        data={"email": SAMPLE_EMAIL, "passphrase": SAMPLE_PASSPHRASE},
+        cookies={"guest_confirmation": "some-confirmation"},
+    )
+
+    assert res.status_code == 400
+    mock_issue_user_identity.assert_not_called()
+    mock_remove_guest_key.assert_awaited_once_with("edu.caltech.beaver")

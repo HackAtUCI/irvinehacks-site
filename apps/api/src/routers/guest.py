@@ -65,7 +65,7 @@ async def verify_guest(
     email: Annotated[EmailStr, Depends(guest_email)],
     passphrase: Annotated[str, Form()],
     guest_confirmation: Annotated[str, Cookie()],
-    return_to: str = "/portal",
+    return_to: str,
 ) -> RedirectResponse:
     """Verify guest token"""
     if not await guest_auth.verify_guest_credentials(
@@ -75,6 +75,11 @@ async def verify_guest(
 
     log.info("%s authenticated as guest.", email)
     guest = guest_auth.acquire_guest_identity(email)
+
+    if not return_to.startswith("/"):
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST, "return_to is not from the same origin"
+        )
 
     res = RedirectResponse(return_to, status_code=status.HTTP_303_SEE_OTHER)
     user_identity.issue_user_identity(guest, res)

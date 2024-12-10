@@ -8,7 +8,7 @@ router = APIRouter()
 
 
 @router.get("/impersonate/{ucinetid}")
-async def impersonate(ucinetid: str, return_to: str = "/portal") -> RedirectResponse:
+async def impersonate(ucinetid: str) -> RedirectResponse:
     """Simulate a user identity during local development (does not require https)."""
     user = NativeUser(
         ucinetid=ucinetid,
@@ -17,7 +17,7 @@ async def impersonate(ucinetid: str, return_to: str = "/portal") -> RedirectResp
         affiliations=[],
     )
 
-    res = RedirectResponse(f"/portal?return_to={return_to}", status_code=303)
+    res = RedirectResponse("/portal", status_code=303)
 
     jwt_token = user_identity._generate_jwt_token(user)
     res.set_cookie(COOKIE_NAME, jwt_token, max_age=4000, httponly=True)

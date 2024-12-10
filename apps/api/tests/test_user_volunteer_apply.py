@@ -9,7 +9,6 @@ from models.ApplicationData import ProcessedVolunteerData
 from models.user_record import Applicant, Status, Role
 from routers import user
 from services.mongodb_handler import Collection
-from utils import resume_handler
 
 # Tests will break again next year, tech should notice and fix :P
 TEST_DEADLINE = datetime(2025, 10, 1, 8, 0, 0, tzinfo=timezone.utc)
@@ -67,8 +66,6 @@ EXPECTED_USER = Applicant(
     application_data=EXPECTED_APPLICATION_DATA,
     status=Status.PENDING_REVIEW,
 )
-
-resume_handler.RESUMES_FOLDER_ID = "RESUMES_FOLDER_ID"
 
 app = FastAPI()
 app.include_router(user.router)

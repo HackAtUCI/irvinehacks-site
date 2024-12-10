@@ -99,7 +99,14 @@ async def _to_processed_application_data_hackers_mentors(
     if resume is not None and resume.size and resume.size > 0:
         try:
             resume_url = await resume_handler.upload_resume(
-                raw_application_data, resume
+                TypeAdapter(
+                    Union[
+                        RawHackerApplicationData,
+                        RawMentorApplicationData,
+                        RawVolunteerApplicationData,
+                    ]
+                ).validate_python(raw_application_data),
+                resume,
             )
         except TypeError:
             log.info("%s provided invalid resume type.", user)

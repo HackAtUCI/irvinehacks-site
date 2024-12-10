@@ -3,25 +3,42 @@ import Button from "@/lib/components/Button/Button";
 interface ConfirmationDetailsProps {
 	isLoggedIn: boolean;
 	applicationURL: string;
+	appDescription?: string;
 	roleText: string;
 }
 
 export default async function ConfirmationDetails({
 	isLoggedIn,
 	applicationURL,
+	appDescription,
 	roleText,
 }: ConfirmationDetailsProps) {
 	return (
-		<div className="flex flex-col items-center gap-8 p-10 md:p-6 md:px-10 md:py-8 border-[2px] md:border-[5px] border-[var(--color-white)] text-[var(--color-white)] bg-[var(--color-black)]">
+		<div className="flex flex-col items-center gap-8 p-10 max-w-screen-lg md:p-6 md:px-10 md:py-8 border-[2px] md:border-[5px] border-[var(--color-white)] text-[var(--color-white)] bg-[var(--color-black)]">
 			<h1 className="text-5xl">Before Applying</h1>
+			{appDescription && (
+				<>
+					<div>
+						{appDescription.split("\n").map((line, index) => (
+							<p key={index} className="text-lg m-0 w-full">
+								{line}
+							</p>
+						))}
+					</div>
+					<p className="text-lg m-0 w-full">
+						<span className="text-[#FF2222]">IMPORTANT NOTE:</span> Please only
+						apply if you are sure about your availability. In addition, there
+						will be no travel reimbursements for this role.
+					</p>
+
+					<hr className="mt-5 w-full h-0.5 bg-[#432810]" />
+				</>
+			)}
 			<p className="text-lg">
 				By submitting an application for IrvineHacks 2025, I understand that
 				IrvineHacks will take place in person during the day from January 24 to
 				26, and that IrvineHacks will not be providing transportation or
-				overnight accommodations. {roleText} Lastly, I acknowledge that I am
-				currently a student enrolled in an accredited high school, college, or
-				university in the United States and will be over the age of 18 by
-				January 24th, 2025.
+				overnight accommodations. {roleText}
 			</p>
 			<strong className="text-lg text-[#FF2222]">
 				Applications are due on January 10th, 2025 at 11:59PM PST.

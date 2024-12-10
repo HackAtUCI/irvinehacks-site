@@ -4,7 +4,7 @@ from typing import Annotated, Union
 
 from fastapi import APIRouter, Depends, Form, Header, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, TypeAdapter
 
 from auth import user_identity
 from auth.authorization import require_accepted_applicant
@@ -126,11 +126,16 @@ async def _apply_flow(
     else:
         resume_url = None
 
-    processed_application_data: ProcessedApplicationDataUnion = {
-        **raw_app_data_dump,
-        "resume_url": resume_url,
-        "submission_time": now,
-    }
+    ProcessedApplicationDataUnionAdapter: TypeAdapter[ProcessedApplicationDataUnion] = (
+        TypeAdapter(ProcessedApplicationDataUnion)
+    )
+    processed_application_data = ProcessedApplicationDataUnionAdapter.validate_python(
+        {
+            **raw_app_data_dump,
+            "resume_url": resume_url,
+            "submission_time": now,
+        }
+    )
 
     applicant = Applicant(
         uid=user.uid,

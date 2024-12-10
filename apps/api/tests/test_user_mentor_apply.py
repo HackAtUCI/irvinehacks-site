@@ -261,7 +261,7 @@ def test_mentor_application_data_with_other_throws_422(
 ) -> None:
     mock_mongodb_handler_retrieve_one.return_value = None
     contains_other = SAMPLE_APPLICATION.copy()
-    contains_other["pronouns"].append("other")
+    contains_other["pronouns"].append("other")  # type: ignore[attr-defined]
     res = client.post("/mentor", data=contains_other, files=SAMPLE_FILES)
     assert res.status_code == 422
 

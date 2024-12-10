@@ -73,6 +73,5 @@ class BareApplicant(UserRecord):
 class Applicant(BareApplicant):
     """Applicant with application data."""
 
-    # Note validators not run on default values
     roles: RoleWithApplicant
     application_data: ProcessedApplicationDataUnion

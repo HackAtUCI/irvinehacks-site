@@ -16,7 +16,7 @@ const FIELDS_WITH_OTHER = [
 ];
 
 interface BaseFormProps {
-	applicationType: "HACKER" | "MENTOR" | "VOLUNTEER";
+	applicationType: "Hacker" | "Mentor" | "Volunteer";
 	applyPath: string;
 }
 

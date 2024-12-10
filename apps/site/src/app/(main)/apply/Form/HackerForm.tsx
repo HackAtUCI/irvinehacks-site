@@ -8,7 +8,7 @@ import ProfileInformation from "./ProfileInformation";
 
 export default function HackerForm() {
 	return (
-		<BaseForm applicationType="HACKER" applyPath="/api/user/apply">
+		<BaseForm applicationType="Hacker" applyPath="/api/user/apply">
 			<BasicInformation />
 			<SchoolInformation />
 			<ProfileInformation />

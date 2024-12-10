@@ -98,7 +98,7 @@ async def _apply_flow(
 
     for field in ["pronouns", "ethnicity", "school", "major"]:
         value = raw_app_data_dump.get(field)
-        if any([value == "other", isinstance(value, list) and "other" in value]):
+        if value == "other" or (isinstance(value, list) and "other" in value):
             raise HTTPException(
                 status.HTTP_422_UNPROCESSABLE_ENTITY,
                 "Please enable JavaScript on your browser.",
@@ -141,7 +141,7 @@ async def _apply_flow(
         uid=user.uid,
         first_name=raw_application_data.first_name,
         last_name=raw_application_data.last_name,
-        roles=(Role.APPLICANT, Role[raw_application_data.application_type]),
+        roles=(Role.APPLICANT, raw_application_data.application_type),  # type: ignore
         application_data=processed_application_data,
         status=Status.PENDING_REVIEW,
     )
@@ -160,7 +160,7 @@ async def _apply_flow(
 
     try:
         await email_handler.send_application_confirmation_email(
-            user.email, applicant, Role[raw_application_data.application_type]
+            user.email, applicant, raw_application_data.application_type
         )
     except RuntimeError:
         log.error("Could not send confirmation email with SendGrid to %s.", user.uid)

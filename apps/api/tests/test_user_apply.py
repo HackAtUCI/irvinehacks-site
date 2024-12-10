@@ -39,7 +39,7 @@ SAMPLE_APPLICATION = {
     "portfolio": "https://github.com",
     "frq_change": "I am pkfire",
     "frq_video_game": "I am pkfire",
-    "application_type": "HACKER",
+    "application_type": "Hacker",
 }
 
 

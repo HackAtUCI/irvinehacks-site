@@ -43,7 +43,7 @@ SAMPLE_APPLICATION = {
     "mentor_team_help_saq3": "",
     "mentor_team_help_saq4": "",
     "other_questions": "",
-    "application_type": "MENTOR",
+    "application_type": "Mentor",
 }
 
 

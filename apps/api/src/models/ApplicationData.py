@@ -47,15 +47,15 @@ class BaseApplicationData(BaseModel):
     is_first_hackathon: bool
     linkedin: NullableHttpUrl = None
     portfolio: NullableHttpUrl = None
-    frq_change: Union[str, None] = Field(None, max_length=2048)
+    frq_change: str = Field(max_length=2048)
     frq_video_game: str = Field(max_length=2048)
 
 
 class BaseMentorApplicationData(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, str_max_length=254)
 
-    experienced_technologies: Optional[List[str]] = []
-    pronouns: Optional[List[str]] = []
+    experienced_technologies: List[str] = []
+    pronouns: List[str] = []
 
     school: str
     major: str
@@ -78,7 +78,7 @@ class RawHackerApplicationData(BaseApplicationData):
     first_name: str
     last_name: str
     resume: Union[UploadFile, None] = None
-    application_type: Literal["HACKER"]
+    application_type: Literal["Hacker"]
 
 
 class RawMentorApplicationData(BaseMentorApplicationData):
@@ -86,8 +86,8 @@ class RawMentorApplicationData(BaseMentorApplicationData):
 
     first_name: str
     last_name: str
-    resume: Union[UploadFile, None] = None
-    application_type: Literal["MENTOR"]
+    resume: UploadFile
+    application_type: Literal["Mentor"]
 
 
 class ProcessedHackerApplicationData(BaseApplicationData):

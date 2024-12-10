@@ -16,14 +16,14 @@ interface ApplicationFlowProps {
 		prefaceAccepted?: string;
 	};
 	applicationType: "Hacker" | "Mentor" | "Volunteer";
-	continueHREF: string;
+	applicationURL: "/apply" | "/mentor" | "/volunteer";
 	isHacker: boolean;
 }
 
 export default async function ApplicationFlow({
 	searchParams,
 	applicationType,
-	continueHREF,
+	applicationURL,
 	isHacker,
 	children,
 }: ApplicationFlowProps & PropsWithChildren) {
@@ -46,7 +46,7 @@ export default async function ApplicationFlow({
 			<div className="flex justify-center">{children}</div>
 		</>
 	) : (
-		<ApplyConfirm continueHREF={continueHREF} isHacker={isHacker} />
+		<ApplyConfirm applicationURL={applicationURL} isHacker={isHacker} />
 	);
 	return (
 		<div className="flex flex-col items-center gap-10 my-32 min-h-[calc(100vh-8rem)]">

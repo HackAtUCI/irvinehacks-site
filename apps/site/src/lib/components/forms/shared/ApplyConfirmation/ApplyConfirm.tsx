@@ -1,15 +1,15 @@
 import getUserIdentity from "@/lib/utils/getUserIdentity";
 import ConfirmationDetails from "./ConfirmationDetails";
 
-interface ApplyConfirmInterface {
-	continueHREF: string;
+interface ApplyConfirmProps {
+	applicationURL: string;
 	isHacker: boolean;
 }
 
 export default async function ApplyConfirm({
-	continueHREF,
+	applicationURL,
 	isHacker,
-}: ApplyConfirmInterface) {
+}: ApplyConfirmProps) {
 	const identity = await getUserIdentity();
 	const roleText = isHacker
 		? "In addition, I understand that I must check in at certain times on all three event days in order to be eligible to win prizes."
@@ -17,7 +17,7 @@ export default async function ApplyConfirm({
 	return (
 		<div className="flex items-center py-16 px-10 min-w-screen min-h-screen">
 			<ConfirmationDetails
-				continueHREF={continueHREF}
+				applicationURL={applicationURL}
 				roleText={roleText}
 				isLoggedIn={identity.uid !== null}
 			/>

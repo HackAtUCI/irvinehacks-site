@@ -2,13 +2,13 @@ import Button from "@/lib/components/Button/Button";
 
 interface ConfirmationDetailsProps {
 	isLoggedIn: boolean;
-	continueHREF: string;
+	applicationURL: string;
 	roleText: string;
 }
 
 export default async function ConfirmationDetails({
 	isLoggedIn,
-	continueHREF,
+	applicationURL,
 	roleText,
 }: ConfirmationDetailsProps) {
 	return (
@@ -29,7 +29,11 @@ export default async function ConfirmationDetails({
 			<Button
 				className="text-2xl"
 				text={isLoggedIn ? "Proceed to Application" : "Log in to Apply"}
-				href={isLoggedIn ? `${continueHREF}?prefaceAccepted=true` : "/login"}
+				href={
+					isLoggedIn
+						? `${applicationURL}?prefaceAccepted=true`
+						: `/login?${new URLSearchParams({ return_to: applicationURL })}`
+				}
 				isLightVersion
 			/>
 		</div>

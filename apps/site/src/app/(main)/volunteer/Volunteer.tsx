@@ -14,7 +14,7 @@ export default async function Volunteer({
 		<ApplicationFlow
 			searchParams={searchParams}
 			applicationType="Volunteer"
-			continueHREF="/volunteer"
+			applicationURL="/volunteer"
 			isHacker={false}
 		>
 			<VolunteerForm />

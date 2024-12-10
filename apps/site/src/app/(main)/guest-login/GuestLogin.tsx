@@ -3,9 +3,17 @@ import { redirect } from "next/navigation";
 import GuestLoginVerificationForm from "./components/GuestLoginVerificationForm";
 import getUserIdentity from "@/lib/utils/getUserIdentity";
 
-async function GuestLogin() {
+async function GuestLogin({
+	searchParams,
+}: {
+	searchParams?: {
+		return_to?: string;
+	};
+}) {
 	const identity = await getUserIdentity();
-	if (identity.uid !== null) redirect("/portal");
+	if (identity.uid !== null) {
+		redirect(searchParams?.return_to ?? "/portal");
+	}
 
 	return (
 		<div className="min-h-screen flex flex-col items-center justify-center">

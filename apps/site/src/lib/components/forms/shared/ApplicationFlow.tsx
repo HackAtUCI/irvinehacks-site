@@ -46,7 +46,7 @@ export default async function ApplicationFlow({
 			<div className="flex justify-center">{children}</div>
 		</>
 	) : (
-		<ApplyConfirm applicationURL={applicationURL} isHacker={isHacker} />
+		<ApplyConfirm applicationURL={applicationURL} isHacker={isHacker} role={applicationType} />
 	);
 	return (
 		<div className="flex flex-col items-center gap-10 my-32 min-h-[calc(100vh-8rem)]">

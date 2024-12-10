@@ -10,10 +10,9 @@ from auth import user_identity
 from auth.authorization import require_accepted_applicant
 from auth.user_identity import User, require_user_identity, use_user_identity
 from models.ApplicationData import (
-    ProcessedHackerApplicationData,
+    ProcessedApplicationDataUnion,
     RawHackerApplicationData,
     RawMentorApplicationData,
-    ProcessedMentorApplicationData,
 )
 from models.user_record import Applicant, BareApplicant, Role, Status
 from services import docusign_handler, mongodb_handler
@@ -72,17 +71,10 @@ async def me(
     return IdentityResponse(uid=user.uid, **user_record)
 
 
-async def apply_flow(
+async def _apply_flow(
     user: User,
     raw_application_data: Union[RawHackerApplicationData, RawMentorApplicationData],
 ) -> str:
-    print("apply_flow called")
-    if raw_application_data.application_type not in Role.__members__:
-        raise HTTPException(
-            status.HTTP_422_UNPROCESSABLE_ENTITY,
-            "Invalid application type.",
-        )
-
     # Check if current datetime is past application deadline
     now = datetime.now(timezone.utc)
 
@@ -105,7 +97,8 @@ async def apply_flow(
     raw_app_data_dump = raw_application_data.model_dump()
 
     for field in ["pronouns", "ethnicity", "school", "major"]:
-        if field in raw_app_data_dump and raw_app_data_dump[field] == "other":
+        value = raw_app_data_dump.get(field)
+        if any([value == "other", isinstance(value, list) and "other" in value]):
             raise HTTPException(
                 status.HTTP_422_UNPROCESSABLE_ENTITY,
                 "Please enable JavaScript on your browser.",
@@ -133,18 +126,17 @@ async def apply_flow(
     else:
         resume_url = None
 
-    ProcessedApplicationData: TypeAdapter[
-        Union[ProcessedHackerApplicationData, ProcessedMentorApplicationData]
-    ] = TypeAdapter(
-        Union[ProcessedHackerApplicationData, ProcessedMentorApplicationData]
+    ProcessedApplicationDataUnionAdapter: TypeAdapter[ProcessedApplicationDataUnion] = (
+        TypeAdapter(ProcessedApplicationDataUnion)
     )
-    processed_application_data = ProcessedApplicationData.validate_python(
+    processed_application_data = ProcessedApplicationDataUnionAdapter.validate_python(
         {
             **raw_app_data_dump,
             "resume_url": resume_url,
             "submission_time": now,
         }
     )
+
     applicant = Applicant(
         uid=user.uid,
         first_name=raw_application_data.first_name,
@@ -192,7 +184,7 @@ async def apply(
         Form(media_type="multipart/form-data"),
     ],
 ) -> str:
-    return await apply_flow(user, raw_application_data)
+    return await _apply_flow(user, raw_application_data)
 
 
 @router.post("/mentor", status_code=status.HTTP_201_CREATED)
@@ -204,7 +196,7 @@ async def mentor(
         Form(media_type="multipart/form-data"),
     ],
 ) -> str:
-    return await apply_flow(user, raw_application_data)
+    return await _apply_flow(user, raw_application_data)
 
 
 @router.get("/waiver")

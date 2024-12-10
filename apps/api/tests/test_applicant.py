@@ -1,6 +1,6 @@
 from test_user_apply import EXPECTED_APPLICATION_DATA
 
-from models.user_record import Applicant, Status
+from models.user_record import Applicant, Role, Status
 
 
 def test_key_uid_not_in_applicant_model_dump() -> None:
@@ -8,6 +8,7 @@ def test_key_uid_not_in_applicant_model_dump() -> None:
         uid="edu.uci.sder",
         first_name="Sam",
         last_name="Der",
+        roles=(Role.APPLICANT,),
         status=Status.ATTENDING,
         application_data=EXPECTED_APPLICATION_DATA,
     )

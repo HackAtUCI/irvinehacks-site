@@ -6,8 +6,7 @@ from typing_extensions import TypeAlias
 
 from models.ApplicationData import (
     Decision,
-    ProcessedHackerApplicationData,
-    ProcessedMentorApplicationData,
+    ProcessedApplicationDataUnion,
 )
 from services.mongodb_handler import BaseRecord
 
@@ -75,7 +74,5 @@ class Applicant(BareApplicant):
     """Applicant with application data."""
 
     # Note validators not run on default values
-    roles: RoleWithApplicant = (Role.APPLICANT,)
-    application_data: Union[
-        ProcessedHackerApplicationData, ProcessedMentorApplicationData
-    ]
+    roles: RoleWithApplicant
+    application_data: ProcessedApplicationDataUnion

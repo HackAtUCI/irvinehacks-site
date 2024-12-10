@@ -21,8 +21,8 @@ const ethnicity = [
 ];
 
 const yesNoOptions = [
-	{ value: "hack-yes", text: "Yes" },
-	{ value: "hack-no", text: "No" },
+	{ value: "Yes", text: "Yes" },
+	{ value: "No", text: "No" },
 ];
 
 export default function BasicInformation() {

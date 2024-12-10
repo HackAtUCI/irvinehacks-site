@@ -14,7 +14,7 @@ import styles from "./CharacterBox.module.scss";
 
 const ChooseCharacter = () => {
 	return (
-		<section className="flex flex-col justify-center my-14">
+		<section className="flex flex-col justify-center my-14" id="apply">
 			<h2 className="font-display text-5xl text-center mb-12">
 				Choose your Character
 			</h2>

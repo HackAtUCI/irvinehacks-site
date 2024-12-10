@@ -1,17 +1,10 @@
 from datetime import datetime, timezone
 from logging import getLogger
-from typing import Annotated, Union, Any
-import json
+from typing import Annotated, Union
+from urllib.parse import urlencode
 
-from fastapi import (
-    APIRouter,
-    Depends,
-    Form,
-    Header,
-    HTTPException,
-    Request,
-    status,
-)
+from fastapi import APIRouter, Depends, Form, Header, HTTPException, Request, status
+from fastapi.datastructures import URL
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, EmailStr, TypeAdapter
 
@@ -19,7 +12,7 @@ from auth import user_identity
 from auth.authorization import require_accepted_applicant
 from auth.user_identity import User, require_user_identity, use_user_identity
 from models.ApplicationData import (
-    ProcessedHackerApplicationData,
+    ProcessedApplicationDataUnion,
     RawHackerApplicationData,
     RawMentorApplicationData,
     RawVolunteerApplicationData,
@@ -50,12 +43,22 @@ def _is_past_deadline(now: datetime) -> bool:
 
 
 @router.post("/login")
-async def login(email: EmailStr = Form()) -> RedirectResponse:
+async def login(
+    email: EmailStr = Form(), return_to: str = "/portal"
+) -> RedirectResponse:
     log.info("%s requested to log in", email)
+    query = urlencode({"return_to": return_to})
+
     if user_identity.uci_email(email):
-        # redirect user to UCI SSO login endpoint, changing to GET method
-        return RedirectResponse("/api/saml/login", status.HTTP_303_SEE_OTHER)
-    return RedirectResponse("/api/guest/login", status.HTTP_307_TEMPORARY_REDIRECT)
+        # redirect user for UCI SSO, changing to GET method
+        return RedirectResponse(
+            URL(path="/api/saml/login", query=query), status.HTTP_303_SEE_OTHER
+        )
+
+    # Forward POST request to guest login
+    return RedirectResponse(
+        URL(path="/api/guest/login", query=query), status.HTTP_307_TEMPORARY_REDIRECT
+    )
 
 
 @router.get("/logout")
@@ -139,18 +142,12 @@ async def _to_processed_application_data_volunteers(
     }
 
 
-async def apply_flow(
+async def _apply_flow(
     user: User,
     raw_application_data: Union[
         RawHackerApplicationData, RawMentorApplicationData, RawVolunteerApplicationData
     ],
 ) -> str:
-    if raw_application_data.application_type not in Role.__members__:
-        raise HTTPException(
-            status.HTTP_422_UNPROCESSABLE_ENTITY,
-            "Invalid application type.",
-        )
-
     # Check if current datetime is past application deadline
     now = datetime.now(timezone.utc)
 
@@ -172,25 +169,44 @@ async def apply_flow(
 
     raw_app_data_dump = raw_application_data.model_dump()
 
-    for field in ["pronouns", "ethnicity", "school", "major"]:
-        if field in raw_app_data_dump and raw_app_data_dump[field] == "other":
+    for field in [
+        "pronouns",
+        "ethnicity",
+        "school",
+        "major",
+        "experienced_technologies",
+    ]:
+        value = raw_app_data_dump.get(field)
+        if value == "other" or (isinstance(value, list) and "other" in value):
             raise HTTPException(
                 status.HTTP_422_UNPROCESSABLE_ENTITY,
                 "Please enable JavaScript on your browser.",
             )
 
-    ProcessedApplicationData: TypeAdapter[
-        Union[
-            ProcessedHackerApplicationData,
-            ProcessedMentorApplicationData,
-            ProcessedVolunteerData,
-        ]
-    ] = TypeAdapter(
-        Union[
-            ProcessedHackerApplicationData,
-            ProcessedMentorApplicationData,
-            ProcessedVolunteerData,
-        ]
+    resume = raw_application_data.resume
+    if resume is not None and resume.size and resume.size > 0:
+        try:
+            resume_url = await resume_handler.upload_resume(
+                raw_application_data, resume
+            )
+        except TypeError:
+            log.info("%s provided invalid resume type.", user)
+            raise HTTPException(
+                status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, "Invalid resume file type"
+            )
+        except ValueError:
+            log.info("%s provided too large resume.", user)
+            raise HTTPException(
+                status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, "Resume upload is too large"
+            )
+        except RuntimeError as err:
+            log.error("During user %s apply, resume upload: %s", user.uid, err)
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+    else:
+        resume_url = None
+
+    ProcessedApplicationDataUnionAdapter: TypeAdapter[ProcessedApplicationDataUnion] = (
+        TypeAdapter(ProcessedApplicationDataUnion)
     )
 
     if (
@@ -206,7 +222,7 @@ async def apply_flow(
             )
         )
     elif raw_application_data.application_type == "VOLUNTEER":
-        processed_application_data = ProcessedApplicationData.validate_python(
+        processed_application_data = ProcessedApplicationDataUnionAdapter.validate_python(
             await _to_processed_application_data_volunteers(raw_app_data_dump, now)
         )
     else:
@@ -215,11 +231,12 @@ async def apply_flow(
             "Invalid application type.",
         )
 
+
     applicant = Applicant(
         uid=user.uid,
         first_name=raw_application_data.first_name,
         last_name=raw_application_data.last_name,
-        roles=(Role.APPLICANT, Role[raw_application_data.application_type]),
+        roles=(Role.APPLICANT, Role(raw_application_data.application_type)),
         application_data=processed_application_data,
         status=Status.PENDING_REVIEW,
     )
@@ -236,13 +253,13 @@ async def apply_flow(
         log.error("Could not insert applicant %s to MongoDB.", user.uid)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    # try:
-    #     await email_handler.send_application_confirmation_email(
-    #         user.email, applicant, Role[raw_application_data.application_type]
-    #     )
-    # except RuntimeError:
-    #     log.error("Could not send confirmation email with SendGrid to %s.", user.uid)
-    #     raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+    try:
+        await email_handler.send_application_confirmation_email(
+            user.email, applicant, raw_application_data.application_type
+        )
+    except RuntimeError:
+        log.error("Could not send confirmation email with SendGrid to %s.", user.uid)
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     # TODO: handle inconsistent results if one service fails
 
@@ -262,7 +279,7 @@ async def apply(
         Form(media_type="multipart/form-data"),
     ],
 ) -> str:
-    return await apply_flow(user, raw_application_data)
+    return await _apply_flow(user, raw_application_data)
 
 
 @router.post("/mentor", status_code=status.HTTP_201_CREATED)
@@ -274,7 +291,7 @@ async def mentor(
         Form(media_type="multipart/form-data"),
     ],
 ) -> str:
-    return await apply_flow(user, raw_application_data)
+    return await _apply_flow(user, raw_application_data)
 
 
 @router.post("/volunteer", status_code=status.HTTP_201_CREATED)

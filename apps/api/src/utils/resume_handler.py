@@ -1,7 +1,8 @@
 import hashlib
 import os
 from logging import getLogger
-from typing import Protocol, Literal, Union
+from typing import Protocol, Literal
+from typing_extensions import assert_never
 
 from aiogoogle import HTTPError
 from fastapi import UploadFile
@@ -20,7 +21,7 @@ ACCEPTED_TYPES = ("application/pdf",)
 class Person(Protocol):
     first_name: str
     last_name: str
-    application_type: Union[Literal["Hacker"], Literal["Mentor"]]
+    application_type: Literal["Hacker", "Mentor"]
 
 
 async def upload_resume(person: Person, resume_upload: UploadFile) -> HttpUrl:
@@ -32,6 +33,8 @@ async def upload_resume(person: Person, resume_upload: UploadFile) -> HttpUrl:
         RESUME_FOLDER_ID = HACKER_RESUMES_FOLDER_ID
     elif person.application_type == "Mentor":
         RESUME_FOLDER_ID = MENTOR_RESUMES_FOLDER_ID
+    else:
+        assert_never(person.application_type)
 
     if not RESUME_FOLDER_ID:
         raise RuntimeError("RESUMES_FOLDER_ID is not defined")

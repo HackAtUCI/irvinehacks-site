@@ -45,7 +45,7 @@ class BaseApplicationData(BaseModel):
     is_first_hackathon: bool
     linkedin: NullableHttpUrl = None
     portfolio: NullableHttpUrl = None
-    frq_change: Union[str, None] = Field(None, max_length=2048)
+    frq_change: str = Field(max_length=2048)
     frq_video_game: str = Field(max_length=2048)
 
 

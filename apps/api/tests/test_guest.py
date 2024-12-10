@@ -11,7 +11,7 @@ from routers import guest
 app = FastAPI()
 app.include_router(guest.router)
 
-client = TestClient(app)
+client = TestClient(app, follow_redirects=False)
 
 SAMPLE_EMAIL = "beaver@caltech.edu"
 SAMPLE_LOGIN_DATA = {"email": SAMPLE_EMAIL}
@@ -51,7 +51,7 @@ def test_guest_login_initiation(
     mock_generate_passphrase.return_value = SAMPLE_PASSPHRASE
     mock_utc_now.return_value = datetime(2023, 2, 4)
 
-    res = client.post("/login", data=SAMPLE_LOGIN_DATA, follow_redirects=False)
+    res = client.post("/login?return_to=%2FJPL", data=SAMPLE_LOGIN_DATA)
 
     mock_save_guest_key.assert_awaited_once_with(
         GuestRecord(
@@ -68,7 +68,10 @@ def test_guest_login_initiation(
     )
 
     assert res.status_code == 303
-    assert res.headers["location"] == "/guest-login?email=beaver%40caltech.edu"
+    assert (
+        res.headers["location"]
+        == "/guest-login?email=beaver%40caltech.edu&return_to=%2FJPL"
+    )
     assert res.headers["Set-Cookie"].startswith("guest_confirmation=abcdef;")
 
 
@@ -81,7 +84,7 @@ def test_requesting_login_when_previous_key_exists_redirects_to_guest_login(
     modify cookie"""
 
     mock_get_existing_key.return_value = "some-existing-key"
-    res = client.post("/login", data=SAMPLE_LOGIN_DATA, follow_redirects=False)
+    res = client.post("/login", data=SAMPLE_LOGIN_DATA)
 
     assert "Set-Cookie" not in res.headers
     assert res.status_code == 303
@@ -99,14 +102,13 @@ def test_successful_guest_verification_provides_identity(
     )
 
     res = client.post(
-        "/verify",
+        "/verify?return_to=%2FJPL",
         data={"email": SAMPLE_EMAIL, "passphrase": SAMPLE_PASSPHRASE},
         cookies={"guest_confirmation": "some-confirmation"},
-        follow_redirects=False,
     )
-
     assert res.status_code == 303
     assert res.headers["Set-Cookie"].startswith("irvinehacks_auth=")
+    assert res.headers["location"] == "/portal?return_to=%2FJPL"
 
     mock_remove_guest_key.assert_awaited_once_with("edu.caltech.beaver")
 
@@ -122,7 +124,11 @@ def test_invalid_guest_verification_is_unauthorized(
 
     res = client.post(
         "/verify",
-        data={"email": SAMPLE_EMAIL, "passphrase": "bad-passphrase"},
+        data={
+            "email": SAMPLE_EMAIL,
+            "passphrase": "bad-passphrase",
+            "return_to": "%2FJPL",
+        },
         cookies={"guest_confirmation": "not-a-confirmation"},
     )
 

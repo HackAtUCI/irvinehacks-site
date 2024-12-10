@@ -14,7 +14,7 @@ export default async function Mentor({
 		<ApplicationFlow
 			searchParams={searchParams}
 			applicationType="Mentor"
-			continueHREF="/mentor"
+			applicationURL="/mentor"
 			isHacker={false}
 		>
 			<MentorForm />

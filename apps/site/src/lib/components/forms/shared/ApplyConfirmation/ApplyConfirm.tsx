@@ -2,12 +2,12 @@ import getUserIdentity from "@/lib/utils/getUserIdentity";
 import ConfirmationDetails from "./ConfirmationDetails";
 
 interface ApplyConfirmInterface {
-	continueHREF: string;
+	applicationURL: string;
 	isHacker: boolean;
 }
 
 export default async function ApplyConfirm({
-	continueHREF,
+	applicationURL,
 	isHacker,
 }: ApplyConfirmInterface) {
 	const identity = await getUserIdentity();
@@ -17,7 +17,7 @@ export default async function ApplyConfirm({
 	return (
 		<div className="flex items-center py-16 px-10 min-w-screen min-h-screen">
 			<ConfirmationDetails
-				continueHREF={continueHREF}
+				applicationURL={applicationURL}
 				roleText={roleText}
 				isLoggedIn={identity.uid !== null}
 			/>

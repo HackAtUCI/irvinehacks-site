@@ -1,8 +1,10 @@
 from datetime import datetime, timezone
 from logging import getLogger
 from typing import Annotated, Union
+from urllib.parse import urlencode
 
 from fastapi import APIRouter, Depends, Form, Header, HTTPException, Request, status
+from fastapi.datastructures import URL
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, EmailStr, TypeAdapter
 
@@ -39,12 +41,22 @@ def _is_past_deadline(now: datetime) -> bool:
 
 
 @router.post("/login")
-async def login(email: EmailStr = Form()) -> RedirectResponse:
+async def login(
+    email: EmailStr = Form(), return_to: str = "/portal"
+) -> RedirectResponse:
     log.info("%s requested to log in", email)
+    query = urlencode({"return_to": return_to})
+
     if user_identity.uci_email(email):
-        # redirect user to UCI SSO login endpoint, changing to GET method
-        return RedirectResponse("/api/saml/login", status.HTTP_303_SEE_OTHER)
-    return RedirectResponse("/api/guest/login", status.HTTP_307_TEMPORARY_REDIRECT)
+        # redirect user for UCI SSO, changing to GET method
+        return RedirectResponse(
+            URL(path="/api/saml/login", query=query), status.HTTP_303_SEE_OTHER
+        )
+
+    # Forward POST request to guest login
+    return RedirectResponse(
+        URL(path="/api/guest/login", query=query), status.HTTP_307_TEMPORARY_REDIRECT
+    )
 
 
 @router.get("/logout")

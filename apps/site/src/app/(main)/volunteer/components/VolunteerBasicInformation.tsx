@@ -54,7 +54,7 @@ export default function BasicInformation() {
 					values={ethnicity}
 				/>
 			</div>
-			
+
 			<div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
 				<MultipleSelect
 					name="pronouns"

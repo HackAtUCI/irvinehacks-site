@@ -52,8 +52,10 @@ async def guest_login(
     )
 
     if not confirmation:
+        log.info("Guest %s recently requested a passphrase, ignoring request.", email)
         return response
 
+    log.info("%s initiated guest login", email)
     response.set_cookie(
         "guest_confirmation", confirmation, max_age=600, secure=True, httponly=True
     )

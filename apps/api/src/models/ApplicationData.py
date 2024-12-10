@@ -1,14 +1,16 @@
 from datetime import datetime
 from enum import Enum
-from typing import Annotated, Union
+from typing import Annotated, Any, Literal, Union
 
 from fastapi import UploadFile
 from pydantic import (
     BaseModel,
     BeforeValidator,
     ConfigDict,
+    Discriminator,
     Field,
     HttpUrl,
+    Tag,
     field_serializer,
 )
 
@@ -45,28 +47,28 @@ class BaseApplicationData(BaseModel):
     is_first_hackathon: bool
     linkedin: NullableHttpUrl = None
     portfolio: NullableHttpUrl = None
-    frq_change: Union[str, None] = Field(None, max_length=2048)
+    frq_change: str = Field(max_length=2048)
     frq_video_game: str = Field(max_length=2048)
 
 
 class BaseMentorApplicationData(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, str_max_length=254)
 
-    experienced_technologies: str
-    pronouns: str
+    experienced_technologies: list[str] = []
+    pronouns: list[str] = []
 
     school: str
     major: str
     education_level: str
-    is_18_older: str
+    is_18_older: bool
     git_experience: str
     github: NullableHttpUrl = None
     portfolio: NullableHttpUrl = None
     linkedin: NullableHttpUrl = None
     mentor_prev_experience_saq1: Union[str, None] = Field(None, max_length=2048)
-    mentor_interest_saq2: Union[str, None] = Field(None, max_length=2048)
-    mentor_team_help_saq3: Union[str, None] = Field(None, max_length=2048)
-    mentor_team_help_saq4: Union[str, None] = Field(None, max_length=2048)
+    mentor_interest_saq2: str = Field(max_length=2048)
+    mentor_team_help_saq3: str = Field(max_length=2048)
+    mentor_team_help_saq4: str = Field(max_length=2048)
     other_questions: Union[str, None] = Field(None, max_length=2048)
 
 
@@ -76,7 +78,7 @@ class RawHackerApplicationData(BaseApplicationData):
     first_name: str
     last_name: str
     resume: Union[UploadFile, None] = None
-    application_type: str
+    application_type: Literal["Hacker"]
 
 
 class RawMentorApplicationData(BaseMentorApplicationData):
@@ -84,8 +86,8 @@ class RawMentorApplicationData(BaseMentorApplicationData):
 
     first_name: str
     last_name: str
-    resume: Union[UploadFile, None] = None
-    application_type: str
+    resume: UploadFile
+    application_type: Literal["Mentor"]
 
 
 class ProcessedHackerApplicationData(BaseApplicationData):
@@ -105,8 +107,33 @@ class ProcessedMentorApplicationData(BaseMentorApplicationData):
     submission_time: datetime
     reviews: list[Review] = []
 
-    @field_serializer("linkedin", "portfolio", "resume_url")
+    @field_serializer("linkedin", "github", "portfolio", "resume_url")
     def url2str(self, val: Union[HttpUrl, None]) -> Union[str, None]:
         if val is not None:
             return str(val)
         return val
+
+
+# To add more discriminating values, add a string
+# that doesn't appear in any other form
+def get_discriminator_value(v: Any) -> str:
+    if isinstance(v, dict):
+        if "frq_video_game" in v:
+            return "hacker"
+        if "mentor_prev_experience_saq1" in v:
+            return "mentor"
+
+    if "frq_video_game" in dir(v):
+        return "hacker"
+    if "mentor_prev_experience_saq1" in dir(v):
+        return "mentor"
+    return ""
+
+
+ProcessedApplicationDataUnion = Annotated[
+    Union[
+        Annotated[ProcessedHackerApplicationData, Tag("hacker")],
+        Annotated[ProcessedMentorApplicationData, Tag("mentor")],
+    ],
+    Discriminator(get_discriminator_value),
+]

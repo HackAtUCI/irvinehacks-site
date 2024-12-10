@@ -9,7 +9,7 @@ import ExtraQuestions from "./components/ExtraQuestions";
 
 export default function VolunteerForm() {
 	return (
-		<BaseForm applicationType="VOLUNTEER">
+		<BaseForm applicationType="Volunteer" applyPath="/api/user/volunteer">
 			<BasicInformation />
 			<SchoolInformation />
 			<VolunteerFRQ />

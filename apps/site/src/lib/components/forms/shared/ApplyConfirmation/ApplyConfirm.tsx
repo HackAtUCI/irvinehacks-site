@@ -10,7 +10,7 @@ interface ApplyConfirmProps {
 export default async function ApplyConfirm({
 	applicationURL,
 	isHacker,
-	role
+	role,
 }: ApplyConfirmProps) {
 	const identity = await getUserIdentity();
 	const roleText = isHacker

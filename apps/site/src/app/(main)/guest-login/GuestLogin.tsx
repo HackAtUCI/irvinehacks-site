@@ -12,12 +12,7 @@ async function GuestLogin({
 }) {
 	const identity = await getUserIdentity();
 	if (identity.uid !== null) {
-		if (searchParams?.return_to === undefined) {
-			redirect("/portal");
-		} else if (searchParams.return_to === "/portal") {
-			redirect(searchParams.return_to);
-		}
-		redirect(`/portal?return_to=${searchParams.return_to}`);
+		redirect(searchParams?.return_to ?? "/portal");
 	}
 
 	return (

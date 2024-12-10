@@ -16,7 +16,7 @@ interface ApplicationFlowProps {
 		prefaceAccepted?: string;
 	};
 	applicationType: "Hacker" | "Mentor" | "Volunteer";
-	applicationURL: string;
+	applicationURL: "/apply" | "/mentor" | "/volunteer";
 	isHacker: boolean;
 }
 

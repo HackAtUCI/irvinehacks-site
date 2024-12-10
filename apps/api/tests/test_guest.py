@@ -108,7 +108,7 @@ def test_successful_guest_verification_provides_identity(
     )
     assert res.status_code == 303
     assert res.headers["Set-Cookie"].startswith("irvinehacks_auth=")
-    assert res.headers["location"] == "/portal?return_to=%2FJPL"
+    assert res.headers["location"] == "/JPL"
 
     mock_remove_guest_key.assert_awaited_once_with("edu.caltech.beaver")
 

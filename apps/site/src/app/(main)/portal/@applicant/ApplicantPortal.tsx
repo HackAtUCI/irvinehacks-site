@@ -32,16 +32,7 @@ async function Portal({
 	const status = identity.status;
 
 	if (status === null) {
-		if (searchParams?.return_to === undefined) {
-			redirect("/");
-		} else if (
-			searchParams?.return_to !== undefined &&
-			searchParams.return_to !== "/portal"
-		) {
-			redirect(searchParams.return_to);
-		} else {
-			redirect("/");
-		}
+		redirect(searchParams?.return_to ?? "/");
 	}
 
 	const submittedWaiver =

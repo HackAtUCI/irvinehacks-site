@@ -11,10 +11,7 @@ async function Login({
 }) {
 	const identity = await getUserIdentity();
 	if (identity.uid !== null) {
-		if (searchParams?.return_to === undefined) {
-			redirect("/portal");
-		}
-		redirect(`/portal?return_to=${searchParams.return_to}`);
+		redirect(searchParams?.return_to ?? "/portal");
 	}
 
 	return (

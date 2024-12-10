@@ -76,9 +76,6 @@ async def verify_guest(
     log.info("%s authenticated as guest.", email)
     guest = guest_auth.acquire_guest_identity(email)
 
-    query = urlencode({"return_to": return_to})
-    res = RedirectResponse(
-        URL(path="/portal", query=query), status_code=status.HTTP_303_SEE_OTHER
-    )
+    res = RedirectResponse(return_to, status_code=status.HTTP_303_SEE_OTHER)
     user_identity.issue_user_identity(guest, res)
     return res

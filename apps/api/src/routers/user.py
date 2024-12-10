@@ -4,12 +4,17 @@ from typing import Annotated, Union
 
 from fastapi import APIRouter, Depends, Form, Header, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, TypeAdapter
 
 from auth import user_identity
 from auth.authorization import require_accepted_applicant
 from auth.user_identity import User, require_user_identity, use_user_identity
-from models.ApplicationData import RawVolunteerData, ProcessedVolunteerData
+from models.ApplicationData import (
+    ProcessedHackerApplicationData,
+    RawHackerApplicationData,
+    RawMentorApplicationData,
+    ProcessedMentorApplicationData,
+)
 from models.user_record import Applicant, BareApplicant, Role, Status
 from services import docusign_handler, mongodb_handler
 from services.docusign_handler import WebhookPayload
@@ -67,15 +72,11 @@ async def me(
     return IdentityResponse(uid=user.uid, **user_record)
 
 
-@router.post("/apply", status_code=status.HTTP_201_CREATED)
-async def apply(
-    user: Annotated[User, Depends(require_user_identity)],
-    # media type should be automatically detected but seems like a bug as of now
-    raw_application_data: Annotated[
-        RawVolunteerData, Form(media_type="multipart/form-data")
-    ],
+async def apply_flow(
+    user: User,
+    raw_application_data: Union[RawHackerApplicationData, RawMentorApplicationData],
 ) -> str:
-    log.info("hiiiii")
+    print("apply_flow called")
     if raw_application_data.application_type not in Role.__members__:
         raise HTTPException(
             status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -108,7 +109,7 @@ async def apply(
     log.info(raw_app_data_dump)
 
     for field in ["pronouns", "ethnicity", "school", "major"]:
-        if raw_app_data_dump[field] == "other":
+        if field in raw_app_data_dump and raw_app_data_dump[field] == "other":
             raise HTTPException(
                 status.HTTP_422_UNPROCESSABLE_ENTITY,
                 "Please enable JavaScript on your browser.",
@@ -136,10 +137,17 @@ async def apply(
     else:
         resume_url = None
 
-    processed_application_data = ProcessedVolunteerData(
-        **raw_app_data_dump,
-        resume_url=resume_url,
-        submission_time=now,
+    ProcessedApplicationData: TypeAdapter[
+        Union[ProcessedHackerApplicationData, ProcessedMentorApplicationData]
+    ] = TypeAdapter(
+        Union[ProcessedHackerApplicationData, ProcessedMentorApplicationData]
+    )
+    processed_application_data = ProcessedApplicationData.validate_python(
+        {
+            **raw_app_data_dump,
+            "resume_url": resume_url,
+            "submission_time": now,
+        }
     )
     applicant = Applicant(
         uid=user.uid,
@@ -177,6 +185,30 @@ async def apply(
         "Thank you for submitting an application to IrvineHacks 2024! Please "
         + "visit https://irvinehacks.com/portal to see your application status."
     )
+
+
+@router.post("/apply", status_code=status.HTTP_201_CREATED)
+async def apply(
+    user: Annotated[User, Depends(require_user_identity)],
+    # media type should be automatically detected but seems like a bug as of now
+    raw_application_data: Annotated[
+        RawHackerApplicationData,
+        Form(media_type="multipart/form-data"),
+    ],
+) -> str:
+    return await apply_flow(user, raw_application_data)
+
+
+@router.post("/mentor", status_code=status.HTTP_201_CREATED)
+async def mentor(
+    user: Annotated[User, Depends(require_user_identity)],
+    # media type should be automatically detected but seems like a bug as of now
+    raw_application_data: Annotated[
+        RawMentorApplicationData,
+        Form(media_type="multipart/form-data"),
+    ],
+) -> str:
+    return await apply_flow(user, raw_application_data)
 
 
 @router.get("/waiver")

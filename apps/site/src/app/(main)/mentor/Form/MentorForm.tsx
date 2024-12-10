@@ -14,7 +14,7 @@ import MultipleSelect from "@/lib/components/forms/MultipleSelect";
 
 export default function MentorForm() {
 	return (
-		<BaseForm>
+		<BaseForm applicationType="MENTOR">
 			<BasicInformation />
 			<SchoolInformation />
 			<ShortAnswers />

@@ -35,7 +35,7 @@ export default function BasicInformation() {
 				<TextInput
 					name="first_name"
 					labelText="First Name"
-					containerClass="flex flex-col w-7/12 max-[1000px]:w-full"
+					containerClass="flex flex-col w-1/2 max-[1000px]:w-full"
 					isRequired={true}
 					type="text"
 					placeholder="Peter"
@@ -43,7 +43,7 @@ export default function BasicInformation() {
 				<TextInput
 					name="last_name"
 					labelText="Last Name"
-					containerClass="flex flex-col w-5/12 max-[1000px]:w-full"
+					containerClass="flex flex-col w-1/2 max-[1000px]:w-full"
 					isRequired={true}
 					type="text"
 					placeholder="Anteater"
@@ -55,13 +55,13 @@ export default function BasicInformation() {
 					name="pronouns"
 					labelText="Pronouns"
 					inputType="checkbox"
-					containerClass="flex flex-col w-7/12 max-[1000px]:w-full"
+					containerClass="flex flex-col w-1/2 max-[1000px]:w-full"
 					values={pronouns}
 				/>
 				<DropdownSelect
 					name="ethnicity"
 					labelText="Race / Ethnicity"
-					containerClass="flex flex-col w-5/12 max-[1000px]:w-full"
+					containerClass="flex flex-col w-1/2 max-[1000px]:w-full"
 					values={ethnicity}
 				/>
 			</div>

@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import Annotated, Any, List, Literal, Union
+from typing import Annotated, Any, Literal, Union
 
 from fastapi import UploadFile
 from pydantic import (
@@ -54,8 +54,8 @@ class BaseApplicationData(BaseModel):
 class BaseMentorApplicationData(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, str_max_length=254)
 
-    experienced_technologies: List[str] = []
-    pronouns: List[str] = []
+    experienced_technologies: list[str] = []
+    pronouns: list[str] = []
 
     school: str
     major: str

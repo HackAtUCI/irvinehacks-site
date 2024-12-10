@@ -96,7 +96,13 @@ async def _apply_flow(
 
     raw_app_data_dump = raw_application_data.model_dump()
 
-    for field in ["pronouns", "ethnicity", "school", "major"]:
+    for field in [
+        "pronouns",
+        "ethnicity",
+        "school",
+        "major",
+        "experienced_technologies",
+    ]:
         value = raw_app_data_dump.get(field)
         if value == "other" or (isinstance(value, list) and "other" in value):
             raise HTTPException(
@@ -141,7 +147,7 @@ async def _apply_flow(
         uid=user.uid,
         first_name=raw_application_data.first_name,
         last_name=raw_application_data.last_name,
-        roles=(Role.APPLICANT, raw_application_data.application_type),  # type: ignore
+        roles=(Role.APPLICANT, Role(raw_application_data.application_type)),
         application_data=processed_application_data,
         status=Status.PENDING_REVIEW,
     )

@@ -126,7 +126,10 @@ async def _apply_flow(
     if resume is not None and resume.size and resume.size > 0:
         try:
             resume_url = await resume_handler.upload_resume(
-                raw_application_data, resume
+                TypeAdapter(
+                    Union[RawHackerApplicationData, RawMentorApplicationData]
+                ).validate_python(raw_application_data),
+                resume,
             )
         except TypeError:
             log.info("%s provided invalid resume type.", user)

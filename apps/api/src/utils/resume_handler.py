@@ -1,7 +1,7 @@
 import hashlib
 import os
 from logging import getLogger
-from typing import Protocol, Literal
+from typing import Protocol, Literal, Union
 
 from aiogoogle import HTTPError
 from fastapi import UploadFile
@@ -20,7 +20,7 @@ ACCEPTED_TYPES = ("application/pdf",)
 class Person(Protocol):
     first_name: str
     last_name: str
-    application_type: Literal["Hacker"] | Literal["Mentor"]
+    application_type: Union[Literal["Hacker"], Literal["Mentor"]]
 
 
 async def upload_resume(person: Person, resume_upload: UploadFile) -> HttpUrl:

@@ -8,6 +8,7 @@ from models.ApplicationData import (
     Decision,
     ProcessedHackerApplicationData,
     ProcessedMentorApplicationData,
+    ProcessedVolunteerData,
 )
 from services.mongodb_handler import BaseRecord
 
@@ -77,5 +78,7 @@ class Applicant(BareApplicant):
     # Note validators not run on default values
     roles: RoleWithApplicant = (Role.APPLICANT,)
     application_data: Union[
-        ProcessedHackerApplicationData, ProcessedMentorApplicationData
+        ProcessedHackerApplicationData,
+        ProcessedMentorApplicationData,
+        ProcessedVolunteerData,
     ]

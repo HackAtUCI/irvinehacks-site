@@ -1,8 +1,17 @@
 from datetime import datetime, timezone
 from logging import getLogger
-from typing import Annotated, Union
+from typing import Annotated, Union, Any
+import json
 
-from fastapi import APIRouter, Depends, Form, Header, HTTPException, Request, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    Form,
+    Header,
+    HTTPException,
+    Request,
+    status,
+)
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, EmailStr, TypeAdapter
 
@@ -13,7 +22,9 @@ from models.ApplicationData import (
     ProcessedHackerApplicationData,
     RawHackerApplicationData,
     RawMentorApplicationData,
+    RawVolunteerApplicationData,
     ProcessedMentorApplicationData,
+    ProcessedVolunteerData,
 )
 from models.user_record import Applicant, BareApplicant, Role, Status
 from services import docusign_handler, mongodb_handler
@@ -72,50 +83,17 @@ async def me(
     return IdentityResponse(uid=user.uid, **user_record)
 
 
-async def apply_flow(
+async def _to_processed_application_data_hackers_mentors(
+    raw_application_data: Union[
+        RawHackerApplicationData,
+        RawMentorApplicationData,
+        RawVolunteerApplicationData,
+    ],
+    raw_app_data_dump: dict[str, Any],
     user: User,
-    raw_application_data: Union[RawHackerApplicationData, RawMentorApplicationData],
-) -> str:
-    print("apply_flow called")
-    if raw_application_data.application_type not in Role.__members__:
-        raise HTTPException(
-            status.HTTP_422_UNPROCESSABLE_ENTITY,
-            "Invalid application type.",
-        )
-
-    # Check if current datetime is past application deadline
-    now = datetime.now(timezone.utc)
-
-    log.info("hiiiii")
-
-    if _is_past_deadline(now):
-        raise HTTPException(status.HTTP_403_FORBIDDEN, "Applications have closed.")
-
-    # check if email is already in database
-    existing_record = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": user.uid, "roles": {"exists": True}}, ["roles"]
-    )
-
-    if existing_record and existing_record.get("roles"):
-        log.error(
-            "User %s already has role %s but tried to apply.",
-            user,
-            existing_record["roles"],
-        )
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, "User already has a role.")
-
-    raw_app_data_dump = raw_application_data.model_dump()
-
-    log.info(raw_app_data_dump)
-
-    for field in ["pronouns", "ethnicity", "school", "major"]:
-        if field in raw_app_data_dump and raw_app_data_dump[field] == "other":
-            raise HTTPException(
-                status.HTTP_422_UNPROCESSABLE_ENTITY,
-                "Please enable JavaScript on your browser.",
-            )
-
-    resume = None
+    now: datetime,
+) -> dict[str, Any]:
+    resume = raw_application_data.resume
     if resume is not None and resume.size and resume.size > 0:
         try:
             resume_url = await resume_handler.upload_resume(
@@ -137,18 +115,106 @@ async def apply_flow(
     else:
         resume_url = None
 
+    return {
+        **raw_app_data_dump,
+        "resume_url": resume_url,
+        "submission_time": now,
+    }
+
+
+async def _to_processed_application_data_volunteers(
+    raw_app_data_dump: dict[str, Any],
+    now: datetime,
+) -> dict[str, Any]:
+    availabilities = {
+        "friday_availability": json.loads(raw_app_data_dump["friday_availability"]),
+        "saturday_availability": json.loads(raw_app_data_dump["saturday_availability"]),
+        "sunday_availability": json.loads(raw_app_data_dump["sunday_availability"]),
+    }
+
+    return {
+        **raw_app_data_dump,
+        **availabilities,
+        "submission_time": now,
+    }
+
+
+async def apply_flow(
+    user: User,
+    raw_application_data: Union[
+        RawHackerApplicationData, RawMentorApplicationData, RawVolunteerApplicationData
+    ],
+) -> str:
+    if raw_application_data.application_type not in Role.__members__:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            "Invalid application type.",
+        )
+
+    # Check if current datetime is past application deadline
+    now = datetime.now(timezone.utc)
+
+    if _is_past_deadline(now):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Applications have closed.")
+
+    # check if email is already in database
+    existing_record = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": user.uid, "roles": {"exists": True}}, ["roles"]
+    )
+
+    if existing_record and existing_record.get("roles"):
+        log.error(
+            "User %s already has role %s but tried to apply.",
+            user,
+            existing_record["roles"],
+        )
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "User already has a role.")
+
+    raw_app_data_dump = raw_application_data.model_dump()
+
+    for field in ["pronouns", "ethnicity", "school", "major"]:
+        if field in raw_app_data_dump and raw_app_data_dump[field] == "other":
+            raise HTTPException(
+                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                "Please enable JavaScript on your browser.",
+            )
+
     ProcessedApplicationData: TypeAdapter[
-        Union[ProcessedHackerApplicationData, ProcessedMentorApplicationData]
+        Union[
+            ProcessedHackerApplicationData,
+            ProcessedMentorApplicationData,
+            ProcessedVolunteerData,
+        ]
     ] = TypeAdapter(
-        Union[ProcessedHackerApplicationData, ProcessedMentorApplicationData]
+        Union[
+            ProcessedHackerApplicationData,
+            ProcessedMentorApplicationData,
+            ProcessedVolunteerData,
+        ]
     )
-    processed_application_data = ProcessedApplicationData.validate_python(
-        {
-            **raw_app_data_dump,
-            "resume_url": resume_url,
-            "submission_time": now,
-        }
-    )
+
+    if (
+        raw_application_data.application_type == "HACKER"
+        or raw_application_data.application_type == "MENTOR"
+    ):
+        processed_application_data = ProcessedApplicationData.validate_python(
+            await _to_processed_application_data_hackers_mentors(
+                raw_application_data,
+                raw_app_data_dump,
+                user,
+                now,
+            )
+        )
+    elif raw_application_data.application_type == "VOLUNTEER":
+        processed_application_data = ProcessedApplicationData.validate_python(
+            await _to_processed_application_data_volunteers(raw_app_data_dump, now)
+        )
+    else:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            "Invalid application type.",
+        )
+
     applicant = Applicant(
         uid=user.uid,
         first_name=raw_application_data.first_name,
@@ -205,6 +271,18 @@ async def mentor(
     # media type should be automatically detected but seems like a bug as of now
     raw_application_data: Annotated[
         RawMentorApplicationData,
+        Form(media_type="multipart/form-data"),
+    ],
+) -> str:
+    return await apply_flow(user, raw_application_data)
+
+
+@router.post("/volunteer", status_code=status.HTTP_201_CREATED)
+async def volunteer(
+    user: Annotated[User, Depends(require_user_identity)],
+    # media type should be automatically detected but seems like a bug as of now
+    raw_application_data: Annotated[
+        RawVolunteerApplicationData,
         Form(media_type="multipart/form-data"),
     ],
 ) -> str:

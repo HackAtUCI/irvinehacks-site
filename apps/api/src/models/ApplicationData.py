@@ -54,7 +54,7 @@ class BaseApplicationData(BaseModel):
 class BaseVolunteerApplicationData(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, str_max_length=1024)
 
-    pronouns: str
+    pronouns: list[str] = []
     ethnicity: str
     is_18_older: bool
     school: str
@@ -115,15 +115,8 @@ class RawMentorApplicationData(BaseMentorApplicationData):
 class RawVolunteerApplicationData(VolunteerApplicationData):
     first_name: str
     last_name: str
-    resume: UploadFile
-    application_type: Literal["Mentor"]
-
-
-class RawVolunteerApplicationData(VolunteerApplicationData):
-    first_name: str
-    last_name: str
     resume: Union[UploadFile, None] = None
-    application_type: str
+    application_type: Literal["Volunteer"]
 
 
 class ProcessedHackerApplicationData(BaseApplicationData):
@@ -166,11 +159,15 @@ def get_discriminator_value(v: Any) -> str:
             return "hacker"
         if "mentor_prev_experience_saq1" in v:
             return "mentor"
+        if "frq_volunteer" in v:
+            return "volunteer"
 
     if "frq_video_game" in dir(v):
         return "hacker"
     if "mentor_prev_experience_saq1" in dir(v):
         return "mentor"
+    if "frq_volunteer" in dir(v):
+        return "volunteer"
     return ""
 
 
@@ -178,6 +175,7 @@ ProcessedApplicationDataUnion = Annotated[
     Union[
         Annotated[ProcessedHackerApplicationData, Tag("hacker")],
         Annotated[ProcessedMentorApplicationData, Tag("mentor")],
+        Annotated[ProcessedVolunteerData, Tag("volunteer")],
     ],
     Discriminator(get_discriminator_value),
 ]

@@ -1,4 +1,5 @@
 import DropdownSelect from "@/lib/components/forms/DropdownSelect";
+import MultipleSelect from "@/lib/components/forms/MultipleSelect";
 import TextInput from "@/lib/components/forms/TextInput";
 
 const pronouns = [
@@ -47,16 +48,20 @@ export default function BasicInformation() {
 
 			<div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
 				<DropdownSelect
-					name="pronouns"
-					labelText="Preferred Pronouns"
-					containerClass="flex flex-col w-5/12 max-[1000px]:w-full"
-					values={pronouns}
-				/>
-				<DropdownSelect
 					name="ethnicity"
 					labelText="Race / Ethnicity"
-					containerClass="flex flex-col w-7/12 max-[1000px]:w-full"
+					containerClass="flex flex-col w-full max-[1000px]:w-full"
 					values={ethnicity}
+				/>
+			</div>
+			
+			<div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
+				<MultipleSelect
+					name="pronouns"
+					labelText="Preferred Pronouns"
+					containerClass="flex flex-col w-full"
+					inputType="checkbox"
+					values={pronouns}
 				/>
 			</div>
 		</div>

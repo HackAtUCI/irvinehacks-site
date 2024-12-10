@@ -1,6 +1,7 @@
+import json
 from datetime import datetime, timezone
 from logging import getLogger
-from typing import Annotated, Union
+from typing import Annotated, Union, Any
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Depends, Form, Header, HTTPException, Request, status
@@ -16,8 +17,6 @@ from models.ApplicationData import (
     RawHackerApplicationData,
     RawMentorApplicationData,
     RawVolunteerApplicationData,
-    ProcessedMentorApplicationData,
-    ProcessedVolunteerData,
 )
 from models.user_record import Applicant, BareApplicant, Role, Status
 from services import docusign_handler, mongodb_handler
@@ -125,19 +124,29 @@ async def _to_processed_application_data_hackers_mentors(
     }
 
 
-async def _to_processed_application_data_volunteers(
+def _to_processed_application_data_volunteers(
     raw_app_data_dump: dict[str, Any],
     now: datetime,
 ) -> dict[str, Any]:
-    availabilities = {
-        "friday_availability": json.loads(raw_app_data_dump["friday_availability"]),
-        "saturday_availability": json.loads(raw_app_data_dump["saturday_availability"]),
-        "sunday_availability": json.loads(raw_app_data_dump["sunday_availability"]),
-    }
+
+    try:
+        raw_app_data_dump["friday_availability"] = json.loads(
+            raw_app_data_dump["friday_availability"]
+        )
+        raw_app_data_dump["saturday_availability"] = json.loads(
+            raw_app_data_dump["saturday_availability"]
+        )
+        raw_app_data_dump["sunday_availability"] = json.loads(
+            raw_app_data_dump["sunday_availability"]
+        )
+    except json.JSONDecodeError:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            "Invalid availability format.",
+        )
 
     return {
         **raw_app_data_dump,
-        **availabilities,
         "submission_time": now,
     }
 
@@ -183,54 +192,35 @@ async def _apply_flow(
                 "Please enable JavaScript on your browser.",
             )
 
-    resume = raw_application_data.resume
-    if resume is not None and resume.size and resume.size > 0:
-        try:
-            resume_url = await resume_handler.upload_resume(
-                raw_application_data, resume
-            )
-        except TypeError:
-            log.info("%s provided invalid resume type.", user)
-            raise HTTPException(
-                status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, "Invalid resume file type"
-            )
-        except ValueError:
-            log.info("%s provided too large resume.", user)
-            raise HTTPException(
-                status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, "Resume upload is too large"
-            )
-        except RuntimeError as err:
-            log.error("During user %s apply, resume upload: %s", user.uid, err)
-            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
-    else:
-        resume_url = None
-
     ProcessedApplicationDataUnionAdapter: TypeAdapter[ProcessedApplicationDataUnion] = (
         TypeAdapter(ProcessedApplicationDataUnion)
     )
 
     if (
-        raw_application_data.application_type == "HACKER"
-        or raw_application_data.application_type == "MENTOR"
+        raw_application_data.application_type == "Hacker"
+        or raw_application_data.application_type == "Mentor"
     ):
-        processed_application_data = ProcessedApplicationData.validate_python(
-            await _to_processed_application_data_hackers_mentors(
-                raw_application_data,
-                raw_app_data_dump,
-                user,
-                now,
+        processed_application_data = (
+            ProcessedApplicationDataUnionAdapter.validate_python(
+                await _to_processed_application_data_hackers_mentors(
+                    raw_application_data,
+                    raw_app_data_dump,
+                    user,
+                    now,
+                )
             )
         )
-    elif raw_application_data.application_type == "VOLUNTEER":
-        processed_application_data = ProcessedApplicationDataUnionAdapter.validate_python(
-            await _to_processed_application_data_volunteers(raw_app_data_dump, now)
+    elif raw_application_data.application_type == "Volunteer":
+        processed_application_data = (
+            ProcessedApplicationDataUnionAdapter.validate_python(
+                _to_processed_application_data_volunteers(raw_app_data_dump, now)
+            )
         )
     else:
         raise HTTPException(
             status.HTTP_422_UNPROCESSABLE_ENTITY,
             "Invalid application type.",
         )
-
 
     applicant = Applicant(
         uid=user.uid,
@@ -303,7 +293,7 @@ async def volunteer(
         Form(media_type="multipart/form-data"),
     ],
 ) -> str:
-    return await apply_flow(user, raw_application_data)
+    return await _apply_flow(user, raw_application_data)
 
 
 @router.get("/waiver")

@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from fastapi.responses import RedirectResponse
 
 from auth import user_identity
-from auth.user_identity import COOKIE_NAME, NativeUser
+from auth.user_identity import NativeUser
 
 router = APIRouter()
 
@@ -18,7 +18,5 @@ async def impersonate(ucinetid: str) -> RedirectResponse:
     )
 
     res = RedirectResponse("/portal", status_code=303)
-
-    jwt_token = user_identity._generate_jwt_token(user)
-    res.set_cookie(COOKIE_NAME, jwt_token, max_age=4000, httponly=True)
+    user_identity.issue_user_identity(user, res)
     return res

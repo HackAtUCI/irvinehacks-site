@@ -187,6 +187,7 @@ async def _apply_flow(
         {
             **raw_app_data_dump,
             "resume_url": resume_url,
+            "email": user.email,
             "submission_time": now,
         }
     )

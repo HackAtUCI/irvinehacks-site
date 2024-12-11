@@ -159,6 +159,7 @@ class ProcessedMentorApplicationData(BaseMentorApplicationData):
             return str(val)
         return val
 
+
 class ProcessedVolunteerApplication(BaseVolunteerApplicationData):
     # TODO: specify common attributes in mixin
     email: EmailStr

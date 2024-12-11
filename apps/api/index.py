@@ -1,8 +1,8 @@
 import logging
 import os
 
-import axiom_py
-from axiom_py.logging import AxiomHandler
+import axiom_py  # type: ignore[import-untyped]
+from axiom_py.logging import AxiomHandler  # type: ignore[import-untyped]
 from fastapi import FastAPI
 
 from app import app as api

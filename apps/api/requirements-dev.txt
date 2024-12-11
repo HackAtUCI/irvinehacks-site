@@ -8,3 +8,5 @@ pytest-cov==6.0.0
 types-python-jose==3.3.4.8
 
 uvicorn[standard]==0.32.0
+
+axiom-py==0.8.1

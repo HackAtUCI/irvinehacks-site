@@ -21,6 +21,11 @@ export default async function ConfirmationDetails({
 			{appDescription && (
 				<>
 					<div>
+						<p className="text-lg m-0 w-full">
+							Details About the{" "}
+							<strong className="text-[#FBA80A]">{role}</strong> Role:
+						</p>
+
 						{appDescription.split("\n").map((line, index) => (
 							<p key={index} className="text-lg m-0 w-full">
 								{line}

@@ -35,18 +35,18 @@ function Navbar({ identity }: NavbarProps) {
 		window.addEventListener("scroll", scrollHandler);
 	}, []);
 
-	const goToChooseChar = (e: React.MouseEvent) => {
-		e.preventDefault();
+	// const goToChooseChar = (e: React.MouseEvent) => {
+	// 	e.preventDefault();
 
-		if (window.location.pathname !== "/") {
-			window.location.href = "/#choose-your-character";
-		} else {
-			const target = document.getElementById("choose-your-character");
-			if (target) {
-				target.scrollIntoView({ behavior: "smooth" });
-			}
-		}
-	};
+	// 	if (window.location.pathname !== "/") {
+	// 		window.location.href = "/#apply";
+	// 	} else {
+	// 		const target = document.getElementById("apply");
+	// 		if (target) {
+	// 			target.scrollIntoView({ behavior: "smooth" });
+	// 		}
+	// 	}
+	// };
 
 	// const deadlinePassed = hasDeadlinePassed();
 
@@ -89,7 +89,7 @@ function Navbar({ identity }: NavbarProps) {
 					<NavLinkItem
 						href="/#apply"
 						className="navMenuLink"
-						onClick={goToChooseChar}
+						// onClick={goToChooseChar}
 					>
 						Apply
 					</NavLinkItem>

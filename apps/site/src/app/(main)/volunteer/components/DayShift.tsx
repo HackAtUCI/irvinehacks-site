@@ -3,6 +3,14 @@
 import React from "react";
 import { useState } from "react";
 
+function as12Hour(hour: number) {
+	const suffix = hour >= 12 ? "PM" : "AM";
+
+	hour = hour % 12;
+	hour = hour || 12; // instead of 0
+	return hour + suffix;
+}
+
 interface ShiftInputs {
 	shiftText: string;
 	startHour: number;
@@ -18,26 +26,21 @@ export default function DayShift({
 }: ShiftInputs) {
 	const num_hours = endHour - startHour;
 
-	const [available, setAvailable] = useState(Array(num_hours).fill(false));
+	const [availability, setAvailability] = useState(
+		Array<boolean>(num_hours).fill(false),
+	);
 	const [isMouseDown, setIsMouseDown] = useState(false);
 	const [firstClicked, setFirstClicked] = useState(false);
-
-	function ToAMPM(hours: number) {
-		const ampm = hours >= 12 ? "PM" : "AM";
-
-		hours = hours % 12;
-		hours = hours ? hours : 12;
-		return hours + ampm;
-	}
 
 	function onMouseDown(
 		e: React.MouseEvent<HTMLDivElement, MouseEvent>,
 		i: number,
 	) {
 		e.preventDefault();
+		// TODO: edge case - React doesn't guarantee immediate updates
 		setIsMouseDown(true);
-		setFirstClicked(available[i]);
-		setAvailable((available) => [
+		setFirstClicked(availability[i]);
+		setAvailability((available) => [
 			...available.slice(0, i),
 			!available[i],
 			...available.slice(i + 1),
@@ -46,7 +49,7 @@ export default function DayShift({
 
 	function onMouseOver(i: number) {
 		if (isMouseDown) {
-			setAvailable((available) => [
+			setAvailability((available) => [
 				...available.slice(0, i),
 				!firstClicked,
 				...available.slice(i + 1),
@@ -61,32 +64,33 @@ export default function DayShift({
 	return (
 		<div className="flex flex-col items-start w-11/12">
 			<div className="flex flex-col relative w-full">
-				<input
-					className="hidden"
-					readOnly
-					value={`{${available.reduce(
-						(acc, cur, ind) =>
-							(acc = `"${ToAMPM(startHour + ind)}" : ${cur.toString()}${
-								ind > 0 ? ", " : ""
-							}${acc}`),
-						"",
-					)}}`}
-					name={shiftLabel}
-				/>
+				{/* TODO: use actual checkboxes in a table */}
+				{availability.map(
+					(available, offset) =>
+						available && (
+							<input
+								key={offset}
+								className="hidden"
+								readOnly
+								value={startHour + offset}
+								name={shiftLabel}
+							/>
+						),
+				)}
 				<div className="w-full text-2xl text-center pb-5">{shiftText}</div>
-				{available.map((_, i) => {
+				{availability.map((available, i) => {
 					return (
 						<div
 							key={`shift_${i}`}
 							className="relative w-full flex justify-end"
 						>
 							<div className=" top-[-7px] text-xs left-0 pr-2 mt-[-7px] min-w-[45px]">
-								{ToAMPM(i + startHour)}
+								{as12Hour(startHour + i)}
 							</div>
 							<div
 								className={`h-[30px] w-full ${
-									i === endHour - startHour ? "" : "border-black border-b-2"
-								} ${available[i] ? "bg-blue-500" : "bg-gray-200"}`}
+									i === num_hours ? "" : "border-black border-b-2"
+								} ${available ? "bg-blue-500" : "bg-gray-200"}`}
 								onMouseDown={(e) => onMouseDown(e, i)}
 								onMouseUp={onMouseUp}
 								onMouseOver={() => onMouseOver(i)}

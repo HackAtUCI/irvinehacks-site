@@ -1,16 +1,8 @@
 import SimpleRadio from "@/lib/components/forms/SimpleRadio";
 
 const yesNoOptions = [
-	{
-		id: "minor-yes",
-		labelText: "Yes",
-		inputValue: "Yes",
-	},
-	{
-		id: "minor-no",
-		labelText: "No",
-		inputValue: "No",
-	},
+	{ labelText: "Yes", inputValue: "Yes" },
+	{ labelText: "No", inputValue: "No" },
 ];
 
 export default function AgeInformation() {

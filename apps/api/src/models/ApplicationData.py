@@ -38,7 +38,8 @@ NullableHttpUrl = Annotated[Union[None, HttpUrl], BeforeValidator(make_empty_non
 class BaseApplicationData(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, str_max_length=254)
 
-    pronouns: str
+    pronouns: list[str] = []
+
     ethnicity: str
     is_18_older: bool
     school: str

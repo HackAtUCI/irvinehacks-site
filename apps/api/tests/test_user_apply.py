@@ -28,7 +28,7 @@ USER_PKFIRE = NativeUser(
 SAMPLE_APPLICATION = {
     "first_name": "pk",
     "last_name": "fire",
-    "pronouns": "pk",
+    "pronouns": ["pk"],
     "ethnicity": "fire",
     "is_18_older": "true",
     "school": "UC Irvine",
@@ -302,7 +302,7 @@ def test_application_data_is_bson_encodable() -> None:
     data = EXPECTED_APPLICATION_DATA.model_copy()
     data.linkedin = HttpUrl("https://linkedin.com")
     encoded = bson.encode(EXPECTED_APPLICATION_DATA.model_dump())
-    assert len(encoded) == 370
+    assert len(encoded) == 378
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
@@ -311,7 +311,7 @@ def test_application_data_with_other_throws_422(
 ) -> None:
     mock_mongodb_handler_retrieve_one.return_value = None
     contains_other = SAMPLE_APPLICATION.copy()
-    contains_other["pronouns"] = "other"
+    contains_other["pronouns"].append("other")  # type: ignore[attr-defined]
     res = client.post("/apply", data=contains_other, files=SAMPLE_FILES)
     assert res.status_code == 422
 

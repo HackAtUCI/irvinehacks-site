@@ -1,6 +1,7 @@
+import json
 from datetime import datetime, timezone
 from logging import getLogger
-from typing import Annotated, Union
+from typing import Annotated, Union, Any
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Depends, Form, Header, HTTPException, Request, status
@@ -15,6 +16,7 @@ from models.ApplicationData import (
     ProcessedApplicationDataUnion,
     RawHackerApplicationData,
     RawMentorApplicationData,
+    RawVolunteerApplicationData,
 )
 from models.user_record import Applicant, BareApplicant, Role, Status
 from services import docusign_handler, mongodb_handler
@@ -83,9 +85,84 @@ async def me(
     return IdentityResponse(uid=user.uid, **user_record)
 
 
+async def _to_processed_application_data_hackers_mentors(
+    raw_application_data: Union[
+        RawHackerApplicationData,
+        RawMentorApplicationData,
+        RawVolunteerApplicationData,
+    ],
+    raw_app_data_dump: dict[str, Any],
+    user: User,
+    now: datetime,
+) -> dict[str, Any]:
+    resume = raw_application_data.resume
+    if resume is not None and resume.size and resume.size > 0:
+        try:
+            resume_url = await resume_handler.upload_resume(
+                TypeAdapter(
+                    Union[
+                        RawHackerApplicationData,
+                        RawMentorApplicationData,
+                        RawVolunteerApplicationData,
+                    ]
+                ).validate_python(raw_application_data),
+                resume,
+            )
+        except TypeError:
+            log.info("%s provided invalid resume type.", user)
+            raise HTTPException(
+                status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, "Invalid resume file type"
+            )
+        except ValueError:
+            log.info("%s provided too large resume.", user)
+            raise HTTPException(
+                status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, "Resume upload is too large"
+            )
+        except RuntimeError as err:
+            log.error("During user %s apply, resume upload: %s", user.uid, err)
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+    else:
+        resume_url = None
+
+    return {
+        **raw_app_data_dump,
+        "resume_url": resume_url,
+        "submission_time": now,
+    }
+
+
+def _to_processed_application_data_volunteers(
+    raw_app_data_dump: dict[str, Any],
+    now: datetime,
+) -> dict[str, Any]:
+
+    try:
+        raw_app_data_dump["friday_availability"] = json.loads(
+            raw_app_data_dump["friday_availability"]
+        )
+        raw_app_data_dump["saturday_availability"] = json.loads(
+            raw_app_data_dump["saturday_availability"]
+        )
+        raw_app_data_dump["sunday_availability"] = json.loads(
+            raw_app_data_dump["sunday_availability"]
+        )
+    except json.JSONDecodeError:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            "Invalid availability format.",
+        )
+
+    return {
+        **raw_app_data_dump,
+        "submission_time": now,
+    }
+
+
 async def _apply_flow(
     user: User,
-    raw_application_data: Union[RawHackerApplicationData, RawMentorApplicationData],
+    raw_application_data: Union[
+        RawHackerApplicationData, RawMentorApplicationData, RawVolunteerApplicationData
+    ],
 ) -> str:
     # Check if current datetime is past application deadline
     now = datetime.now(timezone.utc)
@@ -122,41 +199,35 @@ async def _apply_flow(
                 "Please enable JavaScript on your browser.",
             )
 
-    resume = raw_application_data.resume
-    if resume is not None and resume.size and resume.size > 0:
-        try:
-            resume_url = await resume_handler.upload_resume(
-                TypeAdapter(
-                    Union[RawHackerApplicationData, RawMentorApplicationData]
-                ).validate_python(raw_application_data),
-                resume,
-            )
-        except TypeError:
-            log.info("%s provided invalid resume type.", user)
-            raise HTTPException(
-                status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, "Invalid resume file type"
-            )
-        except ValueError:
-            log.info("%s provided too large resume.", user)
-            raise HTTPException(
-                status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, "Resume upload is too large"
-            )
-        except RuntimeError as err:
-            log.error("During user %s apply, resume upload: %s", user.uid, err)
-            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
-    else:
-        resume_url = None
-
     ProcessedApplicationDataUnionAdapter: TypeAdapter[ProcessedApplicationDataUnion] = (
         TypeAdapter(ProcessedApplicationDataUnion)
     )
-    processed_application_data = ProcessedApplicationDataUnionAdapter.validate_python(
-        {
-            **raw_app_data_dump,
-            "resume_url": resume_url,
-            "submission_time": now,
-        }
-    )
+
+    if (
+        raw_application_data.application_type == "Hacker"
+        or raw_application_data.application_type == "Mentor"
+    ):
+        processed_application_data = (
+            ProcessedApplicationDataUnionAdapter.validate_python(
+                await _to_processed_application_data_hackers_mentors(
+                    raw_application_data,
+                    raw_app_data_dump,
+                    user,
+                    now,
+                )
+            )
+        )
+    elif raw_application_data.application_type == "Volunteer":
+        processed_application_data = (
+            ProcessedApplicationDataUnionAdapter.validate_python(
+                _to_processed_application_data_volunteers(raw_app_data_dump, now)
+            )
+        )
+    else:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            "Invalid application type.",
+        )
 
     applicant = Applicant(
         uid=user.uid,
@@ -214,6 +285,18 @@ async def mentor(
     # media type should be automatically detected but seems like a bug as of now
     raw_application_data: Annotated[
         RawMentorApplicationData,
+        Form(media_type="multipart/form-data"),
+    ],
+) -> str:
+    return await _apply_flow(user, raw_application_data)
+
+
+@router.post("/volunteer", status_code=status.HTTP_201_CREATED)
+async def volunteer(
+    user: Annotated[User, Depends(require_user_identity)],
+    # media type should be automatically detected but seems like a bug as of now
+    raw_application_data: Annotated[
+        RawVolunteerApplicationData,
         Form(media_type="multipart/form-data"),
     ],
 ) -> str:

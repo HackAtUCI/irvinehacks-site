@@ -52,6 +52,28 @@ class BaseApplicationData(BaseModel):
     frq_video_game: str = Field(max_length=2048)
 
 
+class BaseVolunteerApplicationData(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, str_max_length=1024)
+
+    pronouns: list[str] = []
+    ethnicity: str
+    is_18_older: bool
+    school: str
+    education_level: str
+    major: str
+    applied_before: bool
+    frq_volunteer: str = Field(max_length=2048)
+    frq_utensil: str = Field(max_length=2048)
+    allergies: Union[str, None] = Field(None, max_length=2048)
+    extra_questions: Union[str, None] = Field(None, max_length=2048)
+
+
+class VolunteerApplicationData(BaseVolunteerApplicationData):
+    friday_availability: str
+    saturday_availability: str
+    sunday_availability: str
+
+
 class BaseMentorApplicationData(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, str_max_length=254)
 
@@ -92,6 +114,13 @@ class RawMentorApplicationData(BaseMentorApplicationData):
     application_type: Literal["Mentor"]
 
 
+class RawVolunteerApplicationData(VolunteerApplicationData):
+    first_name: str
+    last_name: str
+    resume: Union[UploadFile, None] = None
+    application_type: Literal["Volunteer"]
+
+
 class ProcessedHackerApplicationData(BaseApplicationData):
     resume_url: Union[HttpUrl, None] = None
     submission_time: datetime
@@ -116,6 +145,14 @@ class ProcessedMentorApplicationData(BaseMentorApplicationData):
         return val
 
 
+class ProcessedVolunteerData(BaseVolunteerApplicationData):
+    submission_time: datetime
+    reviews: list[Review] = []
+    friday_availability: dict[str, bool]
+    saturday_availability: dict[str, bool]
+    sunday_availability: dict[str, bool]
+
+
 # To add more discriminating values, add a string
 # that doesn't appear in any other form
 def get_discriminator_value(v: Any) -> str:
@@ -124,11 +161,15 @@ def get_discriminator_value(v: Any) -> str:
             return "hacker"
         if "mentor_prev_experience_saq1" in v:
             return "mentor"
+        if "frq_volunteer" in v:
+            return "volunteer"
 
     if "frq_video_game" in dir(v):
         return "hacker"
     if "mentor_prev_experience_saq1" in dir(v):
         return "mentor"
+    if "frq_volunteer" in dir(v):
+        return "volunteer"
     return ""
 
 
@@ -136,6 +177,7 @@ ProcessedApplicationDataUnion = Annotated[
     Union[
         Annotated[ProcessedHackerApplicationData, Tag("hacker")],
         Annotated[ProcessedMentorApplicationData, Tag("mentor")],
+        Annotated[ProcessedVolunteerData, Tag("volunteer")],
     ],
     Discriminator(get_discriminator_value),
 ]

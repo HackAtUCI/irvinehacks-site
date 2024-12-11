@@ -18,14 +18,14 @@ export default function VolunteerFRQ() {
 				isRequired={true}
 			/>
 			<Textfield
-				name="volunteer_q1"
+				name="frq_volunteer"
 				labelText="Why are you interested in volunteering, and what do you expect to gain from this experience?"
 				containerClass="w-full"
 				isRequired={true}
 				maxLength={1500}
 			/>
 			<Textfield
-				name="volunteer_q2"
+				name="frq_utensil"
 				labelText="If you were a kitchen utensil, what would you be and why?"
 				containerClass="w-full"
 				isRequired={true}

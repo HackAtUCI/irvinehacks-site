@@ -4,10 +4,7 @@ from typing import Annotated, Union
 from pydantic import AfterValidator, Field
 from typing_extensions import TypeAlias
 
-from models.ApplicationData import (
-    Decision,
-    ProcessedApplicationDataUnion,
-)
+from models.ApplicationData import Decision, ProcessedApplicationDataUnion
 from services.mongodb_handler import BaseRecord
 
 

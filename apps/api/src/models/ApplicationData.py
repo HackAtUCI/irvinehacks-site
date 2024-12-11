@@ -8,6 +8,7 @@ from pydantic import (
     BeforeValidator,
     ConfigDict,
     Discriminator,
+    EmailStr,
     Field,
     HttpUrl,
     Tag,
@@ -31,6 +32,15 @@ def make_empty_none(val: Union[str, None]) -> Union[str, None]:
     return val
 
 
+FIELDS_SUPPORTING_OTHER = [
+    "pronouns",
+    "ethnicity",
+    "school",
+    "major",
+    "experienced_technologies",
+]
+
+
 NullableHttpUrl = Annotated[Union[None, HttpUrl], BeforeValidator(make_empty_none)]
 
 
@@ -50,28 +60,6 @@ class BaseApplicationData(BaseModel):
     portfolio: NullableHttpUrl = None
     frq_change: str = Field(max_length=2048)
     frq_video_game: str = Field(max_length=2048)
-
-
-class BaseVolunteerApplicationData(BaseModel):
-    model_config = ConfigDict(str_strip_whitespace=True, str_max_length=1024)
-
-    pronouns: list[str] = []
-    ethnicity: str
-    is_18_older: bool
-    school: str
-    education_level: str
-    major: str
-    applied_before: bool
-    frq_volunteer: str = Field(max_length=2048)
-    frq_utensil: str = Field(max_length=2048)
-    allergies: Union[str, None] = Field(None, max_length=2048)
-    extra_questions: Union[str, None] = Field(None, max_length=2048)
-
-
-class VolunteerApplicationData(BaseVolunteerApplicationData):
-    friday_availability: str
-    saturday_availability: str
-    sunday_availability: str
 
 
 class BaseMentorApplicationData(BaseModel):
@@ -97,6 +85,29 @@ class BaseMentorApplicationData(BaseModel):
     other_questions: Union[str, None] = Field(None, max_length=2048)
 
 
+Hour = Annotated[int, Field(ge=7, lt=24)]
+
+
+class BaseVolunteerApplicationData(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, str_max_length=1024)
+
+    pronouns: list[str] = []
+    ethnicity: str
+    is_18_older: bool
+    school: str
+    education_level: str
+    major: str
+    applied_before: bool
+    frq_volunteer: str = Field(max_length=2048)
+    frq_utensil: str = Field(max_length=2048)
+    allergies: Union[str, None] = Field(None, max_length=2048)
+    extra_questions: Union[str, None] = Field(None, max_length=2048)
+
+    friday_availability: list[Hour] = []
+    saturday_availability: list[Hour] = []
+    sunday_availability: list[Hour] = []
+
+
 class RawHackerApplicationData(BaseApplicationData):
     """Expected to be sent by the form on the site."""
 
@@ -115,14 +126,17 @@ class RawMentorApplicationData(BaseMentorApplicationData):
     application_type: Literal["Mentor"]
 
 
-class RawVolunteerApplicationData(VolunteerApplicationData):
+class RawVolunteerApplicationData(BaseVolunteerApplicationData):
+    """Expected to be sent by the volunteer form on the site."""
+
     first_name: str
     last_name: str
-    resume: Union[UploadFile, None] = None
+    resume: None = None  # to simplify usage of union
     application_type: Literal["Volunteer"]
 
 
 class ProcessedHackerApplicationData(BaseApplicationData):
+    email: EmailStr
     resume_url: Union[HttpUrl, None] = None
     submission_time: datetime
     reviews: list[Review] = []
@@ -135,6 +149,7 @@ class ProcessedHackerApplicationData(BaseApplicationData):
 
 
 class ProcessedMentorApplicationData(BaseMentorApplicationData):
+    email: EmailStr
     resume_url: Union[HttpUrl, None] = None
     submission_time: datetime
     reviews: list[Review] = []
@@ -146,12 +161,11 @@ class ProcessedMentorApplicationData(BaseMentorApplicationData):
         return val
 
 
-class ProcessedVolunteerData(BaseVolunteerApplicationData):
+class ProcessedVolunteerApplication(BaseVolunteerApplicationData):
+    # TODO: specify common attributes in mixin
+    email: EmailStr
     submission_time: datetime
     reviews: list[Review] = []
-    friday_availability: dict[str, bool]
-    saturday_availability: dict[str, bool]
-    sunday_availability: dict[str, bool]
 
 
 # To add more discriminating values, add a string
@@ -178,7 +192,7 @@ ProcessedApplicationDataUnion = Annotated[
     Union[
         Annotated[ProcessedHackerApplicationData, Tag("hacker")],
         Annotated[ProcessedMentorApplicationData, Tag("mentor")],
-        Annotated[ProcessedVolunteerData, Tag("volunteer")],
+        Annotated[ProcessedVolunteerApplication, Tag("volunteer")],
     ],
     Discriminator(get_discriminator_value),
 ]

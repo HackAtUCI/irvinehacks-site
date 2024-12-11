@@ -45,6 +45,7 @@ SAMPLE_APPLICATION = {
     "mentor_team_help_saq4": "",
     "other_questions": "",
     "application_type": "Mentor",
+    "email": "pkfire@uci.edu",
 }
 
 

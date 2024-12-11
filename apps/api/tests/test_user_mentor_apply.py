@@ -30,6 +30,7 @@ SAMPLE_APPLICATION = {
     "last_name": "fire",
     "experienced_technologies": [],
     "pronouns": [],
+    "ethnicity": "eth",
     "is_18_older": "true",
     "school": "UC Irvine",
     "education_level": "Fifth+ Year Undergraduate",
@@ -252,7 +253,7 @@ def test_mentor_application_data_is_bson_encodable() -> None:
     data = EXPECTED_APPLICATION_DATA.model_copy()
     data.linkedin = HttpUrl("https://linkedin.com")
     encoded = bson.encode(EXPECTED_APPLICATION_DATA.model_dump())
-    assert len(encoded) == 467
+    assert len(encoded) == 486
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)

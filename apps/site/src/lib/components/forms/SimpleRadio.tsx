@@ -1,9 +1,8 @@
 import RequiredAsterisk from "./RequiredAsterisk";
 
-interface TextfieldProps {
+interface SimpleRadioProps {
 	name: string;
 	values: Array<{
-		id: string;
 		labelText: string;
 		inputValue: string;
 	}>;
@@ -26,7 +25,7 @@ export default function SimpleRadio({
 	containerClassValues,
 	labelClass,
 	isRequired,
-}: TextfieldProps) {
+}: SimpleRadioProps) {
 	return (
 		<div className={containerClassTotal}>
 			<p className={titleClass}>
@@ -39,12 +38,15 @@ export default function SimpleRadio({
 						<div key={`${name}-${i}`} className={containerClassInputLabels}>
 							<input
 								type="radio"
-								id={value.id}
+								id={`option_${value.inputValue}`}
 								name={name}
 								value={value.inputValue}
 								required={isRequired}
 							/>
-							<label htmlFor={value.id} className={labelClass}>
+							<label
+								htmlFor={`option_${value.inputValue}`}
+								className={labelClass}
+							>
 								{value.labelText}
 							</label>
 						</div>

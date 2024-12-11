@@ -15,7 +15,6 @@ export default async function Mentor({
 			searchParams={searchParams}
 			applicationType="Mentor"
 			applicationURL="/mentor"
-			isHacker={false}
 		>
 			<MentorForm />
 		</ApplicationFlow>

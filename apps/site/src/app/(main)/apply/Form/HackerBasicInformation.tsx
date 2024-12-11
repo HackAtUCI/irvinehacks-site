@@ -1,4 +1,6 @@
 import DropdownSelect from "@/lib/components/forms/DropdownSelect";
+import MultipleSelect from "@/lib/components/forms/MultipleSelect";
+import SimpleRadio from "@/lib/components/forms/SimpleRadio";
 import TextInput from "@/lib/components/forms/TextInput";
 
 const pronouns = [
@@ -21,8 +23,8 @@ const ethnicity = [
 ];
 
 const yesNoOptions = [
-	{ value: "Yes", text: "Yes" },
-	{ value: "No", text: "No" },
+	{ labelText: "Yes", inputValue: "Yes" },
+	{ labelText: "No", inputValue: "No" },
 ];
 
 export default function BasicInformation() {
@@ -33,7 +35,7 @@ export default function BasicInformation() {
 				<TextInput
 					name="first_name"
 					labelText="First Name"
-					containerClass="flex flex-col w-[37.5%] max-[1000px]:w-full"
+					containerClass="flex flex-col w-1/2 max-[1000px]:w-full"
 					isRequired={true}
 					type="text"
 					placeholder="Peter"
@@ -41,31 +43,39 @@ export default function BasicInformation() {
 				<TextInput
 					name="last_name"
 					labelText="Last Name"
-					containerClass="flex flex-col w-[37.5%] max-[1000px]:w-full"
+					containerClass="flex flex-col w-1/2 max-[1000px]:w-full"
 					isRequired={true}
 					type="text"
 					placeholder="Anteater"
 				/>
-				<DropdownSelect
-					name="pronouns"
-					labelText="Pronouns"
-					containerClass="flex flex-col w-3/12 max-[1000px]:w-full"
-					values={pronouns}
-				/>
 			</div>
 
 			<div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
+				<MultipleSelect
+					name="pronouns"
+					labelText="Pronouns"
+					inputType="checkbox"
+					containerClass="flex flex-col w-1/2 max-[1000px]:w-full"
+					values={pronouns}
+				/>
 				<DropdownSelect
 					name="ethnicity"
 					labelText="Race / Ethnicity"
-					containerClass="flex flex-col w-6/12 max-[1000px]:w-full"
+					containerClass="flex flex-col w-1/2 max-[1000px]:w-full"
 					values={ethnicity}
 				/>
-				<DropdownSelect
+			</div>
+			<div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
+				<SimpleRadio
 					name="is_first_hackathon"
-					labelText="Is this your first Hackathon?"
-					containerClass="flex flex-col w-6/12 max-[1000px]:w-full"
 					values={yesNoOptions}
+					title="Is this your first Hackathon?"
+					titleClass="text-xl mb-0.5"
+					containerClassTotal="flex flex-col w-full max-[1000px]:w-full"
+					isRequired={true}
+					labelClass="text-xl"
+					containerClassInputLabels="flex gap-2 items-center"
+					containerClassValues="flex gap-5"
 				/>
 			</div>
 		</div>

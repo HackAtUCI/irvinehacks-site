@@ -15,7 +15,6 @@ export default async function Hacker({
 			searchParams={searchParams}
 			applicationType="Hacker"
 			applicationURL="/apply"
-			isHacker={true}
 		>
 			<HackerForm />
 		</ApplicationFlow>

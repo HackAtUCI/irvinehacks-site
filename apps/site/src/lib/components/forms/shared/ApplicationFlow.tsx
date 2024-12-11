@@ -17,14 +17,12 @@ interface ApplicationFlowProps {
 	};
 	applicationType: "Hacker" | "Mentor" | "Volunteer";
 	applicationURL: "/apply" | "/mentor" | "/volunteer";
-	isHacker: boolean;
 }
 
 export default async function ApplicationFlow({
 	searchParams,
 	applicationType,
 	applicationURL,
-	isHacker,
 	children,
 }: ApplicationFlowProps & PropsWithChildren) {
 	const hasAcceptedQueryParam = searchParams?.prefaceAccepted === "true";
@@ -46,10 +44,10 @@ export default async function ApplicationFlow({
 			<div className="flex justify-center">{children}</div>
 		</>
 	) : (
-		<ApplyConfirm applicationURL={applicationURL} isHacker={isHacker} />
+		<ApplyConfirm applicationURL={applicationURL} role={applicationType} />
 	);
 	return (
-		<div className="flex flex-col items-center gap-10 my-32 min-h-[calc(100vh-8rem)]">
+		<div className="flex flex-col items-center justify-center gap-10 min-h-screen">
 			{!applicationsOpened || deadlinePassed ? (
 				<ApplicationsClosed />
 			) : (

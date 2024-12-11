@@ -1,19 +1,19 @@
 import AgeInformation from "@/lib/components/forms/shared/AgeInformation";
-import Form from "@/lib/components/forms/shared/Form";
+import BaseForm from "@/lib/components/forms/shared/BaseForm";
 import SchoolInformation from "@/lib/components/forms/shared/SchoolInformation";
+import ResumeInformation from "@/lib/components/forms/shared/ResumeInformation";
 
 import BasicInformation from "./HackerBasicInformation";
 import ProfileInformation from "./ProfileInformation";
-import ResumeInformation from "./ResumeInformation";
 
 export default function HackerForm() {
 	return (
-		<Form>
+		<BaseForm applicationType="Hacker" applyPath="/api/user/apply">
 			<BasicInformation />
 			<SchoolInformation />
 			<ProfileInformation />
 			<ResumeInformation />
 			<AgeInformation />
-		</Form>
+		</BaseForm>
 	);
 }

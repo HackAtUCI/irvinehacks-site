@@ -1,10 +1,18 @@
+from typing import Literal, Mapping, TypedDict
+
 from onelogin.saml2.settings import OneLogin_Saml2_Settings
+
+class RequestData(TypedDict):
+    http_host: str  # the hostname
+    script_name: str  # the request path
+    https: Literal["on", "off"]
+    post_data: Mapping[str, str]
 
 class OneLogin_Saml2_Auth:
     def __init__(
         self,
-        request_data: dict[str, object],
-        old_settings: OneLogin_Saml2_Settings | dict[str, object] | None = ...,
+        request_data: RequestData,
+        old_settings: OneLogin_Saml2_Settings | Mapping[str, object] | None = ...,
         custom_base_path: str | None = ...,
     ) -> None: ...
     def process_response(self, request_id: str | None = None) -> None: ...

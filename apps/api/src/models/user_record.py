@@ -4,7 +4,7 @@ from typing import Annotated, Union
 from pydantic import AfterValidator, Field
 from typing_extensions import TypeAlias
 
-from models.ApplicationData import Decision, ProcessedApplicationData
+from models.ApplicationData import Decision, ProcessedApplicationDataUnion
 from services.mongodb_handler import BaseRecord
 
 
@@ -70,6 +70,5 @@ class BareApplicant(UserRecord):
 class Applicant(BareApplicant):
     """Applicant with application data."""
 
-    # Note validators not run on default values
-    roles: RoleWithApplicant = (Role.APPLICANT,)
-    application_data: ProcessedApplicationData
+    roles: RoleWithApplicant
+    application_data: ProcessedApplicationDataUnion

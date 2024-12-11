@@ -1,9 +1,9 @@
 import ApplicationFlow from "@/lib/components/forms/shared/ApplicationFlow";
-import VolunteerForm from "./VolunteerForm";
+import MentorForm from "./Form/MentorForm";
 
 export const revalidate = 60;
 
-export default async function Volunteer({
+export default async function Mentor({
 	searchParams,
 }: {
 	searchParams?: {
@@ -13,10 +13,10 @@ export default async function Volunteer({
 	return (
 		<ApplicationFlow
 			searchParams={searchParams}
-			applicationType="Volunteer"
-			applicationURL="/volunteer"
+			applicationType="Mentor"
+			applicationURL="/mentor"
 		>
-			<VolunteerForm />
+			<MentorForm />
 		</ApplicationFlow>
 	);
 }

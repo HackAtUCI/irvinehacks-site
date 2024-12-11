@@ -25,7 +25,7 @@ class ContactInfo(Protocol):
 
 
 async def send_application_confirmation_email(
-    email: EmailStr, user: ContactInfo
+    email: EmailStr, user: ContactInfo, application_type: str
 ) -> None:
     """Send a confirmation email after a user submits an application.
     Will propagate exceptions from SendGrid."""
@@ -36,6 +36,7 @@ async def send_application_confirmation_email(
             "email": email,
             "first_name": user.first_name,
             "last_name": user.last_name,
+            "application_type": application_type,
         },
     )
 

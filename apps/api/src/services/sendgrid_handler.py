@@ -32,6 +32,7 @@ class PersonalizationData(TypedDict):
 class ConfirmationPersonalization(PersonalizationData):
     first_name: str
     last_name: str
+    application_type: str
 
 
 class GuestTokenPersonalization(PersonalizationData):
@@ -58,8 +59,7 @@ async def send_email(
     receiver_data: ConfirmationPersonalization,
     send_to_multiple: Literal[False] = False,
     reply_to: Union[Tuple[str, str], None] = None,
-) -> None:
-    ...
+) -> None: ...
 
 
 @overload
@@ -69,8 +69,7 @@ async def send_email(
     receiver_data: GuestTokenPersonalization,
     send_to_multiple: Literal[False] = False,
     reply_to: Union[Tuple[str, str], None] = None,
-) -> None:
-    ...
+) -> None: ...
 
 
 @overload
@@ -80,8 +79,7 @@ async def send_email(
     receiver_data: Iterable[ConfirmationPersonalization],
     send_to_multiple: Literal[True],
     reply_to: Union[Tuple[str, str], None] = None,
-) -> None:
-    ...
+) -> None: ...
 
 
 @overload
@@ -91,8 +89,7 @@ async def send_email(
     receiver_data: Iterable[ApplicationUpdatePersonalization],
     send_to_multiple: Literal[True],
     reply_to: Union[Tuple[str, str], None] = None,
-) -> None:
-    ...
+) -> None: ...
 
 
 @overload
@@ -102,8 +99,7 @@ async def send_email(
     receiver_data: ApplicationUpdatePersonalization,
     send_to_multiple: Literal[False],
     reply_to: Union[Tuple[str, str], None] = None,
-) -> None:
-    ...
+) -> None: ...
 
 
 async def send_email(

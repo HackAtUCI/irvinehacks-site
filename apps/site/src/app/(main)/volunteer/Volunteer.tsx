@@ -15,7 +15,6 @@ export default async function Volunteer({
 			searchParams={searchParams}
 			applicationType="Volunteer"
 			applicationURL="/volunteer"
-			isHacker={false}
 		>
 			<VolunteerForm />
 		</ApplicationFlow>

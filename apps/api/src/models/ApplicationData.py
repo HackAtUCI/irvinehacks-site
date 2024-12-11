@@ -8,6 +8,7 @@ from pydantic import (
     BeforeValidator,
     ConfigDict,
     Discriminator,
+    EmailStr,
     Field,
     HttpUrl,
     Tag,
@@ -134,6 +135,7 @@ class RawVolunteerApplicationData(BaseVolunteerApplicationData):
 
 
 class ProcessedHackerApplicationData(BaseApplicationData):
+    email: EmailStr
     resume_url: Union[HttpUrl, None] = None
     submission_time: datetime
     reviews: list[Review] = []
@@ -146,6 +148,7 @@ class ProcessedHackerApplicationData(BaseApplicationData):
 
 
 class ProcessedMentorApplicationData(BaseMentorApplicationData):
+    email: EmailStr
     resume_url: Union[HttpUrl, None] = None
     submission_time: datetime
     reviews: list[Review] = []
@@ -156,9 +159,9 @@ class ProcessedMentorApplicationData(BaseMentorApplicationData):
             return str(val)
         return val
 
-
 class ProcessedVolunteerApplication(BaseVolunteerApplicationData):
     # TODO: specify common attributes in mixin
+    email: EmailStr
     submission_time: datetime
     reviews: list[Review] = []
 

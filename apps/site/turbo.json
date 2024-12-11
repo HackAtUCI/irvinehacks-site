@@ -1,6 +1,6 @@
 {
 	"extends": ["//"],
-	"pipeline": {
+	"tasks": {
 		"build": {
 			"env": ["NEXT_PUBLIC_SANITY_*"],
 			"inputs": [

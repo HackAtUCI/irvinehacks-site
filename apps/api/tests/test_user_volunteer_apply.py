@@ -39,6 +39,7 @@ SAMPLE_APPLICATION = {
     "friday_availability": ["12", "13"],
     "saturday_availability": ["14", "18"],
     "sunday_availability": ["9", "10"],
+    "email": USER_EMAIL,
 }
 
 SAMPLE_SUBMISSION_TIME = datetime(2024, 1, 12, 8, 1, 21, tzinfo=timezone.utc)

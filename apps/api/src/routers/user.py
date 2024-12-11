@@ -223,7 +223,7 @@ async def _apply_flow(
     elif raw_application_data.application_type == "Volunteer":
         processed_application_data = (
             ProcessedApplicationDataUnionAdapter.validate_python(
-                _to_processed_application_data_volunteers(raw_app_data_dump, now)
+                _to_processed_application_data_volunteers(raw_app_data_dump, user, now)
             )
         )
     else:

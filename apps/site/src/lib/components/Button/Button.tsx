@@ -9,7 +9,7 @@ interface ButtonProps {
 	className?: string;
 	href?: ComponentProps<typeof Link>["href"];
 	isLightVersion?: boolean;
-	isNavButton?:boolean
+	isNavButton?: boolean;
 	usePrefetch?: boolean;
 	disabled?: boolean;
 	style?: CSSProperties;
@@ -34,7 +34,7 @@ const Button: React.FC<ButtonProps> = ({
 						styles.button,
 						isLightVersion && styles.lightButton,
 						isNavButton && styles.navButton,
-						isLightVersion ? "font-display" : "font-body",
+						isLightVersion ? "font-body" : "font-display",
 						className,
 					)}
 					style={style}

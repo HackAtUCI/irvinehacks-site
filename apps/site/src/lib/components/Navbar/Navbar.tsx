@@ -1,6 +1,7 @@
 "use client";
 
 import * as NavMenu from "@radix-ui/react-navigation-menu";
+import clsx from "clsx";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
@@ -20,8 +21,8 @@ interface NavbarProps {
 }
 
 function Navbar({ identity }: NavbarProps) {
-	// const { uid, status } = identity;
-	// const isLoggedIn = uid === null;
+	const { uid, status } = identity;
+	const isLoggedIn = uid === null;
 
 	const [listShown, setListShown] = useState(false);
 	const [hasScrolled, setHasScrolled] = useState(false);
@@ -86,18 +87,33 @@ function Navbar({ identity }: NavbarProps) {
 						Home
 					</NavLinkItem>
 					<NavLinkItem
-						href="/#choose-your-character"
+						href="/#apply"
 						className="navMenuLink"
 						onClick={goToChooseChar}
 					>
 						Apply
 					</NavLinkItem>
 
-					<NavLinkItem href="/resources" className="navMenuLink">
+					{/* <NavLinkItem href="/resources" className="navMenuLink">
 						Resources
-					</NavLinkItem>
+					</NavLinkItem> */}
 
-					<Button text="Login" href="/login" usePrefetch={false} isNavButton />
+					{status !== null && <NavLinkItem href="/portal">Portal</NavLinkItem>}
+					{isLoggedIn ? (
+						<Button
+							text="Log In"
+							href="/login"
+							usePrefetch={false}
+							isNavButton
+						/>
+					) : (
+						<a
+							href="/logout"
+							className={clsx(buttonStyles.buttonBox, buttonStyles.navButton)}
+						>
+							Log Out
+						</a>
+					)}
 				</NavMenu.List>
 			</div>
 		</NavMenu.Root>

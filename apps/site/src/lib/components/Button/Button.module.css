@@ -49,9 +49,9 @@
 
 .navButton {
 	border: 3px solid #fff;
-	background: #0c071b;
+	background: var(--color-black);
 	padding: 0.3rem 0.75rem;
-	font-size: 18px;
+	font-size: 1.125rem;
 	border-radius: 5px;
 	cursor: pointer;
 	transition: all 0.3s ease;

@@ -38,7 +38,7 @@ export default function SimpleRadio({
 						<div key={`${name}-${i}`} className={containerClassInputLabels}>
 							<input
 								type="radio"
-								id={`option_${value.inputValue}`}
+								id={`option_${name}_${value.inputValue}`}
 								name={name}
 								value={value.inputValue}
 								required={isRequired}

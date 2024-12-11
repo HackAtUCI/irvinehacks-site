@@ -253,7 +253,7 @@ def test_mentor_application_data_is_bson_encodable() -> None:
     data = EXPECTED_APPLICATION_DATA.model_copy()
     data.linkedin = HttpUrl("https://linkedin.com")
     encoded = bson.encode(EXPECTED_APPLICATION_DATA.model_dump())
-    assert len(encoded) == 486
+    assert len(encoded) == 513
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)

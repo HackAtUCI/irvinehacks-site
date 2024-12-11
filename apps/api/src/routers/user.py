@@ -1,7 +1,6 @@
-import json
 from datetime import datetime, timezone
 from logging import getLogger
-from typing import Annotated, Union, Any
+from typing import Annotated, Union
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Depends, Form, Header, HTTPException, Request, status
@@ -13,6 +12,7 @@ from auth import user_identity
 from auth.authorization import require_accepted_applicant
 from auth.user_identity import User, require_user_identity, use_user_identity
 from models.ApplicationData import (
+    FIELDS_SUPPORTING_OTHER,
     ProcessedApplicationDataUnion,
     RawHackerApplicationData,
     RawMentorApplicationData,
@@ -85,26 +85,80 @@ async def me(
     return IdentityResponse(uid=user.uid, **user_record)
 
 
-async def _to_processed_application_data_hackers_mentors(
-    raw_application_data: Union[
-        RawHackerApplicationData,
-        RawMentorApplicationData,
-        RawVolunteerApplicationData,
+@router.post("/apply", status_code=status.HTTP_201_CREATED)
+async def apply(
+    user: Annotated[User, Depends(require_user_identity)],
+    # media type should be automatically detected but seems like a bug as of now
+    raw_application_data: Annotated[
+        RawHackerApplicationData, Form(media_type="multipart/form-data")
     ],
-    raw_app_data_dump: dict[str, Any],
+) -> str:
+    return await _apply_flow(user, raw_application_data)
+
+
+@router.post("/mentor", status_code=status.HTTP_201_CREATED)
+async def mentor(
+    user: Annotated[User, Depends(require_user_identity)],
+    # media type should be automatically detected but seems like a bug as of now
+    raw_application_data: Annotated[
+        RawMentorApplicationData, Form(media_type="multipart/form-data")
+    ],
+) -> str:
+    return await _apply_flow(user, raw_application_data)
+
+
+@router.post("/volunteer", status_code=status.HTTP_201_CREATED)
+async def volunteer(
+    user: Annotated[User, Depends(require_user_identity)],
+    raw_application_data: Annotated[RawVolunteerApplicationData, Form()],
+) -> str:
+    return await _apply_flow(user, raw_application_data)
+
+
+async def _apply_flow(
     user: User,
-    now: datetime,
-) -> dict[str, Any]:
+    raw_application_data: Union[
+        RawHackerApplicationData, RawMentorApplicationData, RawVolunteerApplicationData
+    ],
+) -> str:
+    """Common flow for all three types of applications."""
+    # Check if current datetime is past application deadline
+    now = datetime.now(timezone.utc)
+
+    if _is_past_deadline(now):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Applications have closed.")
+
+    # check if user already has a role
+    existing_record = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": user.uid, "roles": {"$exists": True}}, ["roles"]
+    )
+
+    if existing_record and existing_record.get("roles"):
+        log.error(
+            "User %s already has role %s but tried to apply.",
+            user,
+            existing_record["roles"],
+        )
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "User already has a role.")
+
+    raw_app_data_dump = raw_application_data.model_dump()
+
+    # Reject unprocessed other values
+    for field in FIELDS_SUPPORTING_OTHER:
+        value = raw_app_data_dump.get(field)
+        if value == "other" or (isinstance(value, list) and "other" in value):
+            raise HTTPException(
+                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                "Please enable JavaScript on your browser.",
+            )
+
     resume = raw_application_data.resume
     if resume is not None and resume.size and resume.size > 0:
         try:
             resume_url = await resume_handler.upload_resume(
+                # TODO: reexamine why adapter is needed
                 TypeAdapter(
-                    Union[
-                        RawHackerApplicationData,
-                        RawMentorApplicationData,
-                        RawVolunteerApplicationData,
-                    ]
+                    Union[RawHackerApplicationData, RawMentorApplicationData]
                 ).validate_python(raw_application_data),
                 resume,
             )
@@ -124,116 +178,24 @@ async def _to_processed_application_data_hackers_mentors(
     else:
         resume_url = None
 
-    return {
-        **raw_app_data_dump,
-        "resume_url": resume_url,
-        "submission_time": now,
-    }
+    application_type = raw_application_data.application_type
 
-
-def _to_processed_application_data_volunteers(
-    raw_app_data_dump: dict[str, Any],
-    now: datetime,
-) -> dict[str, Any]:
-
-    try:
-        raw_app_data_dump["friday_availability"] = json.loads(
-            raw_app_data_dump["friday_availability"]
-        )
-        raw_app_data_dump["saturday_availability"] = json.loads(
-            raw_app_data_dump["saturday_availability"]
-        )
-        raw_app_data_dump["sunday_availability"] = json.loads(
-            raw_app_data_dump["sunday_availability"]
-        )
-    except json.JSONDecodeError:
-        raise HTTPException(
-            status.HTTP_422_UNPROCESSABLE_ENTITY,
-            "Invalid availability format.",
-        )
-
-    return {
-        **raw_app_data_dump,
-        "submission_time": now,
-    }
-
-
-async def _apply_flow(
-    user: User,
-    raw_application_data: Union[
-        RawHackerApplicationData, RawMentorApplicationData, RawVolunteerApplicationData
-    ],
-) -> str:
-    # Check if current datetime is past application deadline
-    now = datetime.now(timezone.utc)
-
-    if _is_past_deadline(now):
-        raise HTTPException(status.HTTP_403_FORBIDDEN, "Applications have closed.")
-
-    # check if email is already in database
-    existing_record = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": user.uid, "roles": {"exists": True}}, ["roles"]
+    # Note: spreading is assumed to be safe since form data was already validated once
+    processed_application_data = TypeAdapter[ProcessedApplicationDataUnion](
+        ProcessedApplicationDataUnion
+    ).validate_python(
+        {
+            **raw_app_data_dump,
+            "resume_url": resume_url,
+            "submission_time": now,
+        }
     )
-
-    if existing_record and existing_record.get("roles"):
-        log.error(
-            "User %s already has role %s but tried to apply.",
-            user,
-            existing_record["roles"],
-        )
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, "User already has a role.")
-
-    raw_app_data_dump = raw_application_data.model_dump()
-
-    for field in [
-        "pronouns",
-        "ethnicity",
-        "school",
-        "major",
-        "experienced_technologies",
-    ]:
-        value = raw_app_data_dump.get(field)
-        if value == "other" or (isinstance(value, list) and "other" in value):
-            raise HTTPException(
-                status.HTTP_422_UNPROCESSABLE_ENTITY,
-                "Please enable JavaScript on your browser.",
-            )
-
-    ProcessedApplicationDataUnionAdapter: TypeAdapter[ProcessedApplicationDataUnion] = (
-        TypeAdapter(ProcessedApplicationDataUnion)
-    )
-
-    if (
-        raw_application_data.application_type == "Hacker"
-        or raw_application_data.application_type == "Mentor"
-    ):
-        processed_application_data = (
-            ProcessedApplicationDataUnionAdapter.validate_python(
-                await _to_processed_application_data_hackers_mentors(
-                    raw_application_data,
-                    raw_app_data_dump,
-                    user,
-                    now,
-                )
-            )
-        )
-    elif raw_application_data.application_type == "Volunteer":
-        processed_application_data = (
-            ProcessedApplicationDataUnionAdapter.validate_python(
-                _to_processed_application_data_volunteers(raw_app_data_dump, now)
-            )
-        )
-    else:
-        raise HTTPException(
-            status.HTTP_422_UNPROCESSABLE_ENTITY,
-            "Invalid application type.",
-        )
 
     applicant = Applicant(
         uid=user.uid,
         first_name=raw_application_data.first_name,
         last_name=raw_application_data.last_name,
-        roles=(Role.APPLICANT, Role(raw_application_data.application_type)),
+        roles=(Role.APPLICANT, Role(application_type)),
         application_data=processed_application_data,
         status=Status.PENDING_REVIEW,
     )
@@ -252,7 +214,7 @@ async def _apply_flow(
 
     try:
         await email_handler.send_application_confirmation_email(
-            user.email, applicant, raw_application_data.application_type
+            user.email, applicant, application_type
         )
     except RuntimeError:
         log.error("Could not send confirmation email with SendGrid to %s.", user.uid)
@@ -265,42 +227,6 @@ async def _apply_flow(
         "Thank you for submitting an application to IrvineHacks 2024! Please "
         + "visit https://irvinehacks.com/portal to see your application status."
     )
-
-
-@router.post("/apply", status_code=status.HTTP_201_CREATED)
-async def apply(
-    user: Annotated[User, Depends(require_user_identity)],
-    # media type should be automatically detected but seems like a bug as of now
-    raw_application_data: Annotated[
-        RawHackerApplicationData,
-        Form(media_type="multipart/form-data"),
-    ],
-) -> str:
-    return await _apply_flow(user, raw_application_data)
-
-
-@router.post("/mentor", status_code=status.HTTP_201_CREATED)
-async def mentor(
-    user: Annotated[User, Depends(require_user_identity)],
-    # media type should be automatically detected but seems like a bug as of now
-    raw_application_data: Annotated[
-        RawMentorApplicationData,
-        Form(media_type="multipart/form-data"),
-    ],
-) -> str:
-    return await _apply_flow(user, raw_application_data)
-
-
-@router.post("/volunteer", status_code=status.HTTP_201_CREATED)
-async def volunteer(
-    user: Annotated[User, Depends(require_user_identity)],
-    # media type should be automatically detected but seems like a bug as of now
-    raw_application_data: Annotated[
-        RawVolunteerApplicationData,
-        Form(media_type="multipart/form-data"),
-    ],
-) -> str:
-    return await _apply_flow(user, raw_application_data)
 
 
 @router.get("/waiver")

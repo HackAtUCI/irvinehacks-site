@@ -5,6 +5,7 @@ interface ConfirmationDetailsProps {
 	applicationURL: string;
 	appDescription?: string;
 	roleText: string;
+	role: "Hacker" | "Mentor" | "Volunteer";
 }
 
 export default async function ConfirmationDetails({
@@ -12,6 +13,7 @@ export default async function ConfirmationDetails({
 	applicationURL,
 	appDescription,
 	roleText,
+	role,
 }: ConfirmationDetailsProps) {
 	return (
 		<div className="flex flex-col items-center gap-8 p-10 max-w-screen-lg md:p-6 md:px-10 md:py-8 border-[2px] md:border-[5px] border-[var(--color-white)] text-[var(--color-white)] bg-[var(--color-black)]">
@@ -35,7 +37,8 @@ export default async function ConfirmationDetails({
 				</>
 			)}
 			<p className="text-lg">
-				By submitting an application for IrvineHacks 2025, I understand that
+				By submitting an application for IrvineHacks 2025 as a{" "}
+				<strong className="text-[#FBA80A]">{role}</strong>, I understand that
 				IrvineHacks will take place in person during the day from January 24 to
 				26, and that IrvineHacks will not be providing transportation or
 				overnight accommodations. {roleText}

@@ -29,6 +29,7 @@ export default async function ApplyConfirm({
 			<ConfirmationDetails
 				isLoggedIn={identity.uid !== null}
 				applicationURL={applicationURL}
+				role={applicationType}
 				roleText={roleText}
 				appDescription={appDescription}
 			/>

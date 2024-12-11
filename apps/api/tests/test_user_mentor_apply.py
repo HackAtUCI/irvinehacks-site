@@ -30,6 +30,7 @@ SAMPLE_APPLICATION = {
     "last_name": "fire",
     "experienced_technologies": [],
     "pronouns": [],
+    "ethnicity": "eth",
     "is_18_older": "true",
     "school": "UC Irvine",
     "education_level": "Fifth+ Year Undergraduate",
@@ -75,7 +76,7 @@ EXPECTED_USER = Applicant(
     status=Status.PENDING_REVIEW,
 )
 
-resume_handler.RESUMES_FOLDER_ID = "RESUMES_FOLDER_ID"
+resume_handler.MENTOR_RESUMES_FOLDER_ID = "MENTOR_RESUMES_FOLDER_ID"
 
 app = FastAPI()
 app.include_router(user.router)
@@ -105,7 +106,7 @@ def test_mentor_apply_successfully(
     res = client.post("/mentor", data=SAMPLE_APPLICATION, files=SAMPLE_FILES)
 
     mock_gdrive_handler_upload_file.assert_awaited_once_with(
-        resume_handler.RESUMES_FOLDER_ID, *EXPECTED_RESUME_UPLOAD
+        resume_handler.MENTOR_RESUMES_FOLDER_ID, *EXPECTED_RESUME_UPLOAD
     )
     mock_mongodb_handler_update_one.assert_awaited_once_with(
         Collection.USERS,
@@ -252,7 +253,7 @@ def test_mentor_application_data_is_bson_encodable() -> None:
     data = EXPECTED_APPLICATION_DATA.model_copy()
     data.linkedin = HttpUrl("https://linkedin.com")
     encoded = bson.encode(EXPECTED_APPLICATION_DATA.model_dump())
-    assert len(encoded) == 467
+    assert len(encoded) == 486
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)

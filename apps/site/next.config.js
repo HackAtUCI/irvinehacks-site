@@ -1,3 +1,5 @@
+const { withAxiom } = require("next-axiom");
+
 // All server-side API requests are handled by lib/utils/api.ts
 // but this rewrite still exists for locally testing native POST requests
 const LOCAL_API_URL = "http://localhost:8000";
@@ -15,7 +17,7 @@ const DOCUSIGN_FORM_URL =
 	"&v=2";
 
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig = withAxiom({
 	rewrites: async () => {
 		return [
 			{
@@ -61,6 +63,6 @@ const nextConfig = {
 			// },
 		];
 	},
-};
+});
 
 module.exports = nextConfig;

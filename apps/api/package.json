@@ -7,7 +7,7 @@
 		"dev:default": "./run-docker.sh",
 		"test": "pytest",
 		"lint": "flake8 src tests && mypy src tests",
-		"build": "mkdir -p lib && pip install --target lib -r requirements.txt",
+		"build": "mkdir -p lib && pip install --target lib -r requirements.txt axiom-py",
 		"format:write": "black src tests",
 		"format:check": "black --check src tests"
 	},

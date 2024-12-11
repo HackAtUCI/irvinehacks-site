@@ -1,5 +1,8 @@
 import logging
+import os
 
+import axiom_py
+from axiom_py.logging import AxiomHandler
 from fastapi import FastAPI
 
 from app import app as api
@@ -14,8 +17,25 @@ if not AUTH_KEY_SALT:
 if not DOCUSIGN_HMAC_KEY:
     raise RuntimeError("DOCUSIGN_HMAC_KEY is not defined")
 
-# Override AWS Lambda logging configuration
-logging.basicConfig(level=logging.INFO, force=True)
+AXIOM_TOKEN = os.getenv("NEXT_PUBLIC_AXIOM_TOKEN")
+AXIOM_DATASET = os.getenv("NEXT_PUBLIC_AXIOM_DATASET")
+
+
+def setup_logging() -> None:
+    """
+    Configure root logger to send data to Axiom.
+    Important: `handler` cannot be global since vc_init will incorrectly register that.
+    """
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.INFO)
+
+    if AXIOM_TOKEN and AXIOM_DATASET:
+        client = axiom_py.Client(AXIOM_TOKEN)
+        handler = AxiomHandler(client, AXIOM_DATASET)
+        root_logger.addHandler(handler)
+
+
+setup_logging()
 
 # This ASGI app is used by Vercel as a Serverless Function
 app = FastAPI()

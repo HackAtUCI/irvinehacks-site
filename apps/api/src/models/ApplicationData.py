@@ -81,6 +81,7 @@ class BaseMentorApplicationData(BaseModel):
     mentor_interest_saq2: str = Field(max_length=2048)
     mentor_team_help_saq3: str = Field(max_length=2048)
     mentor_team_help_saq4: str = Field(max_length=2048)
+    resume_share_to_sponsors: bool = False
     other_questions: Union[str, None] = Field(None, max_length=2048)
 
 

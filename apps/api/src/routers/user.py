@@ -126,6 +126,7 @@ async def _to_processed_application_data_hackers_mentors(
 
     return {
         **raw_app_data_dump,
+        "email": user.email,
         "resume_url": resume_url,
         "submission_time": now,
     }
@@ -133,6 +134,7 @@ async def _to_processed_application_data_hackers_mentors(
 
 def _to_processed_application_data_volunteers(
     raw_app_data_dump: dict[str, Any],
+    user: User,
     now: datetime,
 ) -> dict[str, Any]:
 
@@ -154,6 +156,7 @@ def _to_processed_application_data_volunteers(
 
     return {
         **raw_app_data_dump,
+        "email": user.email,
         "submission_time": now,
     }
 
@@ -220,7 +223,7 @@ async def _apply_flow(
     elif raw_application_data.application_type == "Volunteer":
         processed_application_data = (
             ProcessedApplicationDataUnionAdapter.validate_python(
-                _to_processed_application_data_volunteers(raw_app_data_dump, now)
+                _to_processed_application_data_volunteers(raw_app_data_dump, user, now)
             )
         )
     else:

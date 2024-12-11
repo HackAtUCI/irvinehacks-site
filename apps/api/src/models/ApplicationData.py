@@ -8,6 +8,7 @@ from pydantic import (
     BeforeValidator,
     ConfigDict,
     Discriminator,
+    EmailStr,
     Field,
     HttpUrl,
     Tag,
@@ -122,6 +123,7 @@ class RawVolunteerApplicationData(VolunteerApplicationData):
 
 
 class ProcessedHackerApplicationData(BaseApplicationData):
+    email: EmailStr
     resume_url: Union[HttpUrl, None] = None
     submission_time: datetime
     reviews: list[Review] = []
@@ -134,6 +136,7 @@ class ProcessedHackerApplicationData(BaseApplicationData):
 
 
 class ProcessedMentorApplicationData(BaseMentorApplicationData):
+    email: EmailStr
     resume_url: Union[HttpUrl, None] = None
     submission_time: datetime
     reviews: list[Review] = []
@@ -146,6 +149,7 @@ class ProcessedMentorApplicationData(BaseMentorApplicationData):
 
 
 class ProcessedVolunteerData(BaseVolunteerApplicationData):
+    email: EmailStr
     submission_time: datetime
     reviews: list[Review] = []
     friday_availability: dict[str, bool]

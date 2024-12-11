@@ -36,6 +36,7 @@ BASE_APPLICATION = {
     "frq_utensil": "",
     "other_questions": "",
     "application_type": "Volunteer",
+    "email": USER_EMAIL,
 }
 
 SAMPLE_APPLICATION = {
@@ -250,7 +251,7 @@ def test_volunteer_apply_with_confirmation_email_issue_causes_500(
 def test_volunteer_application_data_is_bson_encodable() -> None:
     """Test that application data model can be encoded into BSON to store in MongoDB."""
     encoded = bson.encode(EXPECTED_APPLICATION_DATA.model_dump())
-    assert len(encoded) == 369
+    assert len(encoded) == 395
 
 
 def test_volunteer_past_deadline_causes_403() -> None:

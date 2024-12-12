@@ -13,10 +13,13 @@
 	display: inline-block;
 	background-color: white;
 
-	&:hover > .button {
+	& > .button {
 		transition: all 0.15s ease-out;
-		transform: translate(-8px, -8px);
-		filter: brightness(1.05);
+
+		&:hover {
+			transform: translate(-8px, -8px);
+			filter: brightness(1.05);
+		}
 	}
 }
 

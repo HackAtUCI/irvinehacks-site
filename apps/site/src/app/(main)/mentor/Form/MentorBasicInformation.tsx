@@ -48,7 +48,7 @@ export default function MentorBasicInformation() {
 				<MultipleSelect
 					name="pronouns"
 					labelText="Preferred Pronouns"
-					containerClass="flex flex-col w-1/2"
+					containerClass="flex flex-col w-1/2 max-[1000px]:w-full"
 					inputType="checkbox"
 					values={pronouns}
 				/>

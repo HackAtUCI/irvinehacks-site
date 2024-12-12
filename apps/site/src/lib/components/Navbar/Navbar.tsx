@@ -10,7 +10,7 @@ import HackLogo from "@/lib/components/HackLogo/HackLogo";
 import NavLinkItem from "./NavbarHelpers";
 
 import hamburger from "@/assets/icons/navigation-icon.svg";
-import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
+// import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
 
 import buttonStyles from "@/lib/components/Button/Button.module.scss";
 import styles from "./Navbar.module.scss";

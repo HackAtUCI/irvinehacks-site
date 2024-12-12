@@ -88,7 +88,7 @@ export default function DayShift({
 								{as12Hour(startHour + i)}
 							</div>
 							<div
-								className={`h-[30px] w-full ${
+								className={`h-[50px] md:h-[30px] w-full ${
 									i === num_hours ? "" : "border-black border-b-2"
 								} ${available ? "bg-blue-500" : "bg-gray-200"}`}
 								onMouseDown={(e) => onMouseDown(e, i)}

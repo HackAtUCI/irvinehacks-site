@@ -23,8 +23,18 @@ import styles from "./Landing.module.css";
 const Landing = () => {
 	const deadlinePassed = hasDeadlinePassed();
 	const applicationsOpened = haveApplicationsOpened();
-	const [loaded, setLoaded] = useState(0);
+	const [imagesLoaded, setImagesLoaded] = useState<boolean>(false);
 	const scrollTo = useRef<null | HTMLDivElement>(null);
+
+	const totalImages = 8; // Total number of images
+	const loadCount = useRef(0);
+	
+	const handleImageLoad = () => {
+		loadCount.current += 1;
+	  	if (loadCount.current === totalImages) {
+			setImagesLoaded(true);
+	  	} 
+	};
 
 	const applyClick = () => {
 		scrollTo.current?.scrollIntoView({ behavior: "smooth" });
@@ -36,7 +46,7 @@ const Landing = () => {
 				className={`${
 					styles.landingBackground
 				} min-h-screen pb-[200px] relative overflow-hidden max-lg:h-[1500px] ${
-					loaded < 8 ? "blur-sm" : ""
+					imagesLoaded ? "" : "blur-sm"
 				} duration-500`}
 			>
 				<div
@@ -82,10 +92,9 @@ const Landing = () => {
 						<Image
 							src={Cloud2}
 							priority
-							fill={true}
 							alt="clouds"
 							className="absolute top-[-200px] min-w-[1800px] w-full max-lg:min-w-[150%]"
-							onLoad={() => setLoaded((loaded) => loaded + 1)}
+							onLoad={handleImageLoad}
 						/>
 
 						<div className="absolute min-w-[570px] w-full">
@@ -94,7 +103,7 @@ const Landing = () => {
 								priority
 								alt="background pillars"
 								className="absolute min-w-[570px] w-full 2xl:max-h-[2500px]"
-								onLoad={() => setLoaded((loaded) => loaded + 1)}
+								onLoad={handleImageLoad}
 							/>
 						</div>
 
@@ -115,7 +124,7 @@ const Landing = () => {
 									priority
 									alt="background pillars"
 									className="w-full"
-									onLoad={() => setLoaded((loaded) => loaded + 1)}
+									onLoad={handleImageLoad}
 								/>
 							</motion.div>
 						</div>
@@ -129,7 +138,7 @@ const Landing = () => {
 								priority
 								alt="castle"
 								className="w-full 2xl:w-[75vw] h-full mt-[50px] sm:mt-[100px] min-w-[520px]"
-								onLoad={() => setLoaded((loaded) => loaded + 1)}
+								onLoad={handleImageLoad}
 							/>
 						</motion.div>
 
@@ -138,21 +147,21 @@ const Landing = () => {
 							priority
 							alt="anteater cliff"
 							className={`absolute top-[31%] max-lg:top-[33%] min-w-[520px] w-full`}
-							onLoad={() => setLoaded((loaded) => loaded + 1)}
+							onLoad={handleImageLoad}
 						/>
 						<Image
 							src={Cloud1}
 							priority
 							alt="clouds"
 							className={`${styles.cloudAnim} absolute top-[-280px] min-w-[1800px] max-lg:min-w-[150%] opacity-50 w-full`}
-							onLoad={() => setLoaded((loaded) => loaded + 1)}
+							onLoad={handleImageLoad}
 						/>
 						<Image
 							src={Cloud1}
 							priority
 							alt="clouds"
 							className={`${styles.cloudAnim} absolute top-28 min-w-[1800px] w-full max-lg:min-w-[150%] max-lg:top-0`}
-							onLoad={() => setLoaded((loaded) => loaded + 1)}
+							onLoad={handleImageLoad}
 						/>
 					</div>
 					<Image
@@ -160,7 +169,7 @@ const Landing = () => {
 						priority
 						alt="foreground clouds"
 						className={`${styles.bottomCloud} absolute bottom-[200px] md:bottom-16 xxl:bottom-0 w-full`}
-						onLoad={() => setLoaded((loaded) => loaded + 1)}
+						onLoad={handleImageLoad}
 					/>
 				</div>
 				<About />

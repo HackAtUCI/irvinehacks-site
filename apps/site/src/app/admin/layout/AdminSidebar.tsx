@@ -15,7 +15,7 @@ function AdminSidebar() {
 	const pathname = usePathname();
 	const followWithNextLink = useFollowWithNextLink();
 
-	const { role } = useContext(UserContext);
+	const { roles } = useContext(UserContext);
 
 	const navigationItems: SideNavigationProps.Item[] = [
 		{ type: "link", text: "Dashboard", href: "/admin/dashboard" },
@@ -25,7 +25,7 @@ function AdminSidebar() {
 		{ type: "link", text: "Back to main site", href: "/" },
 	];
 
-	if (isApplicationManager(role)) {
+	if (isApplicationManager(roles)) {
 		navigationItems.splice(1, 0, {
 			type: "link",
 			text: "Applicants",

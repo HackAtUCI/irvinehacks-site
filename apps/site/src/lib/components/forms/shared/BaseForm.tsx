@@ -1,23 +1,30 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, PropsWithChildren, useState } from "react";
 import axios from "axios";
 
 import Button from "@/lib/components/Button/Button";
 
-import BasicInformation from "./BasicInformation";
-import AgeInformation from "./AgeInformation";
-import SchoolInformation from "./SchoolInformation";
-import ProfileInformation from "./ProfileInformation";
-import ResumeInformation from "./ResumeInformation";
-
-import styles from "./Form.module.scss";
 import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
 
-const APPLY_PATH = "/api/user/apply";
-const FIELDS_WITH_OTHER = ["pronouns", "ethnicity", "school", "major"];
+const FIELDS_WITH_OTHER = [
+	"pronouns",
+	"ethnicity",
+	"school",
+	"major",
+	"experienced_technologies",
+];
 
-export default function Form() {
+interface BaseFormProps {
+	applicationType: "Hacker" | "Mentor" | "Volunteer";
+	applyPath: string;
+}
+
+export default function BaseForm({
+	applicationType,
+	applyPath,
+	children,
+}: PropsWithChildren<BaseFormProps>) {
 	const [submitting, setSubmitting] = useState(false);
 	const [sessionExpired, setSessionExpired] = useState(false);
 
@@ -42,18 +49,24 @@ export default function Form() {
 
 		// Use other values when selected
 		for (const field of FIELDS_WITH_OTHER) {
-			const otherField = `other_${field}`;
-			if (formData.get(field) === "other") {
-				formData.set(field, formData.get(otherField)!);
-				formData.delete(otherField);
-			}
+			const otherField = `_other_${field}`;
+			const otherFieldValue = formData.get(otherField);
+
+			formData.delete(otherField);
+
+			const valuesWithoutOther = formData
+				.getAll(field)
+				.filter((value) => value !== "other");
+
+			formData.delete(field);
+
+			for (const value of valuesWithoutOther) formData.append(field, value);
+
+			if (otherFieldValue) formData.append(field, otherFieldValue);
 		}
 
-		// const formEntries = Object.fromEntries(formData.entries());
-		// console.debug(formEntries);
-
 		try {
-			const res = await axios.post(APPLY_PATH, formData);
+			const res = await axios.post(applyPath, formData);
 			if (res.status === 201) {
 				console.log("Application submitted");
 
@@ -88,16 +101,19 @@ export default function Form() {
 	return (
 		<form
 			method="post"
-			className={`${styles.form} text-[var(--color-white)] w-8/12 flex flex-col items-center py-12 gap-14 z-1 max-[800px]:w-9/12 max-[400px]:w-11/12 drop-shadow-[25px_33px_0px_rgba(255,255,255,1)]`}
-			action="/api/user/apply"
+			className="bg-black border-[5px] border-white text-[var(--color-white)] w-8/12 flex flex-col items-center py-12 gap-14 z-1 max-[800px]:w-9/12 max-[400px]:w-11/12 drop-shadow-[25px_33px_0px_rgba(255,255,255,1)]"
+			action={applyPath}
 			encType="multipart/form-data"
 			onSubmit={handleSubmit}
 		>
-			<BasicInformation />
-			<SchoolInformation />
-			<ProfileInformation />
-			<ResumeInformation />
-			<AgeInformation />
+			<input
+				type="text"
+				name="application_type"
+				value={applicationType}
+				readOnly
+				hidden
+			/>
+			{children}
 			<Button
 				text="Submit"
 				className="text-2xl !px-11 !py-2"

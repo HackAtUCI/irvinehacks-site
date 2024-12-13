@@ -1,16 +1,8 @@
 import SimpleRadio from "@/lib/components/forms/SimpleRadio";
 
 const yesNoOptions = [
-	{
-		id: "minor-yes",
-		labelText: "Yes",
-		inputValue: "Yes",
-	},
-	{
-		id: "minor-no",
-		labelText: "No",
-		inputValue: "No",
-	},
+	{ labelText: "Yes", inputValue: "Yes" },
+	{ labelText: "No", inputValue: "No" },
 ];
 
 export default function AgeInformation() {
@@ -24,8 +16,6 @@ export default function AgeInformation() {
 					2025.
 				</p>
 				<p className="text-[#FF2222] m-0 text-lg">
-					We will be checking ID. If you are a minor, you will be turned away at
-					the door.
 					We will be checking ID. If you are a minor, you will be turned away at
 					the door.
 				</p>

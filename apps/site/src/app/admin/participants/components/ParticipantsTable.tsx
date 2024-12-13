@@ -11,7 +11,7 @@ import SpaceBetween from "@cloudscape-design/components/space-between";
 import Table, { TableProps } from "@cloudscape-design/components/table";
 
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
-import { Participant } from "@/lib/admin/useParticipants";
+import { Participant, Role } from "@/lib/admin/useParticipants";
 
 import CheckinDayIcon from "./CheckinDayIcon";
 import ParticipantAction from "./ParticipantAction";
@@ -42,7 +42,7 @@ const SEARCHABLE_COLUMNS: (keyof Participant)[] = [
 	"_id",
 	"first_name",
 	"last_name",
-	"role",
+	"roles",
 	"status",
 	"badge_number",
 ];
@@ -88,7 +88,7 @@ function ParticipantsTable({
 			"uid",
 			"firstName",
 			"lastName",
-			"role",
+			"roles",
 			"status",
 			"badgeNumber",
 			"friday",
@@ -100,7 +100,10 @@ function ParticipantsTable({
 	const [filterRole, setFilterRole] = useState<Options>([]);
 	const [filterStatus, setFilterStatus] = useState<Options>([]);
 	const matchesRole = (p: Participant) =>
-		filterRole.length === 0 || filterRole.map((r) => r.value).includes(p.role);
+		filterRole.length === 0 ||
+		filterRole
+			.map((r) => r.value)
+			.some((role) => p.roles.includes(role as Role));
 	const matchesStatus = (p: Participant) =>
 		filterStatus.length === 0 ||
 		filterStatus.map((s) => s.value).includes(p.status);
@@ -151,7 +154,7 @@ function ParticipantsTable({
 		selection: {},
 	});
 
-	const allRoles = new Set(participants.map((p) => p.role));
+	const allRoles = new Set(participants.flatMap((p) => p.roles));
 	const roleOptions = Array.from(allRoles).map((r) => ({ value: r, label: r }));
 	const allStatuses = new Set(participants.map((p) => p.status));
 	const statusOptions = Array.from(allStatuses).map((s) => ({
@@ -195,11 +198,11 @@ function ParticipantsTable({
 			sortingField: "last_name",
 		},
 		{
-			id: "role",
-			header: "Role",
+			id: "roles",
+			header: "Roles",
 			cell: RoleBadge,
-			ariaLabel: createLabelFunction("Role"),
-			sortingField: "role",
+			ariaLabel: createLabelFunction("Roles"),
+			sortingField: "roles",
 		},
 		{
 			id: "status",

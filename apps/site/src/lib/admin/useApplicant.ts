@@ -52,7 +52,7 @@ export interface Applicant {
 	_id: Uid;
 	first_name: string;
 	last_name: string;
-	role: string;
+	roles: ReadonlyArray<string>;
 	status: Status;
 	application_data: ApplicationData;
 }

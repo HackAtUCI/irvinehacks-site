@@ -12,28 +12,30 @@ from services.mongodb_handler import Collection
 app = FastAPI()
 app.include_router(user.router)
 
-client = TestClient(app)
+client = TestClient(app, follow_redirects=False)
 
 
 def test_login_as_uci_redirects_to_saml() -> None:
     """Tests that logging in with UCI email redirects to SAML for UCI SSO"""
     res = client.post("/login", data={"email": "hack@uci.edu"}, follow_redirects=False)
     assert res.status_code == status.HTTP_303_SEE_OTHER
-    assert res.headers["location"] == "/api/saml/login"
+    assert res.headers["location"] == "/api/saml/login?return_to=%2Fportal"
 
 
 def test_login_as_non_uci_redirects_to_guest_login() -> None:
     """Test that logging in with a non-UCI email redirects to guest login endpoint."""
     res = client.post(
-        "/login", data={"email": "jeff@amazon.com"}, follow_redirects=False
+        "/login?return_to=%2Fbooks",
+        data={"email": "jeff@amazon.com"},
+        follow_redirects=False,
     )
     assert res.status_code == status.HTTP_307_TEMPORARY_REDIRECT
-    assert res.headers["location"] == "/api/guest/login"
+    assert res.headers["location"] == "/api/guest/login?return_to=%2Fbooks"
 
 
 def test_logout() -> None:
     """Test that logging out removes the authentication cookie."""
-    res = client.get("/logout", follow_redirects=False)
+    res = client.get("/logout")
     assert res.status_code == status.HTTP_303_SEE_OTHER
     assert res.headers["location"] == "/"
     assert res.headers["Set-Cookie"].startswith('irvinehacks_auth=""; Max-Age=0;')
@@ -43,7 +45,7 @@ def test_no_identity_when_unauthenticated() -> None:
     """Test that identity is empty when not authenticated."""
     res = client.get("/me")
     data = res.json()
-    assert data == {"uid": None, "status": None, "role": None}
+    assert data == {"uid": None, "status": None, "roles": []}
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
@@ -56,10 +58,10 @@ def test_plain_identity_when_no_user_record(
     res = client.get("/me")
 
     mock_mongodb_handler_retrieve_one.assert_awaited_once_with(
-        Collection.USERS, {"_id": "edu.stanford.tree"}, ["role", "status"]
+        Collection.USERS, {"_id": "edu.stanford.tree"}, ["roles", "status"]
     )
     data = res.json()
-    assert data == {"uid": "edu.stanford.tree", "status": None, "role": None}
+    assert data == {"uid": "edu.stanford.tree", "status": None, "roles": []}
 
 
 @patch("services.mongodb_handler.update_one", autospec=True)
@@ -143,7 +145,7 @@ def test_user_me_route_returns_correct_type(
     """Test user me route returns correct fields as listed in user.IdentityResponse"""
     mock_mongodb_handler_retrieve_one.return_value = {
         "status": Status.WAIVER_SIGNED,
-        "role": Role.VOLUNTEER,
+        "roles": [Role.VOLUNTEER],
     }
 
     client = UserTestClient(GuestUser(email="tree@stanford.edu"), app)
@@ -153,5 +155,5 @@ def test_user_me_route_returns_correct_type(
     assert data == {
         "uid": "edu.stanford.tree",
         "status": Status.WAIVER_SIGNED,
-        "role": Role.VOLUNTEER,
+        "roles": [Role.VOLUNTEER],
     }

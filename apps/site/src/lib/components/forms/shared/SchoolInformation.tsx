@@ -1,4 +1,3 @@
-import styles from "./Form.module.scss";
 import DropdownSelect from "@/lib/components/forms/DropdownSelect";
 
 //these values can be edited if backend needs it later on
@@ -54,8 +53,6 @@ export default function SchoolInformation() {
 
 			<div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
 				<DropdownSelect
-					labelStyle={styles.label}
-					inputStyle={styles.input}
 					name="school"
 					labelText="School"
 					values={universityOptions}
@@ -65,16 +62,12 @@ export default function SchoolInformation() {
 
 			<div className="flex gap-5 items-end w-full max-[1000px]:flex-col max-[1000px]:items-center">
 				<DropdownSelect
-					labelStyle={styles.label}
-					inputStyle={styles.input}
 					name="major"
 					labelText="Major"
 					values={majorOptions}
 					containerClass="flex flex-col w-6/12 max-[1000px]:w-full"
 				/>
 				<DropdownSelect
-					labelStyle={styles.label}
-					inputStyle={styles.input}
 					name="education_level"
 					labelText="Education Level"
 					values={educationLevels}

@@ -26,7 +26,7 @@ async function Portal() {
 	const status = identity.status;
 
 	if (status === null) {
-		redirect("/apply");
+		redirect("/#apply");
 	}
 
 	const submittedWaiver =

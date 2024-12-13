@@ -28,13 +28,13 @@ export default async function ApplicationFlow({
 	const hasAcceptedQueryParam = searchParams?.prefaceAccepted === "true";
 	const identity = await getUserIdentity();
 
-	// if (identity.status !== null) {
-	// 	redirect("/portal");
-	// }
+	if (identity.status !== null) {
+		redirect("/portal");
+	}
 
-	// if (hasAcceptedQueryParam && identity.uid === null) {
-	// 	redirect("/login");
-	// }
+	if (hasAcceptedQueryParam && identity.uid === null) {
+		redirect("/login");
+	}
 
 	const deadlinePassed = hasDeadlinePassed();
 	const applicationsOpened = haveApplicationsOpened();

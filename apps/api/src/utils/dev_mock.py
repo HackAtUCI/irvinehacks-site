@@ -10,10 +10,12 @@ from fastapi import FastAPI, Response
 from fastapi.responses import RedirectResponse
 
 from services.sendgrid_handler import Template
+from utils import resume_handler
 
 log = getLogger(__name__)
 
-SAMPLE_RESUMES_FOLDER_ID = "1a_Hacker_Resumes"
+_HACKER_RESUMES_FOLDER_ID = "1a_Hacker_Resumes"
+_MENTOR_RESUMES_FOLDER_ID = "1b_Mentor_Resumes"
 
 
 def mock_set_cookie(self: RedirectResponse, *args: Any, **kwargs: Any) -> None:
@@ -59,11 +61,15 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
     # Important: these must be imported as `from services import handler`
     # rather than `from services.handler import function` when used to be patched
-    patch(
-        "utils.resume_handler.RESUMES_FOLDER_ID", new=SAMPLE_RESUMES_FOLDER_ID
-    ).start()
     patch("services.gdrive_handler.upload_file", new=mock_upload_file).start()
     patch("services.sendgrid_handler.send_email", new=mock_send_email).start()
+
+    patch.object(
+        resume_handler, "HACKER_RESUMES_FOLDER_ID", new=_HACKER_RESUMES_FOLDER_ID
+    ).start()
+    patch.object(
+        resume_handler, "MENTOR_RESUMES_FOLDER_ID", new=_MENTOR_RESUMES_FOLDER_ID
+    ).start()
 
     patch.object(RedirectResponse, "set_cookie", new=mock_set_cookie).start()
 

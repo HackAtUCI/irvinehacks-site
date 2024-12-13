@@ -4,7 +4,6 @@ import os
 from fastapi import FastAPI
 
 from routers import admin, demo, guest, saml, user
-from utils import dev_mock
 
 logging.basicConfig(level=logging.INFO)
 
@@ -12,6 +11,7 @@ logging.basicConfig(level=logging.INFO)
 # TODO: check FastAPI CLI usage instead
 if os.getenv("DEPLOYMENT") == "LOCAL":
     from routers import dev
+    from utils import dev_mock
 
     # Set `root_path` for docs to be accessible at localhost:3000/api/docs
     app = FastAPI(root_path="/api/", lifespan=dev_mock.lifespan)

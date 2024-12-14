@@ -44,7 +44,7 @@ export default function SimpleRadio({
 								required={isRequired}
 							/>
 							<label
-								htmlFor={`option_${value.inputValue}`}
+								htmlFor={`option_${name}_${value.inputValue}`}
 								className={labelClass}
 							>
 								{value.labelText}

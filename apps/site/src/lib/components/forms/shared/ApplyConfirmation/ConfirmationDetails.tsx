@@ -16,8 +16,8 @@ export default async function ConfirmationDetails({
 	role,
 }: ConfirmationDetailsProps) {
 	return (
-		<div className="flex flex-col items-center gap-8 p-10 max-w-screen-lg md:p-6 md:px-10 md:py-8 border-[2px] md:border-[5px] border-[var(--color-white)] text-[var(--color-white)] bg-[var(--color-black)]">
-			<h1 className="text-5xl">Before Applying</h1>
+		<div className="flex flex-col items-center gap-8 px-4 py-6 mx-4 max-w-screen-lg md:p-6 md:px-10 md:py-8 border-[2px] md:border-[5px] border-[var(--color-white)] text-[var(--color-white)] bg-[var(--color-black)]">
+			<h1 className="text-5xl text-center">Before Applying</h1>
 			{appDescription && (
 				<>
 					<div>

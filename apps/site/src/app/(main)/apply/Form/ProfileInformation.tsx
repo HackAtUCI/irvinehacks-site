@@ -32,7 +32,7 @@ export default function ProfileInformation() {
 			</div>
 			<Textfield
 				name="frq_change"
-				labelText="Give an example of a time when you experienced a lot of change. What did you learn from it, and how would you apply what you learned to future experiences? (150 words)"
+				labelText="Give an example of a time when you experienced a lot of change. What did you learn from it, and how would you apply what you learned to future experiences? (150+ words recommended)"
 				containerClass="flex flex-col w-full"
 				isRequired={true}
 				maxLength={FRQ_MAX_LENGTH}
@@ -40,7 +40,7 @@ export default function ProfileInformation() {
 
 			<Textfield
 				name="frq_video_game"
-				labelText="If you could design your own video game world, what would it look like, and what features would you add to make it unique?  (100 words)"
+				labelText="If you could design your own video game world, what would it look like, and what features would you add to make it unique?  (100+ words recommended)"
 				containerClass="flex flex-col w-full"
 				isRequired={true}
 				maxLength={FRQ_MAX_LENGTH}

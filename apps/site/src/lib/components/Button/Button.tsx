@@ -2,7 +2,7 @@ import { CSSProperties, ComponentProps } from "react";
 import Link from "next/link";
 import clsx from "clsx";
 
-import styles from "./Button.module.css";
+import styles from "./Button.module.scss";
 
 interface ButtonProps {
 	text: string;

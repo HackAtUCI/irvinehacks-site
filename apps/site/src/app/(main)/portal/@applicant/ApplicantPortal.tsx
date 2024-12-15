@@ -21,6 +21,8 @@ export const enum PortalStatus {
 	void = "VOID",
 }
 
+const rolesArray = ["Mentor", "Hacker", "Volunteer"];
+
 async function Portal() {
 	const identity = await getUserIdentity();
 	const status = identity.status;
@@ -28,6 +30,10 @@ async function Portal() {
 	if (status === null) {
 		redirect("/#apply");
 	}
+
+	const roleToDisplay = identity.roles.find((role) =>
+		rolesArray.includes(role),
+	);
 
 	const submittedWaiver =
 		status === PortalStatus.waived ||
@@ -42,7 +48,7 @@ async function Portal() {
 			<BackgroundStars className="left-[-15%] top-[21%]" />
 			<div className="bg-transparent text-black max-w-6xl rounded-2xl p-6 flex flex-col mb-24 w-full">
 				<h2 className="font-bold font-display text-[var(--color-white)] mb-4 md:mb-[42px] text-[15px] sm:text-2xl md:text-[40px] md:leading-10">
-					Status
+					{roleToDisplay} Application Status
 				</h2>
 				<VerticalTimeline status={status as PortalStatus} />
 				<Message status={status as PortalStatus} />

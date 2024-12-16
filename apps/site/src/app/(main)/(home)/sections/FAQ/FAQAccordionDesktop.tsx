@@ -24,7 +24,7 @@ const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 			<Image
 				src={SpeechDesktop}
 				alt="Dialogue box background"
-				className="hidden lg:block h-fit  lg:max-w-[630px] lg:h-[292px] xl:max-w-[775px] xl:h-[350px] duration-300"
+				className="hidden lg:block h-fit  lg:max-w-[630px] lg:h-[310px] xl:max-w-[775px] xl:h-[350px] duration-300"
 			/>
 			<div className="hidden lg:block absolute lg:w-[555px] xl:w-[685px] lg:text-[.85rem] xl:text-[1rem] mt-3">
 				{/* Page 1 focused */}
@@ -41,7 +41,6 @@ const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 							onClick={() => setFocusedQuestion(F)}
 							text={F.question}
 							inverted={false}
-							displace={0}
 							className="mb-0 py-[2px]"
 						/>
 					))}
@@ -80,7 +79,6 @@ const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 							onClick={() => setFocusedQuestion(F)}
 							text={F.question}
 							inverted={false}
-							displace={0}
 							className="mb-0 py-[2px]"
 						/>
 					))}
@@ -90,7 +88,7 @@ const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 							onClick={() => {
 								setPage1Selected(true);
 							}}
-							className={`absolute flex items-center mt-2 group hover:bg-white hover:text-black p-[1px] px-[3px] xl:mt-3 duration-200 `}
+							className={`absolute flex items-center mt-4 group hover:bg-white hover:text-black p-[1px] px-[3px] xl:mt-4 duration-200 `}
 						>
 							<TriangleIcon className="ms-2 opacity-0 lg:w-4 lg:h-4 xl:w-5 xl:h-5" />
 							<TriangleIcon
@@ -111,7 +109,7 @@ const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 						focusedQuestion
 							? "opacity-100 z-50"
 							: "opacity-0 pointer-events-none"
-					} duration-200 absolute lg:h-[240px] xl:h-[290px]`}
+					} duration-200 absolute lg:h-[250px] xl:h-[285px]`}
 				>
 					<div>
 						<ListItemButton
@@ -119,7 +117,6 @@ const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 							className="mb-2 py-[2px]"
 							text={focusedQuestion?.question}
 							rotate="rotate-90"
-							displace={0}
 							inverted
 						/>
 
@@ -132,7 +129,6 @@ const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 							className="py-[2px] min-w-[175px] xl:min-w-[200px]"
 							text="Ask another question"
 							rotate="rotate-180"
-							displace={0}
 							inverted={false}
 						/>
 					</div>

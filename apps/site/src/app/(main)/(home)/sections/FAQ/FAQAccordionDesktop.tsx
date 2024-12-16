@@ -9,7 +9,6 @@ import { FAQAccordion, FAQ } from "./FAQ";
 
 import SpeechDesktop from "./assets/speech-desktop.svg";
 
-
 const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 	const faqGroup1 = faq.slice(0, 8);
 	const faqGroup2 = faq.slice(8);

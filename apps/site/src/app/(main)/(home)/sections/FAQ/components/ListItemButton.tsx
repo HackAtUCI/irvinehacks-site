@@ -31,7 +31,9 @@ export default function ListItemButton({
 			/>
 			<p
 				className={`w-fit font-light text-left mb-0 ${
-					inverted ? "text-[var(--color-black)]" : "text-white group-hover:text-[var(--color-black)]"
+					inverted
+						? "text-[var(--color-black)]"
+						: "text-white group-hover:text-[var(--color-black)]"
 				}`}
 			>
 				{text}

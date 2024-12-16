@@ -24,7 +24,9 @@ const FAQAccordionMobile: React.FC<FAQAccordion> = ({ faq }) => {
 					src={SpeechMobile}
 					alt="Dialogue box background"
 					className={`${
-						focusedQuestion ? "mt-[-160px] sm:mt-[-120px] sm:max-h-[620px]" : "mt-[-275px] md:mt-[-300px]"
+						focusedQuestion
+							? "mt-[-160px] sm:mt-[-120px] sm:max-h-[620px]"
+							: "mt-[-275px] md:mt-[-300px]"
 					} min-w-[450px] sm:min-w-[600px] md:min-w-[750px] object-fill`}
 					layout="responsive"
 				/>

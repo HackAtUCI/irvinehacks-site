@@ -5,14 +5,12 @@ export default function ListItemButton({
 	text,
 	className,
 	rotate,
-	displace,
 	inverted,
 }: {
 	onClick: () => void;
 	text: string | React.ReactNode;
 	className?: string;
 	rotate?: string;
-	displace?: number;
 	inverted: boolean;
 }) {
 	return (
@@ -24,11 +22,11 @@ export default function ListItemButton({
 			} ${className}`}
 		>
 			<TriangleIcon
-				className={`sm:w-3 sm:h-3 md:w-4 md:h-4 xl:w-5 xl:h-5 mt-${displace} lg:mt-[2px] visible group-hover:hidden ${rotate}`}
+				className={`sm:w-4 sm:h-4 md:w-5 md:h-5 xl:w-5 xl:h-5 mt-2 sm:mt-1 lg:mt-[2px] visible group-hover:hidden ${rotate}`}
 				dark={inverted}
 			/>
 			<TriangleIcon
-				className={`sm:w-3 sm:h-3 md:w-4 md:h-4 xl:w-5 xl:h-5 mt-${displace} lg:mt-[2px] hidden group-hover:block ${rotate}`}
+				className={`sm:w-4 sm:h-4 md:w-5 md:h-5 xl:w-5 xl:h-5 mt-2 sm:mt-1 lg:mt-[2px] hidden group-hover:block ${rotate}`}
 				dark
 			/>
 			<p

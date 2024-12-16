@@ -12,11 +12,11 @@ const FAQAccordionMobile: React.FC<FAQAccordion> = ({ faq }) => {
 	const [focusedQuestion, setFocusedQuestion] = useState<null | FAQ>(null);
 
 	return (
-		<div className="flex flex-1 justify-center lg:h-auto mt-60 lg:mt-8 mb-[-250px] lg:mb-0">
+		<div className="flex flex-1 justify-center lg:h-auto mt-60 lg:mt-8 mb-[-250px] lg:mb-0 sm:text-lg md:text-xl">
 			{/* Changes size of parent component */}
 			<div
 				className={`z-0 ${
-					focusedQuestion ? "h-[520px]" : "h-[965px]"
+					focusedQuestion ? "h-[520px]" : "h-[965px] sm:h-[940px] md:h-[1030px]"
 				} duration-200 transition-transform lg:hidden`}
 			/>
 			<div className="relative flex justify-center lg:hidden">
@@ -24,8 +24,8 @@ const FAQAccordionMobile: React.FC<FAQAccordion> = ({ faq }) => {
 					src={SpeechMobile}
 					alt="Dialogue box background"
 					className={`${
-						focusedQuestion ? "mt-[-160px]" : "mt-[-275px]"
-					} min-w-[450px] object-fill`}
+						focusedQuestion ? "mt-[-160px] sm:mt-[-120px] sm:max-h-[620px]" : "mt-[-275px] md:mt-[-300px]"
+					} min-w-[450px] sm:min-w-[600px] md:min-w-[750px] object-fill`}
 					layout="responsive"
 				/>
 
@@ -35,7 +35,7 @@ const FAQAccordionMobile: React.FC<FAQAccordion> = ({ faq }) => {
 						focusedQuestion
 							? "opacity-0 pointer-events-none"
 							: "opacity-100 z-50"
-					} duration-200 w-[320px] absolute mx-4 mt-2 h-fit`}
+					} duration-200 w-[325px] sm:w-[450px] md:w-[560px] absolute mx-4 mt-2 h-fit`}
 				>
 					<div>
 						{faq.map((F) => (
@@ -43,8 +43,8 @@ const FAQAccordionMobile: React.FC<FAQAccordion> = ({ faq }) => {
 								key={F._key}
 								onClick={() => setFocusedQuestion(F)}
 								text={F.question}
+								className="md:p-2"
 								inverted={false}
-								displace={1}
 							/>
 						))}
 					</div>
@@ -56,14 +56,13 @@ const FAQAccordionMobile: React.FC<FAQAccordion> = ({ faq }) => {
 						focusedQuestion
 							? "opacity-100 z-50"
 							: "opacity-0 pointer-events-none"
-					} duration-200 absolute w-[320px] h-[350px] mt-2`}
+					} duration-200 absolute w-[325px] sm:w-[450px] md:w-[570px] h-[350px] sm:h-[325px] mt-2 sm:mt-8`}
 				>
 					<ListItemButton
 						onClick={() => setFocusedQuestion(null)}
 						className="mb-3"
 						text={focusedQuestion?.question}
 						rotate="rotate-90"
-						displace={1}
 						inverted
 					/>
 
@@ -74,7 +73,6 @@ const FAQAccordionMobile: React.FC<FAQAccordion> = ({ faq }) => {
 							onClick={() => setFocusedQuestion(null)}
 							text="Ask another question"
 							rotate="rotate-180"
-							displace={1}
 							inverted={false}
 						/>
 					</div>

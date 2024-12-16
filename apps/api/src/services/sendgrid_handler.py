@@ -16,13 +16,13 @@ SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
 
 
 class Template(str, Enum):
-    CONFIRMATION_EMAIL = "d-83d42cc17b54456183eeb946ba58861a"
-    GUEST_TOKEN = "d-1998e588ddf74c6d9ede36b778730176"
-    ACCEPTED_EMAIL = "d-062e7106a0d64d49ad9f03325bbc7286"
-    WAITLISTED_EMAIL = "d-9178c043de134a71a4fdbe513d35f89f"
-    REJECTED_EMAIL = "d-71ef30ac91a941e0893b7680928d80b7"
-    RSVP_REMINDER = "d-0c2642268c404c138359ac1b9d41e78c"
-    WAITLIST_RELEASE_EMAIL = "d-19af50295ac14e82a7810791a175b8e9"
+    CONFIRMATION_EMAIL = "d-e2cf3f31521f4b938f584e9c48811a92"
+    GUEST_TOKEN = "d-5820106c78fb4d35a0d5d71947a25821"
+    ACCEPTED_EMAIL = "d-07fa796cf6c34518a7124a68d4790d82"
+    WAITLISTED_EMAIL = "d-0e0cde2bfcc14dbfa069422801b6cf58"
+    REJECTED_EMAIL = "d-4edf53090e42417ea9c065645d8c55c2"
+    RSVP_REMINDER = "d-50090289b60947198def96e5bbc9e8c4"
+    WAITLIST_RELEASE_EMAIL = "d-467b8de41d214f33ad9b6cc98cbb6c05"
 
 
 class PersonalizationData(TypedDict):
@@ -32,6 +32,7 @@ class PersonalizationData(TypedDict):
 class ConfirmationPersonalization(PersonalizationData):
     first_name: str
     last_name: str
+    application_type: str
 
 
 class GuestTokenPersonalization(PersonalizationData):
@@ -58,8 +59,7 @@ async def send_email(
     receiver_data: ConfirmationPersonalization,
     send_to_multiple: Literal[False] = False,
     reply_to: Union[Tuple[str, str], None] = None,
-) -> None:
-    ...
+) -> None: ...
 
 
 @overload
@@ -69,8 +69,7 @@ async def send_email(
     receiver_data: GuestTokenPersonalization,
     send_to_multiple: Literal[False] = False,
     reply_to: Union[Tuple[str, str], None] = None,
-) -> None:
-    ...
+) -> None: ...
 
 
 @overload
@@ -80,8 +79,7 @@ async def send_email(
     receiver_data: Iterable[ConfirmationPersonalization],
     send_to_multiple: Literal[True],
     reply_to: Union[Tuple[str, str], None] = None,
-) -> None:
-    ...
+) -> None: ...
 
 
 @overload
@@ -91,8 +89,7 @@ async def send_email(
     receiver_data: Iterable[ApplicationUpdatePersonalization],
     send_to_multiple: Literal[True],
     reply_to: Union[Tuple[str, str], None] = None,
-) -> None:
-    ...
+) -> None: ...
 
 
 @overload
@@ -102,8 +99,7 @@ async def send_email(
     receiver_data: ApplicationUpdatePersonalization,
     send_to_multiple: Literal[False],
     reply_to: Union[Tuple[str, str], None] = None,
-) -> None:
-    ...
+) -> None: ...
 
 
 async def send_email(

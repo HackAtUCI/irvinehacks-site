@@ -18,6 +18,7 @@ async def impersonate(ucinetid: str) -> RedirectResponse:
     )
 
     res = RedirectResponse("/portal", status_code=303)
+
     jwt_token = user_identity._generate_jwt_token(user)
     res.set_cookie(COOKIE_NAME, jwt_token, max_age=4000, httponly=True)
     return res

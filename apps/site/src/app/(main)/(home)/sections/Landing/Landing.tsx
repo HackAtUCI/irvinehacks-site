@@ -70,7 +70,7 @@ const Landing = () => {
 							/>
 						) : applicationsOpened ? (
 							<div onClick={applyClick}>
-								<Button className="font-display" text="Apply" href="/apply" />
+								<Button className="font-display" text="Apply" />
 							</div>
 						) : (
 							<Button className="font-display" text="Coming Soon..." disabled />

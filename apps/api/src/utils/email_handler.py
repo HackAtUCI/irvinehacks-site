@@ -10,8 +10,7 @@ from services.sendgrid_handler import (
     Template,
 )
 
-IH_SENDER = ("apply@irvinehacks.com", "IrvineHacks 2024 Applications")
-REPLY_TO_HACK_AT_UCI = ("hack@uci.edu", "Hack at UCI")
+IH_SENDER = ("apply@irvinehacks.com", "IrvineHacks 2025 Applications")
 
 DECISION_TEMPLATES: dict[Decision, ApplicationUpdateTemplates] = {
     Decision.ACCEPTED: Template.ACCEPTED_EMAIL,
@@ -26,7 +25,7 @@ class ContactInfo(Protocol):
 
 
 async def send_application_confirmation_email(
-    email: EmailStr, user: ContactInfo
+    email: EmailStr, user: ContactInfo, application_type: str
 ) -> None:
     """Send a confirmation email after a user submits an application.
     Will propagate exceptions from SendGrid."""
@@ -37,8 +36,8 @@ async def send_application_confirmation_email(
             "email": email,
             "first_name": user.first_name,
             "last_name": user.last_name,
+            "application_type": application_type,
         },
-        reply_to=REPLY_TO_HACK_AT_UCI,
     )
 
 
@@ -51,7 +50,6 @@ async def send_guest_login_email(email: EmailStr, passphrase: str) -> None:
             "email": email,
             "passphrase": passphrase,
         },
-        reply_to=REPLY_TO_HACK_AT_UCI,
     )
 
 
@@ -79,5 +77,4 @@ async def send_waitlist_release_email(first_name: str, email: EmailStr) -> None:
         IH_SENDER,
         personalization,
         send_to_multiple=False,
-        reply_to=REPLY_TO_HACK_AT_UCI,
     )

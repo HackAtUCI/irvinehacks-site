@@ -21,9 +21,9 @@ import { isApplicationManager } from "@/lib/admin/authorization";
 function Applicants() {
 	const router = useRouter();
 
-	const { role } = useContext(UserContext);
+	const { roles } = useContext(UserContext);
 
-	if (!isApplicationManager(role)) {
+	if (!isApplicationManager(roles)) {
 		router.push("/admin/dashboard");
 	}
 

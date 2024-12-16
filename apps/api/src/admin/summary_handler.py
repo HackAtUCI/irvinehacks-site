@@ -15,7 +15,7 @@ async def applicant_summary() -> Counter[ApplicantStatus]:
     """Get summary of applicants by status."""
     records = await mongodb_handler.retrieve(
         Collection.USERS,
-        {"role": Role.APPLICANT},
+        {"roles": Role.APPLICANT},
         ["status"],
     )
     applicants = TypeAdapter(list[ApplicantSummaryRecord]).validate_python(records)

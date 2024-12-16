@@ -9,10 +9,16 @@ import styles from "@/lib/components/ValidatingForm/ValidatingForm.module.scss";
 const EMAIL_REGEX = /^\w+([\.\-]?\w+)*@\w+([\.\-]?\w+)*(\.\w{2,3})+$/;
 const LOGIN_PATH = "/api/user/login";
 
-function LoginForm() {
+function LoginForm({ return_to }: { return_to?: string }) {
+	const searchParams = new URLSearchParams();
+
+	if (return_to !== undefined) {
+		searchParams.append("return_to", return_to);
+	}
+
 	return (
 		<div className="mx-8 md:m-0 p-6 md:px-10 md:py-8 border-[2px] md:border-[5px] border-[var(--color-white)] text-[var(--color-white)] bg-[var(--color-black)]">
-			<ValidatingForm method="post" action={LOGIN_PATH}>
+			<ValidatingForm method="post" action={LOGIN_PATH + `?${searchParams}`}>
 				<div className="flex flex-col mb-12 gap-2">
 					<label htmlFor="email">
 						Email <RequiredAsterisk />

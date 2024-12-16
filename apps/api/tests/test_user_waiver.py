@@ -28,7 +28,7 @@ def test_accepted_user_can_request_waiver() -> None:
             uid=uid,
             first_name="Riley",
             last_name="Wong",
-            role=Role.APPLICANT,
+            roles=(Role.APPLICANT,),
             status=Decision.ACCEPTED,
         ),
     )
@@ -53,7 +53,7 @@ def test_cannot_request_waiver_if_already_signed() -> None:
             uid="edu.uci.hack",
             first_name="John",
             last_name="Hancock",
-            role=Role.APPLICANT,
+            roles=(Role.APPLICANT,),
             status=Status.WAIVER_SIGNED,
         ),
     )

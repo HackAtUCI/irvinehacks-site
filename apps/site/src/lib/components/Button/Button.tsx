@@ -9,6 +9,7 @@ interface ButtonProps {
 	className?: string;
 	href?: ComponentProps<typeof Link>["href"];
 	isLightVersion?: boolean;
+	isNavButton?: boolean;
 	usePrefetch?: boolean;
 	disabled?: boolean;
 	style?: CSSProperties;
@@ -20,6 +21,7 @@ const Button: React.FC<ButtonProps> = ({
 	className,
 	style,
 	isLightVersion,
+	isNavButton,
 	disabled,
 	usePrefetch = true,
 }) => {
@@ -31,6 +33,7 @@ const Button: React.FC<ButtonProps> = ({
 					className={clsx(
 						styles.button,
 						isLightVersion && styles.lightButton,
+						isNavButton && styles.navButton,
 						isLightVersion ? "font-body" : "font-display",
 						className,
 					)}

@@ -10,11 +10,11 @@ import HackLogo from "@/lib/components/HackLogo/HackLogo";
 import NavLinkItem from "./NavbarHelpers";
 
 import hamburger from "@/assets/icons/navigation-icon.svg";
-import { Identity } from "@/lib/utils/getUserIdentity";
 import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
 
 import buttonStyles from "@/lib/components/Button/Button.module.css";
 import styles from "./Navbar.module.scss";
+import { Identity } from "@/lib/utils/getUserIdentity";
 
 interface NavbarProps {
 	identity: Identity;
@@ -35,7 +35,20 @@ function Navbar({ identity }: NavbarProps) {
 		window.addEventListener("scroll", scrollHandler);
 	}, []);
 
-	const deadlinePassed = hasDeadlinePassed();
+	// const goToChooseChar = (e: React.MouseEvent) => {
+	// 	e.preventDefault();
+
+	// 	if (window.location.pathname !== "/") {
+	// 		window.location.href = "/#apply";
+	// 	} else {
+	// 		const target = document.getElementById("apply");
+	// 		if (target) {
+	// 			target.scrollIntoView({ behavior: "smooth" });
+	// 		}
+	// 	}
+	// };
+
+	// const deadlinePassed = hasDeadlinePassed();
 
 	return (
 		<NavMenu.Root
@@ -70,50 +83,37 @@ function Navbar({ identity }: NavbarProps) {
 					}
 					onTransitionEnd={() => setHidden(!listShown)}
 				>
-					{/* <NavLinkItem href="/">Home</NavLinkItem> */}
-					{/* <NavLinkItem href="/resources">Resources</NavLinkItem>
-					<NavLinkItem href="/schedule">Schedule</NavLinkItem>
-					<NavLinkItem
-						href="/incident"
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						Report Incident
+					<NavLinkItem href="/" className="navMenuLink">
+						Home
 					</NavLinkItem>
 					<NavLinkItem
-						href="/devpost"
-						target="_blank"
-						rel="noopener noreferrer"
+						href="/#apply"
+						className="navMenuLink"
+						// onClick={goToChooseChar}
 					>
-						Devpost
+						Apply
 					</NavLinkItem>
-					<NavLinkItem
-						href="/feedback"
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						Feedback
-					</NavLinkItem> */}
-					{/* {!status && !deadlinePassed && (
-						<NavLinkItem href="/apply">Apply</NavLinkItem>
-					)} */}
 
-					{/* {status !== null && <NavLinkItem href="/portal">Portal</NavLinkItem>}
+					{/* <NavLinkItem href="/resources" className="navMenuLink">
+						Resources
+					</NavLinkItem> */}
+
+					{status !== null && <NavLinkItem href="/portal">Portal</NavLinkItem>}
 					{isLoggedIn ? (
 						<Button
 							text="Log In"
 							href="/login"
 							usePrefetch={false}
-							isLightVersion
+							isNavButton
 						/>
 					) : (
 						<a
 							href="/logout"
-							className={clsx(buttonStyles.button, buttonStyles.lightButton)}
+							className={clsx(buttonStyles.buttonBox, buttonStyles.navButton)}
 						>
 							Log Out
 						</a>
-					)} */}
+					)}
 				</NavMenu.List>
 			</div>
 		</NavMenu.Root>

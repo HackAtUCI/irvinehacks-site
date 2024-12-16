@@ -19,7 +19,7 @@ async def process_waiver_completion(uid: str, email: EmailStr) -> None:
     the submission.
     """
     record = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": uid}, ["role", "status", "first_name", "last_name"]
+        Collection.USERS, {"_id": uid}, ["roles", "status", "first_name", "last_name"]
     )
 
     if not record:
@@ -31,7 +31,7 @@ async def process_waiver_completion(uid: str, email: EmailStr) -> None:
         return
 
     user_record = UserRecord.model_validate(record)
-    if user_record.role == Role.APPLICANT:
+    if Role.APPLICANT in user_record.roles:
         applicant_record = BareApplicant.model_validate(record)
         if applicant_record.status in (Status.WAIVER_SIGNED, Status.CONFIRMED):
             log.warning(
@@ -42,7 +42,7 @@ async def process_waiver_completion(uid: str, email: EmailStr) -> None:
             log.warning(f"User {uid} attempted to sign waiver but was not accepted.")
             return
 
-    log.info(f"User {uid} signed waiver.")
+    log.info("User %s (%s) signed waiver.", uid, ",".join(user_record.roles))
     # Note: this should be able to account for other participant types
     # including mentors, volunteers, etc.
     await mongodb_handler.update_one(

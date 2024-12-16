@@ -19,14 +19,14 @@ const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 	const [focusedQuestion, setFocusedQuestion] = useState<null | FAQ>(null);
 
 	return (
-		<div className="flex flex-1 justify-center sm:h-auto mt-16 sm:mt-8 mb-[-250px] sm:mb-0">
+		<div className="flex flex-1 justify-center lg:h-auto mt-16 lg:mt-8 mb-[-250px] lg:mb-0">
 			{/* Desktop View */}
 			<Image
 				src={SpeechDesktop}
 				alt="Dialogue box background"
-				className="hidden sm:block h-fit sm:max-w-[425px] sm:h-[205px] md:max-w-[520px] md:h-[245px] lg:max-w-[630px] lg:h-[292px] xl:max-w-[775px] xl:h-[350px] duration-300"
+				className="hidden lg:block h-fit  lg:max-w-[630px] lg:h-[292px] xl:max-w-[775px] xl:h-[350px] duration-300"
 			/>
-			<div className="hidden sm:block absolute sm:w-[380px] md:w-[460px] lg:w-[555px] xl:w-[685px] text-[.6rem] md:text-[.75rem] lg:text-[.85rem] xl:text-[1rem] mt-3">
+			<div className="hidden lg:block absolute lg:w-[555px] xl:w-[685px] lg:text-[.85rem] xl:text-[1rem] mt-3">
 				{/* Page 1 focused */}
 				<div
 					className={`absolute w-full duration-300 ${
@@ -56,11 +56,11 @@ const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 							Page 1/2
 							<TriangleIcon className="ms-2 opacity-0 lg:w-4 lg:h-4 xl:w-5 xl:h-5" />
 							<TriangleIcon
-								className={`ms-2 absolute opacity-0 group-hover:opacity-100 duration-200 right-[-7px] lg:w-4 lg:h-4 xl:w-5 xl:h-5 sm:w-3 sm:h-3`}
+								className={`ms-2 absolute opacity-0 group-hover:opacity-100 duration-200 right-[-7px] lg:w-4 lg:h-4 xl:w-5 xl:h-5`}
 								dark
 							/>
 							<TriangleIcon
-								className={`ms-2 absolute opacity-100 group-hover:opacity-0 duration-200 right-[-7px] lg:w-4 lg:h-4 xl:w-5 xl:h-5 sm:w-3 sm:h-3`}
+								className={`ms-2 absolute opacity-100 group-hover:opacity-0 duration-200 right-[-7px] lg:w-4 lg:h-4 xl:w-5 xl:h-5`}
 							/>
 						</button>
 					</div>
@@ -94,11 +94,11 @@ const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 						>
 							<TriangleIcon className="ms-2 opacity-0 lg:w-4 lg:h-4 xl:w-5 xl:h-5" />
 							<TriangleIcon
-								className={`ms-2 absolute opacity-0 group-hover:opacity-100 duration-200 left-[-5px] rotate-180 lg:w-4 lg:h-4 xl:w-5 xl:h-5 sm:w-3 sm:h-3`}
+								className={`ms-2 absolute opacity-0 group-hover:opacity-100 duration-200 left-[-5px] rotate-180 lg:w-4 lg:h-4 xl:w-5 xl:h-5`}
 								dark
 							/>
 							<TriangleIcon
-								className={`ms-2 absolute opacity-100 group-hover:opacity-0 duration-200 left-[-5px] rotate-180 lg:w-4 lg:h-4 xl:w-5 xl:h-5 sm:w-3 sm:h-3`}
+								className={`ms-2 absolute opacity-100 group-hover:opacity-0 duration-200 left-[-5px] rotate-180 lg:w-4 lg:h-4 xl:w-5 xl:h-5`}
 							/>
 							Page 2/2
 						</button>
@@ -111,7 +111,7 @@ const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 						focusedQuestion
 							? "opacity-100 z-50"
 							: "opacity-0 pointer-events-none"
-					} duration-200 absolute h-[160px] md:h-[196px] lg:h-[240px] xl:h-[290px]`}
+					} duration-200 absolute lg:h-[240px] xl:h-[290px]`}
 				>
 					<div>
 						<ListItemButton

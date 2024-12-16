@@ -29,19 +29,19 @@ const FAQ = async () => {
 	return (
 		<section className="flex justify-center bg-no-repeat bg-cover bg-top mt-20 lg:mt-40">
 			<div className="relative flex flex-col w-4/5 pb-7 justify-center">
-				<h2 className="my-6 font-display sm:text-[2.5rem] text-white text-4xl xl:text-5xl text-center">
+				<h2 className="my-6 font-display text-white text-4xl sm:text-5xl md:text-6xl lg:text-5xl xl:text-6xl text-center">
 					Frequently Asked Questions
 				</h2>
-				<div className="mt-8 sm:mt-0 sm:flex sm:gap-6 sm:items-center sm:justify-center">
-					<div className="sm:flex sm:gap-3 lg:gap-[40px] sm:items-center">
+				<div className="mt-8 lg:mt-0 lg:flex lg:gap-6 lg:items-center lg:justify-center">
+					<div className="lg:flex lg:gap-3 lg:gap-[40px] lg:items-center">
 						<div className="flex justify-center items-center h-fit">
 							<Image
 								src={sprite}
 								alt="Wise anteater"
 								className={`
 									h-fit mt-[-30px] w-[250px] duration-300
-									sm:w-[180px] sm:min-w-[180px]
-									md:w-[200px] md:min-w-[200px]
+									sm:w-[300px] sm:min-w-[300px]
+									md:w-[400px] md:min-w-[400px]
 									lg:w-[240px] lg:min-w-[240px]
 									xl:w-[300px] xl:min-w-[300px]
 								`}
@@ -50,7 +50,7 @@ const FAQ = async () => {
 								src={organizerTitle}
 								alt="Wise anteater title"
 								className={`
-									hidden absolute sm:block h-fit duration-300
+									hidden absolute lg:block h-fit duration-300
 									w-40 md:w-48 lg:w-60 xl:w-72
 									sm:top-[270px] md:top-[290px] lg:top-[330px] xl:top-[380px]
 								`}

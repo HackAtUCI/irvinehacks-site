@@ -12,14 +12,14 @@ const FAQAccordionMobile: React.FC<FAQAccordion> = ({ faq }) => {
 	const [focusedQuestion, setFocusedQuestion] = useState<null | FAQ>(null);
 
 	return (
-		<div className="flex flex-1 justify-center sm:h-auto mt-60 sm:mt-8 mb-[-250px] sm:mb-0">
+		<div className="flex flex-1 justify-center lg:h-auto mt-60 lg:mt-8 mb-[-250px] lg:mb-0">
 			{/* Changes size of parent component */}
 			<div
 				className={`z-0 ${
 					focusedQuestion ? "h-[520px]" : "h-[965px]"
-				} duration-200 transition-transform sm:hidden`}
+				} duration-200 transition-transform lg:hidden`}
 			/>
-			<div className="relative flex justify-center sm:hidden">
+			<div className="relative flex justify-center lg:hidden">
 				<Image
 					src={SpeechMobile}
 					alt="Dialogue box background"

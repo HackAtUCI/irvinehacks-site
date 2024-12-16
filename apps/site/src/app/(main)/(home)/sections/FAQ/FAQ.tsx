@@ -8,6 +8,16 @@ import { PortableText } from "@portabletext/react";
 import sprite from "./assets/sprite.png";
 import organizerTitle from "./assets/organizer-title.png";
 
+export interface FAQAccordion {
+	faq: FAQ[];
+}
+
+export interface FAQ {
+	_key: string;
+	question: JSX.Element;
+	answer: JSX.Element;
+}
+
 const FAQ = async () => {
 	const questions = await getQuestions();
 	const faq = questions[0]["faqs"].map(({ _key, question, answer }) => ({
@@ -17,7 +27,7 @@ const FAQ = async () => {
 	}));
 
 	return (
-		<section className="flex justify-center bg-no-repeat bg-cover bg-center bg-top mt-20 lg:mt-40">
+		<section className="flex justify-center bg-no-repeat bg-cover bg-top mt-20 lg:mt-40">
 			<div className="relative flex flex-col w-4/5 pb-7 justify-center">
 				<h2 className="my-6 font-display sm:text-[2.5rem] text-white text-4xl xl:text-5xl text-center">
 					Frequently Asked Questions

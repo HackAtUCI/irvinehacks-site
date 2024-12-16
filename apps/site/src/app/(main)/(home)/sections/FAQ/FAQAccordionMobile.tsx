@@ -3,24 +3,13 @@
 import React, { useState } from "react";
 import Image from "next/image";
 
+import ListItemButton from "./components/ListItemButton";
+import { FAQAccordion, FAQ } from "./FAQ";
+
 import SpeechMobile from "./assets/speech-mobile.svg";
 
-import ListItemButton from "./components/ListItemButton";
-
-interface FAQAccordion {
-	faq: {
-		_key: string;
-		question: JSX.Element;
-		answer: JSX.Element;
-	}[];
-}
-
 const FAQAccordionMobile: React.FC<FAQAccordion> = ({ faq }) => {
-	const [focusedQuestion, setFocusedQuestion] = useState<null | {
-		_key: string;
-		question: JSX.Element;
-		answer: JSX.Element;
-	}>(null);
+	const [focusedQuestion, setFocusedQuestion] = useState<null | FAQ>(null);
 
 	return (
 		<div className="flex flex-1 justify-center sm:h-auto mt-60 sm:mt-8 mb-[-250px] sm:mb-0">
@@ -55,7 +44,7 @@ const FAQAccordionMobile: React.FC<FAQAccordion> = ({ faq }) => {
 								onClick={() => setFocusedQuestion(F)}
 								text={F.question}
 								inverted={false}
-								displace={4}
+								displace={1}
 							/>
 						))}
 					</div>
@@ -74,7 +63,7 @@ const FAQAccordionMobile: React.FC<FAQAccordion> = ({ faq }) => {
 						className="mb-3"
 						text={focusedQuestion?.question}
 						rotate="rotate-90"
-						displace={4}
+						displace={1}
 						inverted
 					/>
 
@@ -85,7 +74,7 @@ const FAQAccordionMobile: React.FC<FAQAccordion> = ({ faq }) => {
 							onClick={() => setFocusedQuestion(null)}
 							text="Ask another question"
 							rotate="rotate-180"
-							displace={4}
+							displace={1}
 							inverted={false}
 						/>
 					</div>

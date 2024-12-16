@@ -24,16 +24,16 @@ export default function ListItemButton({
 			} ${className}`}
 		>
 			<TriangleIcon
-				className={`sm:w-3 sm:h-3 md:w-4 md:h-4 xl:w-5 xl:h-5 mt-[${displace}px] lg:mt-[2px] visible group-hover:hidden ${rotate}`}
-				dark={inverted ? true : inverted}
+				className={`sm:w-3 sm:h-3 md:w-4 md:h-4 xl:w-5 xl:h-5 mt-${displace} lg:mt-[2px] visible group-hover:hidden ${rotate}`}
+				dark={inverted}
 			/>
 			<TriangleIcon
-				className={`sm:w-3 sm:h-3 md:w-4 md:h-4 xl:w-5 xl:h-5 mt-[${displace}px] lg:mt-[2px] hidden group-hover:block ${rotate}`}
-				dark={inverted ? true : !inverted}
+				className={`sm:w-3 sm:h-3 md:w-4 md:h-4 xl:w-5 xl:h-5 mt-${displace} lg:mt-[2px] hidden group-hover:block ${rotate}`}
+				dark
 			/>
 			<p
 				className={`w-fit font-light text-left mb-0 ${
-					inverted ? "text-[#0C071B]" : "text-white group-hover:text-[#0C071B]"
+					inverted ? "text-[var(--color-black)]" : "text-white group-hover:text-[var(--color-black)]"
 				}`}
 			>
 				{text}

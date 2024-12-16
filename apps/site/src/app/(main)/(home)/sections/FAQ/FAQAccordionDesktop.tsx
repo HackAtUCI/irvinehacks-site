@@ -3,18 +3,12 @@
 import React, { useState } from "react";
 import Image from "next/image";
 
-import SpeechDesktop from "./assets/speech-desktop.svg";
-
 import ListItemButton from "./components/ListItemButton";
 import TriangleIcon from "./components/TriangleIcon";
+import { FAQAccordion, FAQ } from "./FAQ";
 
-interface FAQAccordion {
-	faq: {
-		_key: string;
-		question: JSX.Element;
-		answer: JSX.Element;
-	}[];
-}
+import SpeechDesktop from "./assets/speech-desktop.svg";
+
 
 const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 	const faqGroup1 = faq.slice(0, 8);
@@ -22,11 +16,7 @@ const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 
 	const [page1Selected, setPage1Selected] = useState<boolean>(true);
 
-	const [focusedQuestion, setFocusedQuestion] = useState<null | {
-		_key: string;
-		question: JSX.Element;
-		answer: JSX.Element;
-	}>(null);
+	const [focusedQuestion, setFocusedQuestion] = useState<null | FAQ>(null);
 
 	return (
 		<div className="flex flex-1 justify-center sm:h-auto mt-16 sm:mt-8 mb-[-250px] sm:mb-0">
@@ -51,7 +41,7 @@ const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 							onClick={() => setFocusedQuestion(F)}
 							text={F.question}
 							inverted={false}
-							displace={3}
+							displace={0}
 							className="mb-0 py-[2px]"
 						/>
 					))}
@@ -90,7 +80,7 @@ const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 							onClick={() => setFocusedQuestion(F)}
 							text={F.question}
 							inverted={false}
-							displace={3}
+							displace={0}
 							className="mb-0 py-[2px]"
 						/>
 					))}
@@ -129,7 +119,7 @@ const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 							className="mb-2 py-[2px]"
 							text={focusedQuestion?.question}
 							rotate="rotate-90"
-							displace={4}
+							displace={0}
 							inverted
 						/>
 
@@ -142,7 +132,7 @@ const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 							className="py-[2px] min-w-[175px] xl:min-w-[200px]"
 							text="Ask another question"
 							rotate="rotate-180"
-							displace={2}
+							displace={0}
 							inverted={false}
 						/>
 					</div>

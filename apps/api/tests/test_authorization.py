@@ -1,14 +1,12 @@
-from datetime import datetime
 from unittest.mock import AsyncMock, patch
 
 import pytest
 from fastapi.exceptions import HTTPException
-from test_user_apply import SAMPLE_APPLICATION
 
 from auth import authorization
 from auth.user_identity import GuestUser, User
 from models.ApplicationData import Decision
-from utils.user_record import Role
+from models.user_record import Role
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
@@ -34,9 +32,10 @@ async def test_rejected_applicant_is_unapplied(
     """User with applicant role and rejected status is not accepted."""
     mock_mongodb_handler_retrieve_one.return_value = {
         "_id": "edu.ucsd.tritons",
+        "roles": [Role.APPLICANT],
         "status": Decision.REJECTED,
-        "role": Role.APPLICANT,
-        "application_data": {**SAMPLE_APPLICATION, "submission_time": datetime.now()},
+        "first_name": "King",
+        "last_name": "Triton",
     }
 
     with pytest.raises(HTTPException) as excinfo:
@@ -53,9 +52,10 @@ async def test_accepted_applicant_is_fine(
     """User with applicant role and accepted status is fine."""
     mock_mongodb_handler_retrieve_one.return_value = {
         "_id": "edu.berkeley.oski",
+        "roles": [Role.APPLICANT],
         "status": Decision.ACCEPTED,
-        "role": Role.APPLICANT,
-        "application_data": {**SAMPLE_APPLICATION, "submission_time": datetime.now()},
+        "first_name": "Oski",
+        "last_name": "Bear",
     }
 
     user, applicant = await authorization.require_accepted_applicant(
@@ -72,7 +72,7 @@ async def test_non_applicant_is_unapplied(
     """User with other role is not considered applicant."""
     mock_mongodb_handler_retrieve_one.return_value = {
         "_id": "edu.uci.hack",
-        "role": Role.DIRECTOR,
+        "roles": [Role.DIRECTOR],
     }
 
     with pytest.raises(HTTPException) as excinfo:

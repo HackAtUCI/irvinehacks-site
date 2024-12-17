@@ -2,9 +2,7 @@ import RequiredAsterisk from "./RequiredAsterisk";
 
 interface TextfieldProps {
 	name: string;
-	labelClass: string;
 	labelText: string;
-	inputClass: string;
 	containerClass: string;
 	isRequired: boolean;
 	maxLength?: number;
@@ -12,9 +10,7 @@ interface TextfieldProps {
 
 export default function Textfield({
 	name,
-	labelClass,
 	labelText,
-	inputClass,
 	containerClass,
 	isRequired,
 	maxLength,
@@ -22,12 +18,12 @@ export default function Textfield({
 	return (
 		<div className={containerClass}>
 			<div className="flex flex-col w-full">
-				<label className={labelClass} htmlFor={name}>
+				<label className="text-lg mb-2" htmlFor={name}>
 					{`${labelText} `}
 					{isRequired && <RequiredAsterisk />}
 				</label>
 				<textarea
-					className={inputClass}
+					className="text-[var(--color-black)] bg-[#E1E1E1] p-3 h-48 resize-none rounded-xl"
 					id={name}
 					name={name}
 					required={isRequired}

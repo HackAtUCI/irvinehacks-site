@@ -1,27 +1,26 @@
 import { redirect } from "next/navigation";
 
-import VerificationForm from "./components/VerificationForm";
+import GuestLoginVerificationForm from "./components/GuestLoginVerificationForm";
 import getUserIdentity from "@/lib/utils/getUserIdentity";
-import water from "@/assets/backgrounds/water.jpg";
 
-async function GuestLogin() {
+async function GuestLogin({
+	searchParams,
+}: {
+	searchParams?: {
+		return_to?: string;
+	};
+}) {
 	const identity = await getUserIdentity();
-	if (identity.uid !== null) redirect("/portal");
+	if (identity.uid !== null) {
+		redirect(searchParams?.return_to ?? "/portal");
+	}
 
 	return (
-		<div
-			className="min-h-screen flex flex-col items-center justify-center"
-			style={{ backgroundImage: `url("${water.src}")` }}
-		>
-			<h1
-				className="font-display text-5xl md:text-7xl mb-10"
-				style={{
-					textShadow: "0px 0px 20px rgba(255, 255, 255, 0.75)",
-				}}
-			>
+		<div className="min-h-screen flex flex-col items-center justify-center">
+			<h1 className="font-display text-3xl md:text-5xl mb-20">
 				Enter Passphrase
 			</h1>
-			<VerificationForm />
+			<GuestLoginVerificationForm />
 		</div>
 	);
 }

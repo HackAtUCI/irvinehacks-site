@@ -7,11 +7,11 @@ from fastapi import FastAPI
 from pydantic import HttpUrl
 
 from auth.user_identity import NativeUser, UserTestClient
-from models.ApplicationData import ProcessedApplicationData
+from models.ApplicationData import ProcessedHackerApplicationData
+from models.user_record import Applicant, Status, Role
 from routers import user
 from services.mongodb_handler import Collection
 from utils import resume_handler
-from utils.user_record import Applicant, Status
 
 # Tests will break again next year, tech should notice and fix :P
 TEST_DEADLINE = datetime(2025, 10, 1, 8, 0, 0, tzinfo=timezone.utc)
@@ -28,16 +28,19 @@ USER_PKFIRE = NativeUser(
 SAMPLE_APPLICATION = {
     "first_name": "pk",
     "last_name": "fire",
-    "pronouns": "pk",
+    "pronouns": ["pk"],
     "ethnicity": "fire",
     "is_18_older": "true",
     "school": "UC Irvine",
     "education_level": "Fifth+ Year Undergraduate",
     "major": "Computer Science",
     "is_first_hackathon": "false",
+    "linkedin": "",
     "portfolio": "https://github.com",
-    "frq_collaboration": "I am pkfire",
-    "frq_dream_job": "I am pkfire",
+    "frq_change": "I am pkfire",
+    "frq_video_game": "I am pkfire",
+    "application_type": "Hacker",
+    "email": "pkfire@uci.edu",
 }
 
 
@@ -45,21 +48,28 @@ SAMPLE_RESUME = ("my-resume.pdf", b"resume", "application/pdf")
 SAMPLE_FILES = {"resume": SAMPLE_RESUME}
 BAD_RESUME = ("bad-resume.doc", b"resume", "application/msword")
 LARGE_RESUME = ("large-resume.pdf", b"resume" * 100_000, "application/pdf")
-EMPTY_RESUME = ("", b"", "application/octet-stream")
+# The browser will send an empty file if not selected
+EMPTY_RESUME = (
+    "",
+    b"",
+    "application/octet-stream",
+    {"content-disposition": 'form-data; name="resume"; filename=""'},
+)
 
 EXPECTED_RESUME_UPLOAD = ("pk-fire-69f2afc2.pdf", b"resume", "application/pdf")
 SAMPLE_RESUME_URL = HttpUrl("https://drive.google.com/file/d/...")
 SAMPLE_SUBMISSION_TIME = datetime(2024, 1, 12, 8, 1, 21, tzinfo=timezone.utc)
 SAMPLE_VERDICT_TIME = None
 
-EXPECTED_APPLICATION_DATA = ProcessedApplicationData(
+EXPECTED_APPLICATION_DATA = ProcessedHackerApplicationData(
     **SAMPLE_APPLICATION,  # type: ignore[arg-type]
     resume_url=SAMPLE_RESUME_URL,
     submission_time=SAMPLE_SUBMISSION_TIME,
     verdict_time=SAMPLE_VERDICT_TIME,
 )
+assert EXPECTED_APPLICATION_DATA.linkedin is None
 
-EXPECTED_APPLICATION_DATA_WITHOUT_RESUME = ProcessedApplicationData(
+EXPECTED_APPLICATION_DATA_WITHOUT_RESUME = ProcessedHackerApplicationData(
     **SAMPLE_APPLICATION,  # type: ignore[arg-type]
     resume_url=None,
     submission_time=SAMPLE_SUBMISSION_TIME,
@@ -68,17 +78,23 @@ EXPECTED_APPLICATION_DATA_WITHOUT_RESUME = ProcessedApplicationData(
 
 EXPECTED_USER = Applicant(
     uid="edu.uci.pkfire",
+    first_name="pk",
+    last_name="fire",
+    roles=(Role.APPLICANT, Role.HACKER),
     status=Status.PENDING_REVIEW,
     application_data=EXPECTED_APPLICATION_DATA,
 )
 
 EXPECTED_USER_WITHOUT_RESUME = Applicant(
     uid="edu.uci.pkfire",
-    application_data=EXPECTED_APPLICATION_DATA_WITHOUT_RESUME,
+    first_name="pk",
+    last_name="fire",
+    roles=(Role.APPLICANT, Role.HACKER),
     status=Status.PENDING_REVIEW,
+    application_data=EXPECTED_APPLICATION_DATA_WITHOUT_RESUME,
 )
 
-resume_handler.RESUMES_FOLDER_ID = "RESUMES_FOLDER_ID"
+resume_handler.HACKER_RESUMES_FOLDER_ID = "HACKER_RESUMES_FOLDER_ID"
 
 app = FastAPI()
 app.include_router(user.router)
@@ -108,7 +124,7 @@ def test_apply_successfully(
     res = client.post("/apply", data=SAMPLE_APPLICATION, files=SAMPLE_FILES)
 
     mock_gdrive_handler_upload_file.assert_awaited_once_with(
-        resume_handler.RESUMES_FOLDER_ID, *EXPECTED_RESUME_UPLOAD
+        resume_handler.HACKER_RESUMES_FOLDER_ID, *EXPECTED_RESUME_UPLOAD
     )
     mock_mongodb_handler_update_one.assert_awaited_once_with(
         Collection.USERS,
@@ -117,7 +133,7 @@ def test_apply_successfully(
         upsert=True,
     )
     mock_send_application_confirmation_email.assert_awaited_once_with(
-        USER_EMAIL, EXPECTED_APPLICATION_DATA
+        USER_EMAIL, EXPECTED_USER, Role.HACKER
     )
     assert res.status_code == 201
 
@@ -135,6 +151,19 @@ def test_apply_with_invalid_data_causes_422(
     assert res.status_code == 422
 
 
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_apply_with_invalid_application_type_causes_422(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test that applying with invalid data is unprocessable."""
+    bad_application = SAMPLE_APPLICATION.copy()
+    bad_application["application_type"] = "NotValid"
+    res = client.post("/apply", data=bad_application, files=SAMPLE_FILES)
+
+    mock_mongodb_handler_retrieve_one.assert_not_called()
+    assert res.status_code == 422
+
+
 @patch("services.gdrive_handler.upload_file", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 def test_apply_when_user_exists_causes_400(
@@ -144,7 +173,7 @@ def test_apply_when_user_exists_causes_400(
     """Test that applying when a user already exists causes status 400."""
     mock_mongodb_handler_retrieve_one.return_value = {
         "_id": "edu.uci.pkfire",
-        "status": "pending review",
+        "roles": ["applicant"],
     }
     res = client.post("/apply", data=SAMPLE_APPLICATION, files=SAMPLE_FILES)
 
@@ -186,6 +215,7 @@ def test_apply_with_resume_upload_issue_causes_500(
     """Test that an issue with the resume upload causes status 500."""
     mock_mongodb_handler_retrieve_one.return_value = None
     mock_gdrive_handler_upload_file.side_effect = HTTPError("Google Drive error")
+
     res = client.post("/apply", data=SAMPLE_APPLICATION, files=SAMPLE_FILES)
 
     assert res.status_code == 500
@@ -207,9 +237,9 @@ def test_apply_with_user_insert_issue_causes_500(
     mock_mongodb_handler_update_one.side_effect = RuntimeError
     res = client.post("/apply", data=SAMPLE_APPLICATION, files=SAMPLE_FILES)
 
+    assert res.status_code == 500
     mock_mongodb_handler_update_one.assert_awaited_once()
     mock_send_application_confirmation_email.assert_not_called()
-    assert res.status_code == 500
 
 
 @patch("utils.email_handler.send_application_confirmation_email", autospec=True)
@@ -226,11 +256,12 @@ def test_apply_with_confirmation_email_issue_causes_500(
     mock_mongodb_handler_retrieve_one.return_value = None
     mock_gdrive_handler_upload_file.return_value = SAMPLE_RESUME_URL
     mock_send_application_confirmation_email.side_effect = RuntimeError
+
     res = client.post("/apply", data=SAMPLE_APPLICATION, files=SAMPLE_FILES)
 
+    assert res.status_code == 500
     mock_mongodb_handler_update_one.assert_awaited_once()
     mock_send_application_confirmation_email.assert_awaited_once()
-    assert res.status_code == 500
 
 
 @patch("utils.email_handler.send_application_confirmation_email", autospec=True)
@@ -251,8 +282,10 @@ def test_apply_successfully_without_resume(
     mock_mongodb_handler_retrieve_one.return_value = None
     mock_datetime.now.return_value = SAMPLE_SUBMISSION_TIME
     mock_is_past_deadline.return_value = False
+
     res = client.post("/apply", data=SAMPLE_APPLICATION, files={"resume": EMPTY_RESUME})
 
+    assert res.status_code == 201
     mock_gdrive_handler_upload_file.assert_not_called()
     mock_mongodb_handler_update_one.assert_awaited_once_with(
         Collection.USERS,
@@ -261,9 +294,8 @@ def test_apply_successfully_without_resume(
         upsert=True,
     )
     mock_send_application_confirmation_email.assert_awaited_once_with(
-        USER_EMAIL, EXPECTED_APPLICATION_DATA_WITHOUT_RESUME
+        USER_EMAIL, EXPECTED_USER_WITHOUT_RESUME, Role.HACKER
     )
-    assert res.status_code == 201
 
 
 def test_application_data_is_bson_encodable() -> None:
@@ -271,15 +303,16 @@ def test_application_data_is_bson_encodable() -> None:
     data = EXPECTED_APPLICATION_DATA.model_copy()
     data.linkedin = HttpUrl("https://linkedin.com")
     encoded = bson.encode(EXPECTED_APPLICATION_DATA.model_dump())
-    assert len(encoded) == 415
+    assert len(encoded) == 404
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 def test_application_data_with_other_throws_422(
     mock_mongodb_handler_retrieve_one: AsyncMock,
 ) -> None:
+    mock_mongodb_handler_retrieve_one.return_value = None
     contains_other = SAMPLE_APPLICATION.copy()
-    contains_other["pronouns"] = "other"
+    contains_other["pronouns"].append("other")  # type: ignore[attr-defined]
     res = client.post("/apply", data=contains_other, files=SAMPLE_FILES)
     assert res.status_code == 422
 

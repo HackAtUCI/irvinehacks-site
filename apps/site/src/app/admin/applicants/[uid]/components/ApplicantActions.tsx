@@ -6,6 +6,7 @@ import ButtonDropdown, {
 
 import { Decision, submitReview, Uid } from "@/lib/admin/useApplicant";
 import UserContext from "@/lib/admin/UserContext";
+import { isReviewer } from "@/lib/admin/authorization";
 
 interface ApplicantActionsProps {
 	applicant: Uid;
@@ -19,9 +20,9 @@ interface ReviewButtonItem extends ButtonDropdownProps.Item {
 type ReviewButtonItems = ReviewButtonItem[];
 
 function ApplicantActions({ applicant, submitReview }: ApplicantActionsProps) {
-	const { role } = useContext(UserContext);
+	const { roles } = useContext(UserContext);
 
-	if (role !== "reviewer") {
+	if (!isReviewer(roles)) {
 		return null;
 	}
 

@@ -1,29 +1,28 @@
 from datetime import datetime, timezone
 from logging import getLogger
-from typing import Annotated, Optional, Union
+from typing import Annotated, Union
+from urllib.parse import urlencode
 
-from fastapi import (
-    APIRouter,
-    Depends,
-    Form,
-    Header,
-    HTTPException,
-    Request,
-    UploadFile,
-    status,
-)
+from fastapi import APIRouter, Depends, Form, Header, HTTPException, Request, status
+from fastapi.datastructures import URL
 from fastapi.responses import RedirectResponse
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, TypeAdapter
 
 from auth import user_identity
 from auth.authorization import require_accepted_applicant
 from auth.user_identity import User, require_user_identity, use_user_identity
-from models.ApplicationData import ProcessedApplicationData, RawApplicationData
+from models.ApplicationData import (
+    FIELDS_SUPPORTING_OTHER,
+    ProcessedApplicationDataUnion,
+    RawHackerApplicationData,
+    RawMentorApplicationData,
+    RawVolunteerApplicationData,
+)
+from models.user_record import Applicant, BareApplicant, Role, Status
 from services import docusign_handler, mongodb_handler
 from services.docusign_handler import WebhookPayload
 from services.mongodb_handler import Collection
 from utils import email_handler, resume_handler
-from utils.user_record import Applicant, Role, Status
 
 log = getLogger(__name__)
 
@@ -35,7 +34,7 @@ DEADLINE = datetime(2025, 1, 11, 8, 1, tzinfo=timezone.utc)
 class IdentityResponse(BaseModel):
     uid: Union[str, None] = None
     status: Union[str, None] = None
-    role: Union[Role, None] = None
+    roles: list[Role] = []
 
 
 def _is_past_deadline(now: datetime) -> bool:
@@ -43,12 +42,22 @@ def _is_past_deadline(now: datetime) -> bool:
 
 
 @router.post("/login")
-async def login(email: EmailStr = Form()) -> RedirectResponse:
+async def login(
+    email: EmailStr = Form(), return_to: str = "/portal"
+) -> RedirectResponse:
     log.info("%s requested to log in", email)
+    query = urlencode({"return_to": return_to})
+
     if user_identity.uci_email(email):
-        # redirect user to UCI SSO login endpoint, changing to GET method
-        return RedirectResponse("/api/saml/login", status.HTTP_303_SEE_OTHER)
-    return RedirectResponse("/api/guest/login", status.HTTP_307_TEMPORARY_REDIRECT)
+        # redirect user for UCI SSO, changing to GET method
+        return RedirectResponse(
+            URL(path="/api/saml/login", query=query), status.HTTP_303_SEE_OTHER
+        )
+
+    # Forward POST request to guest login
+    return RedirectResponse(
+        URL(path="/api/guest/login", query=query), status.HTTP_307_TEMPORARY_REDIRECT
+    )
 
 
 @router.get("/logout")
@@ -59,55 +68,99 @@ async def logout() -> RedirectResponse:
     return response
 
 
-@router.get("/me", response_model=IdentityResponse)
+@router.get("/me")
 async def me(
     user: Annotated[Union[User, None], Depends(use_user_identity)]
-) -> dict[str, object]:
+) -> IdentityResponse:
     log.info(user)
     if not user:
-        return dict()
+        return IdentityResponse()
     user_record = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": user.uid}
+        Collection.USERS, {"_id": user.uid}, ["roles", "status"]
     )
+
     if not user_record:
-        return {"uid": user.uid}
-    return {**user_record, "uid": user.uid}
+        return IdentityResponse(uid=user.uid)
+
+    return IdentityResponse(uid=user.uid, **user_record)
 
 
 @router.post("/apply", status_code=status.HTTP_201_CREATED)
 async def apply(
     user: Annotated[User, Depends(require_user_identity)],
-    raw_application_data: Annotated[RawApplicationData, Depends(RawApplicationData)],
-    resume: Optional[UploadFile] = None,
+    # media type should be automatically detected but seems like a bug as of now
+    raw_application_data: Annotated[
+        RawHackerApplicationData, Form(media_type="multipart/form-data")
+    ],
 ) -> str:
+    return await _apply_flow(user, raw_application_data)
+
+
+@router.post("/mentor", status_code=status.HTTP_201_CREATED)
+async def mentor(
+    user: Annotated[User, Depends(require_user_identity)],
+    # media type should be automatically detected but seems like a bug as of now
+    raw_application_data: Annotated[
+        RawMentorApplicationData, Form(media_type="multipart/form-data")
+    ],
+) -> str:
+    return await _apply_flow(user, raw_application_data)
+
+
+@router.post("/volunteer", status_code=status.HTTP_201_CREATED)
+async def volunteer(
+    user: Annotated[User, Depends(require_user_identity)],
+    raw_application_data: Annotated[RawVolunteerApplicationData, Form()],
+) -> str:
+    return await _apply_flow(user, raw_application_data)
+
+
+async def _apply_flow(
+    user: User,
+    raw_application_data: Union[
+        RawHackerApplicationData, RawMentorApplicationData, RawVolunteerApplicationData
+    ],
+) -> str:
+    """Common flow for all three types of applications."""
     # Check if current datetime is past application deadline
     now = datetime.now(timezone.utc)
 
     if _is_past_deadline(now):
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Applications have closed.")
 
-    # check if email is already in database
-    EXISTING_RECORD = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": user.uid}
+    # check if user already has a role
+    existing_record = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": user.uid, "roles": {"$exists": True}}, ["roles"]
     )
 
-    if EXISTING_RECORD and "status" in EXISTING_RECORD:
-        log.error("User %s has already applied.", user)
-        raise HTTPException(status.HTTP_400_BAD_REQUEST)
+    if existing_record and existing_record.get("roles"):
+        log.error(
+            "User %s already has role %s but tried to apply.",
+            user,
+            existing_record["roles"],
+        )
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "User already has a role.")
 
     raw_app_data_dump = raw_application_data.model_dump()
 
-    for field in ["pronouns", "ethnicity", "school", "major"]:
-        if raw_app_data_dump[field] == "other":
+    # Reject unprocessed other values
+    for field in FIELDS_SUPPORTING_OTHER:
+        value = raw_app_data_dump.get(field)
+        if value == "other" or (isinstance(value, list) and "other" in value):
             raise HTTPException(
                 status.HTTP_422_UNPROCESSABLE_ENTITY,
                 "Please enable JavaScript on your browser.",
             )
 
+    resume = raw_application_data.resume
     if resume is not None and resume.size and resume.size > 0:
         try:
             resume_url = await resume_handler.upload_resume(
-                raw_application_data, resume
+                # TODO: reexamine why adapter is needed
+                TypeAdapter(
+                    Union[RawHackerApplicationData, RawMentorApplicationData]
+                ).validate_python(raw_application_data),
+                resume,
             )
         except TypeError:
             log.info("%s provided invalid resume type.", user)
@@ -125,13 +178,25 @@ async def apply(
     else:
         resume_url = None
 
-    processed_application_data = ProcessedApplicationData(
-        **raw_app_data_dump,
-        resume_url=resume_url,
-        submission_time=now,
+    application_type = raw_application_data.application_type
+
+    # Note: spreading is assumed to be safe since form data was already validated once
+    processed_application_data = TypeAdapter[ProcessedApplicationDataUnion](
+        ProcessedApplicationDataUnion
+    ).validate_python(
+        {
+            **raw_app_data_dump,
+            "resume_url": resume_url,
+            "email": user.email,
+            "submission_time": now,
+        }
     )
+
     applicant = Applicant(
         uid=user.uid,
+        first_name=raw_application_data.first_name,
+        last_name=raw_application_data.last_name,
+        roles=(Role.APPLICANT, Role(application_type)),
         application_data=processed_application_data,
         status=Status.PENDING_REVIEW,
     )
@@ -150,7 +215,7 @@ async def apply(
 
     try:
         await email_handler.send_application_confirmation_email(
-            user.email, applicant.application_data
+            user.email, applicant, application_type
         )
     except RuntimeError:
         log.error("Could not send confirmation email with SendGrid to %s.", user.uid)
@@ -167,17 +232,16 @@ async def apply(
 
 @router.get("/waiver")
 async def request_waiver(
-    user: Annotated[tuple[User, Applicant], Depends(require_accepted_applicant)]
+    user: Annotated[tuple[User, BareApplicant], Depends(require_accepted_applicant)]
 ) -> RedirectResponse:
     """Request to sign the participant waiver through DocuSign."""
     # TODO: non-applicants might also want to request a waiver
     user_data, applicant = user
-    application_data = applicant.application_data
 
     if applicant.status in (Status.WAIVER_SIGNED, Status.CONFIRMED):
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Already submitted a waiver.")
 
-    user_name = f"{application_data.first_name} {application_data.last_name}"
+    user_name = f"{applicant.first_name} {applicant.last_name}"
 
     # TODO: email may not match UCInetID format from `docusign_handler._acquire_uid`
     form_url = docusign_handler.waiver_form_url(user_data.email, user_name)

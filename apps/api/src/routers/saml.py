@@ -3,14 +3,15 @@ import os
 from functools import lru_cache
 from logging import getLogger
 from pathlib import Path
-from typing import Any
+from typing import Annotated, Any, Mapping
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Form, HTTPException, Request, status
+from fastapi.datastructures import URL
 from fastapi.responses import RedirectResponse, Response
 from onelogin.saml2.auth import OneLogin_Saml2_Auth
 from onelogin.saml2.settings import OneLogin_Saml2_Settings
 
-from auth.user_identity import NativeUser, utc_now, issue_user_identity
+from auth.user_identity import NativeUser, issue_user_identity, utc_now
 from services import mongodb_handler
 from services.mongodb_handler import Collection
 
@@ -59,28 +60,20 @@ def _get_saml_settings() -> OneLogin_Saml2_Settings:
     return OneLogin_Saml2_Settings(settings, custom_base_path=str(BASE_PATH))
 
 
-async def _prepare_saml_req(req: Request) -> dict[str, object]:
-    """Packages a FastAPI Request into a request dict for SAML Auth"""
-    return {
-        "http_host": req.url.hostname,
-        "script_name": req.url.path,
-        "get_data": req.query_params,
-        "post_data": await req.form(),
-        # Advanced request options
-        "https": "on",
-        # "request_uri": "",
-        # "query_string": "",
-        # "validate_signature_from_qs": False,
-        # "lowercase_urlencoding": False,
-    }
-
-
-async def _get_saml_auth(req: Request) -> OneLogin_Saml2_Auth:
-    """Initializes a SAML Auth instance based on the request"""
-    request_data = await _prepare_saml_req(req)
+def _get_saml_auth(url: URL, post_data: Mapping[str, str]) -> OneLogin_Saml2_Auth:
+    """Package Starlette request into data compatible with OneLogin_Saml2_Auth."""
     settings = _get_saml_settings()
+    assert url.hostname
 
-    return OneLogin_Saml2_Auth(request_data, old_settings=settings)
+    return OneLogin_Saml2_Auth(
+        {
+            "http_host": url.hostname,
+            "script_name": url.path,
+            "https": "on",
+            "post_data": post_data,
+        },
+        old_settings=settings,
+    )
 
 
 async def _update_last_login(user: NativeUser) -> None:
@@ -91,32 +84,60 @@ async def _update_last_login(user: NativeUser) -> None:
 
 
 @router.get("/login")
-async def login(req: Request) -> RedirectResponse:
-    auth = await _get_saml_auth(req)
-    sso_url = auth.login()
+async def login(req: Request, return_to: str = "/") -> RedirectResponse:
+    """Initiate login to SSO identity provider."""
+    auth = _get_saml_auth(req.url, {})
+    if not return_to.startswith("/"):
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_ENTITY, "Cannot return to different origin."
+        )
+    sso_url = auth.login(return_to=return_to)
 
     # Redirect user to SSO url to complete authentication
     return RedirectResponse(sso_url)
 
 
 @router.post("/acs")
-async def acs(req: Request) -> RedirectResponse:
+async def acs(
+    req: Request,
+    saml_response: Annotated[str, Form(alias="SAMLResponse")],
+    relay_state: Annotated[str, Form(alias="RelayState")],
+) -> RedirectResponse:
     """
     SAML Assertion Consumer Service.
     Accepts the response returned by the SAML Identity Provider and
     sets a cookie with a JWT token which validates the user's identity.
+
+    RelayState should be the same as the URL provided in the SAMLRequest.
+    To prevent Open Redirect attacks, AuthN requests should be signed.
     """
-    auth = await _get_saml_auth(req)
+    log.info(
+        "SAML ACS received response of %s bytes and RelayState=%s",
+        len(saml_response),
+        relay_state,
+    )
+
+    if not relay_state.startswith("/"):
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST, "RelayState is not on the same origin."
+        )
+
+    auth = _get_saml_auth(req.url, {"SAMLResponse": saml_response})
     auth.process_response()
     errors = auth.get_errors()
 
     if errors:
         log.error(f"SAML Error: {', '.join(errors)}, {auth.get_last_error_reason()}")
-        raise HTTPException(500, "An error occurred while processing the SAML response")
+        raise HTTPException(
+            status.HTTP_500_INTERNAL_SERVER_ERROR,
+            "An error occurred while processing the SAML response",
+        )
 
     if not auth.is_authenticated():
         log.warning("SAML Response received but user is not authenticated")
-        raise HTTPException(401, "User was not authenticated")
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "User was not authenticated")
+
+    # TODO: check `auth.get_last_assertion_id` to protect against replay attacks
 
     log.info(f"User Authenticated with SAML: {auth.get_friendlyname_attributes()}")
     try:
@@ -126,7 +147,9 @@ async def acs(req: Request) -> RedirectResponse:
         affiliations = auth.get_friendlyname_attribute("uciaffiliation")
     except (ValueError, TypeError) as e:
         log.exception("Error decoding SAML Attributes: %s", e)
-        raise HTTPException(500, "Error decoding user identity")
+        raise HTTPException(
+            status.HTTP_500_INTERNAL_SERVER_ERROR, "Error decoding user identity"
+        )
 
     user = NativeUser(
         ucinetid=ucinetid,
@@ -137,7 +160,7 @@ async def acs(req: Request) -> RedirectResponse:
 
     await _update_last_login(user)
 
-    res = RedirectResponse("/portal", status_code=303)
+    res = RedirectResponse(relay_state, status_code=status.HTTP_303_SEE_OTHER)
     issue_user_identity(user, res)
     return res
 

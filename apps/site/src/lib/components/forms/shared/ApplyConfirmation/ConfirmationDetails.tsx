@@ -1,4 +1,5 @@
 import Button from "@/lib/components/Button/Button";
+import Link from "next/link";
 
 interface ConfirmationDetailsProps {
 	isLoggedIn: boolean;
@@ -69,12 +70,12 @@ export default async function ConfirmationDetails({
 				Interested in being a{" "}
 				{otherRoles.map((role, index) => (
 					<span key={role}>
-						<a
+						<Link
 							href={role === "Hacker" ? `/apply` : `/${role.toLowerCase()}`}
 							className="text-[#FBA80A] underline"
 						>
 							{role}
-						</a>
+						</Link>
 						{index < otherRoles.length - 1 ? " or " : " "}
 					</span>
 				))}

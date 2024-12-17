@@ -7,13 +7,13 @@
 	background: #0c071b;
 
 	// What a crazy way to do the inner border lines
-	&::before,
-	&::after,
-	.horizontalLine {
-		content: "";
-		position: absolute;
-		background: white;
-	}
+	// &::before,
+	// &::after,
+	// .horizontalLine {
+	// 	content: "";
+	// 	position: absolute;
+	// 	background: white;
+	// }
 
 	// Vertical lines
 	&::before {
@@ -90,8 +90,12 @@
 		margin-top: 2rem;
 	}
 	.sponsorsContainer {
-		padding: 3rem;
-		padding-bottom: 8rem;
+		// padding: 3rem;
+		// padding-bottom: 8rem;
+
+		// temp padding for before we put sponsors
+		padding: 1rem;
+		padding-bottom: 2rem;
 	}
 }
 
@@ -112,8 +116,12 @@
 		max-height: 300px;
 	}
 	.sponsorsContainer {
-		padding: 6rem;
-		padding-bottom: 16rem;
+		// padding: 6rem;
+		// padding-bottom: 16rem;
+
+		// temp padding for before we put sponsors
+		padding: 1rem;
+		padding-bottom: 2rem;
 	}
 	.sponsorsGrid {
 		gap: 1.5rem;

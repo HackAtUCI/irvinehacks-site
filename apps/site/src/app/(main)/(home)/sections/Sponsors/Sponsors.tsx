@@ -44,13 +44,13 @@ const Sponsors = async () => {
 					</div>
 				))} */}
 
-				<div className={`${styles.horizontalLine} ${styles.bottom}`} />
-				<div className={styles.cornerSquares}>
+				{/* <div className={`${styles.horizontalLine} ${styles.bottom}`} /> */}
+				{/* <div className={styles.cornerSquares}>
 					<div className={styles.topLeft} />
 					<div className={styles.topRight} />
 					<div className={styles.bottomLeft} />
 					<div className={styles.bottomRight} />
-				</div>
+				</div> */}
 			</div>
 		</section>
 	);

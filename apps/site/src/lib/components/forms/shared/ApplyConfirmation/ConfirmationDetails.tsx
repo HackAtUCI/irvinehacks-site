@@ -67,19 +67,17 @@ export default async function ConfirmationDetails({
 
 			<p>
 				Interested in being a{" "}
-				<a
-					href={otherRoles[0] == "Hacker"?`/apply`:`${otherRoles[0].toLowerCase()}`}
-					className="text-[#FBA80A] underline"
-				>
-					{otherRoles[0]}
-				</a>{" "}
-				or{" "}
-				<a
-					href={otherRoles[1] == "Hacker"?`/apply`:`${otherRoles[1].toLowerCase()}`}
-					className="text-[#FBA80A] underline"
-				>
-					{otherRoles[1]}
-				</a>{" "}
+				{otherRoles.map((role, index) => (
+					<span key={role}>
+						<a
+							href={role === "Hacker" ? `/apply` : `/${role.toLowerCase()}`}
+							className="text-[#FBA80A] underline"
+						>
+							{role}
+						</a>
+						{index < otherRoles.length - 1 ? " or " : " "}
+					</span>
+				))}
 				instead?
 			</p>
 		</div>

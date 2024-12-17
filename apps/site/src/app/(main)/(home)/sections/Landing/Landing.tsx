@@ -1,10 +1,8 @@
 "use client";
 
-import { Suspense, useRef, useState } from "react";
-import { PerspectiveCamera } from "@react-three/drei";
+import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
-import View from "@/components/canvas/View";
 import Button from "@/lib/components/Button/Button";
 import About from "./About/About";
 import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
@@ -42,11 +40,6 @@ const Landing = () => {
 				<div
 					className={`flex flex-col items-center relative w-screen aspect-[3/4] max-h-[240vh] max-lg:h-[1100px] max-sm:h-[850px]`}
 				>
-					<View className="absolute w-full h-full">
-						<Suspense fallback={null}>
-							<PerspectiveCamera makeDefault position={[0, -0.1, 1]} />
-						</Suspense>
-					</View>
 					<div
 						className={`${styles.titleAnim} absolute z-10 w-full h-[50%] sm:h-[40%] flex flex-col items-center justify-center opacity-0`}
 					>

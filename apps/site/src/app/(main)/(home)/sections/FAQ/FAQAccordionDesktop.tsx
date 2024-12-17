@@ -23,12 +23,12 @@ const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 			<Image
 				src={SpeechDesktop}
 				alt="Dialogue box background"
-				className="hidden lg:block h-fit  lg:max-w-[630px] lg:h-[310px] xl:max-w-[775px] xl:h-[350px] duration-300"
+				className="hidden lg:block h-fit lg:max-w-[630px] lg:h-[310px] xl:max-w-[775px] xl:h-[350px]"
 			/>
 			<div className="hidden lg:block absolute lg:w-[555px] xl:w-[685px] lg:text-[.85rem] xl:text-[1rem] mt-3">
 				{/* Page 1 focused */}
 				<div
-					className={`absolute w-full duration-300 ${
+					className={`absolute w-full ${
 						page1Selected && !focusedQuestion
 							? "z-50"
 							: "hidden pointer-events-none"
@@ -89,7 +89,7 @@ const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 							}}
 							className={`absolute flex items-center mt-4 group hover:bg-white hover:text-black p-[1px] px-[3px] xl:mt-4 duration-200 `}
 						>
-							<TriangleIcon className="ms-2 hidden lg:w-4 lg:h-4 xl:w-5 xl:h-5" />
+							<TriangleIcon className="ms-2 opacity-0 lg:w-4 lg:h-4 xl:w-5 xl:h-5" />
 							<TriangleIcon
 								className={`ms-2 absolute hidden group-hover:block duration-200 left-[-5px] rotate-180 lg:w-4 lg:h-4 xl:w-5 xl:h-5`}
 								dark
@@ -105,10 +105,8 @@ const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 				{/* Question is focused. */}
 				<div
 					className={`${
-						focusedQuestion
-							? "z-50"
-							: "hidden pointer-events-none"
-					} duration-200 absolute lg:h-[250px] xl:h-[285px]`}
+						focusedQuestion ? "z-50" : "hidden pointer-events-none"
+					} absolute lg:h-[250px] xl:h-[285px]`}
 				>
 					<div>
 						<ListItemButton

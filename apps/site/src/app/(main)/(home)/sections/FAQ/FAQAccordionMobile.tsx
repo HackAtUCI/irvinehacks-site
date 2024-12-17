@@ -35,8 +35,8 @@ const FAQAccordionMobile: React.FC<FAQAccordion> = ({ faq }) => {
 				<div
 					className={`${
 						focusedQuestion
-							? "opacity-0 pointer-events-none"
-							: "opacity-100 z-50"
+							? "hidden pointer-events-none"
+							: "z-50"
 					} duration-200 w-[325px] sm:w-[450px] md:w-[560px] absolute mx-4 mt-2 h-fit`}
 				>
 					<div>
@@ -56,8 +56,8 @@ const FAQAccordionMobile: React.FC<FAQAccordion> = ({ faq }) => {
 				<div
 					className={`${
 						focusedQuestion
-							? "opacity-100 z-50"
-							: "opacity-0 pointer-events-none"
+							? "z-50"
+							: "hidden pointer-events-none"
 					} duration-200 absolute w-[325px] sm:w-[450px] md:w-[570px] h-[350px] sm:h-[325px] mt-2 sm:mt-8`}
 				>
 					<ListItemButton

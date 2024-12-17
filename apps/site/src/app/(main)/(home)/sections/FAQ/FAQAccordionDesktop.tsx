@@ -30,8 +30,8 @@ const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 				<div
 					className={`absolute w-full duration-300 ${
 						page1Selected && !focusedQuestion
-							? "opacity-100 z-50"
-							: "opacity-0 pointer-events-none"
+							? "z-50"
+							: "hidden pointer-events-none"
 					}`}
 				>
 					{faqGroup1.map((F) => (
@@ -54,11 +54,11 @@ const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 							Page 1/2
 							<TriangleIcon className="ms-2 opacity-0 lg:w-4 lg:h-4 xl:w-5 xl:h-5" />
 							<TriangleIcon
-								className={`ms-2 absolute opacity-0 group-hover:opacity-100 duration-200 right-[-7px] lg:w-4 lg:h-4 xl:w-5 xl:h-5`}
+								className={`ms-2 absolute hidden group-hover:block duration-200 right-[-7px] lg:w-4 lg:h-4 xl:w-5 xl:h-5`}
 								dark
 							/>
 							<TriangleIcon
-								className={`ms-2 absolute opacity-100 group-hover:opacity-0 duration-200 right-[-7px] lg:w-4 lg:h-4 xl:w-5 xl:h-5`}
+								className={`ms-2 absolute group-hover:hidden duration-200 right-[-7px] lg:w-4 lg:h-4 xl:w-5 xl:h-5`}
 							/>
 						</button>
 					</div>
@@ -68,8 +68,8 @@ const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 				<div
 					className={`absolute ${
 						!page1Selected && !focusedQuestion
-							? "opacity-100 z-50"
-							: "opacity-0 pointer-events-none"
+							? "z-50"
+							: "hidden pointer-events-none"
 					}`}
 				>
 					{faqGroup2.map((F) => (
@@ -89,13 +89,13 @@ const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 							}}
 							className={`absolute flex items-center mt-4 group hover:bg-white hover:text-black p-[1px] px-[3px] xl:mt-4 duration-200 `}
 						>
-							<TriangleIcon className="ms-2 opacity-0 lg:w-4 lg:h-4 xl:w-5 xl:h-5" />
+							<TriangleIcon className="ms-2 hidden lg:w-4 lg:h-4 xl:w-5 xl:h-5" />
 							<TriangleIcon
-								className={`ms-2 absolute opacity-0 group-hover:opacity-100 duration-200 left-[-5px] rotate-180 lg:w-4 lg:h-4 xl:w-5 xl:h-5`}
+								className={`ms-2 absolute hidden group-hover:block duration-200 left-[-5px] rotate-180 lg:w-4 lg:h-4 xl:w-5 xl:h-5`}
 								dark
 							/>
 							<TriangleIcon
-								className={`ms-2 absolute opacity-100 group-hover:opacity-0 duration-200 left-[-5px] rotate-180 lg:w-4 lg:h-4 xl:w-5 xl:h-5`}
+								className={`ms-2 absolute group-hover:hidden duration-200 left-[-5px] rotate-180 lg:w-4 lg:h-4 xl:w-5 xl:h-5`}
 							/>
 							Page 2/2
 						</button>
@@ -106,8 +106,8 @@ const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 				<div
 					className={`${
 						focusedQuestion
-							? "opacity-100 z-50"
-							: "opacity-0 pointer-events-none"
+							? "z-50"
+							: "hidden pointer-events-none"
 					} duration-200 absolute lg:h-[250px] xl:h-[285px]`}
 				>
 					<div>

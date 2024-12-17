@@ -1,4 +1,5 @@
 import Button from "@/lib/components/Button/Button";
+import Link from "next/link";
 
 interface ConfirmationDetailsProps {
 	isLoggedIn: boolean;
@@ -15,6 +16,9 @@ export default async function ConfirmationDetails({
 	roleText,
 	role,
 }: ConfirmationDetailsProps) {
+	const otherRoles = ["Hacker", "Mentor", "Volunteer"].filter(
+		(r) => r !== role,
+	);
 	return (
 		<div className="flex flex-col items-center gap-8 px-4 py-6 mx-4 max-w-screen-lg md:p-6 md:px-10 md:py-8 border-[2px] md:border-[5px] border-[var(--color-white)] text-[var(--color-white)] bg-[var(--color-black)]">
 			<h1 className="text-5xl text-center">Before Applying</h1>
@@ -61,6 +65,22 @@ export default async function ConfirmationDetails({
 				}
 				isLightVersion
 			/>
+
+			<p>
+				Interested in being a{" "}
+				{otherRoles.map((role, index) => (
+					<span key={role}>
+						<Link
+							href={role === "Hacker" ? `/apply` : `/${role.toLowerCase()}`}
+							className="text-[#FBA80A] underline"
+						>
+							{role}
+						</Link>
+						{index < otherRoles.length - 1 ? " or " : " "}
+					</span>
+				))}
+				instead?
+			</p>
 		</div>
 	);
 }

@@ -1,23 +1,18 @@
-/* eslint-disable @next/next/no-img-element */
-import { getSponsors } from "./getSponsors";
+// import { getSponsors } from "./getSponsors";
+// import SponsorTier from "./components/SponsorTier/SponsorTier";
 import styles from "./Sponsors.module.scss";
-import { client } from "@/lib/sanity/client";
-import imageUrlBuilder from "@sanity/image-url";
-import SponsorTier from "./components/SponsorTier/SponsorTier";
 
-const builder = imageUrlBuilder(client);
-
-const TIERS = [
-	"platinum",
-	"gold",
-	"silver",
-	"bronze",
-	"sponsored-prize",
-	"in-kind",
-];
+// const TIERS = [
+// 	"platinum",
+// 	"gold",
+// 	"silver",
+// 	"bronze",
+// 	"sponsored-prize",
+// 	"in-kind",
+// ];
 
 const Sponsors = async () => {
-	const sponsors = await getSponsors();
+	// const sponsors = await getSponsors();
 
 	return (
 		<section className="container py-24 md:my-16 relative items-center flex flex-col md:p-8 w-4/5 mx-auto text-center">
@@ -40,14 +35,14 @@ const Sponsors = async () => {
 					<div className="h-[2px] bg-white flex-grow mr-[2rem] mt-[0.5rem]" />
 				</div>
 
-				{TIERS.map((tier) => (
+				{/* {TIERS.map((tier) => (
 					<div key={tier}>
 						<SponsorTier
 							sponsors={sponsors.get(tier)}
 							className={styles[tier]}
 						/>
 					</div>
-				))}
+				))} */}
 
 				<div className={`${styles.horizontalLine} ${styles.bottom}`} />
 				<div className={styles.cornerSquares}>

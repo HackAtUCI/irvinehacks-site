@@ -10,7 +10,7 @@ from admin import participant_manager, summary_handler
 from admin.participant_manager import Participant
 from auth.authorization import require_role
 from auth.user_identity import User, utc_now
-from models.ApplicationData import Decision, Review
+from models.ApplicationData import Decision, HackerReview, OtherReview
 from models.user_record import Applicant, ApplicantStatus, Role, Status
 from services import mongodb_handler, sendgrid_handler
 from services.mongodb_handler import BaseRecord, Collection
@@ -97,6 +97,31 @@ async def applicant_summary() -> dict[ApplicantStatus, int]:
     return await summary_handler.applicant_summary()
 
 
+@router.post("/hackerReview")
+async def submit_hacker_review(
+    applicant: str = Body(),
+    score: float = Body(),
+    reviewer: User = Depends(require_role({Role.REVIEWER})),
+) -> None:
+    """Submit a review decision from the reviewer for the given applicant."""
+    log.info("%s reviewed applicant %s", reviewer, applicant)
+
+    review: HackerReview = (utc_now(), score)
+
+    try:
+        await mongodb_handler.raw_update_one(
+            Collection.USERS,
+            {"_id": applicant},
+            {
+                "$push": {f"application_data.reviews.{reviewer.uid}": review},
+                "$set": {"status": "REVIEWED"},
+            },
+        )
+    except RuntimeError:
+        log.error("Could not submit review for %s", applicant)
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 @router.post("/review")
 async def submit_review(
     applicant: str = Body(),
@@ -106,7 +131,7 @@ async def submit_review(
     """Submit a review decision from the reviewer for the given applicant."""
     log.info("%s reviewed applicant %s", reviewer, applicant)
 
-    review: Review = (utc_now(), reviewer.uid, decision)
+    review: OtherReview = (utc_now(), reviewer.uid, decision)
 
     try:
         await mongodb_handler.raw_update_one(

@@ -18,7 +18,7 @@ interface ApplicantProps {
 function Applicant({ params }: ApplicantProps) {
 	const { uid } = params;
 
-	const { applicant, loading, submitReview } = useApplicant(uid);
+	const { applicant, loading, submitReview, submitHackerReview } = useApplicant(uid);
 
 	if (loading || !applicant) {
 		return (

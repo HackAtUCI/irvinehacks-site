@@ -78,7 +78,13 @@ function useApplicant(uid: Uid) {
 		mutate();
 	}
 
-	return { applicant: data, loading: isLoading, error, submitReview };
+	async function submitHackerReview(uid: Uid, score: number) {
+		await axios.post("/api/admin/hackerReview", { applicant: uid, score: score });
+		// TODO: provide success status to display in alert
+		mutate();
+	}
+
+	return { applicant: data, loading: isLoading, error, submitReview, submitHackerReview };
 }
 
 export type submitReview = (uid: Uid, review: Decision) => Promise<void>;

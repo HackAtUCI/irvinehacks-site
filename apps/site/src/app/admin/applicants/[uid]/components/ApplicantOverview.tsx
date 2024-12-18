@@ -31,7 +31,7 @@ function ApplicantOverview({ applicant }: ApplicantOverviewProps) {
 				</div>
 				<div>
 					<Box variant="awsui-key-label">Reviews</Box>
-					<ApplicationReviews reviews={reviews} />
+					{/* <ApplicationReviews reviews={reviews} /> */}
 				</div>
 			</ColumnLayout>
 		</Container>

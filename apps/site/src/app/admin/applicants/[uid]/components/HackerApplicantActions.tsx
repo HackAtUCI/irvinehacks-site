@@ -1,24 +1,14 @@
 import { useContext, useState } from "react";
 
-import ButtonDropdown, {
-	ButtonDropdownProps,
-} from "@cloudscape-design/components/button-dropdown";
-
-import { Decision, submitHackerReview, Uid } from "@/lib/admin/useApplicant";
+import { Button, Input, SpaceBetween } from "@cloudscape-design/components";
+import { submitHackerReview, Uid } from "@/lib/admin/useApplicant";
 import UserContext from "@/lib/admin/UserContext";
 import { isReviewer } from "@/lib/admin/authorization";
-import { Button, Input, SpaceBetween } from "@cloudscape-design/components";
 
 interface ApplicantActionsProps {
 	applicant: Uid;
 	submitHackerReview: submitHackerReview;
 }
-
-interface ReviewButtonItem extends ButtonDropdownProps.Item {
-	id: Decision;
-}
-
-type ReviewButtonItems = ReviewButtonItem[];
 
 function HackerApplicantActions({
 	applicant,
@@ -30,13 +20,6 @@ function HackerApplicantActions({
 	if (!isReviewer(roles)) {
 		return null;
 	}
-
-	// const handleClick = (
-	// 	event: CustomEvent<ButtonDropdownProps.ItemClickDetails>,
-	// ) => {
-	// 	const review = event.detail.id;
-	// 	submitHackerReview(applicant, review as Decision);
-	// };
 
 	return (
 		<SpaceBetween direction="horizontal" size="xs">

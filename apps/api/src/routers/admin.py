@@ -1,7 +1,7 @@
 import asyncio
 from datetime import datetime
 from logging import getLogger
-from typing import Annotated, Any, Optional, Sequence
+from typing import Annotated, Any, Mapping, Optional, Sequence
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, Field, TypeAdapter, ValidationError
@@ -105,7 +105,7 @@ async def submit_hacker_review(
 ) -> None:
     """Submit a review decision from the reviewer for the given applicant."""
     log.info("%s reviewed applicant %s", reviewer, applicant)
-    
+
     reviewer_key = reviewer.uid.split(".")[-1]
 
     review: HackerReview = (utc_now(), score)
@@ -122,6 +122,31 @@ async def submit_hacker_review(
     except RuntimeError:
         log.error("Could not submit review for %s", applicant)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    project_var = "avgScore"
+    pipeline: list[Mapping[str, object]] = [
+        {"$match": {"_id": applicant}},
+        {
+            "$project": {
+                "lastScores": {
+                    "$map": {
+                        "input": {"$objectToArray": "$application_data.reviews"},
+                        "as": "review",
+                        "in": {
+                            "$arrayElemAt": [
+                                {"$arrayElemAt": ["$$review.v", -1]},
+                                1,
+                            ]
+                        },
+                    }
+                }
+            }
+        },
+        {"$project": {project_var: {"$avg": "$lastScores"}}},
+    ]
+    res = await mongodb_handler.aggregate(Collection.USERS, pipeline)
+    if res:
+        print(res[0][project_var])
 
 
 @router.post("/review")

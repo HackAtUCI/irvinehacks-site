@@ -141,7 +141,6 @@ class ProcessedHackerApplicationData(BaseApplicationData):
     resume_url: Union[HttpUrl, None] = None
     submission_time: datetime
     reviews: dict[str, list[HackerReview]] = {}
-    avg_score: float = -1
 
     @field_serializer("linkedin", "portfolio", "resume_url")
     def url2str(self, val: Union[HttpUrl, None]) -> Union[str, None]:

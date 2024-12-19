@@ -145,8 +145,22 @@ async def submit_hacker_review(
         {"$project": {project_var: {"$avg": "$lastScores"}}},
     ]
     res = await mongodb_handler.aggregate(Collection.USERS, pipeline)
-    if res:
-        print(res[0][project_var])
+    if not res:
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    try:
+        avg_score = res[0][project_var]
+        await mongodb_handler.raw_update_one(
+            Collection.USERS,
+            {"_id": applicant},
+            {
+                "$set": {"avg_score": avg_score},
+            },
+            upsert=True,
+        )
+    except RuntimeError:
+        log.error("Could not submit review for %s", applicant)
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @router.post("/review")

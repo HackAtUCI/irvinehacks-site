@@ -10,6 +10,7 @@ import useApplicant from "@/lib/admin/useApplicant";
 import ApplicantActions from "./components/ApplicantActions";
 import ApplicantOverview from "./components/ApplicantOverview";
 import Application from "./components/Application";
+import HackerApplicantActions from "./components/HackerApplicantActions";
 
 interface ApplicantProps {
 	params: { uid: string };
@@ -18,7 +19,8 @@ interface ApplicantProps {
 function Applicant({ params }: ApplicantProps) {
 	const { uid } = params;
 
-	const { applicant, loading, submitReview, submitHackerReview } = useApplicant(uid);
+	const { applicant, loading, submitReview, submitHackerReview } =
+		useApplicant(uid);
 
 	if (loading || !applicant) {
 		return (
@@ -37,10 +39,17 @@ function Applicant({ params }: ApplicantProps) {
 					variant="h1"
 					description="Applicant"
 					actions={
-						<ApplicantActions
-							applicant={applicant._id}
-							submitReview={submitReview}
-						/>
+						applicant.roles.includes("Hacker") ? (
+							<HackerApplicantActions
+								applicant={applicant._id}
+								submitHackerReview={submitHackerReview}
+							/>
+						) : (
+							<ApplicantActions
+								applicant={applicant._id}
+								submitReview={submitReview}
+							/>
+						)
 					}
 				>
 					{first_name} {last_name}

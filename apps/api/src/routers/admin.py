@@ -64,8 +64,8 @@ async def applicants(
         ],
     )
 
-    for record in records:
-        _include_review_decision(record)
+    # for record in records:
+    #     _include_review_decision(record)
 
     try:
         return TypeAdapter(list[ApplicantSummary]).validate_python(records)
@@ -105,6 +105,8 @@ async def submit_hacker_review(
 ) -> None:
     """Submit a review decision from the reviewer for the given applicant."""
     log.info("%s reviewed applicant %s", reviewer, applicant)
+    
+    reviewer_key = reviewer.uid.split(".")[-1]
 
     review: HackerReview = (utc_now(), score)
 
@@ -113,7 +115,7 @@ async def submit_hacker_review(
             Collection.USERS,
             {"_id": applicant},
             {
-                "$push": {f"application_data.reviews.{reviewer.uid}": review},
+                "$push": {f"application_data.reviews.{reviewer_key}": review},
                 "$set": {"status": "REVIEWED"},
             },
         )

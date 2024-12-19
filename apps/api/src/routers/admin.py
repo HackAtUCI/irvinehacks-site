@@ -115,7 +115,7 @@ async def submit_hacker_review(
             Collection.USERS,
             {"_id": applicant},
             {
-                "$push": {f"application_data.reviews.{reviewer_key}": review},
+                "$push": {f"application_data.hacker_reviews.{reviewer_key}": review},
                 "$set": {"status": "REVIEWED"},
             },
         )
@@ -130,7 +130,7 @@ async def submit_hacker_review(
             "$project": {
                 "lastScores": {
                     "$map": {
-                        "input": {"$objectToArray": "$application_data.reviews"},
+                        "input": {"$objectToArray": "$application_data.hacker_reviews"},
                         "as": "review",
                         "in": {
                             "$arrayElemAt": [

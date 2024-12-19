@@ -140,7 +140,10 @@ class ProcessedHackerApplicationData(BaseApplicationData):
     email: EmailStr
     resume_url: Union[HttpUrl, None] = None
     submission_time: datetime
-    reviews: dict[str, list[HackerReview]] = {}
+    hacker_reviews: dict[str, list[HackerReview]] = {}
+
+    # TODO: remove reviews as they aren't used in hacker reviewing process
+    reviews: list[OtherReview] = []
 
     @field_serializer("linkedin", "portfolio", "resume_url")
     def url2str(self, val: Union[HttpUrl, None]) -> Union[str, None]:

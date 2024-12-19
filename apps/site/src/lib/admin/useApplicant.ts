@@ -2,6 +2,7 @@ import axios from "axios";
 import useSWR from "swr";
 
 export type Uid = string;
+export type Score = number;
 
 export enum Decision {
 	accepted = "ACCEPTED",
@@ -10,6 +11,7 @@ export enum Decision {
 }
 
 export type Review = [string, Uid, Decision];
+export type HackerReview = [string, Score];
 
 // The application responses submitted by an applicant
 export interface ApplicationData {
@@ -28,6 +30,7 @@ export interface ApplicationData {
 	resume_url: string;
 	submission_time: string;
 	reviews: Review[];
+	hacker_reviews: Record<string, HackerReview[]>;
 }
 
 export type ApplicationQuestion = Exclude<keyof ApplicationData, "reviews">;
@@ -79,12 +82,10 @@ function useApplicant(uid: Uid) {
 	}
 
 	async function submitHackerReview(uid: Uid, score: string) {
-		console.log("in hacker submit review route");
-		const res = await axios.post("/api/admin/hackerReview", {
+		await axios.post("/api/admin/hackerReview", {
 			applicant: uid,
 			score: score,
 		});
-		console.log(res);
 		// TODO: provide success status to display in alert
 		mutate();
 	}

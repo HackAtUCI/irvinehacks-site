@@ -31,7 +31,12 @@ function HackerApplicantActions({
 				placeholder="Applicant score"
 				step={0.1}
 			/>
-			<Button onClick={() => submitHackerReview(applicant, value)}>
+			<Button
+				onClick={() => {
+					submitHackerReview(applicant, value);
+					setValue("");
+				}}
+			>
 				Submit
 			</Button>
 		</SpaceBetween>

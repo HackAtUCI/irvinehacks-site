@@ -43,6 +43,16 @@ class ApplicantSummary(BaseRecord):
     application_data: ApplicationDataSummary
 
 
+class HackerApplicantSummary(BaseRecord):
+    uid: str = Field(alias="_id")
+    first_name: str
+    last_name: str
+    status: str
+    num_reviewers: int
+    avg_score: float
+    application_data: ApplicationDataSummary
+
+
 @router.get("/applicants")
 async def applicants(
     user: Annotated[User, Depends(require_manager)]
@@ -71,6 +81,41 @@ async def applicants(
         return TypeAdapter(list[ApplicantSummary]).validate_python(records)
     except ValidationError:
         raise RuntimeError("Could not parse applicant data.")
+
+
+@router.get("/hackerApplicants")
+async def hacker_applicants(
+    user: Annotated[User, Depends(require_manager)]
+) -> list[HackerApplicantSummary]:
+    """Get records of all applicants."""
+    log.info("%s requested applicants", user)
+
+    records: list[dict[str, object]] = await mongodb_handler.retrieve(
+        Collection.USERS,
+        {"roles": Role.HACKER},
+        [
+            "_id",
+            "status",
+            "first_name",
+            "last_name",
+            "application_data.school",
+            "application_data.submission_time",
+            "application_data.hacker_reviews",
+            "avg_score",
+        ],
+    )
+
+    for record in records:
+        _include_num_reviewers_remove_reviews(record)
+
+    try:
+        return TypeAdapter(list[HackerApplicantSummary]).validate_python(records)
+    except ValidationError:
+        raise RuntimeError("Could not parse applicant data.")
+
+
+# left off on this and getting applicants to show on frontend,
+# showing 2 reviewers, showing avg score
 
 
 @router.get("/applicant/{uid}", dependencies=[Depends(require_manager)])
@@ -404,3 +449,9 @@ def _include_review_decision(applicant_record: dict[str, Any]) -> None:
     """Sets the applicant's decision as the last submitted review decision or None."""
     reviews = applicant_record["application_data"]["reviews"]
     applicant_record["decision"] = reviews[-1][2] if reviews else None
+
+
+def _include_num_reviewers_remove_reviews(applicant_record: dict[str, Any]) -> None:
+    reviews = applicant_record["application_data"]["hacker_reviews"]
+    applicant_record["num_reviewers"] = len(reviews)
+    del applicant_record["application_data"]["hacker_reviews"]

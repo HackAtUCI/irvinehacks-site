@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any
 from unittest.mock import ANY, AsyncMock, call, patch
 
 from fastapi import FastAPI
@@ -271,3 +272,21 @@ def test_non_waitlisted_applicant_cannot_be_released(
     assert res.status_code == 404
 
     mock_mongodb_handler_update_one.assert_not_awaited()
+
+
+def test_can_include_num_reviewers_from_reviews() -> None:
+    """Test that a decision can be provided for an applicant with reviews."""
+    record: dict[str, Any] = {
+        "_id": "edu.uci.sydnee",
+        "status": "REVIEWED",
+        "application_data": {
+            "hacker_reviews": {
+                "alicia": [[datetime(2023, 1, 19), 100]],
+                "alicia_number_two": [[datetime(2023, 1, 19), 200]],
+            }
+        },
+    }
+
+    admin._include_num_reviewers_remove_reviews(record)
+    assert record["num_reviewers"] == 2
+    assert "hacker_reviews" not in record["application_data"]

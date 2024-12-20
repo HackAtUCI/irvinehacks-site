@@ -115,8 +115,70 @@ async def hacker_applicants(
         raise RuntimeError("Could not parse applicant data.")
 
 
-# left off on this and getting applicants to show on frontend,
-# showing 2 reviewers, showing avg score
+@router.post("/setThresholds")
+async def set_hacker_score_thresholds(
+    user: Annotated[User, Depends(require_manager)],
+    accept: float = Body(),
+    waitlist: float = Body(),
+    reject: float = Body(),
+) -> None:
+    log.info(
+        "%s changed thresholds: Accept-%f | Waitlist-%f | Reject-%f",
+        user,
+        accept,
+        waitlist,
+        reject,
+    )
+
+    try:
+        await mongodb_handler.raw_update_one(
+            Collection.SETTINGS,
+            {"_id": "hacker_score_thresholds"},
+            {"$set": {"accept": accept, "waitlist": waitlist, "reject": reject}},
+            upsert=True,
+        )
+    except RuntimeError:
+        log.error(
+            "%s could not change thresholds: Accept-%f | Waitlist-%f | Reject-%f",
+            user,
+            accept,
+            waitlist,
+            reject,
+        )
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    # res = await mongodb_handler.retrieve_one(
+    #     Collection.SETTINGS, {"_id": "hacker_score_thresholds"}
+    # )
+    # print(res)
+    records = await mongodb_handler.retrieve(
+        Collection.USERS,
+        {
+            "status": {
+                "$in": [
+                    Status.REVIEWED,
+                    Decision.ACCEPTED,
+                    Decision.WAITLISTED,
+                    Decision.REJECTED,
+                ]
+            }
+        },
+        ["_id", "application_data.reviews"],
+    )
+
+    for record in records:
+        _set_decision_based_on_threshold(record, accept, waitlist, reject)
+
+    for decision in (Decision.ACCEPTED, Decision.WAITLISTED, Decision.REJECTED):
+        group = [record for record in records if record["decision"] == decision]
+        if not group:
+            continue
+        await asyncio.gather(
+            *(
+                _update_batch_of_decisions(batch, decision)
+                for batch in batched(group, 100)
+            )
+        )
 
 
 @router.get("/applicant/{uid}", dependencies=[Depends(require_manager)])
@@ -375,6 +437,18 @@ async def _process_status(uids: Sequence[str], status: Status) -> None:
 
 
 async def _process_batch(batch: tuple[dict[str, Any], ...], decision: Decision) -> None:
+    await _update_batch_of_decisions(batch, decision)
+
+    # Send emails
+    log.info(f"Sending {decision} emails for {len(batch)} applicants")
+    await email_handler.send_decision_email(
+        map(_extract_personalizations, batch), decision
+    )
+
+
+async def _update_batch_of_decisions(
+    batch: tuple[dict[str, Any], ...], decision: Decision
+) -> None:
     uids: list[str] = [record["_id"] for record in batch]
     log.info(f"Setting {','.join(uids)} as {decision}")
     ok = await mongodb_handler.update(
@@ -382,12 +456,6 @@ async def _process_batch(batch: tuple[dict[str, Any], ...], decision: Decision) 
     )
     if not ok:
         raise RuntimeError("gg wp")
-
-    # Send emails
-    log.info(f"Sending {decision} emails for {len(batch)} applicants")
-    await email_handler.send_decision_email(
-        map(_extract_personalizations, batch), decision
-    )
 
 
 def _extract_personalizations(decision_data: dict[str, Any]) -> tuple[str, EmailStr]:
@@ -446,3 +514,15 @@ def _get_avg_score(reviews: list[tuple[str, str, float]]) -> float:
     last_score = _get_last_score(unique_reviewers.pop(), reviews)
     last_score2 = _get_last_score(unique_reviewers.pop(), reviews)
     return (last_score + last_score2) / 2
+
+
+def _set_decision_based_on_threshold(
+    applicant_record: dict[str, Any], accept: float, waitlist: float, reject: float
+) -> None:
+    avg_score = _get_avg_score(applicant_record["application_data"]["reviews"])
+    if avg_score > accept:
+        applicant_record["decision"] = Decision.ACCEPTED
+    elif avg_score > waitlist:
+        applicant_record["decision"] = Decision.WAITLISTED
+    else:
+        applicant_record["decision"] = Decision.REJECTED

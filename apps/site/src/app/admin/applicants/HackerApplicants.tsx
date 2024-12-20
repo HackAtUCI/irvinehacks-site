@@ -21,6 +21,8 @@ import UserContext from "@/lib/admin/UserContext";
 import { isApplicationManager } from "@/lib/admin/authorization";
 import { Status } from "@/lib/admin/useApplicant";
 import ApplicantReviewerIndicator from "./components/ApplicantReviewerIndicator";
+import { Button, SpaceBetween } from "@cloudscape-design/components";
+import HackerThresholdInputs from "./components/HackerThresholdInputs";
 
 function HackerApplicants() {
 	const router = useRouter();
@@ -119,11 +121,15 @@ function HackerApplicants() {
 				/>
 			}
 			empty={emptyContent}
-			header={<Header counter={counter}>Applicants</Header>}
+			header={
+				<Header counter={counter} actions={<HackerThresholdInputs />}>
+					Applicants
+				</Header>
+			}
 		/>
 	);
 }
-
+// left off on setting thresholds. how and when are you going to update decision statuses based on these thresholds
 const CardHeader = ({ _id, first_name, last_name }: HackerApplicantSummary) => {
 	const followWithNextLink = useFollowWithNextLink();
 	return (

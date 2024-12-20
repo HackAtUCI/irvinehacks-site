@@ -21,16 +21,11 @@ interface ResumeInformationProps {
 export default function ResumeInformation({
 	isRequired,
 }: ResumeInformationProps) {
-	const inputRef = useRef<HTMLInputElement>(null);
 	const [resumePath, setResumePath] = useState<string>("");
 	const [hasUploaded, setHasUploaded] = useState<boolean>(false);
 	const [errorMessage, setErrorMessage] = useState<string>("");
 
-	useEffect(() => {
-		if (inputRef.current) {
-			inputRef.current.value = "";
-		}
-	}, []);
+
 
 	const handleFileUpload = (event: ChangeEvent<HTMLInputElement>) => {
 		event.preventDefault();
@@ -84,7 +79,6 @@ export default function ResumeInformation({
 				<h2 className="text-center">Upload file</h2>
 			</label>
 			<input
-				ref={inputRef}
 				className="opacity-0 absolute"
 				name="resume"
 				id="resume_upload"

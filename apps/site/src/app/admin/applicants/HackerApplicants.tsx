@@ -84,7 +84,7 @@ function HackerApplicants() {
 					{
 						id: "reviewers",
 						header: "",
-						content: ApplicantReviewerIndicator
+						content: ApplicantReviewerIndicator,
 					},
 					{
 						id: "submission_time",
@@ -95,7 +95,7 @@ function HackerApplicants() {
 					{
 						id: "avg_score",
 						header: "Averaged Score",
-						content: ({ avg_score }) => avg_score,
+						content: ({ avg_score }) => (avg_score === -1 ? "-" : avg_score),
 					},
 					// {
 					// 	id: "decision",

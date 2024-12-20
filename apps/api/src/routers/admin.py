@@ -1,7 +1,7 @@
 import asyncio
 from datetime import datetime
 from logging import getLogger
-from typing import Annotated, Any, Mapping, Optional, Sequence
+from typing import Annotated, Any, Optional, Sequence
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, Field, TypeAdapter, ValidationError
@@ -100,13 +100,14 @@ async def hacker_applicants(
             "last_name",
             "application_data.school",
             "application_data.submission_time",
-            "application_data.hacker_reviews",
-            "avg_score",
+            "application_data.reviews",
         ],
     )
 
     for record in records:
-        _include_num_reviewers_remove_reviews(record)
+        _include_num_reviewers(record)
+        _include_avg_score(record)
+        _delete_reviews(record)
 
     try:
         return TypeAdapter(list[HackerApplicantSummary]).validate_python(records)
@@ -151,57 +152,16 @@ async def submit_hacker_review(
     """Submit a review decision from the reviewer for the given applicant."""
     log.info("%s reviewed applicant %s", reviewer, applicant)
 
-    reviewer_key = reviewer.uid.split(".")[-1]
-
-    review: HackerReview = (utc_now(), score)
+    review: HackerReview = (utc_now(), reviewer.uid, score)
 
     try:
         await mongodb_handler.raw_update_one(
             Collection.USERS,
             {"_id": applicant},
             {
-                "$push": {f"application_data.hacker_reviews.{reviewer_key}": review},
+                "$push": {"application_data.reviews": review},
                 "$set": {"status": "REVIEWED"},
             },
-        )
-    except RuntimeError:
-        log.error("Could not submit review for %s", applicant)
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    project_var = "avgScore"
-    pipeline: list[Mapping[str, object]] = [
-        {"$match": {"_id": applicant}},
-        {
-            "$project": {
-                "lastScores": {
-                    "$map": {
-                        "input": {"$objectToArray": "$application_data.hacker_reviews"},
-                        "as": "review",
-                        "in": {
-                            "$arrayElemAt": [
-                                {"$arrayElemAt": ["$$review.v", -1]},
-                                1,
-                            ]
-                        },
-                    }
-                }
-            }
-        },
-        {"$project": {project_var: {"$avg": "$lastScores"}}},
-    ]
-    res = await mongodb_handler.aggregate(Collection.USERS, pipeline)
-    if not res:
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    try:
-        avg_score = res[0][project_var]
-        await mongodb_handler.raw_update_one(
-            Collection.USERS,
-            {"_id": applicant},
-            {
-                "$set": {"avg_score": avg_score},
-            },
-            upsert=True,
         )
     except RuntimeError:
         log.error("Could not submit review for %s", applicant)
@@ -451,7 +411,38 @@ def _include_review_decision(applicant_record: dict[str, Any]) -> None:
     applicant_record["decision"] = reviews[-1][2] if reviews else None
 
 
-def _include_num_reviewers_remove_reviews(applicant_record: dict[str, Any]) -> None:
-    reviews = applicant_record["application_data"]["hacker_reviews"]
-    applicant_record["num_reviewers"] = len(reviews)
-    del applicant_record["application_data"]["hacker_reviews"]
+def _include_num_reviewers(applicant_record: dict[str, Any]) -> None:
+    reviews = applicant_record["application_data"]["reviews"]
+    unique_reviewers = {t[1] for t in reviews}
+    applicant_record["num_reviewers"] = len(unique_reviewers)
+
+
+def _include_avg_score(applicant_record: dict[str, Any]) -> None:
+    applicant_record["avg_score"] = _get_avg_score(
+        applicant_record["application_data"]["reviews"]
+    )
+
+
+def _delete_reviews(applicant_record: dict[str, Any]) -> None:
+    del applicant_record["application_data"]["reviews"]
+
+
+def _get_last_score(
+    reviewer: str, reversed_reviews: list[tuple[str, str, float]]
+) -> float:
+    for t in reversed_reviews:
+        if t[1] == reviewer:
+            return t[2]
+    return -1
+
+
+def _get_avg_score(reviews: list[tuple[str, str, float]]) -> float:
+    unique_reviewers = {t[1] for t in reviews}
+    if len(unique_reviewers) < 2:
+        return -1
+
+    reviews.reverse()
+
+    last_score = _get_last_score(unique_reviewers.pop(), reviews)
+    last_score2 = _get_last_score(unique_reviewers.pop(), reviews)
+    return (last_score + last_score2) / 2

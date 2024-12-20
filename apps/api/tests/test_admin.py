@@ -280,13 +280,28 @@ def test_can_include_num_reviewers_from_reviews() -> None:
         "_id": "edu.uci.sydnee",
         "status": "REVIEWED",
         "application_data": {
-            "hacker_reviews": {
-                "alicia": [[datetime(2023, 1, 19), 100]],
-                "alicia_number_two": [[datetime(2023, 1, 19), 200]],
-            }
+            "reviews": [
+                [datetime(2023, 1, 19), "edu.uci.alicia", 100],
+                [datetime(2023, 1, 19), "edu.uci.alicia2", 200],
+            ]
         },
     }
 
-    admin._include_num_reviewers_remove_reviews(record)
+    admin._include_num_reviewers(record)
     assert record["num_reviewers"] == 2
-    assert "hacker_reviews" not in record["application_data"]
+
+
+def test_can_include_avg_score_from_reviews() -> None:
+    record: dict[str, Any] = {
+        "_id": "edu.uci.sydnee",
+        "status": "REVIEWED",
+        "application_data": {
+            "reviews": [
+                [datetime(2023, 1, 19), "edu.uci.alicia", 100],
+                [datetime(2023, 1, 19), "edu.uci.alicia2", 200],
+            ]
+        },
+    }
+
+    admin._include_avg_score(record)
+    assert record["avg_score"] == 150

@@ -11,7 +11,7 @@ export enum Decision {
 }
 
 export type Review = [string, Uid, Decision];
-export type HackerReview = [string, Score];
+export type HackerReview = [string, Uid, Score];
 
 // The application responses submitted by an applicant
 export interface ApplicationData {
@@ -29,8 +29,7 @@ export interface ApplicationData {
 	frq_dream_job: string;
 	resume_url: string;
 	submission_time: string;
-	reviews: Review[];
-	hacker_reviews: Record<string, HackerReview[]>;
+	reviews: Review[] | HackerReview[];
 }
 
 export type ApplicationQuestion = Exclude<keyof ApplicationData, "reviews">;

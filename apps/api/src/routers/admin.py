@@ -119,31 +119,28 @@ async def hacker_applicants(
 async def set_hacker_score_thresholds(
     user: Annotated[User, Depends(require_manager)],
     accept: float = Body(),
-    waitlist: float = Body(),
-    reject: float = Body(),
+    waitlist: float = Body()
 ) -> None:
     log.info(
-        "%s changed thresholds: Accept-%f | Waitlist-%f | Reject-%f",
+        "%s changed thresholds: Accept-%f | Waitlist-%f",
         user,
         accept,
-        waitlist,
-        reject,
+        waitlist
     )
 
     try:
         await mongodb_handler.raw_update_one(
             Collection.SETTINGS,
             {"_id": "hacker_score_thresholds"},
-            {"$set": {"accept": accept, "waitlist": waitlist, "reject": reject}},
+            {"$set": {"accept": accept, "waitlist": waitlist}},
             upsert=True,
         )
     except RuntimeError:
         log.error(
-            "%s could not change thresholds: Accept-%f | Waitlist-%f | Reject-%f",
+            "%s could not change thresholds: Accept-%f | Waitlist-%f",
             user,
             accept,
-            waitlist,
-            reject,
+            waitlist
         )
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -167,7 +164,7 @@ async def set_hacker_score_thresholds(
     )
 
     for record in records:
-        _set_decision_based_on_threshold(record, accept, waitlist, reject)
+        _set_decision_based_on_threshold(record, accept, waitlist)
 
     for decision in (Decision.ACCEPTED, Decision.WAITLISTED, Decision.REJECTED):
         group = [record for record in records if record["decision"] == decision]
@@ -517,7 +514,7 @@ def _get_avg_score(reviews: list[tuple[str, str, float]]) -> float:
 
 
 def _set_decision_based_on_threshold(
-    applicant_record: dict[str, Any], accept: float, waitlist: float, reject: float
+    applicant_record: dict[str, Any], accept: float, waitlist: float
 ) -> None:
     avg_score = _get_avg_score(applicant_record["application_data"]["reviews"])
     if avg_score > accept:

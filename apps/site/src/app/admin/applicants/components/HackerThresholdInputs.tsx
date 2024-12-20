@@ -10,15 +10,23 @@ import { useState } from "react";
 function HackerThresholdInputs() {
 	const [acceptValue, setAcceptValue] = useState("");
 	const [waitlistValue, setWaitlistValue] = useState("");
-	const [rejectValue, setRejectValue] = useState("");
+
+	const [status, setStatus] = useState("");
 
 	async function submitThresholds() {
-		const res = await axios.post("/api/admin/setThresholds", {
-			accept: acceptValue,
-			waitlist: waitlistValue,
-			reject: rejectValue,
-		});
-		console.log(res);
+		await axios
+			.post("/api/admin/setThresholds", {
+				accept: acceptValue,
+				waitlist: waitlistValue
+			})
+			.then((response) => {
+                // TODO: Add flashbar or modal
+				if (response.status === 200) {
+					setStatus("Successfully updated thresholds.");
+				} else {
+					setStatus("Failed to update thresholds");
+				}
+			});
 	}
 
 	return (
@@ -29,7 +37,7 @@ function HackerThresholdInputs() {
 				value={acceptValue}
 				type="number"
 				inputMode="decimal"
-				placeholder="Applicant score"
+				placeholder="Accept Threshold"
 				step={0.1}
 			/>
 			<Box variant="awsui-key-label">Waitlist Threshold</Box>
@@ -38,21 +46,14 @@ function HackerThresholdInputs() {
 				value={waitlistValue}
 				type="number"
 				inputMode="decimal"
-				placeholder="Applicant score"
+				placeholder="Waitlist Threshold"
 				step={0.1}
 			/>
-			<Box variant="awsui-key-label">Reject Threshold</Box>
-			<Input
-				onChange={({ detail }) => setRejectValue(detail.value)}
-				value={rejectValue}
-				type="number"
-				inputMode="decimal"
-				placeholder="Applicant score"
-				step={0.1}
-			/>
+			<Box variant="p">Any score under {waitlistValue} will be rejected</Box>
 			<Button variant="primary" onClick={submitThresholds}>
 				Update Thresholds
 			</Button>
+			{status ? <Box variant="awsui-key-label">{status}</Box> : null}
 		</SpaceBetween>
 	);
 }

@@ -1,7 +1,7 @@
 import asyncio
 from datetime import datetime
 from logging import getLogger
-from typing import Annotated, Any, Optional, Sequence
+from typing import Annotated, Any, Literal, Optional, Sequence
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, Field, TypeAdapter, ValidationError
@@ -74,8 +74,8 @@ async def applicants(
         ],
     )
 
-    # for record in records:
-    #     _include_review_decision(record)
+    for record in records:
+        _include_review_decision(record)
 
     try:
         return TypeAdapter(list[ApplicantSummary]).validate_python(records)
@@ -119,14 +119,9 @@ async def hacker_applicants(
 async def set_hacker_score_thresholds(
     user: Annotated[User, Depends(require_manager)],
     accept: float = Body(),
-    waitlist: float = Body()
+    waitlist: float = Body(),
 ) -> None:
-    log.info(
-        "%s changed thresholds: Accept-%f | Waitlist-%f",
-        user,
-        accept,
-        waitlist
-    )
+    log.info("%s changed thresholds: Accept-%f | Waitlist-%f", user, accept, waitlist)
 
     try:
         await mongodb_handler.raw_update_one(
@@ -140,26 +135,13 @@ async def set_hacker_score_thresholds(
             "%s could not change thresholds: Accept-%f | Waitlist-%f",
             user,
             accept,
-            waitlist
+            waitlist,
         )
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    # res = await mongodb_handler.retrieve_one(
-    #     Collection.SETTINGS, {"_id": "hacker_score_thresholds"}
-    # )
-    # print(res)
     records = await mongodb_handler.retrieve(
         Collection.USERS,
-        {
-            "status": {
-                "$in": [
-                    Status.REVIEWED,
-                    Decision.ACCEPTED,
-                    Decision.WAITLISTED,
-                    Decision.REJECTED,
-                ]
-            }
-        },
+        {"status": Status.REVIEWED},
         ["_id", "application_data.reviews"],
     )
 
@@ -172,7 +154,7 @@ async def set_hacker_score_thresholds(
             continue
         await asyncio.gather(
             *(
-                _update_batch_of_decisions(batch, decision)
+                _update_batch_of_decisions(batch, decision, update_field="decision")
                 for batch in batched(group, 100)
             )
         )
@@ -217,14 +199,28 @@ async def submit_hacker_review(
         await mongodb_handler.raw_update_one(
             Collection.USERS,
             {"_id": applicant},
-            {
-                "$push": {"application_data.reviews": review},
-                "$set": {"status": "REVIEWED"},
-            },
+            {"$push": {"application_data.reviews": review}},
         )
     except RuntimeError:
         log.error("Could not submit review for %s", applicant)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    applicant_record = await mongodb_handler.retrieve_one(
+        Collection.USERS,
+        {"_id": applicant},
+        ["_id", "application_data.reviews"],
+    )
+    if not applicant_record:
+        log.error("Could not retrieve applicant after submitting review")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    num_reviewers = _get_num_unique_reviewers(applicant_record)
+    if num_reviewers > 1:
+        await mongodb_handler.raw_update_one(
+            Collection.USERS,
+            {"_id": applicant},
+            {"$set": {"status": "REVIEWED"}},
+        )
 
 
 @router.post("/review")
@@ -263,6 +259,37 @@ async def release_decisions() -> None:
 
     for record in records:
         _include_review_decision(record)
+
+    for decision in (Decision.ACCEPTED, Decision.WAITLISTED, Decision.REJECTED):
+        group = [record for record in records if record["decision"] == decision]
+        if not group:
+            continue
+        await asyncio.gather(
+            *(_process_batch(batch, decision) for batch in batched(group, 100))
+        )
+
+
+@router.post("/releaseHackerDecisions", dependencies=[Depends(require_director)])
+async def release_hacker_decisions() -> None:
+    """Update applicant status based on decision and send decision emails."""
+    records = await mongodb_handler.retrieve(
+        Collection.USERS,
+        {"status": Status.REVIEWED},
+        ["_id", "avg_score", "first_name"],
+    )
+
+    thresholds = await mongodb_handler.retrieve_one(
+        Collection.SETTINGS, {"_id": "hacker_score_thresholds"}, ["accept", "waitlist"]
+    )
+
+    if not thresholds:
+        log.error("Could not retrieve thresholds")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    for record in records:
+        _set_decision_based_on_threshold(
+            record, thresholds["accept"], thresholds["waitlist"]
+        )
 
     for decision in (Decision.ACCEPTED, Decision.WAITLISTED, Decision.REJECTED):
         group = [record for record in records if record["decision"] == decision]
@@ -434,7 +461,7 @@ async def _process_status(uids: Sequence[str], status: Status) -> None:
 
 
 async def _process_batch(batch: tuple[dict[str, Any], ...], decision: Decision) -> None:
-    await _update_batch_of_decisions(batch, decision)
+    await _update_batch_of_decisions(batch, decision, update_field="status")
 
     # Send emails
     log.info(f"Sending {decision} emails for {len(batch)} applicants")
@@ -444,12 +471,15 @@ async def _process_batch(batch: tuple[dict[str, Any], ...], decision: Decision) 
 
 
 async def _update_batch_of_decisions(
-    batch: tuple[dict[str, Any], ...], decision: Decision
+    batch: tuple[dict[str, Any], ...],
+    decision: Decision,
+    *,
+    update_field: Literal["status", "decision"],
 ) -> None:
     uids: list[str] = [record["_id"] for record in batch]
     log.info(f"Setting {','.join(uids)} as {decision}")
     ok = await mongodb_handler.update(
-        Collection.USERS, {"_id": {"$in": uids}}, {"status": decision}
+        Collection.USERS, {"_id": {"$in": uids}}, {update_field: decision}
     )
     if not ok:
         raise RuntimeError("gg wp")
@@ -493,11 +523,11 @@ def _delete_reviews(applicant_record: dict[str, Any]) -> None:
 
 
 def _get_last_score(
-    reviewer: str, reversed_reviews: list[tuple[str, str, float]]
+    reviewer: str, reviews: list[tuple[str, str, float]]
 ) -> float:
-    for t in reversed_reviews:
-        if t[1] == reviewer:
-            return t[2]
+    for i in range(len(reviews) - 1, -1, -1):
+        if reviews[i][1] == reviewer:
+            return reviews[i][2]
     return -1
 
 
@@ -505,8 +535,6 @@ def _get_avg_score(reviews: list[tuple[str, str, float]]) -> float:
     unique_reviewers = {t[1] for t in reviews}
     if len(unique_reviewers) < 2:
         return -1
-
-    reviews.reverse()
 
     last_score = _get_last_score(unique_reviewers.pop(), reviews)
     last_score2 = _get_last_score(unique_reviewers.pop(), reviews)
@@ -523,3 +551,9 @@ def _set_decision_based_on_threshold(
         applicant_record["decision"] = Decision.WAITLISTED
     else:
         applicant_record["decision"] = Decision.REJECTED
+
+
+def _get_num_unique_reviewers(applicant_record: dict[str, Any]) -> int:
+    reviews = applicant_record["application_data"]["reviews"]
+    unique_reviewers = {t[1] for t in reviews}
+    return len(unique_reviewers)

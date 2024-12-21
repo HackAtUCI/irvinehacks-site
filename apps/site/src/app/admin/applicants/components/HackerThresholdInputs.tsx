@@ -17,10 +17,10 @@ function HackerThresholdInputs() {
 		await axios
 			.post("/api/admin/setThresholds", {
 				accept: acceptValue,
-				waitlist: waitlistValue
+				waitlist: waitlistValue,
 			})
 			.then((response) => {
-                // TODO: Add flashbar or modal
+				// TODO: Add flashbar or modal
 				if (response.status === 200) {
 					setStatus("Successfully updated thresholds.");
 				} else {
@@ -49,7 +49,11 @@ function HackerThresholdInputs() {
 				placeholder="Waitlist Threshold"
 				step={0.1}
 			/>
-			<Box variant="p">Any score under {waitlistValue} will be rejected</Box>
+			<Box variant="p">
+				Any score under{" "}
+				{waitlistValue ? waitlistValue : "the waitlist threshold"} will be
+				rejected
+			</Box>
 			<Button variant="primary" onClick={submitThresholds}>
 				Update Thresholds
 			</Button>

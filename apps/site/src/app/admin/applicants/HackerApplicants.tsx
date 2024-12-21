@@ -19,9 +19,7 @@ import ApplicantStatus from "./components/ApplicantStatus";
 
 import UserContext from "@/lib/admin/UserContext";
 import { isApplicationManager } from "@/lib/admin/authorization";
-import { Status } from "@/lib/admin/useApplicant";
 import ApplicantReviewerIndicator from "./components/ApplicantReviewerIndicator";
-import { Button, SpaceBetween } from "@cloudscape-design/components";
 import HackerThresholdInputs from "./components/HackerThresholdInputs";
 
 function HackerApplicants() {
@@ -40,17 +38,15 @@ function HackerApplicants() {
 	const selectedStatusValues = selectedStatuses.map(({ value }) => value);
 	const selectedDecisionValues = selectedDecisions.map(({ value }) => value);
 
-	// const filteredApplicants = applicantList.filter(
-	// 	(applicant) =>
-	// 		(selectedStatuses.length === 0 ||
-	// 			selectedStatusValues.includes(applicant.status)) &&
-	// 		(selectedDecisions.length === 0 ||
-	// 			selectedDecisionValues.includes(applicant.decision || "-")),
-	// );
+	const filteredApplicants = applicantList.filter(
+		(applicant) =>
+			(selectedStatuses.length === 0 ||
+				selectedStatusValues.includes(applicant.status)) &&
+			(selectedDecisions.length === 0 ||
+				selectedDecisionValues.includes(applicant.decision || "-")),
+	);
 
-	// const items = filteredApplicants;
-
-	const items = applicantList;
+	const items = filteredApplicants;
 
 	const counter =
 		selectedStatuses.length > 0 || selectedDecisions.length > 0
@@ -99,11 +95,11 @@ function HackerApplicants() {
 						header: "Averaged Score",
 						content: ({ avg_score }) => (avg_score === -1 ? "-" : avg_score),
 					},
-					// {
-					// 	id: "decision",
-					// 	header: "Decision",
-					// 	content: DecisionStatus,
-					// },
+					{
+						id: "decision",
+						header: "Decision",
+						content: DecisionStatus,
+					},
 				],
 			}}
 			// visibleSections={preferences.visibleContent}
@@ -129,7 +125,7 @@ function HackerApplicants() {
 		/>
 	);
 }
-// left off on setting thresholds. how and when are you going to update decision statuses based on these thresholds
+
 const CardHeader = ({ _id, first_name, last_name }: HackerApplicantSummary) => {
 	const followWithNextLink = useFollowWithNextLink();
 	return (
@@ -142,9 +138,8 @@ const CardHeader = ({ _id, first_name, last_name }: HackerApplicantSummary) => {
 		</Link>
 	);
 };
-// Need way to push a cut threshold to Collections.SETTINGS
-// Need way to retrieve that and use it here in DecisionStatus
-// const DecisionStatus = ({ decision }: ApplicantSummary) =>
-// 	decision ? <ApplicantStatus status={decision} /> : "-";
+
+const DecisionStatus = ({ decision }: HackerApplicantSummary) =>
+	decision ? <ApplicantStatus status={decision} /> : "-";
 
 export default HackerApplicants;

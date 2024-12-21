@@ -1,13 +1,14 @@
 import axios from "axios";
 import useSWR from "swr";
 
-import { Status } from "./useApplicant";
+import { Decision, Status } from "./useApplicant";
 
 export interface HackerApplicantSummary {
 	_id: string;
 	first_name: string;
 	last_name: string;
 	status: Status;
+	decision: Decision | null;
 	num_reviewers: number;
 	avg_score: number;
 	application_data: {

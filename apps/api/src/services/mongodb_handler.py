@@ -123,13 +123,3 @@ async def update(
         raise RuntimeError("Could not update documents in MongoDB collection")
 
     return result.modified_count > 0
-
-
-async def aggregate(
-    collection: Collection, pipeline: list[Mapping[str, object]]
-) -> list[Mapping[str, object]]:
-    """Search for and update documents (if they exist) using the provided query data."""
-    COLLECTION = DB[collection.value]
-    result_list = await COLLECTION.aggregate(pipeline).to_list()
-
-    return result_list

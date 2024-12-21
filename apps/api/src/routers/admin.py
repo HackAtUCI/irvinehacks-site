@@ -48,6 +48,7 @@ class HackerApplicantSummary(BaseRecord):
     first_name: str
     last_name: str
     status: str
+    decision: Optional[Decision] = None
     num_reviewers: int
     avg_score: float
     application_data: ApplicationDataSummary
@@ -87,8 +88,8 @@ async def applicants(
 async def hacker_applicants(
     user: Annotated[User, Depends(require_manager)]
 ) -> list[HackerApplicantSummary]:
-    """Get records of all applicants."""
-    log.info("%s requested applicants", user)
+    """Get records of all hacker applicants."""
+    log.info("%s requested hacker applicants", user)
 
     records: list[dict[str, object]] = await mongodb_handler.retrieve(
         Collection.USERS,
@@ -104,7 +105,18 @@ async def hacker_applicants(
         ],
     )
 
+    thresholds: Optional[dict[str, float]] = await mongodb_handler.retrieve_one(
+        Collection.SETTINGS, {"_id": "hacker_score_thresholds"}, ["accept", "waitlist"]
+    )
+
+    if not thresholds:
+        log.error("Could not retrieve thresholds")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     for record in records:
+        _set_decision_based_on_threshold(
+            record, thresholds["accept"], thresholds["waitlist"]
+        )
         _include_num_reviewers(record)
         _include_avg_score(record)
         _delete_reviews(record)
@@ -116,11 +128,15 @@ async def hacker_applicants(
 
 
 @router.post("/setThresholds")
-async def set_hacker_score_thresholds(
+async def set_hacker_score_thresholds_and_update_decisions(
     user: Annotated[User, Depends(require_manager)],
     accept: float = Body(),
     waitlist: float = Body(),
 ) -> None:
+    """
+    Sets accepted, waitlisted, and implicitly rejected score thresholds.
+    Then updates all Hacker application decisions based on those thresholds
+    """
     log.info("%s changed thresholds: Accept-%f | Waitlist-%f", user, accept, waitlist)
 
     try:
@@ -141,7 +157,7 @@ async def set_hacker_score_thresholds(
 
     records = await mongodb_handler.retrieve(
         Collection.USERS,
-        {"status": Status.REVIEWED},
+        {"$and": [{"status": Status.REVIEWED}, {"roles": Role.HACKER}]},
         ["_id", "application_data.reviews"],
     )
 
@@ -190,8 +206,8 @@ async def submit_hacker_review(
     score: float = Body(),
     reviewer: User = Depends(require_role({Role.REVIEWER})),
 ) -> None:
-    """Submit a review decision from the reviewer for the given applicant."""
-    log.info("%s reviewed applicant %s", reviewer, applicant)
+    """Submit a review decision from the reviewer for the given hacker applicant."""
+    log.info("%s reviewed hacker %s", reviewer, applicant)
 
     review: HackerReview = (utc_now(), reviewer.uid, score)
 
@@ -275,7 +291,7 @@ async def release_hacker_decisions() -> None:
     records = await mongodb_handler.retrieve(
         Collection.USERS,
         {"status": Status.REVIEWED},
-        ["_id", "avg_score", "first_name"],
+        ["_id", "application_data.reviews", "avg_score", "first_name"],
     )
 
     thresholds = await mongodb_handler.retrieve_one(
@@ -461,6 +477,7 @@ async def _process_status(uids: Sequence[str], status: Status) -> None:
 
 
 async def _process_batch(batch: tuple[dict[str, Any], ...], decision: Decision) -> None:
+    """Update status of batch to given decision and send emails"""
     await _update_batch_of_decisions(batch, decision, update_field="status")
 
     # Send emails
@@ -507,9 +524,7 @@ def _include_review_decision(applicant_record: dict[str, Any]) -> None:
 
 
 def _include_num_reviewers(applicant_record: dict[str, Any]) -> None:
-    reviews = applicant_record["application_data"]["reviews"]
-    unique_reviewers = {t[1] for t in reviews}
-    applicant_record["num_reviewers"] = len(unique_reviewers)
+    applicant_record["num_reviewers"] = _get_num_unique_reviewers(applicant_record)
 
 
 def _include_avg_score(applicant_record: dict[str, Any]) -> None:
@@ -522,9 +537,7 @@ def _delete_reviews(applicant_record: dict[str, Any]) -> None:
     del applicant_record["application_data"]["reviews"]
 
 
-def _get_last_score(
-    reviewer: str, reviews: list[tuple[str, str, float]]
-) -> float:
+def _get_last_score(reviewer: str, reviews: list[tuple[str, str, float]]) -> float:
     for i in range(len(reviews) - 1, -1, -1):
         if reviews[i][1] == reviewer:
             return reviews[i][2]
@@ -545,9 +558,9 @@ def _set_decision_based_on_threshold(
     applicant_record: dict[str, Any], accept: float, waitlist: float
 ) -> None:
     avg_score = _get_avg_score(applicant_record["application_data"]["reviews"])
-    if avg_score > accept:
+    if avg_score >= accept:
         applicant_record["decision"] = Decision.ACCEPTED
-    elif avg_score > waitlist:
+    elif avg_score >= waitlist:
         applicant_record["decision"] = Decision.WAITLISTED
     else:
         applicant_record["decision"] = Decision.REJECTED

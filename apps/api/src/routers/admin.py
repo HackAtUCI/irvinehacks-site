@@ -1,16 +1,25 @@
 import asyncio
 from datetime import datetime
 from logging import getLogger
-from typing import Annotated, Any, Optional, Sequence
+from typing import Annotated, Any, Literal, Optional, Sequence
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
-from pydantic import BaseModel, EmailStr, Field, TypeAdapter, ValidationError
+from pydantic import BaseModel, TypeAdapter, ValidationError
 
 from admin import participant_manager, summary_handler
+from admin.applicant_review_processor import (
+    _delete_reviews,
+    _extract_personalizations,
+    _include_avg_score,
+    _include_num_reviewers,
+    _include_review_decision,
+    _recover_email_from_uid,
+    _set_decision_based_on_threshold,
+)
 from admin.participant_manager import Participant
 from auth.authorization import require_role
 from auth.user_identity import User, utc_now
-from models.ApplicationData import Decision, Review
+from models.ApplicationData import Decision, OtherReview
 from models.user_record import Applicant, ApplicantStatus, Role, Status
 from services import mongodb_handler, sendgrid_handler
 from services.mongodb_handler import BaseRecord, Collection
@@ -35,11 +44,20 @@ class ApplicationDataSummary(BaseModel):
 
 
 class ApplicantSummary(BaseRecord):
-    uid: str = Field(alias="_id")
     first_name: str
     last_name: str
     status: str
     decision: Optional[Decision] = None
+    application_data: ApplicationDataSummary
+
+
+class HackerApplicantSummary(BaseRecord):
+    first_name: str
+    last_name: str
+    status: str
+    decision: Optional[Decision] = None
+    num_reviewers: int
+    avg_score: float
     application_data: ApplicationDataSummary
 
 
@@ -69,6 +87,49 @@ async def applicants(
 
     try:
         return TypeAdapter(list[ApplicantSummary]).validate_python(records)
+    except ValidationError:
+        raise RuntimeError("Could not parse applicant data.")
+
+
+@router.get("/applicants/hackers")
+async def hacker_applicants(
+    user: Annotated[User, Depends(require_manager)]
+) -> list[HackerApplicantSummary]:
+    """Get records of all hacker applicants."""
+    log.info("%s requested hacker applicants", user)
+
+    records: list[dict[str, object]] = await mongodb_handler.retrieve(
+        Collection.USERS,
+        {"roles": Role.HACKER},
+        [
+            "_id",
+            "status",
+            "first_name",
+            "last_name",
+            "application_data.school",
+            "application_data.submission_time",
+            "application_data.reviews",
+        ],
+    )
+
+    thresholds: Optional[dict[str, float]] = await mongodb_handler.retrieve_one(
+        Collection.SETTINGS, {"_id": "hacker_score_thresholds"}, ["accept", "waitlist"]
+    )
+
+    if not thresholds:
+        log.error("Could not retrieve thresholds")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    for record in records:
+        _set_decision_based_on_threshold(
+            record, thresholds["accept"], thresholds["waitlist"]
+        )
+        _include_num_reviewers(record)
+        _include_avg_score(record)
+        _delete_reviews(record)
+
+    try:
+        return TypeAdapter(list[HackerApplicantSummary]).validate_python(records)
     except ValidationError:
         raise RuntimeError("Could not parse applicant data.")
 
@@ -106,7 +167,7 @@ async def submit_review(
     """Submit a review decision from the reviewer for the given applicant."""
     log.info("%s reviewed applicant %s", reviewer, applicant)
 
-    review: Review = (utc_now(), reviewer.uid, decision)
+    review: OtherReview = (utc_now(), reviewer.uid, decision)
 
     try:
         await mongodb_handler.raw_update_one(
@@ -304,13 +365,8 @@ async def _process_status(uids: Sequence[str], status: Status) -> None:
 
 
 async def _process_batch(batch: tuple[dict[str, Any], ...], decision: Decision) -> None:
-    uids: list[str] = [record["_id"] for record in batch]
-    log.info(f"Setting {','.join(uids)} as {decision}")
-    ok = await mongodb_handler.update(
-        Collection.USERS, {"_id": {"$in": uids}}, {"status": decision}
-    )
-    if not ok:
-        raise RuntimeError("gg wp")
+    """Update status of batch to given decision and send emails"""
+    await _update_batch_of_decisions(batch, decision, update_field="status")
 
     # Send emails
     log.info(f"Sending {decision} emails for {len(batch)} applicants")
@@ -319,22 +375,16 @@ async def _process_batch(batch: tuple[dict[str, Any], ...], decision: Decision) 
     )
 
 
-def _extract_personalizations(decision_data: dict[str, Any]) -> tuple[str, EmailStr]:
-    name = decision_data["first_name"]
-    email = _recover_email_from_uid(decision_data["_id"])
-    return name, email
-
-
-def _recover_email_from_uid(uid: str) -> str:
-    """For NativeUsers, the email should still delivery properly."""
-    uid = uid.replace("..", "\n")
-    *reversed_domain, local = uid.split(".")
-    local = local.replace("\n", ".")
-    domain = ".".join(reversed(reversed_domain))
-    return f"{local}@{domain}"
-
-
-def _include_review_decision(applicant_record: dict[str, Any]) -> None:
-    """Sets the applicant's decision as the last submitted review decision or None."""
-    reviews = applicant_record["application_data"]["reviews"]
-    applicant_record["decision"] = reviews[-1][2] if reviews else None
+async def _update_batch_of_decisions(
+    batch: tuple[dict[str, Any], ...],
+    decision: Decision,
+    *,
+    update_field: Literal["status", "decision"],
+) -> None:
+    uids: list[str] = [record["_id"] for record in batch]
+    log.info(f"Setting {','.join(uids)} as {decision}")
+    ok = await mongodb_handler.update(
+        Collection.USERS, {"_id": {"$in": uids}}, {update_field: decision}
+    )
+    if not ok:
+        raise RuntimeError("gg wp")

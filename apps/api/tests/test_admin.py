@@ -1,8 +1,14 @@
 from datetime import datetime
+from typing import Any
 from unittest.mock import ANY, AsyncMock, call, patch
 
 from fastapi import FastAPI
 
+from admin.applicant_review_processor import (
+    _include_avg_score,
+    _include_num_reviewers,
+    _include_review_decision,
+)
 from auth import user_identity
 from auth.user_identity import NativeUser, UserTestClient
 from models.ApplicationData import Decision
@@ -119,7 +125,7 @@ def test_can_include_decision_from_reviews() -> None:
         },
     }
 
-    admin._include_review_decision(record)
+    _include_review_decision(record)
     assert record["decision"] == "ACCEPTED"
 
 
@@ -133,7 +139,7 @@ def test_no_decision_from_no_reviews() -> None:
         },
     }
 
-    admin._include_review_decision(record)
+    _include_review_decision(record)
     assert record["decision"] is None
 
 
@@ -271,3 +277,93 @@ def test_non_waitlisted_applicant_cannot_be_released(
     assert res.status_code == 404
 
     mock_mongodb_handler_update_one.assert_not_awaited()
+
+
+def test_can_include_num_reviewers_from_reviews() -> None:
+    """Test that the number of reviewers are added to an applicant with reviews."""
+    record: dict[str, Any] = {
+        "_id": "edu.uci.sydnee",
+        "status": "REVIEWED",
+        "application_data": {
+            "reviews": [
+                [datetime(2023, 1, 19), "edu.uci.alicia", 100],
+                [datetime(2023, 1, 19), "edu.uci.alicia2", 200],
+            ]
+        },
+    }
+
+    _include_num_reviewers(record)
+    assert record["num_reviewers"] == 2
+
+
+def test_can_include_avg_score_from_reviews() -> None:
+    """Test that an applicant's average score are added to an applicant with reviews."""
+    record: dict[str, Any] = {
+        "_id": "edu.uci.sydnee",
+        "status": "REVIEWED",
+        "application_data": {
+            "reviews": [
+                [datetime(2023, 1, 19), "edu.uci.alicia", 10],
+                [datetime(2023, 1, 19), "edu.uci.alicia2", 0],
+                [datetime(2023, 1, 19), "edu.uci.alicia", 100],
+                [datetime(2023, 1, 19), "edu.uci.alicia2", 200],
+            ]
+        },
+    }
+
+    _include_avg_score(record)
+    assert record["avg_score"] == 150
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+@patch("services.mongodb_handler.retrieve", autospec=True)
+def test_hacker_applicants_returns_correct_applicants(
+    mock_mongodb_handler_retrieve: AsyncMock,
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test that the /hackerApplicants route returns correctly"""
+    returned_records: list[dict[str, object]] = [
+        {
+            "_id": "edu.uci.sydnee",
+            "first_name": "sydnee",
+            "last_name": "unknown",
+            "status": "REVIEWED",
+            "application_data": {
+                "school": "Hamburger University",
+                "submission_time": datetime(2023, 1, 12, 9, 0, 0),
+                "reviews": [
+                    [datetime(2023, 1, 19), "edu.uci.alicia", 100],
+                    [datetime(2023, 1, 19), "edu.uci.alicia2", 200],
+                ],
+            },
+        }
+    ]
+
+    returned_thresholds: dict[str, object] = {"accept": 12, "waitlist": 5}
+
+    mock_mongodb_handler_retrieve.return_value = returned_records
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        REVIEWER_IDENTITY,
+        returned_thresholds,
+    ]
+
+    res = reviewer_client.get("/applicants/hackers")
+
+    assert res.status_code == 200
+    mock_mongodb_handler_retrieve.assert_awaited_once()
+    data = res.json()
+    assert data == [
+        {
+            "_id": "edu.uci.sydnee",
+            "first_name": "sydnee",
+            "last_name": "unknown",
+            "status": "REVIEWED",
+            "decision": "ACCEPTED",
+            "avg_score": 150,
+            "num_reviewers": 2,
+            "application_data": {
+                "school": "Hamburger University",
+                "submission_time": "2023-01-12T09:00:00",
+            },
+        },
+    ]

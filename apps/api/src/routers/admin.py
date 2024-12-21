@@ -4,9 +4,18 @@ from logging import getLogger
 from typing import Annotated, Any, Literal, Optional, Sequence
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
-from pydantic import BaseModel, EmailStr, TypeAdapter, ValidationError
+from pydantic import BaseModel, TypeAdapter, ValidationError
 
 from admin import participant_manager, summary_handler
+from admin.applicant_review_processor import (
+    _delete_reviews,
+    _extract_personalizations,
+    _include_avg_score,
+    _include_num_reviewers,
+    _include_review_decision,
+    _recover_email_from_uid,
+    _set_decision_based_on_threshold,
+)
 from admin.participant_manager import Participant
 from auth.authorization import require_role
 from auth.user_identity import User, utc_now
@@ -82,7 +91,7 @@ async def applicants(
         raise RuntimeError("Could not parse applicant data.")
 
 
-@router.get("/hackerApplicants")
+@router.get("/applicants/hackers")
 async def hacker_applicants(
     user: Annotated[User, Depends(require_manager)]
 ) -> list[HackerApplicantSummary]:
@@ -379,73 +388,3 @@ async def _update_batch_of_decisions(
     )
     if not ok:
         raise RuntimeError("gg wp")
-
-
-def _extract_personalizations(decision_data: dict[str, Any]) -> tuple[str, EmailStr]:
-    name = decision_data["first_name"]
-    email = _recover_email_from_uid(decision_data["_id"])
-    return name, email
-
-
-def _recover_email_from_uid(uid: str) -> str:
-    """For NativeUsers, the email should still delivery properly."""
-    uid = uid.replace("..", "\n")
-    *reversed_domain, local = uid.split(".")
-    local = local.replace("\n", ".")
-    domain = ".".join(reversed(reversed_domain))
-    return f"{local}@{domain}"
-
-
-def _include_review_decision(applicant_record: dict[str, Any]) -> None:
-    """Sets the applicant's decision as the last submitted review decision or None."""
-    reviews = applicant_record["application_data"]["reviews"]
-    applicant_record["decision"] = reviews[-1][2] if reviews else None
-
-
-def _include_num_reviewers(applicant_record: dict[str, Any]) -> None:
-    applicant_record["num_reviewers"] = _get_num_unique_reviewers(applicant_record)
-
-
-def _include_avg_score(applicant_record: dict[str, Any]) -> None:
-    applicant_record["avg_score"] = _get_avg_score(
-        applicant_record["application_data"]["reviews"]
-    )
-
-
-def _delete_reviews(applicant_record: dict[str, Any]) -> None:
-    del applicant_record["application_data"]["reviews"]
-
-
-def _get_last_score(reviewer: str, reviews: list[tuple[str, str, float]]) -> float:
-    for i in range(len(reviews) - 1, -1, -1):
-        if reviews[i][1] == reviewer:
-            return reviews[i][2]
-    return -1
-
-
-def _get_avg_score(reviews: list[tuple[str, str, float]]) -> float:
-    unique_reviewers = {t[1] for t in reviews}
-    if len(unique_reviewers) < 2:
-        return -1
-
-    last_score = _get_last_score(unique_reviewers.pop(), reviews)
-    last_score2 = _get_last_score(unique_reviewers.pop(), reviews)
-    return (last_score + last_score2) / 2
-
-
-def _set_decision_based_on_threshold(
-    applicant_record: dict[str, Any], accept: float, waitlist: float
-) -> None:
-    avg_score = _get_avg_score(applicant_record["application_data"]["reviews"])
-    if avg_score >= accept:
-        applicant_record["decision"] = Decision.ACCEPTED
-    elif avg_score >= waitlist:
-        applicant_record["decision"] = Decision.WAITLISTED
-    else:
-        applicant_record["decision"] = Decision.REJECTED
-
-
-def _get_num_unique_reviewers(applicant_record: dict[str, Any]) -> int:
-    reviews = applicant_record["application_data"]["reviews"]
-    unique_reviewers = {t[1] for t in reviews}
-    return len(unique_reviewers)

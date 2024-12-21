@@ -24,7 +24,7 @@ const fetcher = async (url: string) => {
 
 function useHackerApplicants() {
 	const { data, error, isLoading } = useSWR<HackerApplicantSummary[]>(
-		"/api/admin/hackerApplicants",
+		"/api/admin/applicants/hackers",
 		fetcher,
 	);
 

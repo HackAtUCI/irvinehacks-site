@@ -342,12 +342,11 @@ def test_hacker_applicants_returns_correct_applicants(
         returned_thresholds,
     ]
 
-    res = reviewer_client.get("/hackerApplicants")
+    res = reviewer_client.get("/applicants/hackers")
 
     assert res.status_code == 200
     mock_mongodb_handler_retrieve.assert_awaited_once()
     data = res.json()
-    print(data)
     assert data == [
         {
             "_id": "edu.uci.sydnee",

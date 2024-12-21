@@ -4,6 +4,11 @@ from unittest.mock import ANY, AsyncMock, call, patch
 
 from fastapi import FastAPI
 
+from admin.applicant_review_processor import (
+    _include_avg_score,
+    _include_num_reviewers,
+    _include_review_decision,
+)
 from auth import user_identity
 from auth.user_identity import NativeUser, UserTestClient
 from models.ApplicationData import Decision
@@ -120,7 +125,7 @@ def test_can_include_decision_from_reviews() -> None:
         },
     }
 
-    admin._include_review_decision(record)
+    _include_review_decision(record)
     assert record["decision"] == "ACCEPTED"
 
 
@@ -134,7 +139,7 @@ def test_no_decision_from_no_reviews() -> None:
         },
     }
 
-    admin._include_review_decision(record)
+    _include_review_decision(record)
     assert record["decision"] is None
 
 
@@ -287,7 +292,7 @@ def test_can_include_num_reviewers_from_reviews() -> None:
         },
     }
 
-    admin._include_num_reviewers(record)
+    _include_num_reviewers(record)
     assert record["num_reviewers"] == 2
 
 
@@ -306,7 +311,7 @@ def test_can_include_avg_score_from_reviews() -> None:
         },
     }
 
-    admin._include_avg_score(record)
+    _include_avg_score(record)
     assert record["avg_score"] == 150
 
 

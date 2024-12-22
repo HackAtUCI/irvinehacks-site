@@ -15,8 +15,10 @@ import {
 	PostAcceptedStatus,
 	ReviewStatus,
 	Status,
-} from "@/lib/admin/useApplicant";
-import { StatusLabels } from "../../applicants/components/ApplicantStatus";
+} from "@/lib/userRecord";
+
+import { StatusLabels } from "@/app/admin/applicants/components/ApplicantStatus";
+
 import type { Options } from "./ParticipantsTable";
 
 interface ParticipantsFiltersProps {

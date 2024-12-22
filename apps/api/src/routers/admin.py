@@ -4,18 +4,10 @@ from logging import getLogger
 from typing import Annotated, Any, Literal, Optional, Sequence
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
-from pydantic import BaseModel, TypeAdapter, ValidationError
+from pydantic import BaseModel, EmailStr, TypeAdapter, ValidationError
 
 from admin import participant_manager, summary_handler
-from admin.applicant_review_processor import (
-    _delete_reviews,
-    _extract_personalizations,
-    _include_avg_score,
-    _include_num_reviewers,
-    _include_review_decision,
-    _recover_email_from_uid,
-    _set_decision_based_on_threshold,
-)
+from admin import applicant_review_processor
 from admin.participant_manager import Participant
 from auth.authorization import require_role
 from auth.user_identity import User, utc_now
@@ -83,7 +75,7 @@ async def applicants(
     )
 
     for record in records:
-        _include_review_decision(record)
+        applicant_review_processor.include_review_decision(record)
 
     try:
         return TypeAdapter(list[ApplicantSummary]).validate_python(records)
@@ -121,12 +113,9 @@ async def hacker_applicants(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     for record in records:
-        _set_decision_based_on_threshold(
+        applicant_review_processor.include_hacker_app_fields(
             record, thresholds["accept"], thresholds["waitlist"]
         )
-        _include_num_reviewers(record)
-        _include_avg_score(record)
-        _delete_reviews(record)
 
     try:
         return TypeAdapter(list[HackerApplicantSummary]).validate_python(records)
@@ -193,7 +182,7 @@ async def release_decisions() -> None:
     )
 
     for record in records:
-        _include_review_decision(record)
+        applicant_review_processor.include_review_decision(record)
 
     for decision in (Decision.ACCEPTED, Decision.WAITLISTED, Decision.REJECTED):
         group = [record for record in records if record["decision"] == decision]
@@ -388,3 +377,18 @@ async def _update_batch_of_decisions(
     )
     if not ok:
         raise RuntimeError("gg wp")
+
+
+def _extract_personalizations(decision_data: dict[str, Any]) -> tuple[str, EmailStr]:
+    name = decision_data["first_name"]
+    email = _recover_email_from_uid(decision_data["_id"])
+    return name, email
+
+
+def _recover_email_from_uid(uid: str) -> str:
+    """For NativeUsers, the email should still delivery properly."""
+    uid = uid.replace("..", "\n")
+    *reversed_domain, local = uid.split(".")
+    local = local.replace("\n", ".")
+    domain = ".".join(reversed(reversed_domain))
+    return f"{local}@{domain}"

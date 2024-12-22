@@ -1,14 +1,9 @@
 from datetime import datetime
-from typing import Any
 from unittest.mock import ANY, AsyncMock, call, patch
 
 from fastapi import FastAPI
 
-from admin.applicant_review_processor import (
-    _include_avg_score,
-    _include_num_reviewers,
-    _include_review_decision,
-)
+from admin import applicant_review_processor
 from auth import user_identity
 from auth.user_identity import NativeUser, UserTestClient
 from models.ApplicationData import Decision
@@ -125,7 +120,7 @@ def test_can_include_decision_from_reviews() -> None:
         },
     }
 
-    _include_review_decision(record)
+    applicant_review_processor.include_review_decision(record)
     assert record["decision"] == "ACCEPTED"
 
 
@@ -139,7 +134,7 @@ def test_no_decision_from_no_reviews() -> None:
         },
     }
 
-    _include_review_decision(record)
+    applicant_review_processor.include_review_decision(record)
     assert record["decision"] is None
 
 
@@ -277,42 +272,6 @@ def test_non_waitlisted_applicant_cannot_be_released(
     assert res.status_code == 404
 
     mock_mongodb_handler_update_one.assert_not_awaited()
-
-
-def test_can_include_num_reviewers_from_reviews() -> None:
-    """Test that the number of reviewers are added to an applicant with reviews."""
-    record: dict[str, Any] = {
-        "_id": "edu.uci.sydnee",
-        "status": "REVIEWED",
-        "application_data": {
-            "reviews": [
-                [datetime(2023, 1, 19), "edu.uci.alicia", 100],
-                [datetime(2023, 1, 19), "edu.uci.alicia2", 200],
-            ]
-        },
-    }
-
-    _include_num_reviewers(record)
-    assert record["num_reviewers"] == 2
-
-
-def test_can_include_avg_score_from_reviews() -> None:
-    """Test that an applicant's average score are added to an applicant with reviews."""
-    record: dict[str, Any] = {
-        "_id": "edu.uci.sydnee",
-        "status": "REVIEWED",
-        "application_data": {
-            "reviews": [
-                [datetime(2023, 1, 19), "edu.uci.alicia", 10],
-                [datetime(2023, 1, 19), "edu.uci.alicia2", 0],
-                [datetime(2023, 1, 19), "edu.uci.alicia", 100],
-                [datetime(2023, 1, 19), "edu.uci.alicia2", 200],
-            ]
-        },
-    }
-
-    _include_avg_score(record)
-    assert record["avg_score"] == 150
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)

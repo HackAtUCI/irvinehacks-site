@@ -1,7 +1,7 @@
 import axios from "axios";
 import useSWR from "swr";
 
-import { Decision, Status } from "@/lib/userRecord";
+import { Decision, Status } from "./useApplicant";
 
 export interface HackerApplicantSummary {
 	_id: string;

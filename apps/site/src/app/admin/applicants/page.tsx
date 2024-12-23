@@ -1,1 +1,1 @@
-export { default as default } from "./Applicants";
+export { default as default } from "./ApplicantsSummary";

@@ -10,15 +10,17 @@ import Header from "@cloudscape-design/components/header";
 import Link from "@cloudscape-design/components/link";
 
 import { useFollowWithNextLink } from "@/app/admin/layout/common";
-import useApplicants, { ApplicantSummary } from "@/lib/admin/useApplicants";
+import useHackerApplicants, {
+	HackerApplicantSummary,
+} from "@/lib/admin/useHackerApplicants";
 
-import ApplicantFilters, { Options } from "./components/ApplicantFilters";
-import ApplicantStatus from "./components/ApplicantStatus";
+import ApplicantFilters, { Options } from "../components/ApplicantFilters";
+import ApplicantStatus from "../components/ApplicantStatus";
 
 import UserContext from "@/lib/admin/UserContext";
 import { isApplicationManager } from "@/lib/admin/authorization";
 
-function Applicants() {
+function HackerApplicants() {
 	const router = useRouter();
 
 	const { roles } = useContext(UserContext);
@@ -29,7 +31,7 @@ function Applicants() {
 
 	const [selectedStatuses, setSelectedStatuses] = useState<Options>([]);
 	const [selectedDecisions, setSelectedDecisions] = useState<Options>([]);
-	const { applicantList, loading } = useApplicants();
+	const { applicantList, loading } = useHackerApplicants();
 
 	const selectedStatusValues = selectedStatuses.map(({ value }) => value);
 	const selectedDecisionValues = selectedDecisions.map(({ value }) => value);
@@ -82,8 +84,13 @@ function Applicants() {
 							new Date(application_data.submission_time).toLocaleDateString(),
 					},
 					{
+						id: "avg_score",
+						header: "Averaged Score",
+						content: ({ avg_score }) => (avg_score === -1 ? "-" : avg_score),
+					},
+					{
 						id: "decision",
-						header: "Decision",
+						header: "Decision (based on average score)",
 						content: DecisionStatus,
 					},
 				],
@@ -108,7 +115,7 @@ function Applicants() {
 	);
 }
 
-const CardHeader = ({ _id, first_name, last_name }: ApplicantSummary) => {
+const CardHeader = ({ _id, first_name, last_name }: HackerApplicantSummary) => {
 	const followWithNextLink = useFollowWithNextLink();
 	return (
 		<Link
@@ -121,7 +128,7 @@ const CardHeader = ({ _id, first_name, last_name }: ApplicantSummary) => {
 	);
 };
 
-const DecisionStatus = ({ decision }: ApplicantSummary) =>
+const DecisionStatus = ({ decision }: HackerApplicantSummary) =>
 	decision ? <ApplicantStatus status={decision} /> : "-";
 
-export default Applicants;
+export default HackerApplicants;

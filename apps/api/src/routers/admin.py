@@ -4,13 +4,14 @@ from logging import getLogger
 from typing import Annotated, Any, Optional, Sequence
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
-from pydantic import BaseModel, EmailStr, Field, TypeAdapter, ValidationError
+from pydantic import BaseModel, EmailStr, TypeAdapter, ValidationError
 
 from admin import participant_manager, summary_handler
+from admin import applicant_review_processor
 from admin.participant_manager import Participant
 from auth.authorization import require_role
 from auth.user_identity import User, utc_now
-from models.ApplicationData import Decision, Review
+from models.ApplicationData import Decision, OtherReview
 from models.user_record import Applicant, ApplicantStatus, Role, Status
 from services import mongodb_handler, sendgrid_handler
 from services.mongodb_handler import BaseRecord, Collection
@@ -35,11 +36,20 @@ class ApplicationDataSummary(BaseModel):
 
 
 class ApplicantSummary(BaseRecord):
-    uid: str = Field(alias="_id")
     first_name: str
     last_name: str
     status: str
     decision: Optional[Decision] = None
+    application_data: ApplicationDataSummary
+
+
+class HackerApplicantSummary(BaseRecord):
+    first_name: str
+    last_name: str
+    status: str
+    decision: Optional[Decision] = None
+    num_reviewers: int
+    avg_score: float
     application_data: ApplicationDataSummary
 
 
@@ -65,10 +75,50 @@ async def applicants(
     )
 
     for record in records:
-        _include_review_decision(record)
+        applicant_review_processor.include_review_decision(record)
 
     try:
         return TypeAdapter(list[ApplicantSummary]).validate_python(records)
+    except ValidationError:
+        raise RuntimeError("Could not parse applicant data.")
+
+
+@router.get("/applicants/hackers")
+async def hacker_applicants(
+    user: Annotated[User, Depends(require_manager)]
+) -> list[HackerApplicantSummary]:
+    """Get records of all hacker applicants."""
+    log.info("%s requested hacker applicants", user)
+
+    records: list[dict[str, object]] = await mongodb_handler.retrieve(
+        Collection.USERS,
+        {"roles": Role.HACKER},
+        [
+            "_id",
+            "status",
+            "first_name",
+            "last_name",
+            "application_data.school",
+            "application_data.submission_time",
+            "application_data.reviews",
+        ],
+    )
+
+    thresholds: Optional[dict[str, float]] = await mongodb_handler.retrieve_one(
+        Collection.SETTINGS, {"_id": "hacker_score_thresholds"}, ["accept", "waitlist"]
+    )
+
+    if not thresholds:
+        log.error("Could not retrieve thresholds")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    for record in records:
+        applicant_review_processor.include_hacker_app_fields(
+            record, thresholds["accept"], thresholds["waitlist"]
+        )
+
+    try:
+        return TypeAdapter(list[HackerApplicantSummary]).validate_python(records)
     except ValidationError:
         raise RuntimeError("Could not parse applicant data.")
 
@@ -106,7 +156,7 @@ async def submit_review(
     """Submit a review decision from the reviewer for the given applicant."""
     log.info("%s reviewed applicant %s", reviewer, applicant)
 
-    review: Review = (utc_now(), reviewer.uid, decision)
+    review: OtherReview = (utc_now(), reviewer.uid, decision)
 
     try:
         await mongodb_handler.raw_update_one(
@@ -132,7 +182,7 @@ async def release_decisions() -> None:
     )
 
     for record in records:
-        _include_review_decision(record)
+        applicant_review_processor.include_review_decision(record)
 
     for decision in (Decision.ACCEPTED, Decision.WAITLISTED, Decision.REJECTED):
         group = [record for record in records if record["decision"] == decision]
@@ -332,9 +382,3 @@ def _recover_email_from_uid(uid: str) -> str:
     local = local.replace("\n", ".")
     domain = ".".join(reversed(reversed_domain))
     return f"{local}@{domain}"
-
-
-def _include_review_decision(applicant_record: dict[str, Any]) -> None:
-    """Sets the applicant's decision as the last submitted review decision or None."""
-    reviews = applicant_record["application_data"]["reviews"]
-    applicant_record["decision"] = reviews[-1][2] if reviews else None

@@ -11,7 +11,7 @@ import {
 	ReviewStatus,
 	Status,
 	PostAcceptedStatus,
-} from "@/lib/userRecord";
+} from "@/lib/admin/useApplicant";
 
 import { StatusLabels } from "./ApplicantStatus";
 

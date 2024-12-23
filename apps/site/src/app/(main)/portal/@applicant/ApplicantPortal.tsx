@@ -9,8 +9,6 @@ import ReturnHome from "./components/ReturnHome";
 import VerticalTimeline from "./components/timeline/VerticalTimeline";
 import BackgroundStars from "./components/BackgroundStars";
 
-// TODO: use common Status enum from userRecord.ts
-
 export const enum PortalStatus {
 	pending = "PENDING_REVIEW",
 	reviewed = "REVIEWED",

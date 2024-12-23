@@ -1,7 +1,7 @@
 import axios from "axios";
 import useSWR from "swr";
 
-import { Status } from "@/lib/userRecord";
+import { Status } from "@/lib/admin/useApplicant";
 
 type ApplicantSummary = Partial<Record<Status, number>>;
 

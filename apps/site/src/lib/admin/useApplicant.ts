@@ -1,7 +1,13 @@
 import axios from "axios";
 import useSWR from "swr";
 
-import { Decision, ParticipantRole, Status, Uid } from "@/lib/userRecord";
+export type Uid = string;
+
+export enum Decision {
+	accepted = "ACCEPTED",
+	rejected = "REJECTED",
+	waitlisted = "WAITLISTED",
+}
 
 export type Review = [string, Uid, Decision];
 
@@ -26,11 +32,27 @@ export interface ApplicationData {
 
 export type ApplicationQuestion = Exclude<keyof ApplicationData, "reviews">;
 
+export enum ReviewStatus {
+	pending = "PENDING_REVIEW",
+	reviewed = "REVIEWED",
+	released = "RELEASED",
+}
+
+export enum PostAcceptedStatus {
+	signed = "WAIVER_SIGNED",
+	confirmed = "CONFIRMED",
+	attending = "ATTENDING",
+	void = "VOID",
+}
+
+export const Status = { ...ReviewStatus, ...Decision, ...PostAcceptedStatus };
+export type Status = ReviewStatus | Decision | PostAcceptedStatus;
+
 export interface Applicant {
 	_id: Uid;
 	first_name: string;
 	last_name: string;
-	roles: ReadonlyArray<ParticipantRole>;
+	roles: ReadonlyArray<string>;
 	status: Status;
 	application_data: ApplicationData;
 }

@@ -2,6 +2,7 @@ import { PropsWithChildren } from "react";
 
 import type { Metadata } from "next";
 
+import SceneLayout from "@/components/dom/SceneLayout";
 import Footer from "@/lib/components/Footer/Footer";
 import NavbarParent from "@/lib/components/Navbar/NavbarParent";
 import stars from "@/assets/backgrounds/starry_repeatable.png";
@@ -22,7 +23,7 @@ export default function Layout({ children }: PropsWithChildren) {
 		>
 			{/* reference: https://github.com/pmndrs/react-three-next */}
 			<NavbarParent />
-			{children}
+			<SceneLayout>{children}</SceneLayout>
 			<Footer />
 		</div>
 	);

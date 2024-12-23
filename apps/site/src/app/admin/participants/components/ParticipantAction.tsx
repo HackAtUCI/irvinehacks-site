@@ -2,25 +2,11 @@ import { useContext } from "react";
 
 import Button from "@cloudscape-design/components/button";
 
-import { isCheckInLead } from "@/lib/admin/authorization";
 import UserContext from "@/lib/admin/UserContext";
+import { isCheckinLead, isNonHacker } from "@/lib/admin/authorization";
+import { ReviewStatus, Status } from "@/lib/admin/useApplicant";
 import { Participant } from "@/lib/admin/useParticipants";
-import { ParticipantRole, ReviewStatus, Status } from "@/lib/userRecord";
-
 import ParticipantActionPopover from "./ParticipantActionPopover";
-
-const NONHACKER_ROLES = [
-	ParticipantRole.Judge,
-	ParticipantRole.Sponsor,
-	ParticipantRole.Mentor,
-	ParticipantRole.Volunteer,
-	ParticipantRole.WorkshopLead,
-];
-
-// TODO: reexamine attendance confirmation process
-export function isNonHacker(roles: ReadonlyArray<ParticipantRole>) {
-	return roles.some((role) => NONHACKER_ROLES.includes(role));
-}
 
 interface ParticipantActionProps {
 	participant: Participant;
@@ -37,7 +23,7 @@ function ParticipantAction({
 }: ParticipantActionProps) {
 	const { roles } = useContext(UserContext);
 
-	const canPromote = isCheckInLead(roles);
+	const canPromote = isCheckinLead(roles);
 	const isWaiverSigned = participant.status === Status.signed;
 	const isAccepted = participant.status === Status.accepted;
 	const nonHacker = isNonHacker(participant.roles);

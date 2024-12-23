@@ -11,8 +11,7 @@ import SpaceBetween from "@cloudscape-design/components/space-between";
 import Table, { TableProps } from "@cloudscape-design/components/table";
 
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
-import { Participant } from "@/lib/admin/useParticipants";
-import { ParticipantRole } from "@/lib/userRecord";
+import { Participant, Role } from "@/lib/admin/useParticipants";
 
 import CheckinDayIcon from "./CheckinDayIcon";
 import ParticipantAction from "./ParticipantAction";
@@ -104,7 +103,7 @@ function ParticipantsTable({
 		filterRole.length === 0 ||
 		filterRole
 			.map((r) => r.value)
-			.some((role) => p.roles.includes(role as ParticipantRole));
+			.some((role) => p.roles.includes(role as Role));
 	const matchesStatus = (p: Participant) =>
 		filterStatus.length === 0 ||
 		filterStatus.map((s) => s.value).includes(p.status);

@@ -11,7 +11,7 @@ from services.mongodb_handler import BaseRecord
 class Role(str, Enum):
     """
     Possible roles of organizers and participants.
-    The values are the display labels to be shown throughout the site.
+    The values are the display labels to be shown on the Admin site.
     """
 
     APPLICANT = "Applicant"

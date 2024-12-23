@@ -2,7 +2,7 @@ import StatusIndicator, {
 	StatusIndicatorProps,
 } from "@cloudscape-design/components/status-indicator";
 
-import { Status } from "@/lib/userRecord";
+import { Status } from "@/lib/admin/useApplicant";
 
 export const StatusLabels = {
 	[Status.accepted]: "accepted",

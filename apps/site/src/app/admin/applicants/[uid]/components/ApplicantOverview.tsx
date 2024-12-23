@@ -4,9 +4,16 @@ import Container from "@cloudscape-design/components/container";
 import Header from "@cloudscape-design/components/header";
 
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
-import { Applicant } from "@/lib/admin/useApplicant";
+import { Applicant, HackerReview, Review } from "@/lib/admin/useApplicant";
 
 import ApplicationReviews from "./ApplicationReviews";
+import HackerApplicationReviews from "./HackerApplicationReviews";
+
+function isHackerReviewArray(
+	arr: Review[] | HackerReview[],
+): arr is HackerReview[] {
+	return arr.every((tuple) => typeof tuple[2] === "number");
+}
 
 interface ApplicantOverviewProps {
 	applicant: Applicant;
@@ -31,7 +38,11 @@ function ApplicantOverview({ applicant }: ApplicantOverviewProps) {
 				</div>
 				<div>
 					<Box variant="awsui-key-label">Reviews</Box>
-					<ApplicationReviews reviews={reviews} />
+					{isHackerReviewArray(reviews) ? (
+						<HackerApplicationReviews reviews={reviews} />
+					) : (
+						<ApplicationReviews reviews={reviews} />
+					)}
 				</div>
 			</ColumnLayout>
 		</Container>

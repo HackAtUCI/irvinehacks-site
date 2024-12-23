@@ -3,7 +3,6 @@ from unittest.mock import ANY, AsyncMock, call, patch
 
 from fastapi import FastAPI
 
-from admin import applicant_review_processor
 from auth import user_identity
 from auth.user_identity import NativeUser, UserTestClient
 from models.ApplicationData import Decision
@@ -108,34 +107,6 @@ def test_can_retrieve_applicants(
             },
         },
     ]
-
-
-def test_can_include_decision_from_reviews() -> None:
-    """Test that a decision can be provided for an applicant with reviews."""
-    record = {
-        "_id": "edu.uci.sydnee",
-        "status": "REVIEWED",
-        "application_data": {
-            "reviews": [[datetime(2023, 1, 19), "edu.uci.alicia", "ACCEPTED"]],
-        },
-    }
-
-    applicant_review_processor.include_review_decision(record)
-    assert record["decision"] == "ACCEPTED"
-
-
-def test_no_decision_from_no_reviews() -> None:
-    """Test that a decision is None for an applicant with no reviews."""
-    record = {
-        "_id": "edu.uci.pham",
-        "status": "PENDING_REVIEW",
-        "application_data": {
-            "reviews": [],
-        },
-    }
-
-    applicant_review_processor.include_review_decision(record)
-    assert record["decision"] is None
 
 
 @patch("services.mongodb_handler.raw_update_one", autospec=True)

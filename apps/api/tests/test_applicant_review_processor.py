@@ -5,6 +5,34 @@ from typing import Any
 from admin import applicant_review_processor
 
 
+def test_no_decision_from_no_reviews() -> None:
+    """Test that a decision is None for an applicant with no reviews."""
+    record = {
+        "_id": "edu.uci.pham",
+        "status": "PENDING_REVIEW",
+        "application_data": {
+            "reviews": [],
+        },
+    }
+
+    applicant_review_processor.include_review_decision(record)
+    assert record["decision"] is None
+
+
+def test_can_include_decision_from_reviews() -> None:
+    """Test that a decision can be provided for an applicant with reviews."""
+    record = {
+        "_id": "edu.uci.sydnee",
+        "status": "REVIEWED",
+        "application_data": {
+            "reviews": [[datetime(2023, 1, 19), "edu.uci.alicia", "ACCEPTED"]],
+        },
+    }
+
+    applicant_review_processor.include_review_decision(record)
+    assert record["decision"] == "ACCEPTED"
+
+
 def test_can_include_num_reviewers_from_reviews() -> None:
     """Test that the number of reviewers are added to an applicant with reviews."""
     record: dict[str, Any] = {

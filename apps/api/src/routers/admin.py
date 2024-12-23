@@ -1,7 +1,7 @@
 import asyncio
 from datetime import datetime
 from logging import getLogger
-from typing import Annotated, Any, Literal, Optional, Sequence
+from typing import Annotated, Any, Optional, Sequence
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, TypeAdapter, ValidationError
@@ -354,29 +354,19 @@ async def _process_status(uids: Sequence[str], status: Status) -> None:
 
 
 async def _process_batch(batch: tuple[dict[str, Any], ...], decision: Decision) -> None:
-    """Update status of batch to given decision and send emails"""
-    await _update_batch_of_decisions(batch, decision, update_field="status")
+    uids: list[str] = [record["_id"] for record in batch]
+    log.info(f"Setting {','.join(uids)} as {decision}")
+    ok = await mongodb_handler.update(
+        Collection.USERS, {"_id": {"$in": uids}}, {"status": decision}
+    )
+    if not ok:
+        raise RuntimeError("gg wp")
 
     # Send emails
     log.info(f"Sending {decision} emails for {len(batch)} applicants")
     await email_handler.send_decision_email(
         map(_extract_personalizations, batch), decision
     )
-
-
-async def _update_batch_of_decisions(
-    batch: tuple[dict[str, Any], ...],
-    decision: Decision,
-    *,
-    update_field: Literal["status", "decision"],
-) -> None:
-    uids: list[str] = [record["_id"] for record in batch]
-    log.info(f"Setting {','.join(uids)} as {decision}")
-    ok = await mongodb_handler.update(
-        Collection.USERS, {"_id": {"$in": uids}}, {update_field: decision}
-    )
-    if not ok:
-        raise RuntimeError("gg wp")
 
 
 def _extract_personalizations(decision_data: dict[str, Any]) -> tuple[str, EmailStr]:

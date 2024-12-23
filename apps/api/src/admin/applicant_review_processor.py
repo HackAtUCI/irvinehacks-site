@@ -11,7 +11,6 @@ def include_hacker_app_fields(
     )
     _include_num_reviewers(applicant_record)
     _include_avg_score(applicant_record)
-    _omit_reviews(applicant_record)
 
 
 def include_review_decision(applicant_record: dict[str, Any]) -> None:
@@ -63,7 +62,3 @@ def _include_avg_score(applicant_record: dict[str, Any]) -> None:
     applicant_record["avg_score"] = _get_avg_score(
         applicant_record["application_data"]["reviews"]
     )
-
-
-def _omit_reviews(applicant_record: dict[str, Any]) -> None:
-    del applicant_record["application_data"]["reviews"]

@@ -90,7 +90,7 @@ function HackerApplicants() {
 					},
 					{
 						id: "decision",
-						header: "Decision",
+						header: "Decision (based on average score)",
 						content: DecisionStatus,
 					},
 				],

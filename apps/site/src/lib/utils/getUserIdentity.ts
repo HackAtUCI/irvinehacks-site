@@ -1,10 +1,12 @@
 import axios from "axios";
 
+import { Role, Uid } from "@/lib/userRecord";
+
 import api from "./api";
 
 export interface Identity {
-	uid: string | null;
-	roles: ReadonlyArray<string>;
+	uid: Uid | null;
+	roles: ReadonlyArray<Role>;
 	status: string | null;
 }
 

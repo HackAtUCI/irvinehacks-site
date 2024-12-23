@@ -1,14 +1,14 @@
 import axios from "axios";
 import useSWR from "swr";
 
-import { Status } from "./useApplicant";
+import { Decision, Status } from "@/lib/userRecord";
 
 export interface ApplicantSummary {
 	_id: string;
 	first_name: string;
 	last_name: string;
 	status: Status;
-	decision: Status | null;
+	decision: Decision | null;
 	application_data: {
 		school: string;
 		submission_time: string;

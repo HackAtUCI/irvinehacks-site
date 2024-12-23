@@ -11,7 +11,7 @@ from admin import applicant_review_processor
 from admin.participant_manager import Participant
 from auth.authorization import require_role
 from auth.user_identity import User, utc_now
-from models.ApplicationData import Decision, OtherReview
+from models.ApplicationData import Decision, HackerReview, OtherReview
 from models.user_record import Applicant, ApplicantStatus, Role, Status
 from services import mongodb_handler, sendgrid_handler
 from services.mongodb_handler import BaseRecord, Collection
@@ -172,6 +172,47 @@ async def submit_review(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+@router.post("/review/hacker")
+async def submit_hacker_review(
+    applicant: str = Body(),
+    score: float = Body(),
+    reviewer: User = Depends(require_role({Role.REVIEWER})),
+) -> None:
+    """Submit a review decision from the reviewer for the given hacker applicant."""
+    log.info("%s reviewed hacker %s", reviewer, applicant)
+
+    review: HackerReview = (utc_now(), reviewer.uid, score)
+
+    try:
+        await mongodb_handler.raw_update_one(
+            Collection.USERS,
+            {"_id": applicant},
+            {"$push": {"application_data.reviews": review}},
+        )
+    except RuntimeError:
+        log.error("Could not submit review for %s", applicant)
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    applicant_record = await mongodb_handler.retrieve_one(
+        Collection.USERS,
+        {"_id": applicant},
+        ["_id", "application_data.reviews"],
+    )
+    if not applicant_record:
+        log.error("Could not retrieve applicant after submitting review")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    num_reviewers = applicant_review_processor.get_num_unique_reviewers(
+        applicant_record
+    )
+    if num_reviewers > 1:
+        await mongodb_handler.raw_update_one(
+            Collection.USERS,
+            {"_id": applicant},
+            {"$set": {"status": "REVIEWED"}},
+        )
+
+
 @router.post("/release", dependencies=[Depends(require_director)])
 async def release_decisions() -> None:
     """Update applicant status based on decision and send decision emails."""
@@ -184,13 +225,32 @@ async def release_decisions() -> None:
     for record in records:
         applicant_review_processor.include_review_decision(record)
 
-    for decision in (Decision.ACCEPTED, Decision.WAITLISTED, Decision.REJECTED):
-        group = [record for record in records if record["decision"] == decision]
-        if not group:
-            continue
-        await asyncio.gather(
-            *(_process_batch(batch, decision) for batch in batched(group, 100))
+    await _process_records_in_batches(records)
+
+
+@router.post("/release/hackers", dependencies=[Depends(require_director)])
+async def release_hacker_decisions() -> None:
+    """Update hacker applicant status based on decision and send decision emails."""
+    records = await mongodb_handler.retrieve(
+        Collection.USERS,
+        {"status": Status.REVIEWED},
+        ["_id", "application_data.reviews", "first_name"],
+    )
+
+    thresholds = await mongodb_handler.retrieve_one(
+        Collection.SETTINGS, {"_id": "hacker_score_thresholds"}, ["accept", "waitlist"]
+    )
+
+    if not thresholds:
+        log.error("Could not retrieve thresholds")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    for record in records:
+        applicant_review_processor.include_hacker_app_fields(
+            record, thresholds["accept"], thresholds["waitlist"]
         )
+
+    await _process_records_in_batches(records)
 
 
 @router.post("/rsvp-reminder", dependencies=[Depends(require_director)])
@@ -343,6 +403,16 @@ async def subevent_checkin(
     organizer: Annotated[User, Depends(require_organizer)],
 ) -> None:
     await participant_manager.subevent_checkin(event, uid, organizer)
+
+
+async def _process_records_in_batches(records: list[dict[str, object]]) -> None:
+    for decision in (Decision.ACCEPTED, Decision.WAITLISTED, Decision.REJECTED):
+        group = [record for record in records if record["decision"] == decision]
+        if not group:
+            continue
+        await asyncio.gather(
+            *(_process_batch(batch, decision) for batch in batched(group, 100))
+        )
 
 
 async def _process_status(uids: Sequence[str], status: Status) -> None:

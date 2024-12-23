@@ -19,6 +19,12 @@ def include_review_decision(applicant_record: dict[str, Any]) -> None:
     applicant_record["decision"] = reviews[-1][2] if reviews else None
 
 
+def get_num_unique_reviewers(applicant_record: dict[str, Any]) -> int:
+    reviews = applicant_record["application_data"]["reviews"]
+    unique_reviewers = {t[1] for t in reviews}
+    return len(unique_reviewers)
+
+
 def _get_last_score(reviewer: str, reviews: list[tuple[str, str, float]]) -> float:
     for review in reversed(reviews):
         if review[1] == reviewer:
@@ -48,14 +54,8 @@ def _include_decision_based_on_threshold(
         applicant_record["decision"] = Decision.REJECTED
 
 
-def _get_num_unique_reviewers(applicant_record: dict[str, Any]) -> int:
-    reviews = applicant_record["application_data"]["reviews"]
-    unique_reviewers = {t[1] for t in reviews}
-    return len(unique_reviewers)
-
-
 def _include_num_reviewers(applicant_record: dict[str, Any]) -> None:
-    applicant_record["num_reviewers"] = _get_num_unique_reviewers(applicant_record)
+    applicant_record["num_reviewers"] = get_num_unique_reviewers(applicant_record)
 
 
 def _include_avg_score(applicant_record: dict[str, Any]) -> None:

@@ -26,7 +26,7 @@ export default function GuestLoginVerificationForm() {
 	}
 
 	return (
-		<div className="mx-8 md:m-0 p-6 md:px-10 md:py-8 border-[2px] md:border-[5px] border-[var(--color-white)] text-[var(--color-white)] bg-[var(--color-black)]">
+		<div className="mx-8 md:m-0 p-6 md:px-10 md:py-8 border-[2px] md:border-[5px] border-[var(--color-white)] text-[var(--color-white)] bg-[var(--color-black)] max-w-[800px]">
 			<ValidatingForm
 				method="post"
 				action={VERIFICATION_PATH + `?${newSearchParams}`}
@@ -51,7 +51,9 @@ export default function GuestLoginVerificationForm() {
 						passphrase.
 					</small>
 					<span className="text-[#FF2222]">
-						If you cannot find the passphrase, please check your spam.
+						If you cannot find the passphrase, please check your spam. If the
+						email is still missing, try again later, use a different email, or
+						contact us at contact@irvinehacks.com for assistance.
 					</span>
 					<p className={clsx(styles.invalidFeedback, "text-red-500")}>
 						Sorry, that passphrase is invalid.

@@ -6,6 +6,7 @@ export type Uid = string;
 /** The possible roles of general participants. */
 export enum ParticipantRole {
 	Applicant = "Applicant",
+	Hacker = "Hacker",
 	Mentor = "Mentor",
 	Volunteer = "Volunteer",
 	Sponsor = "Sponsor",

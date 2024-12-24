@@ -9,9 +9,9 @@
 		"lint": "next lint"
 	},
 	"dependencies": {
-		"@cloudscape-design/collection-hooks": "^1.0.34",
-		"@cloudscape-design/components": "^3.0.475",
-		"@cloudscape-design/global-styles": "^1.0.20",
+		"@cloudscape-design/collection-hooks": "^1.0.56",
+		"@cloudscape-design/components": "^3.0.856",
+		"@cloudscape-design/global-styles": "^1.0.33",
 		"@fireworks-js/react": "^2.10.7",
 		"@portabletext/react": "^3.0.11",
 		"@radix-ui/react-accordion": "^1.1.2",

@@ -5,13 +5,15 @@ import LoginForm from "./components/LoginForm";
 async function Login({
 	searchParams,
 }: {
-	searchParams?: {
+	searchParams: {
 		return_to?: string;
 	};
 }) {
+	const { return_to } = searchParams;
+
 	const identity = await getUserIdentity();
 	if (identity.uid !== null) {
-		redirect(searchParams?.return_to ?? "/portal");
+		redirect(return_to ?? "/portal");
 	}
 
 	return (
@@ -19,7 +21,7 @@ async function Login({
 			<h1 className="font-display text-3xl md:text-5xl mb-20">
 				Login to Portal
 			</h1>
-			<LoginForm return_to={searchParams?.return_to} />
+			<LoginForm return_to={return_to} />
 		</div>
 	);
 }

@@ -1,29 +1,28 @@
-import {
-	Box,
-	SpaceBetween,
-	StatusIndicator,
-} from "@cloudscape-design/components";
+import Box from "@cloudscape-design/components/box";
+import SpaceBetween from "@cloudscape-design/components/space-between";
+import StatusIndicator from "@cloudscape-design/components/status-indicator";
 
 interface IndicatorContainerProps {
-	reviewerNumber: string;
-	type: string;
+	number: number;
+	hasReviewed: boolean;
 }
 
 const IndicatorContainer = ({
-	reviewerNumber,
-	type,
+	number,
+	hasReviewed,
 }: IndicatorContainerProps) => {
 	return (
 		<>
-			<Box variant="awsui-key-label">Reviewer {reviewerNumber}</Box>
-			{type === "notReviewed" ? (
-				<StatusIndicator type="error">Not Reviewed</StatusIndicator>
-			) : (
+			<Box variant="awsui-key-label">Reviewer {number}</Box>
+			{hasReviewed ? (
 				<StatusIndicator>Reviewed</StatusIndicator>
+			) : (
+				<StatusIndicator type="pending">Not Reviewed</StatusIndicator>
 			)}
 		</>
 	);
 };
+
 interface ApplicantReviewerIndicatorProps {
 	num_reviewers: number;
 }
@@ -33,24 +32,13 @@ function ApplicantReviewerIndicator({
 }: ApplicantReviewerIndicatorProps) {
 	return (
 		<SpaceBetween size="l">
-			{num_reviewers === 0 ? (
-				<>
-					<IndicatorContainer reviewerNumber="1" type="notReviewed" />
-					<IndicatorContainer reviewerNumber="2" type="notReviewed" />
-				</>
-			) : num_reviewers === 1 ? (
-				<>
-					<IndicatorContainer reviewerNumber="1" type="reviewed" />
-					<IndicatorContainer reviewerNumber="2" type="notReviewed" />
-				</>
-			) : num_reviewers === 2 ? (
-				<>
-					<IndicatorContainer reviewerNumber="1" type="reviewed" />
-					<IndicatorContainer reviewerNumber="2" type="reviewed" />
-				</>
-			) : (
-				<></>
-			)}
+			{[1, 2].map((n) => (
+				<IndicatorContainer
+					key={n}
+					number={n}
+					hasReviewed={n >= num_reviewers}
+				/>
+			))}
 		</SpaceBetween>
 	);
 }

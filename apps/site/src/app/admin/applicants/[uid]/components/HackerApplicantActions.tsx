@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 
 import { Button, Input, SpaceBetween } from "@cloudscape-design/components";
-import { submitHackerReview } from "@/lib/admin/useApplicant";
+import { submitHackerReview } from "@/app/admin/applicants/hackers/useApplicant";
 import { Uid } from "@/lib/userRecord";
 import UserContext from "@/lib/admin/UserContext";
 import { isReviewer } from "@/lib/admin/authorization";

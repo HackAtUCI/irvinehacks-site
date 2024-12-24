@@ -125,6 +125,7 @@ def test_can_submit_review(
         json={"applicant": "edu.uci.applicant", "decision": Decision.ACCEPTED},
     )
 
+    assert res.status_code == 200
     mock_mongodb_handler_retrieve_one.assert_awaited_once()
     mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
         Collection.USERS,
@@ -136,7 +137,6 @@ def test_can_submit_review(
             "$set": {"status": "REVIEWED"},
         },
     )
-    assert res.status_code == 200
 
 
 @patch("services.mongodb_handler.update", autospec=True)
@@ -175,6 +175,7 @@ def test_confirm_attendance_route(
 
     res = director_client.post("/confirm-attendance")
 
+    assert res.status_code == 200
     mock_mongodb_handler_retrieve.assert_awaited_once()
     mock_mognodb_handler_update.assert_has_calls(
         [
@@ -195,8 +196,6 @@ def test_confirm_attendance_route(
             ),
         ]
     )
-
-    assert res.status_code == 200
 
 
 @patch("services.sendgrid_handler.send_email", autospec=True)

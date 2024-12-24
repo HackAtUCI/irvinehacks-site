@@ -5,7 +5,7 @@ import Header from "@cloudscape-design/components/header";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import Spinner from "@cloudscape-design/components/spinner";
 
-import useApplicant from "@/lib/admin/useApplicant";
+import useApplicant from "@/app/admin/applicants/hackers/useApplicant";
 
 import ApplicantActions from "./components/ApplicantActions";
 import ApplicantOverview from "./components/ApplicantOverview";

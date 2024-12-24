@@ -53,6 +53,16 @@ class HackerApplicantSummary(BaseRecord):
     application_data: ApplicationDataSummary
 
 
+class HackerReviewModel(BaseModel):
+    applicant: str
+    score: float
+
+
+class NonHackerReviewModel(BaseModel):
+    applicant: str
+    decision: Decision
+
+
 @router.get("/applicants")
 async def applicants(
     user: Annotated[User, Depends(require_manager)]
@@ -104,9 +114,7 @@ async def hacker_applicants(
         ],
     )
 
-    thresholds: Optional[dict[str, float]] = await mongodb_handler.retrieve_one(
-        Collection.SETTINGS, {"_id": "hacker_score_thresholds"}, ["accept", "waitlist"]
-    )
+    thresholds: Optional[dict[str, float]] = await _retrieve_thresholds()
 
     if not thresholds:
         log.error("Could not retrieve thresholds")
@@ -149,39 +157,37 @@ async def applicant_summary() -> dict[ApplicantStatus, int]:
 
 @router.post("/review")
 async def submit_review(
-    applicant: str = Body(),
-    decision: Decision = Body(),
+    applicant_review: NonHackerReviewModel,
     reviewer: User = Depends(require_role({Role.REVIEWER})),
 ) -> None:
     """Submit a review decision from the reviewer for the given applicant."""
-    log.info("%s reviewed applicant %s", reviewer, applicant)
+    log.info("%s reviewed applicant %s", reviewer, applicant_review.applicant)
 
-    review: OtherReview = (utc_now(), reviewer.uid, decision)
+    review: OtherReview = (utc_now(), reviewer.uid, applicant_review.decision)
 
     try:
         await mongodb_handler.raw_update_one(
             Collection.USERS,
-            {"_id": applicant},
+            {"_id": applicant_review.applicant},
             {
                 "$push": {"application_data.reviews": review},
                 "$set": {"status": "REVIEWED"},
             },
         )
     except RuntimeError:
-        log.error("Could not submit review for %s", applicant)
+        log.error("Could not submit review for %s", applicant_review.applicant)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @router.post("/review/hacker")
 async def submit_hacker_review(
-    applicant: str = Body(),
-    score: float = Body(),
+    hacker_review: HackerReviewModel,
     reviewer: User = Depends(require_role({Role.REVIEWER})),
 ) -> None:
     """Submit a review decision from the reviewer for the given hacker applicant."""
     log.info("%s reviewed hacker %s", reviewer, applicant)
 
-    review: HackerReview = (utc_now(), reviewer.uid, score)
+    review: HackerReview = (utc_now(), reviewer.uid, hacker_review.score)
 
     try:
         await mongodb_handler.raw_update_one(
@@ -190,7 +196,9 @@ async def submit_hacker_review(
             {"$push": {"application_data.reviews": review}},
         )
     except RuntimeError:
-        log.error("Could not submit review for %s", applicant)
+        log.error(
+            "%s could not submit review for %s", reviewer, hacker_review.applicant
+        )
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     applicant_record = await mongodb_handler.retrieve_one(
@@ -205,7 +213,10 @@ async def submit_hacker_review(
     num_reviewers = applicant_review_processor.get_num_unique_reviewers(
         applicant_record
     )
-    if num_reviewers > 1:
+
+    # Because reviewing a hacker requires 2 reviewers, only set the
+    # applicant's status to REVIEWED if there are at least 2 reviewers
+    if num_reviewers >= 2:
         await mongodb_handler.raw_update_one(
             Collection.USERS,
             {"_id": applicant},
@@ -237,9 +248,7 @@ async def release_hacker_decisions() -> None:
         ["_id", "application_data.reviews", "first_name"],
     )
 
-    thresholds = await mongodb_handler.retrieve_one(
-        Collection.SETTINGS, {"_id": "hacker_score_thresholds"}, ["accept", "waitlist"]
-    )
+    thresholds: Optional[dict[str, float]] = await _retrieve_thresholds()
 
     if not thresholds:
         log.error("Could not retrieve thresholds")
@@ -452,3 +461,9 @@ def _recover_email_from_uid(uid: str) -> str:
     local = local.replace("\n", ".")
     domain = ".".join(reversed(reversed_domain))
     return f"{local}@{domain}"
+
+
+async def _retrieve_thresholds() -> Optional[dict[str, Any]]:
+    return await mongodb_handler.retrieve_one(
+        Collection.SETTINGS, {"_id": "hacker_score_thresholds"}, ["accept", "waitlist"]
+    )

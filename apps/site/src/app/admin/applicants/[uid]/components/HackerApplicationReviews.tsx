@@ -1,6 +1,6 @@
 import { useContext } from "react";
 
-import { HackerReview } from "@/lib/admin/useApplicant";
+import { HackerReview } from "@/app/admin/applicants/hackers/useApplicant";
 import { Uid } from "@/lib/userRecord";
 import UserContext from "@/lib/admin/UserContext";
 

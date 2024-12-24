@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { PropsWithChildren } from "react";
 import { redirect } from "next/navigation";
 
@@ -8,6 +9,7 @@ import ApplicationsClosed from "./ApplicationsClosed/ApplicationsClosed";
 import ApplyConfirm from "./ApplyConfirmation/ApplyConfirm";
 import Title from "./Title/Title";
 import getUserIdentity from "@/lib/utils/getUserIdentity";
+import clouds from "@/assets/images/starry_clouds.png";
 
 export const revalidate = 60;
 
@@ -48,6 +50,11 @@ export default async function ApplicationFlow({
 	);
 	return (
 		<div className="flex flex-col items-center justify-center gap-10 min-h-screen">
+			<Image
+				src={clouds}
+				alt="Background clouds"
+				className="absolute top-0 min-w-[1500px] xl:min-w-[100vw] xl:w-[100vw] z-[-1] h-[200vh]"
+			/>
 			{!applicationsOpened || deadlinePassed ? (
 				<ApplicationsClosed />
 			) : (

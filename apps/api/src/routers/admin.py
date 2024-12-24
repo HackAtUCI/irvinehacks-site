@@ -1,13 +1,13 @@
 import asyncio
-from datetime import datetime
+from datetime import date, datetime
 from logging import getLogger
-from typing import Annotated, Any, Optional, Sequence
+from typing import Annotated, Any, Literal, Optional, Sequence
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, TypeAdapter, ValidationError
+from typing_extensions import assert_never
 
-from admin import participant_manager, summary_handler
-from admin import applicant_review_processor
+from admin import applicant_review_processor, participant_manager, summary_handler
 from admin.participant_manager import Participant
 from auth.authorization import require_role
 from auth.user_identity import User, utc_now
@@ -145,6 +145,21 @@ async def applicant(
 async def applicant_summary() -> dict[ApplicantStatus, int]:
     """Provide summary of statuses of applicants."""
     return await summary_handler.applicant_summary()
+
+
+@router.get(
+    "/summary/applications",
+    response_model=dict[str, object],
+    dependencies=[Depends(require_manager)],
+)
+async def applications(
+    group_by: Literal["school", "role"]
+) -> dict[str, dict[date, int]]:
+    if group_by == "school":
+        return await summary_handler.applications_by_school()
+    elif group_by == "role":
+        return await summary_handler.applications_by_role()
+    assert_never(group_by)
 
 
 @router.post("/review")

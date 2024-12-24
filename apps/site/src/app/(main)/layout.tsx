@@ -20,7 +20,6 @@ export default function Layout({ children }: PropsWithChildren) {
 			style={{ backgroundImage: `url(${stars.src})` }}
 			className="overflow-x-hidden bg-top bg-repeat-y bg-[length:100%]"
 		>
-			{/* reference: https://github.com/pmndrs/react-three-next */}
 			<NavbarParent />
 			{children}
 			<Footer />

@@ -7,6 +7,7 @@ async function GuestLogin({
 	searchParams,
 }: {
 	searchParams?: {
+		email?: string;
 		return_to?: string;
 	};
 }) {
@@ -20,7 +21,10 @@ async function GuestLogin({
 			<h1 className="font-display text-3xl md:text-5xl mb-20">
 				Enter Passphrase
 			</h1>
-			<GuestLoginVerificationForm />
+			<GuestLoginVerificationForm
+				email={searchParams?.email}
+				return_to={searchParams?.return_to}
+			/>
 		</div>
 	);
 }

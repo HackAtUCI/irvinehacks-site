@@ -4,20 +4,10 @@ import Container from "@cloudscape-design/components/container";
 import Header from "@cloudscape-design/components/header";
 
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
-import {
-	Applicant,
-	HackerReview,
-	Review,
-} from "@/app/admin/applicants/hackers/useApplicant";
+import { Applicant } from "@/app/admin/applicants/hackers/useApplicant";
 
 import ApplicationReviews from "./ApplicationReviews";
-import HackerApplicationReviews from "./HackerApplicationReviews";
-
-function isHackerReviewArray(
-	arr: Review[] | HackerReview[],
-): arr is HackerReview[] {
-	return arr.every((tuple) => typeof tuple[2] === "number");
-}
+import { ParticipantRole } from "@/lib/userRecord";
 
 interface ApplicantOverviewProps {
 	applicant: Applicant;
@@ -42,11 +32,10 @@ function ApplicantOverview({ applicant }: ApplicantOverviewProps) {
 				</div>
 				<div>
 					<Box variant="awsui-key-label">Reviews</Box>
-					{isHackerReviewArray(reviews) ? (
-						<HackerApplicationReviews reviews={reviews} />
-					) : (
-						<ApplicationReviews reviews={reviews} />
-					)}
+					<ApplicationReviews
+						reviews={reviews}
+						isHacker={applicant.roles.includes(ParticipantRole.Hacker)}
+					/>
 				</div>
 			</ColumnLayout>
 		</Container>

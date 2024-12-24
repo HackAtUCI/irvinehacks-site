@@ -36,7 +36,7 @@ function ApplicantReviewerIndicator({
 				<IndicatorContainer
 					key={n}
 					number={n}
-					hasReviewed={n >= num_reviewers}
+					hasReviewed={num_reviewers >= n}
 				/>
 			))}
 		</SpaceBetween>

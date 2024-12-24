@@ -80,7 +80,7 @@ function HackerApplicants() {
 					},
 					{
 						id: "reviewers",
-						header: "Reviewer Status",
+						header: "",
 						content: ApplicantReviewerIndicator,
 					},
 					{

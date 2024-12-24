@@ -20,8 +20,7 @@ interface ApplicantProps {
 function Applicant({ params }: ApplicantProps) {
 	const { uid } = params;
 
-	const { applicant, loading, submitReview, submitHackerReview } =
-		useApplicant(uid);
+	const { applicant, loading, submitReview } = useApplicant(uid);
 
 	if (loading || !applicant) {
 		return (
@@ -43,7 +42,7 @@ function Applicant({ params }: ApplicantProps) {
 						applicant.roles.includes(ParticipantRole.Hacker) ? (
 							<HackerApplicantActions
 								applicant={applicant._id}
-								submitHackerReview={submitHackerReview}
+								submitReview={submitReview}
 							/>
 						) : (
 							<ApplicantActions

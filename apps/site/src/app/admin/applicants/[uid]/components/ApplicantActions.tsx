@@ -8,6 +8,7 @@ import { isReviewer } from "@/lib/admin/authorization";
 import { submitReview } from "@/app/admin/applicants/hackers/useApplicant";
 import UserContext from "@/lib/admin/UserContext";
 import { Decision, Uid } from "@/lib/userRecord";
+import { decisionsToScores } from "@/lib/decisionScores";
 
 interface ApplicantActionsProps {
 	applicant: Uid;
@@ -30,8 +31,8 @@ function ApplicantActions({ applicant, submitReview }: ApplicantActionsProps) {
 	const handleClick = (
 		event: CustomEvent<ButtonDropdownProps.ItemClickDetails>,
 	) => {
-		const review = event.detail.id;
-		submitReview(applicant, review as Decision);
+		const review = event.detail.id as Decision;
+		submitReview(applicant, decisionsToScores[review]);
 	};
 
 	const dropdownItems: ReviewButtonItems = [

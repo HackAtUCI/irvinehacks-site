@@ -112,31 +112,80 @@ def test_can_retrieve_applicants(
 
 @patch("services.mongodb_handler.raw_update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
-def test_can_submit_review(
+def test_can_submit_nonhacker_review(
     mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_mongodb_handler_raw_update_one: AsyncMock,
 ) -> None:
-    """Test that a user can properly submit an applicant review."""
+    """Test that a user can properly submit a nonhacker applicant review."""
+    post_data = {"applicant": "edu.uci.sydnee", "score": 0}
 
-    mock_mongodb_handler_retrieve_one.return_value = REVIEWER_IDENTITY
+    returned_record: dict[str, Any] = {
+        "_id": "edu.uci.sydnee",
+        "roles": ["Applicant", "Mentor"],
+        "application_data": {
+            "reviews": [
+                [datetime(2023, 1, 19), "edu.uci.alicia", 100],
+            ]
+        },
+    }
 
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        REVIEWER_IDENTITY,
+        returned_record,
+        REVIEWER_IDENTITY,
+        returned_record,
+    ]
+    mock_mongodb_handler_raw_update_one.side_effect = [True, True, True]
+
+    res = reviewer_client.post("/review", json=post_data)
+
+    assert res.status_code == 200
+    assert mock_mongodb_handler_raw_update_one.await_count == 2
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_submit_hacker_review_works(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+    """Test that a user can properly submit a hacker applicant review."""
+    post_data = {"applicant": "edu.uci.sydnee", "score": 0}
+
+    returned_record: dict[str, Any] = {
+        "_id": "edu.uci.sydnee",
+        "roles": ["Applicant", "Hacker"],
+        "application_data": {
+            "reviews": [
+                [datetime(2023, 1, 19), "edu.uci.alicia", 100],
+            ]
+        },
+    }
+
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        REVIEWER_IDENTITY,
+        returned_record,
+        REVIEWER_IDENTITY,
+        returned_record,
+    ]
+    mock_mongodb_handler_raw_update_one.side_effect = [True, True, True]
+
+    res = reviewer_client.post("/review", json=post_data)
+
+    assert res.status_code == 200
+    assert mock_mongodb_handler_raw_update_one.await_count == 1
+
+    # Simulate 2 reviewers
+    # Should make raw_update_one run at very end of /review function
+    returned_record["application_data"]["reviews"].append(
+        [datetime(2023, 1, 19), "edu.uci.alicia2", 200]
+    )
     res = reviewer_client.post(
-        "/review",
-        json={"applicant": "edu.uci.applicant", "decision": Decision.ACCEPTED},
+        "/review", json={"applicant": "edu.uci.sydnee", "score": 0}
     )
 
     assert res.status_code == 200
-    mock_mongodb_handler_retrieve_one.assert_awaited_once()
-    mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
-        Collection.USERS,
-        {"_id": "edu.uci.applicant"},
-        {
-            "$push": {
-                "application_data.reviews": (ANY, "edu.uci.alicia", Decision.ACCEPTED)
-            },
-            "$set": {"status": "REVIEWED"},
-        },
-    )
+    assert mock_mongodb_handler_raw_update_one.await_count == 3
 
 
 @patch("services.mongodb_handler.update", autospec=True)
@@ -297,49 +346,6 @@ def test_hacker_applicants_returns_correct_applicants(
             },
         },
     ]
-
-
-@patch("services.mongodb_handler.raw_update_one", autospec=True)
-@patch("services.mongodb_handler.retrieve_one", autospec=True)
-def test_submit_hacker_review_works(
-    mock_mongodb_handler_retrieve_one: AsyncMock,
-    mock_mongodb_handler_raw_update_one: AsyncMock,
-) -> None:
-    """Test that the /review/hacker route works"""
-    returned_record: dict[str, Any] = {
-        "_id": "edu.uci.sydnee",
-        "application_data": {
-            "reviews": [
-                [datetime(2023, 1, 19), "edu.uci.alicia", 100],
-            ]
-        },
-    }
-
-    mock_mongodb_handler_retrieve_one.side_effect = [
-        REVIEWER_IDENTITY,
-        returned_record,
-        REVIEWER_IDENTITY,
-        returned_record,
-    ]
-    mock_mongodb_handler_raw_update_one.side_effect = [True, True, True]
-
-    res = reviewer_client.post(
-        "/review/hacker", json={"applicant": "edu.uci.sydnee", "score": 0}
-    )
-
-    assert res.status_code == 200
-    assert mock_mongodb_handler_raw_update_one.await_count == 1
-
-    # Simulate 2 reviewers
-    returned_record["application_data"]["reviews"].append(
-        [datetime(2023, 1, 19), "edu.uci.alicia2", 200]
-    )
-    res = reviewer_client.post(
-        "/review/hacker", json={"applicant": "edu.uci.sydnee", "score": 0}
-    )
-
-    assert res.status_code == 200
-    assert mock_mongodb_handler_raw_update_one.await_count == 3
 
 
 @patch("routers.admin._process_records_in_batches", autospec=True)

@@ -1,19 +1,19 @@
 import { useContext, useState } from "react";
 
 import { Button, Input, SpaceBetween } from "@cloudscape-design/components";
-import { submitHackerReview } from "@/app/admin/applicants/hackers/useApplicant";
+import { submitReview } from "@/app/admin/applicants/hackers/useApplicant";
 import { Uid } from "@/lib/userRecord";
 import UserContext from "@/lib/admin/UserContext";
 import { isReviewer } from "@/lib/admin/authorization";
 
 interface ApplicantActionsProps {
 	applicant: Uid;
-	submitHackerReview: submitHackerReview;
+	submitReview: submitReview;
 }
 
 function HackerApplicantActions({
 	applicant,
-	submitHackerReview,
+	submitReview,
 }: ApplicantActionsProps) {
 	const { roles } = useContext(UserContext);
 	const [value, setValue] = useState("");
@@ -34,7 +34,7 @@ function HackerApplicantActions({
 			/>
 			<Button
 				onClick={() => {
-					submitHackerReview(applicant, value);
+					submitReview(applicant, value);
 					setValue("");
 				}}
 			>

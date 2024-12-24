@@ -1,7 +1,7 @@
 import asyncio
 from datetime import datetime
 from logging import getLogger
-from typing import Annotated, Any, Optional, Sequence
+from typing import Annotated, Any, Mapping, Optional, Sequence
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, TypeAdapter, ValidationError
@@ -11,7 +11,7 @@ from admin import applicant_review_processor
 from admin.participant_manager import Participant
 from auth.authorization import require_role
 from auth.user_identity import User, utc_now
-from models.ApplicationData import Decision, HackerReview, OtherReview
+from models.ApplicationData import Decision, Review
 from models.user_record import Applicant, ApplicantStatus, Role, Status
 from services import mongodb_handler, sendgrid_handler
 from services.mongodb_handler import BaseRecord, Collection
@@ -53,14 +53,9 @@ class HackerApplicantSummary(BaseRecord):
     application_data: ApplicationDataSummary
 
 
-class HackerReviewModel(BaseModel):
+class ReviewRequestModel(BaseModel):
     applicant: str
     score: float
-
-
-class NonHackerReviewModel(BaseModel):
-    applicant: str
-    decision: Decision
 
 
 @router.get("/applicants")
@@ -157,70 +152,47 @@ async def applicant_summary() -> dict[ApplicantStatus, int]:
 
 @router.post("/review")
 async def submit_review(
-    applicant_review: NonHackerReviewModel,
-    reviewer: User = Depends(require_role({Role.REVIEWER})),
-) -> None:
-    """Submit a review decision from the reviewer for the given applicant."""
-    log.info("%s reviewed applicant %s", reviewer, applicant_review.applicant)
-
-    review: OtherReview = (utc_now(), reviewer.uid, applicant_review.decision)
-
-    try:
-        await mongodb_handler.raw_update_one(
-            Collection.USERS,
-            {"_id": applicant_review.applicant},
-            {
-                "$push": {"application_data.reviews": review},
-                "$set": {"status": "REVIEWED"},
-            },
-        )
-    except RuntimeError:
-        log.error("Could not submit review for %s", applicant_review.applicant)
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-@router.post("/review/hacker")
-async def submit_hacker_review(
-    hacker_review: HackerReviewModel,
+    applicant_review: ReviewRequestModel,
     reviewer: User = Depends(require_role({Role.REVIEWER})),
 ) -> None:
     """Submit a review decision from the reviewer for the given hacker applicant."""
-    log.info("%s reviewed hacker %s", reviewer, applicant)
+    log.info("%s reviewed hacker %s", reviewer, applicant_review.applicant)
 
-    review: HackerReview = (utc_now(), reviewer.uid, hacker_review.score)
+    review: Review = (utc_now(), reviewer.uid, applicant_review.score)
 
-    try:
-        await mongodb_handler.raw_update_one(
-            Collection.USERS,
-            {"_id": applicant},
-            {"$push": {"application_data.reviews": review}},
-        )
-    except RuntimeError:
-        log.error(
-            "%s could not submit review for %s", reviewer, hacker_review.applicant
-        )
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+    await _try_update_applicant_with_query(
+        applicant_review,
+        query={"$push": {"application_data.reviews": review}},
+        err_msg=f"{reviewer} could not submit review for {applicant_review.applicant}",
+    )
 
     applicant_record = await mongodb_handler.retrieve_one(
         Collection.USERS,
-        {"_id": applicant},
-        ["_id", "application_data.reviews"],
+        {"_id": applicant_review.applicant},
+        ["_id", "application_data.reviews", "roles"],
     )
     if not applicant_record:
         log.error("Could not retrieve applicant after submitting review")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    num_reviewers = applicant_review_processor.get_num_unique_reviewers(
-        applicant_record
-    )
+    if Role.HACKER in applicant_record["roles"]:
+        num_reviewers = applicant_review_processor.get_num_unique_reviewers(
+            applicant_record
+        )
 
-    # Because reviewing a hacker requires 2 reviewers, only set the
-    # applicant's status to REVIEWED if there are at least 2 reviewers
-    if num_reviewers >= 2:
-        await mongodb_handler.raw_update_one(
-            Collection.USERS,
-            {"_id": applicant},
-            {"$set": {"status": "REVIEWED"}},
+        # Because reviewing a hacker requires 2 reviewers, only set the
+        # applicant's status to REVIEWED if there are at least 2 reviewers
+        if num_reviewers >= 2:
+            await _try_update_applicant_with_query(
+                applicant_review,
+                query={"$set": {"status": "REVIEWED"}},
+                err_msg=f"Could not update status for {applicant_review.applicant}",
+            )
+    else:
+        await _try_update_applicant_with_query(
+            applicant_review,
+            query={"$set": {"status": "REVIEWED"}},
+            err_msg=f"Could not update status for {applicant_review.applicant}",
         )
 
 
@@ -239,6 +211,7 @@ async def release_decisions() -> None:
     await _process_records_in_batches(records)
 
 
+# TODO: need to make release hackers check roles as part of query
 @router.post("/release/hackers", dependencies=[Depends(require_director)])
 async def release_hacker_decisions() -> None:
     """Update hacker applicant status based on decision and send decision emails."""
@@ -467,3 +440,20 @@ async def _retrieve_thresholds() -> Optional[dict[str, Any]]:
     return await mongodb_handler.retrieve_one(
         Collection.SETTINGS, {"_id": "hacker_score_thresholds"}, ["accept", "waitlist"]
     )
+
+
+async def _try_update_applicant_with_query(
+    applicant_review: ReviewRequestModel,
+    *,
+    query: Mapping[str, object],
+    err_msg: str = "",
+) -> None:
+    try:
+        await mongodb_handler.raw_update_one(
+            Collection.USERS,
+            {"_id": applicant_review.applicant},
+            query,
+        )
+    except RuntimeError:
+        log.error(err_msg)
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)

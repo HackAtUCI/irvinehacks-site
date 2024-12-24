@@ -21,7 +21,7 @@ async function Login({
 			<Image
 				src={clouds}
 				alt="Background clouds"
-				className="absolute top-0 w-[100vw] h-[200vh] z-[-1]"
+				className="absolute top-0 min-w-[1500px] lg:min-w-[100vw] lg:w-[100vw] z-[-1]"
 			/>
 			<h1 className="font-display text-3xl md:text-5xl mb-20">
 				Login to Portal

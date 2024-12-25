@@ -56,7 +56,7 @@ def _include_decision_based_on_threshold(
 
 def _include_reviewers(applicant_record: dict[str, Any]) -> None:
     reviews = applicant_record["application_data"]["reviews"]
-    unique_reviewers = {t[1] for t in reviews}
+    unique_reviewers = {t[1].split(".")[-1] for t in reviews}
     applicant_record["reviewers"] = sorted(list(unique_reviewers))
 
 

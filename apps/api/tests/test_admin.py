@@ -326,7 +326,7 @@ def test_hacker_applicants_returns_correct_applicants(
             "status": "REVIEWED",
             "decision": "ACCEPTED",
             "avg_score": 150,
-            "reviewers": ["edu.uci.alicia", "edu.uci.alicia2"],
+            "reviewers": ["alicia", "alicia2"],
             "application_data": {
                 "school": "Hamburger University",
                 "submission_time": "2023-01-12T09:00:00",

@@ -9,7 +9,7 @@ export interface HackerApplicantSummary {
 	last_name: string;
 	status: Status;
 	decision: Decision | null;
-	num_reviewers: number;
+	reviewers: ReadonlyArray<string>;
 	avg_score: number;
 	application_data: {
 		school: string;

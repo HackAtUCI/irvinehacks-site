@@ -1,15 +1,17 @@
 import { useContext } from "react";
 
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
-import { Review } from "@/lib/admin/useApplicant";
+import { Review } from "@/app/admin/applicants/hackers/useApplicant";
 import UserContext from "@/lib/admin/UserContext";
-import { Uid } from "@/lib/userRecord";
+import { Status, Uid } from "@/lib/userRecord";
+import { scoresToDecisions } from "@/lib/decisionScores";
 
 interface ApplicationReviewsProps {
 	reviews: Review[];
+	isHacker: boolean;
 }
 
-function ApplicationReviews({ reviews }: ApplicationReviewsProps) {
+function ApplicationReviews({ reviews, isHacker }: ApplicationReviewsProps) {
 	const { uid } = useContext(UserContext);
 
 	if (reviews.length === 0) {
@@ -22,13 +24,20 @@ function ApplicationReviews({ reviews }: ApplicationReviewsProps) {
 
 	return (
 		<ul>
-			{reviews.map(([date, reviewer, decision]) =>
+			{reviews.map(([date, reviewer, score]) =>
 				reviewer === uid ? (
 					<li key={date}>
-						<>
-							You reviewed as <ApplicantStatus status={decision} /> on{" "}
-							{formatDate(date)}
-						</>
+						{isHacker ? (
+							<>
+								You scored this applicant a {score} on {formatDate(date)}
+							</>
+						) : (
+							<>
+								You reviewed as{" "}
+								<ApplicantStatus status={scoresToDecisions[score] as Status} />{" "}
+								on {formatDate(date)}
+							</>
+						)}
 					</li>
 				) : (
 					<li key={date}>

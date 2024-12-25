@@ -22,8 +22,7 @@ class Decision(str, Enum):
     REJECTED = "REJECTED"
 
 
-HackerReview = tuple[datetime, str, float]
-OtherReview = tuple[datetime, str, Decision]
+Review = tuple[datetime, str, float]
 
 
 def make_empty_none(val: Union[str, None]) -> Union[str, None]:
@@ -140,7 +139,7 @@ class ProcessedHackerApplicationData(BaseApplicationData):
     email: EmailStr
     resume_url: Union[HttpUrl, None] = None
     submission_time: datetime
-    reviews: list[HackerReview] = []
+    reviews: list[Review] = []
 
     @field_serializer("linkedin", "portfolio", "resume_url")
     def url2str(self, val: Union[HttpUrl, None]) -> Union[str, None]:
@@ -153,7 +152,7 @@ class ProcessedMentorApplicationData(BaseMentorApplicationData):
     email: EmailStr
     resume_url: Union[HttpUrl, None] = None
     submission_time: datetime
-    reviews: list[OtherReview] = []
+    reviews: list[Review] = []
 
     @field_serializer("linkedin", "github", "portfolio", "resume_url")
     def url2str(self, val: Union[HttpUrl, None]) -> Union[str, None]:
@@ -166,7 +165,7 @@ class ProcessedVolunteerApplication(BaseVolunteerApplicationData):
     # TODO: specify common attributes in mixin
     email: EmailStr
     submission_time: datetime
-    reviews: list[OtherReview] = []
+    reviews: list[Review] = []
 
 
 # To add more discriminating values, add a string

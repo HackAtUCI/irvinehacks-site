@@ -4,9 +4,10 @@ import Container from "@cloudscape-design/components/container";
 import Header from "@cloudscape-design/components/header";
 
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
-import { Applicant } from "@/lib/admin/useApplicant";
+import { Applicant } from "@/app/admin/applicants/hackers/useApplicant";
 
 import ApplicationReviews from "./ApplicationReviews";
+import { ParticipantRole } from "@/lib/userRecord";
 
 interface ApplicantOverviewProps {
 	applicant: Applicant;
@@ -31,7 +32,10 @@ function ApplicantOverview({ applicant }: ApplicantOverviewProps) {
 				</div>
 				<div>
 					<Box variant="awsui-key-label">Reviews</Box>
-					<ApplicationReviews reviews={reviews} />
+					<ApplicationReviews
+						reviews={reviews}
+						isHacker={applicant.roles.includes(ParticipantRole.Hacker)}
+					/>
 				</div>
 			</ColumnLayout>
 		</Container>

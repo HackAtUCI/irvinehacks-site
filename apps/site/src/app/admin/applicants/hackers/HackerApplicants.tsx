@@ -19,6 +19,7 @@ import ApplicantStatus from "../components/ApplicantStatus";
 
 import UserContext from "@/lib/admin/UserContext";
 import { isApplicationManager } from "@/lib/admin/authorization";
+import ApplicantReviewerIndicator from "../components/ApplicantReviewerIndicator";
 
 function HackerApplicants() {
 	const router = useRouter();
@@ -78,6 +79,11 @@ function HackerApplicants() {
 						content: ApplicantStatus,
 					},
 					{
+						id: "reviewers",
+						header: "",
+						content: ApplicantReviewerIndicator,
+					},
+					{
 						id: "submission_time",
 						header: "Applied",
 						content: ({ application_data }) =>
@@ -90,7 +96,7 @@ function HackerApplicants() {
 					},
 					{
 						id: "decision",
-						header: "Decision (based on average score)",
+						header: "Decision",
 						content: DecisionStatus,
 					},
 				],

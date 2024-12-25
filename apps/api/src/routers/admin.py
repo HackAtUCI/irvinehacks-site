@@ -48,7 +48,7 @@ class HackerApplicantSummary(BaseRecord):
     last_name: str
     status: str
     decision: Optional[Decision] = None
-    num_reviewers: int
+    reviewers: list[str] = []
     avg_score: float
     application_data: ApplicationDataSummary
 

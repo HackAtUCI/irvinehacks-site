@@ -9,7 +9,7 @@ def include_hacker_app_fields(
     _include_decision_based_on_threshold(
         applicant_record, accept_threshold, waitlist_threshold
     )
-    _include_num_reviewers(applicant_record)
+    _include_reviewers(applicant_record)
     _include_avg_score(applicant_record)
 
 
@@ -54,8 +54,10 @@ def _include_decision_based_on_threshold(
         applicant_record["decision"] = Decision.REJECTED
 
 
-def _include_num_reviewers(applicant_record: dict[str, Any]) -> None:
-    applicant_record["num_reviewers"] = get_num_unique_reviewers(applicant_record)
+def _include_reviewers(applicant_record: dict[str, Any]) -> None:
+    reviews = applicant_record["application_data"]["reviews"]
+    unique_reviewers = {t[1] for t in reviews}
+    applicant_record["reviewers"] = sorted(list(unique_reviewers))
 
 
 def _include_avg_score(applicant_record: dict[str, Any]) -> None:

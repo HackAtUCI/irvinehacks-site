@@ -30,7 +30,7 @@ function HackerApplicantActions({
 				type="number"
 				inputMode="decimal"
 				placeholder="Applicant score"
-				step={0.1}
+				step={0.5}
 			/>
 			<Button
 				onClick={() => {

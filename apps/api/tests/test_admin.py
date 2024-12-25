@@ -318,6 +318,22 @@ def test_hacker_applicants_returns_correct_applicants(
         }
     ]
 
+    expected_records = [
+        {
+            "_id": "edu.uci.sydnee",
+            "first_name": "sydnee",
+            "last_name": "unknown",
+            "status": "REVIEWED",
+            "decision": "ACCEPTED",
+            "avg_score": 150,
+            "reviewers": ["edu.uci.alicia", "edu.uci.alicia2"],
+            "application_data": {
+                "school": "Hamburger University",
+                "submission_time": "2023-01-12T09:00:00",
+            },
+        },
+    ]
+
     returned_thresholds: dict[str, object] = {"accept": 12, "waitlist": 5}
 
     mock_mongodb_handler_retrieve.return_value = returned_records
@@ -331,21 +347,7 @@ def test_hacker_applicants_returns_correct_applicants(
     assert res.status_code == 200
     mock_mongodb_handler_retrieve.assert_awaited_once()
     data = res.json()
-    assert data == [
-        {
-            "_id": "edu.uci.sydnee",
-            "first_name": "sydnee",
-            "last_name": "unknown",
-            "status": "REVIEWED",
-            "decision": "ACCEPTED",
-            "avg_score": 150,
-            "num_reviewers": 2,
-            "application_data": {
-                "school": "Hamburger University",
-                "submission_time": "2023-01-12T09:00:00",
-            },
-        },
-    ]
+    assert data == expected_records
 
 
 @patch("routers.admin._process_records_in_batches", autospec=True)

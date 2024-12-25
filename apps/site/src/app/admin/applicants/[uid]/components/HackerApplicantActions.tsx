@@ -14,6 +14,18 @@ import { Uid } from "@/lib/userRecord";
 import UserContext from "@/lib/admin/UserContext";
 import { isReviewer } from "@/lib/admin/authorization";
 
+interface ColoredTextBoxProps {
+	text: string | undefined;
+}
+
+const ColoredTextBox = ({ text }: ColoredTextBoxProps) => {
+	return (
+		<Box variant="span" color="text-status-error" fontWeight="heavy">
+			{text}
+		</Box>
+	);
+};
+
 interface ApplicantActionsProps {
 	applicant: Uid;
 	reviews: Review[];
@@ -27,10 +39,14 @@ function HackerApplicantActions({
 }: ApplicantActionsProps) {
 	const { uid, roles } = useContext(UserContext);
 	const [value, setValue] = useState("");
+
+	const uniqueReviewers = Array.from(
+		new Set(reviews.map((review) => review[1])),
+	);
+
 	// const canReview = either there are less than 2 reviewers or uid is in current reviews
-	const uniqueReviewers = new Set(reviews.map((review) => review[1]));
 	const canReview = uid
-		? uniqueReviewers.size < 2 || uniqueReviewers.has(uid)
+		? uniqueReviewers.length < 2 || uniqueReviewers.includes(uid)
 		: false;
 
 	if (!isReviewer(roles)) {
@@ -59,10 +75,16 @@ function HackerApplicantActions({
 			</Button>
 		</SpaceBetween>
 	) : (
-		<Box variant="awsui-key-label" color="text-status-warning">
-			Two reviewers have already submitted reviews. Log in as one of them to
-			submit a review.
-		</Box>
+		<SpaceBetween size="xxs">
+			<Box variant="awsui-key-label" color="text-status-info">
+				<ColoredTextBox text={uniqueReviewers[0].split(".").at(-1)} /> and{" "}
+				<ColoredTextBox text={uniqueReviewers[1].split(".").at(-1)} /> already
+				submitted reviews.
+			</Box>
+			<Box variant="awsui-key-label" color="text-status-info">
+				Log in as one of them to submit a review.
+			</Box>
+		</SpaceBetween>
 	);
 }
 

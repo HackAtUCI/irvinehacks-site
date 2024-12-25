@@ -30,7 +30,7 @@ function Applicant({ params }: ApplicantProps) {
 		);
 	}
 
-	const { first_name, last_name } = applicant;
+	const { first_name, last_name, application_data } = applicant;
 
 	return (
 		<ContentLayout
@@ -42,6 +42,7 @@ function Applicant({ params }: ApplicantProps) {
 						applicant.roles.includes(ParticipantRole.Hacker) ? (
 							<HackerApplicantActions
 								applicant={applicant._id}
+								reviews={application_data.reviews}
 								submitReview={submitReview}
 							/>
 						) : (

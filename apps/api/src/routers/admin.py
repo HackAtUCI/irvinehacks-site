@@ -175,8 +175,8 @@ async def submit_review(
 @router.post("/set-thresholds")
 async def set_hacker_score_thresholds(
     user: Annotated[User, Depends(require_manager)],
-    accept: float = Body(),
-    waitlist: float = Body(),
+    accept: str = Body(),
+    waitlist: str = Body(),
 ) -> None:
     """
     Sets accepted, waitlisted, and implicitly rejected score thresholds.
@@ -184,11 +184,17 @@ async def set_hacker_score_thresholds(
     """
     log.info("%s changed thresholds: Accept-%f | Waitlist-%f", user, accept, waitlist)
 
+    update_query = {}
+    if accept:
+        update_query["accept"] = float(accept)
+    if waitlist:
+        update_query["waitlist"] = float(waitlist)
+
     try:
         await mongodb_handler.raw_update_one(
             Collection.SETTINGS,
             {"_id": "hacker_score_thresholds"},
-            {"$set": {"accept": accept, "waitlist": waitlist}},
+            {"$set": update_query},
             upsert=True,
         )
     except RuntimeError:

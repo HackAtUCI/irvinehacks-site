@@ -297,3 +297,45 @@ def test_hacker_applicants_returns_correct_applicants(
             },
         },
     ]
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+def test_set_thresholds_correctly(
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test that the /set-thresholds route returns correctly"""
+    mock_mongodb_handler_retrieve_one.return_value = REVIEWER_IDENTITY
+
+    res = reviewer_client.post(
+        "/set-thresholds", json={"accept": "12", "waitlist": "5"}
+    )
+
+    assert res.status_code == 200
+    mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
+        Collection.SETTINGS,
+        {"_id": "hacker_score_thresholds"},
+        {"$set": {"accept": 12, "waitlist": 5}},
+        upsert=True,
+    )
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+def test_set_thresholds_with_empty_string_correctly(
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test that the /set-thresholds route returns correctly"""
+    mock_mongodb_handler_retrieve_one.return_value = REVIEWER_IDENTITY
+
+    res = reviewer_client.post("/set-thresholds", json={"accept": "12", "waitlist": ""})
+
+    assert res.status_code == 200
+    mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
+        Collection.SETTINGS,
+        {"_id": "hacker_score_thresholds"},
+        {"$set": {"accept": 12}},
+        upsert=True,
+    )

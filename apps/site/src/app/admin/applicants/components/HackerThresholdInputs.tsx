@@ -12,6 +12,7 @@ import useHackerThresholds from "@/lib/admin/useHackerThresholds";
 
 function HackerThresholdInputs() {
 	const { thresholds } = useHackerThresholds();
+
 	const [acceptValue, setAcceptValue] = useState("");
 	const [waitlistValue, setWaitlistValue] = useState("");
 
@@ -73,7 +74,11 @@ function HackerThresholdInputs() {
 			<Button variant="primary" onClick={submitThresholds}>
 				Update Thresholds
 			</Button>
-			{status ? <Box variant="awsui-key-label">{status}</Box> : null}
+			{status ? (
+				<Box variant="awsui-key-label" color="text-status-warning">
+					{status}
+				</Box>
+			) : null}
 		</SpaceBetween>
 	);
 }

@@ -18,14 +18,14 @@ const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 	const [focusedQuestion, setFocusedQuestion] = useState<null | FAQ>(null);
 
 	return (
-		<div className="flex flex-1 justify-center lg:h-auto mt-16 lg:mt-8 mb-[-250px] lg:mb-0">
+		<div className="hidden lg:flex flex-1 justify-center lg:h-auto mt-16 lg:mt-8 mb-[-250px] lg:mb-0">
 			{/* Desktop View */}
 			<Image
 				src={SpeechDesktop}
 				alt="Dialogue box background"
-				className="hidden lg:block h-fit lg:max-w-[630px] lg:h-[310px] xl:max-w-[775px] xl:h-[350px]"
+				className="lg:block h-fit lg:max-w-[630px] lg:h-[310px] xl:max-w-[775px] xl:h-[350px]"
 			/>
-			<div className="hidden lg:block absolute lg:w-[555px] xl:w-[685px] lg:text-[.85rem] xl:text-[1rem] mt-3">
+			<div className="lg:block absolute lg:w-[555px] xl:w-[685px] lg:text-[.85rem] xl:text-[1rem] mt-3">
 				{/* Page 1 focused */}
 				<div
 					className={`absolute w-full ${

@@ -36,7 +36,7 @@ const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 								inverted
 							/>
 
-							<p className="ms-2">{focusedQuestion?.answer}</p>
+							<div className="ms-2">{focusedQuestion?.answer}</div>
 						</div>
 
 						<div className="absolute bottom-0">

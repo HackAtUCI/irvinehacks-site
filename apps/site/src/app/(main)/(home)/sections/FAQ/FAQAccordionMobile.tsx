@@ -40,7 +40,7 @@ const FAQAccordionMobile: React.FC<FAQAccordion> = ({ faq }) => {
 						inverted
 					/>
 
-					<p>{focusedQuestion?.answer}</p>
+					{focusedQuestion?.answer}
 
 					<div className="-bottom-2 sm:bottom-0 absolute">
 						<ListItemButton

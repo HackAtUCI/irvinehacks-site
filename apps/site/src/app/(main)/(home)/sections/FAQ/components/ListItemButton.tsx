@@ -17,7 +17,7 @@ export default function ListItemButton({
 		<button
 			type="button"
 			onClick={onClick}
-			className={`flex items-center gap-3 duration-200 p-[5px] lg:p-[4px] xl:p-[4px] group ${
+			className={`flex items-center gap-3 duration-300 p-[5px] lg:p-[4px] xl:p-[4px] group ${
 				inverted ? "bg-white" : "hover:bg-white"
 			} ${className}`}
 		>

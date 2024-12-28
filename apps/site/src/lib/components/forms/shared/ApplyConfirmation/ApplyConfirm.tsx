@@ -32,7 +32,7 @@ export default async function ApplyConfirm({
 			  : ""; // eslint-disable-line
 
 	return (
-		<div className="flex items-center py-16">
+		<div className="flex items-center pt-24 pb-16">
 			<ConfirmationDetails
 				isLoggedIn={identity.uid !== null}
 				applicationURL={applicationURL}

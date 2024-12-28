@@ -1,11 +1,11 @@
 import { Decision } from "./userRecord";
 
 /** For use in nonhacker applicant reviews.*/
-const acceptScore = "100";
-const waitlistScore = "-1";
-const rejectScore = "0";
+const acceptScore = 100;
+const waitlistScore = -2;
+const rejectScore = 0;
 
-export const decisionsToScores: Record<Decision, string> = {
+export const decisionsToScores: Record<Decision, number> = {
 	[Decision.accepted]: acceptScore,
 	[Decision.waitlisted]: waitlistScore,
 	[Decision.rejected]: rejectScore,

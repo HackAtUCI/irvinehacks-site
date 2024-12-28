@@ -19,10 +19,10 @@ def include_review_decision(applicant_record: dict[str, Any]) -> None:
     applicant_record["decision"] = reviews[-1][2] if reviews else None
 
 
-def get_num_unique_reviewers(applicant_record: dict[str, Any]) -> int:
+def get_unique_reviewers(applicant_record: dict[str, Any]) -> set[str]:
     reviews = applicant_record["application_data"]["reviews"]
     unique_reviewers = {t[1] for t in reviews}
-    return len(unique_reviewers)
+    return unique_reviewers
 
 
 def _get_last_score(reviewer: str, reviews: list[tuple[str, str, float]]) -> float:
@@ -55,8 +55,7 @@ def _include_decision_based_on_threshold(
 
 
 def _include_reviewers(applicant_record: dict[str, Any]) -> None:
-    reviews = applicant_record["application_data"]["reviews"]
-    unique_reviewers = {t[1].split(".")[-1] for t in reviews}
+    unique_reviewers = get_unique_reviewers(applicant_record)
     applicant_record["reviewers"] = sorted(list(unique_reviewers))
 
 

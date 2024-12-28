@@ -53,7 +53,7 @@ class HackerApplicantSummary(BaseRecord):
     application_data: ApplicationDataSummary
 
 
-class ReviewRequestModel(BaseModel):
+class ReviewRequest(BaseModel):
     applicant: str
     score: float
 
@@ -152,19 +152,14 @@ async def applicant_summary() -> dict[ApplicantStatus, int]:
 
 @router.post("/review")
 async def submit_review(
-    applicant_review: ReviewRequestModel,
+    applicant_review: ReviewRequest,
     reviewer: User = Depends(require_role({Role.REVIEWER})),
 ) -> None:
     """Submit a review decision from the reviewer for the given hacker applicant."""
     log.info("%s reviewed hacker %s", reviewer, applicant_review.applicant)
 
     review: Review = (utc_now(), reviewer.uid, applicant_review.score)
-
-    await _try_update_applicant_with_query(
-        applicant_review,
-        query={"$push": {"application_data.reviews": review}},
-        err_msg=f"{reviewer} could not submit review for {applicant_review.applicant}",
-    )
+    app = applicant_review.applicant
 
     applicant_record = await mongodb_handler.retrieve_one(
         Collection.USERS,
@@ -176,23 +171,44 @@ async def submit_review(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     if Role.HACKER in applicant_record["roles"]:
-        num_reviewers = applicant_review_processor.get_num_unique_reviewers(
+        unique_reviewers = applicant_review_processor.get_unique_reviewers(
             applicant_record
         )
 
+        update_query: dict[str, object] = {}
+
+        # Only add a review if there are either less than 2 reviewers
+        # or reviewer is one of the reviewers
+        if len(unique_reviewers) < 2 or str(reviewer) in unique_reviewers:
+            update_query.update({"$push": {"application_data.reviews": review}})
+        else:
+            log.error(
+                "%s tried submitting a review, but %s already has two reviewers",
+                reviewer,
+                app,
+            )
+            raise HTTPException(status.HTTP_403_FORBIDDEN)
+
         # Because reviewing a hacker requires 2 reviewers, only set the
         # applicant's status to REVIEWED if there are at least 2 reviewers
-        if num_reviewers >= 2:
+        if len(unique_reviewers) >= 2:
+            update_query.update({"$set": {"status": "REVIEWED"}})
+
+        if update_query:
             await _try_update_applicant_with_query(
                 applicant_review,
-                query={"$set": {"status": "REVIEWED"}},
-                err_msg=f"Could not update status for {applicant_review.applicant}",
+                update_query=update_query,
+                err_msg=f"{reviewer} could not submit review for {app}",
             )
+
     else:
         await _try_update_applicant_with_query(
             applicant_review,
-            query={"$set": {"status": "REVIEWED"}},
-            err_msg=f"Could not update status for {applicant_review.applicant}",
+            update_query={
+                "$push": {"application_data.reviews": review},
+                "$set": {"status": "REVIEWED"},
+            },
+            err_msg=f"{reviewer} could not submit review for {app}",
         )
 
 
@@ -443,16 +459,16 @@ async def _retrieve_thresholds() -> Optional[dict[str, Any]]:
 
 
 async def _try_update_applicant_with_query(
-    applicant_review: ReviewRequestModel,
+    applicant_review: ReviewRequest,
     *,
-    query: Mapping[str, object],
+    update_query: Mapping[str, object],
     err_msg: str = "",
 ) -> None:
     try:
         await mongodb_handler.raw_update_one(
             Collection.USERS,
             {"_id": applicant_review.applicant},
-            query,
+            update_query,
         )
     except RuntimeError:
         log.error(err_msg)

@@ -46,7 +46,7 @@ def test_can_include_reviewers_from_reviews() -> None:
         },
     }
 
-    expected_reviewers = ["alicia", "alicia2"]
+    expected_reviewers = ["edu.uci.alicia", "edu.uci.alicia2"]
 
     applicant_review_processor._include_reviewers(record)
     assert record["reviewers"] == expected_reviewers

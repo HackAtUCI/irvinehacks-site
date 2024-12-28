@@ -50,7 +50,7 @@ function useApplicant(uid: Uid) {
 		[string, Uid]
 	>(["/api/admin/applicant/", uid], fetcher);
 
-	async function submitReview(uid: Uid, score: string) {
+	async function submitReview(uid: Uid, score: string | number) {
 		await axios.post("/api/admin/review", { applicant: uid, score: score });
 		// TODO: provide success status to display in alert
 		mutate();
@@ -64,6 +64,6 @@ function useApplicant(uid: Uid) {
 	};
 }
 
-export type submitReview = (uid: Uid, score: string) => Promise<void>;
+export type submitReview = (uid: Uid, score: string | number) => Promise<void>;
 
 export default useApplicant;

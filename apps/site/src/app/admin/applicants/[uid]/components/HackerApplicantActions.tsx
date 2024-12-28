@@ -1,11 +1,10 @@
 import { useContext, useState } from "react";
 
-import {
-	Box,
-	Button,
-	Input,
-	SpaceBetween,
-} from "@cloudscape-design/components";
+import Box from "@cloudscape-design/components/box";
+import Button from "@cloudscape-design/components/button";
+import Input from "@cloudscape-design/components/input";
+import SpaceBetween from "@cloudscape-design/components/space-between";
+
 import {
 	Review,
 	submitReview,
@@ -82,7 +81,7 @@ function HackerApplicantActions({
 				submitted reviews.
 			</Box>
 			<Box variant="awsui-key-label" color="text-status-info">
-				Log in as one of them to submit a review.
+				Contact Rosalind, Nicole, or Albert if you think this is an error.
 			</Box>
 		</SpaceBetween>
 	);

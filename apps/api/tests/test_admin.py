@@ -140,12 +140,19 @@ def test_can_submit_nonhacker_review(
     res = reviewer_client.post("/review", json=post_data)
 
     assert res.status_code == 200
-    assert mock_mongodb_handler_raw_update_one.await_count == 2
+    mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
+        Collection.USERS,
+        {"_id": "edu.uci.sydnee"},
+        {
+            "$push": {"application_data.reviews": (ANY, "edu.uci.alicia", 0)},
+            "$set": {"status": "REVIEWED"},
+        },
+    )
 
 
 @patch("services.mongodb_handler.raw_update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
-def test_submit_hacker_review_works(
+def test_submit_hacker_review_with_one_reviewer_works(
     mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_mongodb_handler_raw_update_one: AsyncMock,
 ) -> None:
@@ -173,19 +180,83 @@ def test_submit_hacker_review_works(
     res = reviewer_client.post("/review", json=post_data)
 
     assert res.status_code == 200
-    assert mock_mongodb_handler_raw_update_one.await_count == 1
-
-    # Simulate 2 reviewers
-    # Should make raw_update_one run at very end of /review function
-    returned_record["application_data"]["reviews"].append(
-        [datetime(2023, 1, 19), "edu.uci.alicia2", 200]
+    mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
+        Collection.USERS,
+        {"_id": "edu.uci.sydnee"},
+        {
+            "$push": {"application_data.reviews": (ANY, "edu.uci.alicia", 0)},
+        },
     )
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_submit_hacker_review_with_two_reviewers_works(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+
+    returned_record: dict[str, Any] = {
+        "_id": "edu.uci.sydnee",
+        "roles": ["Applicant", "Hacker"],
+        "application_data": {
+            "reviews": [
+                [datetime(2023, 1, 19), "edu.uci.alicia", 100],
+                [datetime(2023, 1, 19), "edu.uci.alicia2", 100],
+            ]
+        },
+    }
+
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        REVIEWER_IDENTITY,
+        returned_record,
+    ]
+    mock_mongodb_handler_raw_update_one.return_value = True
+
     res = reviewer_client.post(
         "/review", json={"applicant": "edu.uci.sydnee", "score": 0}
     )
 
     assert res.status_code == 200
-    assert mock_mongodb_handler_raw_update_one.await_count == 3
+    mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
+        Collection.USERS,
+        {"_id": "edu.uci.sydnee"},
+        {
+            "$push": {"application_data.reviews": (ANY, "edu.uci.alicia", 0)},
+            "$set": {"status": "REVIEWED"},
+        },
+    )
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_submit_hacker_review_with_three_reviewers_fails(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+
+    returned_record: dict[str, Any] = {
+        "_id": "edu.uci.sydnee",
+        "roles": ["Applicant", "Hacker"],
+        "application_data": {
+            "reviews": [
+                [datetime(2023, 1, 19), "edu.uci.alicia3", 100],
+                [datetime(2023, 1, 19), "edu.uci.alicia2", 100],
+            ]
+        },
+    }
+
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        REVIEWER_IDENTITY,
+        returned_record,
+    ]
+    mock_mongodb_handler_raw_update_one.return_value = True
+
+    res = reviewer_client.post(
+        "/review", json={"applicant": "edu.uci.sydnee", "score": 0}
+    )
+
+    assert res.status_code == 403
 
 
 @patch("services.mongodb_handler.update", autospec=True)
@@ -326,7 +397,7 @@ def test_hacker_applicants_returns_correct_applicants(
             "status": "REVIEWED",
             "decision": "ACCEPTED",
             "avg_score": 150,
-            "reviewers": ["alicia", "alicia2"],
+            "reviewers": ["edu.uci.alicia", "edu.uci.alicia2"],
             "application_data": {
                 "school": "Hamburger University",
                 "submission_time": "2023-01-12T09:00:00",

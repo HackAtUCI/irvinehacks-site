@@ -175,20 +175,22 @@ async def submit_review(
 @router.post("/set-thresholds")
 async def set_hacker_score_thresholds(
     user: Annotated[User, Depends(require_manager)],
-    accept: str = Body(),
-    waitlist: str = Body(),
+    accept: float = Body(),
+    waitlist: float = Body(),
 ) -> None:
     """
-    Sets accepted, waitlisted, and implicitly rejected score thresholds.
-    Then updates all Hacker application decisions based on those thresholds
+    Sets accepted and waitlisted score thresholds.
+    Any score under waitlisted is considered rejected.
     """
     log.info("%s changed thresholds: Accept-%f | Waitlist-%f", user, accept, waitlist)
 
+    # negative numbers should not be received, but -1 in this case
+    # means there is no update to the respective threshold
     update_query = {}
-    if accept:
-        update_query["accept"] = float(accept)
-    if waitlist:
-        update_query["waitlist"] = float(waitlist)
+    if accept != -1:
+        update_query["accept"] = accept
+    if waitlist != -1:
+        update_query["waitlist"] = waitlist
 
     try:
         await mongodb_handler.raw_update_one(

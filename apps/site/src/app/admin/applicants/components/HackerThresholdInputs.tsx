@@ -19,10 +19,13 @@ function HackerThresholdInputs() {
 	const [status, setStatus] = useState("");
 
 	async function submitThresholds() {
+		const sentAcceptValue = acceptValue ? acceptValue : -1;
+		const sentWaitlistValue = waitlistValue ? waitlistValue : -1;
+
 		await axios
 			.post("/api/admin/set-thresholds", {
-				accept: acceptValue,
-				waitlist: waitlistValue,
+				accept: sentAcceptValue,
+				waitlist: sentWaitlistValue,
 			})
 			.then((response) => {
 				// TODO: Add flashbar or modal to show post status

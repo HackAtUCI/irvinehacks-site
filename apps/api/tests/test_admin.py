@@ -327,10 +327,12 @@ def test_set_thresholds_with_empty_string_correctly(
     mock_mongodb_handler_raw_update_one: AsyncMock,
     mock_mongodb_handler_retrieve_one: AsyncMock,
 ) -> None:
-    """Test that the /set-thresholds route returns correctly"""
+    """Test that the /set-thresholds route returns correctly with -1"""
     mock_mongodb_handler_retrieve_one.return_value = REVIEWER_IDENTITY
 
-    res = reviewer_client.post("/set-thresholds", json={"accept": "12", "waitlist": ""})
+    res = reviewer_client.post(
+        "/set-thresholds", json={"accept": "12", "waitlist": "-1"}
+    )
 
     assert res.status_code == 200
     mock_mongodb_handler_raw_update_one.assert_awaited_once_with(

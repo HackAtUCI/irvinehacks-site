@@ -52,6 +52,12 @@ function HackerApplicantActions({
 		return null;
 	}
 
+	const handleClick = () => {
+		// TODO: use flashbar or modal for submit status
+		submitReview(applicant, parseFloat(value));
+		setValue("");
+	};
+
 	return canReview ? (
 		<SpaceBetween direction="horizontal" size="xs">
 			<Input
@@ -63,13 +69,7 @@ function HackerApplicantActions({
 				step={0.5}
 				disabled={!canReview}
 			/>
-			<Button
-				onClick={() => {
-					submitReview(applicant, value);
-					setValue("");
-				}}
-				disabled={!canReview}
-			>
+			<Button onClick={handleClick} disabled={!canReview}>
 				Submit
 			</Button>
 		</SpaceBetween>

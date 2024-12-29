@@ -132,10 +132,8 @@ def test_can_submit_nonhacker_review(
     mock_mongodb_handler_retrieve_one.side_effect = [
         REVIEWER_IDENTITY,
         returned_record,
-        REVIEWER_IDENTITY,
-        returned_record,
     ]
-    mock_mongodb_handler_raw_update_one.side_effect = [True, True, True]
+    mock_mongodb_handler_raw_update_one.return_value = True
 
     res = reviewer_client.post("/review", json=post_data)
 
@@ -164,18 +162,13 @@ def test_submit_hacker_review_with_one_reviewer_works(
         "roles": ["Applicant", "Hacker"],
         "application_data": {
             "reviews": [
-                [datetime(2023, 1, 19), "edu.uci.alicia", 100],
+                [datetime(2023, 1, 19), "edu.uci.alicia2", 100],
             ]
         },
     }
 
-    mock_mongodb_handler_retrieve_one.side_effect = [
-        REVIEWER_IDENTITY,
-        returned_record,
-        REVIEWER_IDENTITY,
-        returned_record,
-    ]
-    mock_mongodb_handler_raw_update_one.side_effect = [True, True, True]
+    mock_mongodb_handler_retrieve_one.side_effect = [REVIEWER_IDENTITY, returned_record]
+    mock_mongodb_handler_raw_update_one.return_value = True
 
     res = reviewer_client.post("/review", json=post_data)
 
@@ -185,6 +178,7 @@ def test_submit_hacker_review_with_one_reviewer_works(
         {"_id": "edu.uci.sydnee"},
         {
             "$push": {"application_data.reviews": (ANY, "edu.uci.alicia", 0)},
+            "$set": {"status": "REVIEWED"},
         },
     )
 
@@ -195,7 +189,7 @@ def test_submit_hacker_review_with_two_reviewers_works(
     mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_mongodb_handler_raw_update_one: AsyncMock,
 ) -> None:
-
+    """Test that a user can submit a hacker applicant review with 2 reviewers."""
     returned_record: dict[str, Any] = {
         "_id": "edu.uci.sydnee",
         "roles": ["Applicant", "Hacker"],
@@ -234,7 +228,7 @@ def test_submit_hacker_review_with_three_reviewers_fails(
     mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_mongodb_handler_raw_update_one: AsyncMock,
 ) -> None:
-
+    """Test that a hacker applicant review with 3 reviewers fails."""
     returned_record: dict[str, Any] = {
         "_id": "edu.uci.sydnee",
         "roles": ["Applicant", "Hacker"],

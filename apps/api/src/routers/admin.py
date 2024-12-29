@@ -175,31 +175,29 @@ async def submit_review(
             applicant_record
         )
 
-        update_query: dict[str, object] = {}
-
         # Only add a review if there are either less than 2 reviewers
         # or reviewer is one of the reviewers
-        if len(unique_reviewers) < 2 or str(reviewer) in unique_reviewers:
-            update_query.update({"$push": {"application_data.reviews": review}})
-        else:
+        if len(unique_reviewers) >= 2 and reviewer.uid not in unique_reviewers:
             log.error(
-                "%s tried submitting a review, but %s already has two reviewers",
+                "%s tried to submit a review, but %s already has two reviewers",
                 reviewer,
                 app,
             )
             raise HTTPException(status.HTTP_403_FORBIDDEN)
 
+        update_query: dict[str, object] = {
+            "$push": {"application_data.reviews": review}
+        }
         # Because reviewing a hacker requires 2 reviewers, only set the
         # applicant's status to REVIEWED if there are at least 2 reviewers
-        if len(unique_reviewers) >= 2:
+        if len(unique_reviewers | {reviewer.uid}) >= 2:
             update_query.update({"$set": {"status": "REVIEWED"}})
 
-        if update_query:
-            await _try_update_applicant_with_query(
-                applicant_review,
-                update_query=update_query,
-                err_msg=f"{reviewer} could not submit review for {app}",
-            )
+        await _try_update_applicant_with_query(
+            applicant_review,
+            update_query=update_query,
+            err_msg=f"{reviewer} could not submit review for {app}",
+        )
 
     else:
         await _try_update_applicant_with_query(

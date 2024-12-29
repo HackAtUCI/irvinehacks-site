@@ -1,7 +1,10 @@
 import ColumnLayout from "@cloudscape-design/components/column-layout";
 import TextContent from "@cloudscape-design/components/text-content";
 
-import { ApplicationData, ApplicationQuestion } from "@/lib/admin/useApplicant";
+import {
+	ApplicationData,
+	ApplicationQuestion,
+} from "@/app/admin/applicants/hackers/useApplicant";
 
 interface ApplicationResponseProps {
 	value: string | boolean | string[] | null;

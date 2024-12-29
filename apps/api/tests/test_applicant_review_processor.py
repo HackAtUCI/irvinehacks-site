@@ -33,7 +33,7 @@ def test_can_include_decision_from_reviews() -> None:
     assert record["decision"] == "ACCEPTED"
 
 
-def test_can_include_num_reviewers_from_reviews() -> None:
+def test_can_include_reviewers_from_reviews() -> None:
     """Test that the number of reviewers are added to an applicant with reviews."""
     record: dict[str, Any] = {
         "_id": "edu.uci.sydnee",
@@ -46,8 +46,10 @@ def test_can_include_num_reviewers_from_reviews() -> None:
         },
     }
 
-    applicant_review_processor._include_num_reviewers(record)
-    assert record["num_reviewers"] == 2
+    expected_reviewers = ["edu.uci.alicia", "edu.uci.alicia2"]
+
+    applicant_review_processor._include_reviewers(record)
+    assert record["reviewers"] == expected_reviewers
 
 
 def test_can_include_avg_score_from_reviews() -> None:

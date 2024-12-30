@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Image, { StaticImageData } from "next/image";
+import Image from "next/image";
 import box from "@/assets/images/center_chat_box.svg";
 import boxBG from "@/assets/images/center_chat_box_bg.svg";
 import Link from "next/link";
@@ -16,7 +16,7 @@ export const InfiniteMovingCards = ({
 		quote: string;
 		name: string;
 		title: string;
-		image: StaticImageData;
+		image: string;
 		link: string;
 	}[];
 	direction?: "left" | "right";
@@ -34,14 +34,12 @@ export const InfiniteMovingCards = ({
 		// Clone items multiple times to ensure smooth infinite scroll
 		const scrollerContent = Array.from(scrollerRef.current.children);
 		// Clone enough times to ensure continuous scroll
-		for (let i = 0; i < 2; i++) {
-			scrollerContent.forEach((item) => {
-				const duplicatedItem = item.cloneNode(true);
-				if (scrollerRef.current) {
-					scrollerRef.current.appendChild(duplicatedItem);
-				}
-			});
-		}
+		scrollerContent.forEach((item) => {
+			const duplicatedItem = item.cloneNode(true);
+			if (scrollerRef.current) {
+				scrollerRef.current.appendChild(duplicatedItem);
+			}
+		});
 
 		const observer = new IntersectionObserver(
 			(entries) => {
@@ -62,7 +60,7 @@ export const InfiniteMovingCards = ({
 	}, [items]);
 
 	const duration =
-		speed === "fast" ? "30s" : speed === "normal" ? "45s" : "50s";
+		speed === "fast" ? "30s" : speed === "normal" ? "45s" : "270s";
 
 	return (
 		<div

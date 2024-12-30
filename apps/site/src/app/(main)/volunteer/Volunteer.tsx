@@ -6,7 +6,7 @@ export const revalidate = 60;
 export default async function Volunteer({
 	searchParams,
 }: {
-	searchParams?: {
+	searchParams: {
 		prefaceAccepted?: string;
 	};
 }) {

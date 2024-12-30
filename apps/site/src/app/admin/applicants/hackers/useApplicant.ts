@@ -1,9 +1,9 @@
 import axios from "axios";
 import useSWR from "swr";
 
-import { Decision, ParticipantRole, Status, Uid } from "@/lib/userRecord";
+import { ParticipantRole, Status, Uid, Score } from "@/lib/userRecord";
 
-export type Review = [string, Uid, Decision];
+export type Review = [string, Uid, Score];
 
 // The application responses submitted by an applicant
 export interface ApplicationData {
@@ -50,15 +50,20 @@ function useApplicant(uid: Uid) {
 		[string, Uid]
 	>(["/api/admin/applicant/", uid], fetcher);
 
-	async function submitReview(uid: Uid, review: Decision) {
-		await axios.post("/api/admin/review", { applicant: uid, decision: review });
+	async function submitReview(uid: Uid, score: number) {
+		await axios.post("/api/admin/review", { applicant: uid, score: score });
 		// TODO: provide success status to display in alert
 		mutate();
 	}
 
-	return { applicant: data, loading: isLoading, error, submitReview };
+	return {
+		applicant: data,
+		loading: isLoading,
+		error,
+		submitReview,
+	};
 }
 
-export type submitReview = (uid: Uid, review: Decision) => Promise<void>;
+export type submitReview = (uid: Uid, score: number) => Promise<void>;
 
 export default useApplicant;

@@ -1,7 +1,7 @@
 import asyncio
 from datetime import datetime
 from logging import getLogger
-from typing import Annotated, Any, Optional, Sequence
+from typing import Annotated, Any, Mapping, Optional, Sequence
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, TypeAdapter, ValidationError
@@ -11,7 +11,7 @@ from admin import applicant_review_processor
 from admin.participant_manager import Participant
 from auth.authorization import require_role
 from auth.user_identity import User, utc_now
-from models.ApplicationData import Decision, OtherReview
+from models.ApplicationData import Decision, Review
 from models.user_record import Applicant, ApplicantStatus, Role, Status
 from services import mongodb_handler, sendgrid_handler
 from services.mongodb_handler import BaseRecord, Collection
@@ -48,9 +48,14 @@ class HackerApplicantSummary(BaseRecord):
     last_name: str
     status: str
     decision: Optional[Decision] = None
-    num_reviewers: int
+    reviewers: list[str] = []
     avg_score: float
     application_data: ApplicationDataSummary
+
+
+class ReviewRequest(BaseModel):
+    applicant: str
+    score: float
 
 
 @router.get("/applicants")
@@ -104,9 +109,7 @@ async def hacker_applicants(
         ],
     )
 
-    thresholds: Optional[dict[str, float]] = await mongodb_handler.retrieve_one(
-        Collection.SETTINGS, {"_id": "hacker_score_thresholds"}, ["accept", "waitlist"]
-    )
+    thresholds: Optional[dict[str, float]] = await _retrieve_thresholds()
 
     if not thresholds:
         log.error("Could not retrieve thresholds")
@@ -149,27 +152,62 @@ async def applicant_summary() -> dict[ApplicantStatus, int]:
 
 @router.post("/review")
 async def submit_review(
-    applicant: str = Body(),
-    decision: Decision = Body(),
+    applicant_review: ReviewRequest,
     reviewer: User = Depends(require_role({Role.REVIEWER})),
 ) -> None:
-    """Submit a review decision from the reviewer for the given applicant."""
-    log.info("%s reviewed applicant %s", reviewer, applicant)
+    """Submit a review decision from the reviewer for the given hacker applicant."""
+    log.info("%s reviewed hacker %s", reviewer, applicant_review.applicant)
 
-    review: OtherReview = (utc_now(), reviewer.uid, decision)
+    review: Review = (utc_now(), reviewer.uid, applicant_review.score)
+    app = applicant_review.applicant
 
-    try:
-        await mongodb_handler.raw_update_one(
-            Collection.USERS,
-            {"_id": applicant},
-            {
+    applicant_record = await mongodb_handler.retrieve_one(
+        Collection.USERS,
+        {"_id": applicant_review.applicant},
+        ["_id", "application_data.reviews", "roles"],
+    )
+    if not applicant_record:
+        log.error("Could not retrieve applicant after submitting review")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    if Role.HACKER in applicant_record["roles"]:
+        unique_reviewers = applicant_review_processor.get_unique_reviewers(
+            applicant_record
+        )
+
+        # Only add a review if there are either less than 2 reviewers
+        # or reviewer is one of the reviewers
+        if len(unique_reviewers) >= 2 and reviewer.uid not in unique_reviewers:
+            log.error(
+                "%s tried to submit a review, but %s already has two reviewers",
+                reviewer,
+                app,
+            )
+            raise HTTPException(status.HTTP_403_FORBIDDEN)
+
+        update_query: dict[str, object] = {
+            "$push": {"application_data.reviews": review}
+        }
+        # Because reviewing a hacker requires 2 reviewers, only set the
+        # applicant's status to REVIEWED if there are at least 2 reviewers
+        if len(unique_reviewers | {reviewer.uid}) >= 2:
+            update_query.update({"$set": {"status": "REVIEWED"}})
+
+        await _try_update_applicant_with_query(
+            applicant_review,
+            update_query=update_query,
+            err_msg=f"{reviewer} could not submit review for {app}",
+        )
+
+    else:
+        await _try_update_applicant_with_query(
+            applicant_review,
+            update_query={
                 "$push": {"application_data.reviews": review},
                 "$set": {"status": "REVIEWED"},
             },
+            err_msg=f"{reviewer} could not submit review for {app}",
         )
-    except RuntimeError:
-        log.error("Could not submit review for %s", applicant)
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @router.post("/set-thresholds")
@@ -241,13 +279,31 @@ async def release_decisions() -> None:
     for record in records:
         applicant_review_processor.include_review_decision(record)
 
-    for decision in (Decision.ACCEPTED, Decision.WAITLISTED, Decision.REJECTED):
-        group = [record for record in records if record["decision"] == decision]
-        if not group:
-            continue
-        await asyncio.gather(
-            *(_process_batch(batch, decision) for batch in batched(group, 100))
+    await _process_records_in_batches(records)
+
+
+# TODO: need to make release hackers check roles as part of query
+@router.post("/release/hackers", dependencies=[Depends(require_director)])
+async def release_hacker_decisions() -> None:
+    """Update hacker applicant status based on decision and send decision emails."""
+    records = await mongodb_handler.retrieve(
+        Collection.USERS,
+        {"status": Status.REVIEWED},
+        ["_id", "application_data.reviews", "first_name"],
+    )
+
+    thresholds: Optional[dict[str, float]] = await _retrieve_thresholds()
+
+    if not thresholds:
+        log.error("Could not retrieve thresholds")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    for record in records:
+        applicant_review_processor.include_hacker_app_fields(
+            record, thresholds["accept"], thresholds["waitlist"]
         )
+
+    await _process_records_in_batches(records)
 
 
 @router.post("/rsvp-reminder", dependencies=[Depends(require_director)])
@@ -402,6 +458,16 @@ async def subevent_checkin(
     await participant_manager.subevent_checkin(event, uid, organizer)
 
 
+async def _process_records_in_batches(records: list[dict[str, object]]) -> None:
+    for decision in (Decision.ACCEPTED, Decision.WAITLISTED, Decision.REJECTED):
+        group = [record for record in records if record["decision"] == decision]
+        if not group:
+            continue
+        await asyncio.gather(
+            *(_process_batch(batch, decision) for batch in batched(group, 100))
+        )
+
+
 async def _process_status(uids: Sequence[str], status: Status) -> None:
     ok = await mongodb_handler.update(
         Collection.USERS, {"_id": {"$in": uids}}, {"status": status}
@@ -439,3 +505,26 @@ def _recover_email_from_uid(uid: str) -> str:
     local = local.replace("\n", ".")
     domain = ".".join(reversed(reversed_domain))
     return f"{local}@{domain}"
+
+
+async def _retrieve_thresholds() -> Optional[dict[str, Any]]:
+    return await mongodb_handler.retrieve_one(
+        Collection.SETTINGS, {"_id": "hacker_score_thresholds"}, ["accept", "waitlist"]
+    )
+
+
+async def _try_update_applicant_with_query(
+    applicant_review: ReviewRequest,
+    *,
+    update_query: Mapping[str, object],
+    err_msg: str = "",
+) -> None:
+    try:
+        await mongodb_handler.raw_update_one(
+            Collection.USERS,
+            {"_id": applicant_review.applicant},
+            update_query,
+        )
+    except RuntimeError:
+        log.error(err_msg)
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)

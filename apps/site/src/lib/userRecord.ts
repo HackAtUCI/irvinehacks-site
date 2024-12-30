@@ -1,11 +1,15 @@
 /** Represents a UID of a user record, just an alias for string. */
 export type Uid = string;
 
+/** Represents score for a hacker applicant, just an alias for number */
+export type Score = number;
+
 // Note: role labels should match `user_record.Role` in the API
 
 /** The possible roles of general participants. */
 export enum ParticipantRole {
 	Applicant = "Applicant",
+	Hacker = "Hacker",
 	Mentor = "Mentor",
 	Volunteer = "Volunteer",
 	Sponsor = "Sponsor",

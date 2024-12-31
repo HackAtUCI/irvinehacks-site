@@ -12,6 +12,9 @@ interface PathTitles {
 
 const pathTitles: PathTitles = {
 	applicants: "Applicants",
+	hackers: "Hacker Applications",
+	mentors: "Mentor Applications",
+	volunteers: "Volunteer Applications",
 	participants: "Participants",
 	events: "Events",
 };

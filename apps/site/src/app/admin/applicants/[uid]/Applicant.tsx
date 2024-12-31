@@ -5,11 +5,13 @@ import Header from "@cloudscape-design/components/header";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import Spinner from "@cloudscape-design/components/spinner";
 
-import useApplicant from "@/lib/admin/useApplicant";
+import useApplicant from "@/app/admin/applicants/hackers/useApplicant";
 
 import ApplicantActions from "./components/ApplicantActions";
 import ApplicantOverview from "./components/ApplicantOverview";
 import Application from "./components/Application";
+import HackerApplicantActions from "./components/HackerApplicantActions";
+import { ParticipantRole } from "@/lib/userRecord";
 
 interface ApplicantProps {
 	params: { uid: string };
@@ -28,7 +30,7 @@ function Applicant({ params }: ApplicantProps) {
 		);
 	}
 
-	const { first_name, last_name } = applicant;
+	const { first_name, last_name, application_data } = applicant;
 
 	return (
 		<ContentLayout
@@ -37,10 +39,18 @@ function Applicant({ params }: ApplicantProps) {
 					variant="h1"
 					description="Applicant"
 					actions={
-						<ApplicantActions
-							applicant={applicant._id}
-							submitReview={submitReview}
-						/>
+						applicant.roles.includes(ParticipantRole.Hacker) ? (
+							<HackerApplicantActions
+								applicant={applicant._id}
+								reviews={application_data.reviews}
+								submitReview={submitReview}
+							/>
+						) : (
+							<ApplicantActions
+								applicant={applicant._id}
+								submitReview={submitReview}
+							/>
+						)
 					}
 				>
 					{first_name} {last_name}

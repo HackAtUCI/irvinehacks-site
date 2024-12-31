@@ -1,6 +1,3 @@
-"use client";
-
-import { useSearchParams } from "next/navigation";
 import clsx from "clsx";
 
 import ValidatingForm from "@/lib/components/ValidatingForm/ValidatingForm";
@@ -11,17 +8,19 @@ import styles from "@/lib/components/ValidatingForm/ValidatingForm.module.scss";
 const VERIFICATION_PATH = "/api/guest/verify";
 const PASSPHRASE_REGEX = /\w+-\w+-\w+-\w+/;
 
-export default function GuestLoginVerificationForm() {
-	const searchParams = useSearchParams();
-	const email = searchParams.get("email");
-	const return_to = searchParams.get("return_to");
-
+export default function GuestLoginVerificationForm({
+	email,
+	return_to,
+}: {
+	email?: string;
+	return_to?: string;
+}) {
 	if (!email) {
 		return <p>Error: email was not provided</p>;
 	}
 
 	const newSearchParams = new URLSearchParams();
-	if (return_to !== null) {
+	if (return_to) {
 		newSearchParams.append("return_to", return_to);
 	}
 

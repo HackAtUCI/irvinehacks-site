@@ -17,7 +17,7 @@ const APPLICATION_SECTIONS: ApplicationSections = {
 	"Personal Information": ["pronouns", "ethnicity", "is_18_older"],
 	Education: ["school", "education_level", "major", "is_first_hackathon"],
 	Experience: ["portfolio", "linkedin", "resume_url"],
-	"Free Response Questions": ["frq_collaboration", "frq_dream_job"],
+	"Free Response Questions": ["frq_change", "frq_video_game"],
 };
 
 interface ApplicationProps {

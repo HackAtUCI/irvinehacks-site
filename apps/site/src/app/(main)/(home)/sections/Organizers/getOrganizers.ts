@@ -9,7 +9,7 @@ export const Organizer = z.object({
 	name: z.string(),
 	department: z.string(),
 	role: z.string(),
-	image: z.string().optional(),
+	image: SanityImageReference.optional(),
 	link: z.string().url().optional(),
 });
 

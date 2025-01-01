@@ -100,8 +100,9 @@ export const InfiniteMovingCards = ({
 										src={boxBG}
 										alt="Box Background"
 										fill
+										sizes="200px"
+										loading="lazy"
 										className="object-contain"
-										priority
 									/>
 								</div>
 
@@ -110,8 +111,9 @@ export const InfiniteMovingCards = ({
 									src={box}
 									alt="Box"
 									fill
+									sizes="200px"
+									loading="lazy"
 									className="object-contain"
-									priority
 								/>
 								<div className="absolute w-full h-full flex flex-col items-center justify-center gap-0">
 									<p className="text-sm font-medium text-gray-200 leading-tight">
@@ -128,15 +130,19 @@ export const InfiniteMovingCards = ({
 						<div className="relative w-16 h-20 bg-black border-2 border-white overflow-hidden transition-transform group-hover:scale-105 group-hover:bg-[#006FB2]">
 							<div
 								className="absolute inset-0 bg-black group-hover:bg-[#006FB2]"
-								style={{ transform: "skew(30deg) scale(1.2)" }}
+								style={{ transform: "skew(20deg) scale(1.2)" }}
 							>
-								<Link href={item.link} target="_blank">
+								<Link
+									href={item.link}
+									target="_blank"
+									className="relative block w-full h-full"
+								>
 									<Image
 										src={item.image}
 										alt={item.name}
 										fill
+										sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
 										className="object-cover opacity-75 group-hover:opacity-100"
-										style={{ transform: "skew(-20deg) scale(0.8)" }}
 									/>
 								</Link>
 							</div>

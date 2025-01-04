@@ -225,6 +225,63 @@ async def submit_review(
         )
 
 
+@router.post("/set-thresholds")
+async def set_hacker_score_thresholds(
+    user: Annotated[User, Depends(require_manager)],
+    accept: float = Body(),
+    waitlist: float = Body(),
+) -> None:
+    """
+    Sets accepted and waitlisted score thresholds.
+    Any score under waitlisted is considered rejected.
+    """
+    log.info("%s changed thresholds: Accept-%f | Waitlist-%f", user, accept, waitlist)
+
+    # negative numbers should not be received, but -1 in this case
+    # means there is no update to the respective threshold
+    update_query = {}
+    if accept != -1:
+        update_query["accept"] = accept
+    if waitlist != -1:
+        update_query["waitlist"] = waitlist
+
+    try:
+        await mongodb_handler.raw_update_one(
+            Collection.SETTINGS,
+            {"_id": "hacker_score_thresholds"},
+            {"$set": update_query},
+            upsert=True,
+        )
+    except RuntimeError:
+        log.error(
+            "%s could not change thresholds: Accept-%f | Waitlist-%f",
+            user,
+            accept,
+            waitlist,
+        )
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@router.get("/get-thresholds")
+async def get_hacker_score_thresholds(
+    user: Annotated[User, Depends(require_manager)]
+) -> Optional[dict[str, Any]]:
+    """
+    Gets accepted and waitlisted thresholds
+    """
+    log.info("%s requested thresholds", user)
+
+    try:
+        record = await mongodb_handler.retrieve_one(
+            Collection.SETTINGS,
+            {"_id": "hacker_score_thresholds"},
+        )
+    except RuntimeError:
+        log.error("%s could not retrieve thresholds", user)
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+    return record
+
+
 @router.post("/release", dependencies=[Depends(require_director)])
 async def release_decisions() -> None:
     """Update applicant status based on decision and send decision emails."""

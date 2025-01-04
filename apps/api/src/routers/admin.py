@@ -1,13 +1,13 @@
 import asyncio
-from datetime import datetime
+from datetime import date, datetime
 from logging import getLogger
-from typing import Annotated, Any, Mapping, Optional, Sequence
+from typing import Annotated, Any, Literal, Mapping, Optional, Sequence
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, TypeAdapter, ValidationError
+from typing_extensions import assert_never
 
-from admin import participant_manager, summary_handler
-from admin import applicant_review_processor
+from admin import applicant_review_processor, participant_manager, summary_handler
 from admin.participant_manager import Participant
 from auth.authorization import require_role
 from auth.user_identity import User, utc_now
@@ -150,6 +150,21 @@ async def applicant_summary() -> dict[ApplicantStatus, int]:
     return await summary_handler.applicant_summary()
 
 
+@router.get(
+    "/summary/applications",
+    response_model=dict[str, object],
+    dependencies=[Depends(require_manager)],
+)
+async def applications(
+    group_by: Literal["school", "role"]
+) -> dict[str, dict[date, int]]:
+    if group_by == "school":
+        return await summary_handler.applications_by_school()
+    elif group_by == "role":
+        return await summary_handler.applications_by_role()
+    assert_never(group_by)
+
+
 @router.post("/review")
 async def submit_review(
     applicant_review: ReviewRequest,
@@ -208,6 +223,63 @@ async def submit_review(
             },
             err_msg=f"{reviewer} could not submit review for {app}",
         )
+
+
+@router.post("/set-thresholds")
+async def set_hacker_score_thresholds(
+    user: Annotated[User, Depends(require_manager)],
+    accept: float = Body(),
+    waitlist: float = Body(),
+) -> None:
+    """
+    Sets accepted and waitlisted score thresholds.
+    Any score under waitlisted is considered rejected.
+    """
+    log.info("%s changed thresholds: Accept-%f | Waitlist-%f", user, accept, waitlist)
+
+    # negative numbers should not be received, but -1 in this case
+    # means there is no update to the respective threshold
+    update_query = {}
+    if accept != -1:
+        update_query["accept"] = accept
+    if waitlist != -1:
+        update_query["waitlist"] = waitlist
+
+    try:
+        await mongodb_handler.raw_update_one(
+            Collection.SETTINGS,
+            {"_id": "hacker_score_thresholds"},
+            {"$set": update_query},
+            upsert=True,
+        )
+    except RuntimeError:
+        log.error(
+            "%s could not change thresholds: Accept-%f | Waitlist-%f",
+            user,
+            accept,
+            waitlist,
+        )
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@router.get("/get-thresholds")
+async def get_hacker_score_thresholds(
+    user: Annotated[User, Depends(require_manager)]
+) -> Optional[dict[str, Any]]:
+    """
+    Gets accepted and waitlisted thresholds
+    """
+    log.info("%s requested thresholds", user)
+
+    try:
+        record = await mongodb_handler.retrieve_one(
+            Collection.SETTINGS,
+            {"_id": "hacker_score_thresholds"},
+        )
+    except RuntimeError:
+        log.error("%s could not retrieve thresholds", user)
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+    return record
 
 
 @router.post("/release", dependencies=[Depends(require_director)])

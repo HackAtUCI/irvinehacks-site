@@ -19,6 +19,7 @@ import ApplicantStatus from "../components/ApplicantStatus";
 
 import UserContext from "@/lib/admin/UserContext";
 import { isApplicationManager } from "@/lib/admin/authorization";
+import HackerThresholdInputs from "../components/HackerThresholdInputs";
 import ApplicantReviewerIndicator from "../components/ApplicantReviewerIndicator";
 
 function HackerApplicants() {
@@ -116,7 +117,11 @@ function HackerApplicants() {
 				/>
 			}
 			empty={emptyContent}
-			header={<Header counter={counter}>Applicants</Header>}
+			header={
+				<Header counter={counter} actions={<HackerThresholdInputs />}>
+					Applicants
+				</Header>
+			}
 		/>
 	);
 }

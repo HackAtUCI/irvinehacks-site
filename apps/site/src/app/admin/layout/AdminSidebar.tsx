@@ -33,10 +33,37 @@ function AdminSidebar() {
 		});
 	}
 
+	// TODO: change access to role "Volunteer Reviewer"
+	if (isApplicationManager(roles)) {
+		navigationItems.splice(2, 0, {
+			type: "link",
+			text: "Volunteer Applications",
+			href: "/admin/applicants/volunteers",
+		});
+	}
+
+	// TODO: change access to role "Mentor Reviewer"
+	if (isApplicationManager(roles)) {
+		navigationItems.splice(2, 0, {
+			type: "link",
+			text: "Mentor Applications",
+			href: "/admin/applicants/mentors",
+		});
+	}
+
+	// TODO: change access to role "Hacker Reviewer"
+	if (isApplicationManager(roles)) {
+		navigationItems.splice(2, 0, {
+			type: "link",
+			text: "Hacker Applications",
+			href: "/admin/applicants/hackers",
+		});
+	}
+
 	return (
 		<SideNavigation
 			activeHref={pathname}
-			header={{ href: BASE_PATH, text: "IrvineHacks 2024" }}
+			header={{ href: BASE_PATH, text: "IrvineHacks 2025" }}
 			onFollow={followWithNextLink}
 			items={navigationItems}
 		/>

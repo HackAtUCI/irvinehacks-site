@@ -17,8 +17,8 @@ export interface ApplicationData {
 	is_first_hackathon: boolean;
 	portfolio: string | null;
 	linkedin: string | null;
-	frq_collaboration: string;
-	frq_dream_job: string;
+	frq_change: string;
+	frq_video_game: string;
 	resume_url: string;
 	submission_time: string;
 	reviews: Review[];

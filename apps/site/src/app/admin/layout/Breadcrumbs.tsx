@@ -12,11 +12,14 @@ interface PathTitles {
 
 const pathTitles: PathTitles = {
 	applicants: "Applicants",
+	hackers: "Hacker Applications",
+	mentors: "Mentor Applications",
+	volunteers: "Volunteer Applications",
 	participants: "Participants",
 	events: "Events",
 };
 
-const DEFAULT_ITEMS = [{ text: "IrvineHacks 2024", href: BASE_PATH }];
+const DEFAULT_ITEMS = [{ text: "IrvineHacks 2025", href: BASE_PATH }];
 
 function Breadcrumbs() {
 	const pathname = usePathname();

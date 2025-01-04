@@ -25,38 +25,41 @@ function AdminSidebar() {
 		{ type: "link", text: "Back to main site", href: "/" },
 	];
 
-	if (isApplicationManager(roles)) {
-		navigationItems.splice(1, 0, {
-			type: "link",
-			text: "Applicants",
-			href: "/admin/applicants",
-		});
-	}
+	const applicationLinks: SideNavigationProps.Link[] = [];
 
-	// TODO: change access to role "Volunteer Reviewer"
+	// TODO: change access to role "Hacker Reviewer"
 	if (isApplicationManager(roles)) {
-		navigationItems.splice(2, 0, {
+		applicationLinks.push({
 			type: "link",
-			text: "Volunteer Applications",
-			href: "/admin/applicants/volunteers",
+			text: "Hacker Applications",
+			href: "/admin/applicants/hackers",
 		});
 	}
 
 	// TODO: change access to role "Mentor Reviewer"
 	if (isApplicationManager(roles)) {
-		navigationItems.splice(2, 0, {
+		applicationLinks.push({
 			type: "link",
 			text: "Mentor Applications",
 			href: "/admin/applicants/mentors",
 		});
 	}
 
-	// TODO: change access to role "Hacker Reviewer"
+	// TODO: change access to role "Volunteer Reviewer"
 	if (isApplicationManager(roles)) {
-		navigationItems.splice(2, 0, {
+		applicationLinks.push({
 			type: "link",
-			text: "Hacker Applications",
-			href: "/admin/applicants/hackers",
+			text: "Volunteer Applications",
+			href: "/admin/applicants/volunteers",
+		});
+	}
+
+	if (isApplicationManager(roles)) {
+		navigationItems.splice(1, 0, {
+			type: "link-group",
+			text: "Applicants",
+			href: "/admin/applicants",
+			items: applicationLinks,
 		});
 	}
 

@@ -127,12 +127,12 @@ async def hacker_applicants(
 
 
 async def applicant(
-    uid: str,
-    application_type: Literal["Hacker", "Mentor", "Volunteer"]
+    uid: str, application_type: Literal["Hacker", "Mentor", "Volunteer"]
 ) -> Applicant:
     """Get record of an applicant by uid."""
     record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": uid, "roles": [Role.APPLICANT, Role(application_type)]}
+        Collection.USERS,
+        {"_id": uid, "roles": [Role.APPLICANT, Role(application_type)]},
     )
 
     if not record:
@@ -148,8 +148,24 @@ async def applicant(
 async def hacker_applicant(
     uid: str,
 ) -> Applicant:
-    """Get record of an applicant by uid."""
+    """Get record of a hacker applicant by uid."""
     return await applicant(uid, "Hacker")
+
+
+@router.get("/applicant/mentor/{uid}", dependencies=[Depends(require_manager)])
+async def mentor_applicant(
+    uid: str,
+) -> Applicant:
+    """Get record of a mentor applicant by uid."""
+    return await applicant(uid, "Mentor")
+
+
+@router.get("/applicant/volunteer/{uid}", dependencies=[Depends(require_manager)])
+async def volunteer_applicant(
+    uid: str,
+) -> Applicant:
+    """Get record of a volunteer applicant by uid."""
+    return await applicant(uid, "Volunteer")
 
 
 @router.get("/summary/applicants", dependencies=[Depends(require_manager)])

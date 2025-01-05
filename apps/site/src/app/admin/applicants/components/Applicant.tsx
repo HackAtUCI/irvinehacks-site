@@ -11,9 +11,9 @@ import useApplicant, {
 	VolunteerApplicationData,
 } from "@/lib/admin/useApplicant";
 
-import HackerApplication from "@/app/admin/applicants/hackers/HackerApplication";
-import MentorApplication from "@/app/admin/applicants/mentors/MentorApplication";
-import VolunteerApplication from "@/app/admin/applicants/volunteers/VolunteerApplication";
+import HackerApplication from "@/app/admin/applicants/hackers/components/HackerApplication";
+import MentorApplication from "@/app/admin/applicants/mentors/components/MentorApplication";
+import VolunteerApplication from "@/app/admin/applicants/volunteers/components/VolunteerApplication";
 
 import ApplicantActions from "./ApplicantActions";
 import ApplicantOverview from "./ApplicantOverview";

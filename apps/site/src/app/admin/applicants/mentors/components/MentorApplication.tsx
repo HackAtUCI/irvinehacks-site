@@ -3,7 +3,7 @@ import Header from "@cloudscape-design/components/header";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 
 import { MentorApplicationQuestion } from "@/lib/admin/useApplicant";
-import MentorApplicationSection from "@/app/admin/applicants/mentors/MentorApplicationSection";
+import MentorApplicationSection from "@/app/admin/applicants/mentors/components/MentorApplicationSection";
 
 import { MentorApplicationData } from "@/lib/admin/useApplicant";
 

@@ -14,8 +14,10 @@ import useHackerApplicants, {
 	HackerApplicantSummary,
 } from "@/lib/admin/useHackerApplicants";
 
-import ApplicantFilters, { Options } from "../components/ApplicantFilters";
-import ApplicantStatus from "../components/ApplicantStatus";
+import ApplicantFilters, {
+	Options,
+} from "@/app/admin/applicants/components/ApplicantFilters";
+import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
 
 import UserContext from "@/lib/admin/UserContext";
 import { isApplicationManager } from "@/lib/admin/authorization";

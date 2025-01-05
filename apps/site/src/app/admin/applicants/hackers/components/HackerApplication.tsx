@@ -3,7 +3,7 @@ import Header from "@cloudscape-design/components/header";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 
 import { HackerApplicationQuestion } from "@/lib/admin/useApplicant";
-import HackerApplicationSection from "@/app/admin/applicants/hackers/HackerApplicationSection";
+import HackerApplicationSection from "@/app/admin/applicants/hackers/components/HackerApplicationSection";
 
 import { HackerApplicationData } from "@/lib/admin/useApplicant";
 

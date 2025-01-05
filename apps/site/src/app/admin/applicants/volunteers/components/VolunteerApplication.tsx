@@ -3,7 +3,7 @@ import Header from "@cloudscape-design/components/header";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 
 import { VolunteerApplicationQuestion } from "@/lib/admin/useApplicant";
-import VolunteerApplicationSection from "@/app/admin/applicants/volunteers/VolunteerApplicationSection";
+import VolunteerApplicationSection from "@/app/admin/applicants/volunteers/components/VolunteerApplicationSection";
 
 import { VolunteerApplicationData } from "@/lib/admin/useApplicant";
 

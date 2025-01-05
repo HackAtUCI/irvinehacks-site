@@ -126,13 +126,13 @@ async def hacker_applicants(
         raise RuntimeError("Could not parse applicant data.")
 
 
-@router.get("/applicant/{uid}", dependencies=[Depends(require_manager)])
 async def applicant(
     uid: str,
+    application_type: Literal["Hacker", "Mentor", "Volunteer"]
 ) -> Applicant:
     """Get record of an applicant by uid."""
     record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": uid, "roles": Role.APPLICANT}
+        Collection.USERS, {"_id": uid, "roles": [Role.APPLICANT, Role(application_type)]}
     )
 
     if not record:
@@ -142,6 +142,14 @@ async def applicant(
         return Applicant.model_validate(record)
     except ValidationError:
         raise RuntimeError("Could not parse applicant data.")
+
+
+@router.get("/applicant/hacker/{uid}", dependencies=[Depends(require_manager)])
+async def hacker_applicant(
+    uid: str,
+) -> Applicant:
+    """Get record of an applicant by uid."""
+    return await applicant(uid, "Hacker")
 
 
 @router.get("/summary/applicants", dependencies=[Depends(require_manager)])

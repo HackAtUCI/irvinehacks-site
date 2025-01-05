@@ -130,7 +130,7 @@ const CardHeader = ({ _id, first_name, last_name }: HackerApplicantSummary) => {
 	const followWithNextLink = useFollowWithNextLink();
 	return (
 		<Link
-			href={`/admin/applicants/${_id}`}
+			href={`/admin/applicants/hackers/${_id}`}
 			fontSize="inherit"
 			onFollow={followWithNextLink}
 		>

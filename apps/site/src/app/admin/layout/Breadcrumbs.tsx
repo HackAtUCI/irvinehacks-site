@@ -44,7 +44,7 @@ function getBreadcrumbItems(pathname: string): BreadcrumbGroupProps.Item[] {
 			.slice("/admin/".length)
 			.split("/")
 			.reduce((partial, path) => {
-				partial += path;
+				partial += `${path}/`;
 				items.push({
 					text: pathTitles[path] || path,
 					href: partial,

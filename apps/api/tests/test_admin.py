@@ -30,7 +30,7 @@ USER_REVIEWER = NativeUser(
 
 REVIEWER_IDENTITY = {
     "_id": "edu.uci.alicia",
-    "roles": ["Organizer", "Reviewer"],
+    "roles": ["Organizer", "Hacker Reviewer"],
 }
 
 USER_DIRECTOR = NativeUser(

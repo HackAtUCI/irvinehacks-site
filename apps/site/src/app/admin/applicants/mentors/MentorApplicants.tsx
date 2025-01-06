@@ -33,7 +33,7 @@ function MentorApplicants() {
 
 	const [selectedStatuses, setSelectedStatuses] = useState<Options>([]);
 	const [selectedDecisions, setSelectedDecisions] = useState<Options>([]);
-	const { applicantList, loading } = useMentorVolunteerApplicants("mentor");
+	const { applicantList, loading } = useMentorVolunteerApplicants("mentors");
 
 	const selectedStatusValues = selectedStatuses.map(({ value }) => value);
 	const selectedDecisionValues = selectedDecisions.map(({ value }) => value);

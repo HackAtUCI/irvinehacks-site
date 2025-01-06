@@ -20,7 +20,9 @@ const fetcher = async ([url, applicationType]: [string, string]) => {
 	return res.data;
 };
 
-function useMentorVolunteerApplicants(applicationType: "mentor" | "volunteer") {
+function useMentorVolunteerApplicants(
+	applicationType: "mentors" | "volunteers",
+) {
 	const { data, error, isLoading } = useSWR<
 		ApplicantSummary[],
 		unknown,

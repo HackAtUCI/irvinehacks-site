@@ -72,16 +72,13 @@ class ReviewRequest(BaseModel):
     score: float
 
 
-@router.get("/applicants")
-async def applicants(
-    user: Annotated[User, Depends(require_manager)]
+async def mentor_volunteer_applicants(
+    application_type: Literal["Mentor", "Volunteer"]
 ) -> list[ApplicantSummary]:
-    """Get records of all applicants."""
-    log.info("%s requested applicants", user)
-
+    """Get records of all mentor and volunteer applicants."""
     records: list[dict[str, object]] = await mongodb_handler.retrieve(
         Collection.USERS,
-        {"roles": Role.APPLICANT},
+        {"roles": [Role.APPLICANT, Role(application_type)]},
         [
             "_id",
             "status",
@@ -100,6 +97,26 @@ async def applicants(
         return TypeAdapter(list[ApplicantSummary]).validate_python(records)
     except ValidationError:
         raise RuntimeError("Could not parse applicant data.")
+
+
+@router.get("/applicants/mentors")
+async def mentor_applicants(
+    user: Annotated[User, Depends(require_mentor_reviewer)]
+) -> list[ApplicantSummary]:
+    """Get records of all mentor applicants."""
+    log.info("%s requested mentor applicants", user)
+
+    return await mentor_volunteer_applicants("Mentor")
+
+
+@router.get("/applicants/volunteers")
+async def volunteer_applicants(
+    user: Annotated[User, Depends(require_volunteer_reviewer)]
+) -> list[ApplicantSummary]:
+    """Get records of all volunteer applicants."""
+    log.info("%s requested volunteer applicants", user)
+
+    return await mentor_volunteer_applicants("Volunteer")
 
 
 @router.get("/applicants/hackers")

@@ -66,7 +66,7 @@ export default async function Partners() {
 						<img
 							src={builder.image(logo).format("webp").url()}
 							alt={`${name} logo`}
-							className="max-w-full max-h-full object-contain"
+							className="h-full max-w-full max-h-full object-contain"
 						/>
 					</a>
 				))}

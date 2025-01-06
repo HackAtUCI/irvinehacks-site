@@ -86,23 +86,23 @@ export interface Applicant {
 	application_data: ApplicationData;
 }
 
-const fetcher = async ([api, uid]: [string, Uid]) => {
+const fetcher = async ([api, applicationType, uid]: [string, string, Uid]) => {
 	if (!uid) {
 		return null;
 	}
-	const res = await axios.get<Applicant>(api + uid);
+	const res = await axios.get<Applicant>(api + `${applicationType}/${uid}`);
 	return res.data;
 };
 
 function useApplicant(
 	uid: Uid,
-	application_type: "hacker" | "mentor" | "volunteer",
+	applicationType: "hacker" | "mentor" | "volunteer",
 ) {
 	const { data, error, isLoading, mutate } = useSWR<
 		Applicant | null,
 		unknown,
-		[string, Uid]
-	>([`/api/admin/applicant/${application_type}/`, uid], fetcher);
+		[string, string, Uid]
+	>(["/api/admin/applicant/", applicationType, uid], fetcher);
 
 	async function submitReview(uid: Uid, score: number) {
 		await axios.post("/api/admin/review", { applicant: uid, score: score });

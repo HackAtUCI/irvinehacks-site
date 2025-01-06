@@ -4,7 +4,7 @@ import Container from "@cloudscape-design/components/container";
 import Header from "@cloudscape-design/components/header";
 
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
-import { Applicant } from "@/app/admin/applicants/hackers/useApplicant";
+import { Applicant } from "@/lib/admin/useApplicant";
 
 import ApplicationReviews from "./ApplicationReviews";
 import { ParticipantRole } from "@/lib/userRecord";

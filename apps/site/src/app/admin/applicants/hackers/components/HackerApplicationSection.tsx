@@ -2,9 +2,9 @@ import ColumnLayout from "@cloudscape-design/components/column-layout";
 import TextContent from "@cloudscape-design/components/text-content";
 
 import {
-	ApplicationData,
-	ApplicationQuestion,
-} from "@/app/admin/applicants/hackers/useApplicant";
+	HackerApplicationData,
+	HackerApplicationQuestion,
+} from "@/lib/admin/useApplicant";
 
 interface ApplicationResponseProps {
 	value: string | boolean | string[] | null;
@@ -49,11 +49,11 @@ function ApplicationResponse({ value }: ApplicationResponseProps) {
 
 interface ApplicationSectionProps {
 	title: string;
-	data: Omit<ApplicationData, "reviews">;
-	propsToShow: ApplicationQuestion[];
+	data: Omit<HackerApplicationData, "reviews">;
+	propsToShow: HackerApplicationQuestion[];
 }
 
-function ApplicationSection({
+function HackerApplicationSection({
 	title,
 	data,
 	propsToShow,
@@ -76,4 +76,4 @@ function ApplicationSection({
 	);
 }
 
-export default ApplicationSection;
+export default HackerApplicationSection;

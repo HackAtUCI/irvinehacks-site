@@ -20,7 +20,7 @@ import ApplicantFilters, {
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
 
 import UserContext from "@/lib/admin/UserContext";
-import { isApplicationManager } from "@/lib/admin/authorization";
+import { isHackerReviewer } from "@/lib/admin/authorization";
 import HackerThresholdInputs from "../components/HackerThresholdInputs";
 import ApplicantReviewerIndicator from "../components/ApplicantReviewerIndicator";
 
@@ -29,7 +29,7 @@ function HackerApplicants() {
 
 	const { roles } = useContext(UserContext);
 
-	if (!isApplicationManager(roles)) {
+	if (!isHackerReviewer(roles)) {
 		router.push("/admin/dashboard");
 	}
 
@@ -121,7 +121,7 @@ function HackerApplicants() {
 			empty={emptyContent}
 			header={
 				<Header counter={counter} actions={<HackerThresholdInputs />}>
-					Applicants
+					Hacker Applicants
 				</Header>
 			}
 		/>

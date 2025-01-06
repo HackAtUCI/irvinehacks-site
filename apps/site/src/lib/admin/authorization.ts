@@ -3,8 +3,16 @@ import { AdminRole, Role } from "@/lib/userRecord";
 // TODO: reexamine waitlist release procedure: do check-in leads really need to be managers?
 const MANAGER_ROLES = [
 	AdminRole.Director,
-	AdminRole.Reviewer,
+	AdminRole.HackerReviewer,
+	AdminRole.MentorReviewer,
+	AdminRole.VolunteerReviewer,
 	AdminRole.CheckInLead,
+];
+
+const REVIEWER_ROLES = [
+	AdminRole.HackerReviewer,
+	AdminRole.MentorReviewer,
+	AdminRole.VolunteerReviewer,
 ];
 
 export function isApplicationManager(roles: ReadonlyArray<Role>): boolean {
@@ -23,5 +31,26 @@ export function isCheckInLead(roles: ReadonlyArray<Role>): boolean {
 }
 
 export function isReviewer(roles: ReadonlyArray<Role>): boolean {
-	return roles.includes(AdminRole.Reviewer);
+	return REVIEWER_ROLES.some((reviewerRole) => roles.includes(reviewerRole));
+}
+
+export function isHackerReviewer(roles: ReadonlyArray<Role>): boolean {
+	return (
+		roles.includes(AdminRole.Director) ||
+		roles.includes(AdminRole.HackerReviewer)
+	);
+}
+
+export function isMentorReviewer(roles: ReadonlyArray<Role>): boolean {
+	return (
+		roles.includes(AdminRole.Director) ||
+		roles.includes(AdminRole.MentorReviewer)
+	);
+}
+
+export function isVolunteerReviewer(roles: ReadonlyArray<Role>): boolean {
+	return (
+		roles.includes(AdminRole.Director) ||
+		roles.includes(AdminRole.VolunteerReviewer)
+	);
 }

@@ -106,7 +106,7 @@ const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 											setPage1Selected(true);
 										}}
 										className={
-											"w-[100px] absolute flex items-center mt-4 group hover:bg-white hover:text-black px-[3px] xl:mt-4 duration-300"
+											"w-[100px] xl:w-[105px] absolute flex items-center mt-4 group hover:bg-white hover:text-black px-[3px] xl:mt-4 duration-300"
 										}
 									>
 										<TriangleIcon className="ms-2 opacity-0 lg:w-4 lg:h-4 xl:w-5 xl:h-5" />

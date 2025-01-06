@@ -6,7 +6,7 @@ import { ParticipantRole, Status, Uid, Score } from "@/lib/userRecord";
 export type Review = [string, Uid, Score];
 
 // The application responses submitted by an applicant
-export interface HackerApplicationData {
+interface BaseApplicationData {
 	email: string;
 	pronouns: string[];
 	ethnicity: string;
@@ -14,6 +14,9 @@ export interface HackerApplicationData {
 	school: string;
 	education_level: string;
 	major: string;
+}
+
+export interface HackerApplicationData extends BaseApplicationData {
 	is_first_hackathon: boolean;
 	portfolio: string | null;
 	linkedin: string | null;
@@ -24,14 +27,7 @@ export interface HackerApplicationData {
 	reviews: Review[];
 }
 
-export interface MentorApplicationData {
-	email: string;
-	pronouns: string[];
-	ethnicity: string;
-	is_18_older: boolean;
-	school: string;
-	education_level: string;
-	major: string;
+export interface MentorApplicationData extends BaseApplicationData {
 	git_experience: string;
 	github: string | null;
 	portfolio: string | null;
@@ -47,15 +43,7 @@ export interface MentorApplicationData {
 	reviews: Review[];
 }
 
-export interface VolunteerApplicationData {
-	kind: "mentor_prev_experience_saq1";
-	email: string;
-	pronouns: string[];
-	ethnicity: string;
-	is_18_older: boolean;
-	school: string;
-	education_level: string;
-	major: string;
+export interface VolunteerApplicationData extends BaseApplicationData {
 	applied_before: boolean;
 	frq_volunteer: string;
 	frq_utensil: string;

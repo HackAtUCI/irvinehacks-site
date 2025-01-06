@@ -5,7 +5,7 @@ from models.ApplicationData import Decision
 scores_to_decisions: dict[int, Decision] = {
     100: Decision.ACCEPTED,
     -2: Decision.WAITLISTED,
-    0: Decision.REJECTED
+    0: Decision.REJECTED,
 }
 
 

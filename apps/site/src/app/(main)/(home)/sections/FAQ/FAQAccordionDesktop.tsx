@@ -49,84 +49,80 @@ const FAQAccordionDesktop: React.FC<FAQAccordion> = ({ faq }) => {
 							/>
 						</div>
 					</div>
+				) : page1Selected ? (
+					<div className="duration-300">
+						{faqGroup1.map((F) => (
+							<ListItemButton
+								key={F._key}
+								onClick={() => setFocusedQuestion(F)}
+								text={F.question}
+								inverted={false}
+								className="mb-0 py-[2px]"
+							/>
+						))}
+						<div className="flex justify-end w-full ms-3">
+							<button
+								type="button"
+								onClick={() => {
+									setPage1Selected(false);
+								}}
+								className={
+									"flex items-center opacity-100 hover:bg-white hover:text-black px-[3px] duration-300 group"
+								}
+							>
+								Page 1/2
+								<TriangleIcon className="ms-2 opacity-0 lg:w-4 lg:h-4 xl:w-5 xl:h-5" />
+								<TriangleIcon
+									className={
+										"ms-2 absolute hidden group-hover:block duration-300 right-[-7px] lg:w-4 lg:h-4 xl:w-5 xl:h-5"
+									}
+									dark
+								/>
+								<TriangleIcon
+									className={
+										"ms-2 absolute group-hover:hidden duration-300 right-[-7px] lg:w-4 lg:h-4 xl:w-5 xl:h-5"
+									}
+								/>
+							</button>
+						</div>
+					</div>
 				) : (
-					<>
-						{page1Selected ? (
-							<div className="duration-300">
-								{faqGroup1.map((F) => (
-									<ListItemButton
-										key={F._key}
-										onClick={() => setFocusedQuestion(F)}
-										text={F.question}
-										inverted={false}
-										className="mb-0 py-[2px]"
-									/>
-								))}
-								<div className="flex justify-end w-full ms-3">
-									<button
-										type="button"
-										onClick={() => {
-											setPage1Selected(false);
-										}}
-										className={
-											"flex items-center opacity-100 hover:bg-white hover:text-black px-[3px] duration-300 group"
-										}
-									>
-										Page 1/2
-										<TriangleIcon className="ms-2 opacity-0 lg:w-4 lg:h-4 xl:w-5 xl:h-5" />
-										<TriangleIcon
-											className={
-												"ms-2 absolute hidden group-hover:block duration-300 right-[-7px] lg:w-4 lg:h-4 xl:w-5 xl:h-5"
-											}
-											dark
-										/>
-										<TriangleIcon
-											className={
-												"ms-2 absolute group-hover:hidden duration-300 right-[-7px] lg:w-4 lg:h-4 xl:w-5 xl:h-5"
-											}
-										/>
-									</button>
-								</div>
-							</div>
-						) : (
-							<div className="duration-300">
-								{faqGroup2.map((F) => (
-									<ListItemButton
-										key={F._key}
-										onClick={() => setFocusedQuestion(F)}
-										text={F.question}
-										inverted={false}
-										className="mb-0 py-[2px]"
-									/>
-								))}
-								<div className="flex justify-end ms-3 w-full">
-									<button
-										type="button"
-										onClick={() => {
-											setPage1Selected(true);
-										}}
-										className={
-											"w-[100px] xl:w-[105px] absolute flex items-center mt-4 group hover:bg-white hover:text-black px-[3px] xl:mt-4 duration-300"
-										}
-									>
-										<TriangleIcon className="ms-2 opacity-0 lg:w-4 lg:h-4 xl:w-5 xl:h-5" />
-										<TriangleIcon
-											className={
-												"ms-2 absolute hidden group-hover:block duration-300 left-[-5px] rotate-180 lg:w-4 lg:h-4 xl:w-5 xl:h-5"
-											}
-											dark
-										/>
-										<TriangleIcon
-											className={
-												"ms-2 absolute group-hover:hidden duration-300 left-[-5px] rotate-180 lg:w-4 lg:h-4 xl:w-5 xl:h-5"
-											}
-										/>
-										Page 2/2
-									</button>
-								</div>
-							</div>
-						)}
-					</>
+					<div className="duration-300">
+						{faqGroup2.map((F) => (
+							<ListItemButton
+								key={F._key}
+								onClick={() => setFocusedQuestion(F)}
+								text={F.question}
+								inverted={false}
+								className="mb-0 py-[2px]"
+							/>
+						))}
+						<div className="flex justify-end ms-3 w-full">
+							<button
+								type="button"
+								onClick={() => {
+									setPage1Selected(true);
+								}}
+								className={
+									"w-[100px] xl:w-[105px] absolute flex items-center mt-4 group hover:bg-white hover:text-black px-[3px] xl:mt-4 duration-300"
+								}
+							>
+								<TriangleIcon className="ms-2 opacity-0 lg:w-4 lg:h-4 xl:w-5 xl:h-5" />
+								<TriangleIcon
+									className={
+										"ms-2 absolute hidden group-hover:block duration-300 left-[-5px] rotate-180 lg:w-4 lg:h-4 xl:w-5 xl:h-5"
+									}
+									dark
+								/>
+								<TriangleIcon
+									className={
+										"ms-2 absolute group-hover:hidden duration-300 left-[-5px] rotate-180 lg:w-4 lg:h-4 xl:w-5 xl:h-5"
+									}
+								/>
+								Page 2/2
+							</button>
+						</div>
+					</div>
 				)}
 			</div>
 		</div>

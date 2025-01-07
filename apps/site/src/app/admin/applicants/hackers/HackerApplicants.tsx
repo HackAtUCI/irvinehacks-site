@@ -8,6 +8,7 @@ import Box from "@cloudscape-design/components/box";
 import Cards from "@cloudscape-design/components/cards";
 import Header from "@cloudscape-design/components/header";
 import Link from "@cloudscape-design/components/link";
+import Pagination from "@cloudscape-design/components/pagination";
 
 import { useFollowWithNextLink } from "@/app/admin/layout/common";
 import useHackerApplicants, {
@@ -32,6 +33,8 @@ function HackerApplicants() {
 	if (!isHackerReviewer(roles)) {
 		router.push("/admin/dashboard");
 	}
+
+	const [currentPageIndex, setCurrentPageIndex] = useState(1);
 
 	const [selectedStatuses, setSelectedStatuses] = useState<Options>([]);
 	const [selectedDecisions, setSelectedDecisions] = useState<Options>([]);
@@ -120,7 +123,18 @@ function HackerApplicants() {
 			}
 			empty={emptyContent}
 			header={
-				<Header counter={counter} actions={<HackerThresholdInputs />}>
+				<Header
+					counter={counter}
+					actions={
+						<Pagination
+							currentPageIndex={currentPageIndex}
+							onChange={({ detail }) =>
+								setCurrentPageIndex(detail.currentPageIndex)
+							}
+							pagesCount={5}
+						></Pagination>
+					}
+				>
 					Hacker Applicants
 				</Header>
 			}

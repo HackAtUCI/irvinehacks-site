@@ -18,10 +18,16 @@ class Role(str, Enum):
     DIRECTOR = "Director"
     HACKER = "Hacker"
     MENTOR = "Mentor"
-    REVIEWER = "Reviewer"
+    REVIEWER = (
+        "Reviewer"  # leaving this role in for now, but might be removed down the line
+    )
+    HACKER_REVIEWER = "Hacker Reviewer"
+    MENTOR_REVIEWER = "Mentor Reviewer"
+    VOLUNTEER_REVIEWER = "Volunteer Reviewer"
     ORGANIZER = "Organizer"
     VOLUNTEER = "Volunteer"
     CHECKIN_LEAD = "Check-in Lead"
+    LEAD = "Lead"  # Applications/Mentors/Volunteer Committee Leads
     SPONSOR = "Sponsor"
     JUDGE = "Judge"
     WORKSHOP_LEAD = "Workshop Lead"

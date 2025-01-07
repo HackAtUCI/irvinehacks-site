@@ -6,7 +6,12 @@ import SideNavigation, {
 	SideNavigationProps,
 } from "@cloudscape-design/components/side-navigation";
 
-import { isApplicationManager } from "@/lib/admin/authorization";
+import {
+	isApplicationManager,
+	isHackerReviewer,
+	isMentorReviewer,
+	isVolunteerReviewer,
+} from "@/lib/admin/authorization";
 import UserContext from "@/lib/admin/UserContext";
 
 import { BASE_PATH, useFollowWithNextLink } from "./common";
@@ -27,8 +32,7 @@ function AdminSidebar() {
 
 	const applicationLinks: SideNavigationProps.Link[] = [];
 
-	// TODO: change access to role "Hacker Reviewer"
-	if (isApplicationManager(roles)) {
+	if (isHackerReviewer(roles)) {
 		applicationLinks.push({
 			type: "link",
 			text: "Hacker Applications",
@@ -36,8 +40,7 @@ function AdminSidebar() {
 		});
 	}
 
-	// TODO: change access to role "Mentor Reviewer"
-	if (isApplicationManager(roles)) {
+	if (isMentorReviewer(roles)) {
 		applicationLinks.push({
 			type: "link",
 			text: "Mentor Applications",
@@ -45,8 +48,7 @@ function AdminSidebar() {
 		});
 	}
 
-	// TODO: change access to role "Volunteer Reviewer"
-	if (isApplicationManager(roles)) {
+	if (isVolunteerReviewer(roles)) {
 		applicationLinks.push({
 			type: "link",
 			text: "Volunteer Applications",

@@ -1,6 +1,12 @@
-from typing import Any
+from typing import Any, Optional
 
 from models.ApplicationData import Decision
+
+scores_to_decisions: dict[Optional[int], Decision] = {
+    100: Decision.ACCEPTED,
+    -2: Decision.WAITLISTED,
+    0: Decision.REJECTED,
+}
 
 
 def include_hacker_app_fields(
@@ -16,7 +22,8 @@ def include_hacker_app_fields(
 def include_review_decision(applicant_record: dict[str, Any]) -> None:
     """Sets the applicant's decision as the last submitted review decision or None."""
     reviews = applicant_record["application_data"]["reviews"]
-    applicant_record["decision"] = reviews[-1][2] if reviews else None
+    score: Optional[int] = reviews[-1][2] if reviews else None
+    applicant_record["decision"] = scores_to_decisions.get(score)
 
 
 def get_unique_reviewers(applicant_record: dict[str, Any]) -> set[str]:

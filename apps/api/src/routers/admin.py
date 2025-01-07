@@ -24,7 +24,21 @@ log = getLogger(__name__)
 
 router = APIRouter()
 
-require_manager = require_role({Role.DIRECTOR, Role.REVIEWER, Role.CHECKIN_LEAD})
+require_manager = require_role(
+    {
+        Role.DIRECTOR,
+        Role.HACKER_REVIEWER,
+        Role.MENTOR_REVIEWER,
+        Role.VOLUNTEER_REVIEWER,
+        Role.CHECKIN_LEAD,
+    }
+)
+require_reviewer = require_role(
+    {Role.DIRECTOR, Role.HACKER_REVIEWER, Role.MENTOR_REVIEWER, Role.VOLUNTEER_REVIEWER}
+)
+require_hacker_reviewer = require_role({Role.DIRECTOR, Role.HACKER_REVIEWER})
+require_mentor_reviewer = require_role({Role.DIRECTOR, Role.MENTOR_REVIEWER})
+require_volunteer_reviewer = require_role({Role.DIRECTOR, Role.VOLUNTEER_REVIEWER})
 require_checkin_lead = require_role({Role.DIRECTOR, Role.CHECKIN_LEAD})
 require_director = require_role({Role.DIRECTOR})
 require_organizer = require_role({Role.ORGANIZER})
@@ -58,16 +72,13 @@ class ReviewRequest(BaseModel):
     score: float
 
 
-@router.get("/applicants")
-async def applicants(
-    user: Annotated[User, Depends(require_manager)]
+async def mentor_volunteer_applicants(
+    application_type: Literal["Mentor", "Volunteer"]
 ) -> list[ApplicantSummary]:
-    """Get records of all applicants."""
-    log.info("%s requested applicants", user)
-
+    """Get records of all mentor and volunteer applicants."""
     records: list[dict[str, object]] = await mongodb_handler.retrieve(
         Collection.USERS,
-        {"roles": Role.APPLICANT},
+        {"roles": [Role.APPLICANT, Role(application_type)]},
         [
             "_id",
             "status",
@@ -88,9 +99,29 @@ async def applicants(
         raise RuntimeError("Could not parse applicant data.")
 
 
+@router.get("/applicants/mentors")
+async def mentor_applicants(
+    user: Annotated[User, Depends(require_mentor_reviewer)]
+) -> list[ApplicantSummary]:
+    """Get records of all mentor applicants."""
+    log.info("%s requested mentor applicants", user)
+
+    return await mentor_volunteer_applicants("Mentor")
+
+
+@router.get("/applicants/volunteers")
+async def volunteer_applicants(
+    user: Annotated[User, Depends(require_volunteer_reviewer)]
+) -> list[ApplicantSummary]:
+    """Get records of all volunteer applicants."""
+    log.info("%s requested volunteer applicants", user)
+
+    return await mentor_volunteer_applicants("Volunteer")
+
+
 @router.get("/applicants/hackers")
 async def hacker_applicants(
-    user: Annotated[User, Depends(require_manager)]
+    user: Annotated[User, Depends(require_hacker_reviewer)]
 ) -> list[HackerApplicantSummary]:
     """Get records of all hacker applicants."""
     log.info("%s requested hacker applicants", user)
@@ -144,7 +175,7 @@ async def applicant(
         raise RuntimeError("Could not parse applicant data.")
 
 
-@router.get("/applicant/hacker/{uid}", dependencies=[Depends(require_manager)])
+@router.get("/applicant/hacker/{uid}", dependencies=[Depends(require_hacker_reviewer)])
 async def hacker_applicant(
     uid: str,
 ) -> Applicant:
@@ -152,7 +183,7 @@ async def hacker_applicant(
     return await applicant(uid, "Hacker")
 
 
-@router.get("/applicant/mentor/{uid}", dependencies=[Depends(require_manager)])
+@router.get("/applicant/mentor/{uid}", dependencies=[Depends(require_mentor_reviewer)])
 async def mentor_applicant(
     uid: str,
 ) -> Applicant:
@@ -160,7 +191,9 @@ async def mentor_applicant(
     return await applicant(uid, "Mentor")
 
 
-@router.get("/applicant/volunteer/{uid}", dependencies=[Depends(require_manager)])
+@router.get(
+    "/applicant/volunteer/{uid}", dependencies=[Depends(require_volunteer_reviewer)]
+)
 async def volunteer_applicant(
     uid: str,
 ) -> Applicant:
@@ -192,7 +225,7 @@ async def applications(
 @router.post("/review")
 async def submit_review(
     applicant_review: ReviewRequest,
-    reviewer: User = Depends(require_role({Role.REVIEWER})),
+    reviewer: User = Depends(require_reviewer),
 ) -> None:
     """Submit a review decision from the reviewer for the given hacker applicant."""
     log.info("%s reviewed hacker %s", reviewer, applicant_review.applicant)

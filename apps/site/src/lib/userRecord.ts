@@ -20,7 +20,11 @@ export enum ParticipantRole {
 /** The possible roles of admin users (organizers). */
 export enum AdminRole {
 	Organizer = "Organizer",
-	Reviewer = "Reviewer",
+	Reviewer = "Reviewer", // leaving this role in for now, but might be removed down the line
+	HackerReviewer = "Hacker Reviewer",
+	MentorReviewer = "Mentor Reviewer",
+	VolunteerReviewer = "Volunteer Reviewer",
+	Lead = "Lead", // Applications/Mentors/Volunteer Committee Leads
 	CheckInLead = "Check-in Lead",
 	Director = "Director",
 }

@@ -44,7 +44,6 @@ export interface MentorApplicationData extends BaseApplicationData {
 }
 
 export interface VolunteerApplicationData extends BaseApplicationData {
-	applied_before: boolean;
 	frq_volunteer: string;
 	frq_utensil: string;
 	allergies: string | null;

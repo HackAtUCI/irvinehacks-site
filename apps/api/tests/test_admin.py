@@ -28,9 +28,9 @@ USER_REVIEWER = NativeUser(
     affiliations=["student"],
 )
 
-REVIEWER_IDENTITY = {
+HACKER_REVIEWER_IDENTITY = {
     "_id": "edu.uci.alicia",
-    "roles": ["Organizer", "Reviewer"],
+    "roles": ["Organizer", "Hacker Reviewer"],
 }
 
 USER_DIRECTOR = NativeUser(
@@ -61,7 +61,7 @@ def test_restricted_admin_route_is_forbidden(
         "_id": "edu.uci.icssc",
         "roles": ["Mentor"],
     }
-    res = unauthorized_client.get("/applicants")
+    res = unauthorized_client.get("/applicants/hackers")
 
     mock_mongodb_handler_retrieve_one.assert_awaited_once()
     assert res.status_code == 403
@@ -75,7 +75,10 @@ def test_can_retrieve_applicants(
 ) -> None:
     """Test that the applicants summary can be processed."""
 
-    mock_mongodb_handler_retrieve_one.return_value = REVIEWER_IDENTITY
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        HACKER_REVIEWER_IDENTITY,
+        {"accept": 8, "waitlist": 5},
+    ]
     mock_mongodb_handler_retrieve.return_value = [
         {
             "_id": "edu.uci.petr",
@@ -85,12 +88,15 @@ def test_can_retrieve_applicants(
             "application_data": {
                 "school": "UC Irvine",
                 "submission_time": datetime(2023, 1, 12, 9, 0, 0),
-                "reviews": [[datetime(2023, 1, 18), "edu.uci.alicia", "ACCEPTED"]],
+                "reviews": [
+                    [datetime(2023, 1, 18), "edu.uci.alicia", 8],
+                    [datetime(2023, 1, 18), "edu.uci.albert", 9],
+                ],
             },
         },
     ]
 
-    res = reviewer_client.get("/applicants")
+    res = reviewer_client.get("/applicants/hackers")
 
     assert res.status_code == 200
     mock_mongodb_handler_retrieve.assert_awaited_once()
@@ -100,6 +106,8 @@ def test_can_retrieve_applicants(
             "_id": "edu.uci.petr",
             "first_name": "Peter",
             "last_name": "Anteater",
+            "avg_score": 8.5,
+            "reviewers": ["edu.uci.albert", "edu.uci.alicia"],
             "status": "REVIEWED",
             "decision": "ACCEPTED",
             "application_data": {
@@ -108,6 +116,22 @@ def test_can_retrieve_applicants(
             },
         },
     ]
+
+
+@patch("services.mongodb_handler.retrieve", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_cannot_retrieve_applicants_without_role(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_retrieve: AsyncMock,
+) -> None:
+    """Test that the applicants cannot be processed without correct reviewer role."""
+
+    mock_mongodb_handler_retrieve_one.return_value = HACKER_REVIEWER_IDENTITY
+
+    res = reviewer_client.get("/applicants/mentors")
+
+    assert res.status_code == 403
+    mock_mongodb_handler_retrieve.assert_not_awaited()
 
 
 @patch("services.mongodb_handler.raw_update_one", autospec=True)
@@ -130,7 +154,7 @@ def test_can_submit_nonhacker_review(
     }
 
     mock_mongodb_handler_retrieve_one.side_effect = [
-        REVIEWER_IDENTITY,
+        HACKER_REVIEWER_IDENTITY,
         returned_record,
     ]
     mock_mongodb_handler_raw_update_one.return_value = True
@@ -167,7 +191,10 @@ def test_submit_hacker_review_with_one_reviewer_works(
         },
     }
 
-    mock_mongodb_handler_retrieve_one.side_effect = [REVIEWER_IDENTITY, returned_record]
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        HACKER_REVIEWER_IDENTITY,
+        returned_record,
+    ]
     mock_mongodb_handler_raw_update_one.return_value = True
 
     res = reviewer_client.post("/review", json=post_data)
@@ -202,7 +229,7 @@ def test_submit_hacker_review_with_two_reviewers_works(
     }
 
     mock_mongodb_handler_retrieve_one.side_effect = [
-        REVIEWER_IDENTITY,
+        HACKER_REVIEWER_IDENTITY,
         returned_record,
     ]
     mock_mongodb_handler_raw_update_one.return_value = True
@@ -241,7 +268,7 @@ def test_submit_hacker_review_with_three_reviewers_fails(
     }
 
     mock_mongodb_handler_retrieve_one.side_effect = [
-        REVIEWER_IDENTITY,
+        HACKER_REVIEWER_IDENTITY,
         returned_record,
     ]
     mock_mongodb_handler_raw_update_one.return_value = True
@@ -403,7 +430,7 @@ def test_hacker_applicants_returns_correct_applicants(
 
     mock_mongodb_handler_retrieve.return_value = returned_records
     mock_mongodb_handler_retrieve_one.side_effect = [
-        REVIEWER_IDENTITY,
+        HACKER_REVIEWER_IDENTITY,
         returned_thresholds,
     ]
 
@@ -459,7 +486,7 @@ def test_set_thresholds_correctly(
     mock_mongodb_handler_retrieve_one: AsyncMock,
 ) -> None:
     """Test that the /set-thresholds route returns correctly"""
-    mock_mongodb_handler_retrieve_one.return_value = REVIEWER_IDENTITY
+    mock_mongodb_handler_retrieve_one.return_value = HACKER_REVIEWER_IDENTITY
 
     res = reviewer_client.post(
         "/set-thresholds", json={"accept": "12", "waitlist": "5"}
@@ -481,7 +508,7 @@ def test_set_thresholds_with_empty_string_correctly(
     mock_mongodb_handler_retrieve_one: AsyncMock,
 ) -> None:
     """Test that the /set-thresholds route returns correctly with -1"""
-    mock_mongodb_handler_retrieve_one.return_value = REVIEWER_IDENTITY
+    mock_mongodb_handler_retrieve_one.return_value = HACKER_REVIEWER_IDENTITY
 
     res = reviewer_client.post(
         "/set-thresholds", json={"accept": "12", "waitlist": "-1"}

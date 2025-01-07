@@ -8,15 +8,9 @@ import Box from "@cloudscape-design/components/box";
 import Cards from "@cloudscape-design/components/cards";
 import Header from "@cloudscape-design/components/header";
 
+import useOrganizers, { Organizer } from "@/lib/admin/useOrganizers";
 import UserContext from "@/lib/admin/UserContext";
 import { isDirector } from "@/lib/admin/authorization";
-
-interface Organizer {
-	_id: string;
-	first_name: string;
-	last_name: string;
-	roles: ReadonlyArray<string>;
-}
 
 function Directors() {
 	const router = useRouter();
@@ -27,34 +21,9 @@ function Directors() {
 		router.push("/admin/dashboard");
 	}
 
-	const items: Organizer[] = [
-		{
-			_id: "edu.uci.a",
-			first_name: "alb",
-			last_name: "wa",
-			roles: ["Organizer", "Hacker Reviewer"],
-		},
-		{
-			_id: "edu.uci.a",
-			first_name: "alb",
-			last_name: "wa",
-			roles: ["Organizer", "Hacker Reviewer"],
-		},
-		{
-			_id: "edu.uci.a",
-			first_name: "alb",
-			last_name: "wa",
-			roles: ["Organizer", "Hacker Reviewer"],
-		},
-		{
-			_id: "edu.uci.a",
-			first_name: "alb",
-			last_name: "wa",
-			roles: ["Organizer", "Hacker Reviewer"],
-		},
-	];
+	const { organizerList, loading } = useOrganizers();
 
-	const counter = `(${items.length})`;
+	const counter = `(${organizerList.length})`;
 
 	const emptyContent = (
 		<Box textAlign="center" color="inherit">
@@ -79,9 +48,9 @@ function Directors() {
 					},
 				],
 			}}
-			// loading={loading}
+			loading={loading}
 			loadingText="Loading applicants"
-			items={items}
+			items={organizerList}
 			trackBy="_id"
 			variant="full-page"
 			empty={emptyContent}

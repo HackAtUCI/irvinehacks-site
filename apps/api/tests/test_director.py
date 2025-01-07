@@ -75,7 +75,7 @@ def test_can_add_organizer(
     """Test that organizers can be added"""
     mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
 
-    res = director_client.post("/organizers", data=SAMPLE_ORGANIZER)
+    res = director_client.post("/organizers", json=SAMPLE_ORGANIZER)
 
     mock_mongodb_handler_update_one.assert_awaited_once_with(
         Collection.USERS,

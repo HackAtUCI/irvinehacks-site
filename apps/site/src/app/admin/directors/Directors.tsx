@@ -8,6 +8,7 @@ import Box from "@cloudscape-design/components/box";
 import Cards from "@cloudscape-design/components/cards";
 import Header from "@cloudscape-design/components/header";
 
+import OrganizerInput from "./OrganizerInput";
 import useOrganizers, { Organizer } from "@/lib/admin/useOrganizers";
 import UserContext from "@/lib/admin/UserContext";
 import { isDirector } from "@/lib/admin/authorization";
@@ -54,7 +55,11 @@ function Directors() {
 			trackBy="_id"
 			variant="full-page"
 			empty={emptyContent}
-			header={<Header counter={counter}>Organizers</Header>}
+			header={
+				<Header counter={counter} actions={<OrganizerInput />}>
+					Organizers
+				</Header>
+			}
 		/>
 	);
 }

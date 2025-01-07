@@ -1,7 +1,7 @@
 from logging import getLogger
 from typing import Annotated
 
-from fastapi import APIRouter, Form, Depends, HTTPException, status
+from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, TypeAdapter, ValidationError
 
 from auth.authorization import require_role
@@ -67,13 +67,13 @@ async def organizers(
 @router.post("/organizers", status_code=status.HTTP_201_CREATED)
 async def add_organizer(
     user: Annotated[User, Depends(require_director)],
-    raw_organizer_data: Annotated[
-        RawOrganizerData, Form(media_type="multipart/form-data")
-    ],
+    email: EmailStr = Body(),
+    first_name: str = Body(),
+    last_name: str = Body(),
+    roles: list[Role] = Body(),
 ) -> None:
     """Adds an organizer record"""
     log.info("%s adding organizer", user)
-    roles = raw_organizer_data.roles
 
     if not roles_includes_organizer(roles):
         raise HTTPException(
@@ -82,18 +82,18 @@ async def add_organizer(
 
     if roles_includes_applicant(roles):
         raise HTTPException(
-            status.HTTP_400_BAD_REQUEST, "User has submitted an application"
+            status.HTTP_400_BAD_REQUEST, "User has submitted an application."
         )
 
-    uid = uci_scoped_uid(raw_organizer_data.email)
+    uid = uci_scoped_uid(email)
     await mongodb_handler.update_one(
         Collection.USERS,
         {"_id": uid},
         {
             "_id": uid,
-            "first_name": raw_organizer_data.first_name,
-            "last_name": raw_organizer_data.last_name,
-            "roles": raw_organizer_data.roles,
+            "first_name": first_name,
+            "last_name": last_name,
+            "roles": roles,
         },
         upsert=True,
     )

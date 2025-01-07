@@ -18,7 +18,7 @@ export interface RawOrganizer {
 	roles: ReadonlyArray<string>;
 }
 
-function OrganizerInput() {
+function AddOrganizer() {
 	const [email, setEmail] = useState("");
 	const [firstName, setFirstName] = useState("");
 	const [lastName, setLastName] = useState("");
@@ -57,7 +57,12 @@ function OrganizerInput() {
 	}
 
 	async function submitOrganizer() {
-		await axios.post("/api/director/organizers", organizer);
+		await axios
+			.post("/api/director/organizers", organizer)
+			.then(() => {
+				window.location.reload();
+			})
+			.catch((error) => console.error(error));
 	}
 
 	return (
@@ -120,4 +125,4 @@ function OrganizerInput() {
 	);
 }
 
-export default OrganizerInput;
+export default AddOrganizer;

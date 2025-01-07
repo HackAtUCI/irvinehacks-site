@@ -3,7 +3,7 @@ import Box from "@cloudscape-design/components/box";
 import Button from "@cloudscape-design/components/button";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import TextContent from "@cloudscape-design/components/text-content";
-import { RawOrganizer } from "./OrganizerInput";
+import { RawOrganizer } from "./AddOrganizer";
 
 interface AddOrganizerModalProps {
 	onDismiss: () => void;

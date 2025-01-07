@@ -1,7 +1,7 @@
 from logging import getLogger
-from typing import Annotated, Any, Literal, Mapping, Optional, Sequence
+from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, HTTPException, status
+from fastapi import APIRouter, Form, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, TypeAdapter, ValidationError
 
 from auth.authorization import require_role
@@ -18,16 +18,39 @@ router = APIRouter()
 require_director = require_role({Role.DIRECTOR})
 
 
-class Organizer(BaseRecord):
+class OrganizerSummary(BaseRecord):
     first_name: str
     last_name: str
     roles: list[Role]
 
 
+class RawOrganizerData(BaseModel):
+    email: str
+    first_name: str
+    last_name: str
+    roles: list[Role]
+
+
+def uci_scoped_uid(email: EmailStr) -> str:
+    """Provide a scoped unique identifier based on the UCI email"""
+    local, domain = email.split("@")
+    reversed_domains = ".".join(reversed(domain.split(".")))
+    cleaned_local = local.replace(".", "..")
+    return f"{reversed_domains}.{cleaned_local}"
+
+
+def roles_includes_organizer(roles: list[Role]) -> bool:
+    return Role.ORGANIZER in roles
+
+
+def roles_includes_applicant(roles: list[Role]) -> bool:
+    return Role.APPLICANT in roles
+
+
 @router.get("/organizers")
 async def organizers(
     user: Annotated[User, Depends(require_director)]
-) -> list[Organizer]:
+) -> list[OrganizerSummary]:
     """Get records of all organizers"""
     log.info("%s requested organizer", user)
 
@@ -36,6 +59,41 @@ async def organizers(
     )
 
     try:
-        return TypeAdapter(list[Organizer]).validate_python(records)
+        return TypeAdapter(list[OrganizerSummary]).validate_python(records)
     except ValidationError:
         raise RuntimeError("Could not parse applicant data.")
+
+
+@router.post("/organizers", status_code=status.HTTP_201_CREATED)
+async def add_organizer(
+    user: Annotated[User, Depends(require_director)],
+    raw_organizer_data: Annotated[
+        RawOrganizerData, Form(media_type="multipart/form-data")
+    ],
+) -> None:
+    """Adds an organizer record"""
+    log.info("%s adding organizer", user)
+    roles = raw_organizer_data.roles
+
+    if not roles_includes_organizer(roles):
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST, "User doesn't have organizer role."
+        )
+
+    if roles_includes_applicant(roles):
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST, "User has submitted an application"
+        )
+
+    uid = uci_scoped_uid(raw_organizer_data.email)
+    await mongodb_handler.update_one(
+        Collection.USERS,
+        {"_id": uid},
+        {
+            "_id": uid,
+            "first_name": raw_organizer_data.first_name,
+            "last_name": raw_organizer_data.last_name,
+            "roles": raw_organizer_data.roles,
+        },
+        upsert=True,
+    )

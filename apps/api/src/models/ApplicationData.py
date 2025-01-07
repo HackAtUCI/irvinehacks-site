@@ -97,7 +97,6 @@ class BaseVolunteerApplicationData(BaseModel):
     school: str
     education_level: str
     major: str
-    applied_before: bool
     frq_volunteer: str = Field(max_length=2048)
     frq_utensil: str = Field(max_length=2048)
     allergies: Union[str, None] = Field(None, max_length=2048)

@@ -31,7 +31,6 @@ SAMPLE_APPLICATION = {
     "school": "UC Irvine",
     "education_level": "Fifth+ Year Undergraduate",
     "major": "Computer Science",
-    "applied_before": "false",
     "frq_volunteer": "",
     "frq_utensil": "",
     "other_questions": "",

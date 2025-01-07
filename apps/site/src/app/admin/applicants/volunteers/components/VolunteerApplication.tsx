@@ -13,7 +13,7 @@ interface VolunteerApplicationSections {
 
 const VOLUNTEER_APPLICATION_SECTIONS: VolunteerApplicationSections = {
 	"Personal Information": ["pronouns", "ethnicity", "is_18_older"],
-	Education: ["school", "education_level", "major", "applied_before"],
+	Education: ["school", "education_level", "major"],
 	"Free Response Questions": [
 		"frq_volunteer",
 		"frq_utensil",

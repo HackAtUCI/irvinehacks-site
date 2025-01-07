@@ -5,7 +5,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, TypeAdapter, ValidationError
 
 from auth.authorization import require_role
-from auth.user_identity import User
+from auth.user_identity import User, uci_email
 from models.user_record import Role
 from services import mongodb_handler
 from services.mongodb_handler import BaseRecord, Collection
@@ -75,6 +75,11 @@ async def add_organizer(
     """Adds an organizer record"""
     log.info("%s adding organizer", user)
 
+    if not uci_email(email):
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST, "User doesn't have a UCI email."
+        )
+    
     if not roles_includes_organizer(roles):
         raise HTTPException(
             status.HTTP_400_BAD_REQUEST, "User doesn't have organizer role."

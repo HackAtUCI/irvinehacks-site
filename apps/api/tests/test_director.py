@@ -14,7 +14,7 @@ USER_DIRECTOR = NativeUser(
     affiliations=["student"],
 )
 
-DIRECTOR_IDENTITY = {"_id": "edu.uci.dir", "roles": ["Organizer", "Director"]}
+DIRECTOR_IDENTITY = {"_id": "edu.uci.dir", "roles": [Role.ORGANIZER, Role.DIRECTOR]}
 
 app = FastAPI()
 app.include_router(director.router)
@@ -25,7 +25,7 @@ SAMPLE_ORGANIZER = {
     "email": "albert@uci.edu",
     "first_name": "Albert",
     "last_name": "Wang",
-    "roles": ["Organizer"],
+    "roles": [Role.ORGANIZER],
 }
 
 EXPECTED_ORGANIZER = director.OrganizerSummary(

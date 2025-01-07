@@ -9,7 +9,7 @@ import Checkbox from "@cloudscape-design/components/checkbox";
 
 import AddOrganizerModal from "./AddOrganizerModal";
 
-const EMAIL_REGEX = /^\w+([\.\-]?\w+)*@\w+([\.\-]?\w+)*(\.\w{2,3})+$/;
+const EMAIL_REGEX = /^\w+([\.\-]?\w+)*@uci.edu/;
 
 export interface RawOrganizer {
 	email: string;
@@ -27,10 +27,16 @@ function OrganizerInput() {
 	const [isVolunteerReviewer, setVolunteerReviewer] = useState(false);
 	const [organizer, setOrganizer] = useState<RawOrganizer | null>(null);
 
+	const [invalidEmailError, setInvalidEmailError] = useState("");
+
 	function updateOrganizer() {
-		// if (!EMAIL_REGEX.test(email)) {
-		// 	setE
-		// }
+		if (!EMAIL_REGEX.test(email)) {
+			setInvalidEmailError("Not a valid UCI email");
+			return;
+		} else {
+			setInvalidEmailError("");
+		}
+
 		const roles = ["Organizer"];
 		if (isHackerReviewer) {
 			roles.push("Hacker Reviewer");
@@ -57,7 +63,7 @@ function OrganizerInput() {
 	return (
 		<>
 			<SpaceBetween direction="horizontal" size="l">
-				<FormField label="Email">
+				<FormField label="Email" errorText={invalidEmailError}>
 					<Input
 						onChange={({ detail }) => setEmail(detail.value)}
 						value={email}

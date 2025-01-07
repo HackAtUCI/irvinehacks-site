@@ -16,6 +16,10 @@ export function hasAdminRole(role: ReadonlyArray<Role>): boolean {
 	return role.includes(AdminRole.Organizer);
 }
 
+export function isDirector(roles: ReadonlyArray<Role>): boolean {
+	return roles.includes(AdminRole.Director);
+}
+
 export function isCheckInLead(roles: ReadonlyArray<Role>): boolean {
 	return (
 		roles.includes(AdminRole.Director) || roles.includes(AdminRole.CheckInLead)

@@ -79,7 +79,7 @@ async def add_organizer(
         raise HTTPException(
             status.HTTP_400_BAD_REQUEST, "User doesn't have a UCI email."
         )
-    
+
     if not roles_includes_organizer(roles):
         raise HTTPException(
             status.HTTP_400_BAD_REQUEST, "User doesn't have organizer role."

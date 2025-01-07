@@ -9,6 +9,7 @@ import Checkbox from "@cloudscape-design/components/checkbox";
 
 import AddOrganizerModal from "./AddOrganizerModal";
 
+// eslint-disable-next-line no-useless-escape
 const EMAIL_REGEX = /^\w+([\.\-]?\w+)*@uci.edu/;
 
 export interface RawOrganizer {

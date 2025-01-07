@@ -40,7 +40,8 @@ function AddOrganizerModal({
 		>
 			<TextContent>
 				<p>
-					Double check that you have entered this organizer's info correctly
+					Double check that you have entered this organizer&apos;s info
+					correctly
 				</p>
 				<ul>
 					<li>Email: {organizer.email}</li>

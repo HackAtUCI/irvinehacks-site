@@ -8,7 +8,6 @@ import Box from "@cloudscape-design/components/box";
 import Cards from "@cloudscape-design/components/cards";
 import Header from "@cloudscape-design/components/header";
 import Link from "@cloudscape-design/components/link";
-import Pagination from "@cloudscape-design/components/pagination";
 
 import { useFollowWithNextLink } from "@/app/admin/layout/common";
 import useHackerApplicants, {
@@ -22,8 +21,8 @@ import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
 
 import UserContext from "@/lib/admin/UserContext";
 import { isHackerReviewer } from "@/lib/admin/authorization";
-import HackerThresholdInputs from "../components/HackerThresholdInputs";
 import ApplicantReviewerIndicator from "../components/ApplicantReviewerIndicator";
+import HackerPagination from "./components/HackerPagination";
 
 function HackerApplicants() {
 	const router = useRouter();
@@ -33,8 +32,6 @@ function HackerApplicants() {
 	if (!isHackerReviewer(roles)) {
 		router.push("/admin/dashboard");
 	}
-
-	const [currentPageIndex, setCurrentPageIndex] = useState(1);
 
 	const [selectedStatuses, setSelectedStatuses] = useState<Options>([]);
 	const [selectedDecisions, setSelectedDecisions] = useState<Options>([]);
@@ -52,6 +49,10 @@ function HackerApplicants() {
 	);
 
 	const items = filteredApplicants;
+
+	const [currentPageIndex, setCurrentPageIndex] = useState<number>(1);
+
+	const [pageSize, setPageSize] = useState<number>(2);
 
 	const counter =
 		selectedStatuses.length > 0 || selectedDecisions.length > 0
@@ -110,7 +111,10 @@ function HackerApplicants() {
 			// visibleSections={preferences.visibleContent}
 			loading={loading}
 			loadingText="Loading applicants"
-			items={items}
+			items={items.slice(
+				(currentPageIndex - 1) * pageSize,
+				currentPageIndex * pageSize,
+			)}
 			trackBy="_id"
 			variant="full-page"
 			filter={
@@ -126,13 +130,14 @@ function HackerApplicants() {
 				<Header
 					counter={counter}
 					actions={
-						<Pagination
+						<HackerPagination
 							currentPageIndex={currentPageIndex}
-							onChange={({ detail }) =>
-								setCurrentPageIndex(detail.currentPageIndex)
-							}
-							pagesCount={5}
-						></Pagination>
+							onChange={(newCurrentPageIndex) => {
+								setCurrentPageIndex(() => newCurrentPageIndex);
+							}}
+							applicantsList={items}
+							numPages={Math.ceil(items.length / pageSize)}
+						/>
 					}
 				>
 					Hacker Applicants

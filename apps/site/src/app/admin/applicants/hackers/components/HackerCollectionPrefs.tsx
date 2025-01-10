@@ -2,13 +2,13 @@ import CollectionPreferences from "@cloudscape-design/components/collection-pref
 
 interface HackerCollectionPrefs {
 	pageSize: number;
-	setPageSize: (newPageSize: number) => void;
+	onChange: (newPageSize: number) => void;
 	resetPageIndex: () => void;
 }
 
 function HackerCollectionPrefs({
 	pageSize,
-	setPageSize,
+	onChange,
 	resetPageIndex,
 }: HackerCollectionPrefs) {
 	return (
@@ -17,7 +17,7 @@ function HackerCollectionPrefs({
 			confirmLabel="Confirm"
 			cancelLabel="Cancel"
 			onConfirm={({ detail }) => {
-				setPageSize(detail.pageSize ?? 8);
+				onChange(detail.pageSize ?? 8);
 				resetPageIndex();
 				console.log(pageSize);
 			}}
@@ -29,7 +29,7 @@ function HackerCollectionPrefs({
 					{ value: 16, label: "16" },
 				],
 			}}
-		></CollectionPreferences>
+		/>
 	);
 }
 

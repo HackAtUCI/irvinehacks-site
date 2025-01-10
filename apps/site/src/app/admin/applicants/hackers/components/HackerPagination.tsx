@@ -1,7 +1,5 @@
 import Pagination from "@cloudscape-design/components/pagination";
 
-import { HackerApplicantSummary } from "@/lib/admin/useHackerApplicants";
-
 interface HackerPaginationProps {
 	currentPageIndex: number;
 	onChange: (newCurrentPageIndex: number) => void;
@@ -20,7 +18,7 @@ function HackerPagination({
 				onChange(detail.currentPageIndex);
 			}}
 			pagesCount={numPages}
-		></Pagination>
+		/>
 	);
 }
 

@@ -35,7 +35,7 @@ function HackerApplicants() {
 	}
 
 	const [currentPageIndex, setCurrentPageIndex] = useState<number>(1);
-	const [pageSize, setPageSize] = useState<number>(2);
+	const [pageSize, setPageSize] = useState<number>(8);
 	const [selectedStatuses, setSelectedStatuses] = useState<Options>([]);
 	const [selectedDecisions, setSelectedDecisions] = useState<Options>([]);
 	const { applicantList, loading } = useHackerApplicants();
@@ -125,28 +125,24 @@ function HackerApplicants() {
 				/>
 			}
 			empty={emptyContent}
-			header={
-				<Header
-					counter={counter}
-					actions={
-						<>
-							<HackerPagination
-								currentPageIndex={currentPageIndex}
-								onChange={(newCurrentPageIndex) => {
-									setCurrentPageIndex(newCurrentPageIndex);
-								}}
-								numPages={Math.ceil(items.length / pageSize)}
-							/>
-							<HackerCollectionPrefs
-								pageSize={pageSize}
-								setPageSize={setPageSize}
-								resetPageIndex={() => null}
-							/>
-						</>
-					}
-				>
-					Hacker Applicants
-				</Header>
+			header={<Header counter={counter}>Hacker Applicants</Header>}
+			pagination={
+				<HackerPagination
+					currentPageIndex={currentPageIndex}
+					onChange={(newCurrentPageIndex) => {
+						setCurrentPageIndex(newCurrentPageIndex);
+					}}
+					numPages={Math.ceil(items.length / pageSize)}
+				/>
+			}
+			preferences={
+				<HackerCollectionPrefs
+					pageSize={pageSize}
+					onChange={(newPageSize) => {
+						setPageSize(newPageSize);
+					}}
+					resetPageIndex={() => null}
+				/>
 			}
 		/>
 	);

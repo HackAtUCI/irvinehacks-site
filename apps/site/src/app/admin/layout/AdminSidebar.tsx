@@ -69,9 +69,16 @@ function AdminSidebar() {
 
 	if (isDirector(roles)) {
 		navigationItems.splice(4, 0, {
-			type: "link",
+			type: "link-group",
 			text: "Directors",
 			href: "/admin/directors",
+			items: [
+				{
+					type: "link",
+					text: "Organizers",
+					href: "/admin/directors/organizers",
+				},
+			],
 		});
 	}
 

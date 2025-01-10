@@ -23,6 +23,7 @@ import UserContext from "@/lib/admin/UserContext";
 import { isHackerReviewer } from "@/lib/admin/authorization";
 import ApplicantReviewerIndicator from "../components/ApplicantReviewerIndicator";
 import HackerPagination from "./components/HackerPagination";
+import HackerCollectionPrefs from "./components/HackerCollectionPrefs";
 
 function HackerApplicants() {
 	const router = useRouter();
@@ -33,6 +34,8 @@ function HackerApplicants() {
 		router.push("/admin/dashboard");
 	}
 
+	const [currentPageIndex, setCurrentPageIndex] = useState<number>(1);
+	const [pageSize, setPageSize] = useState<number>(2);
 	const [selectedStatuses, setSelectedStatuses] = useState<Options>([]);
 	const [selectedDecisions, setSelectedDecisions] = useState<Options>([]);
 	const { applicantList, loading } = useHackerApplicants();
@@ -49,10 +52,6 @@ function HackerApplicants() {
 	);
 
 	const items = filteredApplicants;
-
-	const [currentPageIndex, setCurrentPageIndex] = useState<number>(1);
-
-	const [pageSize, setPageSize] = useState<number>(2);
 
 	const counter =
 		selectedStatuses.length > 0 || selectedDecisions.length > 0
@@ -130,14 +129,20 @@ function HackerApplicants() {
 				<Header
 					counter={counter}
 					actions={
-						<HackerPagination
-							currentPageIndex={currentPageIndex}
-							onChange={(newCurrentPageIndex) => {
-								setCurrentPageIndex(() => newCurrentPageIndex);
-							}}
-							applicantsList={items}
-							numPages={Math.ceil(items.length / pageSize)}
-						/>
+						<>
+							<HackerPagination
+								currentPageIndex={currentPageIndex}
+								onChange={(newCurrentPageIndex) => {
+									setCurrentPageIndex(newCurrentPageIndex);
+								}}
+								numPages={Math.ceil(items.length / pageSize)}
+							/>
+							<HackerCollectionPrefs
+								pageSize={pageSize}
+								setPageSize={setPageSize}
+								resetPageIndex={() => null}
+							/>
+						</>
 					}
 				>
 					Hacker Applicants

@@ -5,7 +5,6 @@ import { HackerApplicantSummary } from "@/lib/admin/useHackerApplicants";
 interface HackerPaginationProps {
 	currentPageIndex: number;
 	onChange: (newCurrentPageIndex: number) => void;
-	applicantsList: HackerApplicantSummary[];
 	numPages: number;
 }
 

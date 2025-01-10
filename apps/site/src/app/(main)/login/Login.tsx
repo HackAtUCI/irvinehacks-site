@@ -19,7 +19,7 @@ async function Login({
 	return (
 		<div className="min-h-screen flex flex-col items-center justify-center">
 			<h1 className="font-display text-3xl md:text-5xl mb-20">
-				Login to Portal
+				Log in
 			</h1>
 			<LoginForm return_to={return_to} />
 		</div>

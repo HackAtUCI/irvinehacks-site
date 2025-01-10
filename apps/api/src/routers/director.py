@@ -9,7 +9,7 @@ from auth.user_identity import User, uci_email
 from models.user_record import Role
 from services import mongodb_handler, sendgrid_handler
 from services.mongodb_handler import BaseRecord, Collection
-from services.sendgrid_handler import ApplicationUpdatePersonalization, Template
+from services.sendgrid_handler import PersonalizationData, Template
 from routers.admin import recover_email_from_uid
 from utils.email_handler import IH_SENDER
 
@@ -112,19 +112,18 @@ async def apply_reminder() -> None:
     not_yet_applied: list[dict[str, Any]] = await mongodb_handler.retrieve(
         Collection.USERS,
         {"last_login": {"$exists": True}, "roles": {"$exists": False}},
-        ["_id", "first_name"],
+        ["_id"],
     )
 
     personalizations = []
     for record in not_yet_applied:
         personalizations.append(
-            ApplicationUpdatePersonalization(
+            PersonalizationData(
                 email=recover_email_from_uid(record["_id"]),
-                first_name=record["first_name"],
             )
         )
 
-    log.info(f"Sending RSVP reminder emails to {len(not_yet_applied)} applicants")
+    log.info(f"Sending apply reminder emails to {len(not_yet_applied)} users")
 
     await sendgrid_handler.send_email(
         Template.APPLY_REMINDER,

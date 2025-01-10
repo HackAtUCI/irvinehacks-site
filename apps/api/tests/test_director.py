@@ -100,8 +100,8 @@ def test_apply_reminder_emails(
     """Test that users that haven't submitted an application will be sent an email"""
     mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
     mock_mongodb_handler_retrieve.return_value = [
-        {"_id": "edu.uci.petr", "first_name": "Peter"},
-        {"_id": "edu.uci.albert", "first_name": "Albert"},
+        {"_id": "edu.uci.petr"},
+        {"_id": "edu.uci.albert"},
     ]
 
     res = director_client.post("/apply-reminder")
@@ -111,8 +111,8 @@ def test_apply_reminder_emails(
         Template.APPLY_REMINDER,
         IH_SENDER,
         [
-            {"email": "petr@uci.edu", "first_name": "Peter"},
-            {"email": "albert@uci.edu", "first_name": "Albert"},
+            {"email": "petr@uci.edu"},
+            {"email": "albert@uci.edu"},
         ],
         True,
     )

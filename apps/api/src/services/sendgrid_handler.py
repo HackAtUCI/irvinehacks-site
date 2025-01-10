@@ -48,7 +48,6 @@ ApplicationUpdateTemplates: TypeAlias = Literal[
     Template.ACCEPTED_EMAIL,
     Template.WAITLISTED_EMAIL,
     Template.REJECTED_EMAIL,
-    Template.APPLY_REMINDER,
     Template.RSVP_REMINDER,
     Template.WAITLIST_RELEASE_EMAIL,
 ]
@@ -100,6 +99,26 @@ async def send_email(
     sender_email: Tuple[str, str],
     receiver_data: ApplicationUpdatePersonalization,
     send_to_multiple: Literal[False],
+    reply_to: Union[Tuple[str, str], None] = None,
+) -> None: ...
+
+
+@overload
+async def send_email(
+    template_id: Literal[Template.APPLY_REMINDER],
+    sender_email: Tuple[str, str],
+    receiver_data: PersonalizationData,
+    send_to_multiple: Literal[False],
+    reply_to: Union[Tuple[str, str], None] = None,
+) -> None: ...
+
+
+@overload
+async def send_email(
+    template_id: Literal[Template.APPLY_REMINDER],
+    sender_email: Tuple[str, str],
+    receiver_data: Iterable[PersonalizationData],
+    send_to_multiple: Literal[True],
     reply_to: Union[Tuple[str, str], None] = None,
 ) -> None: ...
 

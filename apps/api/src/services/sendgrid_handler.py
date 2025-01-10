@@ -21,6 +21,7 @@ class Template(str, Enum):
     ACCEPTED_EMAIL = "d-07fa796cf6c34518a7124a68d4790d82"
     WAITLISTED_EMAIL = "d-0e0cde2bfcc14dbfa069422801b6cf58"
     REJECTED_EMAIL = "d-4edf53090e42417ea9c065645d8c55c2"
+    APPLY_REMINDER = "d-9fe9988991b9420c86ba7bf2b5cd7357"
     RSVP_REMINDER = "d-50090289b60947198def96e5bbc9e8c4"
     WAITLIST_RELEASE_EMAIL = "d-467b8de41d214f33ad9b6cc98cbb6c05"
 
@@ -47,6 +48,7 @@ ApplicationUpdateTemplates: TypeAlias = Literal[
     Template.ACCEPTED_EMAIL,
     Template.WAITLISTED_EMAIL,
     Template.REJECTED_EMAIL,
+    Template.APPLY_REMINDER,
     Template.RSVP_REMINDER,
     Template.WAITLIST_RELEASE_EMAIL,
 ]

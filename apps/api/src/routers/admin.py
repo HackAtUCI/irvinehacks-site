@@ -396,7 +396,7 @@ async def rsvp_reminder() -> None:
     for record in not_yet_rsvpd:
         personalizations.append(
             ApplicationUpdatePersonalization(
-                email=_recover_email_from_uid(record["_id"]),
+                email=recover_email_from_uid(record["_id"]),
                 first_name=record["first_name"],
             )
         )
@@ -467,7 +467,7 @@ async def waitlist_release(
 
     log.info("%s accepted %s off the waitlist. Sending email.", associate, uid)
     await email_handler.send_waitlist_release_email(
-        record["first_name"], _recover_email_from_uid(uid)
+        record["first_name"], recover_email_from_uid(uid)
     )
 
 
@@ -566,11 +566,11 @@ async def _process_batch(batch: tuple[dict[str, Any], ...], decision: Decision) 
 
 def _extract_personalizations(decision_data: dict[str, Any]) -> tuple[str, EmailStr]:
     name = decision_data["first_name"]
-    email = _recover_email_from_uid(decision_data["_id"])
+    email = recover_email_from_uid(decision_data["_id"])
     return name, email
 
 
-def _recover_email_from_uid(uid: str) -> str:
+def recover_email_from_uid(uid: str) -> str:
     """For NativeUsers, the email should still delivery properly."""
     uid = uid.replace("..", "\n")
     *reversed_domain, local = uid.split(".")

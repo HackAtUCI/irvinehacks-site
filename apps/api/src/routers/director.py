@@ -1,5 +1,5 @@
 from logging import getLogger
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, TypeAdapter, ValidationError
@@ -7,9 +7,11 @@ from pydantic import BaseModel, EmailStr, TypeAdapter, ValidationError
 from auth.authorization import require_role
 from auth.user_identity import User, uci_email
 from models.user_record import Role
-from services import mongodb_handler
+from services import mongodb_handler, sendgrid_handler
 from services.mongodb_handler import BaseRecord, Collection
-
+from services.sendgrid_handler import ApplicationUpdatePersonalization, Template
+from routers.admin import recover_email_from_uid
+from utils.email_handler import IH_SENDER
 
 log = getLogger(__name__)
 
@@ -101,4 +103,32 @@ async def add_organizer(
             "roles": roles,
         },
         upsert=True,
+    )
+
+
+@router.post("/apply-reminder", dependencies=[Depends(require_director)])
+async def apply_reminder() -> None:
+    """Send email to users who haven't submitted an app"""
+    not_yet_applied: list[dict[str, Any]] = await mongodb_handler.retrieve(
+        Collection.USERS,
+        {"last_login": {"$exists": True}, "roles": {"$exists": False}},
+        ["_id", "first_name"],
+    )
+
+    personalizations = []
+    for record in not_yet_applied:
+        personalizations.append(
+            ApplicationUpdatePersonalization(
+                email=recover_email_from_uid(record["_id"]),
+                first_name=record["first_name"],
+            )
+        )
+
+    log.info(f"Sending RSVP reminder emails to {len(not_yet_applied)} applicants")
+
+    await sendgrid_handler.send_email(
+        Template.APPLY_REMINDER,
+        IH_SENDER,
+        personalizations,
+        True,
     )

@@ -78,6 +78,11 @@ function AdminSidebar() {
 					text: "Organizers",
 					href: "/admin/directors/organizers",
 				},
+				{
+					type: "link",
+					text: "Email Sender",
+					href: "/admin/directors/email-sender",
+				},
 			],
 		});
 	}

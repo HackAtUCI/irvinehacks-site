@@ -11,13 +11,20 @@ function Senders({ senders }: SendersProps) {
 	}
 
 	const formatUid = (uid: Uid) => uid.split(".").at(-1);
-	const formatDate = (timestamp: string) =>
-		new Date(timestamp).toLocaleDateString();
+	const formatDate = (timestamp: string) => {
+		const formatter = new Intl.DateTimeFormat("en-US", {
+			dateStyle: "short",
+			timeStyle: "short",
+		});
+		return formatter.format(new Date(timestamp));
+	};
+
 	return (
 		<ul>
 			{senders.map(([date, sender, numEmailsSent]) => (
 				<li key={date}>
-					{formatUid(sender)} sent {numEmailsSent} on {formatDate(date)}
+					{formatUid(sender)} sent {numEmailsSent} email(s) on{" "}
+					{formatDate(date)}
 				</li>
 			))}
 		</ul>

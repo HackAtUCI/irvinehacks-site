@@ -1,3 +1,5 @@
+import TextContent from "@cloudscape-design/components/text-content";
+
 import { Sender } from "@/lib/admin/useEmailSenders";
 import { Uid } from "@/lib/userRecord";
 
@@ -20,14 +22,16 @@ function Senders({ senders }: SendersProps) {
 	};
 
 	return (
-		<ul>
-			{senders.map(([date, sender, numEmailsSent]) => (
-				<li key={date}>
-					{formatUid(sender)} sent {numEmailsSent} email(s) on{" "}
-					{formatDate(date)}
-				</li>
-			))}
-		</ul>
+		<TextContent>
+			<ul>
+				{senders.map(([date, sender, numEmailsSent]) => (
+					<li key={date}>
+						{formatUid(sender)} sent {numEmailsSent} email(s) on{" "}
+						{formatDate(date)}
+					</li>
+				))}
+			</ul>
+		</TextContent>
 	);
 }
 

@@ -1,11 +1,11 @@
 from logging import getLogger
-from typing import Annotated, Any
+from typing import Annotated, Any, Optional
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, TypeAdapter, ValidationError
 
 from auth.authorization import require_role
-from auth.user_identity import User, uci_email
+from auth.user_identity import User, uci_email, utc_now
 from models.user_record import Role
 from services import mongodb_handler, sendgrid_handler
 from services.mongodb_handler import BaseRecord, Collection
@@ -18,6 +18,10 @@ log = getLogger(__name__)
 router = APIRouter()
 
 require_director = require_role({Role.DIRECTOR})
+
+class ApplyReminder(BaseModel):
+    _id: str
+    recipients: list[str]
 
 
 class OrganizerSummary(BaseRecord):
@@ -47,6 +51,18 @@ def roles_includes_organizer(roles: list[Role]) -> bool:
 
 def roles_includes_applicant(roles: list[Role]) -> bool:
     return Role.APPLICANT in roles
+
+
+async def _get_apply_reminder_email_recipients() -> Optional[dict[str, Any]]:
+    try:
+        apply_reminder_recipients = await mongodb_handler.retrieve_one(
+            Collection.EMAILS, {"_id": "apply_reminder"}, ["recipients"]
+        )
+    except RuntimeError:
+        log.error("Could not get apply reminder email recipients")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    return apply_reminder_recipients
 
 
 @router.get("/organizers")
@@ -115,24 +131,40 @@ async def apply_reminder(user: Annotated[User, Depends(require_director)]) -> No
         ["_id"],
     )
 
-    personalizations = []
-    for record in not_yet_applied:
-        personalizations.append(
-            PersonalizationData(
-                email=recover_email_from_uid(record["_id"]),
-            )
-        )
+    apply_reminder_recipients: Optional[dict[str, Any]] = await _get_apply_reminder_email_recipients()
 
-    log.info(f"{user} sending apply reminder emails to {len(not_yet_applied)} users")
+    if not apply_reminder_recipients:
+        log.error("Could not retrieve apply reminder email recipients")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    validated_recipients = ApplyReminder.model_validate(apply_reminder_recipients)
+    log.info("recipients %s" , validated_recipients)
+
+    recipients = set(validated_recipients.recipients)
+
+    personalizations = []
+    new_recipients = []
+    for record in not_yet_applied:
+        if record["_id"] not in recipients:
+            new_recipients.append(record["_id"])
+            personalizations.append(
+                PersonalizationData(
+                    email=recover_email_from_uid(record["_id"]),
+                )
+            )
+
+    log.info(f"{user} sending apply reminder emails to {len(new_recipients)} users")
 
     try:
         await mongodb_handler.raw_update_one(
             Collection.EMAILS,
             {"_id": "apply_reminder"},
             {
-                "$push": {"senders": user},
                 "$push": {
-                    "recipients": {"$each": [user["_id"] for user in not_yet_applied]}
+                    "senders": (utc_now(), user.uid, len(new_recipients)),
+                    "recipients": {
+                        "$each": new_recipients
+                    },
                 },
             },
             upsert=True,

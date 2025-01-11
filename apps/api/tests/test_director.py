@@ -100,8 +100,12 @@ def test_apply_reminder_emails(
     mock_sendgrid_handler_send_email: AsyncMock,
 ) -> None:
     """Test that users that haven't submitted an application will be sent an email"""
-    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        {"recipients": ["edu.uci.emailsent"]},
+    ]
     mock_mongodb_handler_retrieve.return_value = [
+        {"_id": "edu.uci.emailsent"},
         {"_id": "edu.uci.petr"},
         {"_id": "edu.uci.albert"},
     ]
@@ -113,8 +117,10 @@ def test_apply_reminder_emails(
         Collection.EMAILS,
         {"_id": "apply_reminder"},
         {
-            "$push": {"senders": "edu.uci.dir"},
-            "$push": {"recipients": {"$each": ["edu.uci.petr", "edu.uci.albert"]}},
+            "$push": {
+                "senders": (ANY, "edu.uci.dir", 2),
+                "recipients": {"$each": ["edu.uci.petr", "edu.uci.albert"]},
+            },
         },
         upsert=True,
     )

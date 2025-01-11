@@ -46,6 +46,7 @@ class Collection(str, Enum):
     TESTING = "testing"
     SETTINGS = "settings"
     EVENTS = "events"
+    EMAILS = "emails"
 
 
 async def insert(

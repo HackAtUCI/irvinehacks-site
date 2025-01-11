@@ -92,7 +92,9 @@ def test_can_add_organizer(
 @patch("services.sendgrid_handler.send_email", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 @patch("services.mongodb_handler.retrieve", autospec=True)
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
 def test_apply_reminder_emails(
+    mock_mongodb_handler_raw_update_one: AsyncMock,
     mock_mongodb_handler_retrieve: AsyncMock,
     mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_sendgrid_handler_send_email: AsyncMock,
@@ -106,6 +108,16 @@ def test_apply_reminder_emails(
 
     res = director_client.post("/apply-reminder")
     assert res.status_code == 200
+    mock_mongodb_handler_raw_update_one.return_value = True
+    mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
+        Collection.EMAILS,
+        {"_id": "apply_reminder"},
+        {
+            "$push": {"senders": "edu.uci.dir"},
+            "$push": {"recipients": {"$each": ["edu.uci.petr", "edu.uci.albert"]}},
+        },
+        upsert=True,
+    )
 
     mock_sendgrid_handler_send_email.assert_awaited_once_with(
         Template.APPLY_REMINDER,

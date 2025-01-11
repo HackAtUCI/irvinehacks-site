@@ -107,7 +107,7 @@ async def add_organizer(
 
 
 @router.post("/apply-reminder", dependencies=[Depends(require_director)])
-async def apply_reminder() -> None:
+async def apply_reminder(user: Annotated[User, Depends(require_director)]) -> None:
     """Send email to users who haven't submitted an app"""
     not_yet_applied: list[dict[str, Any]] = await mongodb_handler.retrieve(
         Collection.USERS,
@@ -123,7 +123,23 @@ async def apply_reminder() -> None:
             )
         )
 
-    log.info(f"Sending apply reminder emails to {len(not_yet_applied)} users")
+    log.info(f"{user} sending apply reminder emails to {len(not_yet_applied)} users")
+
+    try:
+        await mongodb_handler.raw_update_one(
+            Collection.EMAILS,
+            {"_id": "apply_reminder"},
+            {
+                "$push": {"senders": user},
+                "$push": {
+                    "recipients": {"$each": [user["_id"] for user in not_yet_applied]}
+                },
+            },
+            upsert=True,
+        )
+    except RuntimeError:
+        log.error("Error when attempting to update list of senders and recipients")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     await sendgrid_handler.send_email(
         Template.APPLY_REMINDER,

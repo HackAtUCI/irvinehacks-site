@@ -11,7 +11,7 @@ export default function Title({ applicationType }: TitleProps) {
 				{applyTitle}
 			</h1>
 			<h2 className="text-[var(--color-offwhite)] text-center font-body text-xl my-6 sm:text-2xl md:text-4xl">
-				Applications close on January 10th, 11:59PM PST
+				Applications close on January 12th, 11:59PM PST
 			</h2>
 		</>
 	);

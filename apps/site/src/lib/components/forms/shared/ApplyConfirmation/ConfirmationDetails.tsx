@@ -53,7 +53,7 @@ export default async function ConfirmationDetails({
 				overnight accommodations. {roleText}
 			</p>
 			<strong className="text-lg text-[#FF2222]">
-				Applications are due on January 10th, 2025 at 11:59PM PST.
+				Applications are due on January 12th, 2025 at 11:59PM PST.
 			</strong>
 			<Button
 				className="text-2xl"

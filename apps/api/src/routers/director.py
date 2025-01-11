@@ -202,9 +202,10 @@ async def apply_reminder(user: Annotated[User, Depends(require_director)]) -> No
         log.error("Error when attempting to update list of senders and recipients")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    await sendgrid_handler.send_email(
-        Template.APPLY_REMINDER,
-        IH_SENDER,
-        personalizations,
-        True,
-    )
+    if len(new_recipients) > 0:
+        await sendgrid_handler.send_email(
+            Template.APPLY_REMINDER,
+            IH_SENDER,
+            personalizations,
+            True,
+        )

@@ -1,4 +1,5 @@
-from unittest.mock import AsyncMock, patch
+from datetime import datetime
+from unittest.mock import ANY, AsyncMock, patch
 
 from fastapi import FastAPI
 
@@ -6,6 +7,8 @@ from auth.user_identity import NativeUser, UserTestClient
 from models.user_record import Role
 from routers import director
 from services.mongodb_handler import Collection
+from services.sendgrid_handler import Template
+from utils.email_handler import IH_SENDER
 
 USER_DIRECTOR = NativeUser(
     ucinetid="dir",
@@ -85,3 +88,72 @@ def test_can_add_organizer(
     )
 
     assert res.status_code == 201
+
+
+@patch("services.sendgrid_handler.send_email", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+@patch("services.mongodb_handler.retrieve", autospec=True)
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+def test_apply_reminder_emails(
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+    mock_mongodb_handler_retrieve: AsyncMock,
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_sendgrid_handler_send_email: AsyncMock,
+) -> None:
+    """Test that users that haven't submitted an application will be sent an email"""
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        {"recipients": ["edu.uci.emailsent"]},
+    ]
+    mock_mongodb_handler_retrieve.return_value = [
+        {"_id": "edu.uci.emailsent"},
+        {"_id": "edu.uci.petr"},
+        {"_id": "edu.uci.albert"},
+    ]
+
+    res = director_client.post("/apply-reminder")
+    assert res.status_code == 200
+    mock_mongodb_handler_raw_update_one.return_value = True
+    mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
+        Collection.EMAILS,
+        {"_id": "apply_reminder"},
+        {
+            "$push": {
+                "senders": (ANY, "edu.uci.dir", 2),
+                "recipients": {"$each": ["edu.uci.petr", "edu.uci.albert"]},
+            },
+        },
+        upsert=True,
+    )
+
+    mock_sendgrid_handler_send_email.assert_awaited_once_with(
+        Template.APPLY_REMINDER,
+        IH_SENDER,
+        [
+            {"email": "petr@uci.edu"},
+            {"email": "albert@uci.edu"},
+        ],
+        True,
+    )
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_get_apply_reminder_senders(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test getting all senders of apply reminder emails"""
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        {
+            "_id": "apply_reminder",
+            "senders": [(datetime(2025, 1, 10), "edu.uci.dir", 2)],
+        },
+    ]
+
+    res = director_client.get("/apply-reminder")
+    assert res.status_code == 200
+    mock_mongodb_handler_retrieve_one.assert_awaited_with(
+        Collection.EMAILS,
+        {"_id": "apply_reminder"},
+        ["senders"],
+    )

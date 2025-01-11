@@ -21,6 +21,7 @@ class Template(str, Enum):
     ACCEPTED_EMAIL = "d-07fa796cf6c34518a7124a68d4790d82"
     WAITLISTED_EMAIL = "d-0e0cde2bfcc14dbfa069422801b6cf58"
     REJECTED_EMAIL = "d-4edf53090e42417ea9c065645d8c55c2"
+    APPLY_REMINDER = "d-9fe9988991b9420c86ba7bf2b5cd7357"
     RSVP_REMINDER = "d-50090289b60947198def96e5bbc9e8c4"
     WAITLIST_RELEASE_EMAIL = "d-467b8de41d214f33ad9b6cc98cbb6c05"
 
@@ -98,6 +99,26 @@ async def send_email(
     sender_email: Tuple[str, str],
     receiver_data: ApplicationUpdatePersonalization,
     send_to_multiple: Literal[False],
+    reply_to: Union[Tuple[str, str], None] = None,
+) -> None: ...
+
+
+@overload
+async def send_email(
+    template_id: Literal[Template.APPLY_REMINDER],
+    sender_email: Tuple[str, str],
+    receiver_data: PersonalizationData,
+    send_to_multiple: Literal[False],
+    reply_to: Union[Tuple[str, str], None] = None,
+) -> None: ...
+
+
+@overload
+async def send_email(
+    template_id: Literal[Template.APPLY_REMINDER],
+    sender_email: Tuple[str, str],
+    receiver_data: Iterable[PersonalizationData],
+    send_to_multiple: Literal[True],
     reply_to: Union[Tuple[str, str], None] = None,
 ) -> None: ...
 

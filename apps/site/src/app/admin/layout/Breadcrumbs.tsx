@@ -18,6 +18,8 @@ const pathTitles: PathTitles = {
 	participants: "Participants",
 	events: "Events",
 	directors: "Directors",
+	organizers: "Organizers",
+	"email-sender": "Email Sender",
 };
 
 const DEFAULT_ITEMS = [{ text: "IrvineHacks 2025", href: BASE_PATH }];

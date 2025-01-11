@@ -106,7 +106,7 @@ async def add_organizer(
     )
 
 
-@router.post("/apply-reminder", dependencies=[Depends(require_director)])
+@router.post("/apply-reminder")
 async def apply_reminder(user: Annotated[User, Depends(require_director)]) -> None:
     """Send email to users who haven't submitted an app"""
     not_yet_applied: list[dict[str, Any]] = await mongodb_handler.retrieve(

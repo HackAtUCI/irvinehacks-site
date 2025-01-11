@@ -1,3 +1,5 @@
+import { AxiosResponse } from "axios";
+
 import Modal from "@cloudscape-design/components/modal";
 import Box from "@cloudscape-design/components/box";
 import Button from "@cloudscape-design/components/button";
@@ -5,7 +7,7 @@ import SpaceBetween from "@cloudscape-design/components/space-between";
 import TextContent from "@cloudscape-design/components/text-content";
 
 interface ConfirmationModalProps {
-	onConfirm: () => null;
+	onConfirm: () => Promise<void | AxiosResponse>;
 	visible: boolean;
 	setVisible: (newVisible: boolean) => void;
 }
@@ -25,7 +27,13 @@ function ConfirmationModal({
 						<Button variant="link" onClick={() => setVisible(false)}>
 							Cancel
 						</Button>
-						<Button variant="primary" onClick={() => onConfirm()}>
+						<Button
+							variant="primary"
+							onClick={() => {
+								setVisible(false);
+								onConfirm();
+							}}
+						>
 							Send Emails
 						</Button>
 					</SpaceBetween>

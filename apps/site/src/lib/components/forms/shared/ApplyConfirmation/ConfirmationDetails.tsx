@@ -52,6 +52,9 @@ export default async function ConfirmationDetails({
 				26, and that IrvineHacks will not be providing transportation or
 				overnight accommodations. {roleText}
 			</p>
+			<s aria-hidden className="text-lg text-[#FF2222]">
+				Applications are due on January 10th, 2025 at 11:59PM PST.
+			</s>
 			<strong className="text-lg text-[#FF2222]">
 				Applications are due on January 12th, 2025 at 11:59PM PST.
 			</strong>

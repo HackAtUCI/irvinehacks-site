@@ -1,3 +1,4 @@
+from datetime import datetime
 from logging import getLogger
 from typing import Annotated, Any, Optional
 
@@ -19,7 +20,13 @@ router = APIRouter()
 
 require_director = require_role({Role.DIRECTOR})
 
-class ApplyReminder(BaseModel):
+
+class ApplyReminderSenders(BaseModel):
+    _id: str
+    senders: list[tuple[datetime, str, int]]
+
+
+class ApplyReminderRecipients(BaseModel):
     _id: str
     recipients: list[str]
 
@@ -122,6 +129,27 @@ async def add_organizer(
     )
 
 
+@router.get("/apply-reminder", dependencies=[Depends(require_director)])
+async def get_apply_reminder_senders() -> list[tuple[datetime, str, int]]:
+    """Get data about every sender that sent out apply reminder emails"""
+    records = await mongodb_handler.retrieve_one(
+        Collection.EMAILS, {"_id": "apply_reminder"}, ["senders"]
+    )
+
+    if not records:
+        log.error("Could not retrieve apply reminder email senders")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    senders = ApplyReminderSenders.model_validate(records)
+
+    try:
+        return TypeAdapter(list[tuple[datetime, str, int]]).validate_python(
+            senders.senders
+        )
+    except ValidationError:
+        raise RuntimeError("Could not parse apply reminder email sender data")
+
+
 @router.post("/apply-reminder")
 async def apply_reminder(user: Annotated[User, Depends(require_director)]) -> None:
     """Send email to users who haven't submitted an app"""
@@ -131,14 +159,17 @@ async def apply_reminder(user: Annotated[User, Depends(require_director)]) -> No
         ["_id"],
     )
 
-    apply_reminder_recipients: Optional[dict[str, Any]] = await _get_apply_reminder_email_recipients()
+    apply_reminder_recipients: Optional[dict[str, Any]] = (
+        await _get_apply_reminder_email_recipients()
+    )
 
     if not apply_reminder_recipients:
         log.error("Could not retrieve apply reminder email recipients")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-    validated_recipients = ApplyReminder.model_validate(apply_reminder_recipients)
-    log.info("recipients %s" , validated_recipients)
+
+    validated_recipients = ApplyReminderRecipients.model_validate(
+        apply_reminder_recipients
+    )
 
     recipients = set(validated_recipients.recipients)
 
@@ -162,9 +193,7 @@ async def apply_reminder(user: Annotated[User, Depends(require_director)]) -> No
             {
                 "$push": {
                     "senders": (utc_now(), user.uid, len(new_recipients)),
-                    "recipients": {
-                        "$each": new_recipients
-                    },
+                    "recipients": {"$each": new_recipients},
                 },
             },
             upsert=True,

@@ -1,3 +1,4 @@
+from datetime import datetime
 from unittest.mock import ANY, AsyncMock, patch
 
 from fastapi import FastAPI
@@ -133,4 +134,26 @@ def test_apply_reminder_emails(
             {"email": "albert@uci.edu"},
         ],
         True,
+    )
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_get_apply_reminder_senders(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test getting all senders of apply reminder emails"""
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        {
+            "_id": "apply_reminder",
+            "senders": [(datetime(2025, 1, 10), "edu.uci.dir", 2)],
+        },
+    ]
+
+    res = director_client.get("/apply-reminder")
+    assert res.status_code == 200
+    mock_mongodb_handler_retrieve_one.assert_awaited_with(
+        Collection.EMAILS,
+        {"_id": "apply_reminder"},
+        ["senders"],
     )

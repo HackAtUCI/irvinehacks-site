@@ -19,7 +19,7 @@ function ApplyReminder() {
 		ReadonlyArray<FlashbarProps.MessageDefinition>
 	>([]);
 
-	const { senders } = useEmailSenders();
+	const { senders, mutate } = useEmailSenders();
 
 	return (
 		<SpaceBetween size="m">
@@ -46,6 +46,7 @@ function ApplyReminder() {
 										onDismiss: () => setFlashBarItems([]),
 									},
 								]);
+								mutate();
 							})
 							.catch(() => {
 								console.error("Unable to send out apply reminder emails");

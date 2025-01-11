@@ -2,7 +2,7 @@ import { Sender } from "@/lib/admin/useEmailSenders";
 import { Uid } from "@/lib/userRecord";
 
 interface SendersProps {
-	senders: ReadonlyArray<Sender>;
+	senders: Sender[];
 }
 
 function Senders({ senders }: SendersProps) {

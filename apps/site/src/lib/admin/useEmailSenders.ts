@@ -4,17 +4,13 @@ import { Uid } from "../userRecord";
 
 export type Sender = [string, Uid, number];
 
-export interface Senders {
-	senders: ReadonlyArray<Sender>;
-}
-
 const fetcher = async (url: string) => {
-	const res = await axios.get<Senders[]>(url);
+	const res = await axios.get<Sender[]>(url);
 	return res.data;
 };
 
 function useEmailSenders() {
-	const { data, error, isLoading } = useSWR<Senders[]>(
+	const { data, error, isLoading, mutate } = useSWR<Sender[]>(
 		"/api/director/apply-reminder",
 		fetcher,
 	);
@@ -23,6 +19,7 @@ function useEmailSenders() {
 		senders: data || [],
 		loading: isLoading,
 		error,
+		mutate,
 	};
 }
 

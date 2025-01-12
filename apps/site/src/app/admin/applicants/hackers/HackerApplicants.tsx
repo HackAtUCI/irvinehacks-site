@@ -1,9 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-
-import { useContext, useState } from "react";
-
+import { useContext, useState, useEffect } from "react";
 import Box from "@cloudscape-design/components/box";
 import Cards from "@cloudscape-design/components/cards";
 import Header from "@cloudscape-design/components/header";
@@ -24,9 +22,10 @@ import { isHackerReviewer } from "@/lib/admin/authorization";
 import HackerThresholdInputs from "../components/HackerThresholdInputs";
 import ApplicantReviewerIndicator from "../components/ApplicantReviewerIndicator";
 
+import useHackerThresholds from "@/lib/admin/useHackerThresholds";
+
 function HackerApplicants() {
 	const router = useRouter();
-
 	const { roles } = useContext(UserContext);
 
 	if (!isHackerReviewer(roles)) {
@@ -40,6 +39,13 @@ function HackerApplicants() {
 	const selectedStatusValues = selectedStatuses.map(({ value }) => value);
 	const selectedDecisionValues = selectedDecisions.map(({ value }) => value);
 
+	const [acceptedCount, setAcceptedCount] = useState(0);
+	const [waitlistedCount, setWaitlistedCount] = useState(0);
+
+	const { thresholds } = useHackerThresholds();
+	const acceptThreshold = thresholds?.accept;
+	const waitlistThreshold = thresholds?.waitlist;
+
 	const filteredApplicants = applicantList.filter(
 		(applicant) =>
 			(selectedStatuses.length === 0 ||
@@ -48,12 +54,30 @@ function HackerApplicants() {
 				selectedDecisionValues.includes(applicant.decision || "-")),
 	);
 
+	useEffect(() => {
+		const accepted = acceptThreshold ? acceptThreshold : 0;
+		const acceptedCount = applicantList.filter(
+			(applicant) => applicant.avg_score >= accepted,
+		).length;
+		setAcceptedCount(acceptedCount);
+	}, [applicantList, acceptThreshold]);
+
+	useEffect(() => {
+		const accepted = acceptThreshold ? acceptThreshold : 0;
+		const waitlisted = waitlistThreshold ? waitlistThreshold : 0;
+		const waitlistedCount = applicantList.filter(
+			(applicant) =>
+				applicant.avg_score >= waitlisted && applicant.avg_score < accepted,
+		).length;
+		setWaitlistedCount(waitlistedCount);
+	}, [applicantList, acceptThreshold, waitlistThreshold]);
+
 	const items = filteredApplicants;
 
 	const counter =
 		selectedStatuses.length > 0 || selectedDecisions.length > 0
-			? `(${items.length}/${applicantList.length})`
-			: `(${applicantList.length})`;
+			? `${items.length}/${applicantList.length}`
+			: `${applicantList.length}`;
 
 	const emptyContent = (
 		<Box textAlign="center" color="inherit">
@@ -104,7 +128,6 @@ function HackerApplicants() {
 					},
 				],
 			}}
-			// visibleSections={preferences.visibleContent}
 			loading={loading}
 			loadingText="Loading applicants"
 			items={items}
@@ -120,8 +143,21 @@ function HackerApplicants() {
 			}
 			empty={emptyContent}
 			header={
-				<Header counter={counter} actions={<HackerThresholdInputs />}>
-					Hacker Applicants
+				<Header actions={<HackerThresholdInputs />}>
+					<div style={{ display: "flex", alignItems: "baseline", gap: "8px" }}>
+						<div>Hacker Applicants</div>
+						<div>({counter})</div>
+					</div>
+					<div
+						style={{ fontSize: "0.875rem", color: "#5f6b7a", marginTop: "4px" }}
+					>
+						{acceptedCount} applicants above acceptance threshold
+					</div>
+					<div
+						style={{ fontSize: "0.875rem", color: "#5f6b7a", marginTop: "4px" }}
+					>
+						{waitlistedCount} applicants above waitlist threshold
+					</div>
 				</Header>
 			}
 		/>

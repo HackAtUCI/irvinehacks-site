@@ -63,11 +63,14 @@ function HackerThresholdInputs() {
 
 		const sentWaitlistValue = waitlistValue
 			? parseFloat(waitlistValue)
-			: thresholds?.waitlist;
+			: thresholds.waitlist;
 
-		if (sentAcceptValue < -1 || sentAcceptValue > 10) return false;
-
-		if (sentAcceptValue < sentWaitlistValue) return false;
+		if (
+			sentAcceptValue < -1 ||
+			sentAcceptValue > 10 ||
+			sentAcceptValue < sentWaitlistValue
+		)
+			return false;
 
 		return true;
 	};
@@ -94,11 +97,14 @@ function HackerThresholdInputs() {
 
 		const sentAcceptValue = acceptValue
 			? parseFloat(acceptValue)
-			: thresholds?.accept;
+			: thresholds.accept;
 
-		if (sentWaitlistValue < -1 || sentWaitlistValue > 10) return false;
-
-		if (sentAcceptValue < sentWaitlistValue) return false;
+		if (
+			sentWaitlistValue < -1 ||
+			sentWaitlistValue > 10 ||
+			sentAcceptValue < sentWaitlistValue
+		)
+			return false;
 
 		return true;
 	};

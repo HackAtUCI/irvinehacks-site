@@ -489,7 +489,7 @@ def test_set_thresholds_correctly(
     mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
 
     res = reviewer_client.post(
-        "/set-thresholds", json={"accept": "12", "waitlist": "5"}
+        "/set-thresholds", json={"accept": "10", "waitlist": "5"}
     )
 
     assert res.status_code == 200

@@ -574,14 +574,14 @@ def test_error_on_hacker_invalid_value(
     mock_mongodb_handler_raw_update_one: AsyncMock,
 ) -> None:
     """Test for error on hacker with invalid value."""
-    post_data = {"applicant": "edu.uci.sydnee", "score": 0}
+    post_data = {"applicant": "edu.uci.sydnee", "score": 100}
 
     returned_record: dict[str, Any] = {
         "_id": "edu.uci.sydnee",
         "roles": ["Applicant", "Hacker"],
         "application_data": {
             "reviews": [
-                [datetime(2023, 1, 19), "edu.uci.alicia", 100],
+                [datetime(2023, 1, 19), "edu.uci.alicia", 0],
             ]
         },
     }

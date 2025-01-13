@@ -521,3 +521,47 @@ def test_set_thresholds_with_empty_string_correctly(
         {"$set": {"accept": 12}},
         upsert=True,
     )
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_organizer_set_thresholds_forbidden(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test that the /set-thresholds route returns correctly"""
+    mock_mongodb_handler_retrieve_one.return_value = HACKER_REVIEWER_IDENTITY
+
+    res = reviewer_client.post(
+        "/set-thresholds", json={"accept": "12", "waitlist": "5"}
+    )
+
+    assert res.status_code == 403
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_review_on_invalid_value(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+    """Test that a user can properly submit a nonhacker applicant review."""
+    post_data = {"applicant": "edu.uci.sydnee", "score": -100}
+
+    returned_record: dict[str, Any] = {
+        "_id": "edu.uci.sydnee",
+        "roles": ["Applicant", "Mentor"],
+        "application_data": {
+            "reviews": [
+                [datetime(2023, 1, 19), "edu.uci.alicia", 100],
+            ]
+        },
+    }
+
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        HACKER_REVIEWER_IDENTITY,
+        returned_record,
+    ]
+    mock_mongodb_handler_raw_update_one.return_value = True
+
+    res = reviewer_client.post("/review", json=post_data)
+
+    assert res.status_code == 400

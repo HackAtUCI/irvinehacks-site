@@ -152,17 +152,17 @@ function HackerApplicants() {
 					<div
 						style={{ fontSize: "0.875rem", color: "#5f6b7a", marginTop: "4px" }}
 					>
-						{acceptedCount} applicants with "accepted" status
+						{acceptedCount} applicants with &quot;accepted&quot; status
 					</div>
 					<div
 						style={{ fontSize: "0.875rem", color: "#5f6b7a", marginTop: "4px" }}
 					>
-						{waitlistedCount} applicants with "waitlisted" status
+						{waitlistedCount} applicants with &quot;waitlisted&quot; status
 					</div>
 					<div
 						style={{ fontSize: "0.875rem", color: "#5f6b7a", marginTop: "4px" }}
 					>
-						{rejectedCount} applicants with "rejected" status
+						{rejectedCount} applicants with &quot;rejected&quot; status
 					</div>
 				</Header>
 			}

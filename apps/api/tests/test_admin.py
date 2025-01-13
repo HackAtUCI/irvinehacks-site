@@ -527,7 +527,7 @@ def test_set_thresholds_with_empty_string_correctly(
 def test_organizer_set_thresholds_forbidden(
     mock_mongodb_handler_retrieve_one: AsyncMock,
 ) -> None:
-    """Test that the /set-thresholds route returns correctly"""
+    """Test whether anyone below a director can change threshold."""
     mock_mongodb_handler_retrieve_one.return_value = HACKER_REVIEWER_IDENTITY
 
     res = reviewer_client.post(
@@ -543,7 +543,7 @@ def test_review_on_invalid_value(
     mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_mongodb_handler_raw_update_one: AsyncMock,
 ) -> None:
-    """Test that a user can properly submit a nonhacker applicant review."""
+    """Test that a reviewer cannot submit an invalid value."""
     post_data = {"applicant": "edu.uci.sydnee", "score": -100}
 
     returned_record: dict[str, Any] = {

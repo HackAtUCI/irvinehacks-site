@@ -6,7 +6,6 @@ import { useContext, useState } from "react";
 
 import Box from "@cloudscape-design/components/box";
 import Cards from "@cloudscape-design/components/cards";
-import Header from "@cloudscape-design/components/header";
 import Link from "@cloudscape-design/components/link";
 
 import { useFollowWithNextLink } from "@/app/admin/layout/common";
@@ -21,7 +20,6 @@ import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
 
 import UserContext from "@/lib/admin/UserContext";
 import { isHackerReviewer } from "@/lib/admin/authorization";
-import HackerThresholdInputs from "../components/HackerThresholdInputs";
 import ApplicantReviewerIndicator from "../components/ApplicantReviewerIndicator";
 
 function HackerApplicants() {
@@ -49,11 +47,6 @@ function HackerApplicants() {
 	);
 
 	const items = filteredApplicants;
-
-	const counter =
-		selectedStatuses.length > 0 || selectedDecisions.length > 0
-			? `(${items.length}/${applicantList.length})`
-			: `(${applicantList.length})`;
 
 	const emptyContent = (
 		<Box textAlign="center" color="inherit">
@@ -119,11 +112,6 @@ function HackerApplicants() {
 				/>
 			}
 			empty={emptyContent}
-			header={
-				<Header counter={counter} actions={<HackerThresholdInputs />}>
-					Hacker Applicants
-				</Header>
-			}
 		/>
 	);
 }

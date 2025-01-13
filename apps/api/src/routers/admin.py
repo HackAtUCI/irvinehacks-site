@@ -229,7 +229,7 @@ async def submit_review(
 ) -> None:
     """Submit a review decision from the reviewer for the given hacker applicant."""
 
-    if applicant_review.score < 0 or applicant_review.score > 10:
+    if applicant_review.score < -2 or applicant_review.score > 100:
         log.error("Invalid review score submitted.")
         raise HTTPException(status.HTTP_400_BAD_REQUEST)
 
@@ -248,6 +248,11 @@ async def submit_review(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     if Role.HACKER in applicant_record["roles"]:
+
+        if applicant_review.score < 0 or applicant_review.score > 10:
+            log.error("Invalid review score submitted.")
+            raise HTTPException(status.HTTP_400_BAD_REQUEST)
+
         unique_reviewers = applicant_review_processor.get_unique_reviewers(
             applicant_record
         )

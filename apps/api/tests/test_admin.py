@@ -565,3 +565,33 @@ def test_review_on_invalid_value(
     res = reviewer_client.post("/review", json=post_data)
 
     assert res.status_code == 400
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_error_on_hacker_invalid_value(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+    """Test for error on hacker with invalid value."""
+    post_data = {"applicant": "edu.uci.sydnee", "score": 0}
+
+    returned_record: dict[str, Any] = {
+        "_id": "edu.uci.sydnee",
+        "roles": ["Applicant", "Hacker"],
+        "application_data": {
+            "reviews": [
+                [datetime(2023, 1, 19), "edu.uci.alicia", 100],
+            ]
+        },
+    }
+
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        HACKER_REVIEWER_IDENTITY,
+        returned_record,
+    ]
+    mock_mongodb_handler_raw_update_one.return_value = True
+
+    res = reviewer_client.post("/review", json=post_data)
+
+    assert res.status_code == 400

@@ -42,10 +42,28 @@ function HackerThresholdInputs() {
 	}
 
 	const isValidAccept = () => {
-		if (!acceptValue || !waitlistValue) return true;
+		if (!acceptValue) return true;
 
 		const sentAcceptValue = parseFloat(acceptValue);
-		const sentWaitlistValue = parseFloat(waitlistValue);
+
+		if (!thresholds) {
+			if (!waitlistValue) return true;
+
+			const sentWaitlistValue = parseFloat(waitlistValue);
+
+			if (
+				sentAcceptValue < sentWaitlistValue ||
+				sentAcceptValue < -1 ||
+				sentAcceptValue > 10
+			)
+				return false;
+
+			return true;
+		}
+
+		const sentWaitlistValue = waitlistValue
+			? parseFloat(waitlistValue)
+			: thresholds?.waitlist;
 
 		if (sentAcceptValue < -1 || sentAcceptValue > 10) return false;
 
@@ -55,10 +73,28 @@ function HackerThresholdInputs() {
 	};
 
 	const isValidWaitlist = () => {
-		if (!acceptValue || !waitlistValue) return true;
+		if (!waitlistValue) return true;
 
-		const sentAcceptValue = parseFloat(acceptValue);
 		const sentWaitlistValue = parseFloat(waitlistValue);
+
+		if (!thresholds) {
+			if (!acceptValue) return true;
+
+			const sentAcceptValue = parseFloat(acceptValue);
+
+			if (
+				sentAcceptValue < sentWaitlistValue ||
+				sentWaitlistValue < -1 ||
+				sentWaitlistValue > 10
+			)
+				return false;
+
+			return true;
+		}
+
+		const sentAcceptValue = acceptValue
+			? parseFloat(acceptValue)
+			: thresholds?.accept;
 
 		if (sentWaitlistValue < -1 || sentWaitlistValue > 10) return false;
 

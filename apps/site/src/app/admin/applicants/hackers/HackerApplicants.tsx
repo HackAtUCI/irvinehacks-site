@@ -122,11 +122,12 @@ function HackerApplicants() {
 			}
 			empty={emptyContent}
 			header={
-				isUserDirector ? (
-					<Header counter={counter} actions={<HackerThresholdInputs />}>
-						Hacker Applicants
-					</Header>
-				) : null
+				<Header
+					counter={counter}
+					actions={isUserDirector && <HackerThresholdInputs />}
+				>
+					Hacker Applicants
+				</Header>
 			}
 		/>
 	);

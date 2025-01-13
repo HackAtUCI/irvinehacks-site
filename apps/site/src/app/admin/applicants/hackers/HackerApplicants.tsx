@@ -41,6 +41,7 @@ function HackerApplicants() {
 
 	const [acceptedCount, setAcceptedCount] = useState(0);
 	const [waitlistedCount, setWaitlistedCount] = useState(0);
+	const [rejectedCount, setRejectCount] = useState(0);
 
 	const { thresholds } = useHackerThresholds();
 	const acceptThreshold = thresholds?.accept;
@@ -56,28 +57,31 @@ function HackerApplicants() {
 
 	useEffect(() => {
 		const accepted = acceptThreshold ? acceptThreshold : 0;
+		const waitlisted = waitlistThreshold ? waitlistThreshold : 0;
+
 		const acceptedCount = applicantList.filter(
 			(applicant) => applicant.avg_score >= accepted,
 		).length;
 		setAcceptedCount(acceptedCount);
-	}, [applicantList, acceptThreshold]);
 
-	useEffect(() => {
-		const accepted = acceptThreshold ? acceptThreshold : 0;
-		const waitlisted = waitlistThreshold ? waitlistThreshold : 0;
 		const waitlistedCount = applicantList.filter(
 			(applicant) =>
 				applicant.avg_score >= waitlisted && applicant.avg_score < accepted,
 		).length;
 		setWaitlistedCount(waitlistedCount);
+
+		const rejectedCount = applicantList.filter(
+			(applicant) => applicant.avg_score < waitlisted,
+		).length;
+		setRejectCount(rejectedCount);
 	}, [applicantList, acceptThreshold, waitlistThreshold]);
 
 	const items = filteredApplicants;
 
 	const counter =
 		selectedStatuses.length > 0 || selectedDecisions.length > 0
-			? `${items.length}/${applicantList.length}`
-			: `${applicantList.length}`;
+			? `(${items.length}/${applicantList.length})`
+			: `(${applicantList.length})`;
 
 	const emptyContent = (
 		<Box textAlign="center" color="inherit">
@@ -144,19 +148,21 @@ function HackerApplicants() {
 			empty={emptyContent}
 			header={
 				<Header actions={<HackerThresholdInputs />}>
-					<div style={{ display: "flex", alignItems: "baseline", gap: "8px" }}>
-						<div>Hacker Applicants</div>
-						<div>({counter})</div>
+					Hacker Applicants {counter}
+					<div
+						style={{ fontSize: "0.875rem", color: "#5f6b7a", marginTop: "4px" }}
+					>
+						{acceptedCount} applicants with "accepted" status
 					</div>
 					<div
 						style={{ fontSize: "0.875rem", color: "#5f6b7a", marginTop: "4px" }}
 					>
-						{acceptedCount} applicants above acceptance threshold
+						{waitlistedCount} applicants with "waitlisted" status
 					</div>
 					<div
 						style={{ fontSize: "0.875rem", color: "#5f6b7a", marginTop: "4px" }}
 					>
-						{waitlistedCount} applicants above waitlist threshold
+						{rejectedCount} applicants with "rejected" status
 					</div>
 				</Header>
 			}

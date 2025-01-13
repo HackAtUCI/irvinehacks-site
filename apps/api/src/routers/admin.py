@@ -228,6 +228,11 @@ async def submit_review(
     reviewer: User = Depends(require_reviewer),
 ) -> None:
     """Submit a review decision from the reviewer for the given hacker applicant."""
+
+    if applicant_review.score < 0 or applicant_review.score > 10:
+        log.error("Invalid review score submitted.")
+        raise HTTPException(status.HTTP_400_BAD_REQUEST)
+
     log.info("%s reviewed hacker %s", reviewer, applicant_review.applicant)
 
     review: Review = (utc_now(), reviewer.uid, applicant_review.score)
@@ -284,7 +289,7 @@ async def submit_review(
 
 @router.post("/set-thresholds")
 async def set_hacker_score_thresholds(
-    user: Annotated[User, Depends(require_manager)],
+    user: Annotated[User, Depends(require_director)],
     accept: float = Body(),
     waitlist: float = Body(),
 ) -> None:

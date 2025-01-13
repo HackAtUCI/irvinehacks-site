@@ -303,20 +303,12 @@ async def set_hacker_score_thresholds(
     Any score under waitlisted is considered rejected.
     """
 
-    record = None
+    thresholds: Optional[dict[str, float]] = await _retrieve_thresholds()
 
-    try:
-        record = await mongodb_handler.retrieve_one(
-            Collection.SETTINGS,
-            {"_id": "hacker_score_thresholds"},
-        )
-    except RuntimeError:
-        log.error("%s could not retrieve thresholds")
-
-    if accept != -1 and record is not None:
-        record["accept"] = accept
-    if waitlist != -1 and record is not None:
-        record["waitlist"] = waitlist
+    if accept != -1 and thresholds is not None:
+        thresholds["accept"] = accept
+    if waitlist != -1 and thresholds is not None:
+        thresholds["waitlist"] = waitlist
 
     if (
         accept < -1
@@ -324,7 +316,7 @@ async def set_hacker_score_thresholds(
         or waitlist < -1
         or waitlist > 10
         or (accept != -1 and waitlist != -1 and waitlist > accept)
-        or (record and record["waitlist"] > record["accept"])
+        or (thresholds and thresholds["waitlist"] > thresholds["accept"])
     ):
         log.error("Invalid threshold score submitted.")
         raise HTTPException(status.HTTP_400_BAD_REQUEST)

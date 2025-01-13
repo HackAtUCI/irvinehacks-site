@@ -496,7 +496,7 @@ def test_set_thresholds_correctly(
     mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
         Collection.SETTINGS,
         {"_id": "hacker_score_thresholds"},
-        {"$set": {"accept": 12, "waitlist": 5}},
+        {"$set": {"accept": 10, "waitlist": 5}},
         upsert=True,
     )
 
@@ -511,14 +511,14 @@ def test_set_thresholds_with_empty_string_correctly(
     mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
 
     res = reviewer_client.post(
-        "/set-thresholds", json={"accept": "12", "waitlist": "-1"}
+        "/set-thresholds", json={"accept": "10", "waitlist": "-1"}
     )
 
     assert res.status_code == 200
     mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
         Collection.SETTINGS,
         {"_id": "hacker_score_thresholds"},
-        {"$set": {"accept": 12}},
+        {"$set": {"accept": 10}},
         upsert=True,
     )
 

@@ -34,6 +34,8 @@ function HackerApplicants() {
 
 	const [selectedStatuses, setSelectedStatuses] = useState<Options>([]);
 	const [selectedDecisions, setSelectedDecisions] = useState<Options>([]);
+	const [uidFilter, setUidFilter] = useState("");
+
 	const { applicantList, loading } = useHackerApplicants();
 
 	const selectedStatusValues = selectedStatuses.map(({ value }) => value);
@@ -46,14 +48,17 @@ function HackerApplicants() {
 	const { thresholds } = useHackerThresholds();
 	const acceptThreshold = thresholds?.accept;
 	const waitlistThreshold = thresholds?.waitlist;
-
-	const filteredApplicants = applicantList.filter(
-		(applicant) =>
+	console.log(applicantList)
+	const filteredApplicants = applicantList.filter((applicant) => {
+		return (
 			(selectedStatuses.length === 0 ||
 				selectedStatusValues.includes(applicant.status)) &&
 			(selectedDecisions.length === 0 ||
-				selectedDecisionValues.includes(applicant.decision || "-")),
-	);
+				selectedDecisionValues.includes(applicant.decision || "-")) &&
+			(uidFilter.length === 0 || applicant.reviewers.includes(uidFilter))
+		);
+	});
+	
 
 	useEffect(() => {
 		const accepted = acceptThreshold ? acceptThreshold : 0;
@@ -143,6 +148,8 @@ function HackerApplicants() {
 					setSelectedStatuses={setSelectedStatuses}
 					selectedDecisions={selectedDecisions}
 					setSelectedDecisions={setSelectedDecisions}
+					uidFilter={uidFilter}
+					setUidFilter={setUidFilter}
 				/>
 			}
 			empty={emptyContent}

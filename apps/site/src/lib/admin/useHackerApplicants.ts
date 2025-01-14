@@ -28,6 +28,7 @@ function useHackerApplicants() {
 		fetcher,
 	);
 
+
 	return { applicantList: data || [], loading: isLoading, error };
 }
 

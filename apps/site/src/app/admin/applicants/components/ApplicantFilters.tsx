@@ -5,6 +5,7 @@ import { IconProps } from "@cloudscape-design/components/icon";
 import Multiselect, {
 	MultiselectProps,
 } from "@cloudscape-design/components/multiselect";
+import Input from "@cloudscape-design/components/input";
 
 import {
 	Decision,
@@ -22,7 +23,10 @@ interface ApplicantFiltersProps {
 	setSelectedStatuses: Dispatch<SetStateAction<Options>>;
 	selectedDecisions: Options;
 	setSelectedDecisions: Dispatch<SetStateAction<Options>>;
-}
+	uidFilter?: string; 
+	setUidFilter?: Dispatch<SetStateAction<string>>; 
+  }
+  
 
 const StatusIcons: Record<Status, IconProps.Name> = {
 	[ReviewStatus.pending]: "status-pending",
@@ -52,9 +56,12 @@ function ApplicantFilters({
 	setSelectedStatuses,
 	selectedDecisions,
 	setSelectedDecisions,
+	uidFilter,
+	setUidFilter,
+
 }: ApplicantFiltersProps) {
 	return (
-		<ColumnLayout columns={2}>
+		<ColumnLayout columns={3}>
 			<Multiselect
 				selectedOptions={selectedStatuses}
 				onChange={({ detail }) => setSelectedStatuses(detail.selectedOptions)}
@@ -71,6 +78,13 @@ function ApplicantFilters({
 				placeholder="Choose reviews"
 				selectedAriaLabel="Selected"
 			/>
+			<Input
+				value={uidFilter ?? ""} 
+				onChange={(event) => setUidFilter?.(event.detail.value)} 
+				placeholder="Search by Reviewer's UID"
+				ariaLabel="Search by Reviewer's UID"
+				/>
+
 		</ColumnLayout>
 	);
 }

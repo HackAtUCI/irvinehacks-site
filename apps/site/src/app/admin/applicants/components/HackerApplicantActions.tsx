@@ -51,8 +51,11 @@ function HackerApplicantActions({
 
 	const handleClick = () => {
 		// TODO: use flashbar or modal for submit status
-		submitReview(applicant, parseFloat(value));
-		setValue("");
+		const val = parseFloat(value);
+		if (val >= 0 && val <= 10) {
+			submitReview(applicant, parseFloat(value));
+			setValue("");
+		}
 	};
 
 	return canReview ? (
@@ -65,6 +68,9 @@ function HackerApplicantActions({
 				placeholder="Applicant score"
 				step={0.5}
 				disabled={!canReview}
+				invalid={
+					value !== "" && (parseFloat(value) < 0 || parseFloat(value) > 10)
+				}
 			/>
 			<Button onClick={handleClick} disabled={!canReview}>
 				Submit

@@ -228,6 +228,11 @@ async def submit_review(
     reviewer: User = Depends(require_reviewer),
 ) -> None:
     """Submit a review decision from the reviewer for the given hacker applicant."""
+
+    if applicant_review.score < -2 or applicant_review.score > 100:
+        log.error("Invalid review score submitted.")
+        raise HTTPException(status.HTTP_400_BAD_REQUEST)
+
     log.info("%s reviewed hacker %s", reviewer, applicant_review.applicant)
 
     review: Review = (utc_now(), reviewer.uid, applicant_review.score)
@@ -243,6 +248,11 @@ async def submit_review(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     if Role.HACKER in applicant_record["roles"]:
+
+        if applicant_review.score < 0 or applicant_review.score > 10:
+            log.error("Invalid review score submitted.")
+            raise HTTPException(status.HTTP_400_BAD_REQUEST)
+
         unique_reviewers = applicant_review_processor.get_unique_reviewers(
             applicant_record
         )
@@ -284,7 +294,7 @@ async def submit_review(
 
 @router.post("/set-thresholds")
 async def set_hacker_score_thresholds(
-    user: Annotated[User, Depends(require_manager)],
+    user: Annotated[User, Depends(require_director)],
     accept: float = Body(),
     waitlist: float = Body(),
 ) -> None:
@@ -292,6 +302,25 @@ async def set_hacker_score_thresholds(
     Sets accepted and waitlisted score thresholds.
     Any score under waitlisted is considered rejected.
     """
+
+    thresholds: Optional[dict[str, float]] = await _retrieve_thresholds()
+
+    if accept != -1 and thresholds is not None:
+        thresholds["accept"] = accept
+    if waitlist != -1 and thresholds is not None:
+        thresholds["waitlist"] = waitlist
+
+    if (
+        accept < -1
+        or accept > 10
+        or waitlist < -1
+        or waitlist > 10
+        or (accept != -1 and waitlist != -1 and waitlist > accept)
+        or (thresholds and thresholds["waitlist"] > thresholds["accept"])
+    ):
+        log.error("Invalid threshold score submitted.")
+        raise HTTPException(status.HTTP_400_BAD_REQUEST)
+
     log.info("%s changed thresholds: Accept-%f | Waitlist-%f", user, accept, waitlist)
 
     # negative numbers should not be received, but -1 in this case

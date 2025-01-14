@@ -76,7 +76,7 @@ function HackerApplicants() {
 						selectedStatusValues.includes(applicant.status)) &&
 					(selectedDecisions.length === 0 ||
 						selectedDecisionValues.includes(applicant.decision || "-")),
-		  );
+		);
 
 	useEffect(() => {
 		const accepted = acceptThreshold ? acceptThreshold : 0;

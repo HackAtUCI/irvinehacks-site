@@ -104,7 +104,9 @@ function HackerApplicants() {
 	const items = top400 ? filteredApplicants400 : filteredApplicants;
 
 	const counter =
-		selectedStatuses.length > 0 || selectedDecisions.length > 0
+		selectedStatuses.length > 0 ||
+		selectedDecisions.length > 0 ||
+		uciNetIDFilter.length > 0
 			? `(${items.length}/${applicantList.length})`
 			: `(${applicantList.length})`;
 

@@ -27,7 +27,6 @@ interface ApplicantFiltersProps {
 	setSelectedDecisions: Dispatch<SetStateAction<Options>>;
 	uciNetIDFilter?: Options;
 	setUCINetIDFilter?: Dispatch<SetStateAction<Options>>;
-
 	applicantType: ParticipantRole;
 }
 
@@ -97,7 +96,7 @@ function ApplicantFilters({
 				placeholder="Choose reviews"
 				selectedAriaLabel="Selected"
 			/>
-			{applicantType === ParticipantRole.Hacker ? (
+			{applicantType === ParticipantRole.Hacker && (
 				<Multiselect
 					selectedOptions={uciNetIDFilter ?? []}
 					onChange={({ detail }) => setUCINetIDFilter?.(detail.selectedOptions)}
@@ -106,7 +105,7 @@ function ApplicantFilters({
 					placeholder="Search by Reviewer's UCINetID"
 					selectedAriaLabel="Selected"
 				/>
-			) : null}
+			)}
 		</ColumnLayout>
 	);
 }

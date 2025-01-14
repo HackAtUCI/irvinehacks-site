@@ -12,7 +12,7 @@ export default async function Mentor({
 }) {
 	return (
 		<ApplicationFlow
-			searchParams={searchParams}
+			prefaceAccepted={searchParams.prefaceAccepted}
 			applicationType="Mentor"
 			applicationURL="/mentor"
 		>

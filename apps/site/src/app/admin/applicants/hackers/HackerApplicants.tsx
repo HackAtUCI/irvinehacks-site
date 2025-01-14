@@ -6,6 +6,7 @@ import Box from "@cloudscape-design/components/box";
 import Cards from "@cloudscape-design/components/cards";
 import Header from "@cloudscape-design/components/header";
 import Link from "@cloudscape-design/components/link";
+import Checkbox from "@cloudscape-design/components/checkbox";
 
 import { useFollowWithNextLink } from "@/app/admin/layout/common";
 import useHackerApplicants, {
@@ -49,6 +50,15 @@ function HackerApplicants() {
 	const acceptThreshold = thresholds?.accept;
 	const waitlistThreshold = thresholds?.waitlist;
 
+	const [top400, setTop400] = useState(false);
+
+	useEffect(() => {
+		if (top400) {
+			setSelectedStatuses([]);
+			setSelectedDecisions([]);
+		}
+	}, [top400]);
+
 	const filteredApplicants = applicantList.filter(
 		(applicant) =>
 			(selectedStatuses.length === 0 ||
@@ -56,6 +66,11 @@ function HackerApplicants() {
 			(selectedDecisions.length === 0 ||
 				selectedDecisionValues.includes(applicant.decision || "-")),
 	);
+
+	const filteredApplicants400 = [...applicantList]
+		.filter((applicant) => applicant.avg_score !== -1)
+		.sort((a, b) => b.avg_score - a.avg_score)
+		.slice(0, 400);
 
 	useEffect(() => {
 		const accepted = acceptThreshold ? acceptThreshold : 0;
@@ -78,7 +93,7 @@ function HackerApplicants() {
 		setRejectCount(rejectedCount);
 	}, [applicantList, acceptThreshold, waitlistThreshold]);
 
-	const items = filteredApplicants;
+	const items = top400 ? filteredApplicants400 : filteredApplicants;
 
 	const counter =
 		selectedStatuses.length > 0 || selectedDecisions.length > 0
@@ -149,24 +164,52 @@ function HackerApplicants() {
 			}
 			empty={emptyContent}
 			header={
-				<Header actions={isUserDirector && <HackerThresholdInputs />}>
-					Hacker Applicants {counter}
-					<div
-						style={{ fontSize: "0.875rem", color: "#5f6b7a", marginTop: "4px" }}
+				<div>
+					<Header actions={isUserDirector && <HackerThresholdInputs />}>
+						Hacker Applicants {counter}
+						<div
+							style={{
+								fontSize: "0.875rem",
+								color: "#5f6b7a",
+								marginTop: "4px",
+							}}
+						>
+							{acceptedCount} applicants with &quot;accepted&quot; status
+						</div>
+						<div
+							style={{
+								fontSize: "0.875rem",
+								color: "#5f6b7a",
+								marginTop: "4px",
+							}}
+						>
+							{waitlistedCount} applicants with &quot;waitlisted&quot; status
+						</div>
+						<div
+							style={{
+								fontSize: "0.875rem",
+								color: "#5f6b7a",
+								marginTop: "4px",
+							}}
+						>
+							{rejectedCount} applicants with &quot;rejected&quot; status
+						</div>
+					</Header>
+					<Checkbox
+						checked={top400}
+						onChange={({ detail }) => setTop400(detail.checked)}
 					>
-						{acceptedCount} applicants with &quot;accepted&quot; status
-					</div>
-					<div
-						style={{ fontSize: "0.875rem", color: "#5f6b7a", marginTop: "4px" }}
-					>
-						{waitlistedCount} applicants with &quot;waitlisted&quot; status
-					</div>
-					<div
-						style={{ fontSize: "0.875rem", color: "#5f6b7a", marginTop: "4px" }}
-					>
-						{rejectedCount} applicants with &quot;rejected&quot; status
-					</div>
-				</Header>
+						Show Top 400 Scores
+					</Checkbox>
+					<span>
+						{top400 && "Highest score: " + filteredApplicants400[0]?.avg_score}
+						<br />
+						{top400 &&
+							"Lowest score: " +
+								filteredApplicants400[filteredApplicants400.length - 1]
+									?.avg_score}
+					</span>
+				</div>
 			}
 		/>
 	);

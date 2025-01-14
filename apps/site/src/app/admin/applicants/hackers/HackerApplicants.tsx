@@ -94,6 +94,12 @@ function HackerApplicants() {
 	}, [applicantList, acceptThreshold, waitlistThreshold]);
 
 	const items = top400 ? filteredApplicants400 : filteredApplicants;
+	const highest = top400
+		? "Highest score: " + filteredApplicants400[0]?.avg_score
+		: "";
+	const lowest = top400
+		? "Lowest score: " + filteredApplicants400[filteredApplicants.length - 1]?.avg_score
+		: "";
 
 	const counter =
 		selectedStatuses.length > 0 || selectedDecisions.length > 0
@@ -201,6 +207,9 @@ function HackerApplicants() {
 					>
 						Show Top 400 Scores
 					</Checkbox>
+					{highest}
+					<br />
+					{lowest}
 				</div>
 			}
 		/>

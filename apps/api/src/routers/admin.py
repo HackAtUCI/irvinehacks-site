@@ -354,7 +354,6 @@ async def release_decisions() -> None:
     await _process_records_in_batches(records)
 
 
-# TODO: need to make release hackers check roles as part of query
 @router.post("/release/hackers", dependencies=[Depends(require_director)])
 async def release_hacker_decisions() -> None:
     """Update hacker applicant status based on decision and send decision emails."""

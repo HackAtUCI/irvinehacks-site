@@ -486,17 +486,17 @@ def test_set_thresholds_correctly(
     mock_mongodb_handler_retrieve_one: AsyncMock,
 ) -> None:
     """Test that the /set-thresholds route returns correctly"""
-    mock_mongodb_handler_retrieve_one.return_value = HACKER_REVIEWER_IDENTITY
+    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
 
     res = reviewer_client.post(
-        "/set-thresholds", json={"accept": "12", "waitlist": "5"}
+        "/set-thresholds", json={"accept": "10", "waitlist": "5"}
     )
 
     assert res.status_code == 200
     mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
         Collection.SETTINGS,
         {"_id": "hacker_score_thresholds"},
-        {"$set": {"accept": 12, "waitlist": 5}},
+        {"$set": {"accept": 10, "waitlist": 5}},
         upsert=True,
     )
 
@@ -508,16 +508,90 @@ def test_set_thresholds_with_empty_string_correctly(
     mock_mongodb_handler_retrieve_one: AsyncMock,
 ) -> None:
     """Test that the /set-thresholds route returns correctly with -1"""
-    mock_mongodb_handler_retrieve_one.return_value = HACKER_REVIEWER_IDENTITY
+    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
 
     res = reviewer_client.post(
-        "/set-thresholds", json={"accept": "12", "waitlist": "-1"}
+        "/set-thresholds", json={"accept": "10", "waitlist": "-1"}
     )
 
     assert res.status_code == 200
     mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
         Collection.SETTINGS,
         {"_id": "hacker_score_thresholds"},
-        {"$set": {"accept": 12}},
+        {"$set": {"accept": 10}},
         upsert=True,
     )
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_organizer_set_thresholds_forbidden(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test whether anyone below a director can change threshold."""
+    mock_mongodb_handler_retrieve_one.return_value = HACKER_REVIEWER_IDENTITY
+
+    res = reviewer_client.post(
+        "/set-thresholds", json={"accept": "12", "waitlist": "5"}
+    )
+
+    assert res.status_code == 403
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_review_on_invalid_value(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+    """Test that a reviewer cannot submit an invalid value."""
+    post_data = {"applicant": "edu.uci.sydnee", "score": -100}
+
+    returned_record: dict[str, Any] = {
+        "_id": "edu.uci.sydnee",
+        "roles": ["Applicant", "Mentor"],
+        "application_data": {
+            "reviews": [
+                [datetime(2023, 1, 19), "edu.uci.alicia", 100],
+            ]
+        },
+    }
+
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        HACKER_REVIEWER_IDENTITY,
+        returned_record,
+    ]
+    mock_mongodb_handler_raw_update_one.return_value = True
+
+    res = reviewer_client.post("/review", json=post_data)
+
+    assert res.status_code == 400
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_error_on_hacker_invalid_value(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+    """Test for error on hacker with invalid value."""
+    post_data = {"applicant": "edu.uci.sydnee", "score": 100}
+
+    returned_record: dict[str, Any] = {
+        "_id": "edu.uci.sydnee",
+        "roles": ["Applicant", "Hacker"],
+        "application_data": {
+            "reviews": [
+                [datetime(2023, 1, 19), "edu.uci.alicia", 0],
+            ]
+        },
+    }
+
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        HACKER_REVIEWER_IDENTITY,
+        returned_record,
+    ]
+    mock_mongodb_handler_raw_update_one.return_value = True
+
+    res = reviewer_client.post("/review", json=post_data)
+
+    assert res.status_code == 400

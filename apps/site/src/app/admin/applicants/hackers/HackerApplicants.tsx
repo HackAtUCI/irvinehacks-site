@@ -72,8 +72,8 @@ function HackerApplicants() {
 			(uciNetIDFilter.length === 0 ||
 				applicant.reviewers.some((reviewer) =>
 					uciNetIDFilterValues.includes(reviewer),
-				))
-		);
+				)),
+	);
 
 	const filteredApplicants400 = [...applicantList]
 		.filter((applicant) => applicant.avg_score !== -1)

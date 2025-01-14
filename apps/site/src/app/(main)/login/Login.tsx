@@ -17,7 +17,7 @@ async function Login({
 	}
 
 	return (
-		<div className="min-h-screen flex flex-col items-center justify-center">
+		<div className="min-h-screen flex flex-col items-center justify-center overflow-hidden">
 			<Image
 				src={clouds}
 				alt="Background clouds"

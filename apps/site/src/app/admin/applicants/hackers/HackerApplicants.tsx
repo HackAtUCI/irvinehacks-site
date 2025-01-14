@@ -6,6 +6,7 @@ import Box from "@cloudscape-design/components/box";
 import Cards from "@cloudscape-design/components/cards";
 import Header from "@cloudscape-design/components/header";
 import Link from "@cloudscape-design/components/link";
+import { ParticipantRole } from "@/lib/userRecord";
 import Checkbox from "@cloudscape-design/components/checkbox";
 
 import { useFollowWithNextLink } from "@/app/admin/layout/common";
@@ -37,10 +38,13 @@ function HackerApplicants() {
 
 	const [selectedStatuses, setSelectedStatuses] = useState<Options>([]);
 	const [selectedDecisions, setSelectedDecisions] = useState<Options>([]);
+	const [uciNetIDFilter, setUCINetIDFilter] = useState<Options>([]);
+
 	const { applicantList, loading } = useHackerApplicants();
 
 	const selectedStatusValues = selectedStatuses.map(({ value }) => value);
 	const selectedDecisionValues = selectedDecisions.map(({ value }) => value);
+	const uciNetIDFilterValues = uciNetIDFilter.map(({ value }) => value);
 
 	const [acceptedCount, setAcceptedCount] = useState(0);
 	const [waitlistedCount, setWaitlistedCount] = useState(0);
@@ -64,7 +68,11 @@ function HackerApplicants() {
 			(selectedStatuses.length === 0 ||
 				selectedStatusValues.includes(applicant.status)) &&
 			(selectedDecisions.length === 0 ||
-				selectedDecisionValues.includes(applicant.decision || "-")),
+				selectedDecisionValues.includes(applicant.decision || "-")) &&
+			(uciNetIDFilter.length === 0 ||
+				applicant.reviewers.some((reviewer) =>
+					uciNetIDFilterValues.includes(reviewer),
+				)),
 	);
 
 	const filteredApplicants400 = [...applicantList]
@@ -96,7 +104,9 @@ function HackerApplicants() {
 	const items = top400 ? filteredApplicants400 : filteredApplicants;
 
 	const counter =
-		selectedStatuses.length > 0 || selectedDecisions.length > 0
+		selectedStatuses.length > 0 ||
+		selectedDecisions.length > 0 ||
+		uciNetIDFilter.length > 0
 			? `(${items.length}/${applicantList.length})`
 			: `(${applicantList.length})`;
 
@@ -160,6 +170,9 @@ function HackerApplicants() {
 					setSelectedStatuses={setSelectedStatuses}
 					selectedDecisions={selectedDecisions}
 					setSelectedDecisions={setSelectedDecisions}
+					uciNetIDFilter={uciNetIDFilter}
+					setUCINetIDFilter={setUCINetIDFilter}
+					applicantType={ParticipantRole.Hacker}
 				/>
 			}
 			empty={emptyContent}

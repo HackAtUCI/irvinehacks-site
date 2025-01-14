@@ -21,6 +21,7 @@ import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
 
 import UserContext from "@/lib/admin/UserContext";
 import { isVolunteerReviewer } from "@/lib/admin/authorization";
+import { ParticipantRole } from "@/lib/userRecord";
 
 function VolunteerApplicants() {
 	const router = useRouter();
@@ -104,6 +105,7 @@ function VolunteerApplicants() {
 					setSelectedStatuses={setSelectedStatuses}
 					selectedDecisions={selectedDecisions}
 					setSelectedDecisions={setSelectedDecisions}
+					applicantType={ParticipantRole.Volunteer}
 				/>
 			}
 			empty={emptyContent}

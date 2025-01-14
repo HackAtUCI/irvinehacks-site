@@ -28,7 +28,7 @@ log = getLogger(__name__)
 
 router = APIRouter()
 
-DEADLINE = datetime(2025, 1, 11, 8, 1, tzinfo=timezone.utc)
+DEADLINE = datetime(2025, 1, 13, 8, 1, tzinfo=timezone.utc)
 
 
 class IdentityResponse(BaseModel):
@@ -225,7 +225,7 @@ async def _apply_flow(
 
     log.info("%s submitted an application", user.uid)
     return (
-        "Thank you for submitting an application to IrvineHacks 2024! Please "
+        "Thank you for submitting an application to IrvineHacks 2025! Please "
         + "visit https://irvinehacks.com/portal to see your application status."
     )
 

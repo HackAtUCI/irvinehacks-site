@@ -6,7 +6,14 @@ import SideNavigation, {
 	SideNavigationProps,
 } from "@cloudscape-design/components/side-navigation";
 
-import { isApplicationManager } from "@/lib/admin/authorization";
+import {
+	isApplicationManager,
+	isHackerReviewer,
+	isMentorReviewer,
+	isVolunteerReviewer,
+	isDirector,
+} from "@/lib/admin/authorization";
+
 import UserContext from "@/lib/admin/UserContext";
 
 import { BASE_PATH, useFollowWithNextLink } from "./common";
@@ -25,18 +32,65 @@ function AdminSidebar() {
 		{ type: "link", text: "Back to main site", href: "/" },
 	];
 
+	const applicationLinks: SideNavigationProps.Link[] = [];
+
+	if (isHackerReviewer(roles)) {
+		applicationLinks.push({
+			type: "link",
+			text: "Hacker Applications",
+			href: "/admin/applicants/hackers",
+		});
+	}
+
+	if (isMentorReviewer(roles)) {
+		applicationLinks.push({
+			type: "link",
+			text: "Mentor Applications",
+			href: "/admin/applicants/mentors",
+		});
+	}
+
+	if (isVolunteerReviewer(roles)) {
+		applicationLinks.push({
+			type: "link",
+			text: "Volunteer Applications",
+			href: "/admin/applicants/volunteers",
+		});
+	}
+
 	if (isApplicationManager(roles)) {
 		navigationItems.splice(1, 0, {
-			type: "link",
+			type: "link-group",
 			text: "Applicants",
 			href: "/admin/applicants",
+			items: applicationLinks,
+		});
+	}
+
+	if (isDirector(roles)) {
+		navigationItems.splice(4, 0, {
+			type: "link-group",
+			text: "Directors",
+			href: "/admin/directors",
+			items: [
+				{
+					type: "link",
+					text: "Organizers",
+					href: "/admin/directors/organizers",
+				},
+				{
+					type: "link",
+					text: "Email Sender",
+					href: "/admin/directors/email-sender",
+				},
+			],
 		});
 	}
 
 	return (
 		<SideNavigation
 			activeHref={pathname}
-			header={{ href: BASE_PATH, text: "IrvineHacks 2024" }}
+			header={{ href: BASE_PATH, text: "IrvineHacks 2025" }}
 			onFollow={followWithNextLink}
 			items={navigationItems}
 		/>

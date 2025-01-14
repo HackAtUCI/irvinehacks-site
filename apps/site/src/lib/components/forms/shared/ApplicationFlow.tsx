@@ -14,7 +14,7 @@ import clouds from "@/assets/images/starry_clouds.png";
 export const revalidate = 60;
 
 interface ApplicationFlowProps {
-	searchParams?: {
+	searchParams: {
 		prefaceAccepted?: string;
 	};
 	applicationType: "Hacker" | "Mentor" | "Volunteer";
@@ -27,7 +27,7 @@ export default async function ApplicationFlow({
 	applicationURL,
 	children,
 }: ApplicationFlowProps & PropsWithChildren) {
-	const hasAcceptedQueryParam = searchParams?.prefaceAccepted === "true";
+	const hasAcceptedQueryParam = searchParams.prefaceAccepted === "true";
 	const identity = await getUserIdentity();
 
 	if (identity.status !== null) {

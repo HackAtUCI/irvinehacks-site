@@ -40,7 +40,7 @@ function ValidatingForm(props: PropsWithChildren<FormProps>) {
 			<div className="w-1/3">
 				<Button
 					className="text-xs sm:text-base md:text-2xl"
-					text="Login"
+					text="Continue"
 					disabled={submitting}
 					isLightVersion
 				/>

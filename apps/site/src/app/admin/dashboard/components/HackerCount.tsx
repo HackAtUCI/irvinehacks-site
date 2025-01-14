@@ -3,7 +3,8 @@ import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 
-import useParticipants, { Role } from "@/lib/admin/useParticipants";
+import useParticipants from "@/lib/admin/useParticipants";
+import { ParticipantRole } from "@/lib/userRecord";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -16,7 +17,9 @@ function HackerCount() {
 	const { participants, loading } = useParticipants();
 
 	const checkedIn = participants
-		.filter((participant) => participant.roles.includes(Role.Applicant))
+		.filter((participant) =>
+			participant.roles.includes(ParticipantRole.Applicant),
+		)
 		.filter((participant) =>
 			participant.checkins.some(([datetime]) =>
 				FRIDAY.isSame(dayjs(datetime).tz(EVENT_TIMEZONE), "date"),

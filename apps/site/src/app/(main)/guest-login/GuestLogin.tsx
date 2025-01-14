@@ -9,13 +9,16 @@ import clouds from "@/assets/images/starry_clouds.png";
 async function GuestLogin({
 	searchParams,
 }: {
-	searchParams?: {
+	searchParams: {
+		email?: string;
 		return_to?: string;
 	};
 }) {
+	const { email, return_to } = searchParams;
+
 	const identity = await getUserIdentity();
 	if (identity.uid !== null) {
-		redirect(searchParams?.return_to ?? "/portal");
+		redirect(return_to ?? "/portal");
 	}
 
 	return (
@@ -28,7 +31,7 @@ async function GuestLogin({
 			<h1 className="font-display text-3xl md:text-5xl mb-20">
 				Enter Passphrase
 			</h1>
-			<GuestLoginVerificationForm />
+			<GuestLoginVerificationForm email={email} return_to={return_to} />
 		</div>
 	);
 }

@@ -7,13 +7,15 @@ import clouds from "@/assets/images/starry_clouds.png";
 async function Login({
 	searchParams,
 }: {
-	searchParams?: {
+	searchParams: {
 		return_to?: string;
 	};
 }) {
+	const { return_to } = searchParams;
+
 	const identity = await getUserIdentity();
 	if (identity.uid !== null) {
-		redirect(searchParams?.return_to ?? "/portal");
+		redirect(return_to ?? "/portal");
 	}
 
 	return (
@@ -23,10 +25,8 @@ async function Login({
 				alt="Background clouds"
 				className="absolute top-0 min-w-[1500px] xl:min-w-[100vw] xl:w-[100vw] z-[-1] h-[200vh]"
 			/>
-			<h1 className="font-display text-3xl md:text-5xl mb-20">
-				Login to Portal
-			</h1>
-			<LoginForm return_to={searchParams?.return_to} />
+			<h1 className="font-display text-3xl md:text-5xl mb-20">Log In</h1>
+			<LoginForm return_to={return_to} />
 		</div>
 	);
 }

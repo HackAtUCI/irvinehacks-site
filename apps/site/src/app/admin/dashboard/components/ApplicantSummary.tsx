@@ -2,7 +2,7 @@ import Box from "@cloudscape-design/components/box";
 import Container from "@cloudscape-design/components/container";
 import PieChart from "@cloudscape-design/components/pie-chart";
 
-import { Status } from "@/lib/admin/useApplicant";
+import { Status } from "@/lib/userRecord";
 
 import useApplicantSummary from "./useApplicantSummary";
 

@@ -12,11 +12,17 @@ interface PathTitles {
 
 const pathTitles: PathTitles = {
 	applicants: "Applicants",
+	hackers: "Hacker Applications",
+	mentors: "Mentor Applications",
+	volunteers: "Volunteer Applications",
 	participants: "Participants",
 	events: "Events",
+	directors: "Directors",
+	organizers: "Organizers",
+	"email-sender": "Email Sender",
 };
 
-const DEFAULT_ITEMS = [{ text: "IrvineHacks 2024", href: BASE_PATH }];
+const DEFAULT_ITEMS = [{ text: "IrvineHacks 2025", href: BASE_PATH }];
 
 function Breadcrumbs() {
 	const pathname = usePathname();
@@ -41,7 +47,7 @@ function getBreadcrumbItems(pathname: string): BreadcrumbGroupProps.Item[] {
 			.slice("/admin/".length)
 			.split("/")
 			.reduce((partial, path) => {
-				partial += path;
+				partial += `${path}/`;
 				items.push({
 					text: pathTitles[path] || path,
 					href: partial,

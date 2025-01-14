@@ -9,6 +9,8 @@ export default function Home() {
 		<>
 			<Landing />
 			<ChooseCharacter />
+			<FAQ />
+			<Sponsors />
 		</>
 	) : (
 		<>

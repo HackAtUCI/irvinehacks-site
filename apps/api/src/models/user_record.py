@@ -11,17 +11,23 @@ from services.mongodb_handler import BaseRecord
 class Role(str, Enum):
     """
     Possible roles of organizers and participants.
-    The values are the display labels to be shown on the Admin site.
+    The values are the display labels to be shown throughout the site.
     """
 
     APPLICANT = "Applicant"
     DIRECTOR = "Director"
     HACKER = "Hacker"
     MENTOR = "Mentor"
-    REVIEWER = "Reviewer"
+    REVIEWER = (
+        "Reviewer"  # leaving this role in for now, but might be removed down the line
+    )
+    HACKER_REVIEWER = "Hacker Reviewer"
+    MENTOR_REVIEWER = "Mentor Reviewer"
+    VOLUNTEER_REVIEWER = "Volunteer Reviewer"
     ORGANIZER = "Organizer"
     VOLUNTEER = "Volunteer"
     CHECKIN_LEAD = "Check-in Lead"
+    LEAD = "Lead"  # Applications/Mentors/Volunteer Committee Leads
     SPONSOR = "Sponsor"
     JUDGE = "Judge"
     WORKSHOP_LEAD = "Workshop Lead"

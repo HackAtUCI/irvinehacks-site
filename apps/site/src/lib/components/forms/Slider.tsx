@@ -41,7 +41,7 @@ export default function Slider({
 					<SliderTick leftPercentage="74%" label="4" />
 					<SliderTick leftPercentage="98.7%" label="5" />
 					<input
-						className="w-full h-2 bg-white appearance-none rounded-full z-10"
+						className="w-full h-1 bg-white appearance-none rounded-full z-10"
 						type="range"
 						min="1"
 						max="5"

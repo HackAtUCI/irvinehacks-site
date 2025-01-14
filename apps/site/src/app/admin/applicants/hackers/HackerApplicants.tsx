@@ -35,13 +35,13 @@ function HackerApplicants() {
 
 	const [selectedStatuses, setSelectedStatuses] = useState<Options>([]);
 	const [selectedDecisions, setSelectedDecisions] = useState<Options>([]);
-	const [uciNetIdFilter, setUciNetIdFilter] = useState<Options>([]);
+	const [uciNetIDFilter, setUCINetIDFilter] = useState<Options>([]);
 
 	const { applicantList, loading } = useHackerApplicants();
 
 	const selectedStatusValues = selectedStatuses.map(({ value }) => value);
 	const selectedDecisionValues = selectedDecisions.map(({ value }) => value);
-	const uciNetIdFilterValues = uciNetIdFilter.map(({ value }) => value);
+	const uciNetIDFilterValues = uciNetIDFilter.map(({ value }) => value);
 
 	const [acceptedCount, setAcceptedCount] = useState(0);
 	const [waitlistedCount, setWaitlistedCount] = useState(0);
@@ -52,17 +52,17 @@ function HackerApplicants() {
 	const waitlistThreshold = thresholds?.waitlist;
 
 	const filteredApplicants = applicantList.filter((applicant) => {
-		console.log(uciNetIdFilterValues)
 		return (
 			(selectedStatuses.length === 0 ||
 				selectedStatusValues.includes(applicant.status)) &&
 			(selectedDecisions.length === 0 ||
 				selectedDecisionValues.includes(applicant.decision || "-")) &&
-				(uciNetIdFilter.length === 0 ||
-					applicant.reviewers.some((reviewer) => uciNetIdFilterValues.includes(reviewer)))
+			(uciNetIDFilter.length === 0 ||
+				applicant.reviewers.some((reviewer) =>
+					uciNetIDFilterValues.includes(reviewer),
+				))
 		);
 	});
-	
 
 	useEffect(() => {
 		const accepted = acceptThreshold ? acceptThreshold : 0;
@@ -152,9 +152,9 @@ function HackerApplicants() {
 					setSelectedStatuses={setSelectedStatuses}
 					selectedDecisions={selectedDecisions}
 					setSelectedDecisions={setSelectedDecisions}
-					uciNetIdFilter={uciNetIdFilter}
-					setuciNetIdFilter={setUciNetIdFilter}
-					applicantType = {ParticipantRole.Hacker}
+					uciNetIDFilter={uciNetIDFilter}
+					setUCINetIDFilter={setUCINetIDFilter}
+					applicantType={ParticipantRole.Hacker}
 				/>
 			}
 			empty={emptyContent}

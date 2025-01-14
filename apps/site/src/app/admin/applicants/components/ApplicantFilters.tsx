@@ -25,8 +25,8 @@ interface ApplicantFiltersProps {
 	setSelectedStatuses: Dispatch<SetStateAction<Options>>;
 	selectedDecisions: Options;
 	setSelectedDecisions: Dispatch<SetStateAction<Options>>;
-	uciNetIdFilter?: Options;
-	setuciNetIdFilter?: Dispatch<SetStateAction<Options>>;
+	uciNetIDFilter?: Options;
+	setUCINetIDFilter?: Dispatch<SetStateAction<Options>>;
 
 	applicantType: ParticipantRole;
 }
@@ -59,8 +59,8 @@ function ApplicantFilters({
 	setSelectedStatuses,
 	selectedDecisions,
 	setSelectedDecisions,
-	uciNetIdFilter,
-	setuciNetIdFilter,
+	uciNetIDFilter,
+	setUCINetIDFilter,
 	applicantType,
 }: ApplicantFiltersProps) {
 	const { applicantList, loading } = useHackerApplicants();
@@ -99,8 +99,8 @@ function ApplicantFilters({
 			/>
 			{applicantType === ParticipantRole.Hacker ? (
 				<Multiselect
-					selectedOptions={uciNetIdFilter ?? []}
-					onChange={({ detail }) => setuciNetIdFilter?.(detail.selectedOptions)}
+					selectedOptions={uciNetIDFilter ?? []}
+					onChange={({ detail }) => setUCINetIDFilter?.(detail.selectedOptions)}
 					deselectAriaLabel={(e) => `Remove ${e.label}`}
 					options={reviewerOptions}
 					placeholder="Search by Reviewer's UCINetID"

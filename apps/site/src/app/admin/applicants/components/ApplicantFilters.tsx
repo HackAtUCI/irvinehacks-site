@@ -18,8 +18,6 @@ import { StatusLabels } from "./ApplicantStatus";
 
 import useHackerApplicants from "@/lib/admin/useHackerApplicants";
 
-import { useEffect } from "react";
-
 export type Options = ReadonlyArray<MultiselectProps.Option>;
 
 interface ApplicantFiltersProps {
@@ -99,7 +97,7 @@ function ApplicantFilters({
 				placeholder="Choose reviews"
 				selectedAriaLabel="Selected"
 			/>
-			{applicantType == ParticipantRole.Hacker ? (
+			{applicantType === ParticipantRole.Hacker ? (
 				<Multiselect
 					selectedOptions={uciNetIdFilter ?? []}
 					onChange={({ detail }) => setuciNetIdFilter?.(detail.selectedOptions)}

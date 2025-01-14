@@ -165,7 +165,7 @@ function HackerApplicants() {
 			empty={emptyContent}
 			header={
 				<div>
-				  <Header actions={isUserDirector && <HackerThresholdInputs />}>
+					<Header actions={isUserDirector && <HackerThresholdInputs />}>
 						Hacker Applicants {counter}
 						<div
 							style={{

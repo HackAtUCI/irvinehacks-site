@@ -5,7 +5,6 @@ import { IconProps } from "@cloudscape-design/components/icon";
 import Multiselect, {
 	MultiselectProps,
 } from "@cloudscape-design/components/multiselect";
-import Input from "@cloudscape-design/components/input";
 
 import {
 	Decision,
@@ -13,8 +12,13 @@ import {
 	Status,
 	PostAcceptedStatus,
 } from "@/lib/userRecord";
+import { ParticipantRole } from "@/lib/userRecord";
 
 import { StatusLabels } from "./ApplicantStatus";
+
+import useHackerApplicants from "@/lib/admin/useHackerApplicants";
+
+import { useEffect } from "react";
 
 export type Options = ReadonlyArray<MultiselectProps.Option>;
 
@@ -23,10 +27,11 @@ interface ApplicantFiltersProps {
 	setSelectedStatuses: Dispatch<SetStateAction<Options>>;
 	selectedDecisions: Options;
 	setSelectedDecisions: Dispatch<SetStateAction<Options>>;
-	uidFilter?: string; 
-	setUidFilter?: Dispatch<SetStateAction<string>>; 
-  }
-  
+	uciNetIdFilter?: Options;
+	setuciNetIdFilter?: Dispatch<SetStateAction<Options>>;
+
+	applicantType: ParticipantRole;
+}
 
 const StatusIcons: Record<Status, IconProps.Name> = {
 	[ReviewStatus.pending]: "status-pending",
@@ -56,10 +61,26 @@ function ApplicantFilters({
 	setSelectedStatuses,
 	selectedDecisions,
 	setSelectedDecisions,
-	uidFilter,
-	setUidFilter,
-
+	uciNetIdFilter,
+	setuciNetIdFilter,
+	applicantType,
 }: ApplicantFiltersProps) {
+	const { applicantList, loading } = useHackerApplicants();
+
+	let reviewerOptions: Options = [];
+	if (!loading && applicantList.length > 0) {
+		const reviewerIdsSet = new Set(
+			applicantList.flatMap((applicant) => applicant.reviewers || []),
+		);
+
+		const reviewerIds = Array.from(reviewerIdsSet);
+
+		reviewerOptions = reviewerIds.map((id) => ({
+			label: id.split(".")[2],
+			value: id,
+		}));
+	}
+
 	return (
 		<ColumnLayout columns={3}>
 			<Multiselect
@@ -78,13 +99,16 @@ function ApplicantFilters({
 				placeholder="Choose reviews"
 				selectedAriaLabel="Selected"
 			/>
-			<Input
-				value={uidFilter ?? ""} 
-				onChange={(event) => setUidFilter?.(event.detail.value)} 
-				placeholder="Search by Reviewer's UID"
-				ariaLabel="Search by Reviewer's UID"
+			{applicantType == ParticipantRole.Hacker ? (
+				<Multiselect
+					selectedOptions={uciNetIdFilter ?? []}
+					onChange={({ detail }) => setuciNetIdFilter?.(detail.selectedOptions)}
+					deselectAriaLabel={(e) => `Remove ${e.label}`}
+					options={reviewerOptions}
+					placeholder="Search by Reviewer's UCINetID"
+					selectedAriaLabel="Selected"
 				/>
-
+			) : null}
 		</ColumnLayout>
 	);
 }

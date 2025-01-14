@@ -6,6 +6,7 @@ import Box from "@cloudscape-design/components/box";
 import Cards from "@cloudscape-design/components/cards";
 import Header from "@cloudscape-design/components/header";
 import Link from "@cloudscape-design/components/link";
+import { ParticipantRole } from "@/lib/userRecord";
 
 import { useFollowWithNextLink } from "@/app/admin/layout/common";
 import useHackerApplicants, {
@@ -34,12 +35,13 @@ function HackerApplicants() {
 
 	const [selectedStatuses, setSelectedStatuses] = useState<Options>([]);
 	const [selectedDecisions, setSelectedDecisions] = useState<Options>([]);
-	const [uidFilter, setUidFilter] = useState("");
+	const [uciNetIdFilter, setUciNetIdFilter] = useState<Options>([]);
 
 	const { applicantList, loading } = useHackerApplicants();
 
 	const selectedStatusValues = selectedStatuses.map(({ value }) => value);
 	const selectedDecisionValues = selectedDecisions.map(({ value }) => value);
+	const uciNetIdFilterValues = uciNetIdFilter.map(({ value }) => value);
 
 	const [acceptedCount, setAcceptedCount] = useState(0);
 	const [waitlistedCount, setWaitlistedCount] = useState(0);
@@ -48,14 +50,16 @@ function HackerApplicants() {
 	const { thresholds } = useHackerThresholds();
 	const acceptThreshold = thresholds?.accept;
 	const waitlistThreshold = thresholds?.waitlist;
-	console.log(applicantList)
+
 	const filteredApplicants = applicantList.filter((applicant) => {
+		console.log(uciNetIdFilterValues)
 		return (
 			(selectedStatuses.length === 0 ||
 				selectedStatusValues.includes(applicant.status)) &&
 			(selectedDecisions.length === 0 ||
 				selectedDecisionValues.includes(applicant.decision || "-")) &&
-			(uidFilter.length === 0 || applicant.reviewers.includes(uidFilter))
+				(uciNetIdFilter.length === 0 ||
+					applicant.reviewers.some((reviewer) => uciNetIdFilterValues.includes(reviewer)))
 		);
 	});
 	
@@ -148,8 +152,9 @@ function HackerApplicants() {
 					setSelectedStatuses={setSelectedStatuses}
 					selectedDecisions={selectedDecisions}
 					setSelectedDecisions={setSelectedDecisions}
-					uidFilter={uidFilter}
-					setUidFilter={setUidFilter}
+					uciNetIdFilter={uciNetIdFilter}
+					setuciNetIdFilter={setUciNetIdFilter}
+					applicantType = {ParticipantRole.Hacker}
 				/>
 			}
 			empty={emptyContent}

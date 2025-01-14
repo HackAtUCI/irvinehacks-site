@@ -65,18 +65,10 @@ function HackerApplicants() {
 				selectedDecisionValues.includes(applicant.decision || "-")),
 	);
 
-	const filteredApplicants400 = top400
-		? [...applicantList]
-				.filter((applicant) => applicant.avg_score !== -1)
-				.sort((a, b) => b.avg_score - a.avg_score)
-				.slice(0, 400)
-		: applicantList.filter(
-				(applicant) =>
-					(selectedStatuses.length === 0 ||
-						selectedStatusValues.includes(applicant.status)) &&
-					(selectedDecisions.length === 0 ||
-						selectedDecisionValues.includes(applicant.decision || "-")),
-		);
+	const filteredApplicants400 = [...applicantList]
+		.filter((applicant) => applicant.avg_score !== -1)
+		.sort((a, b) => b.avg_score - a.avg_score)
+		.slice(0, 400);
 
 	useEffect(() => {
 		const accepted = acceptThreshold ? acceptThreshold : 0;

@@ -203,7 +203,7 @@ function HackerApplicants() {
 					</Header>
 					<Checkbox
 						checked={top400}
-						onChange={({detail}) => setTop400(detail.checked)}
+						onChange={({ detail }) => setTop400(detail.checked)}
 					>
 						Show Top 400 Scores
 					</Checkbox>

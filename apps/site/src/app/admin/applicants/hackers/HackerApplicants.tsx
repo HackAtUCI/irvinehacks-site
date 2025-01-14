@@ -9,7 +9,6 @@ import Link from "@cloudscape-design/components/link";
 import { ParticipantRole } from "@/lib/userRecord";
 import Checkbox from "@cloudscape-design/components/checkbox";
 
-
 import { useFollowWithNextLink } from "@/app/admin/layout/common";
 import useHackerApplicants, {
 	HackerApplicantSummary,

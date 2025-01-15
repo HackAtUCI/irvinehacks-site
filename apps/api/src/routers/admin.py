@@ -603,15 +603,6 @@ async def _process_batch(
 def _extract_personalizations(decision_data: dict[str, Any]) -> tuple[str, EmailStr]:
     name = decision_data["first_name"]
     email = recover_email_from_uid(decision_data["_id"])
-    # application_type = ""
-    # roles = decision_data["roles"]
-    # if "Hacker" in roles:
-    #     application_type = "Hacker"
-    # elif "Mentor" in roles:
-    #     application_type = "Mentor"
-    # elif "Volunteer" in roles:
-    #     application_type = "Volunteer"
-    # return name, email, application_type
     return name, email
 
 

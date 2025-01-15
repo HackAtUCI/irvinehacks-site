@@ -3,6 +3,7 @@ from typing import Iterable, Protocol
 from pydantic import EmailStr
 
 from models.ApplicationData import Decision
+from models.user_record import Role
 from services import sendgrid_handler
 from services.sendgrid_handler import (
     ApplicationUpdatePersonalization,
@@ -12,10 +13,20 @@ from services.sendgrid_handler import (
 
 IH_SENDER = ("apply@irvinehacks.com", "IrvineHacks 2025 Applications")
 
-DECISION_TEMPLATES: dict[Decision, ApplicationUpdateTemplates] = {
-    Decision.ACCEPTED: Template.HACKER_ACCEPTED_EMAIL,
-    Decision.REJECTED: Template.HACKER_REJECTED_EMAIL,
-    Decision.WAITLISTED: Template.HACKER_WAITLISTED_EMAIL,
+DECISION_TEMPLATES: dict[Role, dict[Decision, ApplicationUpdateTemplates]] = {
+    Role.HACKER: {
+        Decision.ACCEPTED: Template.HACKER_ACCEPTED_EMAIL,
+        Decision.REJECTED: Template.HACKER_REJECTED_EMAIL,
+        Decision.WAITLISTED: Template.HACKER_WAITLISTED_EMAIL,
+    },
+    Role.MENTOR: {
+        Decision.ACCEPTED: Template.MENTOR_ACCEPTED_EMAIL,
+        Decision.REJECTED: Template.MENTOR_REJECTED_EMAIL,
+    },
+    Role.VOLUNTEER: {
+        Decision.ACCEPTED: Template.VOLUNTEER_ACCEPTED_EMAIL,
+        Decision.REJECTED: Template.VOLUNTEER_REJECTED_EMAIL,
+    },
 }
 
 
@@ -54,7 +65,9 @@ async def send_guest_login_email(email: EmailStr, passphrase: str) -> None:
 
 
 async def send_decision_email(
-    applicant_batch: Iterable[tuple[str, EmailStr]], decision: Decision
+    applicant_batch: Iterable[tuple[str, EmailStr]],
+    decision: Decision,
+    application_type: Role,
 ) -> None:
     """Send a specific decision email to a group of applicants."""
     personalizations = [
@@ -62,7 +75,7 @@ async def send_decision_email(
         for first_name, email in applicant_batch
     ]
 
-    template = DECISION_TEMPLATES[decision]
+    template = DECISION_TEMPLATES[application_type][decision]
     await sendgrid_handler.send_email(template, IH_SENDER, personalizations, True)
 
 

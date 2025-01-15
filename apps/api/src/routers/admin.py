@@ -380,7 +380,7 @@ async def release_mentor_volunteer_decisions() -> None:
     for record in records:
         applicant_review_processor.include_review_decision(record)
 
-    await _process_records_in_batches(records)
+    await _process_records_in_batches(records, [Role.MENTOR, Role.VOLUNTEER])
 
 
 @router.post("/release/hackers", dependencies=[Depends(require_director)])
@@ -403,7 +403,7 @@ async def release_hacker_decisions() -> None:
             record, thresholds["accept"], thresholds["waitlist"]
         )
 
-    await _process_records_in_batches(records)
+    await _process_records_in_batches(records, [Role.HACKER])
 
 
 @router.post("/rsvp-reminder", dependencies=[Depends(require_director)])
@@ -558,14 +558,20 @@ async def subevent_checkin(
     await participant_manager.subevent_checkin(event, uid, organizer)
 
 
-async def _process_records_in_batches(records: list[dict[str, object]]) -> None:
-    for decision in (Decision.ACCEPTED, Decision.WAITLISTED, Decision.REJECTED):
-        group = [record for record in records if record["decision"] == decision]
-        if not group:
-            continue
-        await asyncio.gather(
-            *(_process_batch(batch, decision) for batch in batched(group, 100))
-        )
+async def _process_records_in_batches(
+    records: list[dict[str, object]], application_types: list[Role]
+) -> None:
+    for application_type in application_types:
+        for decision in (Decision.ACCEPTED, Decision.WAITLISTED, Decision.REJECTED):
+            group = [record for record in records if record["decision"] == decision]
+            if not group:
+                continue
+            await asyncio.gather(
+                *(
+                    _process_batch(batch, decision, application_type)
+                    for batch in batched(group, 100)
+                )
+            )
 
 
 async def _process_status(uids: Sequence[str], status: Status) -> None:
@@ -576,7 +582,9 @@ async def _process_status(uids: Sequence[str], status: Status) -> None:
         raise RuntimeError("gg wp")
 
 
-async def _process_batch(batch: tuple[dict[str, Any], ...], decision: Decision) -> None:
+async def _process_batch(
+    batch: tuple[dict[str, Any], ...], decision: Decision, application_type: Role
+) -> None:
     uids: list[str] = [record["_id"] for record in batch]
     log.info(f"Setting {','.join(uids)} as {decision}")
     ok = await mongodb_handler.update(
@@ -588,13 +596,22 @@ async def _process_batch(batch: tuple[dict[str, Any], ...], decision: Decision) 
     # Send emails
     log.info(f"Sending {decision} emails for {len(batch)} applicants")
     await email_handler.send_decision_email(
-        map(_extract_personalizations, batch), decision
+        map(_extract_personalizations, batch), decision, application_type
     )
 
 
 def _extract_personalizations(decision_data: dict[str, Any]) -> tuple[str, EmailStr]:
     name = decision_data["first_name"]
     email = recover_email_from_uid(decision_data["_id"])
+    # application_type = ""
+    # roles = decision_data["roles"]
+    # if "Hacker" in roles:
+    #     application_type = "Hacker"
+    # elif "Mentor" in roles:
+    #     application_type = "Mentor"
+    # elif "Volunteer" in roles:
+    #     application_type = "Volunteer"
+    # return name, email, application_type
     return name, email
 
 

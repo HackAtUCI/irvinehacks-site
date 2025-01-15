@@ -52,6 +52,10 @@ ApplicationUpdateTemplates: TypeAlias = Literal[
     Template.HACKER_ACCEPTED_EMAIL,
     Template.HACKER_WAITLISTED_EMAIL,
     Template.HACKER_REJECTED_EMAIL,
+    Template.MENTOR_ACCEPTED_EMAIL,
+    Template.MENTOR_REJECTED_EMAIL,
+    Template.VOLUNTEER_ACCEPTED_EMAIL,
+    Template.VOLUNTEER_REJECTED_EMAIL,
     Template.RSVP_REMINDER,
     Template.WAITLIST_RELEASE_EMAIL,
 ]

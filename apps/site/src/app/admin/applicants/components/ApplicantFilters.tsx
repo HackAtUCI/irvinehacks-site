@@ -12,8 +12,11 @@ import {
 	Status,
 	PostAcceptedStatus,
 } from "@/lib/userRecord";
+import { ParticipantRole } from "@/lib/userRecord";
 
 import { StatusLabels } from "./ApplicantStatus";
+
+import useHackerApplicants from "@/lib/admin/useHackerApplicants";
 
 export type Options = ReadonlyArray<MultiselectProps.Option>;
 
@@ -22,6 +25,9 @@ interface ApplicantFiltersProps {
 	setSelectedStatuses: Dispatch<SetStateAction<Options>>;
 	selectedDecisions: Options;
 	setSelectedDecisions: Dispatch<SetStateAction<Options>>;
+	uciNetIDFilter?: Options;
+	setUCINetIDFilter?: Dispatch<SetStateAction<Options>>;
+	applicantType: ParticipantRole;
 }
 
 const StatusIcons: Record<Status, IconProps.Name> = {
@@ -52,9 +58,28 @@ function ApplicantFilters({
 	setSelectedStatuses,
 	selectedDecisions,
 	setSelectedDecisions,
+	uciNetIDFilter,
+	setUCINetIDFilter,
+	applicantType,
 }: ApplicantFiltersProps) {
+	const { applicantList, loading } = useHackerApplicants();
+
+	let reviewerOptions: Options = [];
+	if (!loading && applicantList.length > 0) {
+		const reviewerIdsSet = new Set(
+			applicantList.flatMap((applicant) => applicant.reviewers || []),
+		);
+
+		const reviewerIds = Array.from(reviewerIdsSet);
+
+		reviewerOptions = reviewerIds.map((id) => ({
+			label: id.split(".")[2],
+			value: id,
+		}));
+	}
+
 	return (
-		<ColumnLayout columns={2}>
+		<ColumnLayout columns={3}>
 			<Multiselect
 				selectedOptions={selectedStatuses}
 				onChange={({ detail }) => setSelectedStatuses(detail.selectedOptions)}
@@ -71,6 +96,16 @@ function ApplicantFilters({
 				placeholder="Choose reviews"
 				selectedAriaLabel="Selected"
 			/>
+			{applicantType === ParticipantRole.Hacker && (
+				<Multiselect
+					selectedOptions={uciNetIDFilter ?? []}
+					onChange={({ detail }) => setUCINetIDFilter?.(detail.selectedOptions)}
+					deselectAriaLabel={(e) => `Remove ${e.label}`}
+					options={reviewerOptions}
+					placeholder="Search by Reviewer's UCINetID"
+					selectedAriaLabel="Selected"
+				/>
+			)}
 		</ColumnLayout>
 	);
 }

@@ -368,8 +368,8 @@ async def get_hacker_score_thresholds(
     return record
 
 
-@router.post("/release", dependencies=[Depends(require_director)])
-async def release_decisions() -> None:
+@router.post("/release/mentor-volunteer", dependencies=[Depends(require_director)])
+async def release_mentor_volunteer_decisions() -> None:
     """Update applicant status based on decision and send decision emails."""
     records = await mongodb_handler.retrieve(
         Collection.USERS,

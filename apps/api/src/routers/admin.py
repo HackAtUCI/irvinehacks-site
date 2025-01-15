@@ -606,7 +606,9 @@ async def _process_batch(
         raise RuntimeError("gg wp")
 
     # Send emails
-    log.info(f"Sending {application_type} {decision} emails for {len(batch)} applicants")
+    log.info(
+        f"Sending {application_type} {decision} emails for {len(batch)} applicants"
+    )
     await email_handler.send_decision_email(
         map(_extract_personalizations, batch), decision, application_type
     )

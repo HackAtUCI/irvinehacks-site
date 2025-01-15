@@ -1,6 +1,8 @@
+"use client";
+
 import { redirect } from "next/navigation";
 
-import getUserIdentity from "@/lib/utils/getUserIdentity";
+import useUserIdentity from "@/lib/utils/useUserIdentity";
 
 import ConfirmAttendance from "./components/ConfirmAttendance";
 import Message from "./components/Message";
@@ -25,15 +27,15 @@ export const enum PortalStatus {
 
 const rolesArray = ["Mentor", "Hacker", "Volunteer"];
 
-async function Portal() {
-	const identity = await getUserIdentity();
-	const status = identity.status;
+function Portal() {
+	const identity = useUserIdentity();
+	const status = identity?.status;
 
 	if (status === null) {
 		redirect("/#apply");
 	}
 
-	const roleToDisplay = identity.roles.find((role) =>
+	const roleToDisplay = identity?.roles.find((role) =>
 		rolesArray.includes(role),
 	);
 

@@ -11,6 +11,7 @@ interface ButtonProps {
 	isLightVersion?: boolean;
 	isNavButton?: boolean;
 	usePrefetch?: boolean;
+	newWindow?: boolean;
 	disabled?: boolean;
 	style?: CSSProperties;
 }
@@ -24,12 +25,15 @@ const Button: React.FC<ButtonProps> = ({
 	isNavButton,
 	disabled,
 	usePrefetch = true,
+	newWindow = false,
 }) => {
 	if (href) {
 		return (
 			<div className={clsx(!isLightVersion && styles.buttonBox)}>
 				<Link
 					href={href}
+					target={newWindow ? "_blank" : "_self"}
+					rel={newWindow ? "noopener noreferrer" : ""}
 					className={clsx(
 						styles.button,
 						isLightVersion && styles.lightButton,

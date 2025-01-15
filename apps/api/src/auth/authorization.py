@@ -53,6 +53,7 @@ async def require_accepted_applicant(
             Decision.ACCEPTED,
             Status.WAIVER_SIGNED,
             Status.CONFIRMED,
+            Status.ATTENDING,
         ):
             raise HTTPException(status.HTTP_403_FORBIDDEN, "User was not accepted.")
 

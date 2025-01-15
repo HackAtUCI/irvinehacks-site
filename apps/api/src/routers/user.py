@@ -238,7 +238,7 @@ async def request_waiver(
     # TODO: non-applicants might also want to request a waiver
     user_data, applicant = user
 
-    if applicant.status in (Status.WAIVER_SIGNED, Status.CONFIRMED):
+    if applicant.status in (Status.WAIVER_SIGNED, Status.CONFIRMED, Status.ATTENDING):
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Already submitted a waiver.")
 
     user_name = f"{applicant.first_name} {applicant.last_name}"

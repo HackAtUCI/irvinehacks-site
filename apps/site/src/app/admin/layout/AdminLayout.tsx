@@ -10,7 +10,7 @@ import { SWRConfig } from "swr";
 
 import { hasAdminRole } from "@/lib/admin/authorization";
 import UserContext from "@/lib/admin/UserContext";
-import useUserIdentity from "@/lib/admin/useUserIdentity";
+import useUserIdentity from "@/lib/utils/useUserIdentity";
 
 import AdminSidebar from "./AdminSidebar";
 import Breadcrumbs from "./Breadcrumbs";

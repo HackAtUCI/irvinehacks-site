@@ -373,7 +373,7 @@ async def release_decisions() -> None:
     """Update applicant status based on decision and send decision emails."""
     records = await mongodb_handler.retrieve(
         Collection.USERS,
-        {"status": Status.REVIEWED},
+        {"status": Status.REVIEWED, "roles": {"$in": [Role.MENTOR, Role.VOLUNTEER]}},
         ["_id", "application_data.reviews", "first_name"],
     )
 
@@ -388,7 +388,7 @@ async def release_hacker_decisions() -> None:
     """Update hacker applicant status based on decision and send decision emails."""
     records = await mongodb_handler.retrieve(
         Collection.USERS,
-        {"status": Status.REVIEWED},
+        {"status": Status.REVIEWED, "roles": {"$in": [Role.HACKER]}},
         ["_id", "application_data.reviews", "first_name"],
     )
 

@@ -22,5 +22,5 @@ async def test_send_decision_email(mock_sendgrid_handler_send_email: AsyncMock) 
     await email_handler.send_decision_email(users, Decision.ACCEPTED)
 
     mock_sendgrid_handler_send_email.assert_called_once_with(
-        Template.ACCEPTED_EMAIL, IH_SENDER, expected_personalizations, True
+        Template.HACKER_ACCEPTED_EMAIL, IH_SENDER, expected_personalizations, True
     )

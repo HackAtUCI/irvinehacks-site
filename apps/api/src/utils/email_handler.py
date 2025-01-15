@@ -13,9 +13,9 @@ from services.sendgrid_handler import (
 IH_SENDER = ("apply@irvinehacks.com", "IrvineHacks 2025 Applications")
 
 DECISION_TEMPLATES: dict[Decision, ApplicationUpdateTemplates] = {
-    Decision.ACCEPTED: Template.ACCEPTED_EMAIL,
-    Decision.REJECTED: Template.REJECTED_EMAIL,
-    Decision.WAITLISTED: Template.WAITLISTED_EMAIL,
+    Decision.ACCEPTED: Template.HACKER_ACCEPTED_EMAIL,
+    Decision.REJECTED: Template.HACKER_REJECTED_EMAIL,
+    Decision.WAITLISTED: Template.HACKER_WAITLISTED_EMAIL,
 }
 
 

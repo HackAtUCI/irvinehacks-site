@@ -39,7 +39,7 @@ function ConfirmationModal({
 					</SpaceBetween>
 				</Box>
 			}
-			header="Send Reminder Emails"
+			header="Send Emails"
 		>
 			<TextContent>
 				<p>You are about to send out emails</p>

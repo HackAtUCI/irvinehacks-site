@@ -368,12 +368,12 @@ async def get_hacker_score_thresholds(
     return record
 
 
-@router.post("/release", dependencies=[Depends(require_director)])
-async def release_decisions() -> None:
+@router.post("/release/mentor-volunteer", dependencies=[Depends(require_director)])
+async def release_mentor_volunteer_decisions() -> None:
     """Update applicant status based on decision and send decision emails."""
     records = await mongodb_handler.retrieve(
         Collection.USERS,
-        {"status": Status.REVIEWED},
+        {"status": Status.REVIEWED, "roles": {"$in": [Role.MENTOR, Role.VOLUNTEER]}},
         ["_id", "application_data.reviews", "first_name"],
     )
 
@@ -383,13 +383,12 @@ async def release_decisions() -> None:
     await _process_records_in_batches(records)
 
 
-# TODO: need to make release hackers check roles as part of query
 @router.post("/release/hackers", dependencies=[Depends(require_director)])
 async def release_hacker_decisions() -> None:
     """Update hacker applicant status based on decision and send decision emails."""
     records = await mongodb_handler.retrieve(
         Collection.USERS,
-        {"status": Status.REVIEWED},
+        {"status": Status.REVIEWED, "roles": {"$in": [Role.HACKER]}},
         ["_id", "application_data.reviews", "first_name"],
     )
 

@@ -16,10 +16,17 @@ function SignWaiver() {
 				<Button
 					text="Sign Waiver to attend IrvineHacks 2025"
 					href="/api/user/waiver"
+					newWindow={true}
+					usePrefetch={false}
 					isLightVersion={true}
 					className="text-xs sm:text-base md:text-4xl"
 				/>
 			</div>
+
+			<p className="text-xl w-full text-center mt-2 text-yellow-500">
+				It may take up to a minute for this site to update after waiver is
+				signed
+			</p>
 		</div>
 	);
 }

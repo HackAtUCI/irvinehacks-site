@@ -52,7 +52,7 @@ DOCUSIGN_HMAC_KEY = os.getenv("DOCUSIGN_HMAC_KEY", "")
 STAGING_ENV = os.getenv("DEPLOYMENT") == "STAGING"
 
 if STAGING_ENV:
-    POWERFORM_ID = UUID("1efee4cc-ec83-42e8-baef-4633d60c3571")  # temporary
+    POWERFORM_ID = UUID("1efee4cc-ec83-42e8-baef-4633d60c3571")
     ACCOUNT_ID = UUID("e6262c0d-c7c1-444b-99b1-e5c6ceaa4b40")
     DOCUSIGN_ENV = "na3"
 else:

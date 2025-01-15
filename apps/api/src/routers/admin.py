@@ -371,16 +371,26 @@ async def get_hacker_score_thresholds(
 @router.post("/release/mentor-volunteer", dependencies=[Depends(require_director)])
 async def release_mentor_volunteer_decisions() -> None:
     """Update applicant status based on decision and send decision emails."""
-    records = await mongodb_handler.retrieve(
+    mentor_records = await mongodb_handler.retrieve(
         Collection.USERS,
-        {"status": Status.REVIEWED, "roles": {"$in": [Role.MENTOR, Role.VOLUNTEER]}},
+        {"status": Status.REVIEWED, "roles": {"$in": [Role.MENTOR]}},
         ["_id", "application_data.reviews", "first_name"],
     )
 
-    for record in records:
+    for record in mentor_records:
         applicant_review_processor.include_review_decision(record)
 
-    await _process_records_in_batches(records, [Role.MENTOR, Role.VOLUNTEER])
+    volunteer_records = await mongodb_handler.retrieve(
+        Collection.USERS,
+        {"status": Status.REVIEWED, "roles": {"$in": [Role.VOLUNTEER]}},
+        ["_id", "application_data.reviews", "first_name"],
+    )
+
+    for record in volunteer_records:
+        applicant_review_processor.include_review_decision(record)
+
+    await _process_records_in_batches(mentor_records, Role.MENTOR)
+    await _process_records_in_batches(volunteer_records, Role.VOLUNTEER)
 
 
 @router.post("/release/hackers", dependencies=[Depends(require_director)])
@@ -403,7 +413,7 @@ async def release_hacker_decisions() -> None:
             record, thresholds["accept"], thresholds["waitlist"]
         )
 
-    await _process_records_in_batches(records, [Role.HACKER])
+    await _process_records_in_batches(records, Role.HACKER)
 
 
 @router.post("/rsvp-reminder", dependencies=[Depends(require_director)])
@@ -559,19 +569,19 @@ async def subevent_checkin(
 
 
 async def _process_records_in_batches(
-    records: list[dict[str, object]], application_types: list[Role]
+    records: list[dict[str, object]],
+    application_type: Literal[Role.HACKER, Role.MENTOR, Role.VOLUNTEER],
 ) -> None:
-    for application_type in application_types:
-        for decision in (Decision.ACCEPTED, Decision.WAITLISTED, Decision.REJECTED):
-            group = [record for record in records if record["decision"] == decision]
-            if not group:
-                continue
-            await asyncio.gather(
-                *(
-                    _process_batch(batch, decision, application_type)
-                    for batch in batched(group, 100)
-                )
+    for decision in (Decision.ACCEPTED, Decision.WAITLISTED, Decision.REJECTED):
+        group = [record for record in records if record["decision"] == decision]
+        if not group:
+            continue
+        await asyncio.gather(
+            *(
+                _process_batch(batch, decision, application_type)
+                for batch in batched(group, 100)
             )
+        )
 
 
 async def _process_status(uids: Sequence[str], status: Status) -> None:
@@ -583,10 +593,12 @@ async def _process_status(uids: Sequence[str], status: Status) -> None:
 
 
 async def _process_batch(
-    batch: tuple[dict[str, Any], ...], decision: Decision, application_type: Role
+    batch: tuple[dict[str, Any], ...],
+    decision: Decision,
+    application_type: Literal[Role.HACKER, Role.MENTOR, Role.VOLUNTEER],
 ) -> None:
     uids: list[str] = [record["_id"] for record in batch]
-    log.info(f"Setting {','.join(uids)} as {decision}")
+    log.info(f"Setting {application_type}s {','.join(uids)} as {decision}")
     ok = await mongodb_handler.update(
         Collection.USERS, {"_id": {"$in": uids}}, {"status": decision}
     )
@@ -594,7 +606,7 @@ async def _process_batch(
         raise RuntimeError("gg wp")
 
     # Send emails
-    log.info(f"Sending {decision} emails for {len(batch)} applicants")
+    log.info(f"Sending {application_type} {decision} emails for {len(batch)} applicants")
     await email_handler.send_decision_email(
         map(_extract_personalizations, batch), decision, application_type
     )

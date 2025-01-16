@@ -9,7 +9,7 @@ const VERCEL_API_PATH = "/api/";
 
 const DOCUSIGN_FORM_URL =
 	"https://na3.docusign.net/Member/PowerFormSigning.aspx?" +
-	"PowerFormId=f2a69fce-a986-4ad5-9ce9-53f9b544816d" +
+	"PowerFormId=155a2cee-437f-4aa4-bc58-bd1cb01cde20" +
 	"&env=na3" +
 	"&acct=e6262c0d-c7c1-444b-99b1-e5c6ceaa4b40" +
 	"&v=2";
@@ -39,11 +39,11 @@ const nextConfig = {
 			// 	destination: "https://forms.gle/erpJjErKLJkEZMw48",
 			// 	permanent: true,
 			// },
-			// {
-			// 	source: "/waiver",
-			// 	destination: DOCUSIGN_FORM_URL,
-			// 	permanent: true,
-			// },
+			{
+				source: "/waiver",
+				destination: DOCUSIGN_FORM_URL,
+				permanent: true,
+			},
 			// {
 			// 	source: "/incident",
 			// 	destination: "https://forms.gle/A6BdsSzYSiyeTP8Y6",

@@ -52,11 +52,12 @@ DOCUSIGN_HMAC_KEY = os.getenv("DOCUSIGN_HMAC_KEY", "")
 STAGING_ENV = os.getenv("DEPLOYMENT") == "STAGING"
 
 if STAGING_ENV:
-    POWERFORM_ID = UUID("d5120219-dec1-41c5-b579-5e6b45c886e8")  # temporary
+    POWERFORM_ID = UUID("d5120219-dec1-41c5-b579-5e6b45c886e8")
     ACCOUNT_ID = UUID("cc0e3157-358d-4e10-acb0-ef39db7e3071")
     DOCUSIGN_ENV = "demo"
 else:
-    POWERFORM_ID = UUID("f2a69fce-a986-4ad5-9ce9-53f9b544816d")
+    # If POWERFORM_ID changed here, also update PowerFormId in next.config.js
+    POWERFORM_ID = UUID("155a2cee-437f-4aa4-bc58-bd1cb01cde20")
     ACCOUNT_ID = UUID("e6262c0d-c7c1-444b-99b1-e5c6ceaa4b40")
     DOCUSIGN_ENV = "na3"
 

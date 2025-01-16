@@ -29,13 +29,18 @@ const rolesArray = ["Mentor", "Hacker", "Volunteer"];
 
 function Portal() {
 	const identity = useUserIdentity();
-	const status = identity?.status;
+
+	if (!identity) {
+		return <div className="font-display text-4xl mt-5">Loading...</div>;
+	}
+
+	const status = identity.status;
 
 	if (status === null) {
 		redirect("/#apply");
 	}
 
-	const roleToDisplay = identity?.roles.find((role) =>
+	const roleToDisplay = identity.roles.find((role) =>
 		rolesArray.includes(role),
 	);
 

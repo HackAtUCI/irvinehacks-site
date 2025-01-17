@@ -5,7 +5,7 @@ function ReleaseNonHackerDecisions() {
 		<SendGroup
 			description="Send out decision emails for mentors and volunteers"
 			buttonText="Send MENTOR and VOLUNTEER Decision Emails"
-			route="/api/admin/release/mentor-volunteer"
+			route="/api/director/release/mentor-volunteer"
 		/>
 	);
 }

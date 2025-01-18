@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Image from "next/image";
 import box from "@/assets/images/center_chat_box.svg";
 import boxBG from "@/assets/images/center_chat_box_bg.svg";
 import Link from "next/link";
@@ -87,7 +86,7 @@ export const InfiniteMovingCards = ({
 						style={{ transform: "skew(-20deg)" }}
 					>
 						{/* Info popup on hover */}
-						<div className="absolute -top-[110px] left-[12%] -translate-x-1/2 opacity-0 group-hover:opacity-100 z-[300] pointer-events-none">
+						<div className="absolute -top-[110px] left-[12%] -translate-x-1/2 opacity-0 group-hover:opacity-100 z-[300] pointer-events-none transition-opacity">
 							<div
 								className="relative w-[200px] h-[100px]"
 								style={{
@@ -95,27 +94,26 @@ export const InfiniteMovingCards = ({
 								}}
 							>
 								{/* Background chat box - positioned slightly offset */}
-								<div className="absolute -right-1 -bottom-1 w-full h-full">
-									<Image
+								<div className="absolute inset-0 -right-1 -bottom-1">
+									<img
 										src={boxBG}
 										alt="Box Background"
-										fill
-										sizes="200px"
-										loading="lazy"
-										className="object-contain"
+										className="w-full h-full object-contain"
+										style={{ maxWidth: "100%" }}
 									/>
 								</div>
 
 								{/* Main chat box */}
-								<Image
-									src={box}
-									alt="Box"
-									fill
-									sizes="200px"
-									loading="lazy"
-									className="object-contain"
-								/>
-								<div className="absolute w-full h-full flex flex-col items-center justify-center gap-0">
+								<div className="absolute inset-0">
+									<img
+										src={box}
+										alt="Box"
+										className="w-full h-full object-contain"
+										style={{ maxWidth: "100%" }}
+									/>
+								</div>
+
+								<div className="absolute inset-0 flex flex-col items-center justify-center gap-0">
 									<p className="text-sm font-medium text-gray-200 leading-tight">
 										{item.name}
 									</p>
@@ -137,12 +135,11 @@ export const InfiniteMovingCards = ({
 									target="_blank"
 									className="relative block w-full h-full"
 								>
-									<Image
+									<img
 										src={item.image}
 										alt={item.name}
-										fill
-										sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-										className="object-cover opacity-75 group-hover:opacity-100"
+										className="object-cover w-full h-full opacity-75 group-hover:opacity-100"
+										style={{ maxWidth: "100%" }}
 									/>
 								</Link>
 							</div>

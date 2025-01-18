@@ -31,6 +31,20 @@ router = APIRouter()
 require_director = require_role({Role.DIRECTOR})
 
 
+RSVP_REMINDER_EMAIL_TEMPLATES: dict[
+    Role,
+    Literal[
+        Template.HACKER_RSVP_REMINDER,
+        Template.MENTOR_RSVP_REMINDER,
+        Template.VOLUNTEER_RSVP_REMINDER,
+    ],
+] = {
+    Role.HACKER: Template.HACKER_RSVP_REMINDER,
+    Role.MENTOR: Template.MENTOR_RSVP_REMINDER,
+    Role.VOLUNTEER: Template.VOLUNTEER_RSVP_REMINDER,
+}
+
+
 class ApplyReminderSenders(BaseModel):
     _id: str
     senders: list[tuple[datetime, str, int]]
@@ -221,15 +235,16 @@ async def apply_reminder(user: Annotated[User, Depends(require_director)]) -> No
         )
 
 
-@router.post("/rsvp-reminder", dependencies=[Depends(require_director)])
-async def rsvp_reminder() -> None:
-    """Send email to applicants who have a status of ACCEPTED or WAIVER_SIGNED
-    reminding them to RSVP."""
+async def _rsvp_reminder(
+    application_type: Literal[Role.HACKER, Role.MENTOR, Role.VOLUNTEER]
+) -> None:
+    """Send email to applicants based on application_type who have a status of ACCEPTED
+    or WAIVER_SIGNED reminding them to RSVP."""
     # TODO: Consider using Pydantic model validation instead of type annotations
     not_yet_rsvpd: list[dict[str, Any]] = await mongodb_handler.retrieve(
         Collection.USERS,
         {
-            "roles": Role.APPLICANT,
+            "roles": Role(application_type),
             "status": {"$in": [Decision.ACCEPTED, Status.WAIVER_SIGNED]},
         },
         ["_id", "first_name"],
@@ -244,14 +259,29 @@ async def rsvp_reminder() -> None:
             )
         )
 
-    log.info(f"Sending RSVP reminder emails to {len(not_yet_rsvpd)} applicants")
-
-    await sendgrid_handler.send_email(
-        Template.RSVP_REMINDER,
-        IH_SENDER,
-        personalizations,
-        True,
+    log.info(
+        (
+            f"Sending RSVP reminder emails to {len(not_yet_rsvpd)} "
+            f"{application_type} applicants"
+        )
     )
+
+    if len(not_yet_rsvpd) > 0:
+        await sendgrid_handler.send_email(
+            RSVP_REMINDER_EMAIL_TEMPLATES[application_type],
+            IH_SENDER,
+            personalizations,
+            True,
+        )
+
+
+@router.post("/rsvp-reminder", dependencies=[Depends(require_director)])
+async def rsvp_reminder() -> None:
+    """Send email to applicants who have a status of ACCEPTED or WAIVER_SIGNED
+    reminding them to RSVP."""
+    await _rsvp_reminder(Role.HACKER)
+    await _rsvp_reminder(Role.MENTOR)
+    await _rsvp_reminder(Role.VOLUNTEER)
 
 
 @router.post("/confirm-attendance", dependencies=[Depends(require_director)])

@@ -6,6 +6,7 @@ import { useContext } from "react";
 
 import UserContext from "@/lib/admin/UserContext";
 import { isDirector } from "@/lib/admin/authorization";
+import SendGroup from "./email-sender/components/SendGroup";
 
 function Directors() {
 	const router = useRouter();
@@ -16,7 +17,17 @@ function Directors() {
 		router.push("/admin/dashboard");
 	}
 
-	return <p>Director page</p>;
+	return (
+		<>
+			<p>Director page</p>
+			<SendGroup
+				description="Update all applicant statuses to VOID or ATTENDING based on their current status."
+				buttonText="Update applicant statuses (confirm attendance)"
+				modalText="You are about to update all applicant statuses"
+				route="/api/director/confirm-attendance"
+			/>
+		</>
+	);
 }
 
 export default Directors;

@@ -264,7 +264,7 @@ async def _rsvp_reminder(
     )
 
     await sendgrid_handler.send_email(
-        RSVP_REMINDER_EMAIL_TEMPLATES[Role.HACKER],
+        RSVP_REMINDER_EMAIL_TEMPLATES[application_type],
         IH_SENDER,
         personalizations,
         True,

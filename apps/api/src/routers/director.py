@@ -261,7 +261,7 @@ async def _rsvp_reminder(
 
     log.info(
         (
-            f"Sending RSVP reminder emails to {len(not_yet_rsvpd)}"
+            f"Sending RSVP reminder emails to {len(not_yet_rsvpd)} "
             f"{application_type} applicants"
         )
     )

@@ -7,12 +7,16 @@ import SpaceBetween from "@cloudscape-design/components/space-between";
 import TextContent from "@cloudscape-design/components/text-content";
 
 interface ConfirmationModalProps {
+	buttonText: string;
+	modalText: string;
 	onConfirm: () => Promise<void | AxiosResponse>;
 	visible: boolean;
 	setVisible: (newVisible: boolean) => void;
 }
 
 function ConfirmationModal({
+	buttonText,
+	modalText,
 	onConfirm,
 	visible,
 	setVisible,
@@ -34,7 +38,7 @@ function ConfirmationModal({
 								onConfirm();
 							}}
 						>
-							Send Emails
+							{buttonText}
 						</Button>
 					</SpaceBetween>
 				</Box>
@@ -42,7 +46,7 @@ function ConfirmationModal({
 			header="Send Emails"
 		>
 			<TextContent>
-				<p>You are about to send out emails</p>
+				<p>{modalText}</p>
 			</TextContent>
 		</Modal>
 	);

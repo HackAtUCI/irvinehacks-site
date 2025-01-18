@@ -238,8 +238,8 @@ async def apply_reminder(user: Annotated[User, Depends(require_director)]) -> No
 async def _rsvp_reminder(
     application_type: Literal[Role.HACKER, Role.MENTOR, Role.VOLUNTEER]
 ) -> None:
-    """Send email to applicants based on application_type who have a status of ACCEPTED or WAIVER_SIGNED
-    reminding them to RSVP."""
+    """Send email to applicants based on application_type who have a status of ACCEPTED
+    or WAIVER_SIGNED reminding them to RSVP."""
     # TODO: Consider using Pydantic model validation instead of type annotations
     not_yet_rsvpd: list[dict[str, Any]] = await mongodb_handler.retrieve(
         Collection.USERS,
@@ -260,7 +260,8 @@ async def _rsvp_reminder(
         )
 
     log.info(
-        f"Sending RSVP reminder emails to {len(not_yet_rsvpd)} {application_type} applicants"
+        (f"Sending RSVP reminder emails to {len(not_yet_rsvpd)}"
+         f"{application_type} applicants")
     )
 
     await sendgrid_handler.send_email(

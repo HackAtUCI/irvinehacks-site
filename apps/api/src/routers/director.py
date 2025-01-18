@@ -266,12 +266,13 @@ async def _rsvp_reminder(
         )
     )
 
-    await sendgrid_handler.send_email(
-        Template.HACKER_RSVP_REMINDER,
-        IH_SENDER,
-        personalizations,
-        True,
-    )
+    if len(not_yet_rsvpd) > 0:
+        await sendgrid_handler.send_email(
+            RSVP_REMINDER_EMAIL_TEMPLATES[application_type],
+            IH_SENDER,
+            personalizations,
+            True,
+        )
 
 
 @router.post("/rsvp-reminder", dependencies=[Depends(require_director)])

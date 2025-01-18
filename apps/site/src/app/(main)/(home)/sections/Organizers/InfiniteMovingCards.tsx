@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import box from "@/assets/images/center_chat_box.svg";
 import boxBG from "@/assets/images/center_chat_box_bg.svg";
 import Link from "next/link";
+import Image from "next/image";
 
 export const InfiniteMovingCards = ({
 	items,
@@ -95,7 +96,7 @@ export const InfiniteMovingCards = ({
 							>
 								{/* Background chat box - positioned slightly offset */}
 								<div className="absolute inset-0 -right-1 -bottom-1">
-									<img
+									<Image
 										src={boxBG}
 										alt="Box Background"
 										className="w-full h-full object-contain"
@@ -105,7 +106,7 @@ export const InfiniteMovingCards = ({
 
 								{/* Main chat box */}
 								<div className="absolute inset-0">
-									<img
+									<Image
 										src={box}
 										alt="Box"
 										className="w-full h-full object-contain"

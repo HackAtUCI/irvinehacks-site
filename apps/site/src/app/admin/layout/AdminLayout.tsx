@@ -10,13 +10,13 @@ import { SWRConfig } from "swr";
 
 import { hasAdminRole } from "@/lib/admin/authorization";
 import UserContext from "@/lib/admin/UserContext";
-import useUserIdentity from "@/lib/admin/useUserIdentity";
+import useUserIdentityStatic from "@/lib/admin/useUserIdentityStatic";
 
 import AdminSidebar from "./AdminSidebar";
 import Breadcrumbs from "./Breadcrumbs";
 
 function AdminLayout({ children }: PropsWithChildren) {
-	const identity = useUserIdentity();
+	const identity = useUserIdentityStatic();
 	const router = useRouter();
 
 	if (!identity) {

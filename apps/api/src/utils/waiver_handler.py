@@ -38,6 +38,9 @@ async def process_waiver_completion(uid: str, email: EmailStr) -> None:
                 f"User {uid} attempted to sign waiver but already signed it previously."
             )
             return
+        elif applicant_record.status == Status.ATTENDING:
+            log.warning(f"User {uid} has already signed the waiver and is attending.")
+            return
         elif applicant_record.status != Decision.ACCEPTED:
             log.warning(f"User {uid} attempted to sign waiver but was not accepted.")
             return

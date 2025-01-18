@@ -25,7 +25,7 @@ def test_can_include_decision_from_reviews() -> None:
         "_id": "edu.uci.sydnee",
         "status": "REVIEWED",
         "application_data": {
-            "reviews": [[datetime(2023, 1, 19), "edu.uci.alicia", "ACCEPTED"]],
+            "reviews": [[datetime(2023, 1, 19), "edu.uci.alicia", 100]],
         },
     }
 

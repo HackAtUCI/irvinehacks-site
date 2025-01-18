@@ -31,7 +31,6 @@ SAMPLE_APPLICATION = {
     "school": "UC Irvine",
     "education_level": "Fifth+ Year Undergraduate",
     "major": "Computer Science",
-    "applied_before": "false",
     "frq_volunteer": "",
     "frq_utensil": "",
     "other_questions": "",
@@ -171,7 +170,7 @@ def test_volunteer_apply_with_confirmation_email_issue_causes_500(
 def test_volunteer_application_data_is_bson_encodable() -> None:
     """Test that application data model can be encoded into BSON to store in MongoDB."""
     encoded = bson.encode(EXPECTED_APPLICATION_DATA.model_dump())
-    assert len(encoded) == 437
+    assert len(encoded) == 420
 
 
 def test_volunteer_past_deadline_causes_403() -> None:

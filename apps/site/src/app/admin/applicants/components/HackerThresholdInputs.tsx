@@ -24,7 +24,7 @@ function HackerThresholdInputs() {
 
 		if (isValidAccept() && isValidWaitlist()) {
 			await axios
-				.post("/api/admin/set-thresholds", {
+				.post("/api/director/set-thresholds", {
 					accept: sentAcceptValue,
 					waitlist: sentWaitlistValue,
 				})

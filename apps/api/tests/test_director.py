@@ -1,14 +1,24 @@
 from datetime import datetime
-from unittest.mock import ANY, AsyncMock, patch
+from typing import Any
+from unittest.mock import ANY, AsyncMock, call, patch
 
 from fastapi import FastAPI
 
 from auth.user_identity import NativeUser, UserTestClient
-from models.user_record import Role
+from models.ApplicationData import Decision
+from models.user_record import Role, Status
 from routers import director
 from services.mongodb_handler import Collection
 from services.sendgrid_handler import Template
 from utils.email_handler import IH_SENDER
+
+
+USER_REVIEWER = NativeUser(
+    ucinetid="alicia",
+    display_name="Alicia",
+    email="alicia@uci.edu",
+    affiliations=["student"],
+)
 
 USER_DIRECTOR = NativeUser(
     ucinetid="dir",
@@ -17,10 +27,17 @@ USER_DIRECTOR = NativeUser(
     affiliations=["student"],
 )
 
+HACKER_REVIEWER_IDENTITY = {
+    "_id": "edu.uci.alicia",
+    "roles": ["Organizer", "Hacker Reviewer"],
+}
+
 DIRECTOR_IDENTITY = {"_id": "edu.uci.dir", "roles": [Role.ORGANIZER, Role.DIRECTOR]}
 
 app = FastAPI()
 app.include_router(director.router)
+
+reviewer_client = UserTestClient(USER_REVIEWER, app)
 
 director_client = UserTestClient(USER_DIRECTOR, app)
 
@@ -157,3 +174,157 @@ def test_get_apply_reminder_senders(
         {"_id": "apply_reminder"},
         ["senders"],
     )
+
+
+@patch("services.mongodb_handler.update", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+@patch("services.mongodb_handler.retrieve", autospec=True)
+def test_confirm_attendance_route(
+    mock_mongodb_handler_retrieve: AsyncMock,
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mognodb_handler_update: AsyncMock,
+) -> None:
+    """Test that confirmed status changes to void with accepted."""
+
+    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
+    mock_mongodb_handler_retrieve.return_value = [
+        {
+            "_id": "edu.uc.tester",
+            "status": Decision.ACCEPTED,
+        },
+        {
+            "_id": "edu.uc.tester2",
+            "status": Status.WAIVER_SIGNED,
+        },
+        {
+            "_id": "edu.uc.tester3",
+            "status": Status.CONFIRMED,
+        },
+        {
+            "_id": "edu.uc.tester4",
+            "status": Decision.WAITLISTED,
+        },
+    ]
+
+    # Not doing this will result in the return value acting as a mock, which would be
+    # tracked in the assert_has_calls below.
+    mock_mognodb_handler_update.side_effect = [True, True, True]
+
+    res = director_client.post("/confirm-attendance")
+
+    assert res.status_code == 200
+    mock_mongodb_handler_retrieve.assert_awaited_once()
+    mock_mognodb_handler_update.assert_has_calls(
+        [
+            call(
+                Collection.USERS,
+                {"_id": {"$in": ("edu.uc.tester3",)}},
+                {"status": Status.ATTENDING},
+            ),
+            call(
+                Collection.USERS,
+                {"_id": {"$in": ("edu.uc.tester",)}},
+                {"status": Status.VOID},
+            ),
+            call(
+                Collection.USERS,
+                {"_id": {"$in": ("edu.uc.tester2",)}},
+                {"status": Status.VOID},
+            ),
+        ]
+    )
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+def test_set_thresholds_correctly(
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test that the /set-thresholds route returns correctly"""
+    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
+
+    res = director_client.post(
+        "/set-thresholds", json={"accept": "10", "waitlist": "5"}
+    )
+
+    assert res.status_code == 200
+    mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
+        Collection.SETTINGS,
+        {"_id": "hacker_score_thresholds"},
+        {"$set": {"accept": 10, "waitlist": 5}},
+        upsert=True,
+    )
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+def test_set_thresholds_with_empty_string_correctly(
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test that the /set-thresholds route returns correctly with -1"""
+    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
+
+    res = director_client.post(
+        "/set-thresholds", json={"accept": "10", "waitlist": "-1"}
+    )
+
+    assert res.status_code == 200
+    mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
+        Collection.SETTINGS,
+        {"_id": "hacker_score_thresholds"},
+        {"$set": {"accept": 10}},
+        upsert=True,
+    )
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_organizer_set_thresholds_forbidden(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test whether anyone below a director can change threshold."""
+    mock_mongodb_handler_retrieve_one.return_value = HACKER_REVIEWER_IDENTITY
+
+    res = reviewer_client.post(
+        "/set-thresholds", json={"accept": "12", "waitlist": "5"}
+    )
+
+    assert res.status_code == 403
+
+
+@patch("routers.director._process_records_in_batches", autospec=True)
+@patch("services.mongodb_handler.retrieve", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_release_hacker_decisions_works(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_retrieve: AsyncMock,
+    mock_admin_process_records_in_batches: AsyncMock,
+) -> None:
+    """Test that the /release/hackers route works"""
+    returned_records: list[dict[str, Any]] = [
+        {
+            "_id": "edu.uci.sydnee",
+            "first_name": "sydnee",
+            "application_data": {
+                "reviews": [
+                    [datetime(2023, 1, 19), "edu.uci.alicia", 100],
+                    [datetime(2023, 1, 19), "edu.uci.alicia2", 300],
+                ]
+            },
+        }
+    ]
+
+    threshold_record: dict[str, Any] = {"accept": 10, "waitlist": 5}
+
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        threshold_record,
+    ]
+    mock_mongodb_handler_retrieve.return_value = returned_records
+    mock_admin_process_records_in_batches.return_value = None
+
+    res = director_client.post("/release/hackers")
+
+    assert res.status_code == 200
+    assert returned_records[0]["decision"] == Decision.ACCEPTED

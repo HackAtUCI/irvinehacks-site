@@ -43,7 +43,7 @@ function ConfirmationModal({
 					</SpaceBetween>
 				</Box>
 			}
-			header="Send Emails"
+			header="Are you sure?"
 		>
 			<TextContent>
 				<p>{modalText}</p>

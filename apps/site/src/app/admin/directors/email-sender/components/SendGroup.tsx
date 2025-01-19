@@ -41,7 +41,7 @@ function SendGroup({
 				setFlashBarItems([
 					{
 						type: "success",
-						content: "Successfully sent emails.",
+						content: "Success!",
 						dismissible: true,
 						dismissLabel: "Dismiss message",
 						onDismiss: () => setFlashBarItems([]),
@@ -54,7 +54,7 @@ function SendGroup({
 				setFlashBarItems([
 					{
 						type: "error",
-						content: "Emails failed to send.",
+						content: "Failed!",
 						dismissible: true,
 						dismissLabel: "Dismiss message",
 						onDismiss: () => setFlashBarItems([]),

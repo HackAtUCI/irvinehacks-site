@@ -106,9 +106,7 @@ async def send_logistics_email(role: Role) -> None:
     records: list[dict[str, Any]] = []
     records = await mongodb_handler.retrieve(
         mongodb_handler.Collection.USERS,
-        {
-            "roles": Role(role)
-        },
+        {"roles": Role(role)},
         ["_id", "first_name"],
     )
 

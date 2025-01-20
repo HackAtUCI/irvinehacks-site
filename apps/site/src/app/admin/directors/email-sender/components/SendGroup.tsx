@@ -17,11 +17,18 @@ import { Sender } from "@/lib/admin/useEmailSenders";
 interface SendGroupProps {
 	description: string;
 	buttonText: string;
+	modalText: string;
 	route: string;
 	mutate?: KeyedMutator<Sender[]>;
 }
 
-function SendGroup({ description, buttonText, route, mutate }: SendGroupProps) {
+function SendGroup({
+	description,
+	buttonText,
+	modalText,
+	route,
+	mutate,
+}: SendGroupProps) {
 	const [visible, setVisible] = useState(false);
 	const [flashBarItems, setFlashBarItems] = useState<
 		ReadonlyArray<FlashbarProps.MessageDefinition>
@@ -34,7 +41,7 @@ function SendGroup({ description, buttonText, route, mutate }: SendGroupProps) {
 				setFlashBarItems([
 					{
 						type: "success",
-						content: "Successfully sent emails.",
+						content: "Success!",
 						dismissible: true,
 						dismissLabel: "Dismiss message",
 						onDismiss: () => setFlashBarItems([]),
@@ -47,7 +54,7 @@ function SendGroup({ description, buttonText, route, mutate }: SendGroupProps) {
 				setFlashBarItems([
 					{
 						type: "error",
-						content: "Emails failed to send.",
+						content: "Failed!",
 						dismissible: true,
 						dismissLabel: "Dismiss message",
 						onDismiss: () => setFlashBarItems([]),
@@ -64,6 +71,8 @@ function SendGroup({ description, buttonText, route, mutate }: SendGroupProps) {
 					{buttonText}
 				</Button>
 				<ConfirmationModal
+					buttonText={buttonText}
+					modalText={modalText}
 					visible={visible}
 					setVisible={setVisible}
 					onConfirm={handleClick}

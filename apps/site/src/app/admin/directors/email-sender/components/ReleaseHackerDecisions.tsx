@@ -5,6 +5,7 @@ function ReleaseHackerDecisions() {
 		<SendGroup
 			description="Send out decision emails for hackers"
 			buttonText="Send HACKER Decision Emails"
+			modalText="You are about to send out decision emails for hackers"
 			route="/api/director/release/hackers"
 		/>
 	);

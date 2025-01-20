@@ -74,6 +74,7 @@ LogisticsTemplates: TypeAlias = Literal[
 ]
 
 
+
 @overload
 async def send_email(
     template_id: Literal[Template.CONFIRMATION_EMAIL],

@@ -1,26 +1,31 @@
+/* eslint-disable no-mixed-spaces-and-tabs */
 "use client";
 
-import clsx from "clsx";
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import getTimeAndDates from "@/lib/utils/getTimeAndDates";
 
 import { forwardRef } from "react";
 
 import styles from "./EventPlaque.module.scss";
+import { SwordsIcon } from "lucide-react";
+
+import { motion } from "framer-motion";
 
 export default forwardRef(function EventPlaque(
 	{
 		title,
 		startTime,
 		endTime,
+		isHappening,
 		onClick,
 	}: {
 		title: string;
 		startTime: Date;
 		endTime: Date;
-		onClick: any;
+		isHappening: boolean;
+		onClick: (title: string) => void;
 	},
-	ref: any,
+	ref: React.LegacyRef<HTMLDivElement>,
 ) {
 	const [hovered, setHovered] = useState(false);
 
@@ -36,22 +41,51 @@ export default forwardRef(function EventPlaque(
 			onClick={() => onClick(title)}
 		>
 			<div
-				className={`duration-500 font-display p-5 w-full h-fit border-4 top-0 left-0 ${
-					hovered
-						? `bg-white border-black text-black top-[-5px] left-[-5px] ${styles.plaqueHover}`
-						: "bg-black border-white"
-				}`}
+				className={
+					isHappening
+						? "duration-500 font-display p-5 w-full h-fit border-4 bg-blue-100 border-blue-900 text-blue-950 top-[-8px] left-[-8px]"
+						: `duration-500 font-display p-5 w-full h-fit border-4 top-0 left-0 ${
+								hovered
+									? `bg-white border-black text-black top-[-5px] left-[-5px] ${styles.plaqueHover}`
+									: "bg-black border-white"
+						  }`
+				}
 			>
-				<div className="text-2xl">{title}</div>
+				<div
+					className={
+						isHappening
+							? "text-2xl flex justify-between min-h-[50px] gap-5 items-center"
+							: `text-2xl`
+					}
+				>
+					<span>{title}</span>
+					{isHappening && (
+						<motion.div
+							className="min-w-[50px]"
+							animate={{ y: ["0%", "-10%", "0%"] }}
+							transition={{
+								repeat: Infinity,
+								duration: 2,
+								ease: "easeInOut",
+							}}
+						>
+							<SwordsIcon width={50} height={50} color="rgb(23 37 84)" />
+						</motion.div>
+					)}
+				</div>
 				<div className="text-lg">
 					<div>{`${start.compositeTimeHourMinute} - ${end.compositeTimeHourMinute} ${end.amPm}`}</div>
 				</div>
 			</div>
 			<div
-				className={`absolute w-full h-full top-0 left-0 z-[-1] duration-500 bg-white ${
-					hovered ? styles.decorHover : ""
-				}`}
-			></div>
+				className={
+					isHappening
+						? "absolute w-full h-full top-[9px] left-[9px] z-[-1] duration-500 bg-blue-100"
+						: `absolute w-full h-full top-0 left-0 z-[-1] duration-500 bg-white ${
+								hovered ? styles.decorHover : ""
+						  }`
+				}
+			/>
 		</div>
 	);
 });

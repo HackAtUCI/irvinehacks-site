@@ -35,7 +35,7 @@ const CountdownItem = ({
 					<motion.span
 						variants={timerAnimVariants}
 						className={clsx(
-							"flex text-6xl xl:text-9xl text-white text-center flex-col justify-center items-center",
+							"flex text-2xl sm:text-4xl md:text-6xl xl:text-9xl text-white text-center flex-col justify-center items-center",
 							styles.text,
 						)}
 					>

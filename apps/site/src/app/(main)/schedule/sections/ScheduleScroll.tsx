@@ -2,83 +2,123 @@
 
 import clsx from "clsx";
 import styles from "./ScheduleScroll.module.scss";
-import { useState, useEffect, useRef } from "react";
+import { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import getTimeAndDates from "@/lib/utils/getTimeAndDates";
 
-export default function ScheduleScroll({ weekdays }: { weekdays: string[] }) {
+export default function ScheduleScroll({
+	weekdays,
+	selectedEventDay,
+	setSelectedEventDay,
+}: {
+	weekdays: Date[];
+	selectedEventDay: Date | undefined;
+	setSelectedEventDay: React.Dispatch<React.SetStateAction<Date | undefined>>;
+}) {
 	const sheduleBarRef = useRef<HTMLDivElement>(null);
 	const scheduleContainerRef = useRef<HTMLDivElement>(null);
-	const scheduleBarWidth = useRef(0);
 
-	const [newPos, setNewPos] = useState(0);
+	function scrollTo(newPos: number) {
+		const fixedPos = [0, 0.25, 0.5];
+		scheduleContainerRef.current?.scrollTo({
+			left: sheduleBarRef.current
+				? sheduleBarRef.current.getBoundingClientRect().width * fixedPos[newPos]
+				: 0,
+			behavior: "smooth",
+		});
+	}
 
-	const getScheduleWidth = () => {
-		return sheduleBarRef.current
-			? sheduleBarRef.current?.getBoundingClientRect().right -
-					sheduleBarRef.current?.getBoundingClientRect().left
-			: 0;
-	};
-
-	useEffect(() => {
-		scheduleBarWidth.current = getScheduleWidth();
-	}, []);
-
-	const onMouseDown = () => {
-
-		function mouseUpListener() {
-			window.removeEventListener("mouseup", mouseUpListener);
-			window.removeEventListener("mousemove", mouseMoveListener);
+	function scrollDir(action: string) {
+		let ind = 0;
+		for (let i = 0; i < weekdays.length; i++) {
+			if (
+				selectedEventDay &&
+				weekdays[i].getTime() === selectedEventDay.getTime()
+			)
+				ind = i;
 		}
 
-		function mouseMoveListener(e: any) {
-			setNewPos((pos) =>
-				Math.min(
-					Math.max(pos - e.movementX, -150),
-					scheduleBarWidth.current - 500,
-				),
-			);
+		if (action === "left") {
+			const nextIndex = (ind + (weekdays.length - 1)) % weekdays.length;
+			scrollTo(nextIndex);
+			setSelectedEventDay(weekdays[nextIndex]);
+		} else {
+			const nextIndex = (ind + 1) % weekdays.length;
+			scrollTo(nextIndex);
+			setSelectedEventDay(weekdays[nextIndex]);
 		}
-
-		window.addEventListener("mouseup", mouseUpListener);
-		window.addEventListener("mousemove", mouseMoveListener);
-	};
+	}
 
 	return (
-		<div className="w-full flex flex-col items-center select-none">
-			<h1>Schedule</h1>
-			<div className="w-full flex gap-10 justify-center">
-				<div>
-					<ChevronLeft />
+		<div className="w-full flex flex-col items-center select-none gap-20">
+			<h1 className="text-5xl font-display">Schedule</h1>
+			<div className="flex gap-10 sm:hidden">
+				<div className="h-full flex items-center">
+					<ChevronLeft
+						height={40}
+						width={40}
+						onClick={() => scrollDir("left")}
+						className="cursor-pointer"
+					/>
+				</div>
+				<div className="h-full flex items-center">
+					<ChevronRight
+						height={40}
+						width={40}
+						onClick={() => scrollDir("right")}
+						className="cursor-pointer"
+					/>
+				</div>
+			</div>
+			<div className="w-full flex gap-40 justify-center h-[100px] max-lg:gap-2">
+				<div className="h-full flex items-center max-sm:hidden">
+					<ChevronLeft
+						height={40}
+						width={40}
+						onClick={() => scrollDir("left")}
+						className="cursor-pointer"
+					/>
 				</div>
 				<div
 					className={clsx(
-						"w-[600px] h-[100px] gap-20 font-display text-6xl overflow-auto relative",
+						"w-[600px] h-full gap-20 font-display text-6xl overflow-auto relative max-lg:min-w-[400px] max-lg:w-[400px]",
 						styles.background,
 						styles.hideScroll,
 					)}
-					onMouseDown={onMouseDown}
 					ref={scheduleContainerRef}
 				>
 					<div
 						className={clsx(
 							"top-0 absolute h-full min-w-full w-fit flex gap-20",
 						)}
-						style={{ left: `${-newPos}px` }}
 						ref={sheduleBarRef}
 					>
-						<div className="h-full w-[5%]" />
-						{weekdays.map((weekday) => {
+						<div className="h-full w-[150px] max-lg:w-[50px]" />
+						{weekdays.map((weekday, i) => {
+							const weekdayStr = getTimeAndDates(weekday).day;
 							return (
-								<span className="whitespace-nowrap" key={weekday}>
-									{weekday}
+								<span
+									className="whitespace-nowrap cursor-pointer"
+									key={weekdayStr}
+									onClick={() => {
+										setSelectedEventDay(weekday);
+										scrollTo(i);
+									}}
+								>
+									{weekdayStr}
 								</span>
 							);
 						})}
-						<div className="h-full w-[5%]" />
+						<div className="h-full w-[100px] max-lg:w-[190px]" />
 					</div>
 				</div>
-				<div>
-					<ChevronRight />
+				<div className="h-full flex items-center max-sm:hidden">
+					<ChevronRight
+						height={40}
+						width={40}
+						onClick={() => scrollDir("right")}
+						className="cursor-pointer"
+					/>
 				</div>
 			</div>
 		</div>

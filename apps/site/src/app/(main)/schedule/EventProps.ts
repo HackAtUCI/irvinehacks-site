@@ -1,5 +1,5 @@
 export default interface EventProps {
-	now: Date;
+	now?: Date;
 	title: string;
 	eventType: string;
 	location?: string | undefined;

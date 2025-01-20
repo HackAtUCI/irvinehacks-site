@@ -2,20 +2,10 @@
 
 import clsx from "clsx";
 import styles from "./EventSidebar.module.scss";
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import EventPlaque from "./EventPlaque";
 
-interface EventProps {
-	title: string;
-	eventType: string;
-	location?: string;
-	virtual?: string | undefined;
-	startTime: Date;
-	endTime: Date;
-	organization?: string | undefined;
-	hosts?: string[] | undefined;
-	description: JSX.Element;
-}
+import EventProps from "../EventProps";
 
 export default function EventSidebar({
 	events,
@@ -24,18 +14,23 @@ export default function EventSidebar({
 }: {
 	events: EventProps[];
 	currentTitle: string | undefined;
-	setSelectedEvent: any;
+	setSelectedEvent: React.Dispatch<
+		React.SetStateAction<EventProps | undefined>
+	>;
 }) {
-	const sheduleBarRef = useRef<any>(null);
-	const scheduleContainerRef = useRef<any>(null);
-	const scheduleScrollerRef = useRef<any>(null);
+	const sheduleBarRef = useRef<Map<string, HTMLDivElement>>(new Map());
+	const scheduleContainerRef = useRef<HTMLDivElement>(null);
+	const scheduleScrollerRef = useRef<HTMLDivElement>(null);
 
 	const getScheduleRef = () => {
 		if (!sheduleBarRef.current) sheduleBarRef.current = new Map();
 		return sheduleBarRef.current;
 	};
 
-	const calculateScrollDistance = (node: any) => {
+	const calculateScrollDistance = (node: HTMLDivElement | undefined) => {
+		if (!node || !scheduleContainerRef.current || !scheduleScrollerRef.current)
+			return 0;
+
 		return (
 			node.getBoundingClientRect().top -
 			scheduleContainerRef.current?.getBoundingClientRect().top +
@@ -56,18 +51,20 @@ export default function EventSidebar({
 			behavior: "smooth",
 		});
 
-		setSelectedEvent(events.filter((event) => event.title == title)[0]);
+		setSelectedEvent(events.filter((event) => event.title === title)[0]);
 	};
 
 	useEffect(() => {
-		const m = getScheduleRef();
-		const node = m.get(currentTitle);
+		if (currentTitle) {
+			const m = getScheduleRef();
+			const node = m.get(currentTitle);
 
-		scheduleScrollerRef.current?.scrollTo({
-			top: calculateScrollDistance(node),
-			behavior: "smooth",
-		});
-	}, []);
+			scheduleScrollerRef.current?.scrollTo({
+				top: calculateScrollDistance(node),
+				behavior: "smooth",
+			});
+		}
+	}, [currentTitle]);
 
 	return (
 		<div className="flex flex-col items-center select-none relative w-[50%] max-lg:w-[100%]">
@@ -79,13 +76,13 @@ export default function EventSidebar({
 					className="w-full h-fit flex flex-col gap-4 p-6"
 					ref={scheduleContainerRef}
 				>
-					<div className="h-[400px] w-full">Events...</div>
+					<div className="h-[300px] w-full" />
 					{events.map((event) => {
 						return (
 							<EventPlaque
 								key={event.title}
 								onClick={eventPlaqueClick}
-								ref={(node) => {
+								ref={(node: HTMLDivElement) => {
 									const m = getScheduleRef();
 									m.set(event.title, node);
 
@@ -94,10 +91,11 @@ export default function EventSidebar({
 								title={event.title}
 								startTime={event.startTime}
 								endTime={event.endTime}
-							></EventPlaque>
+								isHappening={currentTitle === event.title}
+							/>
 						);
 					})}
-					<div className="h-[400px] w-full"></div>
+					<div className="h-[300px] w-full" />
 				</div>
 			</div>
 		</div>

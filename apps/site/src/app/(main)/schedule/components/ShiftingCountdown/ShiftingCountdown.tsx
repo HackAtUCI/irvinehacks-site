@@ -7,7 +7,6 @@ import clsx from "clsx";
 import { Fireworks } from "@fireworks-js/react";
 import QuestBox from "@/assets/images/text_box_with_title.svg";
 import LgStar from "@/assets/images/large_star.svg";
-import SmStar from "@/assets/images/small_star.svg";
 
 import styles from "./ShiftingCountdown.module.scss";
 import Image from "next/image";
@@ -90,7 +89,7 @@ const ShiftingCountdown = () => {
 
 	return (
 		<>
-			<div className="absolute top-[20%] left-16">
+			<div className="absolute top-[20%] left-16 max-md:hidden">
 				<Image src={LgStar} alt="*" className="w-[70px]" />
 				<Image
 					src={LgStar}
@@ -98,7 +97,7 @@ const ShiftingCountdown = () => {
 					className="absolute top-22 left-10 w-[50px]"
 				/>
 			</div>
-			<div className="absolute top-[50%] right-14">
+			<div className="absolute top-[50%] right-14 max-md:hidden">
 				<Image src={LgStar} alt="*" className="w-[70px] left-14" />
 				<Image
 					src={LgStar}
@@ -136,7 +135,7 @@ const ShiftingCountdown = () => {
 											styles.text,
 										)}
 									>
-										<span className="max-w-[25%] min-w-[100px] text-center">
+										<span className="max-w-[25%] min-w-[130px] text-center">
 											{countdown.label}
 										</span>
 									</div>

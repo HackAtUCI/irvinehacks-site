@@ -29,7 +29,7 @@ export default async function Schedule() {
 	return (
 		<>
 			<section className="h-full w-full mb-12">
-				<div className="m-36">
+				<div className="p-36 relative">
 					<ShiftingCountdown />
 				</div>
 				<div className="flex justify-center">

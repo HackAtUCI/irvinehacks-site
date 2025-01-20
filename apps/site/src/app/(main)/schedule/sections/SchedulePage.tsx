@@ -7,6 +7,8 @@ import EventCard from "../components/EventCard";
 import convertToPST from "@/lib/utils/convertToPST";
 
 import "./SchedulePage.scss";
+import ScheduleScroll from "./ScheduleScroll";
+import EventSidebar from "../components/EventSidebar";
 
 const T_REFRESH = 15000;
 
@@ -35,14 +37,16 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 
 	const [day, setDay] = useState("Friday");
 
-	const [now, setNow] = useState<Date>(convertToPST(new Date()));
+	const [now, setNow] = useState<Date>(
+		convertToPST(new Date("2024-01-26T23:30:00.000Z")),
+	);
 
 	const [haveTabsBeenScrolledToTop, setHaveTabsBeenScrolledToTop] =
 		useState(false);
 
 	useEffect(() => {
 		const refreshNow = setInterval(() => {
-			setNow(convertToPST(new Date()));
+			setNow(convertToPST(new Date("2024-01-26T23:30:00.000Z")));
 		}, T_REFRESH);
 
 		return () => {
@@ -72,60 +76,110 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 		};
 	}, []);
 
+	const [selectedEvent, setSelectedEvent] = useState<any>(null);
+
+	function getEventDate(date: Date) {
+		return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+	}
+
+	function getEventTomorrow(date: Date) {
+		return new Date(
+			new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime() +
+				24 * 60 * 60 * 1000,
+		);
+	}
+
+	const currentWeekday = now.getDay();
+
+	const currentScheduleEvents = schedule.filter(
+		(event) =>
+			getEventDate(event[0].startTime) <= now &&
+			now <= getEventTomorrow(event[0].startTime),
+	)?.[0];
+
+	const currentEvent = currentScheduleEvents
+		? currentScheduleEvents.filter(
+				(event) =>
+					event.startTime.getTime() <= now.getTime() &&
+					event.endTime.getTime() >= now.getTime(),
+		  )?.[0]
+		: undefined;
+
+	useEffect(() => {
+		setSelectedEvent(currentEvent);
+	}, []);
+
+	console.log("currentEvent", selectedEvent, { ...selectedEvent });
+
 	return (
-		<Tabs.Root
-			value={day}
-			defaultValue="Friday"
-			onValueChange={setDay}
-			className="w-11/12 sm:w-4/5"
-		>
-			<div className="text-center mb-6 sm:mb-10 sm:flex sm:justify-between sm:flex-row-reverse">
-				<Tabs.List
-					className={`${
-						haveTabsBeenScrolledToTop
-							? "max-w-[15rem] m-auto xs:max-sm:fixed top-3 left-0 right-0 z-[51] sm:static sm:z-auto"
-							: ""
-					} mb-8 sm:m-0`}
-					ref={tabsRef}
-				>
-					<Tabs.Trigger
-						className="TabsTrigger text-lg text-[#2F1C00] px-3.5 py-1.5 border border-[#2F1C00] rounded-l-2xl bg-[#FFFCE2] min-w-[5rem] sm:min-w-[4rem]"
-						value="Friday"
-					>
-						Fri
-					</Tabs.Trigger>
-					<Tabs.Trigger
-						className="TabsTrigger text-lg text-[#2F1C00] px-3.5 py-1.5 border border-[#2F1C00] bg-[#FFFCE2] min-w-[5rem] sm:min-w-[4rem]"
-						value="Saturday"
-					>
-						Sat
-					</Tabs.Trigger>
-					<Tabs.Trigger
-						className="TabsTrigger text-lg text-[#2F1C00] px-3.5 py-1.5 border border-[#2F1C00] rounded-r-2xl bg-[#FFFCE2] min-w-[5rem] sm:min-w-[4rem]"
-						value="Sunday"
-					>
-						Sun
-					</Tabs.Trigger>
-				</Tabs.List>
-				<h2 className="text-[#FFFCE2] font-bold text-2xl sm:text-3xl">
-					{day} Schedule
-				</h2>
-			</div>
-			{schedule.map((day, i) => (
-				<div
-					key={i}
-					className="flex flex-col justify-center items-center w-full"
-				>
-					<Tabs.Content
-						value={weekdayFormat.format(convertToPST(day[0].startTime))}
-						className="w-full"
-					>
-						{day.map((event) => {
-							return <EventCard key={event.title} now={now} {...event} />;
-						})}
-					</Tabs.Content>
+		<>
+			<div className="relative w-full h-fit flex gap-10 flex-col">
+				<ScheduleScroll weekdays={["Friday", "Saturday", "Sunday"]} />
+				<div className="w-full relative flex max-lg:flex-col">
+					<EventSidebar
+						events={currentScheduleEvents}
+						currentTitle={currentEvent?.title}
+						setSelectedEvent={setSelectedEvent}
+					/>
+					<EventCard
+						key={selectedEvent?.title}
+						now={now}
+						{...selectedEvent}
+						selectedEvent={selectedEvent}
+					/>
 				</div>
-			))}
-		</Tabs.Root>
+			</div>
+
+			{/* <Tabs.Root
+				value={day}
+				defaultValue="Friday"
+				onValueChange={setDay}
+				className="w-11/12 sm:w-4/5"
+			>
+				<div className="text-center mb-6 sm:mb-10 sm:flex sm:justify-between sm:flex-row-reverse">
+					<Tabs.List
+						className={`${
+							haveTabsBeenScrolledToTop
+								? "max-w-[15rem] m-auto xs:max-sm:fixed top-3 left-0 right-0 z-[51] sm:static sm:z-auto"
+								: ""
+						} mb-8 sm:m-0`}
+						ref={tabsRef}
+					>
+						<Tabs.Trigger
+							className="TabsTrigger text-lg text-[#2F1C00] px-3.5 py-1.5 border border-[#2F1C00] rounded-l-2xl bg-[#FFFCE2] min-w-[5rem] sm:min-w-[4rem]"
+							value="Friday"
+						>
+							Fri
+						</Tabs.Trigger>
+						<Tabs.Trigger
+							className="TabsTrigger text-lg text-[#2F1C00] px-3.5 py-1.5 border border-[#2F1C00] bg-[#FFFCE2] min-w-[5rem] sm:min-w-[4rem]"
+							value="Saturday"
+						>
+							Sat
+						</Tabs.Trigger>
+						<Tabs.Trigger
+							className="TabsTrigger text-lg text-[#2F1C00] px-3.5 py-1.5 border border-[#2F1C00] rounded-r-2xl bg-[#FFFCE2] min-w-[5rem] sm:min-w-[4rem]"
+							value="Sunday"
+						>
+							Sun
+						</Tabs.Trigger>
+					</Tabs.List>
+					<h2 className="text-[#FFFCE2] font-bold text-2xl sm:text-3xl">
+						{day} Schedule
+					</h2>
+				</div>
+				{schedule.map((day, i) => (
+					<div
+						key={i}
+						className="flex flex-col justify-center items-center w-full"
+					>
+						<Tabs.Content
+							value={weekdayFormat.format(convertToPST(day[0].startTime))}
+							className="w-full"
+						></Tabs.Content>
+					</div>
+				))}
+			</Tabs.Root> */}
+		</>
 	);
 }

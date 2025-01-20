@@ -53,7 +53,6 @@ class ApplicationUpdatePersonalization(PersonalizationData):
     first_name: str
 
 
-
 ApplicationUpdateTemplates: TypeAlias = Literal[
     Template.HACKER_ACCEPTED_EMAIL,
     Template.HACKER_WAITLISTED_EMAIL,

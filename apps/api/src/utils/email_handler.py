@@ -30,11 +30,13 @@ DECISION_TEMPLATES: dict[Role, dict[Decision, ApplicationUpdateTemplates]] = {
     },
 }
 
+
 LOGISTICS_TEMPLATES: dict[Role, LogisticsTemplates] = {
     Role.HACKER: Template.HACKER_LOGISTICS_EMAIL,
     Role.MENTOR: Template.MENTOR_LOGISTICS_EMAIL,
     Role.VOLUNTEER: Template.VOLUNTEER_LOGISTICS_EMAIL,
 }
+
 
 class ContactInfo(Protocol):
     first_name: str
@@ -98,11 +100,10 @@ async def send_waitlist_release_email(first_name: str, email: EmailStr) -> None:
         send_to_multiple=False,
     )
 
+
 async def send_logistics_email(role: Role) -> None:
     """Send logistics email to a particular group."""
-    
     records: list[dict[str, Any]] = []
-
     records = await mongodb_handler.retrieve(
         mongodb_handler.Collection.USERS,
         {

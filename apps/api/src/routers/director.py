@@ -21,7 +21,7 @@ from services.sendgrid_handler import (
 )
 from routers.admin import retrieve_thresholds
 from utils import email_handler
-from utils.email_handler import IH_SENDER
+from utils.email_handler import IH_SENDER, recover_email_from_uid
 from utils.batched import batched
 
 log = getLogger(__name__)
@@ -476,8 +476,9 @@ def _extract_personalizations(decision_data: dict[str, Any]) -> tuple[str, Email
 
 class RoleRequest(BaseModel):
     role: Literal[Role.HACKER, Role.MENTOR, Role.VOLUNTEER]
-    
+
+
 @router.post("/logistics", dependencies=[Depends(require_director)])
-async def release_hacker_decisions(request: RoleRequest) -> None:
+async def release_logistics_emails(request: RoleRequest) -> None:
     """Send logistics email."""
     await email_handler.send_logistics_email(request.role)

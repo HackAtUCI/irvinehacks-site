@@ -398,7 +398,6 @@ async def retrieve_thresholds() -> Optional[dict[str, Any]]:
     )
 
 
-
 async def _try_update_applicant_with_query(
     applicant_review: ReviewRequest,
     *,

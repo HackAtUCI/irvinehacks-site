@@ -19,6 +19,7 @@ interface SendGroupProps {
 	buttonText: string;
 	modalText: string;
 	route: string;
+	body?: unknown;
 	mutate?: KeyedMutator<Sender[]>;
 }
 
@@ -27,6 +28,7 @@ function SendGroup({
 	buttonText,
 	modalText,
 	route,
+	body,
 	mutate,
 }: SendGroupProps) {
 	const [visible, setVisible] = useState(false);
@@ -35,8 +37,9 @@ function SendGroup({
 	>([]);
 
 	const handleClick = async () => {
+
 		await axios
-			.post(route)
+			.post(route, body ? body : undefined)
 			.then(() => {
 				setFlashBarItems([
 					{

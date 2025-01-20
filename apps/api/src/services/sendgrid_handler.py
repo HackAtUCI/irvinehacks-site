@@ -30,6 +30,9 @@ class Template(str, Enum):
     MENTOR_RSVP_REMINDER = "d-44da492ad79945a8932904904c39141b"
     VOLUNTEER_RSVP_REMINDER = "d-10a22149e4594cdf85d861f9e420dbe8"
     WAITLIST_RELEASE_EMAIL = "d-467b8de41d214f33ad9b6cc98cbb6c05"
+    HACKER_LOGISTICS_EMAIL = "d-daa64b617d914a5996d51003e6d900a6"
+    MENTOR_LOGISTICS_EMAIL = "d-2fb645c51c1a450babe5434162884ee4"
+    VOLUNTEER_LOGISTICS_EMAIL = "d-c1cb63658bfe412aa9c8b327cceb29a7"
 
 
 class PersonalizationData(TypedDict):
@@ -50,6 +53,7 @@ class ApplicationUpdatePersonalization(PersonalizationData):
     first_name: str
 
 
+
 ApplicationUpdateTemplates: TypeAlias = Literal[
     Template.HACKER_ACCEPTED_EMAIL,
     Template.HACKER_WAITLISTED_EMAIL,
@@ -64,6 +68,11 @@ ApplicationUpdateTemplates: TypeAlias = Literal[
     Template.WAITLIST_RELEASE_EMAIL,
 ]
 
+LogisticsTemplates: TypeAlias = Literal[
+    Template.HACKER_LOGISTICS_EMAIL,
+    Template.MENTOR_LOGISTICS_EMAIL,
+    Template.VOLUNTEER_LOGISTICS_EMAIL,
+]
 
 @overload
 async def send_email(

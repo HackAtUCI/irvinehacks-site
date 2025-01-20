@@ -13,6 +13,7 @@ import ApplyReminder from "./components/ApplyReminder";
 import ReleaseNonHackerDecisions from "./components/ReleaseDecisions";
 import ReleaseHackerDecisions from "./components/ReleaseHackerDecisions";
 import RSVPReminder from "./components/RSVPReminder";
+import Logistics from "./components/Logistics"
 
 function EmailSender() {
 	const router = useRouter();
@@ -30,6 +31,8 @@ function EmailSender() {
 			<ReleaseHackerDecisions />
 			<RSVPReminder />
 			<ApplyReminder />
+			<Header>Logistics Emails</Header>
+			<Logistics />
 		</SpaceBetween>
 	);
 }

@@ -103,7 +103,7 @@ async def send_waitlist_release_email(first_name: str, email: EmailStr) -> None:
 
 async def send_logistics_email(role: Role) -> None:
     """Send logistics email to a particular group."""
-    records: list[dict[str, Any]] = []
+    records = []
     records = await mongodb_handler.retrieve(
         mongodb_handler.Collection.USERS,
         {"roles": Role(role)},

@@ -73,6 +73,7 @@ LogisticsTemplates: TypeAlias = Literal[
     Template.VOLUNTEER_LOGISTICS_EMAIL,
 ]
 
+
 @overload
 async def send_email(
     template_id: Literal[Template.CONFIRMATION_EMAIL],

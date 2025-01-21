@@ -1,4 +1,4 @@
-from typing import Any, Iterable, Literal, Protocol, Union
+from typing import Any, Iterable, Literal, Protocol
 
 from pydantic import EmailStr
 
@@ -31,11 +31,10 @@ DECISION_TEMPLATES: dict[Role, dict[Decision, ApplicationUpdateTemplates]] = {
 }
 
 
-LOGISTICS_TEMPLATES: dict[Union[Role, Decision], LogisticsTemplates] = {
+LOGISTICS_TEMPLATES: dict[Role, LogisticsTemplates] = {
     Role.HACKER: Template.HACKER_LOGISTICS_EMAIL,
     Role.MENTOR: Template.MENTOR_LOGISTICS_EMAIL,
     Role.VOLUNTEER: Template.VOLUNTEER_LOGISTICS_EMAIL,
-    Decision.WAITLISTED: Template.HACKER_WAITLISTED_LOGISTICS_EMAIL,
 }
 
 
@@ -103,21 +102,14 @@ async def send_waitlist_release_email(first_name: str, email: EmailStr) -> None:
 
 
 async def send_logistics_email(
-    type: Literal[Role.HACKER, Role.MENTOR, Role.VOLUNTEER, Decision.WAITLISTED]
+    application_type: Literal[Role.HACKER, Role.MENTOR, Role.VOLUNTEER]
 ) -> None:
-    """Send logistics email to a particular group of attendees."""
-    if type == Decision.WAITLISTED:
-        records: list[dict[str, Any]] = await mongodb_handler.retrieve(
-            mongodb_handler.Collection.USERS,
-            {"roles": Role.HACKER, "status": Decision.WAITLISTED},
-            ["_id", "first_name"],
-        )
-    else:
-        records: list[dict[str, Any]] = await mongodb_handler.retrieve(
-            mongodb_handler.Collection.USERS,
-            {"roles": Role(type), "status": Status.ATTENDING},
-            ["_id", "first_name"],
-        )
+    """Send logistics emails to a particular group of attendees."""
+    records: list[dict[str, Any]] = await mongodb_handler.retrieve(
+        mongodb_handler.Collection.USERS,
+        {"roles": Role(application_type), "status": Status.ATTENDING},
+        ["_id", "first_name"],
+    )
 
     personalizations = []
     for record in records:
@@ -128,7 +120,7 @@ async def send_logistics_email(
             )
         )
 
-    template = LOGISTICS_TEMPLATES[type]
+    template = LOGISTICS_TEMPLATES[application_type]
 
     await sendgrid_handler.send_email(template, IH_SENDER, personalizations, True)
 

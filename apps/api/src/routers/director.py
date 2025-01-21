@@ -442,8 +442,25 @@ async def volunteer_logistics_emails() -> None:
 
 @router.post("/logistics/waitlists", dependencies=[Depends(require_director)])
 async def waitlist_logistics_emails() -> None:
-    """Send logistics email to waitlisted hackers."""
-    await email_handler.send_logistics_email(Decision.WAITLISTED)
+    """Send logistics emails to waitlisted hackers."""
+    records: list[dict[str, Any]] = await mongodb_handler.retrieve(
+        mongodb_handler.Collection.USERS,
+        {"roles": Role.HACKER, "status": Decision.WAITLISTED},
+        ["_id", "first_name"],
+    )
+
+    personalizations = []
+    for record in records:
+        personalizations.append(
+            ApplicationUpdatePersonalization(
+                email=recover_email_from_uid(record["_id"]),
+                first_name=record["first_name"],
+            )
+        )
+
+    await sendgrid_handler.send_email(
+        Template.HACKER_WAITLISTED_LOGISTICS_EMAIL, IH_SENDER, personalizations, True
+    )
 
 
 async def _process_status(uids: Sequence[str], status: Status) -> None:

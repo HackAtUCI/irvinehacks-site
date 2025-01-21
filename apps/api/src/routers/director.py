@@ -458,9 +458,10 @@ async def waitlist_logistics_emails() -> None:
             )
         )
 
-    await sendgrid_handler.send_email(
-        Template.HACKER_WAITLISTED_LOGISTICS_EMAIL, IH_SENDER, personalizations, True
-    )
+    if len(records) > 0:
+        await sendgrid_handler.send_email(
+            Template.HACKER_WAITLISTED_LOGISTICS_EMAIL, IH_SENDER, personalizations, True
+        )
 
 
 async def _process_status(uids: Sequence[str], status: Status) -> None:

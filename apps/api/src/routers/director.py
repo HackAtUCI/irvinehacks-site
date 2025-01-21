@@ -2,7 +2,7 @@ import asyncio
 
 from datetime import datetime
 from logging import getLogger
-from typing import Annotated, Any, Literal, Optional, Sequence
+from typing import Annotated, Any, Literal, Optional, Sequence, Union
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, TypeAdapter, ValidationError
@@ -467,7 +467,47 @@ async def waitlist_logistics_emails() -> None:
         )
 
 
-async def _process_status(uids: Sequence[str], status: Status) -> None:
+@router.post("/waitlist-transfer", dependencies=[Depends(require_director)])
+async def waitlist_transfer() -> None:
+    """Transfer all accepted hackers that didn't RSVP in time to the waitlist"""
+    records: list[dict[str, Any]] = await mongodb_handler.retrieve(
+        Collection.USERS,
+        {"roles": Role.HACKER, "status": Status.VOID},
+        ["_id", "first_name"],
+    )
+
+    log.info(
+        f"Changing status of {len(records)} from {Status.VOID} to {Decision.WAITLISTED}"
+    )
+
+    await asyncio.gather(
+        *(
+            _process_status(batch, Decision.WAITLISTED)
+            for batch in batched([str(record["_id"]) for record in records], 100)
+        )
+    )
+
+    personalizations = []
+    for record in records:
+        personalizations.append(
+            ApplicationUpdatePersonalization(
+                email=recover_email_from_uid(record["_id"]),
+                first_name=record["first_name"],
+            )
+        )
+
+    log.info(f"Sending waitlist transfer emails to {len(records)} users")
+
+    if len(records) > 0:
+        await sendgrid_handler.send_email(
+            Template.WAITLIST_TRANSFER_EMAIL,
+            IH_SENDER,
+            personalizations,
+            True,
+        )
+
+
+async def _process_status(uids: Sequence[str], status: Union[Status, Decision]) -> None:
     ok = await mongodb_handler.update(
         Collection.USERS, {"_id": {"$in": uids}}, {"status": status}
     )

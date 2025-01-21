@@ -34,6 +34,7 @@ class Template(str, Enum):
     MENTOR_LOGISTICS_EMAIL = "d-2fb645c51c1a450babe5434162884ee4"
     VOLUNTEER_LOGISTICS_EMAIL = "d-c1cb63658bfe412aa9c8b327cceb29a7"
     HACKER_WAITLISTED_LOGISTICS_EMAIL = "d-96dee09b12ef49b3977353fb96ee866e"
+    WAITLIST_TRANSFER_EMAIL = "d-d31a55e147e74d1689d859c88de19d9d"
 
 
 class PersonalizationData(TypedDict):
@@ -66,6 +67,7 @@ ApplicationUpdateTemplates: TypeAlias = Literal[
     Template.MENTOR_RSVP_REMINDER,
     Template.VOLUNTEER_RSVP_REMINDER,
     Template.WAITLIST_RELEASE_EMAIL,
+    Template.WAITLIST_TRANSFER_EMAIL,
 ]
 
 LogisticsTemplates: TypeAlias = Literal[

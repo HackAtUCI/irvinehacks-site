@@ -23,7 +23,7 @@ function getTimeAndDates(givenTime: Date) {
 		"Dec",
 	];
 
-	const currentHour = givenTime.getHours() % 12;
+	const currentHour = (((givenTime.getHours() % 12) + 11) % 12) + 1;
 	const currentMinute = givenTime.getMinutes().toString().padStart(2, "0");
 	const amPm = givenTime.getHours() < 12 ? "am" : "pm";
 	const currentWeekDay = convertWeekdays[givenTime.getDay()];

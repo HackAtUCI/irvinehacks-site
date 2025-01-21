@@ -99,11 +99,7 @@ const ShiftingCountdown = () => {
 			</div>
 			<div className="absolute top-[50%] right-14 max-md:hidden">
 				<Image src={LgStar} alt="*" className="w-[70px] left-14" />
-				<Image
-					src={LgStar}
-					alt="*"
-					className="absolute top-22 w-[50px]"
-				/>
+				<Image src={LgStar} alt="*" className="absolute top-22 w-[50px]" />
 			</div>
 			<div className="p-4">
 				<div className="w-full mx-auto flex items-center justify-center max-sm:w-full max-sm:h-[200px]">

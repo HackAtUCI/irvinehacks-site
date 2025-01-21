@@ -5,7 +5,10 @@ import styles from "./EventSidebar.module.scss";
 import { useEffect, useRef } from "react";
 import EventPlaque from "./EventPlaque";
 
+import star from "@/assets/images/large_star.svg";
+
 import EventProps from "../EventProps";
+import Image from "next/image";
 
 export default function EventSidebar({
 	events,
@@ -76,7 +79,15 @@ export default function EventSidebar({
 					className="w-full h-fit flex flex-col gap-4 p-6"
 					ref={scheduleContainerRef}
 				>
-					<div className="h-[300px] w-full" />
+					<div className="h-[300px] w-full relative flex justify-center items-center">
+						<Image
+							src={star}
+							width={80}
+							height={80}
+							alt="*"
+							className="opacity-60"
+						/>
+					</div>
 					{events.map((event) => {
 						return (
 							<EventPlaque
@@ -95,7 +106,15 @@ export default function EventSidebar({
 							/>
 						);
 					})}
-					<div className="h-[300px] w-full" />
+					<div className="h-[300px] w-full flex justify-center items-center">
+						<Image
+							src={star}
+							width={80}
+							height={80}
+							alt="*"
+							className="opacity-60"
+						/>
+					</div>
 				</div>
 			</div>
 		</div>

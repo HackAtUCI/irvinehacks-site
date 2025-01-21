@@ -4,13 +4,8 @@ import { AnimatePresence, motion, Variants } from "framer-motion";
 import { useEffect, useState } from "react";
 import BarLoader from "../BarLoader";
 import clsx from "clsx";
-import { Fireworks } from "@fireworks-js/react";
 import QuestBox from "@/assets/images/text_box_with_title.svg";
 import LgStar from "@/assets/images/large_star.svg";
-
-import Sprite1 from "@/assets/images/hacker_sprite.png";
-import Sprite2 from "@/assets/images/mentor_sprite.png";
-import Sprite3 from "@/assets/images/volunteer_sprite.png";
 
 import styles from "./ShiftingCountdown.module.scss";
 import Image from "next/image";

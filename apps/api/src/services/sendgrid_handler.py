@@ -146,13 +146,19 @@ async def send_email(
 
 @overload
 async def send_email(
-    template_id: Literal[
-        Template.HACKER_LOGISTICS_EMAIL,
-        Template.MENTOR_LOGISTICS_EMAIL,
-        Template.VOLUNTEER_LOGISTICS_EMAIL,
-    ],
+    template_id: LogisticsTemplates,
     sender_email: Tuple[str, str],
-    receiver_data: Iterable[PersonalizationData],
+    receiver_data: ApplicationUpdatePersonalization,
+    send_to_multiple: Literal[False],
+    reply_to: Union[Tuple[str, str], None] = None,
+) -> None: ...
+
+
+@overload
+async def send_email(
+    template_id: LogisticsTemplates,
+    sender_email: Tuple[str, str],
+    receiver_data: Iterable[ApplicationUpdatePersonalization],
     send_to_multiple: Literal[True],
     reply_to: Union[Tuple[str, str], None] = None,
 ) -> None: ...

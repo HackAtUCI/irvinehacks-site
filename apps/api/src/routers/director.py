@@ -422,6 +422,14 @@ async def release_hacker_decisions() -> None:
     await _process_records_in_batches(records, Role.HACKER)
 
 
+@router.post("/logistics", dependencies=[Depends(require_director)])
+async def release_logistics_emails() -> None:
+    """Send logistics email."""
+    await email_handler.send_logistics_email(Role.HACKER)
+    await email_handler.send_logistics_email(Role.MENTOR)
+    await email_handler.send_logistics_email(Role.VOLUNTEER)
+
+
 async def _process_status(uids: Sequence[str], status: Status) -> None:
     ok = await mongodb_handler.update(
         Collection.USERS, {"_id": {"$in": uids}}, {"status": status}
@@ -472,13 +480,3 @@ def _extract_personalizations(decision_data: dict[str, Any]) -> tuple[str, Email
     name = decision_data["first_name"]
     email = recover_email_from_uid(decision_data["_id"])
     return name, email
-
-
-class RoleRequest(BaseModel):
-    role: Literal[Role.HACKER, Role.MENTOR, Role.VOLUNTEER]
-
-
-@router.post("/logistics", dependencies=[Depends(require_director)])
-async def release_logistics_emails(request: RoleRequest) -> None:
-    """Send logistics email."""
-    await email_handler.send_logistics_email(request.role)

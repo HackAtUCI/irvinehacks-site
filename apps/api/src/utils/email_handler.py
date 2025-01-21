@@ -3,7 +3,7 @@ from typing import Any, Iterable, Literal, Protocol
 from pydantic import EmailStr
 
 from models.ApplicationData import Decision
-from models.user_record import Role
+from models.user_record import Role, Status
 from services import mongodb_handler, sendgrid_handler
 from services.sendgrid_handler import (
     ApplicationUpdatePersonalization,
@@ -101,12 +101,13 @@ async def send_waitlist_release_email(first_name: str, email: EmailStr) -> None:
     )
 
 
-async def send_logistics_email(role: Role) -> None:
-    """Send logistics email to a particular group."""
-    records = []
-    records = await mongodb_handler.retrieve(
+async def send_logistics_email(
+    application_type: Literal[Role.HACKER, Role.MENTOR, Role.VOLUNTEER]
+) -> None:
+    """Send logistics email to a particular group of attendees."""
+    records: list[dict[str, Any]] = await mongodb_handler.retrieve(
         mongodb_handler.Collection.USERS,
-        {"roles": Role(role)},
+        {"roles": Role(application_type), "status": Status.ATTENDING},
         ["_id", "first_name"],
     )
 
@@ -119,7 +120,7 @@ async def send_logistics_email(role: Role) -> None:
             )
         )
 
-    template = LOGISTICS_TEMPLATES[role]
+    template = LOGISTICS_TEMPLATES[application_type]
 
     await sendgrid_handler.send_email(template, IH_SENDER, personalizations, True)
 

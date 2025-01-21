@@ -11,7 +11,6 @@ const variants = {
 			repeat: Infinity,
 			repeatType: "mirror",
 			duration: 0.5,
-			// ease: "circIn",
 		},
 	},
 } as Variants;

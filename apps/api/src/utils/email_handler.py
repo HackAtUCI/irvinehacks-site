@@ -1,4 +1,4 @@
-from typing import Any, Iterable, Literal, Protocol
+from typing import Any, Iterable, Literal, Protocol, Union
 
 from pydantic import EmailStr
 
@@ -31,10 +31,11 @@ DECISION_TEMPLATES: dict[Role, dict[Decision, ApplicationUpdateTemplates]] = {
 }
 
 
-LOGISTICS_TEMPLATES: dict[Role, LogisticsTemplates] = {
+LOGISTICS_TEMPLATES: dict[Union[Role, Decision], LogisticsTemplates] = {
     Role.HACKER: Template.HACKER_LOGISTICS_EMAIL,
     Role.MENTOR: Template.MENTOR_LOGISTICS_EMAIL,
     Role.VOLUNTEER: Template.VOLUNTEER_LOGISTICS_EMAIL,
+    Decision.WAITLISTED: Template.HACKER_WAITLISTED_LOGISTICS_EMAIL,
 }
 
 
@@ -102,14 +103,21 @@ async def send_waitlist_release_email(first_name: str, email: EmailStr) -> None:
 
 
 async def send_logistics_email(
-    application_type: Literal[Role.HACKER, Role.MENTOR, Role.VOLUNTEER]
+    type: Literal[Role.HACKER, Role.MENTOR, Role.VOLUNTEER, Decision.WAITLISTED]
 ) -> None:
     """Send logistics email to a particular group of attendees."""
-    records: list[dict[str, Any]] = await mongodb_handler.retrieve(
-        mongodb_handler.Collection.USERS,
-        {"roles": Role(application_type), "status": Status.ATTENDING},
-        ["_id", "first_name"],
-    )
+    if type == Decision.WAITLISTED:
+        records: list[dict[str, Any]] = await mongodb_handler.retrieve(
+            mongodb_handler.Collection.USERS,
+            {"roles": Role.HACKER, "status": Decision.WAITLISTED},
+            ["_id", "first_name"],
+        )
+    else:
+        records: list[dict[str, Any]] = await mongodb_handler.retrieve(
+            mongodb_handler.Collection.USERS,
+            {"roles": Role(type), "status": Status.ATTENDING},
+            ["_id", "first_name"],
+        )
 
     personalizations = []
     for record in records:
@@ -120,7 +128,7 @@ async def send_logistics_email(
             )
         )
 
-    template = LOGISTICS_TEMPLATES[application_type]
+    template = LOGISTICS_TEMPLATES[type]
 
     await sendgrid_handler.send_email(template, IH_SENDER, personalizations, True)
 

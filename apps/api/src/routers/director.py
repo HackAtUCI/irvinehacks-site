@@ -422,12 +422,28 @@ async def release_hacker_decisions() -> None:
     await _process_records_in_batches(records, Role.HACKER)
 
 
-@router.post("/logistics", dependencies=[Depends(require_director)])
-async def release_logistics_emails() -> None:
-    """Send logistics email."""
+@router.post("/logistics/hackers", dependencies=[Depends(require_director)])
+async def hacker_logistics_emails() -> None:
+    """Send logistics emails to hackers."""
     await email_handler.send_logistics_email(Role.HACKER)
+
+
+@router.post("/logistics/mentors", dependencies=[Depends(require_director)])
+async def mentor_logistics_emails() -> None:
+    """Send logistics email to mentors."""
     await email_handler.send_logistics_email(Role.MENTOR)
+
+
+@router.post("/logistics/volunteers", dependencies=[Depends(require_director)])
+async def volunteer_logistics_emails() -> None:
+    """Send logistics email to volunteers."""
     await email_handler.send_logistics_email(Role.VOLUNTEER)
+
+
+@router.post("/logistics/waitlists", dependencies=[Depends(require_director)])
+async def waitlist_logistics_emails() -> None:
+    """Send logistics email to waitlisted hackers."""
+    await email_handler.send_logistics_email(Decision.WAITLISTED)
 
 
 async def _process_status(uids: Sequence[str], status: Status) -> None:

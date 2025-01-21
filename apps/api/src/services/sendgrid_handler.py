@@ -33,6 +33,7 @@ class Template(str, Enum):
     HACKER_LOGISTICS_EMAIL = "d-daa64b617d914a5996d51003e6d900a6"
     MENTOR_LOGISTICS_EMAIL = "d-2fb645c51c1a450babe5434162884ee4"
     VOLUNTEER_LOGISTICS_EMAIL = "d-c1cb63658bfe412aa9c8b327cceb29a7"
+    HACKER_WAITLISTED_LOGISTICS_EMAIL = "d-96dee09b12ef49b3977353fb96ee866e"
 
 
 class PersonalizationData(TypedDict):
@@ -71,6 +72,7 @@ LogisticsTemplates: TypeAlias = Literal[
     Template.HACKER_LOGISTICS_EMAIL,
     Template.MENTOR_LOGISTICS_EMAIL,
     Template.VOLUNTEER_LOGISTICS_EMAIL,
+    Template.HACKER_WAITLISTED_LOGISTICS_EMAIL,
 ]
 
 

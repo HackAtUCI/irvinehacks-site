@@ -12,7 +12,7 @@ export default async function Volunteer({
 }) {
 	return (
 		<ApplicationFlow
-			searchParams={searchParams}
+			prefaceAccepted={searchParams.prefaceAccepted}
 			applicationType="Volunteer"
 			applicationURL="/volunteer"
 		>

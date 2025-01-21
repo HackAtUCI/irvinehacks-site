@@ -496,7 +496,7 @@ async def waitlist_transfer() -> None:
             )
         )
 
-    log.info(f"Sending waitlist transfer emails to {len(records)} users")
+    log.info(f"Sending waitlist transfer emails to {len(records)} hackers")
 
     if len(records) > 0:
         await sendgrid_handler.send_email(

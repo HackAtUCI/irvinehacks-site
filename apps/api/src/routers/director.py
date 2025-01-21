@@ -460,7 +460,10 @@ async def waitlist_logistics_emails() -> None:
 
     if len(records) > 0:
         await sendgrid_handler.send_email(
-            Template.HACKER_WAITLISTED_LOGISTICS_EMAIL, IH_SENDER, personalizations, True
+            Template.HACKER_WAITLISTED_LOGISTICS_EMAIL,
+            IH_SENDER,
+            personalizations,
+            True,
         )
 
 

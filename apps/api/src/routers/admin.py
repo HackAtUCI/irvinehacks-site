@@ -329,7 +329,7 @@ async def waitlist_release(
 
     log.info("%s accepted %s off the waitlist. Sending email.", associate, uid)
     await email_handler.send_waitlist_release_email(
-        record["first_name"], recover_email_from_uid(uid)
+        record["first_name"], email_handler.recover_email_from_uid(uid)
     )
 
 
@@ -396,15 +396,6 @@ async def retrieve_thresholds() -> Optional[dict[str, Any]]:
     return await mongodb_handler.retrieve_one(
         Collection.SETTINGS, {"_id": "hacker_score_thresholds"}, ["accept", "waitlist"]
     )
-
-
-def recover_email_from_uid(uid: str) -> str:
-    """For NativeUsers, the email should still delivery properly."""
-    uid = uid.replace("..", "\n")
-    *reversed_domain, local = uid.split(".")
-    local = local.replace("\n", ".")
-    domain = ".".join(reversed(reversed_domain))
-    return f"{local}@{domain}"
 
 
 async def _try_update_applicant_with_query(

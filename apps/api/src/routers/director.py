@@ -19,9 +19,9 @@ from services.sendgrid_handler import (
     PersonalizationData,
     Template,
 )
-from routers.admin import recover_email_from_uid, retrieve_thresholds
+from routers.admin import retrieve_thresholds
 from utils import email_handler
-from utils.email_handler import IH_SENDER
+from utils.email_handler import IH_SENDER, recover_email_from_uid
 from utils.batched import batched
 
 log = getLogger(__name__)
@@ -420,6 +420,51 @@ async def release_hacker_decisions() -> None:
         )
 
     await _process_records_in_batches(records, Role.HACKER)
+
+
+@router.post("/logistics/hackers", dependencies=[Depends(require_director)])
+async def hacker_logistics_emails() -> None:
+    """Send logistics emails to hackers."""
+    await email_handler.send_logistics_email(Role.HACKER)
+
+
+@router.post("/logistics/mentors", dependencies=[Depends(require_director)])
+async def mentor_logistics_emails() -> None:
+    """Send logistics email to mentors."""
+    await email_handler.send_logistics_email(Role.MENTOR)
+
+
+@router.post("/logistics/volunteers", dependencies=[Depends(require_director)])
+async def volunteer_logistics_emails() -> None:
+    """Send logistics email to volunteers."""
+    await email_handler.send_logistics_email(Role.VOLUNTEER)
+
+
+@router.post("/logistics/waitlists", dependencies=[Depends(require_director)])
+async def waitlist_logistics_emails() -> None:
+    """Send logistics emails to waitlisted hackers."""
+    records: list[dict[str, Any]] = await mongodb_handler.retrieve(
+        mongodb_handler.Collection.USERS,
+        {"roles": Role.HACKER, "status": Decision.WAITLISTED},
+        ["_id", "first_name"],
+    )
+
+    personalizations = []
+    for record in records:
+        personalizations.append(
+            ApplicationUpdatePersonalization(
+                email=recover_email_from_uid(record["_id"]),
+                first_name=record["first_name"],
+            )
+        )
+
+    if len(records) > 0:
+        await sendgrid_handler.send_email(
+            Template.HACKER_WAITLISTED_LOGISTICS_EMAIL,
+            IH_SENDER,
+            personalizations,
+            True,
+        )
 
 
 async def _process_status(uids: Sequence[str], status: Status) -> None:

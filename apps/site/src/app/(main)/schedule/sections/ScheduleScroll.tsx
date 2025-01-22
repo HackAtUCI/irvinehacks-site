@@ -19,7 +19,7 @@ export default function ScheduleScroll({
 	const scheduleContainerRef = useRef<HTMLDivElement>(null);
 
 	function scrollTo(newPos: number) {
-		const fixedPos = [0, 0.25, 0.5];
+		const fixedPos = [0.01, 0.25, 0.51];
 		scheduleContainerRef.current?.scrollTo({
 			left: sheduleBarRef.current
 				? sheduleBarRef.current.getBoundingClientRect().width * fixedPos[newPos]
@@ -72,7 +72,7 @@ export default function ScheduleScroll({
 	}
 
 	return (
-		<div className="w-full flex flex-col items-center select-none gap-20">
+		<div className="w-full flex flex-col items-center select-none gap-20 max-md:gap-5">
 			<h1 className="text-5xl font-display">Schedule</h1>
 			<div className="flex gap-10 sm:hidden">
 				<div className="h-full flex items-center">
@@ -103,7 +103,7 @@ export default function ScheduleScroll({
 				</div>
 				<div
 					className={clsx(
-						"w-[600px] h-full gap-20 font-display text-6xl overflow-auto relative max-lg:min-w-[400px] max-lg:w-[400px]",
+						"w-[600px] h-full gap-20 font-display text-6xl overflow-auto relative max-lg:min-w-[400px] max-lg:w-[400px] max-md:text-4xl",
 						styles.background,
 						styles.hideScroll,
 					)}
@@ -119,16 +119,21 @@ export default function ScheduleScroll({
 						{weekdays.map((weekday, i) => {
 							const weekdayStr = getTimeAndDates(weekday).day;
 							return (
-								<span
-									className="whitespace-nowrap cursor-pointer"
+								<div
+									className="whitespace-nowrap cursor-pointer relative flex justify-center items-center"
 									key={weekdayStr}
 									onClick={() => {
 										setSelectedEventDay(weekday);
 										scrollTo(i);
 									}}
 								>
-									{weekdayStr}
-								</span>
+									<span className="invisible font-display text-6xl">
+										{weekdayStr}
+									</span>
+									<div className="absolute w-full h-full top-0 left-0 flex justify-center items-center">
+										<span className="absolute">{weekdayStr}</span>
+									</div>
+								</div>
 							);
 						})}
 						<div className="h-full w-[100px] max-lg:w-[190px]" />

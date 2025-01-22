@@ -88,7 +88,7 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 
 	return (
 		<>
-			<div className="relative w-full h-fit flex gap-10 flex-col">
+			<div className="relative w-full h-fit flex gap-10 flex-col max-md:gap-2">
 				<ScheduleScroll
 					weekdays={allDays}
 					setSelectedEventDay={setSelectedEventDay}

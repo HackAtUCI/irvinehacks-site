@@ -2,7 +2,7 @@
 
 import clsx from "clsx";
 import styles from "./ScheduleScroll.module.scss";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import getTimeAndDates from "@/lib/utils/getTimeAndDates";
 
@@ -28,7 +28,7 @@ export default function ScheduleScroll({
 		});
 	}
 
-	function scrollDir(action: string) {
+	function getCurrentDateIndex() {
 		let ind = 0;
 		for (let i = 0; i < weekdays.length; i++) {
 			if (
@@ -37,6 +37,28 @@ export default function ScheduleScroll({
 			)
 				ind = i;
 		}
+
+		return ind;
+	}
+
+	useEffect(() => {
+		const date = new Date(Date.now());
+		const curDay = new Date(
+			date.getFullYear(),
+			date.getMonth(),
+			date.getDate(),
+		);
+		let ind = 0;
+		for (let i = 0; i < weekdays.length; i++) {
+			if (curDay && weekdays[i].getTime() === curDay.getTime()) ind = i;
+		}
+		if (ind > 0) {
+			scrollTo(ind);
+		}
+	}, [weekdays]);
+
+	function scrollDir(action: string) {
+		const ind = getCurrentDateIndex();
 
 		if (action === "left") {
 			const nextIndex = (ind + (weekdays.length - 1)) % weekdays.length;

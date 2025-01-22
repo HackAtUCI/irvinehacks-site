@@ -37,7 +37,7 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 	);
 
 	const [selectedEventDay, setSelectedEventDay] = useState<Date | undefined>(
-		getEventDate(new Date()),
+		getEventDate(new Date(Date.now())),
 	);
 
 	function getEventDate(date: Date) {
@@ -51,7 +51,7 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 	// 	);
 	// }
 
-	const firstDay = new Date(2025, 1, 24); // hackathon start day
+	const firstDay = new Date(2025, 0, 24); // hackathon start day
 
 	const allDays = schedule
 		.map((event) => (event ? event[0].startTime : new Date(0)))
@@ -101,7 +101,7 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 								? selectedScheduleEvents
 								: currentScheduleEvents
 						}
-						currentTitle={currentEvent?.title}
+						currentTitle={`${currentEvent?.title}${currentEvent?.startTime.toISOString()}`}
 						setSelectedEvent={setSelectedEvent}
 					/>
 					{selectedEvent ? (
@@ -109,6 +109,7 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 							<EventCard
 								key={selectedEvent.title}
 								now={now}
+								isHappening={false}
 								{...selectedEvent}
 							/>
 						</div>

@@ -86,7 +86,10 @@ export default function EventSidebar({
 					<div className="h-[100px] w-full relative flex justify-center items-center" />
 					{events.map((event) => {
 						return (
-							<div key={event.title} className="max-lg:hidden">
+							<div
+								key={`${event.title}${event.startTime.toISOString()}`}
+								className="max-lg:hidden"
+							>
 								<EventPlaque
 									onClick={eventPlaqueClick}
 									ref={(node: HTMLDivElement) => {
@@ -98,7 +101,10 @@ export default function EventSidebar({
 									title={event.title}
 									startTime={event.startTime}
 									endTime={event.endTime}
-									isHappening={currentTitle === event.title}
+									isHappening={
+										currentTitle ===
+										`${event.title}${event.startTime.toISOString()}`
+									}
 								/>
 							</div>
 						);
@@ -106,8 +112,17 @@ export default function EventSidebar({
 
 					{events.map((event) => {
 						return (
-							<div key={event.title} className="lg:hidden">
-								<EventCard key={event.title} {...event} />
+							<div
+								key={`${event.title}${event.startTime.toISOString()}`}
+								className="lg:hidden"
+							>
+								<EventCard
+									{...event}
+									isHappening={
+										currentTitle ===
+										`${event.title}${event.startTime.toISOString()}`
+									}
+								/>
 							</div>
 						);
 					})}

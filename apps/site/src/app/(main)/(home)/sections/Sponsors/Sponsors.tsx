@@ -2,13 +2,14 @@ import { getSponsors } from "./getSponsors";
 import SponsorTier from "./components/SponsorTier/SponsorTier";
 import styles from "./Sponsors.module.scss";
 
+// no sponsors under bronze for IH 2025
 const TIERS = [
 	"platinum",
 	"gold",
 	"silver",
-	"bronze",
-	"sponsored-prize",
-	"in-kind",
+	// "bronze",
+	// "sponsored-prize",
+	// "in-kind",
 ];
 
 const Sponsors = async () => {

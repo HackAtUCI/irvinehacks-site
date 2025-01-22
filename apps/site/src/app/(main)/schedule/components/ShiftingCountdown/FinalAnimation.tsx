@@ -161,8 +161,6 @@ const FinalAnimation = () => {
 					</motion.div>
 				)}
 			</AnimatePresence>
-
-			<div className="flex w-full justify-center"></div>
 		</motion.div>
 	);
 };

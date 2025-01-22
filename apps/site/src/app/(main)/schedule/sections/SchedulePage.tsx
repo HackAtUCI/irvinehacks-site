@@ -105,9 +105,15 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 						setSelectedEvent={setSelectedEvent}
 					/>
 					{selectedEvent ? (
-						<EventCard key={selectedEvent.title} now={now} {...selectedEvent} />
+						<div className="w-[50%] relative flex max-lg:hidden lg:min-h-[700px]">
+							<EventCard
+								key={selectedEvent.title}
+								now={now}
+								{...selectedEvent}
+							/>
+						</div>
 					) : (
-						<div className="w-[50%] min-h-[700px] relative flex max-lg:justify-center max-lg:w-full">
+						<div className="w-[50%] min-h-[700px] relative flex max-lg:justify-center max-lg:hidden">
 							<div className="w-[90%] min-h-[700px] h-full bg-black border-4 border-white relative p-16 font-display">
 								<div className="text-4xl min-h-[600px] w-full h-full flex justify-center items-center text-center">
 									No Event Selected...

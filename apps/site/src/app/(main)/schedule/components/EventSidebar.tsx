@@ -9,6 +9,7 @@ import star from "@/assets/images/large_star.svg";
 
 import EventProps from "../EventProps";
 import Image from "next/image";
+import EventCard from "./EventCard";
 
 export default function EventSidebar({
 	events,
@@ -72,38 +73,42 @@ export default function EventSidebar({
 	return (
 		<div className="flex flex-col items-center select-none relative w-[50%] max-lg:w-[100%]">
 			<div
-				className={clsx(styles.background, "h-[800px] w-[80%] overflow-auto")}
+				className={clsx(
+					styles.background,
+					"h-[800px] w-[80%] overflow-auto max-lg:w-full",
+				)}
 				ref={scheduleScrollerRef}
 			>
 				<div
-					className="w-full h-fit flex flex-col gap-4 p-6"
+					className="w-full h-fit flex flex-col gap-4 p-6 max-lg:gap-10"
 					ref={scheduleContainerRef}
 				>
-					<div className="h-[300px] w-full relative flex justify-center items-center">
-						<Image
-							src={star}
-							width={80}
-							height={80}
-							alt="*"
-							className="opacity-60"
-						/>
-					</div>
+					<div className="h-[100px] w-full relative flex justify-center items-center" />
 					{events.map((event) => {
 						return (
-							<EventPlaque
-								key={event.title}
-								onClick={eventPlaqueClick}
-								ref={(node: HTMLDivElement) => {
-									const m = getScheduleRef();
-									m.set(event.title, node);
+							<div key={event.title} className="max-lg:hidden">
+								<EventPlaque
+									onClick={eventPlaqueClick}
+									ref={(node: HTMLDivElement) => {
+										const m = getScheduleRef();
+										m.set(event.title, node);
 
-									return () => m.delete(event.title);
-								}}
-								title={event.title}
-								startTime={event.startTime}
-								endTime={event.endTime}
-								isHappening={currentTitle === event.title}
-							/>
+										return () => m.delete(event.title);
+									}}
+									title={event.title}
+									startTime={event.startTime}
+									endTime={event.endTime}
+									isHappening={currentTitle === event.title}
+								/>
+							</div>
+						);
+					})}
+
+					{events.map((event) => {
+						return (
+							<div key={event.title} className="lg:hidden">
+								<EventCard key={event.title} {...event} />
+							</div>
 						);
 					})}
 					<div className="h-[300px] w-full flex justify-center items-center">

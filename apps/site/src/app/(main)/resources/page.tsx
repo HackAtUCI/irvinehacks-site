@@ -26,8 +26,11 @@ export default async function Resources() {
 				</div>
 				<div className="mb-40 mx-4">
 					{resources.order.map(
-						({ _id, iconUrl, title, description, resources }, i) => (
-							<div className="flex flex-col md:flex-row justify-center align-center justify-items-center">
+						({ _id, iconUrl, title, description, resources }) => (
+							<div
+								key={_id}
+								className="flex flex-col md:flex-row justify-center align-center justify-items-center"
+							>
 								<div className="grow basis-0">
 									<img
 										className="w-8 mx-auto h-auto lg:w-80"
@@ -35,14 +38,13 @@ export default async function Resources() {
 										alt=""
 									/>
 									<div className="s align-center justify-items-center">
-										<div className="top-1 left-1 bg-white w-full h-full"></div>
+										<div className="top-1 left-1 bg-white w-full h-full" />
 										<h2 className="shadow-[8px_8px_0px_1px_#ffffff] font-display text-center font-bold text-3xl bg-black text-[calc(13px_+_1vw)] px-10 py-[0.7rem] border-[3px] border-solid border-white">
 											{title}
 										</h2>
 									</div>
 								</div>
 								<div
-									key={_id}
 									className="max-w-5xl w-full grow-[2] basis-0
 									 mx-auto mb-12 bg-[var(--color-white)] text-[#2F1C00] p-12 rounded-2xl lg:grid lg:gap-20 lg:grid-cols-2 lg:items-center"
 								>

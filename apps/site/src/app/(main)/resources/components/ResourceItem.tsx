@@ -28,7 +28,7 @@ export default function ResourceItem({
 			className="my-2 flex flex-col items-center justify-center bg-black text-white border border-[3px] border-white transition-all duration-300 hover:bg-white hover:text-black hover:border-black hover:shadow-[9px_9px_0px_1px_#ffffff] w-full h-[200px] xl:h-[240px] flex-grow"
 		>
 			<div className="h-full py-6 xl:p-6">
-                {/* eslint-disable-next-line @next/next/no-img-element*/}
+				{/* eslint-disable-next-line @next/next/no-img-element*/}
 				<img
 					className="pointer-events-none w-[90px] h-[90px] xl:w-[130px] xl:h-[130px]"
 					src={resourceIconUrl}

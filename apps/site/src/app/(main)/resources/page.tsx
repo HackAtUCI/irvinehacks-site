@@ -2,10 +2,7 @@ import Button from "@/lib/components/Button/Button";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getResources } from "./getResources";
-import fire from "../../../assets/backgrounds/fire.png";
-import anteaters from "../../../assets/backgrounds/anteaters.png";
-import foilage from "../../../assets/backgrounds/foilage.png";
-import sleeping_anteater from "../../../assets/backgrounds/sleeping_anteater.png";
+import resource_header_bg from "../../../assets/backgrounds/resources-header-background.png";
 
 import Image from "next/image";
 
@@ -27,39 +24,14 @@ export default async function Resources() {
 			<section className="h-full w-full mb-12">
 				<div className="relative w-full min-h-[400px] md:min-h-[500px] lg:min-h-[600px] flex flex-col items-center justify-center overflow-hidden">
 					<Image
-						src={foilage}
-						alt="Foilage Background"
+						src={resource_header_bg}
+						alt="Resources Header Background"
 						fill
 						className="object-cover object-top z-0"
 						priority
 					/>
 
-					<Image
-						src={anteaters}
-						alt="Anteater Scene"
-						fill
-						className="object-contain object-center z-10"
-						priority
-					/>
-
-					<Image
-						src={sleeping_anteater}
-						alt="Sleeping Anteater"
-						fill
-						className="object-contain object-center z-10"
-						priority
-					/>
-
-					<Image
-						src={fire}
-						alt="Fire"
-						width={1300}
-						height={885}
-						className="absolute bottom-[1%] left-1/2 transform -translate-x-1/2 z-20"
-						priority
-					/>
-
-					<h1 className="absolute bottom-[5%] text-white text-3xl md:text-4xl lg:text-5xl font-bold z-30">
+					<h1 className="absolute bottom-[5%] text-white text-3xl md:text-4xl lg:text-5xl font-bold z-10">
 						Resources
 					</h1>
 				</div>
@@ -85,7 +57,6 @@ export default async function Resources() {
 											text={title}
 											href={link}
 											className="w-[100%!important] text-center"
-											// color={i % 2 === 0 ? "light" : "dark"}
 										/>
 									))}
 								</div>

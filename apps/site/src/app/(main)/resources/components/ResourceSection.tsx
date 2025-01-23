@@ -1,3 +1,5 @@
+import clsx from "clsx";
+import styles from "./ResourceSection.module.scss";
 import ResourceCategory from "./ResourceCategory";
 import ResourceDescription from "./ResourceDescription";
 import ResourceItem from "./ResourceItem";
@@ -27,7 +29,12 @@ export default async function ResourceSection() {
 										description={description}
 										isMobile={false}
 									/>
-									<div className="overflow-y-auto h-[210px] xl:h-[250px] pb-[9px] pr-4 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-white [&::-webkit-scrollbar-track]:p-2l">
+									<div
+										className={clsx(
+											styles.background,
+											"overflow-y-auto h-[226px] xl:h-[266px] pb-[9px] pr-4",
+										)}
+									>
 										<div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
 											{resources.map(
 												({ _id, resourceIconUrl, title, link }) => (

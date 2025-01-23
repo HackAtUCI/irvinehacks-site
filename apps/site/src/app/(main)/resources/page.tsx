@@ -18,37 +18,63 @@ export default async function Resources() {
 
 	return (
 		<>
-			<section className="h-full w-full mb-12">
-				<div className="my-36">
-					<h1 className="font-display text-4xl md:text-5xl font-bold mb-2 text-center">
+			<section className="w-full h-full mb-12">
+				<div className="my-36 text-center">
+					<h1 className="mb-2 font-display font-bold text-4xl md:text-5xl">
 						Resources
 					</h1>
 				</div>
-				<div className="mb-40 mx-4 ">
+				<div className="mx-4 mb-40">
 					{resources.order.map(
-						({ _id, iconUrl, title, description, resources }, i) => (
+						({ _id, iconUrl, title, description, resources }) => (
 							<div
 								key={_id}
-								className="max-w-5xl w-full mx-auto mb-12 bg-[var(--color-white)] text-[#2F1C00] p-12 rounded-2xl lg:grid lg:gap-20 lg:grid-cols-2 lg:items-center"
+								className="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 justify-center items-center lg:pr-[3.25vw]"
 							>
-								<div>
-									<div className="flex gap-2 lg:flex-col">
-										{/* eslint-disable-next-line @next/next/no-img-element */}
-										<img className="w-8 h-auto lg:w-16" src={iconUrl} alt="" />
-										<h2 className="text-2xl font-bold">{title}</h2>
+								<div className="grow basis-0 select-none pointer-events-none">
+									<img
+										className="mx-auto h-auto w-8 md:w-80"
+										src={iconUrl}
+										alt={title}
+									/>
+									<div className="align-center justify-items-center">
+										<div className="top-1 left-1 w-full h-full bg-white " />
+										<h2 className="border-solid border-white border-[3px] bg-black px-10 py-[0.7rem] font-display text-center font-bold text-3xl text-[calc(13px_+_1vw)] shadow-[8px_8px_0px_1px_#ffffff]">
+											{title}
+										</h2>
 									</div>
-									<p>{description}</p>
 								</div>
-								<div className="flex flex-col gap-3 lg:gap-4">
-									{resources.map(({ _id, title, link }) => (
-										<Button
-											key={_id}
-											text={title}
-											href={link}
-											className="w-[100%!important] text-center"
-											// color={i % 2 === 0 ? "light" : "dark"}
-										/>
-									))}
+								<div className="w-full max-w-5xl bg-black p-12 grow-[2] mb-12 border-[5px] border-white shadow-[9px_9px_0px_1px_#ffffff] md:col-span-2 select-none">
+									<h1 className="mb-8 font-body text-xl md:text-2xl">
+										{description}
+									</h1>
+									<div className="overflow-y-auto h-[210px] xl:h-[250px] pb-[9px]">
+										<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
+											{resources.map(
+												({ _id, resourceIconUrl, title, link }) => (
+													<a
+														key={_id}
+														href={link}
+														target="_blank"
+														className="flex flex-col items-center justify-center bg-black text-white border border-[3px] border-white transition-all duration-300 hover:bg-white hover:text-black hover:border-black hover:shadow-[9px_9px_0px_1px_#ffffff] w-full h-[200px] xl:h-[240px] flex-grow"
+													>
+														<div className="h-full py-6 xl:p-6">
+															<img
+																className="pointer-events-none  w-[90px] h-[90px] xl:w-[130px] xl:h-[130px]"
+																src={resourceIconUrl}
+																alt={title}
+															/>
+														</div>
+														<div className="flex flex-wrap text-center px-2">
+															<p className="text-md lg:text-lg font-medium">
+																{title}
+															</p>
+														</div>
+													</a>
+												),
+											)}
+										</div>
+									</div>
 								</div>
 							</div>
 						),

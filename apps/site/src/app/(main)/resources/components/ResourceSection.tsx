@@ -1,9 +1,9 @@
 import clsx from "clsx";
-import styles from "./ResourceSection.module.scss";
 import ResourceCategory from "./ResourceCategory";
 import ResourceDescription from "./ResourceDescription";
 import ResourceItem from "./ResourceItem";
 import { getResources } from "../getResources";
+import styles from "./ResourceSection.module.scss";
 
 export default async function ResourceSection() {
 	const resources = await getResources();
@@ -54,7 +54,7 @@ export default async function ResourceSection() {
 						</div>
 						<div className="block md:hidden">
 							<div className="w-full max-w-5xl bg-black p-5 sm:p-7 grow-[2] mb-12 border-[5px] border-white shadow-[9px_9px_0px_1px_#ffffff] select-none">
-								<div className="flex flex-row justify-stretch select-none pointer-events-none">
+								<div className="flex justify-stretch select-none pointer-events-none">
 									<ResourceCategory
 										iconUrl={iconUrl}
 										title={title}

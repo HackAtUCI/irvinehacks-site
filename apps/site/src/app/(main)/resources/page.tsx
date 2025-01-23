@@ -1,4 +1,3 @@
-import Button from "@/lib/components/Button/Button";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import ResourceSection from "./components/ResourceSection";

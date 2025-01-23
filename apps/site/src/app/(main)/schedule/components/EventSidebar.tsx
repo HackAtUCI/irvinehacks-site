@@ -1,15 +1,16 @@
 "use client";
 
-import clsx from "clsx";
-import styles from "./EventSidebar.module.scss";
 import { useEffect, useRef } from "react";
+import clsx from "clsx";
+import Image from "next/image";
+
 import EventPlaque from "./EventPlaque";
+import EventProps from "../EventProps";
+import EventCard from "./EventCard";
 
 import star from "@/assets/images/large_star.svg";
 
-import EventProps from "../EventProps";
-import Image from "next/image";
-import EventCard from "./EventCard";
+import styles from "./EventSidebar.module.scss";
 
 export default function EventSidebar({
 	events,
@@ -46,7 +47,7 @@ export default function EventSidebar({
 		);
 	};
 
-	const eventPlaqueClick = (title: string) => {
+	const scrollToEventPlaqueOnClick = (title: string) => {
 		const m = getScheduleRef();
 		const node = m.get(title);
 
@@ -91,7 +92,7 @@ export default function EventSidebar({
 								className="max-lg:hidden"
 							>
 								<EventPlaque
-									onClick={eventPlaqueClick}
+									onClick={scrollToEventPlaqueOnClick}
 									ref={(node: HTMLDivElement) => {
 										const m = getScheduleRef();
 										m.set(event.title, node);
@@ -131,7 +132,7 @@ export default function EventSidebar({
 							src={star}
 							width={80}
 							height={80}
-							alt="*"
+							alt="✦"
 							className="opacity-60"
 						/>
 					</div>

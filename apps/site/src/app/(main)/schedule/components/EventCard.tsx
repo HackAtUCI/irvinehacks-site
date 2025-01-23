@@ -1,8 +1,7 @@
 import { SwordsIcon } from "lucide-react";
-import EventProps from "../EventProps";
-
 import { motion } from "framer-motion";
 
+import EventProps from "../EventProps";
 import getTimeAndDates from "@/lib/utils/getTimeAndDates";
 
 interface EventCardProps extends EventProps {
@@ -23,9 +22,8 @@ export default function EventCard({
 	return (
 		<div
 			className={`w-[90%] min-w-[200px] h-full bg-black border-4 border-white relative p-16 font-display max-lg:w-full ${
-				isHappening
-					? "max-lg:bg-blue-100 max-lg:border-blue-900 max-lg:text-blue-950 max-lg:top-[-8px] max-lg:left-[-8px]"
-					: ""
+				isHappening &&
+				"max-lg:bg-blue-100 max-lg:border-blue-900 max-lg:text-blue-950 max-lg:top-[-8px] max-lg:left-[-8px]"
 			}`}
 		>
 			{title ? (

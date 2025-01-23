@@ -1,5 +1,5 @@
 import { motion, Variants } from "framer-motion";
-import { Swords } from "lucide-react";
+import { SwordsIcon } from "lucide-react";
 
 const variants = {
 	initial: {
@@ -25,21 +25,13 @@ const BarLoader = () => {
 			animate="animate"
 			className="flex gap-2"
 		>
-			<motion.div variants={variants} className="w-20 h-20">
-				<Swords className="w-full h-full" />
-			</motion.div>
-			<motion.div variants={variants} className="w-20 h-20">
-				<Swords className="w-full h-full" />
-			</motion.div>
-			<motion.div variants={variants} className="w-20 h-20">
-				<Swords className="w-full h-full" />
-			</motion.div>
-			<motion.div variants={variants} className="w-20 h-20">
-				<Swords className="w-full h-full" />
-			</motion.div>
-			<motion.div variants={variants} className="w-20 h-20">
-				<Swords className="w-full h-full" />
-			</motion.div>
+			{Array(5)
+				.fill(0)
+				.map((_, i) => (
+					<motion.div key={i} variants={variants} className="w-20 h-20">
+						<SwordsIcon className="w-full h-full" />
+					</motion.div>
+				))}
 		</motion.div>
 	);
 };

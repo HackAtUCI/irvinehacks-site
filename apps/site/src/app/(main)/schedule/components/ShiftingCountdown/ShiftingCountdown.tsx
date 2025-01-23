@@ -2,15 +2,17 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import BarLoader from "../BarLoader";
+import Image from "next/image";
 import clsx from "clsx";
-import QuestBox from "@/assets/images/text_box_with_title.svg";
+
 import LgStar from "@/assets/images/large_star.svg";
 
-import styles from "./ShiftingCountdown.module.scss";
-import Image from "next/image";
+import QuestBox from "@/assets/images/text_box_with_title.svg";
+import BarLoader from "../BarLoader";
 import CountdownItem from "./CountdownItem";
 import FinalAnimation from "./FinalAnimation";
+
+import styles from "./ShiftingCountdown.module.scss";
 
 // NOTE: Change this date to whatever date you want to countdown to :)
 const HACKING_STARTS = Date.UTC(2025, 0, 27, 2, 0, 0); // 1/26 at 6pm PST
@@ -52,7 +54,7 @@ const ShiftingCountdown = () => {
 
 		let end = new Date(HACKING_STARTS);
 
-		if (now >= new Date(HACKING_STARTS)) {
+		if (now >= end) {
 			setCountdown((prev) => {
 				return { ...prev, label: "Hackathon Ends in:" };
 			});
@@ -116,16 +118,16 @@ const ShiftingCountdown = () => {
 			</AnimatePresence>
 
 			<div className="absolute top-[20%] left-16 max-md:hidden">
-				<Image src={LgStar} alt="*" className="w-[70px]" />
+				<Image src={LgStar} alt="✦" className="w-[70px]" />
 				<Image
 					src={LgStar}
-					alt="*"
+					alt="✦"
 					className="absolute top-22 left-10 w-[50px]"
 				/>
 			</div>
 			<div className="absolute top-[50%] right-14 max-md:hidden">
-				<Image src={LgStar} alt="*" className="w-[70px] left-14" />
-				<Image src={LgStar} alt="*" className="absolute top-22 w-[50px]" />
+				<Image src={LgStar} alt="✦" className="w-[70px] left-14" />
+				<Image src={LgStar} alt="✦" className="absolute top-22 w-[50px]" />
 			</div>
 			<div className="p-4">
 				<div className="w-full mx-auto flex items-center justify-center max-sm:w-full max-sm:h-[200px]">

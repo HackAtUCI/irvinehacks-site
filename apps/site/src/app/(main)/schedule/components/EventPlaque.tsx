@@ -2,29 +2,24 @@
 "use client";
 
 import { useState } from "react";
-import getTimeAndDates from "@/lib/utils/getTimeAndDates";
-
 import { forwardRef } from "react";
-
-import styles from "./EventPlaque.module.scss";
 import { SwordsIcon } from "lucide-react";
-
 import { motion } from "framer-motion";
 
+import getTimeAndDates from "@/lib/utils/getTimeAndDates";
+
+import styles from "./EventPlaque.module.scss";
+
+interface EventPlaqueProps {
+	title: string;
+	startTime: Date;
+	endTime: Date;
+	isHappening: boolean;
+	onClick: (title: string) => void;
+}
+
 export default forwardRef(function EventPlaque(
-	{
-		title,
-		startTime,
-		endTime,
-		isHappening,
-		onClick,
-	}: {
-		title: string;
-		startTime: Date;
-		endTime: Date;
-		isHappening: boolean;
-		onClick: (title: string) => void;
-	},
+	{ title, startTime, endTime, isHappening, onClick }: EventPlaqueProps,
 	ref: React.LegacyRef<HTMLDivElement>,
 ) {
 	const [hovered, setHovered] = useState(false);
@@ -82,7 +77,7 @@ export default forwardRef(function EventPlaque(
 					isHappening
 						? "absolute w-full h-full top-[9px] left-[9px] z-[-1] duration-500 bg-blue-100"
 						: `absolute w-full h-full top-0 left-0 z-[-1] duration-500 bg-white ${
-								hovered ? styles.decorHover : ""
+								hovered && styles.decorHover
 						  }`
 				}
 			/>

@@ -7,19 +7,19 @@ const About = () => {
 	return (
 		<div className="w-full absolute bottom-0 lg:bottom-[30vh] flex justify-center aspect-[12/5] max-lg:[h-1000px]">
 			<div className="w-full h-full absolute bottom-0 max-lg:hidden">
-				<Image src={LgStar} alt="*" className="absolute top-[30%] left-10" />
+				<Image src={LgStar} alt="✦" className="absolute top-[30%] left-10" />
 				<Image
 					src={SmStar}
-					alt="*"
+					alt="✦"
 					className="absolute bottom-[30%] left-[7%]"
 				/>
 
-				<Image src={LgStar} alt="*" className="absolute bottom-0 left-20" />
+				<Image src={LgStar} alt="✦" className="absolute bottom-0 left-20" />
 
-				<Image src={LgStar} alt="*" className="absolute top-[40%] right-10" />
+				<Image src={LgStar} alt="✦" className="absolute top-[40%] right-10" />
 				<Image
 					src={SmStar}
-					alt="*"
+					alt="✦"
 					className="absolute bottom-[20%] right-[7%]"
 				/>
 			</div>

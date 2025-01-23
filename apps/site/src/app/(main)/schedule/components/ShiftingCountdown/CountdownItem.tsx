@@ -1,4 +1,4 @@
-import { AnimatePresence, motion, Variants } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import clsx from "clsx";
 
 import styles from "./ShiftingCountdown.module.scss";
@@ -13,7 +13,7 @@ const timerAnimVariants = {
 			duration: 0.7,
 		},
 	},
-} as Variants;
+};
 
 const CountdownItem = ({
 	num,

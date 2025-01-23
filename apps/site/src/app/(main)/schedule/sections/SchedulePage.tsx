@@ -3,13 +3,14 @@
 
 import { useState, useEffect } from "react";
 
-import EventCard from "../components/EventCard";
 import convertToPST from "@/lib/utils/convertToPST";
-import EventProps from "../EventProps";
 
-import "./SchedulePage.scss";
+import EventCard from "../components/EventCard";
+import EventProps from "../EventProps";
 import ScheduleScroll from "./ScheduleScroll";
 import EventSidebar from "../components/EventSidebar";
+
+import "./SchedulePage.scss";
 
 const T_REFRESH = 15000;
 
@@ -87,43 +88,41 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 	}, [currentEvent]);
 
 	return (
-		<>
-			<div className="relative w-full h-fit flex gap-10 flex-col max-md:gap-2">
-				<ScheduleScroll
-					weekdays={allDays}
-					setSelectedEventDay={setSelectedEventDay}
-					selectedEventDay={selectedEventDay}
+		<div className="relative w-full h-fit flex gap-10 flex-col max-md:gap-2">
+			<ScheduleScroll
+				weekdays={allDays}
+				setSelectedEventDay={setSelectedEventDay}
+				selectedEventDay={selectedEventDay}
+			/>
+			<div className="w-full relative flex max-lg:flex-col-reverse max-lg:gap-20">
+				<EventSidebar
+					events={
+						selectedScheduleEvents
+							? selectedScheduleEvents
+							: currentScheduleEvents
+					}
+					currentTitle={`${currentEvent?.title}${currentEvent?.startTime.toISOString()}`}
+					setSelectedEvent={setSelectedEvent}
 				/>
-				<div className="w-full relative flex max-lg:flex-col-reverse max-lg:gap-20">
-					<EventSidebar
-						events={
-							selectedScheduleEvents
-								? selectedScheduleEvents
-								: currentScheduleEvents
-						}
-						currentTitle={`${currentEvent?.title}${currentEvent?.startTime.toISOString()}`}
-						setSelectedEvent={setSelectedEvent}
-					/>
-					{selectedEvent ? (
-						<div className="w-[50%] relative flex max-lg:hidden lg:min-h-[700px]">
-							<EventCard
-								key={selectedEvent.title}
-								now={now}
-								isHappening={false}
-								{...selectedEvent}
-							/>
-						</div>
-					) : (
-						<div className="w-[50%] min-h-[700px] relative flex max-lg:justify-center max-lg:hidden">
-							<div className="w-[90%] min-h-[700px] h-full bg-black border-4 border-white relative p-16 font-display">
-								<div className="text-4xl min-h-[600px] w-full h-full flex justify-center items-center text-center">
-									No Event Selected...
-								</div>
+				{selectedEvent ? (
+					<div className="w-[50%] relative flex max-lg:hidden lg:min-h-[700px]">
+						<EventCard
+							key={selectedEvent.title}
+							now={now}
+							isHappening={false}
+							{...selectedEvent}
+						/>
+					</div>
+				) : (
+					<div className="w-[50%] min-h-[700px] relative flex max-lg:justify-center max-lg:hidden">
+						<div className="w-[90%] min-h-[700px] h-full bg-black border-4 border-white relative p-16 font-display">
+							<div className="text-4xl min-h-[600px] w-full h-full flex justify-center items-center text-center">
+								No Event Selected...
 							</div>
 						</div>
-					)}
-				</div>
+					</div>
+				)}
 			</div>
-		</>
+		</div>
 	);
 }

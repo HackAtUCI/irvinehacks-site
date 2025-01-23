@@ -1,10 +1,12 @@
 "use client";
 
 import clsx from "clsx";
-import styles from "./ScheduleScroll.module.scss";
 import { useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+
 import getTimeAndDates from "@/lib/utils/getTimeAndDates";
+
+import styles from "./ScheduleScroll.module.scss";
 
 export default function ScheduleScroll({
 	weekdays,
@@ -19,7 +21,7 @@ export default function ScheduleScroll({
 	const scheduleContainerRef = useRef<HTMLDivElement>(null);
 
 	function scrollTo(newPos: number) {
-		const fixedPos = [0.01, 0.25, 0.51];
+		const fixedPos = [0.015, 0.25, 0.51];
 		scheduleContainerRef.current?.scrollTo({
 			left: sheduleBarRef.current
 				? sheduleBarRef.current.getBoundingClientRect().width * fixedPos[newPos]
@@ -60,15 +62,13 @@ export default function ScheduleScroll({
 	function scrollDir(action: string) {
 		const ind = getCurrentDateIndex();
 
-		if (action === "left") {
-			const nextIndex = (ind + (weekdays.length - 1)) % weekdays.length;
-			scrollTo(nextIndex);
-			setSelectedEventDay(weekdays[nextIndex]);
-		} else {
-			const nextIndex = (ind + 1) % weekdays.length;
-			scrollTo(nextIndex);
-			setSelectedEventDay(weekdays[nextIndex]);
-		}
+		const nextIndex =
+			action === "left"
+				? (ind + (weekdays.length - 1)) % weekdays.length
+				: (ind + 1) % weekdays.length;
+
+		scrollTo(nextIndex);
+		setSelectedEventDay(weekdays[nextIndex]);
 	}
 
 	return (
@@ -111,7 +111,7 @@ export default function ScheduleScroll({
 				>
 					<div
 						className={clsx(
-							"top-0 absolute h-full min-w-full w-fit flex gap-20",
+							"top-0 absolute h-full min-w-full w-fit flex gap-20 max-lg:left-[-2%]",
 						)}
 						ref={sheduleBarRef}
 					>

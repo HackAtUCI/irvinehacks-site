@@ -1,14 +1,14 @@
 "use client";
 
-import { AnimatePresence, motion, Variants } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 import Sprite1 from "@/assets/images/hacker_sprite.png";
 import Sprite2 from "@/assets/images/mentor_sprite.png";
 import Sprite3 from "@/assets/images/volunteer_sprite.png";
 
 import styles from "./ShiftingCountdown.module.scss";
-import Image from "next/image";
 
 const finalAnimVariants = {
 	initial: {
@@ -20,7 +20,7 @@ const finalAnimVariants = {
 			duration: 0.7,
 		},
 	},
-} as Variants;
+};
 
 const exitAnim = {
 	opacity: 0,
@@ -100,24 +100,17 @@ const FinalAnimation = () => {
 						>
 							<div className="fixed top-0 left-0 text-9xl font-display w-full h-[100vh] flex justify-center items-center">
 								<div className="overflow-hidden flex gap-20">
-									<motion.div
-										variants={finalAnimVariants}
-										className={styles.text}
-									>
-										!
-									</motion.div>
-									<motion.div
-										variants={finalAnimVariants}
-										className={styles.text}
-									>
-										!
-									</motion.div>
-									<motion.div
-										variants={finalAnimVariants}
-										className={styles.text}
-									>
-										!
-									</motion.div>
+									{Array(3)
+										.fill(0)
+										.map((_, i) => (
+											<motion.div
+												key={i}
+												variants={finalAnimVariants}
+												className={styles.text}
+											>
+												!
+											</motion.div>
+										))}
 								</div>
 							</div>
 						</motion.div>
@@ -131,7 +124,7 @@ const FinalAnimation = () => {
 						initial={initialState}
 						animate={introAnim}
 						exit={exitAnim}
-						className={`fixed top-0 left-0 text-7xl font-display w-full h-[100vh] flex flex-col gap-10 justify-center items-center text-center`}
+						className="fixed top-0 left-0 text-7xl font-display w-full h-[100vh] flex flex-col gap-10 justify-center items-center text-center"
 					>
 						<Image src={Sprite1} alt="hacker thanks!" width={200} />
 						<div>Thank you all!</div>

@@ -27,7 +27,7 @@ export default async function ResourceSection() {
 										description={description}
 										isMobile={false}
 									/>
-									<div className="overflow-y-auto h-[210px] xl:h-[250px] pb-[9px]">
+									<div className="overflow-y-auto h-[210px] xl:h-[250px] pb-[9px] pr-4 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:bg-white [&::-webkit-scrollbar-track]:p-2l">
 										<div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
 											{resources.map(
 												({ _id, resourceIconUrl, title, link }) => (

@@ -31,10 +31,7 @@ function useParticipants() {
 		// TODO: implement mutation for showing checked in on each day
 		// Note: Will cause 422 if badge number is null, but in practice,
 		// this should never happen
-		await axios.post(
-			`/api/admin/checkin/${participant._id}`,
-			participant.badge_number,
-		);
+		await axios.post(`/api/admin/checkin/${participant._id}`);
 		mutate();
 	};
 

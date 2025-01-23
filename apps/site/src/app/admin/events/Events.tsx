@@ -37,9 +37,9 @@ function Events() {
 				options={options}
 				statusType={loadingEvents ? "loading" : undefined}
 			/>
-			{event && !loadingParticipants && (
+			{/* {event && !loadingParticipants && (
 				<SubeventCheckin participants={participants} onConfirm={onConfirm} />
-			)}
+			)} */}
 		</ContentLayout>
 	);
 }

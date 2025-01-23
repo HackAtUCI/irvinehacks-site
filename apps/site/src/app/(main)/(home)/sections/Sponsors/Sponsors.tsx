@@ -1,18 +1,19 @@
-// import { getSponsors } from "./getSponsors";
-// import SponsorTier from "./components/SponsorTier/SponsorTier";
+import { getSponsors } from "./getSponsors";
+import SponsorTier from "./components/SponsorTier/SponsorTier";
 import styles from "./Sponsors.module.scss";
 
-// const TIERS = [
-// 	"platinum",
-// 	"gold",
-// 	"silver",
-// 	"bronze",
-// 	"sponsored-prize",
-// 	"in-kind",
-// ];
+// no sponsors under bronze for IH 2025
+const TIERS = [
+	"platinum",
+	"gold",
+	"silver",
+	// "bronze",
+	// "sponsored-prize",
+	// "in-kind",
+];
 
 const Sponsors = async () => {
-	// const sponsors = await getSponsors();
+	const sponsors = await getSponsors();
 
 	return (
 		<section className="container py-24 md:my-16 relative items-center flex flex-col md:p-8 w-4/5 mx-auto text-center">
@@ -35,22 +36,22 @@ const Sponsors = async () => {
 					<div className="h-[2px] bg-white flex-grow mr-[2rem] mt-[0.5rem]" />
 				</div>
 
-				{/* {TIERS.map((tier) => (
+				{TIERS.map((tier) => (
 					<div key={tier}>
 						<SponsorTier
 							sponsors={sponsors.get(tier)}
 							className={styles[tier]}
 						/>
 					</div>
-				))} */}
+				))}
 
-				{/* <div className={`${styles.horizontalLine} ${styles.bottom}`} /> */}
-				{/* <div className={styles.cornerSquares}>
+				<div className={`${styles.horizontalLine} ${styles.bottom}`} />
+				<div className={styles.cornerSquares}>
 					<div className={styles.topLeft} />
 					<div className={styles.topRight} />
 					<div className={styles.bottomLeft} />
 					<div className={styles.bottomRight} />
-				</div> */}
+				</div>
 			</div>
 		</section>
 	);

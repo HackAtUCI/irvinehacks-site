@@ -1,21 +1,40 @@
-from typing import Iterable, Protocol
+from typing import Any, Iterable, Literal, Protocol
 
 from pydantic import EmailStr
 
 from models.ApplicationData import Decision
-from services import sendgrid_handler
+from models.user_record import Role, Status
+from services import mongodb_handler, sendgrid_handler
 from services.sendgrid_handler import (
     ApplicationUpdatePersonalization,
     ApplicationUpdateTemplates,
+    LogisticsTemplates,
     Template,
 )
 
 IH_SENDER = ("apply@irvinehacks.com", "IrvineHacks 2025 Applications")
 
-DECISION_TEMPLATES: dict[Decision, ApplicationUpdateTemplates] = {
-    Decision.ACCEPTED: Template.ACCEPTED_EMAIL,
-    Decision.REJECTED: Template.REJECTED_EMAIL,
-    Decision.WAITLISTED: Template.WAITLISTED_EMAIL,
+DECISION_TEMPLATES: dict[Role, dict[Decision, ApplicationUpdateTemplates]] = {
+    Role.HACKER: {
+        Decision.ACCEPTED: Template.HACKER_ACCEPTED_EMAIL,
+        Decision.REJECTED: Template.HACKER_REJECTED_EMAIL,
+        Decision.WAITLISTED: Template.HACKER_WAITLISTED_EMAIL,
+    },
+    Role.MENTOR: {
+        Decision.ACCEPTED: Template.MENTOR_ACCEPTED_EMAIL,
+        Decision.REJECTED: Template.MENTOR_REJECTED_EMAIL,
+    },
+    Role.VOLUNTEER: {
+        Decision.ACCEPTED: Template.VOLUNTEER_ACCEPTED_EMAIL,
+        Decision.REJECTED: Template.VOLUNTEER_REJECTED_EMAIL,
+    },
+}
+
+
+LOGISTICS_TEMPLATES: dict[Role, LogisticsTemplates] = {
+    Role.HACKER: Template.HACKER_LOGISTICS_EMAIL,
+    Role.MENTOR: Template.MENTOR_LOGISTICS_EMAIL,
+    Role.VOLUNTEER: Template.VOLUNTEER_LOGISTICS_EMAIL,
 }
 
 
@@ -54,7 +73,9 @@ async def send_guest_login_email(email: EmailStr, passphrase: str) -> None:
 
 
 async def send_decision_email(
-    applicant_batch: Iterable[tuple[str, EmailStr]], decision: Decision
+    applicant_batch: Iterable[tuple[str, EmailStr]],
+    decision: Decision,
+    application_type: Literal[Role.HACKER, Role.MENTOR, Role.VOLUNTEER],
 ) -> None:
     """Send a specific decision email to a group of applicants."""
     personalizations = [
@@ -62,7 +83,7 @@ async def send_decision_email(
         for first_name, email in applicant_batch
     ]
 
-    template = DECISION_TEMPLATES[decision]
+    template = DECISION_TEMPLATES[application_type][decision]
     await sendgrid_handler.send_email(template, IH_SENDER, personalizations, True)
 
 
@@ -78,3 +99,36 @@ async def send_waitlist_release_email(first_name: str, email: EmailStr) -> None:
         personalization,
         send_to_multiple=False,
     )
+
+
+async def send_logistics_email(
+    application_type: Literal[Role.HACKER, Role.MENTOR, Role.VOLUNTEER]
+) -> None:
+    """Send logistics emails to a particular group of attendees."""
+    records: list[dict[str, Any]] = await mongodb_handler.retrieve(
+        mongodb_handler.Collection.USERS,
+        {"roles": Role(application_type), "status": Status.ATTENDING},
+        ["_id", "first_name"],
+    )
+
+    personalizations = []
+    for record in records:
+        personalizations.append(
+            ApplicationUpdatePersonalization(
+                email=recover_email_from_uid(record["_id"]),
+                first_name=record["first_name"],
+            )
+        )
+
+    template = LOGISTICS_TEMPLATES[application_type]
+    if len(records) > 0:
+        await sendgrid_handler.send_email(template, IH_SENDER, personalizations, True)
+
+
+def recover_email_from_uid(uid: str) -> str:
+    """For NativeUsers, the email should still delivery properly."""
+    uid = uid.replace("..", "\n")
+    *reversed_domain, local = uid.split(".")
+    local = local.replace("\n", ".")
+    domain = ".".join(reversed(reversed_domain))
+    return f"{local}@{domain}"

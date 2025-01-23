@@ -28,7 +28,7 @@ log = getLogger(__name__)
 
 router = APIRouter()
 
-DEADLINE = datetime(2025, 1, 11, 8, 1, tzinfo=timezone.utc)
+DEADLINE = datetime(2025, 1, 13, 8, 1, tzinfo=timezone.utc)
 
 
 class IdentityResponse(BaseModel):
@@ -225,7 +225,7 @@ async def _apply_flow(
 
     log.info("%s submitted an application", user.uid)
     return (
-        "Thank you for submitting an application to IrvineHacks 2024! Please "
+        "Thank you for submitting an application to IrvineHacks 2025! Please "
         + "visit https://irvinehacks.com/portal to see your application status."
     )
 
@@ -238,7 +238,7 @@ async def request_waiver(
     # TODO: non-applicants might also want to request a waiver
     user_data, applicant = user
 
-    if applicant.status in (Status.WAIVER_SIGNED, Status.CONFIRMED):
+    if applicant.status in (Status.WAIVER_SIGNED, Status.CONFIRMED, Status.ATTENDING):
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Already submitted a waiver.")
 
     user_name = f"{applicant.first_name} {applicant.last_name}"

@@ -18,11 +18,23 @@ SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
 class Template(str, Enum):
     CONFIRMATION_EMAIL = "d-e2cf3f31521f4b938f584e9c48811a92"
     GUEST_TOKEN = "d-5820106c78fb4d35a0d5d71947a25821"
-    ACCEPTED_EMAIL = "d-07fa796cf6c34518a7124a68d4790d82"
-    WAITLISTED_EMAIL = "d-0e0cde2bfcc14dbfa069422801b6cf58"
-    REJECTED_EMAIL = "d-4edf53090e42417ea9c065645d8c55c2"
-    RSVP_REMINDER = "d-50090289b60947198def96e5bbc9e8c4"
+    HACKER_ACCEPTED_EMAIL = "d-07fa796cf6c34518a7124a68d4790d82"
+    HACKER_WAITLISTED_EMAIL = "d-0e0cde2bfcc14dbfa069422801b6cf58"
+    HACKER_REJECTED_EMAIL = "d-4edf53090e42417ea9c065645d8c55c2"
+    MENTOR_ACCEPTED_EMAIL = "d-b98f516aedc24b83a1ad913610d6994a"
+    MENTOR_REJECTED_EMAIL = "d-d7edf0ed4acd4fd084d619f9dab181fc"
+    VOLUNTEER_ACCEPTED_EMAIL = "d-32ec9c6b7b00474a833778e276f65e50"
+    VOLUNTEER_REJECTED_EMAIL = "d-29c4bbb0fedb48cb8869a0f43d058b80"
+    APPLY_REMINDER = "d-9fe9988991b9420c86ba7bf2b5cd7357"
+    HACKER_RSVP_REMINDER = "d-50090289b60947198def96e5bbc9e8c4"
+    MENTOR_RSVP_REMINDER = "d-44da492ad79945a8932904904c39141b"
+    VOLUNTEER_RSVP_REMINDER = "d-10a22149e4594cdf85d861f9e420dbe8"
     WAITLIST_RELEASE_EMAIL = "d-467b8de41d214f33ad9b6cc98cbb6c05"
+    HACKER_LOGISTICS_EMAIL = "d-daa64b617d914a5996d51003e6d900a6"
+    MENTOR_LOGISTICS_EMAIL = "d-2fb645c51c1a450babe5434162884ee4"
+    VOLUNTEER_LOGISTICS_EMAIL = "d-c1cb63658bfe412aa9c8b327cceb29a7"
+    HACKER_WAITLISTED_LOGISTICS_EMAIL = "d-96dee09b12ef49b3977353fb96ee866e"
+    WAITLIST_TRANSFER_EMAIL = "d-d31a55e147e74d1689d859c88de19d9d"
 
 
 class PersonalizationData(TypedDict):
@@ -44,11 +56,25 @@ class ApplicationUpdatePersonalization(PersonalizationData):
 
 
 ApplicationUpdateTemplates: TypeAlias = Literal[
-    Template.ACCEPTED_EMAIL,
-    Template.WAITLISTED_EMAIL,
-    Template.REJECTED_EMAIL,
-    Template.RSVP_REMINDER,
+    Template.HACKER_ACCEPTED_EMAIL,
+    Template.HACKER_WAITLISTED_EMAIL,
+    Template.HACKER_REJECTED_EMAIL,
+    Template.MENTOR_ACCEPTED_EMAIL,
+    Template.MENTOR_REJECTED_EMAIL,
+    Template.VOLUNTEER_ACCEPTED_EMAIL,
+    Template.VOLUNTEER_REJECTED_EMAIL,
+    Template.HACKER_RSVP_REMINDER,
+    Template.MENTOR_RSVP_REMINDER,
+    Template.VOLUNTEER_RSVP_REMINDER,
     Template.WAITLIST_RELEASE_EMAIL,
+    Template.WAITLIST_TRANSFER_EMAIL,
+]
+
+LogisticsTemplates: TypeAlias = Literal[
+    Template.HACKER_LOGISTICS_EMAIL,
+    Template.MENTOR_LOGISTICS_EMAIL,
+    Template.VOLUNTEER_LOGISTICS_EMAIL,
+    Template.HACKER_WAITLISTED_LOGISTICS_EMAIL,
 ]
 
 
@@ -98,6 +124,46 @@ async def send_email(
     sender_email: Tuple[str, str],
     receiver_data: ApplicationUpdatePersonalization,
     send_to_multiple: Literal[False],
+    reply_to: Union[Tuple[str, str], None] = None,
+) -> None: ...
+
+
+@overload
+async def send_email(
+    template_id: Literal[Template.APPLY_REMINDER],
+    sender_email: Tuple[str, str],
+    receiver_data: PersonalizationData,
+    send_to_multiple: Literal[False],
+    reply_to: Union[Tuple[str, str], None] = None,
+) -> None: ...
+
+
+@overload
+async def send_email(
+    template_id: Literal[Template.APPLY_REMINDER],
+    sender_email: Tuple[str, str],
+    receiver_data: Iterable[PersonalizationData],
+    send_to_multiple: Literal[True],
+    reply_to: Union[Tuple[str, str], None] = None,
+) -> None: ...
+
+
+@overload
+async def send_email(
+    template_id: LogisticsTemplates,
+    sender_email: Tuple[str, str],
+    receiver_data: ApplicationUpdatePersonalization,
+    send_to_multiple: Literal[False],
+    reply_to: Union[Tuple[str, str], None] = None,
+) -> None: ...
+
+
+@overload
+async def send_email(
+    template_id: LogisticsTemplates,
+    sender_email: Tuple[str, str],
+    receiver_data: Iterable[ApplicationUpdatePersonalization],
+    send_to_multiple: Literal[True],
     reply_to: Union[Tuple[str, str], None] = None,
 ) -> None: ...
 

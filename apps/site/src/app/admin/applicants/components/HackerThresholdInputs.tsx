@@ -19,25 +19,95 @@ function HackerThresholdInputs() {
 	const [status, setStatus] = useState("");
 
 	async function submitThresholds() {
-		const sentAcceptValue = acceptValue ? acceptValue : -1;
-		const sentWaitlistValue = waitlistValue ? waitlistValue : -1;
+		const sentAcceptValue = acceptValue ? parseFloat(acceptValue) : -1;
+		const sentWaitlistValue = waitlistValue ? parseFloat(waitlistValue) : -1;
 
-		await axios
-			.post("/api/admin/set-thresholds", {
-				accept: sentAcceptValue,
-				waitlist: sentWaitlistValue,
-			})
-			.then((response) => {
-				// TODO: Add flashbar or modal to show post status
-				if (response.status === 200) {
-					setStatus(
-						"Successfully updated thresholds. Reload to see changes to applicants.",
-					);
-				} else {
-					setStatus("Failed to update thresholds");
-				}
-			});
+		if (isValidAccept() && isValidWaitlist()) {
+			await axios
+				.post("/api/director/set-thresholds", {
+					accept: sentAcceptValue,
+					waitlist: sentWaitlistValue,
+				})
+				.then((response) => {
+					// TODO: Add flashbar or modal to show post status
+					if (response.status === 200) {
+						setStatus(
+							"Successfully updated thresholds. Reload to see changes to applicants.",
+						);
+					} else {
+						setStatus("Failed to update thresholds");
+					}
+				});
+		}
 	}
+
+	const isValidAccept = () => {
+		if (!acceptValue) return true;
+
+		const sentAcceptValue = parseFloat(acceptValue);
+
+		if (!thresholds) {
+			if (!waitlistValue) return true;
+
+			const sentWaitlistValue = parseFloat(waitlistValue);
+
+			if (
+				sentAcceptValue < sentWaitlistValue ||
+				sentAcceptValue < -1 ||
+				sentAcceptValue > 10
+			)
+				return false;
+
+			return true;
+		}
+
+		const sentWaitlistValue = waitlistValue
+			? parseFloat(waitlistValue)
+			: thresholds.waitlist;
+
+		if (
+			sentAcceptValue < -1 ||
+			sentAcceptValue > 10 ||
+			sentAcceptValue < sentWaitlistValue
+		)
+			return false;
+
+		return true;
+	};
+
+	const isValidWaitlist = () => {
+		if (!waitlistValue) return true;
+
+		const sentWaitlistValue = parseFloat(waitlistValue);
+
+		if (!thresholds) {
+			if (!acceptValue) return true;
+
+			const sentAcceptValue = parseFloat(acceptValue);
+
+			if (
+				sentAcceptValue < sentWaitlistValue ||
+				sentWaitlistValue < -1 ||
+				sentWaitlistValue > 10
+			)
+				return false;
+
+			return true;
+		}
+
+		const sentAcceptValue = acceptValue
+			? parseFloat(acceptValue)
+			: thresholds.accept;
+
+		if (
+			sentWaitlistValue < -1 ||
+			sentWaitlistValue > 10 ||
+			sentAcceptValue < sentWaitlistValue
+		)
+			return false;
+
+		return true;
+	};
 
 	return (
 		<SpaceBetween direction="vertical" size="xs">
@@ -59,6 +129,7 @@ function HackerThresholdInputs() {
 				inputMode="decimal"
 				placeholder="Accept Threshold"
 				step={0.1}
+				invalid={!isValidAccept()}
 			/>
 			<Box variant="awsui-key-label">Waitlist Threshold</Box>
 			<Input
@@ -68,6 +139,7 @@ function HackerThresholdInputs() {
 				inputMode="decimal"
 				placeholder="Waitlist Threshold"
 				step={0.1}
+				invalid={!isValidWaitlist()}
 			/>
 			<Box variant="p">
 				Any score under{" "}

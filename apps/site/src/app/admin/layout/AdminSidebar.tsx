@@ -11,7 +11,9 @@ import {
 	isHackerReviewer,
 	isMentorReviewer,
 	isVolunteerReviewer,
+	isDirector,
 } from "@/lib/admin/authorization";
+
 import UserContext from "@/lib/admin/UserContext";
 
 import { BASE_PATH, useFollowWithNextLink } from "./common";
@@ -62,6 +64,26 @@ function AdminSidebar() {
 			text: "Applicants",
 			href: "/admin/applicants",
 			items: applicationLinks,
+		});
+	}
+
+	if (isDirector(roles)) {
+		navigationItems.splice(4, 0, {
+			type: "link-group",
+			text: "Directors",
+			href: "/admin/directors",
+			items: [
+				{
+					type: "link",
+					text: "Organizers",
+					href: "/admin/directors/organizers",
+				},
+				{
+					type: "link",
+					text: "Email Sender",
+					href: "/admin/directors/email-sender",
+				},
+			],
 		});
 	}
 

@@ -1,10 +1,9 @@
-import asyncio
 from datetime import date, datetime
 from logging import getLogger
-from typing import Annotated, Any, Literal, Mapping, Optional, Sequence
+from typing import Annotated, Any, Literal, Mapping, Optional
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
-from pydantic import BaseModel, EmailStr, TypeAdapter, ValidationError
+from pydantic import BaseModel, TypeAdapter, ValidationError
 from typing_extensions import assert_never
 
 from admin import applicant_review_processor, participant_manager, summary_handler
@@ -12,13 +11,10 @@ from admin.participant_manager import Participant
 from auth.authorization import require_role
 from auth.user_identity import User, utc_now
 from models.ApplicationData import Decision, Review
-from models.user_record import Applicant, ApplicantStatus, Role, Status
-from services import mongodb_handler, sendgrid_handler
+from models.user_record import Applicant, ApplicantStatus, Role
+from services import mongodb_handler
 from services.mongodb_handler import BaseRecord, Collection
-from services.sendgrid_handler import ApplicationUpdatePersonalization, Template
 from utils import email_handler
-from utils.batched import batched
-from utils.email_handler import IH_SENDER
 
 log = getLogger(__name__)
 
@@ -40,7 +36,6 @@ require_hacker_reviewer = require_role({Role.DIRECTOR, Role.HACKER_REVIEWER})
 require_mentor_reviewer = require_role({Role.DIRECTOR, Role.MENTOR_REVIEWER})
 require_volunteer_reviewer = require_role({Role.DIRECTOR, Role.VOLUNTEER_REVIEWER})
 require_checkin_lead = require_role({Role.DIRECTOR, Role.CHECKIN_LEAD})
-require_director = require_role({Role.DIRECTOR})
 require_organizer = require_role({Role.ORGANIZER})
 
 
@@ -140,7 +135,7 @@ async def hacker_applicants(
         ],
     )
 
-    thresholds: Optional[dict[str, float]] = await _retrieve_thresholds()
+    thresholds: Optional[dict[str, float]] = await retrieve_thresholds()
 
     if not thresholds:
         log.error("Could not retrieve thresholds")
@@ -228,6 +223,11 @@ async def submit_review(
     reviewer: User = Depends(require_reviewer),
 ) -> None:
     """Submit a review decision from the reviewer for the given hacker applicant."""
+
+    if applicant_review.score < -2 or applicant_review.score > 100:
+        log.error("Invalid review score submitted.")
+        raise HTTPException(status.HTTP_400_BAD_REQUEST)
+
     log.info("%s reviewed hacker %s", reviewer, applicant_review.applicant)
 
     review: Review = (utc_now(), reviewer.uid, applicant_review.score)
@@ -243,6 +243,11 @@ async def submit_review(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     if Role.HACKER in applicant_record["roles"]:
+
+        if applicant_review.score < 0 or applicant_review.score > 10:
+            log.error("Invalid review score submitted.")
+            raise HTTPException(status.HTTP_400_BAD_REQUEST)
+
         unique_reviewers = applicant_review_processor.get_unique_reviewers(
             applicant_record
         )
@@ -282,43 +287,6 @@ async def submit_review(
         )
 
 
-@router.post("/set-thresholds")
-async def set_hacker_score_thresholds(
-    user: Annotated[User, Depends(require_manager)],
-    accept: float = Body(),
-    waitlist: float = Body(),
-) -> None:
-    """
-    Sets accepted and waitlisted score thresholds.
-    Any score under waitlisted is considered rejected.
-    """
-    log.info("%s changed thresholds: Accept-%f | Waitlist-%f", user, accept, waitlist)
-
-    # negative numbers should not be received, but -1 in this case
-    # means there is no update to the respective threshold
-    update_query = {}
-    if accept != -1:
-        update_query["accept"] = accept
-    if waitlist != -1:
-        update_query["waitlist"] = waitlist
-
-    try:
-        await mongodb_handler.raw_update_one(
-            Collection.SETTINGS,
-            {"_id": "hacker_score_thresholds"},
-            {"$set": update_query},
-            upsert=True,
-        )
-    except RuntimeError:
-        log.error(
-            "%s could not change thresholds: Accept-%f | Waitlist-%f",
-            user,
-            accept,
-            waitlist,
-        )
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
 @router.get("/get-thresholds")
 async def get_hacker_score_thresholds(
     user: Annotated[User, Depends(require_manager)]
@@ -337,112 +305,6 @@ async def get_hacker_score_thresholds(
         log.error("%s could not retrieve thresholds", user)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
     return record
-
-
-@router.post("/release", dependencies=[Depends(require_director)])
-async def release_decisions() -> None:
-    """Update applicant status based on decision and send decision emails."""
-    records = await mongodb_handler.retrieve(
-        Collection.USERS,
-        {"status": Status.REVIEWED},
-        ["_id", "application_data.reviews", "first_name"],
-    )
-
-    for record in records:
-        applicant_review_processor.include_review_decision(record)
-
-    await _process_records_in_batches(records)
-
-
-# TODO: need to make release hackers check roles as part of query
-@router.post("/release/hackers", dependencies=[Depends(require_director)])
-async def release_hacker_decisions() -> None:
-    """Update hacker applicant status based on decision and send decision emails."""
-    records = await mongodb_handler.retrieve(
-        Collection.USERS,
-        {"status": Status.REVIEWED},
-        ["_id", "application_data.reviews", "first_name"],
-    )
-
-    thresholds: Optional[dict[str, float]] = await _retrieve_thresholds()
-
-    if not thresholds:
-        log.error("Could not retrieve thresholds")
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    for record in records:
-        applicant_review_processor.include_hacker_app_fields(
-            record, thresholds["accept"], thresholds["waitlist"]
-        )
-
-    await _process_records_in_batches(records)
-
-
-@router.post("/rsvp-reminder", dependencies=[Depends(require_director)])
-async def rsvp_reminder() -> None:
-    """Send email to applicants who have a status of ACCEPTED or WAIVER_SIGNED
-    reminding them to RSVP."""
-    # TODO: Consider using Pydantic model validation instead of type annotations
-    not_yet_rsvpd: list[dict[str, Any]] = await mongodb_handler.retrieve(
-        Collection.USERS,
-        {
-            "roles": Role.APPLICANT,
-            "status": {"$in": [Decision.ACCEPTED, Status.WAIVER_SIGNED]},
-        },
-        ["_id", "first_name"],
-    )
-
-    personalizations = []
-    for record in not_yet_rsvpd:
-        personalizations.append(
-            ApplicationUpdatePersonalization(
-                email=_recover_email_from_uid(record["_id"]),
-                first_name=record["first_name"],
-            )
-        )
-
-    log.info(f"Sending RSVP reminder emails to {len(not_yet_rsvpd)} applicants")
-
-    await sendgrid_handler.send_email(
-        Template.RSVP_REMINDER,
-        IH_SENDER,
-        personalizations,
-        True,
-    )
-
-
-@router.post("/confirm-attendance", dependencies=[Depends(require_director)])
-async def confirm_attendance() -> None:
-    """Update applicant status to void or attending based on their current status."""
-    # TODO: consider using Pydantic model, maybe BareApplicant
-    records = await mongodb_handler.retrieve(
-        Collection.USERS, {"roles": Role.APPLICANT}, ["_id", "status"]
-    )
-
-    statuses = {
-        Status.CONFIRMED: Status.ATTENDING,
-        Decision.ACCEPTED: Status.VOID,
-        Status.WAIVER_SIGNED: Status.VOID,
-    }
-
-    for status_from, status_to in statuses.items():
-        curr_records = [record for record in records if record["status"] == status_from]
-
-        for record in curr_records:
-            record["status"] = status_to
-
-        log.info(
-            f"Changing status of {len(curr_records)} from {status_from} to {status_to}"
-        )
-
-        await asyncio.gather(
-            *(
-                _process_status(batch, status_to)
-                for batch in batched(
-                    [str(record["_id"]) for record in curr_records], 100
-                )
-            )
-        )
 
 
 @router.post("/waitlist-release/{uid}")
@@ -467,7 +329,7 @@ async def waitlist_release(
 
     log.info("%s accepted %s off the waitlist. Sending email.", associate, uid)
     await email_handler.send_waitlist_release_email(
-        record["first_name"], _recover_email_from_uid(uid)
+        record["first_name"], email_handler.recover_email_from_uid(uid)
     )
 
 
@@ -530,56 +392,7 @@ async def subevent_checkin(
     await participant_manager.subevent_checkin(event, uid, organizer)
 
 
-async def _process_records_in_batches(records: list[dict[str, object]]) -> None:
-    for decision in (Decision.ACCEPTED, Decision.WAITLISTED, Decision.REJECTED):
-        group = [record for record in records if record["decision"] == decision]
-        if not group:
-            continue
-        await asyncio.gather(
-            *(_process_batch(batch, decision) for batch in batched(group, 100))
-        )
-
-
-async def _process_status(uids: Sequence[str], status: Status) -> None:
-    ok = await mongodb_handler.update(
-        Collection.USERS, {"_id": {"$in": uids}}, {"status": status}
-    )
-    if not ok:
-        raise RuntimeError("gg wp")
-
-
-async def _process_batch(batch: tuple[dict[str, Any], ...], decision: Decision) -> None:
-    uids: list[str] = [record["_id"] for record in batch]
-    log.info(f"Setting {','.join(uids)} as {decision}")
-    ok = await mongodb_handler.update(
-        Collection.USERS, {"_id": {"$in": uids}}, {"status": decision}
-    )
-    if not ok:
-        raise RuntimeError("gg wp")
-
-    # Send emails
-    log.info(f"Sending {decision} emails for {len(batch)} applicants")
-    await email_handler.send_decision_email(
-        map(_extract_personalizations, batch), decision
-    )
-
-
-def _extract_personalizations(decision_data: dict[str, Any]) -> tuple[str, EmailStr]:
-    name = decision_data["first_name"]
-    email = _recover_email_from_uid(decision_data["_id"])
-    return name, email
-
-
-def _recover_email_from_uid(uid: str) -> str:
-    """For NativeUsers, the email should still delivery properly."""
-    uid = uid.replace("..", "\n")
-    *reversed_domain, local = uid.split(".")
-    local = local.replace("\n", ".")
-    domain = ".".join(reversed(reversed_domain))
-    return f"{local}@{domain}"
-
-
-async def _retrieve_thresholds() -> Optional[dict[str, Any]]:
+async def retrieve_thresholds() -> Optional[dict[str, Any]]:
     return await mongodb_handler.retrieve_one(
         Collection.SETTINGS, {"_id": "hacker_score_thresholds"}, ["accept", "waitlist"]
     )

@@ -1,6 +1,8 @@
+"use client";
+
 import { redirect } from "next/navigation";
 
-import getUserIdentity from "@/lib/utils/getUserIdentity";
+import useUserIdentity from "@/lib/utils/useUserIdentity";
 
 import ConfirmAttendance from "./components/ConfirmAttendance";
 import Message from "./components/Message";
@@ -25,8 +27,13 @@ export const enum PortalStatus {
 
 const rolesArray = ["Mentor", "Hacker", "Volunteer"];
 
-async function Portal() {
-	const identity = await getUserIdentity();
+function Portal() {
+	const identity = useUserIdentity();
+
+	if (!identity) {
+		return <div className="font-display text-4xl mt-5">Loading...</div>;
+	}
+
 	const status = identity.status;
 
 	if (status === null) {

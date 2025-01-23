@@ -4,7 +4,7 @@ import axios from "axios";
 
 import { Identity } from "@/lib/utils/getUserIdentity";
 
-function useUserIdentity(): Identity | undefined {
+function useUserIdentityStatic(): Identity | undefined {
 	const [identity, setIdentity] = useState<Identity | undefined>();
 
 	useEffect(() => {
@@ -20,4 +20,4 @@ function useUserIdentity(): Identity | undefined {
 	return identity;
 }
 
-export default useUserIdentity;
+export default useUserIdentityStatic;

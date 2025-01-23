@@ -100,7 +100,7 @@ def test_valid_webhook_payload_is_fine(mock_process_webhook_event: AsyncMock) ->
         "/waiver",
         json=SAMPLE_WEBHOOK_PAYLOAD,
         headers={
-            "x-docusign-signature-1": "r3eOIE4RkCGA1w2rBX9uprQuL+dV1BCUw3UI4qvQcI4="
+            "x-docusign-signature-1": "eMMrlnAK8rmJc9Avou2slkKGxMVLbN3OE3nIDQ8mh18="
         },
     )
 

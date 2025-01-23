@@ -1,50 +1,67 @@
 import { TimelineComponent } from "./TimelineComponent";
-import { PortalStatus } from "../.././ApplicantPortal";
+import { Status } from "@/lib/userRecord";
 import { StatusImageProps } from "./StatusImage";
 
-export const VerdictComponent = ({ status }: { status: PortalStatus }) => {
-	let verdict = null;
+export const VerdictComponent = ({ status }: { status: Status }) => {
+	let verdict: {
+		text: string;
+		finished: boolean;
+		statusIcon: StatusImageProps["statusIcon"];
+	} | null = null;
 
-	if (
-		status === PortalStatus.accepted ||
-		status === PortalStatus.void ||
-		status === PortalStatus.waived ||
-		status === PortalStatus.confirmed ||
-		status === PortalStatus.attending
-	) {
-		verdict = {
-			text: "Application Accepted",
-			finished: true,
-			statusIcon: "Accepted",
-		};
-	} else if (status === PortalStatus.rejected) {
-		verdict = {
-			text: "Application Rejected",
-			finished: true,
-			statusIcon: "Rejected",
-		};
-	} else if (status === PortalStatus.waitlisted) {
-		verdict = {
-			text: "Application Waitlisted",
-			finished: true,
-			statusIcon: "Pending",
-		};
-	} else if (
-		status === PortalStatus.pending ||
-		status === PortalStatus.reviewed
-	) {
-		verdict = {
-			text: "Application Under Review",
-			finished: true,
-			statusIcon: "Pending",
-		};
+	switch (status) {
+		case Status.Accepted:
+		case Status.Void:
+		case Status.Signed:
+		case Status.Confirmed:
+		case Status.Attending: {
+			verdict = {
+				text: "Application Accepted",
+				finished: true,
+				statusIcon: "Accepted",
+			};
+			break;
+		}
+
+		case Status.Rejected: {
+			verdict = {
+				text: "Application Rejected",
+				finished: true,
+				statusIcon: "Rejected",
+			};
+			break;
+		}
+
+		case Status.Waitlisted: {
+			verdict = {
+				text: "Application Waitlisted",
+				finished: true,
+				statusIcon: "Pending",
+			};
+			break;
+		}
+
+		case Status.Pending:
+		case Status.Reviewed: {
+			verdict = {
+				text: "Application Under Review",
+				finished: true,
+				statusIcon: "Pending",
+			};
+			break;
+		}
+
+		default: {
+			const exhaustiveCheck: never = status;
+			throw new Error(`Unhandled status: ${exhaustiveCheck}`);
+		}
 	}
 
 	return verdict ? (
 		<TimelineComponent
 			text={verdict.text}
 			finished={verdict.finished}
-			statusIcon={verdict.statusIcon as StatusImageProps["statusIcon"]}
+			statusIcon={verdict.statusIcon}
 		/>
 	) : null;
 };

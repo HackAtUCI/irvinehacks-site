@@ -11,13 +11,15 @@ function ApplicantSummary() {
 	const totalApplicants = Object.values(summary).reduce((s, v) => s + v, 0);
 
 	const orderedData = [
-		Status.rejected,
-		Status.waitlisted,
-		Status.accepted,
-		Status.signed,
-		Status.confirmed,
-		Status.attending,
-		Status.void,
+		Status.Pending,
+		Status.Reviewed,
+		Status.Rejected,
+		Status.Waitlisted,
+		Status.Accepted,
+		Status.Signed,
+		Status.Confirmed,
+		Status.Attending,
+		Status.Void,
 	].map((status) => ({
 		title: status,
 		value: summary[status] ?? 0,

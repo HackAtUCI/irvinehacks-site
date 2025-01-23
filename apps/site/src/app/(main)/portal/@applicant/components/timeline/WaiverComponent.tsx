@@ -1,20 +1,20 @@
 import { TimelineComponent } from "./TimelineComponent";
-import { PortalStatus } from "../.././ApplicantPortal";
+import { Status } from "@/lib/userRecord";
 import { StatusImageProps } from "./StatusImage";
 
-export const WaiverComponent = ({ status }: { status: PortalStatus }) => {
+export const WaiverComponent = ({ status }: { status: Status }) => {
 	let verdict = null;
 
-	if (status === PortalStatus.accepted) {
+	if (status === Status.Accepted) {
 		verdict = {
 			text: "Sign Waiver",
 			finished: false,
 			statusIcon: "Pending",
 		};
 	} else if (
-		status === PortalStatus.waived ||
-		status === PortalStatus.attending ||
-		status === PortalStatus.confirmed
+		status === Status.Signed ||
+		status === Status.Attending ||
+		status === Status.Confirmed
 	) {
 		verdict = {
 			text: "Waiver Signed",

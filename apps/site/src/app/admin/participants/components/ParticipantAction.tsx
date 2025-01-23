@@ -38,8 +38,8 @@ function ParticipantAction({
 	const { roles } = useContext(UserContext);
 
 	const canPromote = isCheckInLead(roles);
-	const isWaiverSigned = participant.status === Status.signed;
-	const isAccepted = participant.status === Status.accepted;
+	const isWaiverSigned = participant.status === Status.Signed;
+	const isAccepted = participant.status === Status.Accepted;
 	const nonHacker = isNonHacker(participant.roles);
 
 	const promoteButton = (
@@ -79,17 +79,17 @@ function ParticipantAction({
 		const content = !canPromote
 			? "Only check-in leads can confirm non-hackers."
 			: "Must sign waiver first.";
-		if (!canPromote || participant.status === ReviewStatus.reviewed) {
+		if (!canPromote || participant.status === ReviewStatus.Reviewed) {
 			return (
 				<ParticipantActionPopover content={content}>
 					{confirmButton}
 				</ParticipantActionPopover>
 			);
-		} else if (participant.status === Status.signed) {
+		} else if (participant.status === Status.Signed) {
 			return confirmButton;
 		}
 		return checkinButton;
-	} else if (participant.status === Status.waitlisted) {
+	} else if (participant.status === Status.Waitlisted) {
 		if (!canPromote) {
 			return (
 				<ParticipantActionPopover content="Only check-in leads are allowed to promote walk-ins.">

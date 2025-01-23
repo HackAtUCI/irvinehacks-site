@@ -33,16 +33,15 @@ interface ParticipantsFiltersProps {
 }
 
 const StatusIcons: Record<Status, IconProps.Name> = {
-	[ReviewStatus.pending]: "status-pending",
-	[ReviewStatus.reviewed]: "status-in-progress",
-	[ReviewStatus.released]: "status-positive",
-	[Decision.accepted]: "status-positive",
-	[Decision.rejected]: "status-pending",
-	[Decision.waitlisted]: "status-negative",
-	[PostAcceptedStatus.signed]: "status-in-progress",
-	[PostAcceptedStatus.confirmed]: "status-positive",
-	[PostAcceptedStatus.attending]: "status-positive",
-	[PostAcceptedStatus.void]: "status-negative",
+	[ReviewStatus.Pending]: "status-pending",
+	[ReviewStatus.Reviewed]: "status-in-progress",
+	[Decision.Accepted]: "status-positive",
+	[Decision.Rejected]: "status-pending",
+	[Decision.Waitlisted]: "status-negative",
+	[PostAcceptedStatus.Signed]: "status-in-progress",
+	[PostAcceptedStatus.Confirmed]: "status-positive",
+	[PostAcceptedStatus.Attending]: "status-positive",
+	[PostAcceptedStatus.Void]: "status-negative",
 };
 
 const statusOption = (status: MultiselectProps.Option) => {

@@ -37,24 +37,23 @@ export type Role = ParticipantRole | AdminRole;
  * An applicant's decision becomes their status when released.
  */
 export enum Decision {
-	accepted = "ACCEPTED",
-	rejected = "REJECTED",
-	waitlisted = "WAITLISTED",
+	Accepted = "ACCEPTED",
+	Rejected = "REJECTED",
+	Waitlisted = "WAITLISTED",
 }
 
 /** The possible statuses for an applicant without a released decision. */
 export enum ReviewStatus {
-	pending = "PENDING_REVIEW",
-	reviewed = "REVIEWED",
-	released = "RELEASED",
+	Pending = "PENDING_REVIEW",
+	Reviewed = "REVIEWED",
 }
 
 /** The possible status after an applicant has been accepted. */
 export enum PostAcceptedStatus {
-	signed = "WAIVER_SIGNED",
-	confirmed = "CONFIRMED",
-	attending = "ATTENDING",
-	void = "VOID",
+	Signed = "WAIVER_SIGNED",
+	Confirmed = "CONFIRMED",
+	Attending = "ATTENDING",
+	Void = "VOID",
 }
 
 /** All of the different possible status values. */

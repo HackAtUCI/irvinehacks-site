@@ -8,9 +8,13 @@ export default function ResourceCategory({
 	isMobile: boolean;
 }) {
 	return isMobile ? (
-		<img className="h-32 w-32 sm:h-40 sm:w-40" src={iconUrl} alt={title} />
+		<>
+			{/* eslint-disable-next-line @next/next/no-img-element*/}
+			<img className="h-32 w-32 sm:h-40 sm:w-40" src={iconUrl} alt={title} />
+		</>
 	) : (
 		<div className="grow basis-0 select-none pointer-events-none">
+			{/* eslint-disable-next-line @next/next/no-img-element*/}
 			<img className="mx-auto h-auto w-8 md:w-80" src={iconUrl} alt={title} />
 			<div className="align-center justify-items-center">
 				<div className="top-1 left-1 w-full h-full bg-white " />

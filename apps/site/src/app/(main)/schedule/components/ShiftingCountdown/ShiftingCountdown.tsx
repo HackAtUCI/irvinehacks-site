@@ -15,9 +15,9 @@ import FinalAnimation from "./FinalAnimation";
 import styles from "./ShiftingCountdown.module.scss";
 
 // NOTE: Change this date to whatever date you want to countdown to :)
-const HACKING_STARTS = Date.UTC(2025, 0, 27, 2, 0, 0); // 1/26 at 6pm PST
-const HACKING_ENDS = Date.UTC(2025, 0, 28, 20, 0, 0); // 1/28 at 12pm PST
-const STOP_PLAYING = Date.UTC(2025, 1, 3, 20, 0, 0);
+const HACKING_STARTS = Date.UTC(2025, 0, 25, 5, 0, 0); // 1/24 at 9pm PST
+const HACKING_ENDS = Date.UTC(2025, 0, 26, 17, 0, 0); // 1/26 at 9am PST
+const STOP_PLAYING = Date.UTC(2025, 1, 0, 0, 0, 0);
 
 // Testing:
 // const HACKING_STARTS = "2024-01-25T01:18:00.000";

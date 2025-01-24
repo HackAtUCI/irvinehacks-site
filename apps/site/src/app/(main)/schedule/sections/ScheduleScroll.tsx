@@ -17,14 +17,14 @@ export default function ScheduleScroll({
 	selectedEventDay: Date | undefined;
 	setSelectedEventDay: React.Dispatch<React.SetStateAction<Date | undefined>>;
 }) {
-	const sheduleBarRef = useRef<HTMLDivElement>(null);
+	const scheduleBarRef = useRef<HTMLDivElement>(null);
 	const scheduleContainerRef = useRef<HTMLDivElement>(null);
 
 	function scrollTo(newPos: number) {
 		const fixedPos = [0.015, 0.25, 0.51];
 		scheduleContainerRef.current?.scrollTo({
-			left: sheduleBarRef.current
-				? sheduleBarRef.current.getBoundingClientRect().width * fixedPos[newPos]
+			left: scheduleBarRef.current
+				? scheduleBarRef.current.getBoundingClientRect().width * fixedPos[newPos]
 				: 0,
 			behavior: "smooth",
 		});
@@ -113,7 +113,7 @@ export default function ScheduleScroll({
 						className={clsx(
 							"top-0 absolute h-full min-w-full w-fit flex gap-20 max-lg:left-[-2%]",
 						)}
-						ref={sheduleBarRef}
+						ref={scheduleBarRef}
 					>
 						<div className="h-full w-[150px] max-lg:w-[50px]" />
 						{weekdays.map((weekday, i) => {

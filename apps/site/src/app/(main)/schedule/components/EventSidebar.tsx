@@ -23,13 +23,13 @@ export default function EventSidebar({
 		React.SetStateAction<EventProps | undefined>
 	>;
 }) {
-	const sheduleBarRef = useRef<Map<string, HTMLDivElement>>(new Map());
+	const scheduleBarRef = useRef<Map<string, HTMLDivElement>>(new Map());
 	const scheduleContainerRef = useRef<HTMLDivElement>(null);
 	const scheduleScrollerRef = useRef<HTMLDivElement>(null);
 
 	const getScheduleRef = () => {
-		if (!sheduleBarRef.current) sheduleBarRef.current = new Map();
-		return sheduleBarRef.current;
+		if (!scheduleBarRef.current) scheduleBarRef.current = new Map();
+		return scheduleBarRef.current;
 	};
 
 	const calculateScrollDistance = (node: HTMLDivElement | undefined) => {

@@ -73,7 +73,7 @@ async def get_non_hackers() -> list[Participant]:
     return [Participant(**user) for user in records]
 
 
-async def check_in_participant(uid: str, badge_number: str, associate: User) -> None:
+async def check_in_participant(uid: str, associate: User) -> None:
     """Check in participant at IrvineHacks"""
     record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
         Collection.USERS, {"_id": uid, "roles": {"$exists": True}}, ["status"]
@@ -92,13 +92,12 @@ async def check_in_participant(uid: str, badge_number: str, associate: User) -> 
         {"_id": uid},
         {
             "$push": {"checkins": new_checkin_entry},
-            "$set": {"badge_number": badge_number},
         },
     )
     if not update_status:
         raise RuntimeError(f"Could not update check-in record for {uid}.")
 
-    log.info(f"Applicant {uid} ({badge_number}) checked in by {associate.uid}")
+    log.info(f"Applicant {uid} checked in by {associate.uid}")
 
 
 async def confirm_attendance_non_hacker(uid: str, director: User) -> None:

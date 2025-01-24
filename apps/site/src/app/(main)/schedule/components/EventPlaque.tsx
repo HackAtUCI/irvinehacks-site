@@ -69,7 +69,11 @@ export default forwardRef(function EventPlaque(
 					)}
 				</div>
 				<div className="text-lg">
-					<div>{`${start.compositeTimeHourMinute} - ${end.compositeTimeHourMinute} ${end.amPm}`}</div>
+					<div>
+						{startTime.getTime() === endTime.getTime()
+							? `${end.compositeTimeHourMinute} ${end.amPm}`
+							: `${start.compositeTimeHourMinute} - ${end.compositeTimeHourMinute} ${end.amPm}`}
+					</div>
 				</div>
 			</div>
 			<div

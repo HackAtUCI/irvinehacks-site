@@ -1,3 +1,4 @@
+/* eslint-disable no-mixed-spaces-and-tabs */
 import { SwordsIcon } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -19,6 +20,7 @@ export default function EventCard({
 	description,
 	isHappening,
 }: EventCardProps) {
+	console.log(title, startTime.getTime() === endTime.getTime());
 	return (
 		<div
 			className={`w-[90%] min-w-[200px] h-full bg-black border-4 border-white relative p-16 font-display max-lg:w-full ${
@@ -59,9 +61,13 @@ export default function EventCard({
 								{organization && <p className="text-xl">By: {organization}</p>}
 							</div>
 							<p className="text-xl">{`Time: ${
-								getTimeAndDates(startTime).compositeTimeHourMinute
-							} - ${getTimeAndDates(endTime).compositeTimeHourMinute} ${
-								getTimeAndDates(endTime).amPm
+								startTime.getTime() === endTime.getTime()
+									? `${getTimeAndDates(endTime).compositeTimeHourMinute} ${
+											getTimeAndDates(endTime).amPm
+									  }`
+									: `${getTimeAndDates(startTime).compositeTimeHourMinute} - ${
+											getTimeAndDates(endTime).compositeTimeHourMinute
+									  } ${getTimeAndDates(endTime).amPm}`
 							}`}</p>
 						</div>
 					</div>

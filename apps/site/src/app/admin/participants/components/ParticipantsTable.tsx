@@ -20,9 +20,9 @@ import ParticipantsFilters from "./ParticipantsFilters";
 import RoleBadge from "./RoleBadge";
 import SearchScannerModal from "./SearchScannerModal";
 
-const FRIDAY = new Date("2024-01-26T12:00:00");
-const SATURDAY = new Date("2024-01-27T12:00:00");
-const SUNDAY = new Date("2024-01-28T12:00:00");
+const FRIDAY = new Date("2025-01-24T12:00:00");
+const SATURDAY = new Date("2025-01-25T12:00:00");
+const SUNDAY = new Date("2025-01-26T12:00:00");
 
 interface EmptyStateProps {
 	title: string;
@@ -45,7 +45,6 @@ const SEARCHABLE_COLUMNS: (keyof Participant)[] = [
 	"last_name",
 	"roles",
 	"status",
-	"badge_number",
 ];
 
 type StrictColumnDefinition = TableProps.ColumnDefinition<Participant> & {
@@ -91,7 +90,6 @@ function ParticipantsTable({
 			"lastName",
 			"roles",
 			"status",
-			"badgeNumber",
 			"friday",
 			"saturday",
 			"sunday",
@@ -211,13 +209,6 @@ function ParticipantsTable({
 			cell: ApplicantStatus,
 			ariaLabel: createLabelFunction("status"),
 			sortingField: "status",
-		},
-		{
-			id: "badgeNumber",
-			header: "Badge Number",
-			cell: (item: Participant) => item.badge_number,
-			ariaLabel: createLabelFunction("Badge Number"),
-			sortingField: "badge_number",
 		},
 		{
 			id: "friday",

@@ -1,0 +1,11 @@
+.background {
+	mask-image: linear-gradient(
+		rgba(0, 0, 0, 0),
+		rgba(0, 0, 0, 1) 7%,
+		rgba(0, 0, 0, 1) 93%,
+		rgba(0, 0, 0, 0)
+	);
+	scrollbar-color: white var(--color-black);
+	scrollbar-width: auto;
+	scrollbar-gutter: stable;
+}

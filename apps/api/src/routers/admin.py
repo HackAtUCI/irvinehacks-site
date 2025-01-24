@@ -345,12 +345,11 @@ async def participants() -> list[Participant]:
 @router.post("/checkin/{uid}")
 async def check_in_participant(
     uid: str,
-    badge_number: Annotated[str, Body()],
     associate: Annotated[User, Depends(require_organizer)],
 ) -> None:
     """Check in participant at IrvineHacks."""
     try:
-        await participant_manager.check_in_participant(uid, badge_number, associate)
+        await participant_manager.check_in_participant(uid, associate)
     except ValueError:
         raise HTTPException(status.HTTP_404_NOT_FOUND)
     except RuntimeError as err:

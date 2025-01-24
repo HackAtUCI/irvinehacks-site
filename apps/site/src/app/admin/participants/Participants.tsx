@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useContext, useState } from "react";
 
 import useParticipants, { Participant } from "@/lib/admin/useParticipants";
+import NotificationContext from "@/lib/admin/NotificationContext";
 
 import CheckInModal from "./components/CheckInModal";
 import ParticipantsTable from "./components/ParticipantsTable";
@@ -21,14 +22,54 @@ function Participants() {
 	const [promoteParticipant, setPromoteParticipant] =
 		useState<Participant | null>(null);
 
+	const { setNotifications } = useContext(NotificationContext);
+
 	const initiateCheckIn = (participant: Participant): void => {
 		setCheckinParticipant(participant);
 	};
 
 	const sendCheckIn = async (participant: Participant): Promise<void> => {
-		await checkInParticipant(participant);
-		setCheckinParticipant(null);
-		// TODO: Flashbar notification
+		try {
+			await checkInParticipant(participant);
+			setCheckinParticipant(null);
+			if (setNotifications) {
+				setNotifications((oldNotifications) => [
+					{
+						type: "success",
+						content: `Successfully checked in ${participant.first_name} ${participant.last_name} (${participant._id})!`,
+						dismissible: true,
+						dismissLabel: "Dismiss message",
+						id: participant._id,
+						onDismiss: () =>
+							setNotifications((notifications) =>
+								notifications.filter(
+									(notification) => notification.id !== participant._id,
+								),
+							),
+					},
+					...oldNotifications,
+				]);
+			}
+		} catch (error) {
+			if (setNotifications) {
+				setNotifications((oldNotifications) => [
+					{
+						type: "error",
+						content: `Failed to check in ${participant.first_name} ${participant.last_name} (${participant._id})!`,
+						dismissible: true,
+						dismissLabel: "Dismiss message",
+						id: participant._id,
+						onDismiss: () =>
+							setNotifications((notifications) =>
+								notifications.filter(
+									(notification) => notification.id !== participant._id,
+								),
+							),
+					},
+					...oldNotifications,
+				]);
+			}
+		}
 	};
 
 	const initiatePromotion = (participant: Participant): void => {

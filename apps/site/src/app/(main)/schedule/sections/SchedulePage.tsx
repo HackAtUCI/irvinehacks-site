@@ -45,13 +45,6 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 		return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 	}
 
-	// function getEventTomorrow(date: Date) {
-	// 	return new Date(
-	// 		new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime() +
-	// 			24 * 60 * 60 * 1000,
-	// 	);
-	// }
-
 	const firstDay = new Date(2025, 0, 24); // hackathon start day
 
 	const allDays = schedule

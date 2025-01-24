@@ -8,7 +8,6 @@ import brick_bg from "../../../assets/backgrounds/brick_bg.png";
 import Image from "next/image";
 
 export const revalidate = 60;
-let count = 0;
 
 export const metadata: Metadata = {
 	title: "Resources | IrvineHacks 2025",
@@ -24,7 +23,6 @@ export default async function Resources() {
 	return (
 		<>
 			<section className="relative min-h-screen w-full flex flex-col">
-				
 				<div className="absolute top-[75%] left-0 w-full h-[calc(100%-75%)] min-h-[25vh] z-0">
 					<Image
 						src={brick_bg}
@@ -50,33 +48,39 @@ export default async function Resources() {
 				</div>
 
 				<div className="relative flex-grow mb-40 mx-4 z-10">
-					{resources.order.map(({ _id, iconUrl, title, description, resources }, i) => {
-						return (
-							<div
-								key={_id}
-								className="relative max-w-5xl w-full mx-auto mb-12 text-[#2F1C00] p-12 rounded-2xl lg:grid lg:gap-20 lg:grid-cols-2 lg:items-center bg-[var(--color-white)] shadow-lg z-20"
-							>
-								<div className="relative z-10">
-									<div className="flex gap-2 lg:flex-col">
-										{/* eslint-disable-next-line @next/next/no-img-element */}
-										<img className="w-8 h-auto lg:w-16" src={iconUrl} alt="" />
-										<h2 className="text-2xl font-bold">{title}</h2>
+					{resources.order.map(
+						({ _id, iconUrl, title, description, resources }) => {
+							return (
+								<div
+									key={_id}
+									className="relative max-w-5xl w-full mx-auto mb-12 text-[#2F1C00] p-12 rounded-2xl lg:grid lg:gap-20 lg:grid-cols-2 lg:items-center bg-[var(--color-white)] shadow-lg z-20"
+								>
+									<div className="relative z-10">
+										<div className="flex gap-2 lg:flex-col">
+											{/* eslint-disable-next-line @next/next/no-img-element */}
+											<img
+												className="w-8 h-auto lg:w-16"
+												src={iconUrl}
+												alt=""
+											/>
+											<h2 className="text-2xl font-bold">{title}</h2>
+										</div>
+										<p>{description}</p>
 									</div>
-									<p>{description}</p>
+									<div className="relative z-10 flex flex-col gap-3 lg:gap-4">
+										{resources.map(({ _id, title, link }) => (
+											<Button
+												key={_id}
+												text={title}
+												href={link}
+												className="w-[100%!important] text-center"
+											/>
+										))}
+									</div>
 								</div>
-								<div className="relative z-10 flex flex-col gap-3 lg:gap-4">
-									{resources.map(({ _id, title, link }) => (
-										<Button
-											key={_id}
-											text={title}
-											href={link}
-											className="w-[100%!important] text-center"
-										/>
-									))}
-								</div>
-							</div>
-						);
-					})}
+							);
+						},
+					)}
 				</div>
 			</section>
 		</>

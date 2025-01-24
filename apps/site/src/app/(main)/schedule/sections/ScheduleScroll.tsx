@@ -1,3 +1,4 @@
+/* eslint-disable no-mixed-spaces-and-tabs */
 "use client";
 
 import clsx from "clsx";
@@ -24,7 +25,8 @@ export default function ScheduleScroll({
 		const fixedPos = [0.015, 0.25, 0.51];
 		scheduleContainerRef.current?.scrollTo({
 			left: scheduleBarRef.current
-				? scheduleBarRef.current.getBoundingClientRect().width * fixedPos[newPos]
+				? scheduleBarRef.current.getBoundingClientRect().width *
+				  fixedPos[newPos]
 				: 0,
 			behavior: "smooth",
 		});

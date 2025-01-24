@@ -29,31 +29,22 @@ const nextConfig = {
 	},
 	async redirects() {
 		return [
-			// {
-			// 	source: "/mentor",
-			// 	destination: "https://forms.gle/yCmXvG89ygvxUSCd7",
-			// 	permanent: true,
-			// },
-			// {
-			// 	source: "/volunteer",
-			// 	destination: "https://forms.gle/erpJjErKLJkEZMw48",
-			// 	permanent: true,
-			// },
 			{
 				source: "/waiver",
 				destination: DOCUSIGN_FORM_URL,
 				permanent: true,
 			},
-			// {
-			// 	source: "/incident",
-			// 	destination: "https://forms.gle/A6BdsSzYSiyeTP8Y6",
-			// 	permanent: true,
-			// },
-			// {
-			// 	source: "/devpost",
-			// 	destination: "https://irvinehacks-2024.devpost.com",
-			// 	permanent: true,
-			// },
+			{
+				source: "/incident",
+				destination:
+					"https://docs.google.com/forms/d/e/1FAIpQLSf-Frl5wHNoBMs9_pBlaUFyw525N5HqtJaDdmooEssUSREggQ/viewform?usp=sharing",
+				permanent: true,
+			},
+			{
+				source: "/devpost",
+				destination: "https://irvinehacks-2025.devpost.com/",
+				permanent: true,
+			},
 			// {
 			// 	source: "/feedback",
 			// 	destination: "https://forms.gle/c154z45wRx7ARnrE9",

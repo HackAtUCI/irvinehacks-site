@@ -1,13 +1,13 @@
-import { createContext, ReactNode, SetStateAction, Dispatch } from "react";
+import { FlashbarProps } from "@cloudscape-design/components";
+import { createContext, SetStateAction, Dispatch } from "react";
 
 interface Notification {
-	notifications: ReactNode[] | null;
-	setNotifications: Dispatch<SetStateAction<ReactNode[]>> | null;
+	setNotifications: Dispatch<
+		SetStateAction<FlashbarProps.MessageDefinition[]>
+	> | null;
 }
 
-type x = Dispatch<SetStateAction<ReactNode[]>>;
 const NotificationContext = createContext<Notification>({
-	notifications: null,
 	setNotifications: null,
 });
 

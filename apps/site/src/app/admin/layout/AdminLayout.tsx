@@ -2,9 +2,12 @@
 
 import { useRouter, usePathname } from "next/navigation";
 
-import { PropsWithChildren, ReactNode, useEffect, useState } from "react";
+import { PropsWithChildren, useEffect, useState } from "react";
 
 import AppLayout from "@cloudscape-design/components/app-layout";
+import Flashbar, {
+	FlashbarProps,
+} from "@cloudscape-design/components/flashbar";
 import axios from "axios";
 import { SWRConfig } from "swr";
 
@@ -20,7 +23,9 @@ function AdminLayout({ children }: PropsWithChildren) {
 	const identity = useUserIdentityStatic();
 	const router = useRouter();
 	const pathName = usePathname();
-	const [notifications, setNotifications] = useState<ReactNode[]>([]);
+	const [notifications, setNotifications] = useState<
+		FlashbarProps.MessageDefinition[]
+	>([]);
 
 	useEffect(() => {
 		setNotifications(() => []);
@@ -53,14 +58,27 @@ function AdminLayout({ children }: PropsWithChildren) {
 			}}
 		>
 			<UserContext.Provider value={identity}>
-				<NotificationContext.Provider
-					value={{ notifications, setNotifications }}
-				>
+				<NotificationContext.Provider value={{ setNotifications }}>
 					<AppLayout
 						content={children}
 						navigation={<AdminSidebar />}
 						breadcrumbs={<Breadcrumbs />}
-						notifications={notifications}
+						notifications={
+							<Flashbar
+								items={notifications}
+								i18nStrings={{
+									ariaLabel: "Notifications",
+									notificationBarAriaLabel: "View all notifications",
+									notificationBarText: "Notifications",
+									errorIconAriaLabel: "Error",
+									warningIconAriaLabel: "Warning",
+									successIconAriaLabel: "Success",
+									infoIconAriaLabel: "Info",
+									inProgressIconAriaLabel: "In progress",
+								}}
+								stackItems
+							/>
+						}
 					/>
 				</NotificationContext.Provider>
 			</UserContext.Provider>

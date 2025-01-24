@@ -20,9 +20,9 @@ import ParticipantsFilters from "./ParticipantsFilters";
 import RoleBadge from "./RoleBadge";
 import SearchScannerModal from "./SearchScannerModal";
 
-const FRIDAY = new Date("2024-01-26T12:00:00");
-const SATURDAY = new Date("2024-01-27T12:00:00");
-const SUNDAY = new Date("2024-01-28T12:00:00");
+const FRIDAY = new Date("2025-01-24T12:00:00");
+const SATURDAY = new Date("2025-01-25T12:00:00");
+const SUNDAY = new Date("2025-01-26T12:00:00");
 
 interface EmptyStateProps {
 	title: string;

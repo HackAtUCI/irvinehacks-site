@@ -51,14 +51,21 @@ async def get_participants() -> list[Participant]:
             "$or": [
                 {
                     "roles": {
-                        "$in": (
+                        "$in": [
                             Role.SPONSOR,
                             Role.JUDGE,
                             Role.WORKSHOP_LEAD,
-                        )
+                        ]
                     }
                 },
                 {
+                    "roles": {
+                        "$in": [
+                            Role.HACKER,
+                            Role.MENTOR,
+                            Role.VOLUNTEER,
+                        ]
+                    },
                     "status": {
                         "$in": [
                             Status.ATTENDING,
@@ -67,7 +74,7 @@ async def get_participants() -> list[Participant]:
                             Decision.ACCEPTED,
                             Decision.WAITLISTED,
                         ]
-                    }
+                    },
                 },
             ],
         },

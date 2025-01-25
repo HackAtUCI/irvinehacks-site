@@ -42,34 +42,38 @@ PARTICIPANT_FIELDS = [
 ]
 
 
-async def get_hackers() -> list[Participant]:
-    """Fetch all applicants who have a status of ATTENDING, WAIVER_SIGNED, CONFIRMED,
-    or WAITLISTED."""
+async def get_participants() -> list[Participant]:
+    """Fetch all Sponsors, Judges, and Workshop Leads. Also applicants who have a
+    status of ATTENDING, WAIVER_SIGNED, CONFIRMED, or WAITLISTED."""
     records: list[dict[str, Any]] = await mongodb_handler.retrieve(
         Collection.USERS,
         {
-            "roles": Role.APPLICANT,
-            "status": {
-                "$in": [
-                    Status.ATTENDING,
-                    Status.WAIVER_SIGNED,
-                    Status.CONFIRMED,
-                    Decision.ACCEPTED,
-                    Decision.WAITLISTED,
-                ]
-            },
+            "$or": [
+                {
+                    "roles": {
+                        "$in": (
+                            Role.SPONSOR,
+                            Role.JUDGE,
+                            Role.WORKSHOP_LEAD,
+                        )
+                    }
+                },
+                {
+                    "status": {
+                        "$in": [
+                            Status.ATTENDING,
+                            Status.WAIVER_SIGNED,
+                            Status.CONFIRMED,
+                            Decision.ACCEPTED,
+                            Decision.WAITLISTED,
+                        ]
+                    }
+                },
+            ],
         },
         PARTICIPANT_FIELDS,
     )
 
-    return [Participant(**user) for user in records]
-
-
-async def get_non_hackers() -> list[Participant]:
-    """Fetch all non-hackers participating in the event."""
-    records: list[dict[str, Any]] = await mongodb_handler.retrieve(
-        Collection.USERS, {"roles": {"$in": NON_HACKER_ROLES}}, PARTICIPANT_FIELDS
-    )
     return [Participant(**user) for user in records]
 
 

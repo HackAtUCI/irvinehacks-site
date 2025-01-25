@@ -336,10 +336,7 @@ async def waitlist_release(
 @router.get("/participants", dependencies=[Depends(require_organizer)])
 async def participants() -> list[Participant]:
     """Get list of participants."""
-    # TODO: consider combining the two functions into one
-    hackers = await participant_manager.get_hackers()
-    non_hackers = await participant_manager.get_non_hackers()
-    return hackers + non_hackers
+    return await participant_manager.get_participants()
 
 
 @router.post("/checkin/{uid}")

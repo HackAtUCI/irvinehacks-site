@@ -79,9 +79,47 @@ function Participants() {
 	const sendWaitlistPromote = async (
 		participant: Participant,
 	): Promise<void> => {
-		await releaseParticipantFromWaitlist(participant);
-		setPromoteParticipant(null);
-		// TODO: Flashbar notification
+		try {
+			await releaseParticipantFromWaitlist(participant);
+			setPromoteParticipant(null);
+			if (setNotifications) {
+				setNotifications((oldNotifications) => [
+					{
+						type: "success",
+						content: `Successfully released ${participant.first_name} ${participant.last_name} (${participant._id}) from waitlist!`,
+						dismissible: true,
+						dismissLabel: "Dismiss message",
+						id: participant._id,
+						onDismiss: () =>
+							setNotifications((notifications) =>
+								notifications.filter(
+									(notification) => notification.id !== participant._id,
+								),
+							),
+					},
+					...oldNotifications,
+				]);
+			}
+		} catch (error) {
+			if (setNotifications) {
+				setNotifications((oldNotifications) => [
+					{
+						type: "error",
+						content: `Failed to release ${participant.first_name} ${participant.last_name} (${participant._id}) from waitlist!`,
+						dismissible: true,
+						dismissLabel: "Dismiss message",
+						id: participant._id,
+						onDismiss: () =>
+							setNotifications((notifications) =>
+								notifications.filter(
+									(notification) => notification.id !== participant._id,
+								),
+							),
+					},
+					...oldNotifications,
+				]);
+			}
+		}
 	};
 
 	return (

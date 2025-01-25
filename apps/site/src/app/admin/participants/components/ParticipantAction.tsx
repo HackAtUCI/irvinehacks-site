@@ -9,17 +9,14 @@ import { ParticipantRole, ReviewStatus, Status } from "@/lib/userRecord";
 
 import ParticipantActionPopover from "./ParticipantActionPopover";
 
-const NONHACKER_ROLES = [
+const OUTSIDE_ROLES = [
 	ParticipantRole.Judge,
 	ParticipantRole.Sponsor,
-	ParticipantRole.Mentor,
-	ParticipantRole.Volunteer,
 	ParticipantRole.WorkshopLead,
 ];
 
-// TODO: reexamine attendance confirmation process
-export function isNonHacker(roles: ReadonlyArray<ParticipantRole>) {
-	return roles.some((role) => NONHACKER_ROLES.includes(role));
+export function isOutsideParticipant(roles: ReadonlyArray<ParticipantRole>) {
+	return roles.some((role) => OUTSIDE_ROLES.includes(role));
 }
 
 interface ParticipantActionProps {
@@ -40,7 +37,7 @@ function ParticipantAction({
 	const canPromote = isCheckInLead(roles);
 	const isWaiverSigned = participant.status === Status.signed;
 	const isAccepted = participant.status === Status.accepted;
-	const nonHacker = isNonHacker(participant.roles);
+	const outsideParticipant = isOutsideParticipant(participant.roles);
 
 	const promoteButton = (
 		<Button
@@ -75,9 +72,9 @@ function ParticipantAction({
 		</Button>
 	);
 
-	if (nonHacker) {
+	if (outsideParticipant) {
 		const content = !canPromote
-			? "Only check-in leads can confirm non-hackers."
+			? "Only check-in leads can confirm outside participants."
 			: "Must sign waiver first.";
 		if (!canPromote || participant.status === ReviewStatus.reviewed) {
 			return (

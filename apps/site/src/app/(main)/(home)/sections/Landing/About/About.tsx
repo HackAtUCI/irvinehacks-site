@@ -26,7 +26,7 @@ const About = () => {
 
 			<div className="absolute bottom-0 flex flex-col items-center w-[75%] max-w-[1200px] min-w-[750px] pb-10 max-2xl:bottom-[30%]">
 				<p className="font-display text-3xl md:text-4xl font-bold mb-10 max-sm:max-w-[300px] text-center">
-					3 Days, 400+ Hackers, $5,000+ in Prizes
+					3 Days, 400+ Hackers, $7,000+ in Prizes
 				</p>
 
 				<div className="h-auto w-auto relative flex justify-center">

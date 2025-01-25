@@ -18,7 +18,7 @@ export default async function Resources() {
 
 	return (
 		<>
-			<section className="w-full h-full mb-12">
+			<section className=" bg-black w-full h-full mb-12">
 				<div className="absolute top-[75%] left-0 w-full h-[calc(100%-75%)] min-h-[25vh] z-[-10]">
 					<Image
 						src={brick_bg}

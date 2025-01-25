@@ -135,6 +135,7 @@ export const InfiniteMovingCards = ({
 									href={item.link}
 									target="_blank"
 									className="relative block w-full h-full"
+									prefetch={false}
 								>
 									<img
 										src={item.image}

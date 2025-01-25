@@ -11,15 +11,13 @@ dayjs.extend(timezone);
 
 const EVENT_TIMEZONE = "America/Los_Angeles";
 
-const FRIDAY = dayjs(new Date("2024-01-26T12:00:00")).tz(EVENT_TIMEZONE);
+const FRIDAY = dayjs(new Date("2025-01-24T12:00:00")).tz(EVENT_TIMEZONE);
 
 function HackerCount() {
 	const { participants, loading } = useParticipants();
 
 	const checkedIn = participants
-		.filter((participant) =>
-			participant.roles.includes(ParticipantRole.Applicant),
-		)
+		.filter((participant) => participant.roles.includes(ParticipantRole.Hacker))
 		.filter((participant) =>
 			participant.checkins.some(([datetime]) =>
 				FRIDAY.isSame(dayjs(datetime).tz(EVENT_TIMEZONE), "date"),

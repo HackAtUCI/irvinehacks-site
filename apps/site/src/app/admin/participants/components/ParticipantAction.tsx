@@ -9,11 +9,7 @@ import { ParticipantRole, ReviewStatus, Status } from "@/lib/userRecord";
 
 import ParticipantActionPopover from "./ParticipantActionPopover";
 
-const OUTSIDE_ROLES = [
-	ParticipantRole.Judge,
-	ParticipantRole.Sponsor,
-	ParticipantRole.WorkshopLead,
-];
+const OUTSIDE_ROLES = [ParticipantRole.Judge, ParticipantRole.Sponsor];
 
 export function isOutsideParticipant(roles: ReadonlyArray<ParticipantRole>) {
 	return roles.some((role) => OUTSIDE_ROLES.includes(role));

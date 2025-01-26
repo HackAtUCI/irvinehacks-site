@@ -31,10 +31,7 @@ function useParticipants() {
 		// TODO: implement mutation for showing checked in on each day
 		// Note: Will cause 422 if badge number is null, but in practice,
 		// this should never happen
-		await axios.post(
-			`/api/admin/checkin/${participant._id}`,
-			participant.badge_number,
-		);
+		await axios.post(`/api/admin/checkin/${participant._id}`);
 		mutate();
 	};
 
@@ -45,8 +42,8 @@ function useParticipants() {
 		mutate();
 	};
 
-	const confirmNonHacker = async (participant: Participant) => {
-		console.log("Confirmed attendance for non-hacker", participant);
+	const confirmOutsideParticipants = async (participant: Participant) => {
+		console.log("Confirmed attendance for outside participants", participant);
 		await axios.post(`/api/admin/update-attendance/${participant._id}`);
 		mutate();
 	};
@@ -57,7 +54,7 @@ function useParticipants() {
 		error,
 		checkInParticipant,
 		releaseParticipantFromWaitlist,
-		confirmNonHacker,
+		confirmOutsideParticipants,
 	};
 }
 

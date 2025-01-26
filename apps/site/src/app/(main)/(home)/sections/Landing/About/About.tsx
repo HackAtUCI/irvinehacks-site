@@ -7,26 +7,26 @@ const About = () => {
 	return (
 		<div className="w-full absolute bottom-0 lg:bottom-[30vh] flex justify-center aspect-[12/5] max-lg:[h-1000px]">
 			<div className="w-full h-full absolute bottom-0 max-lg:hidden">
-				<Image src={LgStar} alt="*" className="absolute top-[30%] left-10" />
+				<Image src={LgStar} alt="✦" className="absolute top-[30%] left-10" />
 				<Image
 					src={SmStar}
-					alt="*"
+					alt="✦"
 					className="absolute bottom-[30%] left-[7%]"
 				/>
 
-				<Image src={LgStar} alt="*" className="absolute bottom-0 left-20" />
+				<Image src={LgStar} alt="✦" className="absolute bottom-0 left-20" />
 
-				<Image src={LgStar} alt="*" className="absolute top-[40%] right-10" />
+				<Image src={LgStar} alt="✦" className="absolute top-[40%] right-10" />
 				<Image
 					src={SmStar}
-					alt="*"
+					alt="✦"
 					className="absolute bottom-[20%] right-[7%]"
 				/>
 			</div>
 
 			<div className="absolute bottom-0 flex flex-col items-center w-[75%] max-w-[1200px] min-w-[750px] pb-10 max-2xl:bottom-[30%]">
 				<p className="font-display text-3xl md:text-4xl font-bold mb-10 max-sm:max-w-[300px] text-center">
-					3 Days, 400+ Hackers, $5,000+ in Prizes
+					3 Days, 400+ Hackers, $7,000+ in Prizes
 				</p>
 
 				<div className="h-auto w-auto relative flex justify-center">

@@ -19,7 +19,7 @@ export default function Layout({ children }: PropsWithChildren) {
 	return (
 		<div
 			style={{ backgroundImage: `url(${stars.src})` }}
-			className="overflow-x-hidden bg-top bg-repeat-y bg-[length:100%]"
+			className="overflow-x-hidden bg-top bg-repeat-y bg-[length:100%] relative"
 		>
 			<Suspense fallback={<BaseNavbar />}>
 				<NavbarParent />

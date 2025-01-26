@@ -1,18 +1,16 @@
 import { motion, Variants } from "framer-motion";
+import { SwordsIcon } from "lucide-react";
 
 const variants = {
 	initial: {
-		scaleY: 0.5,
 		opacity: 0,
 	},
 	animate: {
-		scaleY: 1,
-		opacity: 1,
+		opacity: 0.7,
 		transition: {
 			repeat: Infinity,
 			repeatType: "mirror",
-			duration: 1,
-			// ease: "circIn",
+			duration: 0.5,
 		},
 	},
 } as Variants;
@@ -27,11 +25,13 @@ const BarLoader = () => {
 			animate="animate"
 			className="flex gap-2"
 		>
-			<motion.div variants={variants} className="h-20 w-4 bg-white" />
-			<motion.div variants={variants} className="h-20 w-4 bg-white" />
-			<motion.div variants={variants} className="h-20 w-4 bg-white" />
-			<motion.div variants={variants} className="h-20 w-4 bg-white" />
-			<motion.div variants={variants} className="h-20 w-4 bg-white" />
+			{Array(5)
+				.fill(0)
+				.map((_, i) => (
+					<motion.div key={i} variants={variants} className="w-20 h-20">
+						<SwordsIcon className="w-full h-full" />
+					</motion.div>
+				))}
 		</motion.div>
 	);
 };

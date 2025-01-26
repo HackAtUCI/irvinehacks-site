@@ -12,6 +12,7 @@ function ApplyReminder() {
 			<SendGroup
 				description="Send out email reminders to users who haven't submitted an app"
 				buttonText="Send Reminder Emails"
+				modalText="You are about to send out reminder emails."
 				route="/api/director/apply-reminder"
 				mutate={mutate}
 			/>

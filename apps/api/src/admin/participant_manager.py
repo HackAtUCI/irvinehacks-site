@@ -14,9 +14,7 @@ log = getLogger(__name__)
 
 Checkin: TypeAlias = tuple[datetime, str]
 
-NON_HACKER_ROLES = (
-    Role.MENTOR,
-    Role.VOLUNTEER,
+OUTSIDE_ROLES = (
     Role.SPONSOR,
     Role.JUDGE,
     Role.WORKSHOP_LEAD,
@@ -42,22 +40,41 @@ PARTICIPANT_FIELDS = [
 ]
 
 
-async def get_hackers() -> list[Participant]:
-    """Fetch all applicants who have a status of ATTENDING, WAIVER_SIGNED, CONFIRMED,
-    or WAITLISTED."""
+async def get_participants() -> list[Participant]:
+    """Fetch all Sponsors, Judges, and Workshop Leads. Also applicants who have a
+    status of ATTENDING, WAIVER_SIGNED, CONFIRMED, or WAITLISTED."""
     records: list[dict[str, Any]] = await mongodb_handler.retrieve(
         Collection.USERS,
         {
-            "roles": Role.APPLICANT,
-            "status": {
-                "$in": [
-                    Status.ATTENDING,
-                    Status.WAIVER_SIGNED,
-                    Status.CONFIRMED,
-                    Decision.ACCEPTED,
-                    Decision.WAITLISTED,
-                ]
-            },
+            "$or": [
+                {
+                    "roles": {
+                        "$in": [
+                            Role.SPONSOR,
+                            Role.JUDGE,
+                            Role.WORKSHOP_LEAD,
+                        ]
+                    }
+                },
+                {
+                    "roles": {
+                        "$in": [
+                            Role.HACKER,
+                            Role.MENTOR,
+                            Role.VOLUNTEER,
+                        ]
+                    },
+                    "status": {
+                        "$in": [
+                            Status.ATTENDING,
+                            Status.WAIVER_SIGNED,
+                            Status.CONFIRMED,
+                            Decision.ACCEPTED,
+                            Decision.WAITLISTED,
+                        ]
+                    },
+                },
+            ],
         },
         PARTICIPANT_FIELDS,
     )
@@ -65,15 +82,7 @@ async def get_hackers() -> list[Participant]:
     return [Participant(**user) for user in records]
 
 
-async def get_non_hackers() -> list[Participant]:
-    """Fetch all non-hackers participating in the event."""
-    records: list[dict[str, Any]] = await mongodb_handler.retrieve(
-        Collection.USERS, {"roles": {"$in": NON_HACKER_ROLES}}, PARTICIPANT_FIELDS
-    )
-    return [Participant(**user) for user in records]
-
-
-async def check_in_participant(uid: str, badge_number: str, associate: User) -> None:
+async def check_in_participant(uid: str, associate: User) -> None:
     """Check in participant at IrvineHacks"""
     record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
         Collection.USERS, {"_id": uid, "roles": {"$exists": True}}, ["status"]
@@ -92,21 +101,20 @@ async def check_in_participant(uid: str, badge_number: str, associate: User) -> 
         {"_id": uid},
         {
             "$push": {"checkins": new_checkin_entry},
-            "$set": {"badge_number": badge_number},
         },
     )
     if not update_status:
         raise RuntimeError(f"Could not update check-in record for {uid}.")
 
-    log.info(f"Applicant {uid} ({badge_number}) checked in by {associate.uid}")
+    log.info(f"Applicant {uid} checked in by {associate.uid}")
 
 
-async def confirm_attendance_non_hacker(uid: str, director: User) -> None:
-    """Update status from WAIVER_SIGNED to ATTENDING for non-hackers."""
+async def confirm_attendance_outside_participants(uid: str, director: User) -> None:
+    """Update status from WAIVER_SIGNED to ATTENDING for outside participants."""
 
     record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
         Collection.USERS,
-        {"_id": uid, "roles": {"$in": NON_HACKER_ROLES}},
+        {"_id": uid, "roles": {"$in": OUTSIDE_ROLES}},
         ["status"],
     )
 

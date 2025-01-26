@@ -1,4 +1,11 @@
-import { Landing, ChooseCharacter, FAQ, Sponsors, Partners, Organizers } from "./sections";
+import {
+	Landing,
+	ChooseCharacter,
+	FAQ,
+	Sponsors,
+	Partners,
+	Organizers,
+} from "./sections";
 
 export const revalidate = 60;
 
@@ -8,9 +15,6 @@ export default function Home() {
 	return process.env.MAINTENANCE_MODE_HOME ? (
 		<>
 			<Landing />
-			<ChooseCharacter />
-			<FAQ />
-			<Sponsors />
 		</>
 	) : (
 		<>

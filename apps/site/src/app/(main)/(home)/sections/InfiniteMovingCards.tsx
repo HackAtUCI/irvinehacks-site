@@ -1,16 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Image from "next/image";
-import box from "@/assets/images/center_chat_box.svg";
-import boxBG from "@/assets/images/center_chat_box_bg.svg";
-import Link from "next/link";
 
 export const InfiniteMovingCards = ({
 	items,
-	direction = "left",
-	speed = "fast",
-	pauseOnHover = true,
 }: {
 	items: {
 		quote: string;

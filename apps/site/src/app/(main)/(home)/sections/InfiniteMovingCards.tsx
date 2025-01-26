@@ -25,7 +25,9 @@ export const InfiniteMovingCards = ({
 		if (!containerRef.current || !scrollerRef.current) return;
 
 		// Clear existing clones
+
 		while (scrollerRef.current.children.length > items.length) {
+			/* eslint-disable-next-line no-unused-expressions*/
 			scrollerRef.current.lastChild &&
 				scrollerRef.current.removeChild(scrollerRef.current.lastChild);
 		}

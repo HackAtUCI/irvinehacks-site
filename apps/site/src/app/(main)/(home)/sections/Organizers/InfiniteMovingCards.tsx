@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from "react";
 import box from "@/assets/images/center_chat_box.svg";
 import boxBG from "@/assets/images/center_chat_box_bg.svg";
-import Link from "next/link";
 import Image from "next/image";
 
 export const InfiniteMovingCards = ({
@@ -131,19 +130,19 @@ export const InfiniteMovingCards = ({
 								className="absolute inset-0 bg-black group-hover:bg-[#006FB2]"
 								style={{ transform: "skew(20deg) scale(1.2)" }}
 							>
-								<Link
+								<a
 									href={item.link}
 									target="_blank"
 									className="relative block w-full h-full"
-									prefetch={false}
 								>
+									{/* eslint-disable-next-line @next/next/no-img-element*/}
 									<img
 										src={item.image}
 										alt={item.name}
 										className="object-cover w-full h-full opacity-75 group-hover:opacity-100"
 										style={{ maxWidth: "100%" }}
 									/>
-								</Link>
+								</a>
 							</div>
 						</div>
 					</li>

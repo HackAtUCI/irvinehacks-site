@@ -14,9 +14,7 @@ log = getLogger(__name__)
 
 Checkin: TypeAlias = tuple[datetime, str]
 
-NON_HACKER_ROLES = (
-    Role.MENTOR,
-    Role.VOLUNTEER,
+OUTSIDE_ROLES = (
     Role.SPONSOR,
     Role.JUDGE,
     Role.WORKSHOP_LEAD,
@@ -111,12 +109,12 @@ async def check_in_participant(uid: str, associate: User) -> None:
     log.info(f"Applicant {uid} checked in by {associate.uid}")
 
 
-async def confirm_attendance_non_hacker(uid: str, director: User) -> None:
-    """Update status from WAIVER_SIGNED to ATTENDING for non-hackers."""
+async def confirm_attendance_outside_participants(uid: str, director: User) -> None:
+    """Update status from WAIVER_SIGNED to ATTENDING for outside participants."""
 
     record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
         Collection.USERS,
-        {"_id": uid, "roles": {"$in": NON_HACKER_ROLES}},
+        {"_id": uid, "roles": {"$in": OUTSIDE_ROLES}},
         ["status"],
     )
 

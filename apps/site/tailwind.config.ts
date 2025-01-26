@@ -10,6 +10,15 @@ const config: Config = {
 	],
 	theme: {
 		extend: {
+			keyframes: {
+				scroll: {
+					from: { transform: "translateX(0)" },
+					to: { transform: "translateX(calc(-50%))" },
+				},
+			},
+			animation: {
+				scroll: "scroll var(--duration) linear infinite",
+			},
 			backgroundImage: {
 				"gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
 				"gradient-conic":

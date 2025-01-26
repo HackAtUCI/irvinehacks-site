@@ -5,6 +5,7 @@ import resource from "./resource";
 import resourceCategory from "./resourceCategory";
 import resourceCategoryOrder from "./resourceCategoryOrder";
 import sponsors from "./sponsors";
+import organizers from "./organizers";
 
 export const schemaTypes = [
 	faqs,
@@ -14,4 +15,5 @@ export const schemaTypes = [
 	resourceCategory,
 	resourceCategoryOrder,
 	sponsors,
+	organizers,
 ];

@@ -9,10 +9,25 @@ import { ParticipantRole, ReviewStatus, Status } from "@/lib/userRecord";
 
 import ParticipantActionPopover from "./ParticipantActionPopover";
 
-const OUTSIDE_ROLES = [ParticipantRole.Judge, ParticipantRole.Sponsor];
+const JUDGE_SPONSOR_ROLES = [ParticipantRole.Judge, ParticipantRole.Sponsor];
+const HACKER_MENTOR_VOLUNTEER_ROLES = [
+	ParticipantRole.Hacker,
+	ParticipantRole.Mentor,
+	ParticipantRole.Volunteer,
+];
 
-export function isOutsideParticipant(roles: ReadonlyArray<ParticipantRole>) {
-	return roles.some((role) => OUTSIDE_ROLES.includes(role));
+export function isJudgeSponsorParticipant(
+	roles: ReadonlyArray<ParticipantRole>,
+) {
+	return roles.some((role) => JUDGE_SPONSOR_ROLES.includes(role));
+}
+
+function isWorkshopLead(roles: ReadonlyArray<ParticipantRole>) {
+	return roles.includes(ParticipantRole.WorkshopLead);
+}
+
+function isHackerMentorVolunteer(roles: ReadonlyArray<ParticipantRole>) {
+	return roles.some((role) => HACKER_MENTOR_VOLUNTEER_ROLES.includes(role));
 }
 
 interface ParticipantActionProps {
@@ -33,7 +48,9 @@ function ParticipantAction({
 	const canPromote = isCheckInLead(roles);
 	const isWaiverSigned = participant.status === Status.signed;
 	const isAccepted = participant.status === Status.accepted;
-	const outsideParticipant = isOutsideParticipant(participant.roles);
+	const judgeSponsorParticipant = isJudgeSponsorParticipant(participant.roles);
+	const hackerMentorVolunteer = isHackerMentorVolunteer(participant.roles);
+	const workshopLead = isWorkshopLead(participant.roles);
 
 	const promoteButton = (
 		<Button
@@ -68,9 +85,9 @@ function ParticipantAction({
 		</Button>
 	);
 
-	if (outsideParticipant) {
+	if (judgeSponsorParticipant) {
 		const content = !canPromote
-			? "Only check-in leads can confirm outside participants."
+			? "Only check-in leads can confirm judges and sponsors."
 			: "Must sign waiver first.";
 		if (!canPromote || participant.status === ReviewStatus.reviewed) {
 			return (
@@ -91,7 +108,7 @@ function ParticipantAction({
 			);
 		}
 		return promoteButton;
-	} else if (isWaiverSigned || isAccepted) {
+	} else if (hackerMentorVolunteer && (isWaiverSigned || isAccepted)) {
 		const content = isWaiverSigned
 			? "Must confirm attendance in portal first"
 			: "Must sign waiver and confirm attendance in portal";
@@ -100,6 +117,21 @@ function ParticipantAction({
 				{checkinButton}
 			</ParticipantActionPopover>
 		);
+	} else if (!hackerMentorVolunteer && workshopLead) {
+		// participants that are just workshop leads
+		const content = !canPromote
+			? "Only check-in leads can confirm workshop leads without any other roles."
+			: "Must sign waiver first.";
+		if (!canPromote || participant.status === ReviewStatus.reviewed) {
+			return (
+				<ParticipantActionPopover content={content}>
+					{confirmButton}
+				</ParticipantActionPopover>
+			);
+		} else if (participant.status === Status.signed) {
+			return confirmButton;
+		}
+		return checkinButton;
 	}
 	return checkinButton;
 }

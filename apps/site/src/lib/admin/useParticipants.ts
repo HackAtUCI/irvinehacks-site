@@ -42,8 +42,8 @@ function useParticipants() {
 		mutate();
 	};
 
-	const confirmNonHacker = async (participant: Participant) => {
-		console.log("Confirmed attendance for non-hacker", participant);
+	const confirmOutsideParticipants = async (participant: Participant) => {
+		console.log("Confirmed attendance for outside participants", participant);
 		await axios.post(`/api/admin/update-attendance/${participant._id}`);
 		mutate();
 	};
@@ -54,7 +54,7 @@ function useParticipants() {
 		error,
 		checkInParticipant,
 		releaseParticipantFromWaitlist,
-		confirmNonHacker,
+		confirmOutsideParticipants,
 	};
 }
 

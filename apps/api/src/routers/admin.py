@@ -363,9 +363,9 @@ async def update_attendance(
         User, Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))
     ],
 ) -> None:
-    """Update status to Role.ATTENDING for non-hackers."""
+    """Update status to Role.ATTENDING for outside participants."""
     try:
-        await participant_manager.confirm_attendance_non_hacker(uid, director)
+        await participant_manager.confirm_attendance_outside_participants(uid, director)
     except ValueError:
         raise HTTPException(status.HTTP_404_NOT_FOUND)
     except RuntimeError as err:

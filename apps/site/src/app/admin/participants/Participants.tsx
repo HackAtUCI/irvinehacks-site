@@ -15,7 +15,7 @@ function Participants() {
 		loading,
 		checkInParticipant,
 		releaseParticipantFromWaitlist,
-		confirmNonHacker,
+		confirmOutsideParticipants,
 	} = useParticipants();
 	const [checkinParticipant, setCheckinParticipant] =
 		useState<Participant | null>(null);
@@ -129,7 +129,7 @@ function Participants() {
 				loading={loading}
 				initiateCheckIn={initiateCheckIn}
 				initiatePromotion={initiatePromotion}
-				initiateConfirm={confirmNonHacker}
+				initiateConfirm={confirmOutsideParticipants}
 			/>
 			<CheckInModal
 				onDismiss={() => setCheckinParticipant(null)}

@@ -45,11 +45,12 @@ const nextConfig = {
 				destination: "https://irvinehacks-2025.devpost.com/",
 				permanent: true,
 			},
-			// {
-			// 	source: "/feedback",
-			// 	destination: "https://forms.gle/c154z45wRx7ARnrE9",
-			// 	permanent: true,
-			// },
+			{
+				source: "/feedback",
+				destination:
+					"https://docs.google.com/forms/d/e/1FAIpQLSfFP7D0WMwUn0cSnNCU6W1OQtv6qa10SdjL2FkigZHkY92voQ/viewform",
+				permanent: true,
+			},
 		];
 	},
 };

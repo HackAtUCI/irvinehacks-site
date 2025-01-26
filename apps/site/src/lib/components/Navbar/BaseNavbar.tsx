@@ -102,6 +102,14 @@ export default function BaseNavbar({ children }: PropsWithChildren) {
 						Devpost
 					</NavLinkItem>
 
+					<NavLinkItem
+						href="/feedback"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						Feedback Form
+					</NavLinkItem>
+
 					{children}
 				</NavMenu.List>
 			</div>

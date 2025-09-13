@@ -6,8 +6,10 @@ from typing import Any, Mapping, Optional, Union
 
 from bson import CodecOptions
 from motor.core import AgnosticClient
-from motor.motor_asyncio import AsyncIOMotorClient
+from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from pydantic import BaseModel, ConfigDict, Field
+
+from utils.hackathon_context import hackathon_name_ctx
 
 log = getLogger(__name__)
 
@@ -22,10 +24,8 @@ MONGODB_CLIENT: AgnosticClient = AsyncIOMotorClient(MONGODB_URI)  # type: ignore
 # Resolve Vercel runtime issue
 MONGODB_CLIENT.get_io_loop = asyncio.get_event_loop  # type: ignore
 
-DATABASE_NAME = "irvinehacks" if STAGING_ENV else "irvinehacks-prod"
-DB = MONGODB_CLIENT[DATABASE_NAME].with_options(
-    codec_options=CodecOptions(tz_aware=True)
-)
+IRVINE_HACKS_DATABASE_NAME = "irvinehacks" if STAGING_ENV else "irvinehacks-prod"
+ZOTHACKS_DATABASE_NAME = "zothacks" if STAGING_ENV else "zothacks-prod"
 
 
 class BaseRecord(BaseModel):
@@ -49,10 +49,27 @@ class Collection(str, Enum):
     EMAILS = "emails"
 
 
+def get_database() -> AsyncIOMotorDatabase:
+    hackathon_name = hackathon_name_ctx.get()
+    if hackathon_name == "irvinehacks":
+        database_name = IRVINE_HACKS_DATABASE_NAME
+    elif hackathon_name == "zothacks":
+        database_name = ZOTHACKS_DATABASE_NAME
+    else:
+        raise ValueError(
+            f"Hackathon name must be irvinehacks or zothacks, but was {hackathon_name}"
+        )
+
+    return MONGODB_CLIENT[database_name].with_options(
+        codec_options=CodecOptions(tz_aware=True)
+    )
+
+
 async def insert(
     collection: Collection, data: Mapping[str, object]
 ) -> Union[str, bool]:
     """Insert a document into the specified collection of the database"""
+    DB = get_database()
     COLLECTION = DB[collection.value]
     result = await COLLECTION.insert_one(data)
     if not result.acknowledged:
@@ -67,6 +84,7 @@ async def retrieve_one(
 ) -> Optional[dict[str, Any]]:
     """Search for and retrieve the specified fields of all documents (if any exist)
     that satisfy the provided query."""
+    DB = get_database()
     COLLECTION = DB[collection.value]
 
     result: Optional[dict[str, object]] = await COLLECTION.find_one(query, fields)
@@ -78,6 +96,7 @@ async def retrieve(
 ) -> list[dict[str, object]]:
     """Search for and retrieve the specified fields of a document (if any exist)
     that satisfy the provided query."""
+    DB = get_database()
     COLLECTION = DB[collection.value]
 
     result = COLLECTION.find(query, fields)
@@ -104,6 +123,7 @@ async def raw_update_one(
     upsert: bool = False,
 ) -> bool:
     """Search for and update a document using the provided query and raw update."""
+    DB = get_database()
     COLLECTION = DB[collection.value]
     result = await COLLECTION.update_one(query, update, upsert=upsert)
     if not result.acknowledged:
@@ -117,6 +137,7 @@ async def update(
     collection: Collection, query: Mapping[str, object], new_data: Mapping[str, object]
 ) -> bool:
     """Search for and update documents (if they exist) using the provided query data."""
+    DB = get_database()
     COLLECTION = DB[collection.value]
     result = await COLLECTION.update_many(query, {"$set": new_data})
     if not result.acknowledged:

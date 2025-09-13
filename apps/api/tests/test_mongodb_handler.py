@@ -152,8 +152,8 @@ async def test_update_existing_documents(mock_DB: MagicMock) -> None:
     assert result is True
 
 
-@patch("services.mongodb_handler.get_database")
-async def test_update_existing_documents_failure(mock_DB: MagicMock) -> None:
+@patch("services.mongodb_handler.get_database", new_callable=AsyncMock)
+async def test_update_existing_documents_failure(mock_DB: AsyncMock) -> None:
     """Test that lack of acknowledgement during update causes RuntimeError"""
     mock_collection = AsyncMock()
     mock_collection.update_many.return_value = UpdateResult(dict(), False)

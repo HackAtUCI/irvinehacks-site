@@ -157,7 +157,10 @@ async def test_update_existing_documents_failure(mock_DB: AsyncMock) -> None:
     """Test that lack of acknowledgement during update causes RuntimeError"""
     mock_collection = AsyncMock()
     mock_collection.update_many.return_value = UpdateResult(dict(), False)
-    mock_DB.__getitem__.return_value = mock_collection
+    mock_db_instance = AsyncMock()
+    mock_db_instance.__getitem__.return_value = mock_collection
+
+    mock_DB.return_value = mock_db_instance
 
     update = {"status": "ACCEPTED"}
     with pytest.raises(RuntimeError):

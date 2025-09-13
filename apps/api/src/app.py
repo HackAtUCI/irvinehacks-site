@@ -1,7 +1,7 @@
 import logging
 import os
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 
 from routers import admin, director, guest, saml, user
 
@@ -29,3 +29,12 @@ app.include_router(director.router, prefix="/director", tags=["director"])
 @app.get("/")
 async def root() -> dict[str, str]:
     return {"message": "hello"}
+
+
+@app.middleware("http")
+async def set_db_name_from_header(request: Request, call_next):
+    # db_name_ctx.set(request.headers.get("X-Database-Name"))
+    print("Setting db name from header")
+    print(request.headers.get("X-Hackathon-Name"))
+    print("--------------------------------")
+    return await call_next(request)

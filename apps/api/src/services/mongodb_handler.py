@@ -5,8 +5,8 @@ from logging import getLogger
 from typing import Any, Mapping, Optional, Union
 
 from bson import CodecOptions
-from motor.core import AgnosticClient
-from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
+from motor.core import AgnosticClient, AgnosticDatabase
+from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, ConfigDict, Field
 
 from utils.hackathon_context import hackathon_name_ctx
@@ -49,7 +49,7 @@ class Collection(str, Enum):
     EMAILS = "emails"
 
 
-def get_database() -> AsyncIOMotorDatabase:
+def get_database() -> AgnosticDatabase[Any]:
     hackathon_name = hackathon_name_ctx.get()
     if hackathon_name == "irvinehacks":
         database_name = IRVINE_HACKS_DATABASE_NAME

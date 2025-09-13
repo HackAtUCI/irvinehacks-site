@@ -4,6 +4,7 @@ import os
 from fastapi import FastAPI, Request
 
 from routers import admin, director, guest, saml, user
+from utils.hackathon_context import hackathon_name_ctx
 
 logging.basicConfig(level=logging.INFO)
 
@@ -32,9 +33,6 @@ async def root() -> dict[str, str]:
 
 
 @app.middleware("http")
-async def set_db_name_from_header(request: Request, call_next):
-    # db_name_ctx.set(request.headers.get("X-Database-Name"))
-    print("Setting db name from header")
-    print(request.headers.get("X-Hackathon-Name"))
-    print("--------------------------------")
+async def set_hackathon_name_context_from_header(request: Request, call_next):
+    hackathon_name_ctx.set(request.headers.get("X-Hackathon-Name"))
     return await call_next(request)

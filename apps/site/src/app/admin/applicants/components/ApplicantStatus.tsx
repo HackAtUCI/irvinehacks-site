@@ -5,29 +5,27 @@ import StatusIndicator, {
 import { Status } from "@/lib/userRecord";
 
 export const StatusLabels = {
-	[Status.accepted]: "accepted",
-	[Status.rejected]: "rejected",
-	[Status.waitlisted]: "waitlisted",
-	[Status.pending]: "needs review",
-	[Status.reviewed]: "reviewed",
-	[Status.released]: "released",
-	[Status.signed]: "waiver signed",
-	[Status.confirmed]: "confirmed",
-	[Status.attending]: "attending",
-	[Status.void]: "void",
+	[Status.Accepted]: "accepted",
+	[Status.Rejected]: "rejected",
+	[Status.Waitlisted]: "waitlisted",
+	[Status.Pending]: "needs review",
+	[Status.Reviewed]: "reviewed",
+	[Status.Signed]: "waiver signed",
+	[Status.Confirmed]: "confirmed",
+	[Status.Attending]: "attending",
+	[Status.Void]: "void",
 };
 
 const StatusTypes: Record<Status, StatusIndicatorProps.Type> = {
-	[Status.accepted]: "success",
-	[Status.rejected]: "error",
-	[Status.waitlisted]: "pending",
-	[Status.pending]: "pending",
-	[Status.reviewed]: "in-progress",
-	[Status.released]: "success",
-	[Status.signed]: "in-progress",
-	[Status.confirmed]: "info",
-	[Status.attending]: "success",
-	[Status.void]: "stopped",
+	[Status.Accepted]: "success",
+	[Status.Rejected]: "error",
+	[Status.Waitlisted]: "pending",
+	[Status.Pending]: "pending",
+	[Status.Reviewed]: "in-progress",
+	[Status.Signed]: "in-progress",
+	[Status.Confirmed]: "info",
+	[Status.Attending]: "success",
+	[Status.Void]: "stopped",
 };
 
 interface ApplicantStatusProps {
@@ -38,7 +36,7 @@ function ApplicantStatus({ status }: ApplicantStatusProps) {
 	return (
 		<StatusIndicator
 			type={StatusTypes[status]}
-			colorOverride={status === Status.signed ? "blue" : undefined}
+			colorOverride={status === Status.Signed ? "blue" : undefined}
 		>
 			{StatusLabels[status]}
 		</StatusIndicator>

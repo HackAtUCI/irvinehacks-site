@@ -41,9 +41,9 @@ def test_can_validate_key() -> None:
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 async def test_get_existing_unexpired_key(mock_mongodb_retrieve_one: AsyncMock) -> None:
     """Test that existing, unexpired guest authorization key can be retrieved."""
-    iat = datetime(2024, 1, 11)
+    iat = datetime(2025, 1, 11)
     exp = datetime(
-        2025, 7, 1, tzinfo=timezone.utc
+        2026, 7, 1, tzinfo=timezone.utc
     )  # update expire date for this test to not fail :)
     # this test will fail next year :P
     mock_mongodb_retrieve_one.return_value = {

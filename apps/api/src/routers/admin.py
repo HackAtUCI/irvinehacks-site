@@ -329,28 +329,24 @@ async def waitlist_release(
 
     log.info("%s accepted %s off the waitlist. Sending email.", associate, uid)
     await email_handler.send_waitlist_release_email(
-        record["first_name"], recover_email_from_uid(uid)
+        record["first_name"], email_handler.recover_email_from_uid(uid)
     )
 
 
 @router.get("/participants", dependencies=[Depends(require_organizer)])
 async def participants() -> list[Participant]:
     """Get list of participants."""
-    # TODO: consider combining the two functions into one
-    hackers = await participant_manager.get_hackers()
-    non_hackers = await participant_manager.get_non_hackers()
-    return hackers + non_hackers
+    return await participant_manager.get_participants()
 
 
 @router.post("/checkin/{uid}")
 async def check_in_participant(
     uid: str,
-    badge_number: Annotated[str, Body()],
     associate: Annotated[User, Depends(require_organizer)],
 ) -> None:
     """Check in participant at IrvineHacks."""
     try:
-        await participant_manager.check_in_participant(uid, badge_number, associate)
+        await participant_manager.check_in_participant(uid, associate)
     except ValueError:
         raise HTTPException(status.HTTP_404_NOT_FOUND)
     except RuntimeError as err:
@@ -367,9 +363,9 @@ async def update_attendance(
         User, Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))
     ],
 ) -> None:
-    """Update status to Role.ATTENDING for non-hackers."""
+    """Update status to Role.ATTENDING for outside participants."""
     try:
-        await participant_manager.confirm_attendance_non_hacker(uid, director)
+        await participant_manager.confirm_attendance_outside_participants(uid, director)
     except ValueError:
         raise HTTPException(status.HTTP_404_NOT_FOUND)
     except RuntimeError as err:
@@ -396,15 +392,6 @@ async def retrieve_thresholds() -> Optional[dict[str, Any]]:
     return await mongodb_handler.retrieve_one(
         Collection.SETTINGS, {"_id": "hacker_score_thresholds"}, ["accept", "waitlist"]
     )
-
-
-def recover_email_from_uid(uid: str) -> str:
-    """For NativeUsers, the email should still delivery properly."""
-    uid = uid.replace("..", "\n")
-    *reversed_domain, local = uid.split(".")
-    local = local.replace("\n", ".")
-    domain = ".".join(reversed(reversed_domain))
-    return f"{local}@{domain}"
 
 
 async def _try_update_applicant_with_query(

@@ -8,7 +8,7 @@ import HackLogo from "@/lib/components/HackLogo/HackLogo";
 import NavLinkItem from "./NavbarHelpers";
 
 import hamburger from "@/assets/icons/navigation-icon.svg";
-// import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
+import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
 
 import styles from "./Navbar.module.scss";
 
@@ -37,7 +37,7 @@ export default function BaseNavbar({ children }: PropsWithChildren) {
 	// 	}
 	// };
 
-	// const deadlinePassed = hasDeadlinePassed();
+	const deadlinePassed = hasDeadlinePassed();
 
 	return (
 		<NavMenu.Root
@@ -72,20 +72,43 @@ export default function BaseNavbar({ children }: PropsWithChildren) {
 					}
 					onTransitionEnd={() => setHidden(!listShown)}
 				>
-					<NavLinkItem href="/" className="navMenuLink">
-						Home
-					</NavLinkItem>
+					<NavLinkItem href="/">Home</NavLinkItem>
+					{!deadlinePassed && (
+						<NavLinkItem
+							href="/#apply"
+							// onClick={goToChooseChar}
+						>
+							Apply
+						</NavLinkItem>
+					)}
+
+					<NavLinkItem href="/resources">Resources</NavLinkItem>
+
+					<NavLinkItem href="/schedule">Schedule</NavLinkItem>
+
 					<NavLinkItem
-						href="/#apply"
-						className="navMenuLink"
-						// onClick={goToChooseChar}
+						href="/incident"
+						target="_blank"
+						rel="noopener noreferrer"
 					>
-						Apply
+						Report Incident
 					</NavLinkItem>
 
-					{/* <NavLinkItem href="/resources" className="navMenuLink">
-						Resources
-					</NavLinkItem> */}
+					<NavLinkItem
+						href="/devpost"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						Devpost
+					</NavLinkItem>
+
+					<NavLinkItem
+						href="/feedback"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						Feedback Form
+					</NavLinkItem>
 
 					{children}
 				</NavMenu.List>

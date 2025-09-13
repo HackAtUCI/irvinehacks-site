@@ -2,7 +2,7 @@ import asyncio
 
 from datetime import datetime
 from logging import getLogger
-from typing import Annotated, Any, Literal, Optional, Sequence
+from typing import Annotated, Any, Literal, Optional, Sequence, Union
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, TypeAdapter, ValidationError
@@ -19,9 +19,9 @@ from services.sendgrid_handler import (
     PersonalizationData,
     Template,
 )
-from routers.admin import recover_email_from_uid, retrieve_thresholds
+from routers.admin import retrieve_thresholds
 from utils import email_handler
-from utils.email_handler import IH_SENDER
+from utils.email_handler import IH_SENDER, recover_email_from_uid
 from utils.batched import batched
 
 log = getLogger(__name__)
@@ -29,6 +29,20 @@ log = getLogger(__name__)
 router = APIRouter()
 
 require_director = require_role({Role.DIRECTOR})
+
+
+RSVP_REMINDER_EMAIL_TEMPLATES: dict[
+    Role,
+    Literal[
+        Template.HACKER_RSVP_REMINDER,
+        Template.MENTOR_RSVP_REMINDER,
+        Template.VOLUNTEER_RSVP_REMINDER,
+    ],
+] = {
+    Role.HACKER: Template.HACKER_RSVP_REMINDER,
+    Role.MENTOR: Template.MENTOR_RSVP_REMINDER,
+    Role.VOLUNTEER: Template.VOLUNTEER_RSVP_REMINDER,
+}
 
 
 class ApplyReminderSenders(BaseModel):
@@ -221,15 +235,16 @@ async def apply_reminder(user: Annotated[User, Depends(require_director)]) -> No
         )
 
 
-@router.post("/rsvp-reminder", dependencies=[Depends(require_director)])
-async def rsvp_reminder() -> None:
-    """Send email to applicants who have a status of ACCEPTED or WAIVER_SIGNED
-    reminding them to RSVP."""
+async def _rsvp_reminder(
+    application_type: Literal[Role.HACKER, Role.MENTOR, Role.VOLUNTEER]
+) -> None:
+    """Send email to applicants based on application_type who have a status of ACCEPTED
+    or WAIVER_SIGNED reminding them to RSVP."""
     # TODO: Consider using Pydantic model validation instead of type annotations
     not_yet_rsvpd: list[dict[str, Any]] = await mongodb_handler.retrieve(
         Collection.USERS,
         {
-            "roles": Role.APPLICANT,
+            "roles": Role(application_type),
             "status": {"$in": [Decision.ACCEPTED, Status.WAIVER_SIGNED]},
         },
         ["_id", "first_name"],
@@ -244,14 +259,29 @@ async def rsvp_reminder() -> None:
             )
         )
 
-    log.info(f"Sending RSVP reminder emails to {len(not_yet_rsvpd)} applicants")
-
-    await sendgrid_handler.send_email(
-        Template.RSVP_REMINDER,
-        IH_SENDER,
-        personalizations,
-        True,
+    log.info(
+        (
+            f"Sending RSVP reminder emails to {len(not_yet_rsvpd)} "
+            f"{application_type} applicants"
+        )
     )
+
+    if len(not_yet_rsvpd) > 0:
+        await sendgrid_handler.send_email(
+            RSVP_REMINDER_EMAIL_TEMPLATES[application_type],
+            IH_SENDER,
+            personalizations,
+            True,
+        )
+
+
+@router.post("/rsvp-reminder", dependencies=[Depends(require_director)])
+async def rsvp_reminder() -> None:
+    """Send email to applicants who have a status of ACCEPTED or WAIVER_SIGNED
+    reminding them to RSVP."""
+    await _rsvp_reminder(Role.HACKER)
+    await _rsvp_reminder(Role.MENTOR)
+    await _rsvp_reminder(Role.VOLUNTEER)
 
 
 @router.post("/confirm-attendance", dependencies=[Depends(require_director)])
@@ -392,7 +422,92 @@ async def release_hacker_decisions() -> None:
     await _process_records_in_batches(records, Role.HACKER)
 
 
-async def _process_status(uids: Sequence[str], status: Status) -> None:
+@router.post("/logistics/hackers", dependencies=[Depends(require_director)])
+async def hacker_logistics_emails() -> None:
+    """Send logistics emails to hackers."""
+    await email_handler.send_logistics_email(Role.HACKER)
+
+
+@router.post("/logistics/mentors", dependencies=[Depends(require_director)])
+async def mentor_logistics_emails() -> None:
+    """Send logistics email to mentors."""
+    await email_handler.send_logistics_email(Role.MENTOR)
+
+
+@router.post("/logistics/volunteers", dependencies=[Depends(require_director)])
+async def volunteer_logistics_emails() -> None:
+    """Send logistics email to volunteers."""
+    await email_handler.send_logistics_email(Role.VOLUNTEER)
+
+
+@router.post("/logistics/waitlists", dependencies=[Depends(require_director)])
+async def waitlist_logistics_emails() -> None:
+    """Send logistics emails to waitlisted hackers."""
+    records: list[dict[str, Any]] = await mongodb_handler.retrieve(
+        mongodb_handler.Collection.USERS,
+        {"roles": Role.HACKER, "status": Decision.WAITLISTED},
+        ["_id", "first_name"],
+    )
+
+    personalizations = []
+    for record in records:
+        personalizations.append(
+            ApplicationUpdatePersonalization(
+                email=recover_email_from_uid(record["_id"]),
+                first_name=record["first_name"],
+            )
+        )
+
+    if len(records) > 0:
+        await sendgrid_handler.send_email(
+            Template.HACKER_WAITLISTED_LOGISTICS_EMAIL,
+            IH_SENDER,
+            personalizations,
+            True,
+        )
+
+
+@router.post("/waitlist-transfer", dependencies=[Depends(require_director)])
+async def waitlist_transfer() -> None:
+    """Transfer all accepted hackers that didn't RSVP in time to the waitlist"""
+    records: list[dict[str, Any]] = await mongodb_handler.retrieve(
+        Collection.USERS,
+        {"roles": Role.HACKER, "status": Status.VOID},
+        ["_id", "first_name"],
+    )
+
+    log.info(
+        f"Changing status of {len(records)} from {Status.VOID} to {Decision.WAITLISTED}"
+    )
+
+    await asyncio.gather(
+        *(
+            _process_status(batch, Decision.WAITLISTED)
+            for batch in batched([str(record["_id"]) for record in records], 100)
+        )
+    )
+
+    personalizations = []
+    for record in records:
+        personalizations.append(
+            ApplicationUpdatePersonalization(
+                email=recover_email_from_uid(record["_id"]),
+                first_name=record["first_name"],
+            )
+        )
+
+    log.info(f"Sending waitlist transfer emails to {len(records)} hackers")
+
+    if len(records) > 0:
+        await sendgrid_handler.send_email(
+            Template.WAITLIST_TRANSFER_EMAIL,
+            IH_SENDER,
+            personalizations,
+            True,
+        )
+
+
+async def _process_status(uids: Sequence[str], status: Union[Status, Decision]) -> None:
     ok = await mongodb_handler.update(
         Collection.USERS, {"_id": {"$in": uids}}, {"status": status}
     )

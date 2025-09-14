@@ -1,9 +1,11 @@
 import logging
 import os
+from typing import Awaitable, Callable
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
 
 from routers import admin, director, guest, saml, user
+from utils.hackathon_context import hackathon_name_ctx
 
 logging.basicConfig(level=logging.INFO)
 
@@ -29,3 +31,15 @@ app.include_router(director.router, prefix="/director", tags=["director"])
 @app.get("/")
 async def root() -> dict[str, str]:
     return {"message": "hello"}
+
+
+@app.middleware("http")
+async def set_hackathon_name_context_from_header(
+    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+) -> Response:
+    hackathon_name = request.headers.get("X-Hackathon-Name")
+    if not hackathon_name:
+        raise ValueError("X-Hackathon-Name was empty or not set")
+
+    hackathon_name_ctx.set(hackathon_name)
+    return await call_next(request)

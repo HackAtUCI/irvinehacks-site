@@ -9,14 +9,17 @@ from services.mongodb_handler import Collection
 SAMPLE_DOCUMENT = {"_id": "my-id", "email": "hack@uci.edu"}
 
 
-@patch("services.mongodb_handler.DB")
+@patch("services.mongodb_handler.get_database")
 async def test_insert_document_success(mock_DB: MagicMock) -> None:
     """Test that inserting a document successfully returns the document id"""
     mock_collection = AsyncMock()
     mock_collection.insert_one.return_value = InsertOneResult(
         "my-id", acknowledged=True
     )
-    mock_DB.__getitem__.return_value = mock_collection
+    mock_db_instance = MagicMock()
+    mock_db_instance.__getitem__.return_value = mock_collection
+
+    mock_DB.return_value = mock_db_instance
 
     data = {"_id": "my-id", "email": "hack@uci.edu"}
     result = await mongodb_handler.insert(Collection.TESTING, data)
@@ -25,12 +28,15 @@ async def test_insert_document_success(mock_DB: MagicMock) -> None:
     assert result == "my-id"
 
 
-@patch("services.mongodb_handler.DB")
+@patch("services.mongodb_handler.get_database")
 async def test_insert_document_failure(mock_DB: MagicMock) -> None:
     """Test that a lack of write acknowledgement of insertion causes a RuntimeError"""
     mock_collection = AsyncMock()
     mock_collection.insert_one.return_value = InsertOneResult("", acknowledged=False)
-    mock_DB.__getitem__.return_value = mock_collection
+    mock_db_instance = MagicMock()
+    mock_db_instance.__getitem__.return_value = mock_collection
+
+    mock_DB.return_value = mock_db_instance
 
     data = {"_id": "my-id", "email": "hack@uci.edu"}
     with pytest.raises(RuntimeError):
@@ -38,12 +44,15 @@ async def test_insert_document_failure(mock_DB: MagicMock) -> None:
         mock_collection.insert_one.assert_awaited_once_with(data)
 
 
-@patch("services.mongodb_handler.DB")
+@patch("services.mongodb_handler.get_database")
 async def test_retrieve_one_existing_document(mock_DB: MagicMock) -> None:
     """Test that single existing document can be retrieved"""
     mock_collection = AsyncMock()
     mock_collection.find_one.return_value = SAMPLE_DOCUMENT
-    mock_DB.__getitem__.return_value = mock_collection
+    mock_db_instance = MagicMock()
+    mock_db_instance.__getitem__.return_value = mock_collection
+
+    mock_DB.return_value = mock_db_instance
 
     query = {"_id": "my-id"}
     result = await mongodb_handler.retrieve_one(Collection.TESTING, query)
@@ -51,7 +60,7 @@ async def test_retrieve_one_existing_document(mock_DB: MagicMock) -> None:
     assert result == SAMPLE_DOCUMENT
 
 
-@patch("services.mongodb_handler.DB")
+@patch("services.mongodb_handler.get_database")
 async def test_retrieve_existing_documents(mock_DB: MagicMock) -> None:
     """Test that multiple existing documents can be retrieved"""
     SAMPLE_DOCUMENTS = [
@@ -63,7 +72,10 @@ async def test_retrieve_existing_documents(mock_DB: MagicMock) -> None:
     mock_cursor = AsyncMock()
     mock_cursor.to_list.return_value = SAMPLE_DOCUMENTS
     mock_collection.find.return_value = mock_cursor
-    mock_DB.__getitem__.return_value = mock_collection
+    mock_db_instance = MagicMock()
+    mock_db_instance.__getitem__.return_value = mock_collection
+
+    mock_DB.return_value = mock_db_instance
 
     query = {"roles": "Hacker"}
     result = await mongodb_handler.retrieve(Collection.TESTING, query)
@@ -71,7 +83,7 @@ async def test_retrieve_existing_documents(mock_DB: MagicMock) -> None:
     assert result == SAMPLE_DOCUMENTS
 
 
-@patch("services.mongodb_handler.DB")
+@patch("services.mongodb_handler.get_database")
 async def test_update_existing_document(mock_DB: MagicMock) -> None:
     """Test that single existing document can be updated"""
     mock_collection = AsyncMock()
@@ -82,7 +94,10 @@ async def test_update_existing_document(mock_DB: MagicMock) -> None:
         },
         True,
     )
-    mock_DB.__getitem__.return_value = mock_collection
+    mock_db_instance = MagicMock()
+    mock_db_instance.__getitem__.return_value = mock_collection
+
+    mock_DB.return_value = mock_db_instance
 
     query = {"_id": "my-id"}
     update = {"name": "hack"}
@@ -93,7 +108,7 @@ async def test_update_existing_document(mock_DB: MagicMock) -> None:
     assert result is True
 
 
-@patch("services.mongodb_handler.DB")
+@patch("services.mongodb_handler.get_database")
 async def test_upsert_existing_document(mock_DB: MagicMock) -> None:
     """Test that single existing document can be upserted"""
     mock_collection = AsyncMock()
@@ -104,7 +119,10 @@ async def test_upsert_existing_document(mock_DB: MagicMock) -> None:
         },
         True,
     )
-    mock_DB.__getitem__.return_value = mock_collection
+    mock_db_instance = MagicMock()
+    mock_db_instance.__getitem__.return_value = mock_collection
+
+    mock_DB.return_value = mock_db_instance
 
     query = {"_id": "my-id"}
     update = {"status": "accepted"}
@@ -117,12 +135,15 @@ async def test_upsert_existing_document(mock_DB: MagicMock) -> None:
     assert result is True
 
 
-@patch("services.mongodb_handler.DB")
+@patch("services.mongodb_handler.get_database")
 async def test_update_existing_document_failure(mock_DB: MagicMock) -> None:
     """Test that lack of acknowledgement during update causes RuntimeError"""
     mock_collection = AsyncMock()
     mock_collection.update_one.return_value = UpdateResult(dict(), False)
-    mock_DB.__getitem__.return_value = mock_collection
+    mock_db_instance = MagicMock()
+    mock_db_instance.__getitem__.return_value = mock_collection
+
+    mock_DB.return_value = mock_db_instance
 
     with pytest.raises(RuntimeError):
         query = {"_id": "my-id"}
@@ -132,7 +153,7 @@ async def test_update_existing_document_failure(mock_DB: MagicMock) -> None:
         )
 
 
-@patch("services.mongodb_handler.DB")
+@patch("services.mongodb_handler.get_database")
 async def test_update_existing_documents(mock_DB: MagicMock) -> None:
     """Test that multiple existing documents can be updated"""
     mock_collection = AsyncMock()
@@ -143,7 +164,10 @@ async def test_update_existing_documents(mock_DB: MagicMock) -> None:
         },
         True,
     )
-    mock_DB.__getitem__.return_value = mock_collection
+    mock_db_instance = MagicMock()
+    mock_db_instance.__getitem__.return_value = mock_collection
+
+    mock_DB.return_value = mock_db_instance
 
     query = {"_id": "my-id"}
     update = {"status": "ACCEPTED"}
@@ -152,12 +176,15 @@ async def test_update_existing_documents(mock_DB: MagicMock) -> None:
     assert result is True
 
 
-@patch("services.mongodb_handler.DB")
+@patch("services.mongodb_handler.get_database")
 async def test_update_existing_documents_failure(mock_DB: MagicMock) -> None:
     """Test that lack of acknowledgement during update causes RuntimeError"""
     mock_collection = AsyncMock()
     mock_collection.update_many.return_value = UpdateResult(dict(), False)
-    mock_DB.__getitem__.return_value = mock_collection
+    mock_db_instance = MagicMock()
+    mock_db_instance.__getitem__.return_value = mock_collection
+
+    mock_DB.return_value = mock_db_instance
 
     update = {"status": "ACCEPTED"}
     with pytest.raises(RuntimeError):

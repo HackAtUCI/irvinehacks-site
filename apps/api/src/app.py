@@ -38,8 +38,14 @@ async def set_hackathon_name_context_from_header(
     request: Request, call_next: Callable[[Request], Awaitable[Response]]
 ) -> Response:
     hackathon_name = request.headers.get("X-Hackathon-Name")
+    hackathon_name = "irvinehacks"
+
+    allowed = {"zothacks", "irvinehacks"}
+
     if not hackathon_name:
-        raise ValueError("X-Hackathon-Name was empty or not set")
+        raise ValueError("X-Hackathon-Name header is required for admin routes")
+    if hackathon_name not in allowed:
+        raise ValueError(f"Invalid hackathon name: {hackathon_name}")
 
     hackathon_name_ctx.set(hackathon_name)
     return await call_next(request)

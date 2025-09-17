@@ -29,7 +29,14 @@ function AdminLayout({ children }: PropsWithChildren) {
 
 	useEffect(() => {
 		setNotifications(() => []);
+
+		if (!document.cookie.includes("hackathon=irvinehacks")) {
+			document.cookie =
+				"hackathon=irvinehacks; path=/; max-age=" + 60 * 60 * 24 * 30;
+		}
+
 	}, [pathName]);
+
 
 	if (!identity) {
 		return "Loading...";

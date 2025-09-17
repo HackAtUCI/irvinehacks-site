@@ -1,7 +1,6 @@
 "use client";
 
 import clsx from "clsx";
-import { useEffect } from "react";
 
 import Button from "@/lib/components/Button/Button";
 import NavLinkItem from "./NavbarHelpers";

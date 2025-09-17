@@ -19,13 +19,6 @@ export default function Navbar({ identity }: NavbarProps) {
 	const { uid, status } = identity;
 	const isLoggedIn = uid !== null;
 
-	useEffect(() => {
-		if (!document.cookie.includes("hackathon=irvinehacks")) {
-			document.cookie =
-				"hackathon=irvinehacks; path=/; max-age=" + 60 * 60 * 24 * 30;
-		}
-	}, []);
-
 	return (
 		<BaseNavbar>
 			{status !== null && <NavLinkItem href="/portal">Portal</NavLinkItem>}

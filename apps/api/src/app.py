@@ -9,6 +9,7 @@ from utils.hackathon_context import hackathon_name_ctx
 
 logging.basicConfig(level=logging.INFO)
 
+ALLOWED_HACKATHONS = {"irvinehacks", "zothacks"}
 
 # TODO: check FastAPI CLI usage instead
 if os.getenv("DEPLOYMENT") == "LOCAL":
@@ -38,13 +39,10 @@ async def set_hackathon_name_context_from_header(
     request: Request, call_next: Callable[[Request], Awaitable[Response]]
 ) -> Response:
     hackathon_name = request.headers.get("X-Hackathon-Name")
-    hackathon_name = "irvinehacks"
-
-    allowed = {"zothacks", "irvinehacks"}
 
     if not hackathon_name:
         raise ValueError("X-Hackathon-Name header is required for admin routes")
-    if hackathon_name not in allowed:
+    if hackathon_name not in ALLOWED_HACKATHONS:
         raise ValueError(f"Invalid hackathon name: {hackathon_name}")
 
     hackathon_name_ctx.set(hackathon_name)

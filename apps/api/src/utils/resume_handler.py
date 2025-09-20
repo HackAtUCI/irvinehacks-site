@@ -10,7 +10,7 @@ from pydantic import HttpUrl
 
 from services import gdrive_handler
 
-from hackathon_context import hackathon_name_ctx, 
+from hackathon_context import hackathon_name_ctx, IRVINEHACKS, ZOTHACKS
 
 log = getLogger(__name__)
 
@@ -23,7 +23,14 @@ SIZE_LIMIT = 500_000
 ACCEPTED_TYPES = ("application/pdf",)
 
 FOLDER_MAP = {
-    ""
+    IRVINEHACKS: {
+        "Hacker": IRVINEHACKS_HACKER_RESUMES_FOLDER_ID,
+        "Mentor": IRVINEHACKS_MENTOR_RESUMES_FOLDER_ID,
+    },
+    ZOTHACKS: {
+        "Hacker": ZOTHACKS_HACKER_RESUMES_FOLDER_ID,
+        "Mentor": ZOTHACKS_MENTOR_RESUMES_FOLDER_ID,
+    },
 }
 
 
@@ -37,14 +44,12 @@ async def upload_resume(person: Person, resume_upload: UploadFile) -> HttpUrl:
     """Upload resume file to Google Drive and provide url to uploaded file.
     Reject files larger than size limit"""
 
-    RESUME_FOLDER_ID = None
-    if person.application_type == "Hacker":
-        RESUME_FOLDER_ID = IRVINEHACKS_HACKER_RESUMES_FOLDER_ID
-    elif person.application_type == "Mentor":
-        RESUME_FOLDER_ID = IRVINEHACKS_MENTOR_RESUMES_FOLDER_ID
-    else:
-        assert_never(person.application_type)
+    hackathon_name = hackathon_name_ctx.get()
+    MAP_FOR_HACKATHON = FOLDER_MAP.get(hackathon_name)
+    if not MAP_FOR_HACKATHON:
+        raise RuntimeError(f"No map found for {hackathon_name}")
 
+    RESUME_FOLDER_ID = MAP_FOR_HACKATHON.get(person.application_type)
     if not RESUME_FOLDER_ID:
         raise RuntimeError("RESUMES_FOLDER_ID is not defined")
 

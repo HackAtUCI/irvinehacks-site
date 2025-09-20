@@ -2,7 +2,6 @@ import hashlib
 import os
 from logging import getLogger
 from typing import Protocol, Literal
-from typing_extensions import assert_never
 
 from aiogoogle import HTTPError
 from fastapi import UploadFile
@@ -10,7 +9,7 @@ from pydantic import HttpUrl
 
 from services import gdrive_handler
 
-from hackathon_context import hackathon_name_ctx, IRVINEHACKS, ZOTHACKS
+from utils.hackathon_context import hackathon_name_ctx, IRVINEHACKS, ZOTHACKS
 
 log = getLogger(__name__)
 

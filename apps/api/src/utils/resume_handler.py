@@ -10,12 +10,21 @@ from pydantic import HttpUrl
 
 from services import gdrive_handler
 
+from hackathon_context import hackathon_name_ctx, 
+
 log = getLogger(__name__)
 
-HACKER_RESUMES_FOLDER_ID = os.getenv("HACKER_RESUMES_FOLDER_ID")
-MENTOR_RESUMES_FOLDER_ID = os.getenv("MENTOR_RESUMES_FOLDER_ID")
+IRVINEHACKS_HACKER_RESUMES_FOLDER_ID = os.getenv("IRVINEHACKS_HACKER_RESUMES_FOLDER_ID")
+IRVINEHACKS_MENTOR_RESUMES_FOLDER_ID = os.getenv("IRVINEHACKS_MENTOR_RESUMES_FOLDER_ID")
+ZOTHACKS_HACKER_RESUMES_FOLDER_ID = os.getenv("ZOTHACKS_HACKER_RESUMES_FOLDER_ID")
+ZOTHACKS_MENTOR_RESUMES_FOLDER_ID = os.getenv("ZOTHACKS_MENTOR_RESUMES_FOLDER_ID")
+
 SIZE_LIMIT = 500_000
 ACCEPTED_TYPES = ("application/pdf",)
+
+FOLDER_MAP = {
+    ""
+}
 
 
 class Person(Protocol):
@@ -30,9 +39,9 @@ async def upload_resume(person: Person, resume_upload: UploadFile) -> HttpUrl:
 
     RESUME_FOLDER_ID = None
     if person.application_type == "Hacker":
-        RESUME_FOLDER_ID = HACKER_RESUMES_FOLDER_ID
+        RESUME_FOLDER_ID = IRVINEHACKS_HACKER_RESUMES_FOLDER_ID
     elif person.application_type == "Mentor":
-        RESUME_FOLDER_ID = MENTOR_RESUMES_FOLDER_ID
+        RESUME_FOLDER_ID = IRVINEHACKS_MENTOR_RESUMES_FOLDER_ID
     else:
         assert_never(person.application_type)
 

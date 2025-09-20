@@ -4,7 +4,6 @@ import type { NextRequest } from "next/server";
 const ALLOWED_HACKATHONS = new Set(["irvinehacks", "zothacks"]);
 
 export function middleware(request: NextRequest) {
-
 	const referer = request.headers.get("referer") || "";
 	let pathname = "";
 
@@ -19,7 +18,7 @@ export function middleware(request: NextRequest) {
 
 	const isAdminApi = pathname.startsWith("/admin");
 
-	let hackathon = "irvinehacks"; 
+	let hackathon = "irvinehacks";
 	if (isAdminApi) {
 		const selected = request.cookies.get("hackathon")?.value;
 		if (selected && ALLOWED_HACKATHONS.has(selected)) {

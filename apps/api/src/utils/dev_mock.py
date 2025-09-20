@@ -65,10 +65,14 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     patch("services.sendgrid_handler.send_email", new=mock_send_email).start()
 
     patch.object(
-        resume_handler, "HACKER_RESUMES_FOLDER_ID", new=_HACKER_RESUMES_FOLDER_ID
+        resume_handler,
+        "IRVINEHACKS_HACKER_RESUMES_FOLDER_ID",
+        new=_HACKER_RESUMES_FOLDER_ID,
     ).start()
     patch.object(
-        resume_handler, "MENTOR_RESUMES_FOLDER_ID", new=_MENTOR_RESUMES_FOLDER_ID
+        resume_handler,
+        "IRVINEHACKS_MENTOR_RESUMES_FOLDER_ID",
+        new=_MENTOR_RESUMES_FOLDER_ID,
     ).start()
 
     patch.object(RedirectResponse, "set_cookie", new=mock_set_cookie).start()

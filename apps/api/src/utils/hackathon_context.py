@@ -1,10 +1,14 @@
-from typing import Literal
+from enum import Enum
 from contextvars import ContextVar
 
 
-IRVINEHACKS = "irvinehacks"
-ZOTHACKS = "zothacks"
+class HackathonName(str, Enum):
+    IRVINEHACKS = "irvinehacks"
+    ZOTHACKS = "zothacks"
 
-hackathon_name_ctx: ContextVar[Literal["irvinehacks", "zothacks"]] = ContextVar(
-    "hackathon_name", default="irvinehacks"
+
+ALLOWED_HACKATHONS = {HackathonName.IRVINEHACKS, HackathonName.ZOTHACKS}
+
+hackathon_name_ctx: ContextVar[HackathonName] = ContextVar(
+    "hackathon_name", default=HackathonName.IRVINEHACKS
 )

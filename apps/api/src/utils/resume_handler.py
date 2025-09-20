@@ -46,7 +46,7 @@ async def upload_resume(person: Person, resume_upload: UploadFile) -> HttpUrl:
     hackathon_name = hackathon_name_ctx.get()
     MAP_FOR_HACKATHON = FOLDER_MAP.get(hackathon_name)
     if not MAP_FOR_HACKATHON:
-        raise RuntimeError(f"No map found for {hackathon_name}")
+        raise RuntimeError(f"No folder map found for {hackathon_name}")
 
     RESUME_FOLDER_ID = MAP_FOR_HACKATHON.get(person.application_type)
     if not RESUME_FOLDER_ID:

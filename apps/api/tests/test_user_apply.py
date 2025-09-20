@@ -14,7 +14,7 @@ from services.mongodb_handler import Collection
 from utils import resume_handler
 
 # Tests will break again next year, tech should notice and fix :P
-TEST_DEADLINE = datetime(2025, 10, 1, 8, 0, 0, tzinfo=timezone.utc)
+TEST_DEADLINE = datetime(2026, 10, 1, 8, 0, 0, tzinfo=timezone.utc)
 user.DEADLINE = TEST_DEADLINE
 
 USER_EMAIL = "pkfire@uci.edu"
@@ -94,7 +94,7 @@ EXPECTED_USER_WITHOUT_RESUME = Applicant(
     application_data=EXPECTED_APPLICATION_DATA_WITHOUT_RESUME,
 )
 
-resume_handler.HACKER_RESUMES_FOLDER_ID = "HACKER_RESUMES_FOLDER_ID"
+resume_handler.IRVINEHACKS_HACKER_RESUMES_FOLDER_ID = "HACKER_RESUMES_FOLDER_ID"
 
 app = FastAPI()
 app.include_router(user.router)
@@ -124,7 +124,7 @@ def test_apply_successfully(
     res = client.post("/apply", data=SAMPLE_APPLICATION, files=SAMPLE_FILES)
 
     mock_gdrive_handler_upload_file.assert_awaited_once_with(
-        resume_handler.HACKER_RESUMES_FOLDER_ID, *EXPECTED_RESUME_UPLOAD
+        resume_handler.IRVINEHACKS_HACKER_RESUMES_FOLDER_ID, *EXPECTED_RESUME_UPLOAD
     )
     mock_mongodb_handler_update_one.assert_awaited_once_with(
         Collection.USERS,

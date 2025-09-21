@@ -44,15 +44,7 @@ async def upload_resume(person: Person, resume_upload: UploadFile) -> HttpUrl:
     Reject files larger than size limit"""
 
     hackathon_name = hackathon_name_ctx.get()
-    print("for hackathon")
-    print(hackathon_name)
-    print("app tuype")
-    print(person.application_type)
-    print("irvine")
-    print(IRVINEHACKS_HACKER_RESUMES_FOLDER_ID)
-    print(FOLDER_MAP[hackathon_name])
     RESUME_FOLDER_ID = FOLDER_MAP[hackathon_name][person.application_type]
-    print(RESUME_FOLDER_ID)
     if not RESUME_FOLDER_ID:
         raise RuntimeError("RESUMES_FOLDER_ID is not defined")
 

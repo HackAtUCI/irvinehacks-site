@@ -120,22 +120,22 @@ async def test_send_multiple_emails(mock_AsyncClient: AsyncMock) -> None:
     )
 
 
-# @patch("aiosendgrid.AsyncSendGridClient")
-# async def test_sendgrid_error_causes_runtime_error(mock_AsyncClient: AsyncMock) -> None:
-#     """Test that an issue with SendGrid causes a RuntimeError"""
-#     mock_client = AsyncMock(AsyncSendGridClient)
-#     mock_client.send_mail_v3.side_effect = HTTPStatusError(
-#         "SendGrid error",
-#         request=Request("POST", "/v3/mail/send"),
-#         response=Response(500),
-#     )
+@patch("aiosendgrid.AsyncSendGridClient")
+async def test_sendgrid_error_causes_runtime_error(mock_AsyncClient: AsyncMock) -> None:
+    """Test that an issue with SendGrid causes a RuntimeError"""
+    mock_client = AsyncMock(AsyncSendGridClient)
+    mock_client.send_mail_v3.side_effect = HTTPStatusError(
+        "SendGrid error",
+        request=Request("POST", "/v3/mail/send"),
+        response=Response(500),
+    )
 
-#     mock_AsyncClient.return_value.__aenter__.return_value = mock_client
+    mock_AsyncClient.return_value.__aenter__.return_value = mock_client
 
-#     with pytest.raises(RuntimeError):
-#         await sendgrid_handler.send_email(
-#             Template.CONFIRMATION_EMAIL,
-#             SAMPLE_SENDER,
-#             SAMPLE_RECIPIENTS,
-#             True,
-#         )
+    with pytest.raises(RuntimeError):
+        await sendgrid_handler.send_email(
+            Template.CONFIRMATION_EMAIL,
+            SAMPLE_SENDER,
+            SAMPLE_RECIPIENTS,
+            True,
+        )

@@ -18,7 +18,7 @@ export function middleware(request: NextRequest) {
 
 	const isAdminApi = pathname.startsWith("/admin");
 
-	let hackathon = "irvinehacks";
+	let hackathon = request.headers.get("X-Hackathon-Name") || "irvinehacks";
 	if (isAdminApi) {
 		const selected = request.cookies.get("hackathon")?.value;
 		if (selected && ALLOWED_HACKATHONS.has(selected)) {

@@ -107,6 +107,27 @@ class BaseVolunteerApplicationData(BaseModel):
     sunday_availability: list[Hour] = []
 
 
+class BaseZotHacksMentorApplicationData(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, str_max_length=1024)
+
+    is_18_older: bool
+    pronouns: str
+    degree: str
+    major: str
+    graduation_year: int
+    mentoring_experience: str = Field(max_length=2048)
+    help_participants_frq: str = Field(max_length=2048)
+    new_team_help_frq: str = Field(max_length=2048)
+    tech_stack_frq: str = Field(max_length=2048)
+    frontend_backend_frq: str = Field(max_length=2048)
+    skills: list[str] = []
+
+    github: NullableHttpUrl = None
+    portfolio: NullableHttpUrl = None
+    linkedin: NullableHttpUrl = None
+    comments: Union[str, None] = Field(None, max_length=2048)
+
+
 class RawHackerApplicationData(BaseApplicationData):
     """Expected to be sent by the form on the site."""
 
@@ -132,6 +153,13 @@ class RawVolunteerApplicationData(BaseVolunteerApplicationData):
     last_name: str
     resume: None = None  # to simplify usage of union
     application_type: Literal["Volunteer"]
+
+
+class RawZotHacksMentorApplicationData(BaseZotHacksMentorApplicationData):
+    first_name: str
+    last_name: str
+    resume: UploadFile
+    application_type: Literal["Mentor"]
 
 
 class ProcessedHackerApplicationData(BaseApplicationData):
@@ -167,6 +195,19 @@ class ProcessedVolunteerApplication(BaseVolunteerApplicationData):
     reviews: list[Review] = []
 
 
+class ProcessedZotHacksMentorApplication(BaseZotHacksMentorApplicationData):
+    email: EmailStr
+    resume_url: Union[HttpUrl, None] = None
+    submission_time: datetime
+    reviews: list[Review] = []
+
+    @field_serializer("linkedin", "github", "portfolio", "resume_url")
+    def url2str(self, val: Union[HttpUrl, None]) -> Union[str, None]:
+        if val is not None:
+            return str(val)
+        return val
+
+
 # To add more discriminating values, add a string
 # that doesn't appear in any other form
 def get_discriminator_value(v: Any) -> str:
@@ -177,6 +218,8 @@ def get_discriminator_value(v: Any) -> str:
             return "mentor"
         if "frq_volunteer" in v:
             return "volunteer"
+        if "help_participants_frq" in v:
+            return "zothacks_mentor"
 
     if "frq_video_game" in dir(v):
         return "hacker"
@@ -184,6 +227,8 @@ def get_discriminator_value(v: Any) -> str:
         return "mentor"
     if "frq_volunteer" in dir(v):
         return "volunteer"
+    if "help_participants_frq" in dir(v):
+        return "zothacks_mentor"
     return ""
 
 
@@ -192,6 +237,7 @@ ProcessedApplicationDataUnion = Annotated[
         Annotated[ProcessedHackerApplicationData, Tag("hacker")],
         Annotated[ProcessedMentorApplicationData, Tag("mentor")],
         Annotated[ProcessedVolunteerApplication, Tag("volunteer")],
+        Annotated[ProcessedZotHacksMentorApplication, Tag("zothacks_mentor")],
     ],
     Discriminator(get_discriminator_value),
 ]

@@ -88,6 +88,10 @@ async def retrieve_one(
     DB = get_database()
     COLLECTION = DB[collection.value]
 
+    print("Current database name:", DB.name)
+    collections = await DB.list_collection_names()
+    print("Collections in DB:", collections)
+
     result: Optional[dict[str, object]] = await COLLECTION.find_one(query, fields)
     return result
 

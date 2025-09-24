@@ -39,8 +39,6 @@ async def set_hackathon_name_context_from_header(
     request: Request, call_next: Callable[[Request], Awaitable[Response]]
 ) -> Response:
     hackathon_name = request.headers.get("X-Hackathon-Name")
-    print("from api middleware")
-    print(request.headers)
 
     if not hackathon_name:
         raise ValueError("X-Hackathon-Name header is required for admin routes")

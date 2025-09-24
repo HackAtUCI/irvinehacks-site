@@ -59,7 +59,7 @@ def get_database() -> AgnosticDatabase[Any]:
         raise ValueError(
             f"Hackathon name must be irvinehacks or zothacks, but was {hackathon_name}"
         )
-    log.info(f"Going to {hackathon_name}")
+    log.info(f"Using database: {database_name}")
 
     return MONGODB_CLIENT[database_name].with_options(
         codec_options=CodecOptions(tz_aware=True)

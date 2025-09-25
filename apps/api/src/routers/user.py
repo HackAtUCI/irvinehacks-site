@@ -17,6 +17,7 @@ from models.ApplicationData import (
     RawHackerApplicationData,
     RawMentorApplicationData,
     RawVolunteerApplicationData,
+    RawZotHacksMentorApplicationData,
 )
 from models.user_record import Applicant, BareApplicant, Role, Status
 from services import docusign_handler, mongodb_handler
@@ -28,7 +29,7 @@ log = getLogger(__name__)
 
 router = APIRouter()
 
-DEADLINE = datetime(2025, 1, 13, 8, 1, tzinfo=timezone.utc)
+DEADLINE = datetime(2025, 8, 13, 8, 1, tzinfo=timezone.utc)
 
 
 class IdentityResponse(BaseModel):
@@ -118,7 +119,10 @@ async def volunteer(
 async def _apply_flow(
     user: User,
     raw_application_data: Union[
-        RawHackerApplicationData, RawMentorApplicationData, RawVolunteerApplicationData
+        RawHackerApplicationData,
+        RawMentorApplicationData,
+        RawVolunteerApplicationData,
+        RawZotHacksMentorApplicationData,
     ],
 ) -> str:
     """Common flow for all three types of applications."""
@@ -158,7 +162,11 @@ async def _apply_flow(
             resume_url = await resume_handler.upload_resume(
                 # TODO: reexamine why adapter is needed
                 TypeAdapter(
-                    Union[RawHackerApplicationData, RawMentorApplicationData]
+                    Union[
+                        RawHackerApplicationData,
+                        RawMentorApplicationData,
+                        RawZotHacksMentorApplicationData,
+                    ]
                 ).validate_python(raw_application_data),
                 resume,
             )

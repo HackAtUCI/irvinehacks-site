@@ -13,8 +13,11 @@ from routers import user
 from services.mongodb_handler import Collection
 from utils import resume_handler
 
+from utils.hackathon_context import HackathonName
+from middleware.hackathon_context_middleware import HackathonContextMiddleware
+
 # Tests will break again next year, tech should notice and fix :P
-TEST_DEADLINE = datetime(2025, 10, 1, 8, 0, 0, tzinfo=timezone.utc)
+TEST_DEADLINE = datetime(2026, 10, 1, 8, 0, 0, tzinfo=timezone.utc)
 user.DEADLINE = TEST_DEADLINE
 
 USER_EMAIL = "pkfire@uci.edu"
@@ -94,12 +97,23 @@ EXPECTED_USER_WITHOUT_RESUME = Applicant(
     application_data=EXPECTED_APPLICATION_DATA_WITHOUT_RESUME,
 )
 
-resume_handler.HACKER_RESUMES_FOLDER_ID = "HACKER_RESUMES_FOLDER_ID"
+resume_handler.FOLDER_MAP = {
+    HackathonName.IRVINEHACKS: {
+        "Hacker": "HACKER_RESUMES_FOLDER_ID",
+        "Mentor": "MENTOR_RESUMES_FOLDER_ID",
+    },
+    HackathonName.ZOTHACKS: {
+        "Hacker": "HACKER_RESUMES_FOLDER_ID",
+        "Mentor": "MENTOR_RESUMES_FOLDER_ID",
+    },
+}
 
 app = FastAPI()
 app.include_router(user.router)
+app.add_middleware(HackathonContextMiddleware)
 
 client = UserTestClient(USER_PKFIRE, app)
+client.headers.update({"X-Hackathon-Name": HackathonName.IRVINEHACKS})
 
 
 @patch("utils.email_handler.send_application_confirmation_email", autospec=True)
@@ -124,7 +138,8 @@ def test_apply_successfully(
     res = client.post("/apply", data=SAMPLE_APPLICATION, files=SAMPLE_FILES)
 
     mock_gdrive_handler_upload_file.assert_awaited_once_with(
-        resume_handler.HACKER_RESUMES_FOLDER_ID, *EXPECTED_RESUME_UPLOAD
+        resume_handler.FOLDER_MAP[HackathonName.IRVINEHACKS]["Hacker"],
+        *EXPECTED_RESUME_UPLOAD,
     )
     mock_mongodb_handler_update_one.assert_awaited_once_with(
         Collection.USERS,

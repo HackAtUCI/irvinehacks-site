@@ -9,7 +9,7 @@ from motor.core import AgnosticClient, AgnosticDatabase
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, ConfigDict, Field
 
-from utils.hackathon_context import hackathon_name_ctx
+from utils.hackathon_context import hackathon_name_ctx, HackathonName
 
 log = getLogger(__name__)
 
@@ -51,9 +51,9 @@ class Collection(str, Enum):
 
 def get_database() -> AgnosticDatabase[Any]:
     hackathon_name = hackathon_name_ctx.get()
-    if hackathon_name == "irvinehacks":
+    if hackathon_name == HackathonName.IRVINEHACKS:
         database_name = IRVINE_HACKS_DATABASE_NAME
-    elif hackathon_name == "zothacks":
+    elif hackathon_name == HackathonName.ZOTHACKS:
         database_name = ZOTHACKS_DATABASE_NAME
     else:
         raise ValueError(

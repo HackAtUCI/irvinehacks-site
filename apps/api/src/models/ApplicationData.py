@@ -261,7 +261,6 @@ def get_raw_mentor_discriminator_value(v: Any) -> str:
     return ""
 
 
-# Add this discriminated union
 RawMentorApplicationDataUnion = Annotated[
     Union[
         Annotated[RawMentorApplicationData, Tag("mentor")],

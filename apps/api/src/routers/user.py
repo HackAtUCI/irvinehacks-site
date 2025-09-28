@@ -12,7 +12,7 @@ from fastapi import (
     Request,
     status,
 )
-from fastapi.datastructures import URL
+from fastapi.datastructures import URL, FormData
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, EmailStr, TypeAdapter
 
@@ -110,23 +110,8 @@ async def apply(
 async def mentor(
     user: Annotated[User, Depends(require_user_identity)], request: Request
 ) -> str:
-    form = await request.form()  # get all form fields
-    # data = dict(form)  # convert to regular dict
-
-    # # Handle files separately if needed
-    # files = {k: v for k, v in form.multi_items() if isinstance(v, UploadFile)}
-    # data.update(files)
-
-    # Group by key: combine repeated keys into lists
-    data: dict[str, Any] = {}
-    for k, v in form.multi_items():
-        if k in data:
-            if isinstance(data[k], list):
-                data[k].append(v)
-            else:
-                data[k] = [data[k], v]
-        else:
-            data[k] = v
+    form = await request.form()
+    data = _parsed_form(form)
 
     # Use your discriminator function
     discriminator = get_raw_mentor_discriminator_value(data)
@@ -171,7 +156,6 @@ async def _apply_flow(
     existing_record = await mongodb_handler.retrieve_one(
         Collection.USERS, {"_id": user.uid, "roles": {"$exists": True}}, ["roles"]
     )
-    print("past existing")
 
     if existing_record and existing_record.get("roles"):
         log.error(
@@ -182,7 +166,6 @@ async def _apply_flow(
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "User already has a role.")
 
     raw_app_data_dump = raw_application_data.model_dump()
-    print("past dump")
 
     # Reject unprocessed other values
     for field in FIELDS_SUPPORTING_OTHER:
@@ -223,8 +206,6 @@ async def _apply_flow(
     else:
         resume_url = None
 
-    print("past resume upload")
-
     application_type = raw_application_data.application_type
 
     # Note: spreading is assumed to be safe since form data was already validated once
@@ -259,8 +240,6 @@ async def _apply_flow(
     except RuntimeError:
         log.error("Could not insert applicant %s to MongoDB.", user.uid)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    print("past mongo")
 
     try:
         await email_handler.send_application_confirmation_email(
@@ -358,3 +337,27 @@ async def rsvp(
     log.info(f"User {user.uid} changed status from {old_status} to {new_status}.")
 
     return RedirectResponse("/portal", status.HTTP_303_SEE_OTHER)
+
+
+def _parsed_form(form: FormData) -> dict[str, Any]:
+    """Manually parse form data.
+    This function combines repeated keys into lists
+
+    Normally, FastAPI will automatically parse the same key into a list
+    ex. ...skills=Java&skills=C&skills=C++ will be parsed as ["Java", "C", "C++"]
+
+    This function is needed for the mentor application form because
+    discriminated unions don't work with FastAPI's Annotated For()
+    """
+
+    data: dict[str, Any] = {}
+    for k, v in form.multi_items():
+        if k in data:
+            if isinstance(data[k], list):
+                data[k].append(v)
+            else:
+                data[k] = [data[k], v]
+        else:
+            data[k] = v
+
+    return data

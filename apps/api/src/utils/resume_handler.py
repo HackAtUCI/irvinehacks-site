@@ -45,6 +45,10 @@ async def upload_resume(person: Person, resume_upload: UploadFile) -> HttpUrl:
 
     hackathon_name = hackathon_name_ctx.get()
     RESUME_FOLDER_ID = FOLDER_MAP[hackathon_name][person.application_type]
+    print(person)
+    print(hackathon_name)
+    print(RESUME_FOLDER_ID)
+    print(person.application_type)
     if not RESUME_FOLDER_ID:
         raise RuntimeError("RESUMES_FOLDER_ID is not defined")
 

@@ -1,9 +1,17 @@
 from datetime import datetime, timezone
 from logging import getLogger
-from typing import Annotated, Union
+from typing import Annotated, Any, Union
 from urllib.parse import urlencode
 
-from fastapi import APIRouter, Depends, Form, Header, HTTPException, Request, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    Form,
+    Header,
+    HTTPException,
+    Request,
+    status,
+)
 from fastapi.datastructures import URL
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, EmailStr, TypeAdapter
@@ -18,6 +26,7 @@ from models.ApplicationData import (
     RawMentorApplicationData,
     RawVolunteerApplicationData,
     RawZotHacksMentorApplicationData,
+    get_raw_mentor_discriminator_value,
 )
 from models.user_record import Applicant, BareApplicant, Role, Status
 from services import docusign_handler, mongodb_handler
@@ -29,7 +38,7 @@ log = getLogger(__name__)
 
 router = APIRouter()
 
-DEADLINE = datetime(2025, 8, 13, 8, 1, tzinfo=timezone.utc)
+DEADLINE = datetime(2025, 10, 15, 8, 1, tzinfo=timezone.utc)
 
 
 class IdentityResponse(BaseModel):
@@ -97,14 +106,40 @@ async def apply(
     return await _apply_flow(user, raw_application_data)
 
 
-@router.post("/mentor", status_code=status.HTTP_201_CREATED)
+@router.post("/mentor")
 async def mentor(
-    user: Annotated[User, Depends(require_user_identity)],
-    # media type should be automatically detected but seems like a bug as of now
-    raw_application_data: Annotated[
-        RawMentorApplicationData, Form(media_type="multipart/form-data")
-    ],
+    user: Annotated[User, Depends(require_user_identity)], request: Request
 ) -> str:
+    form = await request.form()  # get all form fields
+    # data = dict(form)  # convert to regular dict
+
+    # # Handle files separately if needed
+    # files = {k: v for k, v in form.multi_items() if isinstance(v, UploadFile)}
+    # data.update(files)
+
+    # Group by key: combine repeated keys into lists
+    data: dict[str, Any] = {}
+    for k, v in form.multi_items():
+        if k in data:
+            if isinstance(data[k], list):
+                data[k].append(v)
+            else:
+                data[k] = [data[k], v]
+        else:
+            data[k] = v
+
+    # Use your discriminator function
+    discriminator = get_raw_mentor_discriminator_value(data)
+    raw_application_data: Union[
+        RawMentorApplicationData, RawZotHacksMentorApplicationData
+    ]
+    if discriminator == "mentor":
+        raw_application_data = RawMentorApplicationData.model_validate(data)
+    elif discriminator == "zothacks_mentor":
+        raw_application_data = RawZotHacksMentorApplicationData.model_validate(data)
+    else:
+        raise ValueError("Cannot determine mentor application type")
+
     return await _apply_flow(user, raw_application_data)
 
 
@@ -136,6 +171,7 @@ async def _apply_flow(
     existing_record = await mongodb_handler.retrieve_one(
         Collection.USERS, {"_id": user.uid, "roles": {"$exists": True}}, ["roles"]
     )
+    print("past existing")
 
     if existing_record and existing_record.get("roles"):
         log.error(
@@ -146,6 +182,7 @@ async def _apply_flow(
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "User already has a role.")
 
     raw_app_data_dump = raw_application_data.model_dump()
+    print("past dump")
 
     # Reject unprocessed other values
     for field in FIELDS_SUPPORTING_OTHER:
@@ -186,6 +223,8 @@ async def _apply_flow(
     else:
         resume_url = None
 
+    print("past resume upload")
+
     application_type = raw_application_data.application_type
 
     # Note: spreading is assumed to be safe since form data was already validated once
@@ -220,6 +259,8 @@ async def _apply_flow(
     except RuntimeError:
         log.error("Could not insert applicant %s to MongoDB.", user.uid)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    print("past mongo")
 
     try:
         await email_handler.send_application_confirmation_email(

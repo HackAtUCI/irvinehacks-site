@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Annotated, Any, Literal, Union
 
-from fastapi import UploadFile
+from fastapi import Form, UploadFile
 from pydantic import (
     BaseModel,
     BeforeValidator,
@@ -140,7 +140,7 @@ class RawHackerApplicationData(BaseApplicationData):
 class RawMentorApplicationData(BaseMentorApplicationData):
     """Expected to be sent by the form on the site."""
 
-    first_name: str
+    first_name: str = Form(...)
     last_name: str
     resume: UploadFile
     application_type: Literal["Mentor"]
@@ -240,4 +240,32 @@ ProcessedApplicationDataUnion = Annotated[
         Annotated[ProcessedZotHacksMentorApplication, Tag("zothacks_mentor")],
     ],
     Discriminator(get_discriminator_value),
+]
+
+
+def get_raw_mentor_discriminator_value(v: Any) -> str:
+    """Discriminator function for raw mentor application data."""
+    if isinstance(v, dict):
+        # Check for unique fields to distinguish between the two types
+        if "mentor_prev_experience_saq1" in v:
+            return "mentor"
+        if "help_participants_frq" in v:
+            return "zothacks_mentor"
+
+    # For object instances, check attributes
+    if hasattr(v, "mentor_prev_experience_saq1"):
+        return "mentor"
+    if hasattr(v, "help_participants_frq"):
+        return "zothacks_mentor"
+
+    return ""
+
+
+# Add this discriminated union
+RawMentorApplicationDataUnion = Annotated[
+    Union[
+        Annotated[RawMentorApplicationData, Tag("mentor")],
+        Annotated[RawZotHacksMentorApplicationData, Tag("zothacks_mentor")],
+    ],
+    Discriminator(get_raw_mentor_discriminator_value),
 ]

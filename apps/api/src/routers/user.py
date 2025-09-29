@@ -102,18 +102,18 @@ async def apply(
     raw_application_data: Annotated[
         RawHackerApplicationData, Form(media_type="multipart/form-data")
     ],
-) -> str:
+) -> RedirectResponse:
     return await _apply_flow(user, raw_application_data)
 
 
 @router.post("/mentor")
 async def mentor(
     user: Annotated[User, Depends(require_user_identity)], request: Request
-) -> str:
+) -> RedirectResponse:
     form = await request.form()
     data = _parsed_form(form)
 
-    # Use your discriminator function
+    # Manually usediscriminator function
     discriminator = get_raw_mentor_discriminator_value(data)
     raw_application_data: Union[
         RawMentorApplicationData, RawZotHacksMentorApplicationData
@@ -132,7 +132,7 @@ async def mentor(
 async def volunteer(
     user: Annotated[User, Depends(require_user_identity)],
     raw_application_data: Annotated[RawVolunteerApplicationData, Form()],
-) -> str:
+) -> RedirectResponse:
     return await _apply_flow(user, raw_application_data)
 
 
@@ -144,7 +144,7 @@ async def _apply_flow(
         RawVolunteerApplicationData,
         RawZotHacksMentorApplicationData,
     ],
-) -> str:
+) -> RedirectResponse:
     """Common flow for all three types of applications."""
     # Check if current datetime is past application deadline
     now = datetime.now(timezone.utc)
@@ -252,10 +252,7 @@ async def _apply_flow(
     # TODO: handle inconsistent results if one service fails
 
     log.info("%s submitted an application", user.uid)
-    return (
-        "Thank you for submitting an application to IrvineHacks 2025! Please "
-        + "visit https://irvinehacks.com/portal to see your application status."
-    )
+    return RedirectResponse(URL(path="/portal"), status.HTTP_303_SEE_OTHER)
 
 
 @router.get("/waiver")

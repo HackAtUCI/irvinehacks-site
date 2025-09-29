@@ -14,7 +14,7 @@ from fastapi import (
 )
 from fastapi.datastructures import URL, FormData
 from fastapi.responses import RedirectResponse
-from pydantic import BaseModel, EmailStr, TypeAdapter
+from pydantic import BaseModel, EmailStr, TypeAdapter, ValidationError
 
 from auth import user_identity
 from auth.authorization import require_accepted_applicant
@@ -106,24 +106,27 @@ async def apply(
     return await _apply_flow(user, raw_application_data)
 
 
-@router.post("/mentor")
+@router.post("/mentor", status_code=status.HTTP_201_CREATED)
 async def mentor(
     user: Annotated[User, Depends(require_user_identity)], request: Request
 ) -> str:
     form = await request.form()
     data = _parsed_form(form)
 
-    # Use your discriminator function
+    # Manually determine model to use
     discriminator = get_raw_mentor_discriminator_value(data)
     raw_application_data: Union[
         RawMentorApplicationData, RawZotHacksMentorApplicationData
     ]
-    if discriminator == "mentor":
-        raw_application_data = RawMentorApplicationData.model_validate(data)
-    elif discriminator == "zothacks_mentor":
-        raw_application_data = RawZotHacksMentorApplicationData.model_validate(data)
-    else:
-        raise ValueError("Cannot determine mentor application type")
+    try:
+        if discriminator == "mentor":
+            raw_application_data = RawMentorApplicationData.model_validate(data)
+        elif discriminator == "zothacks_mentor":
+            raw_application_data = RawZotHacksMentorApplicationData.model_validate(data)
+        else:
+            raise ValueError("Cannot determine mentor application type")
+    except ValidationError as e:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, str(e))
 
     return await _apply_flow(user, raw_application_data)
 

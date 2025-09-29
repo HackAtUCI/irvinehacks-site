@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Annotated, Any, Literal, Union
 
-from fastapi import Form, UploadFile
+from fastapi import UploadFile
 from pydantic import (
     BaseModel,
     BeforeValidator,
@@ -140,7 +140,7 @@ class RawHackerApplicationData(BaseApplicationData):
 class RawMentorApplicationData(BaseMentorApplicationData):
     """Expected to be sent by the form on the site."""
 
-    first_name: str = Form(...)
+    first_name: str
     last_name: str
     resume: UploadFile
     application_type: Literal["Mentor"]

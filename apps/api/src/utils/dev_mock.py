@@ -11,11 +11,23 @@ from fastapi.responses import RedirectResponse
 
 from services.sendgrid_handler import Template
 from utils import resume_handler
+from utils.hackathon_context import HackathonName
 
 log = getLogger(__name__)
 
 _HACKER_RESUMES_FOLDER_ID = "1a_Hacker_Resumes"
 _MENTOR_RESUMES_FOLDER_ID = "1b_Mentor_Resumes"
+
+_FOLDER_MAP = {
+    HackathonName.IRVINEHACKS: {
+        "Hacker": _HACKER_RESUMES_FOLDER_ID,
+        "Mentor": _MENTOR_RESUMES_FOLDER_ID,
+    },
+    HackathonName.ZOTHACKS: {
+        "Hacker": _HACKER_RESUMES_FOLDER_ID,
+        "Mentor": _MENTOR_RESUMES_FOLDER_ID,
+    },
+}
 
 
 def mock_set_cookie(self: RedirectResponse, *args: Any, **kwargs: Any) -> None:
@@ -73,6 +85,22 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         resume_handler,
         "IRVINEHACKS_MENTOR_RESUMES_FOLDER_ID",
         new=_MENTOR_RESUMES_FOLDER_ID,
+    ).start()
+    patch.object(
+        resume_handler,
+        "ZOTHACKS_HACKER_RESUMES_FOLDER_ID",
+        new=_HACKER_RESUMES_FOLDER_ID,
+    ).start()
+    patch.object(
+        resume_handler,
+        "ZOTHACKS_MENTOR_RESUMES_FOLDER_ID",
+        new=_MENTOR_RESUMES_FOLDER_ID,
+    ).start()
+
+    patch.object(
+        resume_handler,
+        "FOLDER_MAP",
+        new=_FOLDER_MAP,
     ).start()
 
     patch.object(RedirectResponse, "set_cookie", new=mock_set_cookie).start()

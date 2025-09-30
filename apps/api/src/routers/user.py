@@ -1,12 +1,20 @@
 from datetime import datetime, timezone
 from logging import getLogger
-from typing import Annotated, Union
+from typing import Annotated, Any, Union
 from urllib.parse import urlencode
 
-from fastapi import APIRouter, Depends, Form, Header, HTTPException, Request, status
-from fastapi.datastructures import URL
+from fastapi import (
+    APIRouter,
+    Depends,
+    Form,
+    Header,
+    HTTPException,
+    Request,
+    status,
+)
+from fastapi.datastructures import URL, FormData
 from fastapi.responses import RedirectResponse
-from pydantic import BaseModel, EmailStr, TypeAdapter
+from pydantic import BaseModel, EmailStr, TypeAdapter, ValidationError
 
 from auth import user_identity
 from auth.authorization import require_accepted_applicant
@@ -17,6 +25,8 @@ from models.ApplicationData import (
     RawHackerApplicationData,
     RawMentorApplicationData,
     RawVolunteerApplicationData,
+    RawZotHacksMentorApplicationData,
+    get_raw_mentor_discriminator_value,
 )
 from models.user_record import Applicant, BareApplicant, Role, Status
 from services import docusign_handler, mongodb_handler
@@ -28,7 +38,7 @@ log = getLogger(__name__)
 
 router = APIRouter()
 
-DEADLINE = datetime(2025, 1, 13, 8, 1, tzinfo=timezone.utc)
+DEADLINE = datetime(2025, 10, 15, 8, 1, tzinfo=timezone.utc)
 
 
 class IdentityResponse(BaseModel):
@@ -98,12 +108,26 @@ async def apply(
 
 @router.post("/mentor", status_code=status.HTTP_201_CREATED)
 async def mentor(
-    user: Annotated[User, Depends(require_user_identity)],
-    # media type should be automatically detected but seems like a bug as of now
-    raw_application_data: Annotated[
-        RawMentorApplicationData, Form(media_type="multipart/form-data")
-    ],
+    user: Annotated[User, Depends(require_user_identity)], request: Request
 ) -> str:
+    form = await request.form()
+    data = _parsed_form(form)
+
+    # Manually determine model to use
+    discriminator = get_raw_mentor_discriminator_value(data)
+    raw_application_data: Union[
+        RawMentorApplicationData, RawZotHacksMentorApplicationData
+    ]
+    try:
+        if discriminator == "mentor":
+            raw_application_data = RawMentorApplicationData.model_validate(data)
+        elif discriminator == "zothacks_mentor":
+            raw_application_data = RawZotHacksMentorApplicationData.model_validate(data)
+        else:
+            raise ValueError("Cannot determine mentor application type")
+    except ValidationError as e:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, str(e))
+
     return await _apply_flow(user, raw_application_data)
 
 
@@ -118,7 +142,10 @@ async def volunteer(
 async def _apply_flow(
     user: User,
     raw_application_data: Union[
-        RawHackerApplicationData, RawMentorApplicationData, RawVolunteerApplicationData
+        RawHackerApplicationData,
+        RawMentorApplicationData,
+        RawVolunteerApplicationData,
+        RawZotHacksMentorApplicationData,
     ],
 ) -> str:
     """Common flow for all three types of applications."""
@@ -158,7 +185,11 @@ async def _apply_flow(
             resume_url = await resume_handler.upload_resume(
                 # TODO: reexamine why adapter is needed
                 TypeAdapter(
-                    Union[RawHackerApplicationData, RawMentorApplicationData]
+                    Union[
+                        RawHackerApplicationData,
+                        RawMentorApplicationData,
+                        RawZotHacksMentorApplicationData,
+                    ]
                 ).validate_python(raw_application_data),
                 resume,
             )
@@ -309,3 +340,27 @@ async def rsvp(
     log.info(f"User {user.uid} changed status from {old_status} to {new_status}.")
 
     return RedirectResponse("/portal", status.HTTP_303_SEE_OTHER)
+
+
+def _parsed_form(form: FormData) -> dict[str, Any]:
+    """Manually parse form data.
+    This function combines repeated keys into lists
+
+    Normally, FastAPI will automatically parse the same key into a list
+    ex. ...skills=Java&skills=C&skills=C++ will be parsed as ["Java", "C", "C++"]
+
+    This function is needed for the mentor application form because
+    discriminated unions don't work with FastAPI's Annotated For()
+    """
+
+    data: dict[str, Any] = {}
+    for k, v in form.multi_items():
+        if k in data:
+            if isinstance(data[k], list):
+                data[k].append(v)
+            else:
+                data[k] = [data[k], v]
+        else:
+            data[k] = v
+
+    return data

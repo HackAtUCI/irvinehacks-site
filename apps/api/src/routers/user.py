@@ -40,7 +40,6 @@ router = APIRouter()
 
 DEADLINE = datetime(2025, 10, 15, 8, 1, tzinfo=timezone.utc)
 
-
 class IdentityResponse(BaseModel):
     uid: Union[str, None] = None
     status: Union[str, None] = None
@@ -58,7 +57,7 @@ async def login(
     log.info("%s requested to log in", email)
     query = urlencode({"return_to": return_to})
 
-    if user_identity.uci_email(email):
+    if user_identity.uci_email(email) and user_identity.UCI_SSO:
         # redirect user for UCI SSO, changing to GET method
         return RedirectResponse(
             URL(path="/api/saml/login", query=query), status.HTTP_303_SEE_OTHER

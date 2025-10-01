@@ -206,6 +206,7 @@ async def _apply_flow(
                     Union[
                         RawHackerApplicationData,
                         RawMentorApplicationData,
+                        RawZotHacksHackerApplicationData,
                         RawZotHacksMentorApplicationData,
                     ]
                 ).validate_python(raw_application_data),

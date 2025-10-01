@@ -12,6 +12,8 @@ JWT_SECRET = os.getenv("JWT_SECRET", "")
 
 COOKIE_NAME = "irvinehacks_auth"
 
+UCI_SSO_ENABLED = os.getenv("UCI_SSO_ENABLED", "true") == "true"
+
 
 class User(BaseModel):
     uid: str
@@ -63,7 +65,7 @@ class JWTClaims(BaseModel):
 
 def scoped_uid(email: EmailStr) -> str:
     """Provide a scoped unique identifier based on the email domain."""
-    if uci_email(email):
+    if uci_email(email) and UCI_SSO_ENABLED:
         raise ValueError("UCI user should use NativeUser")
     local, domain = email.split("@")
     reversed_domains = ".".join(reversed(domain.split(".")))
@@ -97,7 +99,7 @@ def issue_user_identity(user: User, response: Response) -> Response:
 
 
 def require_user_identity(
-    irvinehacks_auth: Annotated[Union[str, None], Cookie()] = None
+    irvinehacks_auth: Annotated[Union[str, None], Cookie()] = None,
 ) -> User:
     """Provide the user decoded from the auth cookie.
     Raise status 401 if valid identity cannot be decoded."""
@@ -109,7 +111,7 @@ def require_user_identity(
 
 
 def use_user_identity(
-    irvinehacks_auth: Annotated[Union[str, None], Cookie()] = None
+    irvinehacks_auth: Annotated[Union[str, None], Cookie()] = None,
 ) -> Union[User, None]:
     """Provide the user decoded from the auth cookie or `None` if invalid."""
     return _decode_user_identity(irvinehacks_auth)
@@ -126,7 +128,7 @@ def _decode_user_identity(user_token: Union[str, None]) -> Union[User, None]:
     except ValueError:
         return None
 
-    if decoded_token.sub.startswith("edu.uci."):
+    if decoded_token.sub.startswith("edu.uci.") and UCI_SSO_ENABLED:
         return NativeUser(**decoded_token.data)
     return GuestUser(**decoded_token.data)
 

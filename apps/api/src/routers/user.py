@@ -58,7 +58,7 @@ async def login(
     log.info("%s requested to log in", email)
     query = urlencode({"return_to": return_to})
 
-    if user_identity.uci_email(email):
+    if user_identity.uci_email(email) and user_identity.UCI_SSO_ENABLED:
         # redirect user for UCI SSO, changing to GET method
         return RedirectResponse(
             URL(path="/api/saml/login", query=query), status.HTTP_303_SEE_OTHER
@@ -80,7 +80,7 @@ async def logout() -> RedirectResponse:
 
 @router.get("/me")
 async def me(
-    user: Annotated[Union[User, None], Depends(use_user_identity)]
+    user: Annotated[Union[User, None], Depends(use_user_identity)],
 ) -> IdentityResponse:
     log.info(user)
     if not user:
@@ -263,7 +263,7 @@ async def _apply_flow(
 
 @router.get("/waiver")
 async def request_waiver(
-    user: Annotated[tuple[User, BareApplicant], Depends(require_accepted_applicant)]
+    user: Annotated[tuple[User, BareApplicant], Depends(require_accepted_applicant)],
 ) -> RedirectResponse:
     """Request to sign the participant waiver through DocuSign."""
     # TODO: non-applicants might also want to request a waiver
@@ -308,7 +308,7 @@ async def waiver_webhook(
 
 @router.post("/rsvp")
 async def rsvp(
-    user: Annotated[User, Depends(require_user_identity)]
+    user: Annotated[User, Depends(require_user_identity)],
 ) -> RedirectResponse:
     """Change user status for RSVP"""
     user_record = await mongodb_handler.retrieve_one(

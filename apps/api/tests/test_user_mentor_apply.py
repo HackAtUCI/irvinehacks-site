@@ -15,7 +15,7 @@ from services.mongodb_handler import Collection
 from utils import resume_handler
 
 # Tests will break again next year, tech should notice and fix :P
-TEST_DEADLINE = datetime(2025, 10, 1, 8, 0, 0, tzinfo=timezone.utc)
+TEST_DEADLINE = datetime(2026, 10, 1, 8, 0, 0, tzinfo=timezone.utc)
 user.DEADLINE = TEST_DEADLINE
 
 USER_EMAIL = "pkfire@uci.edu"

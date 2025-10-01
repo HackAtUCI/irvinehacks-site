@@ -50,6 +50,8 @@ class IdentityResponse(BaseModel):
 
 
 def _is_past_deadline(now: datetime) -> bool:
+    print(now)
+    print(DEADLINE)
     return now > DEADLINE
 
 
@@ -104,7 +106,6 @@ async def apply(
 ) -> str:
     form = await request.form()
     data = _parsed_form(form)
-    print(data)
 
     discriminator = get_raw_hacker_discriminator_value(data)
     raw_application_data: Union[

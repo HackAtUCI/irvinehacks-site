@@ -1,3 +1,4 @@
+import copy
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, Mock, patch
 
@@ -158,7 +159,7 @@ def test_apply_with_invalid_data_causes_422(
     mock_mongodb_handler_retrieve_one: AsyncMock,
 ) -> None:
     """Test that applying with invalid data is unprocessable."""
-    bad_application = SAMPLE_APPLICATION.copy()
+    bad_application = copy.deepcopy(SAMPLE_APPLICATION)
     bad_application["is_18_older"] = "maybe"
     res = client.post("/apply", data=bad_application, files=SAMPLE_FILES)
 
@@ -171,7 +172,7 @@ def test_apply_with_invalid_application_type_causes_422(
     mock_mongodb_handler_retrieve_one: AsyncMock,
 ) -> None:
     """Test that applying with invalid data is unprocessable."""
-    bad_application = SAMPLE_APPLICATION.copy()
+    bad_application = copy.deepcopy(SAMPLE_APPLICATION)
     bad_application["application_type"] = "NotValid"
     res = client.post("/apply", data=bad_application, files=SAMPLE_FILES)
 
@@ -326,7 +327,7 @@ def test_application_data_with_other_throws_422(
     mock_mongodb_handler_retrieve_one: AsyncMock,
 ) -> None:
     mock_mongodb_handler_retrieve_one.return_value = None
-    contains_other = SAMPLE_APPLICATION.copy()
+    contains_other = copy.deepcopy(SAMPLE_APPLICATION)
     contains_other["pronouns"].append("other")  # type: ignore[attr-defined]
     res = client.post("/apply", data=contains_other, files=SAMPLE_FILES)
     assert res.status_code == 422

@@ -118,7 +118,6 @@ async def apply(
         else:
             raise ValueError("Cannot determine hacker application type")
     except ValidationError as e:
-        raise e
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, str(e))
 
     return await _apply_flow(user, raw_application_data)
@@ -275,8 +274,8 @@ async def _apply_flow(
 
     log.info("%s submitted an application", user.uid)
     return (
-        "Thank you for submitting an application to IrvineHacks 2025! Please "
-        + "visit https://irvinehacks.com/portal to see your application status."
+        "Thank you for submitting an application to ZotHacks 2025! Please "
+        + "visit https://zothacks.com/portal to see your application status."
     )
 
 

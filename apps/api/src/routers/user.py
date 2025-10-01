@@ -25,7 +25,9 @@ from models.ApplicationData import (
     RawHackerApplicationData,
     RawMentorApplicationData,
     RawVolunteerApplicationData,
+    RawZotHacksHackerApplicationData,
     RawZotHacksMentorApplicationData,
+    get_raw_hacker_discriminator_value,
     get_raw_mentor_discriminator_value,
 )
 from models.user_record import Applicant, BareApplicant, Role, Status
@@ -98,11 +100,27 @@ async def me(
 @router.post("/apply", status_code=status.HTTP_201_CREATED)
 async def apply(
     user: Annotated[User, Depends(require_user_identity)],
-    # media type should be automatically detected but seems like a bug as of now
-    raw_application_data: Annotated[
-        RawHackerApplicationData, Form(media_type="multipart/form-data")
-    ],
+    request: Request,
 ) -> str:
+    form = await request.form()
+    data = _parsed_form(form)
+    print(data)
+
+    discriminator = get_raw_hacker_discriminator_value(data)
+    raw_application_data: Union[
+        RawHackerApplicationData, RawZotHacksHackerApplicationData
+    ]
+    try:
+        if discriminator == "hacker":
+            raw_application_data = RawHackerApplicationData.model_validate(data)
+        elif discriminator == "zothacks_hacker":
+            raw_application_data = RawZotHacksHackerApplicationData.model_validate(data)
+        else:
+            raise ValueError("Cannot determine hacker application type")
+    except ValidationError as e:
+        raise e
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, str(e))
+
     return await _apply_flow(user, raw_application_data)
 
 
@@ -145,6 +163,7 @@ async def _apply_flow(
         RawHackerApplicationData,
         RawMentorApplicationData,
         RawVolunteerApplicationData,
+        RawZotHacksHackerApplicationData,
         RawZotHacksMentorApplicationData,
     ],
 ) -> str:
@@ -350,8 +369,19 @@ def _parsed_form(form: FormData) -> dict[str, Any]:
     ex. ...skills=Java&skills=C&skills=C++ will be parsed as ["Java", "C", "C++"]
 
     This function is needed for the mentor application form because
-    discriminated unions don't work with FastAPI's Annotated For()
+    discriminated unions don't work with FastAPI's Annotated Form()
     """
+
+    # Fields that should always be lists, even with single values
+    MULTI_SELECT_FIELDS = {
+        "pronouns",
+        "experienced_technologies",
+        "dietary_restrictions",
+        "skills",
+        "friday_availability",
+        "saturday_availability",
+        "sunday_availability",
+    }
 
     data: dict[str, Any] = {}
     for k, v in form.multi_items():
@@ -362,5 +392,10 @@ def _parsed_form(form: FormData) -> dict[str, Any]:
                 data[k] = [data[k], v]
         else:
             data[k] = v
+
+    # Ensure multi-select fields are always lists
+    for field in MULTI_SELECT_FIELDS:
+        if field in data and not isinstance(data[field], list):
+            data[field] = [data[field]]
 
     return data

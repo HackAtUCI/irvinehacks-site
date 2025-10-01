@@ -28,7 +28,7 @@ services:
         environment:
             MONGODB_URI: mongodb://root:example@mongo:27017
             DEPLOYMENT: LOCAL
-            UCI_SSO: "false"
+            UCI_SSO_ENABLED: "false"
 
 volumes:
     mongodb_data_volume: {}

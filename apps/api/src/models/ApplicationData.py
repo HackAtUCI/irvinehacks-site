@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import Enum
+import json
 from typing import Annotated, Any, Literal, Union
 
 from fastapi import UploadFile
@@ -13,6 +14,7 @@ from pydantic import (
     HttpUrl,
     Tag,
     field_serializer,
+    field_validator,
 )
 
 
@@ -38,6 +40,7 @@ FIELDS_SUPPORTING_OTHER = [
     "school",
     "major",
     "experienced_technologies",
+    "dietary_restrictions",
 ]
 
 
@@ -107,6 +110,32 @@ class BaseVolunteerApplicationData(BaseModel):
     sunday_availability: list[Hour] = []
 
 
+class BaseZotHacksHackerApplicationData(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, str_max_length=1024)
+
+    pronouns: list[str] = []
+    is_18_older: bool
+    school_year: str
+    dietary_restrictions: list[str] = []
+    allergies: str = Field(max_length=2048)
+    major: str
+    hackathon_experience: str
+
+    elevator_pitch_saq: str = Field(max_length=1024)
+    tech_experience_saq: str = Field(max_length=2048)
+    learn_about_self_saq: str = Field(max_length=2048)
+    pixel_art_saq: str = Field(max_length=2048)
+    pixel_art_data: list[int] = Field(..., min_length=64, max_length=64)
+
+    comments: Union[str, None] = Field(None, max_length=2048)
+
+    @field_validator("pixel_art_data", mode="before")
+    def parse_pixel_art(cls, v: str) -> Any:
+        if isinstance(v, str):
+            return json.loads(v)
+        return v
+
+
 class BaseZotHacksMentorApplicationData(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, str_max_length=1024)
 
@@ -155,6 +184,13 @@ class RawVolunteerApplicationData(BaseVolunteerApplicationData):
     application_type: Literal["Volunteer"]
 
 
+class RawZotHacksHackerApplicationData(BaseZotHacksHackerApplicationData):
+    first_name: str
+    last_name: str
+    resume: Union[UploadFile, None] = None
+    application_type: Literal["Hacker"]
+
+
 class RawZotHacksMentorApplicationData(BaseZotHacksMentorApplicationData):
     first_name: str
     last_name: str
@@ -195,6 +231,19 @@ class ProcessedVolunteerApplication(BaseVolunteerApplicationData):
     reviews: list[Review] = []
 
 
+class ProcessedZotHacksHackerApplicationData(BaseZotHacksHackerApplicationData):
+    email: EmailStr
+    resume_url: Union[HttpUrl, None] = None
+    submission_time: datetime
+    reviews: list[Review] = []
+
+    @field_serializer("resume_url")
+    def url2str(self, val: Union[HttpUrl, None]) -> Union[str, None]:
+        if val is not None:
+            return str(val)
+        return val
+
+
 class ProcessedZotHacksMentorApplication(BaseZotHacksMentorApplicationData):
     email: EmailStr
     resume_url: Union[HttpUrl, None] = None
@@ -218,6 +267,8 @@ def get_discriminator_value(v: Any) -> str:
             return "mentor"
         if "frq_volunteer" in v:
             return "volunteer"
+        if "elevator_pitch_saq" in v:
+            return "zothacks_hacker"
         if "help_participants_frq" in v:
             return "zothacks_mentor"
 
@@ -227,6 +278,8 @@ def get_discriminator_value(v: Any) -> str:
         return "mentor"
     if "frq_volunteer" in dir(v):
         return "volunteer"
+    if "elevator_pitch_saq" in dir(v):
+        return "zothacks_hacker"
     if "help_participants_frq" in dir(v):
         return "zothacks_mentor"
     return ""
@@ -237,9 +290,35 @@ ProcessedApplicationDataUnion = Annotated[
         Annotated[ProcessedHackerApplicationData, Tag("hacker")],
         Annotated[ProcessedMentorApplicationData, Tag("mentor")],
         Annotated[ProcessedVolunteerApplication, Tag("volunteer")],
+        Annotated[ProcessedZotHacksHackerApplicationData, Tag("zothacks_hacker")],
         Annotated[ProcessedZotHacksMentorApplication, Tag("zothacks_mentor")],
     ],
     Discriminator(get_discriminator_value),
+]
+
+
+def get_raw_hacker_discriminator_value(v: Any) -> str:
+    """Discriminator function for raw hacker application data."""
+    if isinstance(v, dict):
+        if "frq_video_game" in v:
+            return "hacker"
+        if "elevator_pitch_saq" in v:
+            return "zothacks_hacker"
+
+    # For object instances, check attributes
+    if hasattr(v, "frq_video_game"):
+        return "hacker"
+    if hasattr(v, "elevator_pitch_saq"):
+        return "zothacks_hacker"
+    return ""
+
+
+RawHackerApplicationDataUnion = Annotated[
+    Union[
+        Annotated[RawHackerApplicationData, Tag("hacker")],
+        Annotated[RawZotHacksHackerApplicationData, Tag("zothacks_hacker")],
+    ],
+    Discriminator(get_raw_hacker_discriminator_value),
 ]
 
 

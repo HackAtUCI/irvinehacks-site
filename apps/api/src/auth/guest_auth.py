@@ -83,7 +83,7 @@ async def _get_existing_key(email: EmailStr) -> Optional[str]:
         Collection.USERS, {"_id": uid}, ["guest_auth"]
     )
 
-    if not record or not record["guest_auth"]:
+    if not record or not record.get("guest_auth"):
         return None
 
     auth = GuestAuth.model_validate(record["guest_auth"])

@@ -29,7 +29,7 @@ FOLDER_MAP = {
     },
 }
 
-SIZE_LIMIT = 500_000
+SIZE_LIMIT = 1 * 1024 * 1024  # 1MB
 ACCEPTED_TYPES = ("application/pdf",)
 
 

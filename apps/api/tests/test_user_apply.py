@@ -51,7 +51,7 @@ SAMPLE_APPLICATION = {
 SAMPLE_RESUME = ("my-resume.pdf", b"resume", "application/pdf")
 SAMPLE_FILES = {"resume": SAMPLE_RESUME}
 BAD_RESUME = ("bad-resume.doc", b"resume", "application/msword")
-LARGE_RESUME = ("large-resume.pdf", b"resume" * 100_000, "application/pdf")
+LARGE_RESUME = ("large-resume.pdf", b"resume" * 2_000_000, "application/pdf")
 # The browser will send an empty file if not selected
 EMPTY_RESUME = (
     "",

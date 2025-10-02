@@ -54,7 +54,7 @@ SAMPLE_APPLICATION = {
 SAMPLE_RESUME = ("my-resume.pdf", b"resume", "application/pdf")
 SAMPLE_FILES = {"resume": SAMPLE_RESUME}
 BAD_RESUME = ("bad-resume.doc", b"resume", "application/msword")
-LARGE_RESUME = ("large-resume.pdf", b"resume" * 100_000, "application/pdf")
+LARGE_RESUME = ("large-resume.pdf", b"resume" * 2_000_000, "application/pdf")
 
 EXPECTED_RESUME_UPLOAD = ("pk-fire-69f2afc2.pdf", b"resume", "application/pdf")
 SAMPLE_RESUME_URL = HttpUrl("https://drive.google.com/file/d/...")

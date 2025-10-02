@@ -117,7 +117,7 @@ class BaseZotHacksHackerApplicationData(BaseModel):
     is_18_older: bool
     school_year: str
     dietary_restrictions: list[str] = []
-    allergies: str = Field(max_length=2048)
+    allergies: Union[str, None] = Field(None, max_length=2048)
     major: str
     hackathon_experience: str
 

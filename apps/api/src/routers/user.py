@@ -50,8 +50,6 @@ class IdentityResponse(BaseModel):
 
 
 def _is_past_deadline(now: datetime) -> bool:
-    print(now)
-    print(DEADLINE)
     return now > DEADLINE
 
 

@@ -12,7 +12,7 @@ from services.sendgrid_handler import (
     Template,
 )
 
-IH_SENDER = ("zothacks@gmail.com", "ZotHacks 2025 Applications")
+IH_SENDER = ("apply@zothacks.com", "ZotHacks 2025 Applications")
 
 DECISION_TEMPLATES: dict[Role, dict[Decision, ApplicationUpdateTemplates]] = {
     Role.HACKER: {

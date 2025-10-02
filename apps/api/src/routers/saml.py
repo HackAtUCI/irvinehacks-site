@@ -1,5 +1,6 @@
 import json
 import os
+from urllib.parse import urlparse
 from functools import lru_cache
 from logging import getLogger
 from pathlib import Path

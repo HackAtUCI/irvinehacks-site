@@ -25,6 +25,38 @@ SP_CRT = os.getenv("SP_CRT")
 SP_KEY = os.getenv("SP_KEY")
 
 
+ALLOWED_RELAY_HOSTS = {
+    "zothacks.com",
+    "www.zothacks.com",
+}
+
+
+def _is_valid_relay_state(relay_state: str) -> bool:
+    # allow same-origin relative paths
+    if relay_state.startswith("/"):
+        return True
+
+    # allow absolute https URLs only for hosts in ALLOWED_RELAY_HOSTS
+    try:
+        parsed = urlparse(relay_state)
+    except Exception:
+        return False
+
+    if parsed.scheme != "https":
+        return False
+
+    hostname = parsed.hostname or ""
+    # exact match or subdomain policy (optional)
+    if hostname in ALLOWED_RELAY_HOSTS:
+        return True
+
+    # optionally allow subdomains (example: allow *.zothacks.com)
+    if hostname.endswith(".zothacks.com"):
+        return True
+
+    return False
+
+
 @lru_cache
 def _get_saml_settings() -> OneLogin_Saml2_Settings:
     """
@@ -88,10 +120,11 @@ async def _update_last_login(user: NativeUser) -> None:
 async def login(req: Request, return_to: str = "/") -> RedirectResponse:
     """Initiate login to SSO identity provider."""
     auth = _get_saml_auth(req.url, {})
-    if not return_to.startswith("/"):
+    if not _is_valid_relay_state(return_to):
         raise HTTPException(
             status.HTTP_422_UNPROCESSABLE_ENTITY, "Cannot return to different origin."
         )
+
     sso_url = auth.login(return_to=return_to)
 
     # Redirect user to SSO url to complete authentication
@@ -118,10 +151,8 @@ async def acs(
         relay_state,
     )
 
-    if not relay_state.startswith("/"):
-        raise HTTPException(
-            status.HTTP_400_BAD_REQUEST, "RelayState is not on the same origin."
-        )
+    if not _is_valid_relay_state(relay_state):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "RelayState is not allowed.")
 
     auth = _get_saml_auth(req.url, {"SAMLResponse": saml_response})
     auth.process_response()

@@ -25,10 +25,7 @@ SP_CRT = os.getenv("SP_CRT")
 SP_KEY = os.getenv("SP_KEY")
 
 
-ALLOWED_RELAY_HOSTS = {
-    "zothacks.com",
-    "www.zothacks.com",
-}
+ALLOWED_RELAY_HOSTS = {"zothacks.com", "www.zothacks.com", "localhost"}
 
 
 def _is_valid_relay_state(relay_state: str) -> bool:

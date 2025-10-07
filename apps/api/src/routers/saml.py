@@ -16,8 +16,6 @@ from auth.user_identity import NativeUser, issue_user_identity, utc_now
 from services import mongodb_handler
 from services.mongodb_handler import Collection
 
-from utils.hackathon_context import hackathon_name_ctx, HackathonName
-
 log = getLogger(__name__)
 
 router = APIRouter()
@@ -27,7 +25,7 @@ SP_CRT = os.getenv("SP_CRT")
 SP_KEY = os.getenv("SP_KEY")
 
 
-ALLOWED_RELAY_HOSTS = {"zothacks.com", "www.zothacks.com"}
+ALLOWED_RELAY_HOSTS = {"zothacks.com", "www.zothacks.com", "localhost"}
 
 
 def _is_valid_relay_state(relay_state: str) -> bool:
@@ -45,22 +43,15 @@ def _is_valid_relay_state(relay_state: str) -> bool:
         return False
 
     hostname = parsed.hostname or ""
+    # exact match or subdomain policy (optional)
     if hostname in ALLOWED_RELAY_HOSTS:
         return True
 
+    # optionally allow subdomains (example: allow *.zothacks.com)
+    if hostname.endswith(".zothacks.com"):
+        return True
+
     return False
-
-
-def _get_settings_file_name() -> str:
-    hackathon_name = hackathon_name_ctx.get()
-    if hackathon_name == HackathonName.IRVINEHACKS:
-        if STAGING_ENV:
-            return "irvinehacks-settings-staging.json"
-        return "irvinehacks-settings-prod.json"
-
-    # TODO: Create staging settings for zothacks
-    elif hackathon_name == HackathonName.ZOTHACKS:
-        return "zothacks-settings-prod.json"
 
 
 @lru_cache
@@ -81,7 +72,7 @@ def _get_saml_settings() -> OneLogin_Saml2_Settings:
             data: dict[str, Any] = json.load(file)
             return data
 
-    settings_filename = _get_settings_file_name()
+    settings_filename = "settings-staging.json" if STAGING_ENV else "settings-prod.json"
     advanced_settings_filename = "advanced_settings.json"
     settings = {
         **_read_json(settings_filename),

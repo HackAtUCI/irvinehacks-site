@@ -1,0 +1,60 @@
+{
+	"strict": true,
+	"debug": true,
+	"sp": {
+		"entityId": "https://zothacks.com/shibboleth",
+		"assertionConsumerService": {
+			"url": "https://zothacks.com/api/saml/acs",
+			"binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+		},
+		"singleLogoutService": {
+			"url": "https://zothacks.com/api/saml/sls",
+			"binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+		},
+		"attributeConsumingService": {
+			"serviceName": "IrvineHacks Website",
+			"serviceDescription": "Website for IrvineHacks, Orange County's largest hackathon.",
+			"requestedAttributes": [
+				{
+					"nameFormat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+					"name": "urn:oid:0.9.2342.19200300.100.1.3",
+					"isRequired": true,
+					"friendlyName": "email"
+				},
+				{
+					"nameFormat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+					"name": "urn:oid:2.16.840.1.113730.3.1.241",
+					"isRequired": true,
+					"friendlyName": "displayName"
+				},
+				{
+					"nameFormat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+					"name": "urn:oid:2.16.840.1.113916.5.6.1.1",
+					"isRequired": true,
+					"friendlyName": "ucinetid"
+				},
+				{
+					"nameFormat": "urn:oasis:names:tc:SAML:2.0:attrname-format:uri",
+					"name": "urn:oid:2.16.840.1.113916.5.6.1.59",
+					"isRequired": true,
+					"friendlyName": "uciaffiliation"
+				}
+			]
+		},
+		"NameIDFormat": "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified",
+		"x509cert": "",
+		"privateKey": ""
+	},
+	"idp": {
+		"entityId": "urn:mace:incommon:uci.edu",
+		"singleSignOnService": {
+			"url": "https://shib.service.uci.edu/idp/profile/SAML2/Redirect/SSO",
+			"binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+		},
+		"singleLogoutService": {
+			"url": "https://shib.service.uci.edu/logout.html",
+			"binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+		},
+		"x509cert": "MIIDODCCAiCgAwIBAgIJALjyIupKtkKDMA0GCSqGSIb3DQEBBQUAMBwxGjAYBgNVBAMTEXNoaWIubmFjcy51Y2kuZWR1MB4XDTE2MDcxNTIzMTg1MVoXDTI2MDcxMzIzMTg1MVowHDEaMBgGA1UEAxMRc2hpYi5uYWNzLnVjaS5lZHUwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDp964Q5ZWIBmmI/5EfAo1z0S3SBYoLfNl5EkfJrnqntc5VO7AcBjsuNrZTb1zrv/juL7cXXjzcrh1Pbh2BIpwSa3z0yta1KQX3NZBq8wZOjdyd6iLkLx6kcT9q5MyWyd8qJ2DmPQZ9wWdPCb0RoRA8RaJW0gp/3JQhh4+ERVUJx438JA/+dfouSiXB+UguVYHgceETjOik09A/j6cD1shILMZnuBObAtOAuT9PSFiWhOKOLghloAHkc0QDTyXC9BNTBKtyBr9XiYLgvspmy13L3Kc1npPynLt+KqfuBIG0OE/arSOImGD/y6ep6EaB6WTcWaCqNaQ3l4bQX8RaLMp5AgMBAAGjfTB7MB0GA1UdDgQWBBTvY0+ZHT/jnKj8RLLgCpDcTowcCzBMBgNVHSMERTBDgBTvY0+ZHT/jnKj8RLLgCpDcTowcC6EgpB4wHDEaMBgGA1UEAxMRc2hpYi5uYWNzLnVjaS5lZHWCCQC48iLqSrZCgzAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBBQUAA4IBAQBTuqm1sr3CNlHMKaou7THCv+ADueR7mE+25C0vG8cEF+5GQ1Rh3dGPqXPmnt/D1R8zKhm5XqvkjXTvdE4cvq1hdpwADhDAa9IOYbnRCrbeajfZFUG0tAe5mFayBhKKmSVdM73n535nQ2NvTImGgO9bkD1Nss/Yi1WfCWUdoYf6zhE8LP6zQEE75vYHD5nmYpQ/k3Yw3dxkifIjuUZf/eTibB26/FRM4cdv05EYBQ88U4+0PzRg8ZRqvZ2Cj0qub7eRQNt6Jfm4/QsEos3q2PxBLbvTGUtZ1RizkEWrhF5bk0Ax8xJFkh64xXidpKNgt8Bl6IfZDpHXUZTdfjCTDRRD"
+	}
+}

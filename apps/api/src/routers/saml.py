@@ -294,3 +294,12 @@ async def get_saml_metadata() -> Response:
         raise HTTPException(500, "Could not prepare SP metadata")
 
     return Response(metadata, media_type="application/xml")
+
+
+@router.get("/exchange")
+async def exchange_code(code: str) -> RedirectResponse:
+    """Exchange one-time code for JWT."""
+    user = await validate_one_time_code(code)
+    res = RedirectResponse("/", status_code=status.HTTP_303_SEE_OTHER)
+    issue_user_identity(user, res)
+    return res

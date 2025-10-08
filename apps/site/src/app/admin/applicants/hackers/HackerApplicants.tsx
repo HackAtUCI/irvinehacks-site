@@ -74,6 +74,7 @@ function HackerApplicants() {
 					uciNetIDFilterValues.includes(reviewer),
 				)),
 	);
+	console.log({ filteredApplicants });
 
 	const filteredApplicants400 = [...applicantList]
 		.filter((applicant) => applicant.avg_score !== -1)
@@ -129,8 +130,16 @@ function HackerApplicants() {
 					{
 						id: "school",
 						header: "School",
-						content: ({ application_data }) => application_data.school,
+						content: ({ application_data, type }) =>
+							type === "zothacks_hacker" ? "UC Irvine" : application_data.school,
 					},
+					{
+						id: "year",
+						header: "Year",
+						content: ({ application_data, type }) =>
+							type === "zothacks_hacker" ? application_data.school_year : "—",
+					},
+
 					{
 						id: "status",
 						header: "Status",

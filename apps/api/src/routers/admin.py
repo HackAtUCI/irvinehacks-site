@@ -1,20 +1,21 @@
 from datetime import date, datetime
 from logging import getLogger
-from typing import Annotated, Any, Literal, Mapping, Optional
+from typing import Annotated, Any, Literal, Mapping, Optional, Union
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
-from pydantic import BaseModel, TypeAdapter, ValidationError
+from pydantic import BaseModel, TypeAdapter, ValidationError, Tag, Discriminator
 from typing_extensions import assert_never
 
 from admin import applicant_review_processor, participant_manager, summary_handler
 from admin.participant_manager import Participant
 from auth.authorization import require_role
 from auth.user_identity import User, utc_now
-from models.ApplicationData import Decision, Review
+from models.ApplicationData import Decision, Review, get_discriminator_value
 from models.user_record import Applicant, ApplicantStatus, Role
 from services import mongodb_handler
 from services.mongodb_handler import BaseRecord, Collection
 from utils import email_handler
+
 
 log = getLogger(__name__)
 
@@ -44,6 +45,11 @@ class ApplicationDataSummary(BaseModel):
     submission_time: datetime
 
 
+class ZotHacksApplicationDataSummary(BaseModel):
+    school_year: str
+    submission_time: Any
+
+
 class ApplicantSummary(BaseRecord):
     first_name: str
     last_name: str
@@ -53,6 +59,7 @@ class ApplicantSummary(BaseRecord):
 
 
 class HackerApplicantSummary(BaseRecord):
+    type: Literal["hacker"] = "hacker"
     first_name: str
     last_name: str
     status: str
@@ -62,13 +69,34 @@ class HackerApplicantSummary(BaseRecord):
     application_data: ApplicationDataSummary
 
 
+class ZotHacksHackerApplicantSummary(BaseRecord):
+    type: Literal["zothacks_hacker"] = "zothacks_hacker"
+    _id: str
+    first_name: str
+    last_name: str
+    status: str
+    decision: Optional[Decision] = None
+    reviewers: list[str] = []
+    avg_score: float = -1
+    application_data: ZotHacksApplicationDataSummary
+
+
+HackerApplicantSummaryUnion = Annotated[
+    Union[
+        Annotated[HackerApplicantSummary, Tag("hacker")],
+        Annotated[ZotHacksHackerApplicantSummary, Tag("zothacks_hacker")],
+    ],
+    Discriminator("type"),
+]
+
+
 class ReviewRequest(BaseModel):
     applicant: str
     score: float
 
 
 async def mentor_volunteer_applicants(
-    application_type: Literal["Mentor", "Volunteer"]
+    application_type: Literal["Mentor", "Volunteer"],
 ) -> list[ApplicantSummary]:
     """Get records of all mentor and volunteer applicants."""
     records: list[dict[str, object]] = await mongodb_handler.retrieve(
@@ -96,7 +124,7 @@ async def mentor_volunteer_applicants(
 
 @router.get("/applicants/mentors")
 async def mentor_applicants(
-    user: Annotated[User, Depends(require_mentor_reviewer)]
+    user: Annotated[User, Depends(require_mentor_reviewer)],
 ) -> list[ApplicantSummary]:
     """Get records of all mentor applicants."""
     log.info("%s requested mentor applicants", user)
@@ -106,7 +134,7 @@ async def mentor_applicants(
 
 @router.get("/applicants/volunteers")
 async def volunteer_applicants(
-    user: Annotated[User, Depends(require_volunteer_reviewer)]
+    user: Annotated[User, Depends(require_volunteer_reviewer)],
 ) -> list[ApplicantSummary]:
     """Get records of all volunteer applicants."""
     log.info("%s requested volunteer applicants", user)
@@ -116,8 +144,8 @@ async def volunteer_applicants(
 
 @router.get("/applicants/hackers")
 async def hacker_applicants(
-    user: Annotated[User, Depends(require_hacker_reviewer)]
-) -> list[HackerApplicantSummary]:
+    user: Annotated[User, Depends(require_hacker_reviewer)],
+) -> list[HackerApplicantSummaryUnion]:
     """Get records of all hacker applicants."""
     log.info("%s requested hacker applicants", user)
 
@@ -129,12 +157,9 @@ async def hacker_applicants(
             "status",
             "first_name",
             "last_name",
-            "application_data.school",
-            "application_data.submission_time",
-            "application_data.reviews",
+            "application_data",
         ],
     )
-
     thresholds: Optional[dict[str, float]] = await retrieve_thresholds()
 
     if not thresholds:
@@ -142,12 +167,34 @@ async def hacker_applicants(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     for record in records:
+        app_data = record.get("application_data", {})
+        sub_time = app_data.get("submission_time")
+        if isinstance(sub_time, dict) and "$date" in sub_time:
+            try:
+                raw_date = sub_time["$date"]
+                app_data["submission_time"] = datetime.fromisoformat(
+                    raw_date.replace("Z", "+00:00")
+                )
+            except Exception:
+                app_data["submission_time"] = datetime.utcnow()
+
         applicant_review_processor.include_hacker_app_fields(
             record, thresholds["accept"], thresholds["waitlist"]
         )
 
+    for record in records:
+        app_data = record.get("application_data", {})
+        record_type = None
+        if "school_year" in app_data:
+            record_type = "zothacks_hacker"
+        elif "school" in app_data:
+            record_type = "hacker"
+        record["type"] = record_type
+        log.info(f"Parsed record {record['_id']} as {record_type}")
+    print(records)
     try:
-        return TypeAdapter(list[HackerApplicantSummary]).validate_python(records)
+        return TypeAdapter(list[HackerApplicantSummaryUnion]).validate_python(records)
+
     except ValidationError:
         raise RuntimeError("Could not parse applicant data.")
 
@@ -208,7 +255,7 @@ async def applicant_summary() -> dict[ApplicantStatus, int]:
     dependencies=[Depends(require_manager)],
 )
 async def applications(
-    group_by: Literal["school", "role"]
+    group_by: Literal["school", "role"],
 ) -> dict[str, dict[date, int]]:
     if group_by == "school":
         return await summary_handler.applications_by_school()
@@ -289,7 +336,7 @@ async def submit_review(
 
 @router.get("/get-thresholds")
 async def get_hacker_score_thresholds(
-    user: Annotated[User, Depends(require_manager)]
+    user: Annotated[User, Depends(require_manager)],
 ) -> Optional[dict[str, Any]]:
     """
     Gets accepted and waitlisted thresholds

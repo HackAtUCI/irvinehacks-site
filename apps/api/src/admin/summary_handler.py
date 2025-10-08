@@ -52,7 +52,7 @@ async def applications_by_school() -> dict[str, dict[date, int]]:
         applicant_stats_adapter = TypeAdapter(list[ApplicantSchoolStats])
         applicants = applicant_stats_adapter.validate_python(records)
     except ValidationError:
-        raise RuntimeError("Could not parse applicant data.")
+        raise RuntimeError("1Could not parse applicant data.")
 
     grouped_applications: dict[str, dict[date, int]] = defaultdict(
         lambda: defaultdict(int)
@@ -85,7 +85,7 @@ async def applications_by_role() -> dict[str, dict[date, int]]:
         applicant_stats_adapter = TypeAdapter(list[ApplicantRoleStats])
         applicants = applicant_stats_adapter.validate_python(records)
     except ValidationError:
-        raise RuntimeError("Could not parse applicant data.")
+        raise RuntimeError("2Could not parse applicant data.")
 
     return {
         role.value: _count_applications_by_day(

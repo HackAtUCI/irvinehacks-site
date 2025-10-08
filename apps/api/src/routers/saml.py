@@ -118,7 +118,7 @@ async def _update_last_login(user: NativeUser) -> None:
     )
 
 
-async def generate_one_time_code(user: NativeUser) -> str:
+async def _generate_one_time_code(user: NativeUser) -> str:
     """Generate a secure one-time code and store it in MongoDB."""
     code = secrets.token_urlsafe(32)
     expires_at = time.time() + ONE_TIME_CODE_TTL
@@ -145,7 +145,7 @@ async def generate_one_time_code(user: NativeUser) -> str:
         )
 
 
-async def validate_one_time_code(code: str) -> NativeUser:
+async def _validate_one_time_code(code: str) -> NativeUser:
     """Validate the one-time code and return the associated user."""
     try:
         code_data = await mongodb_handler.retrieve_one(Collection.CODES, {"code": code})
@@ -264,7 +264,7 @@ async def acs(
 
     # Generate one-time code if returning to external site
     if relay_state.startswith("https://zothacks.com"):
-        code = await generate_one_time_code(user)
+        code = await _generate_one_time_code(user)
         redirect_url = f"{relay_state}?code={code}"
         return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
     else:
@@ -299,7 +299,7 @@ async def get_saml_metadata() -> Response:
 @router.get("/exchange")
 async def exchange_code(code: str) -> RedirectResponse:
     """Exchange one-time code for JWT."""
-    user = await validate_one_time_code(code)
+    user = await _validate_one_time_code(code)
     res = RedirectResponse("/", status_code=status.HTTP_303_SEE_OTHER)
     issue_user_identity(user, res)
     return res

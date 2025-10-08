@@ -170,13 +170,10 @@ async def hacker_applicants(
         app_data = record.get("application_data", {})
         sub_time = app_data.get("submission_time")
         if isinstance(sub_time, dict) and "$date" in sub_time:
-            try:
-                raw_date = sub_time["$date"]
-                app_data["submission_time"] = datetime.fromisoformat(
-                    raw_date.replace("Z", "+00:00")
-                )
-            except Exception:
-                app_data["submission_time"] = datetime.utcnow()
+            raw_date = sub_time["$date"]
+            app_data["submission_time"] = datetime.fromisoformat(
+                raw_date.replace("Z", "+00:00")
+            )
 
         applicant_review_processor.include_hacker_app_fields(
             record, thresholds["accept"], thresholds["waitlist"]
@@ -210,7 +207,16 @@ async def applicant(
 
     if not record:
         raise HTTPException(status.HTTP_404_NOT_FOUND)
-
+    app_data = record.get("application_data", {})
+    sub_time = app_data.get("submission_time")
+    if isinstance(sub_time, dict) and "$date" in sub_time:
+        raw_date = sub_time["$date"]
+        app_data["submission_time"] = datetime.fromisoformat(
+            raw_date.replace("Z", "+00:00")
+        )
+    record_type = get_discriminator_value(app_data)
+    if record_type:
+        record["application_data"]["type"] = record_type
     try:
         return Applicant.model_validate(record)
     except ValidationError:

@@ -148,6 +148,9 @@ async def _generate_one_time_code(user: NativeUser) -> str:
 async def _validate_one_time_code(code: str) -> NativeUser:
     """Validate the one-time code and return the associated user."""
     try:
+        if not code:
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid code")
+
         code_data = await mongodb_handler.retrieve_one(Collection.CODES, {"code": code})
 
         if not code_data:

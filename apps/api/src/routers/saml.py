@@ -161,7 +161,6 @@ async def _validate_one_time_code(code: str) -> NativeUser:
             )
             raise HTTPException(status.HTTP_400_BAD_REQUEST, "Code expired")
 
-        # Reconstruct user from stored data
         user_data = code_data["user"]
         user = NativeUser(
             ucinetid=user_data["ucinetid"],
@@ -270,7 +269,7 @@ async def acs(
     else:
         # Same-domain redirect: set cookie directly
         res = RedirectResponse(relay_state, status_code=status.HTTP_303_SEE_OTHER)
-        issue_user_identity(user, res)  # sets JWT cookie
+        issue_user_identity(user, res)
         return res
 
 

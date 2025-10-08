@@ -16,6 +16,22 @@ interface BaseApplicationData {
 	major: string;
 }
 
+export interface ZotHacksHackerApplicationData extends BaseApplicationData {
+	school_year: string;
+	dietary_restrictions: string[];
+	allergies: string | null;
+	hackathon_experience: string;
+	elevator_pitch_saq: string;
+	tech_experience_saq: string;
+	learn_about_self_saq: string;
+	pixel_art_saq: string;
+	pixel_art_data: number[];
+	comments: string | null;
+	resume_url: string | null;
+	submission_time: string;
+	reviews: Review[];
+}
+
 export interface HackerApplicationData extends BaseApplicationData {
 	is_first_hackathon: boolean;
 	portfolio: string | null;
@@ -74,7 +90,8 @@ export type VolunteerApplicationQuestion = Exclude<
 type ApplicationData =
 	| HackerApplicationData
 	| MentorApplicationData
-	| VolunteerApplicationData;
+	| VolunteerApplicationData
+	| ZotHacksHackerApplicationData;
 
 export interface Applicant {
 	_id: Uid;

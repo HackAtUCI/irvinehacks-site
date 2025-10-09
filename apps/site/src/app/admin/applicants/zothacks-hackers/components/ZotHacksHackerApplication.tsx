@@ -63,8 +63,6 @@ function ZotHacksHackerApplication({
 						);
 					},
 				)}
-
-				<PixelArtDisplay gridColors={application_data.pixel_art_data} />
 			</SpaceBetween>
 		</Container>
 	);

@@ -260,7 +260,6 @@ class ProcessedZotHacksMentorApplication(BaseZotHacksMentorApplicationData):
 # To add more discriminating values, add a string
 # that doesn't appear in any other form
 def get_discriminator_value(v: Any) -> str:
-    print(v)
     if isinstance(v, dict):
         if "frq_video_game" in v:
             return "hacker"

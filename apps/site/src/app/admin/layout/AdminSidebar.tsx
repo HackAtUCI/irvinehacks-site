@@ -38,25 +38,25 @@ function AdminSidebar() {
 		applicationLinks.push({
 			type: "link",
 			text: "Hacker Applications",
-			href: "/admin/applicants/hackers",
+			href: "/admin/applicants/zothacks-hackers",
 		});
 	}
 
-	if (isMentorReviewer(roles)) {
-		applicationLinks.push({
-			type: "link",
-			text: "Mentor Applications",
-			href: "/admin/applicants/mentors",
-		});
-	}
+	// if (isMentorReviewer(roles)) {
+	// 	applicationLinks.push({
+	// 		type: "link",
+	// 		text: "Mentor Applications",
+	// 		href: "/admin/applicants/mentors",
+	// 	});
+	// }
 
-	if (isVolunteerReviewer(roles)) {
-		applicationLinks.push({
-			type: "link",
-			text: "Volunteer Applications",
-			href: "/admin/applicants/volunteers",
-		});
-	}
+	// if (isVolunteerReviewer(roles)) {
+	// 	applicationLinks.push({
+	// 		type: "link",
+	// 		text: "Volunteer Applications",
+	// 		href: "/admin/applicants/volunteers",
+	// 	});
+	// }
 
 	if (isApplicationManager(roles)) {
 		navigationItems.splice(1, 0, {

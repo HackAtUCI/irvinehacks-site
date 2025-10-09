@@ -6,9 +6,9 @@ function HackerApplicants() {
 	return (
 		<HackerApplicantsList
 			extraColumn={{
-				id: "school",
-				header: "School",
-				content: ({ application_data }) => application_data.school,
+				id: "year",
+				header: "Year",
+				content: ({ application_data }) => application_data.school_year,
 			}}
 		/>
 	);

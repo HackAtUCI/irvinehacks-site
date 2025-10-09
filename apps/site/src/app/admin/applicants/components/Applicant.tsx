@@ -9,11 +9,13 @@ import useApplicant, {
 	HackerApplicationData,
 	MentorApplicationData,
 	VolunteerApplicationData,
+	ZotHacksHackerApplicationData,
 } from "@/lib/admin/useApplicant";
 
 import HackerApplication from "@/app/admin/applicants/hackers/components/HackerApplication";
 import MentorApplication from "@/app/admin/applicants/mentors/components/MentorApplication";
 import VolunteerApplication from "@/app/admin/applicants/volunteers/components/VolunteerApplication";
+import ZotHacksHackerApplication from "@/app/admin/applicants/zothacks-hackers/components/ZotHacksHackerApplication";
 
 import ApplicantActions from "./ApplicantActions";
 import ApplicantOverview from "./ApplicantOverview";
@@ -23,9 +25,14 @@ import { ParticipantRole } from "@/lib/userRecord";
 interface ApplicantProps {
 	uid: string;
 	applicationType: "hacker" | "mentor" | "volunteer";
+	hackathonName?: "irvinehacks" | "zothacks";
 }
 
-function Applicant({ uid, applicationType }: ApplicantProps) {
+function Applicant({
+	uid,
+	applicationType,
+	hackathonName = "irvinehacks",
+}: ApplicantProps) {
 	const { applicant, loading, submitReview } = useApplicant(
 		uid,
 		applicationType,
@@ -69,9 +76,17 @@ function Applicant({ uid, applicationType }: ApplicantProps) {
 			<SpaceBetween direction="vertical" size="l">
 				<ApplicantOverview applicant={applicant} />
 				{applicant.roles.includes(ParticipantRole.Hacker) ? (
-					<HackerApplication
-						application_data={application_data as HackerApplicationData}
-					/>
+					hackathonName === "zothacks" ? (
+						<ZotHacksHackerApplication
+							application_data={
+								application_data as ZotHacksHackerApplicationData
+							}
+						/>
+					) : (
+						<HackerApplication
+							application_data={application_data as HackerApplicationData}
+						/>
+					)
 				) : applicant.roles.includes(ParticipantRole.Mentor) ? (
 					<MentorApplication
 						application_data={application_data as MentorApplicationData}

@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from logging import getLogger
-from typing import Annotated, Any, Literal, Mapping, Optional
+from typing import Annotated, Any, Literal, Mapping, Optional, Union
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, TypeAdapter, ValidationError
@@ -15,6 +15,7 @@ from models.user_record import Applicant, ApplicantStatus, Role
 from services import mongodb_handler
 from services.mongodb_handler import BaseRecord, Collection
 from utils import email_handler
+
 
 log = getLogger(__name__)
 
@@ -44,6 +45,11 @@ class ApplicationDataSummary(BaseModel):
     submission_time: datetime
 
 
+class ZotHacksApplicationDataSummary(BaseModel):
+    school_year: str
+    submission_time: Any
+
+
 class ApplicantSummary(BaseRecord):
     first_name: str
     last_name: str
@@ -59,7 +65,7 @@ class HackerApplicantSummary(BaseRecord):
     decision: Optional[Decision] = None
     reviewers: list[str] = []
     avg_score: float
-    application_data: ApplicationDataSummary
+    application_data: Union[ApplicationDataSummary, ZotHacksApplicationDataSummary]
 
 
 class ReviewRequest(BaseModel):
@@ -68,7 +74,7 @@ class ReviewRequest(BaseModel):
 
 
 async def mentor_volunteer_applicants(
-    application_type: Literal["Mentor", "Volunteer"]
+    application_type: Literal["Mentor", "Volunteer"],
 ) -> list[ApplicantSummary]:
     """Get records of all mentor and volunteer applicants."""
     records: list[dict[str, object]] = await mongodb_handler.retrieve(
@@ -96,7 +102,7 @@ async def mentor_volunteer_applicants(
 
 @router.get("/applicants/mentors")
 async def mentor_applicants(
-    user: Annotated[User, Depends(require_mentor_reviewer)]
+    user: Annotated[User, Depends(require_mentor_reviewer)],
 ) -> list[ApplicantSummary]:
     """Get records of all mentor applicants."""
     log.info("%s requested mentor applicants", user)
@@ -106,7 +112,7 @@ async def mentor_applicants(
 
 @router.get("/applicants/volunteers")
 async def volunteer_applicants(
-    user: Annotated[User, Depends(require_volunteer_reviewer)]
+    user: Annotated[User, Depends(require_volunteer_reviewer)],
 ) -> list[ApplicantSummary]:
     """Get records of all volunteer applicants."""
     log.info("%s requested volunteer applicants", user)
@@ -116,7 +122,7 @@ async def volunteer_applicants(
 
 @router.get("/applicants/hackers")
 async def hacker_applicants(
-    user: Annotated[User, Depends(require_hacker_reviewer)]
+    user: Annotated[User, Depends(require_hacker_reviewer)],
 ) -> list[HackerApplicantSummary]:
     """Get records of all hacker applicants."""
     log.info("%s requested hacker applicants", user)
@@ -129,12 +135,9 @@ async def hacker_applicants(
             "status",
             "first_name",
             "last_name",
-            "application_data.school",
-            "application_data.submission_time",
-            "application_data.reviews",
+            "application_data",
         ],
     )
-
     thresholds: Optional[dict[str, float]] = await retrieve_thresholds()
 
     if not thresholds:
@@ -148,6 +151,7 @@ async def hacker_applicants(
 
     try:
         return TypeAdapter(list[HackerApplicantSummary]).validate_python(records)
+
     except ValidationError:
         raise RuntimeError("Could not parse applicant data.")
 
@@ -208,7 +212,7 @@ async def applicant_summary() -> dict[ApplicantStatus, int]:
     dependencies=[Depends(require_manager)],
 )
 async def applications(
-    group_by: Literal["school", "role"]
+    group_by: Literal["school", "role"],
 ) -> dict[str, dict[date, int]]:
     if group_by == "school":
         return await summary_handler.applications_by_school()
@@ -243,7 +247,6 @@ async def submit_review(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     if Role.HACKER in applicant_record["roles"]:
-
         if applicant_review.score < 0 or applicant_review.score > 10:
             log.error("Invalid review score submitted.")
             raise HTTPException(status.HTTP_400_BAD_REQUEST)
@@ -289,7 +292,7 @@ async def submit_review(
 
 @router.get("/get-thresholds")
 async def get_hacker_score_thresholds(
-    user: Annotated[User, Depends(require_manager)]
+    user: Annotated[User, Depends(require_manager)],
 ) -> Optional[dict[str, Any]]:
     """
     Gets accepted and waitlisted thresholds

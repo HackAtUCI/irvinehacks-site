@@ -12,7 +12,8 @@ export interface HackerApplicantSummary {
 	reviewers: ReadonlyArray<string>;
 	avg_score: number;
 	application_data: {
-		school: string;
+		school?: string;
+		school_year?: string;
 		submission_time: string;
 	};
 }

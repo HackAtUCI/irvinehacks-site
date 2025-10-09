@@ -17,7 +17,7 @@ api.interceptors.request.use((config) => {
 	const provided = config.headers.get("Cookie");
 	const newCookies = (provided ? `${provided}; ` : "") + cookieStore.toString();
 	config.headers.set("Cookie", newCookies);
-	config.headers.set("X-Hackathon-Name", "irvinehacks");
+	config.headers.set("X-Hackathon-Name", "zothacks");
 
 	return config;
 });

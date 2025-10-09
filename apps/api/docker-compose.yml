@@ -10,8 +10,6 @@ services:
             MONGO_INITDB_ROOT_PASSWORD: example
         volumes:
             - mongodb_data_volume:/data/db
-        ports:
-            - "27017:27017"
 
     mongo-express:
         image: mongo-express

@@ -32,10 +32,10 @@ type ColumnDef = {
 };
 
 interface HackerApplicantsListProps {
-	extraColumn: ColumnDef;
+	hackathonName: "irvinehacks" | "zothacks";
 }
 
-function HackerApplicantsList({ extraColumn }: HackerApplicantsListProps) {
+function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 	const router = useRouter();
 	const { roles } = useContext(UserContext);
 
@@ -125,6 +125,20 @@ function HackerApplicantsList({ extraColumn }: HackerApplicantsListProps) {
 		</Box>
 	);
 
+	const zothacksExtraColumn: ColumnDef = {
+		id: "year",
+		header: "Year",
+		content: ({ application_data }) => application_data.school_year,
+	};
+
+	const irvinehacksExtraColumn: ColumnDef = {
+		id: "school",
+		header: "School",
+		content: ({ application_data }) => application_data.school,
+	};
+
+	const extraColumn =
+		hackathonName === "zothacks" ? zothacksExtraColumn : irvinehacksExtraColumn;
 	return (
 		<Cards
 			cardDefinition={{
@@ -233,14 +247,19 @@ function HackerApplicantsList({ extraColumn }: HackerApplicantsListProps) {
 	);
 }
 
-const CardHeader = ({ _id, first_name, last_name }: HackerApplicantSummary) => {
+const CardHeader = ({
+	_id,
+	first_name,
+	last_name,
+	hackathonName,
+}: HackerApplicantSummary & { hackathonName: "irvinehacks" | "zothacks" }) => {
 	const followWithNextLink = useFollowWithNextLink();
+	const href =
+		hackathonName === "zothacks"
+			? `/admin/applicants/zothacks-hackers/${_id}`
+			: `/admin/applicants/hackers/${_id}`;
 	return (
-		<Link
-			href={`/admin/applicants/hackers/${_id}`}
-			fontSize="inherit"
-			onFollow={followWithNextLink}
-		>
+		<Link href={href} fontSize="inherit" onFollow={followWithNextLink}>
 			{first_name} {last_name}
 		</Link>
 	);

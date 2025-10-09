@@ -3,15 +3,7 @@
 import HackerApplicantsList from "@/app/admin/applicants/components/HackerApplicantsList";
 
 function HackerApplicants() {
-	return (
-		<HackerApplicantsList
-			extraColumn={{
-				id: "school",
-				header: "School",
-				content: ({ application_data }) => application_data.school,
-			}}
-		/>
-	);
+	return <HackerApplicantsList hackathonName="irvinehacks" />;
 }
 
 export default HackerApplicants;

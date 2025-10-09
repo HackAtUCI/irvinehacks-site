@@ -23,13 +23,6 @@ const ZH_HACKER_APPLICATION_SECTIONS: ZHHackerApplicationSections = {
 	],
 	Education: ["school_year", "major"],
 	"Hackathon Experience": ["hackathon_experience"],
-	// "Short Answer Questions": [
-	// 	"elevator_pitch_saq",
-	// 	"tech_experience_saq",
-	// 	"learn_about_self_saq",
-	// 	"pixel_art_saq",
-	// ],
-	// "Pixel Art": ["pixel_art_data"],
 	Comments: ["comments"],
 };
 
@@ -53,6 +46,28 @@ function ZotHacksHackerApplication({
 					),
 				)}
 			</Container>
+			<ScoreSection
+				title="Resume"
+				leftColumn={<p>Overqualified is an auto-reject</p>}
+				rightColumn={
+					<p>
+						<a
+							href={application_data.resume_url as string}
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							{application_data.resume_url}
+						</a>
+					</p>
+				}
+				options={[
+					{ label: "Weak", value: "5" },
+					{ label: "Medium", value: "15" },
+					{ label: "Strong", value: "0" },
+					{ label: "Overqualified (auto-reject)", value: "-1000" },
+				]}
+				useDropdown
+			/>
 			<ScoreSection
 				title="If you had 30 seconds in an elevator with your dream mentor, how would
 					you explain why you’re joining ZotHacks? [75 word limit]"

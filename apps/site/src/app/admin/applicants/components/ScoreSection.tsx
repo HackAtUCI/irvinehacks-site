@@ -33,17 +33,11 @@ export default function ScoreSection({
 	min = 0,
 	max = 5,
 	step = 1,
-	initialScore,
 	options,
 	leftColumn,
 	rightColumn,
 }: ScoreSectionProps) {
-	const defaultScore = useMemo(() => {
-		if (typeof initialScore === "number") return initialScore;
-		return Math.round((min + max) / 2);
-	}, [initialScore, min, max]);
-
-	const [score, setScore] = useState<number>(defaultScore);
+	const [score, setScore] = useState<number>(min);
 
 	const defaultOptions: SelectProps.Option[] = useMemo(
 		() => options ?? [],

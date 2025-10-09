@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import {
 	Container,
 	Header,
@@ -17,7 +17,6 @@ interface ScoreSectionProps {
 	min?: number;
 	max?: number;
 	step?: number;
-	initialScore?: number;
 	// Dropdown configuration
 	options?: SelectProps.Option[];
 	// Header override for Container header
@@ -25,6 +24,9 @@ interface ScoreSectionProps {
 	// Custom column content
 	leftColumn: React.ReactNode;
 	rightColumn: React.ReactNode;
+	// Controlled value and change handler
+	value: number;
+	onChange: (value: number) => void;
 }
 
 export default function ScoreSection({
@@ -36,16 +38,12 @@ export default function ScoreSection({
 	options,
 	leftColumn,
 	rightColumn,
+	value,
+	onChange,
 }: ScoreSectionProps) {
-	const [score, setScore] = useState<number>(min);
-
 	const defaultOptions: SelectProps.Option[] = useMemo(
 		() => options ?? [],
 		[options],
-	);
-
-	const [selectedOption, setSelectedOption] = useState<SelectProps.Option>(
-		() => defaultOptions[0],
 	);
 
 	return (
@@ -69,10 +67,14 @@ export default function ScoreSection({
 						<SpaceBetween size="s">
 							<Box fontWeight="bold">Select Score:</Box>
 							<Select
-								selectedOption={selectedOption}
-								onChange={({ detail }) =>
-									setSelectedOption(detail.selectedOption)
+								selectedOption={
+									defaultOptions.find((opt) => opt.value === String(value)) ??
+									null
 								}
+								onChange={({ detail }) => {
+									const newVal = Number(detail.selectedOption?.value ?? 0);
+									onChange(newVal);
+								}}
 								options={defaultOptions}
 								selectedAriaLabel="Selected score"
 								placeholder="Select a score"
@@ -80,10 +82,10 @@ export default function ScoreSection({
 						</SpaceBetween>
 					) : (
 						<SpaceBetween size="s">
-							<Box fontWeight="bold">Score: {score}</Box>
+							<Box fontWeight="bold">Score: {value}</Box>
 							<Slider
-								value={score}
-								onChange={({ detail }) => setScore(detail.value)}
+								value={value}
+								onChange={({ detail }) => onChange(detail.value)}
 								min={min}
 								max={max}
 								step={step}

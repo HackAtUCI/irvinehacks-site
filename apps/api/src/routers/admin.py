@@ -3,14 +3,14 @@ from logging import getLogger
 from typing import Annotated, Any, Literal, Mapping, Optional, Union
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
-from pydantic import BaseModel, TypeAdapter, ValidationError, Tag, Discriminator
+from pydantic import BaseModel, TypeAdapter, ValidationError
 from typing_extensions import assert_never
 
 from admin import applicant_review_processor, participant_manager, summary_handler
 from admin.participant_manager import Participant
 from auth.authorization import require_role
 from auth.user_identity import User, utc_now
-from models.ApplicationData import Decision, Review, get_discriminator_value
+from models.ApplicationData import Decision, Review
 from models.user_record import Applicant, ApplicantStatus, Role
 from services import mongodb_handler
 from services.mongodb_handler import BaseRecord, Collection
@@ -66,28 +66,7 @@ class HackerApplicantSummary(BaseRecord):
     decision: Optional[Decision] = None
     reviewers: list[str] = []
     avg_score: float
-    application_data: ApplicationDataSummary
-
-
-class ZotHacksHackerApplicantSummary(BaseRecord):
-    type: Literal["zothacks_hacker"] = "zothacks_hacker"
-    _id: str
-    first_name: str
-    last_name: str
-    status: str
-    decision: Optional[Decision] = None
-    reviewers: list[str] = []
-    avg_score: float = -1
-    application_data: ZotHacksApplicationDataSummary
-
-
-HackerApplicantSummaryUnion = Annotated[
-    Union[
-        Annotated[HackerApplicantSummary, Tag("hacker")],
-        Annotated[ZotHacksHackerApplicantSummary, Tag("zothacks_hacker")],
-    ],
-    Discriminator("type"),
-]
+    application_data: Union[ApplicationDataSummary, ZotHacksApplicationDataSummary]
 
 
 class ReviewRequest(BaseModel):
@@ -145,7 +124,7 @@ async def volunteer_applicants(
 @router.get("/applicants/hackers")
 async def hacker_applicants(
     user: Annotated[User, Depends(require_hacker_reviewer)],
-) -> list[HackerApplicantSummaryUnion]:
+) -> list[HackerApplicantSummary]:
     """Get records of all hacker applicants."""
     log.info("%s requested hacker applicants", user)
 
@@ -167,30 +146,12 @@ async def hacker_applicants(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     for record in records:
-        app_data = record.get("application_data", {})
-        sub_time = app_data.get("submission_time")
-        if isinstance(sub_time, dict) and "$date" in sub_time:
-            raw_date = sub_time["$date"]
-            app_data["submission_time"] = datetime.fromisoformat(
-                raw_date.replace("Z", "+00:00")
-            )
-
         applicant_review_processor.include_hacker_app_fields(
             record, thresholds["accept"], thresholds["waitlist"]
         )
 
-    for record in records:
-        app_data = record.get("application_data", {})
-        record_type = None
-        if "school_year" in app_data:
-            record_type = "zothacks_hacker"
-        elif "school" in app_data:
-            record_type = "hacker"
-        record["type"] = record_type
-        log.info(f"Parsed record {record['_id']} as {record_type}")
-    print(records)
     try:
-        return TypeAdapter(list[HackerApplicantSummaryUnion]).validate_python(records)
+        return TypeAdapter(list[HackerApplicantSummary]).validate_python(records)
 
     except ValidationError:
         raise RuntimeError("Could not parse applicant data.")
@@ -207,16 +168,7 @@ async def applicant(
 
     if not record:
         raise HTTPException(status.HTTP_404_NOT_FOUND)
-    app_data = record.get("application_data", {})
-    sub_time = app_data.get("submission_time")
-    if isinstance(sub_time, dict) and "$date" in sub_time:
-        raw_date = sub_time["$date"]
-        app_data["submission_time"] = datetime.fromisoformat(
-            raw_date.replace("Z", "+00:00")
-        )
-    record_type = get_discriminator_value(app_data)
-    if record_type:
-        record["application_data"]["type"] = record_type
+
     try:
         return Applicant.model_validate(record)
     except ValidationError:
@@ -296,7 +248,6 @@ async def submit_review(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     if Role.HACKER in applicant_record["roles"]:
-
         if applicant_review.score < 0 or applicant_review.score > 10:
             log.error("Invalid review score submitted.")
             raise HTTPException(status.HTTP_400_BAD_REQUEST)

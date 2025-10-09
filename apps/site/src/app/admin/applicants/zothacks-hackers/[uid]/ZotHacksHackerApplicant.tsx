@@ -7,7 +7,7 @@ interface ApplicantProps {
 function ZotHacksHackerApplicant({ params }: ApplicantProps) {
 	const { uid } = params;
 
-	return <Applicant uid={uid} applicationType="zothacks_hacker" />;
+	return <Applicant uid={uid} applicationType="hacker" />;
 }
 
 export default ZotHacksHackerApplicant;

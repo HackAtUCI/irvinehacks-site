@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useContext, useEffect, useState } from "react";
+import { ReactNode, useContext, useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Box from "@cloudscape-design/components/box";
 import Cards from "@cloudscape-design/components/cards";
@@ -139,10 +139,23 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 
 	const extraColumn =
 		hackathonName === "zothacks" ? zothacksExtraColumn : irvinehacksExtraColumn;
+
+	const renderHeader = useCallback(
+		({ _id, first_name, last_name }: HackerApplicantSummary) => (
+			<CardHeader
+				_id={_id}
+				first_name={first_name}
+				last_name={last_name}
+				hackathonName={hackathonName}
+			/>
+		),
+		[hackathonName],
+	);
+
 	return (
 		<Cards
 			cardDefinition={{
-				header: CardHeader,
+				header: renderHeader,
 				sections: [
 					{
 						id: "uid",
@@ -252,7 +265,9 @@ const CardHeader = ({
 	first_name,
 	last_name,
 	hackathonName,
-}: HackerApplicantSummary & { hackathonName: "irvinehacks" | "zothacks" }) => {
+}: Pick<HackerApplicantSummary, "_id" | "first_name" | "last_name"> & {
+	hackathonName: "irvinehacks" | "zothacks";
+}) => {
 	const followWithNextLink = useFollowWithNextLink();
 	const href =
 		hackathonName === "zothacks"

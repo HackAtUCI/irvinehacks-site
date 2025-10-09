@@ -9,8 +9,6 @@ import SideNavigation, {
 import {
 	isApplicationManager,
 	isHackerReviewer,
-	isMentorReviewer,
-	isVolunteerReviewer,
 	isDirector,
 } from "@/lib/admin/authorization";
 

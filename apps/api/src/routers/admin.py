@@ -59,7 +59,6 @@ class ApplicantSummary(BaseRecord):
 
 
 class HackerApplicantSummary(BaseRecord):
-    type: Literal["hacker"] = "hacker"
     first_name: str
     last_name: str
     status: str

@@ -87,6 +87,11 @@ export type VolunteerApplicationQuestion = Exclude<
 	"reviews"
 >;
 
+export type ZotHacksHackerApplicationQuestion = Exclude<
+	keyof ZotHacksHackerApplicationData,
+	"reviews"
+>;
+
 type ApplicationData =
 	| HackerApplicationData
 	| MentorApplicationData

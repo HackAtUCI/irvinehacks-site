@@ -7,8 +7,10 @@ import PixelArtDisplay from "./PixelArtDisplay";
 import HackerApplicationSection from "@/app/admin/applicants/hackers/components/HackerApplicationSection";
 import { ZotHacksHackerApplicationData } from "@/lib/admin/useApplicant";
 
+type ZHKeys = Exclude<keyof ZotHacksHackerApplicationData, "reviews">;
+
 interface ZHHackerApplicationSections {
-	[key: string]: (keyof ZotHacksHackerApplicationData)[];
+	[key: string]: ZHKeys[];
 }
 
 const ZH_HACKER_APPLICATION_SECTIONS: ZHHackerApplicationSections = {
@@ -57,8 +59,8 @@ function ZotHacksHackerApplication({
 							<HackerApplicationSection
 								key={section}
 								title={section}
-								data={application_data as any}
-								propsToShow={propsToShow as any}
+								data={application_data}
+								propsToShow={propsToShow}
 							/>
 						);
 					},

@@ -137,6 +137,7 @@ async def _generate_one_time_code(user: NativeUser) -> str:
 
     try:
         await mongodb_handler.insert(Collection.CODES, code_data)
+        log.info("Generated one-time code")
         return code
     except Exception as e:
         log.error(f"Failed to store one-time code in MongoDB: {e}")
@@ -154,6 +155,7 @@ async def _validate_one_time_code(code: str) -> NativeUser:
         code_data = await mongodb_handler.retrieve_one(Collection.CODES, {"code": code})
 
         if not code_data:
+            log.info("Code not found")
             raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid code")
 
         current_time = time.time()
@@ -176,6 +178,8 @@ async def _validate_one_time_code(code: str) -> NativeUser:
         await mongodb_handler.raw_update_one(
             Collection.CODES, {"code": code}, {"$unset": {"code": ""}}
         )
+
+        log.info(f"Validated code: {code}")
 
         return user
 
@@ -266,11 +270,13 @@ async def acs(
 
     # Generate one-time code if returning to external site
     if relay_state.startswith("https://zothacks.com"):
+        log.info("Relay starts with zothacks, generating one-time code")
         code = await _generate_one_time_code(user)
         redirect_url = f"{relay_state}?code={code}"
         return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
     else:
         # Same-domain redirect: set cookie directly
+        log.info("Relay from irvinehacks, issuing identity")
         res = RedirectResponse(relay_state, status_code=status.HTTP_303_SEE_OTHER)
         issue_user_identity(user, res)
         return res
@@ -301,7 +307,9 @@ async def get_saml_metadata() -> Response:
 @router.get("/exchange")
 async def exchange_code(code: str) -> RedirectResponse:
     """Exchange one-time code for JWT."""
+    log.info(f"Attempting exchange with code: {code}")
     user = await _validate_one_time_code(code)
     res = RedirectResponse("/", status_code=status.HTTP_303_SEE_OTHER)
+    log.info("Issuing user identity")
     issue_user_identity(user, res)
     return res

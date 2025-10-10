@@ -1,5 +1,7 @@
 import json
 import os
+import secrets
+import time
 from urllib.parse import urlparse
 from functools import lru_cache
 from logging import getLogger
@@ -26,6 +28,9 @@ SP_KEY = os.getenv("SP_KEY")
 
 
 ALLOWED_RELAY_HOSTS = {"zothacks.com", "www.zothacks.com", "localhost"}
+
+
+ONE_TIME_CODE_TTL = 5 * 60  # in seconds
 
 
 def _is_valid_relay_state(relay_state: str) -> bool:
@@ -113,6 +118,80 @@ async def _update_last_login(user: NativeUser) -> None:
     )
 
 
+async def _generate_one_time_code(user: NativeUser) -> str:
+    """Generate a secure one-time code and store it in MongoDB."""
+    code = secrets.token_urlsafe(32)
+    expires_at = time.time() + ONE_TIME_CODE_TTL
+
+    code_data = {
+        "code": code,
+        "user": {
+            "ucinetid": user.ucinetid,
+            "display_name": user.display_name,
+            "email": user.email,
+            "affiliations": user.affiliations,
+        },
+        "expires_at": expires_at,
+        "created_at": time.time(),
+    }
+
+    try:
+        await mongodb_handler.insert(Collection.CODES, code_data)
+        log.info("Generated one-time code")
+        return code
+    except Exception as e:
+        log.error(f"Failed to store one-time code in MongoDB: {e}")
+        raise HTTPException(
+            status.HTTP_500_INTERNAL_SERVER_ERROR, "Failed to generate one-time code"
+        )
+
+
+async def _validate_one_time_code(code: str) -> NativeUser:
+    """Validate the one-time code and return the associated user."""
+    try:
+        if not code:
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid code")
+
+        code_data = await mongodb_handler.retrieve_one(Collection.CODES, {"code": code})
+
+        if not code_data:
+            log.info("Code not found")
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid code")
+
+        current_time = time.time()
+        if current_time > code_data["expires_at"]:
+            # Remove if expired
+            await mongodb_handler.raw_update_one(
+                Collection.CODES, {"code": code}, {"$unset": {"code": ""}}
+            )
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, "Code expired")
+
+        user_data = code_data["user"]
+        user = NativeUser(
+            ucinetid=user_data["ucinetid"],
+            display_name=user_data["display_name"],
+            email=user_data["email"],
+            affiliations=user_data["affiliations"],
+        )
+
+        # Remove the code after successful validation (single-use)
+        await mongodb_handler.raw_update_one(
+            Collection.CODES, {"code": code}, {"$unset": {"code": ""}}
+        )
+
+        log.info(f"Validated code: {code}")
+
+        return user
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        log.error(f"Failed to validate one-time code: {e}")
+        raise HTTPException(
+            status.HTTP_500_INTERNAL_SERVER_ERROR, "Failed to validate one-time code"
+        )
+
+
 @router.get("/login")
 async def login(req: Request, return_to: str = "/") -> RedirectResponse:
     """Initiate login to SSO identity provider."""
@@ -189,9 +268,18 @@ async def acs(
 
     await _update_last_login(user)
 
-    res = RedirectResponse(relay_state, status_code=status.HTTP_303_SEE_OTHER)
-    issue_user_identity(user, res)
-    return res
+    # Generate one-time code if returning to external site
+    if relay_state.startswith("https://zothacks.com"):
+        log.info("Relay starts with zothacks, generating one-time code")
+        code = await _generate_one_time_code(user)
+        redirect_url = f"{relay_state}?code={code}"
+        return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
+    else:
+        # Same-domain redirect: set cookie directly
+        log.info("Relay from irvinehacks, issuing identity")
+        res = RedirectResponse(relay_state, status_code=status.HTTP_303_SEE_OTHER)
+        issue_user_identity(user, res)
+        return res
 
 
 @router.get("/sls")
@@ -214,3 +302,14 @@ async def get_saml_metadata() -> Response:
         raise HTTPException(500, "Could not prepare SP metadata")
 
     return Response(metadata, media_type="application/xml")
+
+
+@router.get("/exchange")
+async def exchange_code(code: str) -> RedirectResponse:
+    """Exchange one-time code for JWT."""
+    log.info(f"Attempting exchange with code: {code}")
+    user = await _validate_one_time_code(code)
+    res = RedirectResponse("/", status_code=status.HTTP_303_SEE_OTHER)
+    log.info("Issuing user identity")
+    issue_user_identity(user, res)
+    return res

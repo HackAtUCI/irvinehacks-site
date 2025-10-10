@@ -303,7 +303,7 @@ async def submit_review(
     log.info("%s reviewed hacker %s", reviewer, applicant_review.applicant)
 
 
-@router.post("/detailedReview")
+@router.post("/detailed-review")
 async def submit_detailed_review(
     applicant_review: DetailedReviewRequest,
     reviewer: User = Depends(require_reviewer),
@@ -370,11 +370,12 @@ async def submit_detailed_review(
             err_msg=f"{reviewer} could not submit review for {app}",
         )
 
+    uid_no_domain = reviewer.uid.split(".")[-1]
     await _try_update_applicant_with_query(
         applicant_review.applicant,
         update_query={
             "$set": {
-                f"application_data.review_breakdown.{reviewer.uid}": score_breakdown
+                f"application_data.review_breakdown.{uid_no_domain}": score_breakdown
             }
         },
         err_msg=f"{reviewer} could not submit review for {app}",

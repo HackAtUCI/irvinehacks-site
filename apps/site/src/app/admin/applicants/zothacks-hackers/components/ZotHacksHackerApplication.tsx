@@ -37,10 +37,10 @@ const HACKATHON_EXPERIENCE_SCORE_MAP: Record<HackathonExperience, number> = {
 
 function ZotHacksHackerApplication({
 	application_data,
-	onTotalScoreChange,
+	onScoreChange,
 }: {
 	application_data: ZotHacksHackerApplicationData;
-	onTotalScoreChange: (totalScore: number) => void;
+	onScoreChange: (scores: Object) => void;
 }) {
 	// Resume options used for dropdown-based ScoreSection
 	const resumeOptions = useMemo(
@@ -67,14 +67,17 @@ function ZotHacksHackerApplication({
 			HACKATHON_EXPERIENCE_SCORE_MAP[
 				application_data.hackathon_experience as HackathonExperience
 			] || 0;
-		const totalScore =
-			hackathonExperienceScore +
-			resumeScore +
-			elevatorScore +
-			techExperienceScore +
-			learnAboutSelfScore +
-			pixelArtScore;
-		onTotalScoreChange(Math.max(-2, totalScore));
+
+		const scoresObject = {
+			resume: resumeScore,
+			elevator_pitch_saq: elevatorScore,
+			tech_experience_saq: techExperienceScore,
+			learn_about_self_saq: learnAboutSelfScore,
+			pixel_art_saq: pixelArtScore,
+			hackathon_experience: hackathonExperienceScore,
+		};
+
+		onScoreChange(scoresObject);
 	}, [
 		application_data.hackathon_experience,
 		resumeScore,
@@ -82,7 +85,7 @@ function ZotHacksHackerApplication({
 		techExperienceScore,
 		learnAboutSelfScore,
 		pixelArtScore,
-		onTotalScoreChange,
+		onScoreChange,
 	]);
 
 	return (

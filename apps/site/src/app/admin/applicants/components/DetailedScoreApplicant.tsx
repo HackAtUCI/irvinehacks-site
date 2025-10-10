@@ -20,11 +20,11 @@ interface ApplicantProps {
 }
 
 function DetailedScoreApplicant({ uid, applicationType }: ApplicantProps) {
-	const { applicant, loading, submitReview } = useApplicant(
+	const { applicant, loading, submitDetailedReview } = useApplicant(
 		uid,
 		applicationType,
 	);
-	const [totalScore, setTotalScore] = useState<number>(0);
+	const [scores, setScores] = useState({});
 
 	if (loading || !applicant) {
 		return (
@@ -47,8 +47,8 @@ function DetailedScoreApplicant({ uid, applicationType }: ApplicantProps) {
 							<ZotHacksHackerApplicantActions
 								applicant={applicant._id}
 								reviews={application_data.reviews}
-								score={totalScore}
-								submitReview={submitReview}
+								scores={scores}
+								submitDetailedReview={submitDetailedReview}
 							/>
 						) : (
 							<></>
@@ -64,7 +64,7 @@ function DetailedScoreApplicant({ uid, applicationType }: ApplicantProps) {
 				{applicant.roles.includes(ParticipantRole.Hacker) ? (
 					<ZotHacksHackerApplication
 						application_data={application_data as ZotHacksHackerApplicationData}
-						onTotalScoreChange={setTotalScore}
+						onScoreChange={setScores}
 					/>
 				) : applicant.roles.includes(ParticipantRole.Mentor) ? (
 					<></>

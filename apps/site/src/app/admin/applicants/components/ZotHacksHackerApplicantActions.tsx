@@ -5,7 +5,11 @@ import Button from "@cloudscape-design/components/button";
 import Input from "@cloudscape-design/components/input";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 
-import { Review, submitReview } from "@/lib/admin/useApplicant";
+import {
+	Review,
+	submitDetailedReview,
+	submitReview,
+} from "@/lib/admin/useApplicant";
 import { Uid } from "@/lib/userRecord";
 import UserContext from "@/lib/admin/UserContext";
 import { isReviewer } from "@/lib/admin/authorization";
@@ -26,15 +30,15 @@ const ColoredTextBox = ({ text }: ColoredTextBoxProps) => {
 interface ApplicantActionsProps {
 	applicant: Uid;
 	reviews: Review[];
-	score: number;
-	submitReview: submitReview;
+	scores: Object;
+	submitDetailedReview: submitDetailedReview;
 }
 
 function ZotHacksHackerApplicantActions({
 	applicant,
 	reviews,
-	score,
-	submitReview,
+	scores,
+	submitDetailedReview,
 }: ApplicantActionsProps) {
 	const { uid, roles } = useContext(UserContext);
 
@@ -53,13 +57,18 @@ function ZotHacksHackerApplicantActions({
 
 	const handleClick = () => {
 		// TODO: use flashbar or modal for submit status
-		submitReview(applicant, score);
+		submitDetailedReview(applicant, scores);
 	};
+
+	const totalScore = Object.values(scores).reduce(
+		(acc, currentValue) => acc + currentValue,
+		0,
+	);
 
 	return canReview ? (
 		<SpaceBetween direction="horizontal" size="xs">
 			<SpaceBetween direction="horizontal" size="xs">
-				{score === -2 && (
+				{totalScore === -2 && (
 					<>
 						<Box variant="h3" color="text-status-error">
 							OVERQUALIFIED
@@ -68,7 +77,7 @@ function ZotHacksHackerApplicantActions({
 					</>
 				)}
 				<Box variant="h3" color="text-status-warning">
-					Calculated score: {score}
+					Calculated score: {totalScore}
 				</Box>
 			</SpaceBetween>
 

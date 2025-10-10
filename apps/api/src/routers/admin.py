@@ -310,7 +310,7 @@ async def submit_detailed_review(
 ) -> None:
     """Submit a review decision from the reviewer for the given hacker applicant."""
     score_breakdown = applicant_review.scores.model_dump()
-    total_score = max(sum(score_breakdown.values()), -2)
+    total_score = max(sum(score_breakdown.values()), 0)
 
     if total_score < -2 or total_score > 100:
         log.error("Invalid review score submitted.")

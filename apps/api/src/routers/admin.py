@@ -322,7 +322,12 @@ async def submit_detailed_review(
     applicant_record = await mongodb_handler.retrieve_one(
         Collection.USERS,
         {"_id": applicant_review.applicant},
-        ["_id", "application_data.reviews", "roles"],
+        [
+            "_id",
+            "application_data.reviews",
+            "application_data.review_breakdown",
+            "roles",
+        ],
     )
     if not applicant_record:
         log.error("Could not retrieve applicant after submitting review")
@@ -356,7 +361,6 @@ async def submit_detailed_review(
             update_query=update_query,
             err_msg=f"{reviewer} could not submit review for {app}",
         )
-
     else:
         await _try_update_applicant_with_query(
             applicant_review.applicant,
@@ -366,6 +370,16 @@ async def submit_detailed_review(
             },
             err_msg=f"{reviewer} could not submit review for {app}",
         )
+
+    await _try_update_applicant_with_query(
+        applicant_review.applicant,
+        update_query={
+            "$set": {
+                f"application_data.review_breakdown.{reviewer.uid}": score_breakdown
+            }
+        },
+        err_msg=f"{reviewer} could not submit review for {app}",
+    )
 
     log.info("%s reviewed hacker %s", reviewer, applicant_review.applicant)
 

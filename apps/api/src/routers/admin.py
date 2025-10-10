@@ -325,7 +325,6 @@ async def submit_detailed_review(
         [
             "_id",
             "application_data.reviews",
-            "application_data.review_breakdown",
             "roles",
         ],
     )

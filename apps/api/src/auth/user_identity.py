@@ -12,7 +12,8 @@ JWT_SECRET = os.getenv("JWT_SECRET", "")
 
 COOKIE_NAME = "irvinehacks_auth"
 
-UCI_SSO_ENABLED = os.getenv("UCI_SSO_ENABLED", "true") == "true"
+# UCI_SSO_ENABLED = os.getenv("UCI_SSO_ENABLED", "true") == "true"
+UCI_SSO_ENABLED = True
 
 
 class User(BaseModel):

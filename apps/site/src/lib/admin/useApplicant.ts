@@ -16,11 +16,12 @@ interface BaseApplicationData {
 	major: string;
 }
 
+export type HackathonExperience = "first_time" | "some_experience" | "veteran";
 export interface ZotHacksHackerApplicationData extends BaseApplicationData {
 	school_year: string;
 	dietary_restrictions: string[];
 	allergies: string | null;
-	hackathon_experience: "first_time" | "some_experience" | "veteran";
+	hackathon_experience: HackathonExperience;
 	elevator_pitch_saq: string;
 	tech_experience_saq: string;
 	learn_about_self_saq: string;

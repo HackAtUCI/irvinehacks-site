@@ -9,6 +9,7 @@ import { Review, submitReview } from "@/lib/admin/useApplicant";
 import { Uid } from "@/lib/userRecord";
 import UserContext from "@/lib/admin/UserContext";
 import { isReviewer } from "@/lib/admin/authorization";
+import Container from "@cloudscape-design/components/container";
 
 interface ColoredTextBoxProps {
 	text: string | undefined;
@@ -25,16 +26,17 @@ const ColoredTextBox = ({ text }: ColoredTextBoxProps) => {
 interface ApplicantActionsProps {
 	applicant: Uid;
 	reviews: Review[];
+	score: number;
 	submitReview: submitReview;
 }
 
 function ZotHacksHackerApplicantActions({
 	applicant,
 	reviews,
+	score,
 	submitReview,
 }: ApplicantActionsProps) {
 	const { uid, roles } = useContext(UserContext);
-	const [value, setValue] = useState("");
 
 	const uniqueReviewers = Array.from(
 		new Set(reviews.map((review) => review[1])),
@@ -51,27 +53,14 @@ function ZotHacksHackerApplicantActions({
 
 	const handleClick = () => {
 		// TODO: use flashbar or modal for submit status
-		const val = parseFloat(value);
-		if (val >= 0 && val <= 10) {
-			submitReview(applicant, parseFloat(value));
-			setValue("");
-		}
+		submitReview(applicant, score);
 	};
 
 	return canReview ? (
 		<SpaceBetween direction="horizontal" size="xs">
-			<Input
-				onChange={({ detail }) => setValue(detail.value)}
-				value={value}
-				type="number"
-				inputMode="decimal"
-				placeholder="Applicant score"
-				step={0.5}
-				disabled={!canReview}
-				invalid={
-					value !== "" && (parseFloat(value) < 0 || parseFloat(value) > 10)
-				}
-			/>
+			<Box variant="h3" color="text-status-error">
+				Calculated score: {score}
+			</Box>
 			<Button onClick={handleClick} disabled={!canReview}>
 				Submit
 			</Button>
@@ -84,7 +73,7 @@ function ZotHacksHackerApplicantActions({
 				submitted reviews.
 			</Box>
 			<Box variant="awsui-key-label" color="text-status-info">
-				Contact Rosalind, Nicole, or Albert if you think this is an error.
+				Contact a Logistics or Tech director if you think this is an error.
 			</Box>
 		</SpaceBetween>
 	);

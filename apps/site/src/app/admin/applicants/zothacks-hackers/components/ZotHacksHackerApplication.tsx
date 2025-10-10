@@ -1,11 +1,14 @@
 import Container from "@cloudscape-design/components/container";
 import Header from "@cloudscape-design/components/header";
 import SpaceBetween from "@cloudscape-design/components/space-between";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 
 import PixelArtDisplay from "./PixelArtDisplay";
 import HackerApplicationSection from "@/app/admin/applicants/hackers/components/HackerApplicationSection";
-import { ZotHacksHackerApplicationData } from "@/lib/admin/useApplicant";
+import {
+	HackathonExperience,
+	ZotHacksHackerApplicationData,
+} from "@/lib/admin/useApplicant";
 import ScoreSection from "../../components/ScoreSection";
 
 type ZHKeys = Exclude<keyof ZotHacksHackerApplicationData, "reviews">;
@@ -26,7 +29,7 @@ const ZH_HACKER_APPLICATION_SECTIONS: ZHHackerApplicationSections = {
 	Comments: ["comments"],
 };
 
-const HACKATHON_EXPERIENCE_SCORE_MAP = {
+const HACKATHON_EXPERIENCE_SCORE_MAP: Record<HackathonExperience, number> = {
 	first_time: 5,
 	some_experience: 0,
 	veteran: -1000,
@@ -34,8 +37,10 @@ const HACKATHON_EXPERIENCE_SCORE_MAP = {
 
 function ZotHacksHackerApplication({
 	application_data,
+	onTotalScoreChange,
 }: {
 	application_data: ZotHacksHackerApplicationData;
+	onTotalScoreChange: (totalScore: number) => void;
 }) {
 	// Resume options used for dropdown-based ScoreSection
 	const resumeOptions = useMemo(
@@ -57,13 +62,28 @@ function ZotHacksHackerApplication({
 	const [learnAboutSelfScore, setLearnAboutSelfScore] = useState<number>(0);
 	const [pixelArtScore, setPixelArtScore] = useState<number>(0);
 
-	const totalScore =
-		HACKATHON_EXPERIENCE_SCORE_MAP[application_data.hackathon_experience] +
-		resumeScore +
-		elevatorScore +
-		techExperienceScore +
-		learnAboutSelfScore +
-		pixelArtScore;
+	useEffect(() => {
+		const hackathonExperienceScore =
+			HACKATHON_EXPERIENCE_SCORE_MAP[
+				application_data.hackathon_experience as HackathonExperience
+			] || 0;
+		const totalScore =
+			hackathonExperienceScore +
+			resumeScore +
+			elevatorScore +
+			techExperienceScore +
+			learnAboutSelfScore +
+			pixelArtScore;
+		onTotalScoreChange(totalScore);
+	}, [
+		application_data.hackathon_experience,
+		resumeScore,
+		elevatorScore,
+		techExperienceScore,
+		learnAboutSelfScore,
+		pixelArtScore,
+		onTotalScoreChange,
+	]);
 
 	return (
 		<SpaceBetween direction="vertical" size="m">

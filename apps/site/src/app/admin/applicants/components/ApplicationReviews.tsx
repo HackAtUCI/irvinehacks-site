@@ -5,6 +5,8 @@ import { Review } from "@/lib/admin/useApplicant";
 import UserContext from "@/lib/admin/UserContext";
 import { Status, Uid } from "@/lib/userRecord";
 import { scoresToDecisions } from "@/lib/decisionScores";
+import Box from "@cloudscape-design/components/box";
+import { SpaceBetween } from "@cloudscape-design/components";
 
 interface ApplicationReviewsProps {
 	reviews: Review[];
@@ -42,8 +44,19 @@ function ApplicationReviews({ reviews, isHacker }: ApplicationReviewsProps) {
 					</li>
 				) : (
 					<li key={date}>
-						{formatUid(reviewer)} reviewed this application on{" "}
-						{formatDate(date)}
+						<SpaceBetween direction="horizontal" size="xxxs">
+							{formatUid(reviewer)}
+							{isHacker && score === -2 ? (
+								<>
+									{" "}
+									marked this applicant{" "}
+									<Box color="text-status-error">OVERQUALIFIED</Box>
+								</>
+							) : (
+								<> reviewed this application </>
+							)}
+							on {formatDate(date)}
+						</SpaceBetween>
 					</li>
 				),
 			)}

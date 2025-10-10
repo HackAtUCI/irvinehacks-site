@@ -29,7 +29,8 @@ function ApplicationReviews({ reviews, isHacker }: ApplicationReviewsProps) {
 					<li key={date}>
 						{isHacker ? (
 							<>
-								You scored this applicant a {score} on {formatDate(date)}
+								You scored this applicant a{" "}
+								{score === -2 ? "OVERQUALIFIED" : score} on {formatDate(date)}
 							</>
 						) : (
 							<>

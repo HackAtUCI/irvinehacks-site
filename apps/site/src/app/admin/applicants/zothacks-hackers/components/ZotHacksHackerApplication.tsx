@@ -5,7 +5,7 @@ import { useMemo, useState, useEffect, useContext } from "react";
 
 import PixelArtDisplay from "./PixelArtDisplay";
 import HackerApplicationSection from "@/app/admin/applicants/hackers/components/HackerApplicationSection";
-import useApplicant, {
+import {
 	HackathonExperience,
 	ZotHacksHackerApplicationData,
 } from "@/lib/admin/useApplicant";
@@ -58,27 +58,37 @@ function ZotHacksHackerApplication({
 	);
 
 	// Controlled scores for each section
-	const [resumeScore, setResumeScore] = useState<number>(
-		Number(resumeOptions[0].value),
-	);
+	const [resumeScore, setResumeScore] = useState<number>(() => {
+		const raw = formattedUid
+			? application_data?.review_breakdown?.[formattedUid]?.resume
+			: undefined;
+		// If there's a stored score, ensure it's one of the allowed dropdown values; otherwise default
+		const allowedValues = new Set(resumeOptions.map((o) => Number(o.value)));
+		return allowedValues.has(Number(raw))
+			? Number(raw)
+			: Number(resumeOptions[0].value);
+	});
 	const [elevatorScore, setElevatorScore] = useState<number>(
 		formattedUid
-			? application_data?.review_breakdown?.[formattedUid]?.elevator_pitch_saq
+			? application_data?.review_breakdown?.[formattedUid]
+					?.elevator_pitch_saq ?? 0
 			: 0,
 	);
 	const [techExperienceScore, setTechExperienceScore] = useState<number>(
 		formattedUid
-			? application_data?.review_breakdown?.[formattedUid]?.tech_experience_saq
+			? application_data?.review_breakdown?.[formattedUid]
+					?.tech_experience_saq ?? 0
 			: 0,
 	);
 	const [learnAboutSelfScore, setLearnAboutSelfScore] = useState<number>(
 		formattedUid
-			? application_data?.review_breakdown?.[formattedUid]?.learn_about_self_saq
+			? application_data?.review_breakdown?.[formattedUid]
+					?.learn_about_self_saq ?? 0
 			: 0,
 	);
 	const [pixelArtScore, setPixelArtScore] = useState<number>(
 		formattedUid
-			? application_data?.review_breakdown?.[formattedUid]?.pixel_art_saq
+			? application_data?.review_breakdown?.[formattedUid]?.pixel_art_saq ?? 0
 			: 0,
 	);
 

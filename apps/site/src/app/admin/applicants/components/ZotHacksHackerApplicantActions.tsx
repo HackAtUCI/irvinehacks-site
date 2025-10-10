@@ -68,7 +68,7 @@ function ZotHacksHackerApplicantActions({
 	return canReview ? (
 		<SpaceBetween direction="horizontal" size="xs">
 			<SpaceBetween direction="horizontal" size="xs">
-				{totalScore === -2 && (
+				{totalScore < 0 && (
 					<>
 						<Box variant="h3" color="text-status-error">
 							OVERQUALIFIED

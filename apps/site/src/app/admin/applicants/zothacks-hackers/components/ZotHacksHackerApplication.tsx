@@ -41,7 +41,7 @@ function ZotHacksHackerApplication({
 	onScoreChange,
 }: {
 	application_data: ZotHacksHackerApplicationData;
-	onScoreChange: (scores: Object) => void;
+	onScoreChange: (scores: object) => void;
 }) {
 	const { uid: reviewer_uid } = useContext(UserContext);
 	const formattedUid = reviewer_uid?.split(".").at(-1);

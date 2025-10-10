@@ -1,12 +1,12 @@
 import { useContext } from "react";
+import Box from "@cloudscape-design/components/box";
+import { SpaceBetween } from "@cloudscape-design/components";
 
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
 import { Review } from "@/lib/admin/useApplicant";
 import UserContext from "@/lib/admin/UserContext";
 import { Status, Uid } from "@/lib/userRecord";
 import { scoresToDecisions } from "@/lib/decisionScores";
-import Box from "@cloudscape-design/components/box";
-import { SpaceBetween } from "@cloudscape-design/components";
 
 interface ApplicationReviewsProps {
 	reviews: Review[];

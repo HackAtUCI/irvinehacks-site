@@ -140,7 +140,7 @@ function useApplicant(
 		mutate();
 	}
 
-	async function submitDetailedReview(uid: Uid, scores: Object) {
+	async function submitDetailedReview(uid: Uid, scores: object) {
 		await axios.post("/api/admin/detailed-review", {
 			applicant: uid,
 			scores: scores,
@@ -159,6 +159,6 @@ function useApplicant(
 }
 
 export type submitReview = (uid: Uid, score: number) => Promise<void>;
-export type submitDetailedReview = (uid: Uid, scores: Object) => Promise<void>;
+export type submitDetailedReview = (uid: Uid, scores: object) => Promise<void>;
 
 export default useApplicant;

@@ -1,19 +1,13 @@
-import { useContext, useState } from "react";
+import { useContext } from "react";
 
 import Box from "@cloudscape-design/components/box";
 import Button from "@cloudscape-design/components/button";
-import Input from "@cloudscape-design/components/input";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 
-import {
-	Review,
-	submitDetailedReview,
-	submitReview,
-} from "@/lib/admin/useApplicant";
+import { Review, submitDetailedReview } from "@/lib/admin/useApplicant";
 import { Uid } from "@/lib/userRecord";
 import UserContext from "@/lib/admin/UserContext";
 import { isReviewer } from "@/lib/admin/authorization";
-import Container from "@cloudscape-design/components/container";
 
 interface ColoredTextBoxProps {
 	text: string | undefined;
@@ -30,7 +24,7 @@ const ColoredTextBox = ({ text }: ColoredTextBoxProps) => {
 interface ApplicantActionsProps {
 	applicant: Uid;
 	reviews: Review[];
-	scores: Object;
+	scores: object;
 	submitDetailedReview: submitDetailedReview;
 }
 

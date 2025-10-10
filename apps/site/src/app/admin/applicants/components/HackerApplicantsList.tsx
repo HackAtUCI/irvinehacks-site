@@ -152,6 +152,12 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		[hackathonName],
 	);
 
+	const avgScore = ({ avg_score }: { avg_score: number }) => {
+		if (avg_score === -1) return "-";
+		if (avg_score === -3) return "OVERQUALIFIED (-3)";
+		return avg_score;
+	};
+
 	return (
 		<Cards
 			cardDefinition={{
@@ -182,12 +188,7 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 					{
 						id: "avg_score",
 						header: "Averaged Score",
-						content: ({ avg_score }) =>
-							avg_score === -1
-								? "-"
-								: avg_score === -3
-								  ? "OVERQUALIFIED (-3)"
-								  : avg_score,
+						content: avgScore,
 					},
 					{
 						id: "decision",

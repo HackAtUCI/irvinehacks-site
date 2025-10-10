@@ -1,4 +1,4 @@
-import Applicant from "@/app/admin/applicants/components/Applicant";
+import DetailedScoreApplicant from "@/app/admin/applicants/components/DetailedScoreApplicant";
 
 interface ApplicantProps {
 	params: { uid: string };
@@ -7,9 +7,7 @@ interface ApplicantProps {
 function ZotHacksHackerApplicant({ params }: ApplicantProps) {
 	const { uid } = params;
 
-	return (
-		<Applicant uid={uid} applicationType="hacker" hackathonName="zothacks" />
-	);
+	return <DetailedScoreApplicant uid={uid} applicationType="hacker" />;
 }
 
 export default ZotHacksHackerApplicant;

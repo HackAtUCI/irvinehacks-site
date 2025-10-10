@@ -6,26 +6,22 @@ import SpaceBetween from "@cloudscape-design/components/space-between";
 import Spinner from "@cloudscape-design/components/spinner";
 
 import useApplicant, {
-	HackerApplicationData,
-	MentorApplicationData,
-	VolunteerApplicationData,
+	ZotHacksHackerApplicationData,
 } from "@/lib/admin/useApplicant";
-
-import HackerApplication from "@/app/admin/applicants/hackers/components/HackerApplication";
-import MentorApplication from "@/app/admin/applicants/mentors/components/MentorApplication";
-import VolunteerApplication from "@/app/admin/applicants/volunteers/components/VolunteerApplication";
 
 import ApplicantActions from "./ApplicantActions";
 import ApplicantOverview from "./ApplicantOverview";
 import HackerApplicantActions from "./HackerApplicantActions";
 import { ParticipantRole } from "@/lib/userRecord";
+import ZotHacksHackerApplication from "../zothacks-hackers/components/ZotHacksHackerApplication";
+import ZotHacksHackerApplicantActions from "./ZotHacksHackerApplicantActions";
 
 interface ApplicantProps {
 	uid: string;
 	applicationType: "hacker" | "mentor" | "volunteer";
 }
 
-function Applicant({ uid, applicationType }: ApplicantProps) {
+function DetailedScoreApplicant({ uid, applicationType }: ApplicantProps) {
 	const { applicant, loading, submitReview } = useApplicant(
 		uid,
 		applicationType,
@@ -49,16 +45,13 @@ function Applicant({ uid, applicationType }: ApplicantProps) {
 					description="Applicant"
 					actions={
 						applicant.roles.includes(ParticipantRole.Hacker) ? (
-							<HackerApplicantActions
+							<ZotHacksHackerApplicantActions
 								applicant={applicant._id}
 								reviews={application_data.reviews}
 								submitReview={submitReview}
 							/>
 						) : (
-							<ApplicantActions
-								applicant={applicant._id}
-								submitReview={submitReview}
-							/>
+							<></>
 						)
 					}
 				>
@@ -69,21 +62,17 @@ function Applicant({ uid, applicationType }: ApplicantProps) {
 			<SpaceBetween direction="vertical" size="l">
 				<ApplicantOverview applicant={applicant} />
 				{applicant.roles.includes(ParticipantRole.Hacker) ? (
-					<HackerApplication
-						application_data={application_data as HackerApplicationData}
+					<ZotHacksHackerApplication
+						application_data={application_data as ZotHacksHackerApplicationData}
 					/>
 				) : applicant.roles.includes(ParticipantRole.Mentor) ? (
-					<MentorApplication
-						application_data={application_data as MentorApplicationData}
-					/>
+					<></>
 				) : (
-					<VolunteerApplication
-						application_data={application_data as VolunteerApplicationData}
-					/>
+					<></>
 				)}
 			</SpaceBetween>
 		</ContentLayout>
 	);
 }
 
-export default Applicant;
+export default DetailedScoreApplicant;

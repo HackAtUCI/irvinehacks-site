@@ -84,7 +84,7 @@ function HackerApplicantActions({
 				submitted reviews.
 			</Box>
 			<Box variant="awsui-key-label" color="text-status-info">
-				Contact Rosalind, Nicole, or Albert if you think this is an error.
+				Contact a Logistics or Tech director if you think this is an error.
 			</Box>
 		</SpaceBetween>
 	);

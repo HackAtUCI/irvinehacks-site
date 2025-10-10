@@ -35,7 +35,7 @@ function AdminSidebar() {
 	if (isHackerReviewer(roles)) {
 		applicationLinks.push({
 			type: "link",
-			text: "Hacker Applications",
+			text: "ZotHacks Hacker Applications",
 			href: "/admin/applicants/zothacks-hackers",
 		});
 	}

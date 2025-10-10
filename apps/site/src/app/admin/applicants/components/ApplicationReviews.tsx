@@ -1,4 +1,6 @@
 import { useContext } from "react";
+import Box from "@cloudscape-design/components/box";
+import { SpaceBetween } from "@cloudscape-design/components";
 
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
 import { Review } from "@/lib/admin/useApplicant";
@@ -29,7 +31,8 @@ function ApplicationReviews({ reviews, isHacker }: ApplicationReviewsProps) {
 					<li key={date}>
 						{isHacker ? (
 							<>
-								You scored this applicant a {score} on {formatDate(date)}
+								You scored this applicant a{" "}
+								{score === -3 ? "OVERQUALIFIED" : score} on {formatDate(date)}
 							</>
 						) : (
 							<>
@@ -41,8 +44,19 @@ function ApplicationReviews({ reviews, isHacker }: ApplicationReviewsProps) {
 					</li>
 				) : (
 					<li key={date}>
-						{formatUid(reviewer)} reviewed this application on{" "}
-						{formatDate(date)}
+						<SpaceBetween direction="horizontal" size="xxxs">
+							{formatUid(reviewer)}
+							{isHacker && score === -3 ? (
+								<>
+									{" "}
+									marked this applicant{" "}
+									<Box color="text-status-error">OVERQUALIFIED</Box>
+								</>
+							) : (
+								<> reviewed this application </>
+							)}
+							on {formatDate(date)}
+						</SpaceBetween>
 					</li>
 				),
 			)}

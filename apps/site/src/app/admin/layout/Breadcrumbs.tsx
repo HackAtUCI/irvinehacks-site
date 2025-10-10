@@ -20,9 +20,10 @@ const pathTitles: PathTitles = {
 	directors: "Directors",
 	organizers: "Organizers",
 	"email-sender": "Email Sender",
+	"zothacks-hackers": "ZotHacks Hacker Applications",
 };
 
-const DEFAULT_ITEMS = [{ text: "IrvineHacks 2025", href: BASE_PATH }];
+const DEFAULT_ITEMS = [{ text: "Admin Dashboard", href: BASE_PATH }];
 
 function Breadcrumbs() {
 	const pathname = usePathname();

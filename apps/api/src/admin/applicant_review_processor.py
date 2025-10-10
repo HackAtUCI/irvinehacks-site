@@ -46,6 +46,8 @@ def _get_avg_score(reviews: list[tuple[str, str, float]]) -> float:
 
     last_score = _get_last_score(unique_reviewers.pop(), reviews)
     last_score2 = _get_last_score(unique_reviewers.pop(), reviews)
+    if any([last_score == -3, last_score2 == -3]):
+        return -3
     return (last_score + last_score2) / 2
 
 

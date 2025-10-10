@@ -73,6 +73,19 @@ class ReviewRequest(BaseModel):
     score: float
 
 
+class ZotHacksHackerDetailedScores(BaseModel):
+    resume: int
+    elevator_pitch_saq: int
+    tech_experience_saq: int
+    learn_about_self_saq: int
+    pixel_art_saq: int
+
+
+class DetailedReviewRequest(BaseModel):
+    applicant: str
+    scores: ZotHacksHackerDetailedScores
+
+
 async def mentor_volunteer_applicants(
     application_type: Literal["Mentor", "Volunteer"],
 ) -> list[ApplicantSummary]:
@@ -232,8 +245,6 @@ async def submit_review(
         log.error("Invalid review score submitted.")
         raise HTTPException(status.HTTP_400_BAD_REQUEST)
 
-    log.info("%s reviewed hacker %s", reviewer, applicant_review.applicant)
-
     review: Review = (utc_now(), reviewer.uid, applicant_review.score)
     app = applicant_review.applicant
 
@@ -274,20 +285,89 @@ async def submit_review(
             update_query.update({"$set": {"status": "REVIEWED"}})
 
         await _try_update_applicant_with_query(
-            applicant_review,
+            applicant_review.applicant,
             update_query=update_query,
             err_msg=f"{reviewer} could not submit review for {app}",
         )
 
     else:
         await _try_update_applicant_with_query(
-            applicant_review,
+            applicant_review.applicant,
             update_query={
                 "$push": {"application_data.reviews": review},
                 "$set": {"status": "REVIEWED"},
             },
             err_msg=f"{reviewer} could not submit review for {app}",
         )
+
+    log.info("%s reviewed hacker %s", reviewer, applicant_review.applicant)
+
+
+@router.post("/detailedReview")
+async def submit_detailed_review(
+    applicant_review: DetailedReviewRequest,
+    reviewer: User = Depends(require_reviewer),
+) -> None:
+    """Submit a review decision from the reviewer for the given hacker applicant."""
+    score_breakdown = applicant_review.scores.model_dump()
+    total_score = sum(score_breakdown.values())
+
+    if total_score < -2 or total_score > 100:
+        log.error("Invalid review score submitted.")
+        raise HTTPException(status.HTTP_400_BAD_REQUEST)
+
+    review: Review = (utc_now(), reviewer.uid, total_score)
+    app = applicant_review.applicant
+
+    applicant_record = await mongodb_handler.retrieve_one(
+        Collection.USERS,
+        {"_id": applicant_review.applicant},
+        ["_id", "application_data.reviews", "roles"],
+    )
+    if not applicant_record:
+        log.error("Could not retrieve applicant after submitting review")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    if Role.HACKER in applicant_record["roles"]:
+        unique_reviewers = applicant_review_processor.get_unique_reviewers(
+            applicant_record
+        )
+
+        # Only add a review if there are either less than 2 reviewers
+        # or reviewer is one of the reviewers
+        if len(unique_reviewers) >= 2 and reviewer.uid not in unique_reviewers:
+            log.error(
+                "%s tried to submit a review, but %s already has two reviewers",
+                reviewer,
+                app,
+            )
+            raise HTTPException(status.HTTP_403_FORBIDDEN)
+
+        update_query: dict[str, object] = {
+            "$push": {"application_data.reviews": review}
+        }
+        # Because reviewing a hacker requires 2 reviewers, only set the
+        # applicant's status to REVIEWED if there are at least 2 reviewers
+        if len(unique_reviewers | {reviewer.uid}) >= 2:
+            update_query.update({"$set": {"status": "REVIEWED"}})
+
+        await _try_update_applicant_with_query(
+            applicant_review.applicant,
+            update_query=update_query,
+            err_msg=f"{reviewer} could not submit review for {app}",
+        )
+
+    else:
+        await _try_update_applicant_with_query(
+            applicant_review.applicant,
+            update_query={
+                "$push": {"application_data.reviews": review},
+                "$set": {"status": "REVIEWED"},
+            },
+            err_msg=f"{reviewer} could not submit review for {app}",
+        )
+
+    log.info("%s reviewed hacker %s", reviewer, applicant_review.applicant)
 
 
 @router.get("/get-thresholds")
@@ -398,7 +478,7 @@ async def retrieve_thresholds() -> Optional[dict[str, Any]]:
 
 
 async def _try_update_applicant_with_query(
-    applicant_review: ReviewRequest,
+    applicant: str,
     *,
     update_query: Mapping[str, object],
     err_msg: str = "",
@@ -406,7 +486,7 @@ async def _try_update_applicant_with_query(
     try:
         await mongodb_handler.raw_update_one(
             Collection.USERS,
-            {"_id": applicant_review.applicant},
+            {"_id": applicant},
             update_query,
         )
     except RuntimeError:

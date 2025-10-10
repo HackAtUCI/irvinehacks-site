@@ -132,11 +132,21 @@ function useApplicant(
 		mutate();
 	}
 
+	async function submitDetailedReview(uid: Uid, scores: Object) {
+		await axios.post("/api/admin/detailedReview", {
+			applicant: uid,
+			scores: scores,
+		});
+		// TODO: provide success status to display in alert
+		mutate();
+	}
+
 	return {
 		applicant: data,
 		loading: isLoading,
 		error,
 		submitReview,
+		submitDetailedReview,
 	};
 }
 

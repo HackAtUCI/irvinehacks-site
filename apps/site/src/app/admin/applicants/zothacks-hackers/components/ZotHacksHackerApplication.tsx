@@ -74,7 +74,7 @@ function ZotHacksHackerApplication({
 			techExperienceScore +
 			learnAboutSelfScore +
 			pixelArtScore;
-		onTotalScoreChange(totalScore);
+		onTotalScoreChange(Math.max(-2, totalScore));
 	}, [
 		application_data.hackathon_experience,
 		resumeScore,

@@ -58,9 +58,20 @@ function ZotHacksHackerApplicantActions({
 
 	return canReview ? (
 		<SpaceBetween direction="horizontal" size="xs">
-			<Box variant="h3" color="text-status-error">
-				Calculated score: {score}
-			</Box>
+			<SpaceBetween direction="horizontal" size="xs">
+				{score === -2 && (
+					<>
+						<Box variant="h3" color="text-status-error">
+							OVERQUALIFIED
+						</Box>
+						<Box variant="h3">|</Box>
+					</>
+				)}
+				<Box variant="h3" color="text-status-warning">
+					Calculated score: {score}
+				</Box>
+			</SpaceBetween>
+
 			<Button onClick={handleClick} disabled={!canReview}>
 				Submit
 			</Button>

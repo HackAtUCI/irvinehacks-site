@@ -182,7 +182,12 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 					{
 						id: "avg_score",
 						header: "Averaged Score",
-						content: ({ avg_score }) => (avg_score === -1 ? "-" : avg_score),
+						content: ({ avg_score }) =>
+							avg_score === -1
+								? "-"
+								: avg_score === -3
+								  ? "OVERQUALIFIED (-3)"
+								  : avg_score,
 					},
 					{
 						id: "decision",

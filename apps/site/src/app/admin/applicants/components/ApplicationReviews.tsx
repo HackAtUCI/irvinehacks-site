@@ -32,7 +32,7 @@ function ApplicationReviews({ reviews, isHacker }: ApplicationReviewsProps) {
 						{isHacker ? (
 							<>
 								You scored this applicant a{" "}
-								{score === 0 ? "OVERQUALIFIED" : score} on {formatDate(date)}
+								{score === -3 ? "OVERQUALIFIED" : score} on {formatDate(date)}
 							</>
 						) : (
 							<>
@@ -46,7 +46,7 @@ function ApplicationReviews({ reviews, isHacker }: ApplicationReviewsProps) {
 					<li key={date}>
 						<SpaceBetween direction="horizontal" size="xxxs">
 							{formatUid(reviewer)}
-							{isHacker && score === 0 ? (
+							{isHacker && score === -3 ? (
 								<>
 									{" "}
 									marked this applicant{" "}

@@ -17,6 +17,13 @@ interface BaseApplicationData {
 }
 
 export type HackathonExperience = "first_time" | "some_experience" | "veteran";
+interface ReviewBreakdown {
+	resume: number;
+	elevator_pitch_saq: number;
+	tech_experience_saq: number;
+	learn_about_self_saq: number;
+	pixel_art_saq: number;
+}
 export interface ZotHacksHackerApplicationData extends BaseApplicationData {
 	school_year: string;
 	dietary_restrictions: string[];
@@ -31,6 +38,7 @@ export interface ZotHacksHackerApplicationData extends BaseApplicationData {
 	resume_url: string | null;
 	submission_time: string;
 	reviews: Review[];
+	review_breakdown: { [reviewer_uid: string]: ReviewBreakdown };
 }
 
 export interface HackerApplicationData extends BaseApplicationData {

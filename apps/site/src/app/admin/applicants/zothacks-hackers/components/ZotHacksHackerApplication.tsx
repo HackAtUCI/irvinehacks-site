@@ -1,15 +1,16 @@
 import Container from "@cloudscape-design/components/container";
 import Header from "@cloudscape-design/components/header";
 import SpaceBetween from "@cloudscape-design/components/space-between";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useContext } from "react";
 
 import PixelArtDisplay from "./PixelArtDisplay";
 import HackerApplicationSection from "@/app/admin/applicants/hackers/components/HackerApplicationSection";
-import {
+import useApplicant, {
 	HackathonExperience,
 	ZotHacksHackerApplicationData,
 } from "@/lib/admin/useApplicant";
 import ScoreSection from "../../components/ScoreSection";
+import UserContext from "@/lib/admin/UserContext";
 
 type ZHKeys = Exclude<keyof ZotHacksHackerApplicationData, "reviews">;
 
@@ -42,6 +43,9 @@ function ZotHacksHackerApplication({
 	application_data: ZotHacksHackerApplicationData;
 	onScoreChange: (scores: Object) => void;
 }) {
+	const { uid: reviewer_uid } = useContext(UserContext);
+	const formattedUid = reviewer_uid?.split(".").at(-1);
+
 	// Resume options used for dropdown-based ScoreSection
 	const resumeOptions = useMemo(
 		() => [
@@ -57,10 +61,26 @@ function ZotHacksHackerApplication({
 	const [resumeScore, setResumeScore] = useState<number>(
 		Number(resumeOptions[0].value),
 	);
-	const [elevatorScore, setElevatorScore] = useState<number>(0);
-	const [techExperienceScore, setTechExperienceScore] = useState<number>(0);
-	const [learnAboutSelfScore, setLearnAboutSelfScore] = useState<number>(0);
-	const [pixelArtScore, setPixelArtScore] = useState<number>(0);
+	const [elevatorScore, setElevatorScore] = useState<number>(
+		formattedUid
+			? application_data?.review_breakdown?.[formattedUid]?.elevator_pitch_saq
+			: 0,
+	);
+	const [techExperienceScore, setTechExperienceScore] = useState<number>(
+		formattedUid
+			? application_data?.review_breakdown?.[formattedUid]?.tech_experience_saq
+			: 0,
+	);
+	const [learnAboutSelfScore, setLearnAboutSelfScore] = useState<number>(
+		formattedUid
+			? application_data?.review_breakdown?.[formattedUid]?.learn_about_self_saq
+			: 0,
+	);
+	const [pixelArtScore, setPixelArtScore] = useState<number>(
+		formattedUid
+			? application_data?.review_breakdown?.[formattedUid]?.pixel_art_saq
+			: 0,
+	);
 
 	useEffect(() => {
 		const hackathonExperienceScore =

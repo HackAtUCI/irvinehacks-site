@@ -16,3 +16,5 @@ export const scoresToDecisions: Record<string, Decision> = {
 	[waitlistScore]: Decision.Waitlisted,
 	[rejectScore]: Decision.Rejected,
 };
+
+export const OVERQUALIFIED_SCORE = -3;

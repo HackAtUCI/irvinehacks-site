@@ -6,7 +6,7 @@ import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
 import { Review } from "@/lib/admin/useApplicant";
 import UserContext from "@/lib/admin/UserContext";
 import { Status, Uid } from "@/lib/userRecord";
-import { scoresToDecisions } from "@/lib/decisionScores";
+import { OVERQUALIFIED_SCORE, scoresToDecisions } from "@/lib/decisionScores";
 
 interface ApplicationReviewsProps {
 	reviews: Review[];
@@ -32,7 +32,7 @@ function ApplicationReviews({ reviews, isHacker }: ApplicationReviewsProps) {
 						{isHacker ? (
 							<>
 								You scored this applicant a{" "}
-								{score === -3 ? "OVERQUALIFIED" : score} on {formatDate(date)}
+								{score === OVERQUALIFIED_SCORE ? "OVERQUALIFIED" : score} on {formatDate(date)}
 							</>
 						) : (
 							<>
@@ -46,7 +46,7 @@ function ApplicationReviews({ reviews, isHacker }: ApplicationReviewsProps) {
 					<li key={date}>
 						<SpaceBetween direction="horizontal" size="xxxs">
 							{formatUid(reviewer)}
-							{isHacker && score === -3 ? (
+							{isHacker && score === OVERQUALIFIED_SCORE ? (
 								<>
 									{" "}
 									marked this applicant{" "}

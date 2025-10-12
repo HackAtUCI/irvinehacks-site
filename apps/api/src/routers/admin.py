@@ -86,15 +86,17 @@ class ZotHacksHackerDetailedScores(BaseModel):
     tech_experience_saq: int
     learn_about_self_saq: int
     pixel_art_saq: int
+    hackathon_experience: int
 
 
-class ResumeOnlyReview(BaseModel):
+class GlobalOnlyReview(BaseModel):
     resume: int
+    hackathon_experience: int
 
 
 class DetailedReviewRequest(BaseModel):
     applicant: str
-    scores: Union[ResumeOnlyReview, ZotHacksHackerDetailedScores]
+    scores: Union[GlobalOnlyReview, ZotHacksHackerDetailedScores]
 
 
 async def mentor_volunteer_applicants(
@@ -320,7 +322,7 @@ async def submit_detailed_review(
     reviewer: User = Depends(require_reviewer),
 ) -> None:
     """Submit a review decision from the reviewer for the given hacker applicant."""
-    if isinstance(applicant_review.scores, ResumeOnlyReview):
+    if isinstance(applicant_review.scores, GlobalOnlyReview):
         await _handle_resume_only_review(
             applicant_review.applicant, applicant_review.scores, reviewer
         )
@@ -440,7 +442,7 @@ async def retrieve_thresholds() -> Optional[dict[str, Any]]:
 
 
 async def _handle_resume_only_review(
-    applicant: str, scores: ResumeOnlyReview, reviewer: User
+    applicant: str, scores: GlobalOnlyReview, reviewer: User
 ) -> None:
     """Handle resume-only review submission."""
     # Check if user has LEAD role for resume-only reviews

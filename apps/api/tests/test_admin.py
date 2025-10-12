@@ -12,7 +12,7 @@ from routers import admin
 from routers.admin import (
     _handle_detailed_scores_review,
     _handle_resume_only_review,
-    ResumeOnlyReview,
+    GlobalOnlyReview,
     ZotHacksHackerDetailedScores,
 )
 from services.mongodb_handler import Collection
@@ -457,7 +457,7 @@ async def test_handle_resume_only_review_success(
 ) -> None:
     """Test successful resume-only review submission."""
     applicant = "edu.uci.test"
-    scores = ResumeOnlyReview(resume=8)
+    scores = GlobalOnlyReview(resume=8, hackathon_experience=10)
     reviewer = USER_REVIEWER
 
     mock_require_lead.return_value = None
@@ -469,7 +469,7 @@ async def test_handle_resume_only_review_success(
     mock_mongodb_handler_update_one.assert_awaited_once_with(
         Collection.USERS,
         {"_id": applicant},
-        {"$set": {"global_field_scores": {"resume": 8}}},
+        {"$set": {"global_field_scores": {"resume": 8, "hackathon_experience": 10}}},
         upsert=True,
     )
 
@@ -480,7 +480,7 @@ async def test_handle_resume_only_review_forbidden(
 ) -> None:
     """Test resume-only review submission fails without LEAD role."""
     applicant = "edu.uci.test"
-    scores = ResumeOnlyReview(resume=8)
+    scores = GlobalOnlyReview(resume=8, hackathon_experience=10)
     reviewer = USER_REVIEWER
 
     mock_require_lead.side_effect = HTTPException(status_code=403, detail="Forbidden")
@@ -508,6 +508,7 @@ async def test_handle_detailed_scores_review_success(
         tech_experience_saq=9,
         learn_about_self_saq=6,
         pixel_art_saq=8,
+        hackathon_experience=10,
     )
     reviewer = USER_REVIEWER
 
@@ -545,6 +546,7 @@ async def test_handle_detailed_scores_review_invalid_score(
         tech_experience_saq=100,
         learn_about_self_saq=100,
         pixel_art_saq=100,
+        hackathon_experience=10,
     )
     reviewer = USER_REVIEWER
 
@@ -568,6 +570,7 @@ async def test_handle_detailed_scores_review_applicant_not_found(
         tech_experience_saq=9,
         learn_about_self_saq=6,
         pixel_art_saq=8,
+        hackathon_experience=10,
     )
     reviewer = USER_REVIEWER
 

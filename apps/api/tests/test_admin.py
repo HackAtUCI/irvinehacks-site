@@ -2,12 +2,19 @@ from datetime import datetime
 from typing import Any
 from unittest.mock import ANY, AsyncMock, patch
 
-from fastapi import FastAPI
+import pytest
+from fastapi import FastAPI, HTTPException
 
 from auth import user_identity
 from auth.user_identity import NativeUser, UserTestClient
 from models.ApplicationData import Decision
 from routers import admin
+from routers.admin import (
+    _handle_detailed_scores_review,
+    _handle_resume_only_review,
+    ResumeOnlyReview,
+    ZotHacksHackerDetailedScores,
+)
 from services.mongodb_handler import Collection
 from services.sendgrid_handler import Template
 
@@ -440,3 +447,134 @@ def test_error_on_hacker_invalid_value(
     res = reviewer_client.post("/review", json=post_data)
 
     assert res.status_code == 400
+
+
+@patch("routers.admin.require_lead", autospec=True)
+@patch("services.mongodb_handler.update_one", autospec=True)
+async def test_handle_resume_only_review_success(
+    mock_mongodb_handler_update_one: AsyncMock,
+    mock_require_lead: AsyncMock,
+) -> None:
+    """Test successful resume-only review submission."""
+    applicant = "edu.uci.test"
+    scores = ResumeOnlyReview(resume=8)
+    reviewer = USER_REVIEWER
+
+    mock_require_lead.return_value = None
+    mock_mongodb_handler_update_one.return_value = True
+
+    await _handle_resume_only_review(applicant, scores, reviewer)
+
+    mock_require_lead.assert_awaited_once_with(reviewer)
+    mock_mongodb_handler_update_one.assert_awaited_once_with(
+        Collection.USERS,
+        {"_id": applicant},
+        {"$set": {"global_field_scores": {"resume": 8}}},
+        upsert=True,
+    )
+
+
+@patch("routers.admin.require_lead", autospec=True)
+async def test_handle_resume_only_review_forbidden(
+    mock_require_lead: AsyncMock,
+) -> None:
+    """Test resume-only review submission fails without LEAD role."""
+    applicant = "edu.uci.test"
+    scores = ResumeOnlyReview(resume=8)
+    reviewer = USER_REVIEWER
+
+    mock_require_lead.side_effect = HTTPException(status_code=403, detail="Forbidden")
+
+    with pytest.raises(HTTPException) as exc_info:
+        await _handle_resume_only_review(applicant, scores, reviewer)
+
+    assert exc_info.value.status_code == 403
+    mock_require_lead.assert_awaited_once_with(reviewer)
+
+
+@patch("routers.admin.require_lead", autospec=True)
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_handle_detailed_scores_review_success(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+    mock_require_lead: AsyncMock,
+) -> None:
+    """Test successful detailed scores review submission."""
+    applicant = "edu.uci.test"
+    scores = ZotHacksHackerDetailedScores(
+        resume=8,
+        elevator_pitch_saq=7,
+        tech_experience_saq=9,
+        learn_about_self_saq=6,
+        pixel_art_saq=8,
+    )
+    reviewer = USER_REVIEWER
+
+    # Mock the applicant record retrieval
+    applicant_record = {
+        "_id": applicant,
+        "roles": ["Applicant", "Hacker"],
+        "application_data": {
+            "reviews": [
+                [datetime(2023, 1, 19), "edu.uci.alicia2", 100],
+            ]
+        },
+    }
+
+    mock_mongodb_handler_retrieve_one.return_value = applicant_record
+    mock_mongodb_handler_raw_update_one.return_value = True
+
+    await _handle_detailed_scores_review(applicant, scores, reviewer)
+
+    mock_require_lead.assert_not_awaited()
+    mock_mongodb_handler_retrieve_one.assert_awaited_once()
+    # Should be called twice - once for the review and once for the breakdown
+    assert mock_mongodb_handler_raw_update_one.await_count == 2
+
+
+@patch("routers.admin.require_lead", autospec=True)
+async def test_handle_detailed_scores_review_invalid_score(
+    mock_require_lead: AsyncMock,
+) -> None:
+    """Test detailed scores review submission fails with invalid score."""
+    applicant = "edu.uci.test"
+    scores = ZotHacksHackerDetailedScores(
+        resume=100,  # This will make total score > 100
+        elevator_pitch_saq=100,
+        tech_experience_saq=100,
+        learn_about_self_saq=100,
+        pixel_art_saq=100,
+    )
+    reviewer = USER_REVIEWER
+
+    with pytest.raises(HTTPException) as exc_info:
+        await _handle_detailed_scores_review(applicant, scores, reviewer)
+
+    assert exc_info.value.status_code == 400
+
+
+@patch("routers.admin.require_lead", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_handle_detailed_scores_review_applicant_not_found(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_require_lead: AsyncMock,
+) -> None:
+    """Test detailed scores review submission fails when applicant not found."""
+    applicant = "edu.uci.test"
+    scores = ZotHacksHackerDetailedScores(
+        resume=8,
+        elevator_pitch_saq=7,
+        tech_experience_saq=9,
+        learn_about_self_saq=6,
+        pixel_art_saq=8,
+    )
+    reviewer = USER_REVIEWER
+
+    mock_mongodb_handler_retrieve_one.return_value = None
+
+    with pytest.raises(HTTPException) as exc_info:
+        await _handle_detailed_scores_review(applicant, scores, reviewer)
+
+    assert exc_info.value.status_code == 500
+    mock_mongodb_handler_retrieve_one.assert_awaited_once()

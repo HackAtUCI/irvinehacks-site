@@ -89,14 +89,14 @@ class ZotHacksHackerDetailedScores(BaseModel):
     hackathon_experience: int
 
 
-class GlobalOnlyReview(BaseModel):
+class GlobalScores(BaseModel):
     resume: int
     hackathon_experience: int
 
 
 class DetailedReviewRequest(BaseModel):
     applicant: str
-    scores: Union[GlobalOnlyReview, ZotHacksHackerDetailedScores]
+    scores: Union[GlobalScores, ZotHacksHackerDetailedScores]
 
 
 async def mentor_volunteer_applicants(
@@ -322,8 +322,8 @@ async def submit_detailed_review(
     reviewer: User = Depends(require_reviewer),
 ) -> None:
     """Submit a review decision from the reviewer for the given hacker applicant."""
-    if isinstance(applicant_review.scores, GlobalOnlyReview):
-        await _handle_resume_only_review(
+    if isinstance(applicant_review.scores, GlobalScores):
+        await _handle_global_only_review(
             applicant_review.applicant, applicant_review.scores, reviewer
         )
     elif isinstance(applicant_review.scores, ZotHacksHackerDetailedScores):
@@ -441,8 +441,8 @@ async def retrieve_thresholds() -> Optional[dict[str, Any]]:
     )
 
 
-async def _handle_resume_only_review(
-    applicant: str, scores: GlobalOnlyReview, reviewer: User
+async def _handle_global_only_review(
+    applicant: str, scores: GlobalScores, reviewer: User
 ) -> None:
     """Handle resume-only review submission."""
     # Check if user has LEAD role for resume-only reviews
@@ -531,6 +531,18 @@ async def _handle_detailed_scores_review(
         },
         err_msg=f"{reviewer} could not submit review for {applicant}",
     )
+
+    # If user has Lead role, also update global field scores
+    try:
+        await require_lead(reviewer)
+        global_scores = GlobalScores(
+            resume=scores.resume,
+            hackathon_experience=scores.hackathon_experience,
+        )
+        await _handle_global_only_review(applicant, global_scores, reviewer)
+    except HTTPException:
+        # User doesn't have Lead role, skip global field scores update
+        pass
 
     log.info("%s reviewed hacker %s", reviewer, applicant)
 

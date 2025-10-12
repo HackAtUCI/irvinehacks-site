@@ -452,7 +452,7 @@ async def _handle_resume_only_review(
     await mongodb_handler.update_one(
         Collection.USERS,
         {"_id": applicant},
-        {"$set": {"global_field_scores": scores.model_dump()}},
+        {"global_field_scores": scores.model_dump()},
         upsert=True,
     )
 

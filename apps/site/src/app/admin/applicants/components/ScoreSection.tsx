@@ -46,6 +46,11 @@ export default function ScoreSection({
 		[options],
 	);
 
+	function getSelectedOption() {
+		if (value === -1) return null;
+		return defaultOptions.find((opt) => opt.value === String(value)) ?? null;
+	}
+
 	return (
 		<Container header={<Header variant="h2">{title}</Header>}>
 			<SpaceBetween size="l">
@@ -67,12 +72,9 @@ export default function ScoreSection({
 						<SpaceBetween size="s">
 							<Box fontWeight="bold">Select Score:</Box>
 							<Select
-								selectedOption={
-									defaultOptions.find((opt) => opt.value === String(value)) ??
-									null
-								}
+								selectedOption={getSelectedOption()}
 								onChange={({ detail }) => {
-									const newVal = Number(detail.selectedOption?.value ?? 0);
+									const newVal = Number(detail.selectedOption?.value ?? -1);
 									onChange(newVal);
 								}}
 								options={defaultOptions}
@@ -82,9 +84,11 @@ export default function ScoreSection({
 						</SpaceBetween>
 					) : (
 						<SpaceBetween size="s">
-							<Box fontWeight="bold">Score: {value}</Box>
+							<Box fontWeight="bold">
+								{value === -1 ? "Score: Not selected" : `Score: ${value}`}
+							</Box>
 							<Slider
-								value={value}
+								value={value === -1 ? min : value}
 								onChange={({ detail }) => onChange(detail.value)}
 								min={min}
 								max={max}

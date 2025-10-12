@@ -49,6 +49,7 @@ function ZotHacksHackerApplication({
 	// Resume options used for dropdown-based ScoreSection
 	const resumeOptions = useMemo(
 		() => [
+			{ label: "Select a score", value: "-1" },
 			{ label: "Weak", value: "5" },
 			{ label: "Medium", value: "15" },
 			{ label: "Strong", value: "0" },
@@ -62,34 +63,32 @@ function ZotHacksHackerApplication({
 		const raw = formattedUid
 			? application_data?.review_breakdown?.[formattedUid]?.resume
 			: undefined;
-		// If there's a stored score, ensure it's one of the allowed dropdown values; otherwise default
+		// If there's a stored score, ensure it's one of the allowed dropdown values; otherwise default to -1
 		const allowedValues = new Set(resumeOptions.map((o) => Number(o.value)));
-		return allowedValues.has(Number(raw))
-			? Number(raw)
-			: Number(resumeOptions[0].value);
+		return allowedValues.has(Number(raw)) ? Number(raw) : -1;
 	});
 	const [elevatorScore, setElevatorScore] = useState<number>(
 		formattedUid
 			? application_data?.review_breakdown?.[formattedUid]
-					?.elevator_pitch_saq ?? 0
-			: 0,
+					?.elevator_pitch_saq ?? -1
+			: -1,
 	);
 	const [techExperienceScore, setTechExperienceScore] = useState<number>(
 		formattedUid
 			? application_data?.review_breakdown?.[formattedUid]
-					?.tech_experience_saq ?? 0
-			: 0,
+					?.tech_experience_saq ?? -1
+			: -1,
 	);
 	const [learnAboutSelfScore, setLearnAboutSelfScore] = useState<number>(
 		formattedUid
 			? application_data?.review_breakdown?.[formattedUid]
-					?.learn_about_self_saq ?? 0
-			: 0,
+					?.learn_about_self_saq ?? -1
+			: -1,
 	);
 	const [pixelArtScore, setPixelArtScore] = useState<number>(
 		formattedUid
-			? application_data?.review_breakdown?.[formattedUid]?.pixel_art_saq ?? 0
-			: 0,
+			? application_data?.review_breakdown?.[formattedUid]?.pixel_art_saq ?? -1
+			: -1,
 	);
 
 	useEffect(() => {
@@ -98,14 +97,26 @@ function ZotHacksHackerApplication({
 				application_data.hackathon_experience as HackathonExperience
 			] || 0;
 
-		const scoresObject = {
-			resume: resumeScore,
-			elevator_pitch_saq: elevatorScore,
-			tech_experience_saq: techExperienceScore,
-			learn_about_self_saq: learnAboutSelfScore,
-			pixel_art_saq: pixelArtScore,
+		const scoresObject: Record<string, number> = {
 			hackathon_experience: hackathonExperienceScore,
 		};
+
+		// Only include fields that don't have -1 values
+		if (resumeScore !== -1) {
+			scoresObject.resume = resumeScore;
+		}
+		if (elevatorScore !== -1) {
+			scoresObject.elevator_pitch_saq = elevatorScore;
+		}
+		if (techExperienceScore !== -1) {
+			scoresObject.tech_experience_saq = techExperienceScore;
+		}
+		if (learnAboutSelfScore !== -1) {
+			scoresObject.learn_about_self_saq = learnAboutSelfScore;
+		}
+		if (pixelArtScore !== -1) {
+			scoresObject.pixel_art_saq = pixelArtScore;
+		}
 
 		onScoreChange(scoresObject);
 	}, [

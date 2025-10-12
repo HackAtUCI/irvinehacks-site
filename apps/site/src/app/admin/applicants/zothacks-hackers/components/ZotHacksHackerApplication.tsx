@@ -11,6 +11,7 @@ import {
 } from "@/lib/admin/useApplicant";
 import ScoreSection from "../../components/ScoreSection";
 import UserContext from "@/lib/admin/UserContext";
+import { isLead } from "@/lib/admin/authorization";
 
 type ZHKeys = Exclude<keyof ZotHacksHackerApplicationData, "reviews">;
 
@@ -43,8 +44,16 @@ function ZotHacksHackerApplication({
 	application_data: ZotHacksHackerApplicationData;
 	onScoreChange: (scores: object) => void;
 }) {
-	const { uid: reviewer_uid } = useContext(UserContext);
+	const { uid: reviewer_uid, roles } = useContext(UserContext);
 	const formattedUid = reviewer_uid?.split(".").at(-1);
+
+	// Check if resume dropdown should be disabled
+	const isResumeDisabled = useMemo(() => {
+		const hasGlobalResumeScore =
+			application_data?.global_field_scores?.resume !== undefined;
+
+		return hasGlobalResumeScore && !isLead(roles);
+	}, [application_data?.global_field_scores?.resume, roles]);
 
 	// Resume options used for dropdown-based ScoreSection
 	const resumeOptions = useMemo(
@@ -60,6 +69,16 @@ function ZotHacksHackerApplication({
 
 	// Controlled scores for each section
 	const [resumeScore, setResumeScore] = useState<number>(() => {
+		// First check if there's a global field score for resume
+		const globalResumeScore = application_data?.global_field_scores?.resume;
+		if (globalResumeScore !== undefined) {
+			const allowedValues = new Set(resumeOptions.map((o) => Number(o.value)));
+			return allowedValues.has(Number(globalResumeScore))
+				? Number(globalResumeScore)
+				: -1;
+		}
+
+		// Fall back to reviewer-specific score
 		const raw = formattedUid
 			? application_data?.review_breakdown?.[formattedUid]?.resume
 			: undefined;
@@ -162,6 +181,7 @@ function ZotHacksHackerApplication({
 				useDropdown
 				value={resumeScore}
 				onChange={setResumeScore}
+				disabled={isResumeDisabled}
 			/>
 			<ScoreSection
 				title="If you had 30 seconds in an elevator with your dream mentor, how would

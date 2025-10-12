@@ -39,6 +39,7 @@ export interface ZotHacksHackerApplicationData extends BaseApplicationData {
 	submission_time: string;
 	reviews: Review[];
 	review_breakdown: { [reviewer_uid: string]: ReviewBreakdown };
+	global_field_scores?: { resume?: number };
 }
 
 export interface HackerApplicationData extends BaseApplicationData {

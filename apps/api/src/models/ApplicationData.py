@@ -237,8 +237,11 @@ class ProcessedZotHacksHackerApplicationData(BaseZotHacksHackerApplicationData):
     submission_time: datetime
     reviews: list[Review] = []
     review_breakdown: dict[str, dict[str, int]] = {}
-    # TODO: Create aliases for these types
+    # TODO: Create aliases for review_breakdown
     # dict[reviewer_uid, dict[field_name, score]]
+    global_field_scores: dict[str, int] = {}
+    # TODO: Create aliases for these global_field_scores
+    # dict[field that can have detailed reviews, score]
 
     @field_serializer("resume_url")
     def url2str(self, val: Union[HttpUrl, None]) -> Union[str, None]:

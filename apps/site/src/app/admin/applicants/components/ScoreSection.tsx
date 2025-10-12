@@ -27,6 +27,7 @@ interface ScoreSectionProps {
 	// Controlled value and change handler
 	value: number;
 	onChange: (value: number) => void;
+	disabled?: boolean;
 }
 
 export default function ScoreSection({
@@ -40,6 +41,7 @@ export default function ScoreSection({
 	rightColumn,
 	value,
 	onChange,
+	disabled = false,
 }: ScoreSectionProps) {
 	const defaultOptions: SelectProps.Option[] = useMemo(
 		() => options ?? [],
@@ -80,6 +82,7 @@ export default function ScoreSection({
 								options={defaultOptions}
 								selectedAriaLabel="Selected score"
 								placeholder="Select a score"
+								disabled={disabled}
 							/>
 						</SpaceBetween>
 					) : (
@@ -94,6 +97,7 @@ export default function ScoreSection({
 								max={max}
 								step={step}
 								ariaLabel="Score slider"
+								disabled={disabled}
 							/>
 						</SpaceBetween>
 					)}

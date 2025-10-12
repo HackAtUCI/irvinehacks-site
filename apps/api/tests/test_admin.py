@@ -469,7 +469,12 @@ async def test_handle_resume_only_review_success(
     mock_mongodb_handler_update_one.assert_awaited_once_with(
         Collection.USERS,
         {"_id": applicant},
-        {"global_field_scores": {"resume": 8, "hackathon_experience": 10}},
+        {
+            "application_data.global_field_scores": {
+                "resume": 8,
+                "hackathon_experience": 10,
+            }
+        },
         upsert=True,
     )
 

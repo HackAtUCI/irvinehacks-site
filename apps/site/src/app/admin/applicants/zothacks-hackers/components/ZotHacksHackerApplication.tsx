@@ -165,7 +165,26 @@ function ZotHacksHackerApplication({
 			</Container>
 			<ScoreSection
 				title="Resume"
-				leftColumn={<p>Overqualified is an auto-reject</p>}
+				leftColumn={
+					<p>
+						<strong>Weak: 5</strong>
+						<br />
+						no cs
+						<br />
+						<strong>Medium: 10</strong>
+						<br />
+						class projects or programming ability
+						<br />
+						<strong>Strong: 0</strong>
+						<br />
+						made a html/css/js project, or ONE react project
+						<br />
+						<strong>OQ: -1000</strong>
+						<br />
+						use sparingly, if clearly overqualified or should’ve been a mentor,
+						not from UCI
+					</p>
+				}
 				rightColumn={
 					<p>
 						<a
@@ -188,7 +207,35 @@ function ZotHacksHackerApplication({
 					you explain why you’re joining ZotHacks? [75 word limit]"
 				min={0}
 				max={20}
-				leftColumn={<p>0 is bad. 20 is amazing.</p>}
+				leftColumn={
+					<p>
+						Highest quality responses should include these attributes:
+						<br />
+						<br />
+						<strong>Wow Factor</strong> - do you want this person on your team?
+						<br />
+						<strong>Uniqueness</strong> - memorable, different, stood out
+						<br />
+						<strong>Authenticity</strong> - genuineness, explanation sounds
+						human and not chat
+						<br />
+						<br />
+						<strong>18-20</strong> – amazing – all the good traits and{" "}
+						<strong>MORE</strong>; super special/stood out and I want them on my
+						team
+						<br />
+						<strong>13-17</strong> – good – all the aforementioned good traits
+						<br />
+						<strong>7-12</strong> – mid – effort but less memorable/lacking some
+						of the aforementioned traits
+						<br />
+						<strong>2-6</strong> – poor – nice try but lower effort or they
+						obviously didn’t spend much time
+						<br />
+						<strong>0-1</strong> – not even trying/inappropriate
+						<br />
+					</p>
+				}
 				rightColumn={<p>{application_data.elevator_pitch_saq}</p>}
 				value={elevatorScore}
 				onChange={setElevatorScore}
@@ -198,7 +245,34 @@ function ZotHacksHackerApplication({
 					[100 words]"
 				min={0}
 				max={20}
-				leftColumn={<p>0 is bad. 20 is amazing.</p>}
+				leftColumn={
+					<p>
+						Highest quality responses should include these attributes:
+						<br />
+						<br />
+						<strong>Interesting story</strong> - were you engaged/hooked by it
+						<br />
+						<strong>Uniqueness</strong> - memorable, different, stood out
+						<br />
+						<strong>Authenticity</strong> - genuineness, explanation sounds
+						human and not chat
+						<br />
+						<br />
+						<strong>18-20</strong> – amazing – all the good traits and{" "}
+						<strong>MORE</strong>; super special/stood out and cool story
+						<br />
+						<strong>13-17</strong> – good – all the aforementioned good traits
+						<br />
+						<strong>7-12</strong> – mid – effort but less memorable/lacking some
+						of the aforementioned traits
+						<br />
+						<strong>2-6</strong> – poor – nice try but lower effort or they
+						obviously didn’t spend much time
+						<br />
+						<strong>0-1</strong> – not even trying/inappropriate
+						<br />
+					</p>
+				}
 				rightColumn={<p>{application_data.tech_experience_saq}</p>}
 				value={techExperienceScore}
 				onChange={setTechExperienceScore}
@@ -208,7 +282,37 @@ function ZotHacksHackerApplication({
 					might ZotHacks help with that? [100 words]"
 				min={0}
 				max={20}
-				leftColumn={<p>0 is bad. 20 is amazing.</p>}
+				leftColumn={
+					<p>
+						Highest quality responses should include these attributes:
+						<br />
+						<br />
+						<strong>Tied to Zothack&apos;s Core Mission</strong> - some
+						combination of willingness to try/fail/learn (knows what ZotHacks
+						is)
+						<br />
+						<strong>Uniqueness</strong> - memorable, different, stood out
+						<br />
+						<strong>Authenticity</strong> - genuineness, explanation sounds
+						human and not chat
+						<br />
+						<br />
+						<strong>18-20</strong> – amazing – all the good traits and{" "}
+						<strong>MORE</strong>; super special/stood out and aligns with ZH
+						core values
+						<br />
+						<strong>13-17</strong> – good – all the aforementioned good traits
+						<br />
+						<strong>7-12</strong> – mid – effort but less memorable/lacking some
+						of the aforementioned traits
+						<br />
+						<strong>2-6</strong> – poor – nice try but lower effort or they
+						obviously didn’t spend much time
+						<br />
+						<strong>0-1</strong> – not even trying/inappropriate
+						<br />
+					</p>
+				}
 				rightColumn={<p>{application_data.learn_about_self_saq}</p>}
 				value={learnAboutSelfScore}
 				onChange={setLearnAboutSelfScore}
@@ -218,7 +322,36 @@ function ZotHacksHackerApplication({
 					art. [100 words]"
 				min={0}
 				max={20}
-				leftColumn={<p>0 is bad. 20 is amazing.</p>}
+				leftColumn={
+					<p>
+						Highest quality responses should include these attributes:
+						<br />
+						<br />
+						<strong>Creativity </strong> - visually appealing, imaginative, cool
+						art concept
+						<br />
+						<strong>Uniqueness</strong> - memorable, different, stood out
+						<br />
+						<strong>Authenticity</strong> - genuineness, explanation sounds
+						human and not chat
+						<br />
+						<br />
+						<strong>18-20</strong> – amazing – all the good traits and{" "}
+						<strong>MORE</strong>; super special/stood out to you, &quot;Your
+						art was amazing wow I love it&quot;
+						<br />
+						<strong>13-17</strong> – good – all the aforementioned good traits
+						<br />
+						<strong>7-12</strong> – mid – effort but less memorable/lacking some
+						of the aforementioned traits
+						<br />
+						<strong>2-6</strong> – poor – nice try but lower effort or they
+						obviously didn’t spend much time
+						<br />
+						<strong>0-1</strong> – not even trying/inappropriate
+						<br />
+					</p>
+				}
 				rightColumn={
 					<div>
 						<p>{application_data.pixel_art_saq}</p>

@@ -42,8 +42,8 @@ export default function PixelArtDisplay({
 		<div
 			style={{
 				display: "grid",
-				gridTemplateColumns: "repeat(8, 20px)",
-				gridTemplateRows: "repeat(8, 20px)",
+				gridTemplateColumns: "repeat(8, 25px)",
+				gridTemplateRows: "repeat(8, 25px)",
 				justifyContent: "center",
 				marginTop: "10px",
 				backgroundColor: "rgba(0, 0, 0, 0.83)",

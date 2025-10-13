@@ -7,11 +7,11 @@ export const ZothacksScoringGuidelines = z.object({
 	_id: z.string(),
 	_type: z.literal("zothacksScoringGuidelines"),
 	guidelines: z.object({
-		resume: z.string(),
-		elevator_pitch_saq: z.string(),
-		tech_experience_saq: z.string(),
-		learn_about_self_saq: z.string(),
-		pixel_art_saq: z.string(),
+		resume: z.array(z.any()),
+		elevator_pitch_saq: z.array(z.any()),
+		tech_experience_saq: z.array(z.any()),
+		learn_about_self_saq: z.array(z.any()),
+		pixel_art_saq: z.array(z.any()),
 	}),
 });
 

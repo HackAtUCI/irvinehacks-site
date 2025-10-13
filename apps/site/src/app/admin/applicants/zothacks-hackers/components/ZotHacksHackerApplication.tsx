@@ -1,7 +1,8 @@
+import { useMemo, useState, useEffect, useContext } from "react";
 import Container from "@cloudscape-design/components/container";
 import Header from "@cloudscape-design/components/header";
 import SpaceBetween from "@cloudscape-design/components/space-between";
-import { useMemo, useState, useEffect, useContext } from "react";
+import { PortableText } from "@portabletext/react";
 
 import PixelArtDisplay from "./PixelArtDisplay";
 import HackerApplicationSection from "@/app/admin/applicants/hackers/components/HackerApplicationSection";
@@ -168,11 +169,7 @@ function ZotHacksHackerApplication({
 			</Container>
 			<ScoreSection
 				title="Resume"
-				leftColumn={
-					<p
-						dangerouslySetInnerHTML={{ __html: guidelines.guidelines.resume }}
-					/>
-				}
+				leftColumn={<PortableText value={guidelines.guidelines.resume} />}
 				rightColumn={
 					<p>
 						<a
@@ -196,11 +193,7 @@ function ZotHacksHackerApplication({
 				min={0}
 				max={20}
 				leftColumn={
-					<p
-						dangerouslySetInnerHTML={{
-							__html: guidelines.guidelines.elevator_pitch_saq,
-						}}
-					/>
+					<PortableText value={guidelines.guidelines.elevator_pitch_saq} />
 				}
 				rightColumn={<p>{application_data.elevator_pitch_saq}</p>}
 				value={elevatorScore}
@@ -212,11 +205,7 @@ function ZotHacksHackerApplication({
 				min={0}
 				max={20}
 				leftColumn={
-					<p
-						dangerouslySetInnerHTML={{
-							__html: guidelines.guidelines.tech_experience_saq,
-						}}
-					/>
+					<PortableText value={guidelines.guidelines.tech_experience_saq} />
 				}
 				rightColumn={<p>{application_data.tech_experience_saq}</p>}
 				value={techExperienceScore}
@@ -228,11 +217,7 @@ function ZotHacksHackerApplication({
 				min={0}
 				max={20}
 				leftColumn={
-					<p
-						dangerouslySetInnerHTML={{
-							__html: guidelines.guidelines.learn_about_self_saq,
-						}}
-					/>
+					<PortableText value={guidelines.guidelines.learn_about_self_saq} />
 				}
 				rightColumn={<p>{application_data.learn_about_self_saq}</p>}
 				value={learnAboutSelfScore}
@@ -244,11 +229,7 @@ function ZotHacksHackerApplication({
 				min={0}
 				max={20}
 				leftColumn={
-					<p
-						dangerouslySetInnerHTML={{
-							__html: guidelines.guidelines.pixel_art_saq,
-						}}
-					/>
+					<PortableText value={guidelines.guidelines.pixel_art_saq} />
 				}
 				rightColumn={
 					<div>

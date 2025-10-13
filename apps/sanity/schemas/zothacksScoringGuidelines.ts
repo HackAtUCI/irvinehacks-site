@@ -15,27 +15,32 @@ export default defineType({
 				defineField({
 					name: "resume",
 					title: "Resume",
-					type: "text",
+					type: "array",
+					of: [{ type: "block" }],
 				}),
 				defineField({
 					name: "elevator_pitch_saq",
 					title: "Elevator Pitch SAQ",
-					type: "text",
+					type: "array",
+					of: [{ type: "block" }],
 				}),
 				defineField({
 					name: "tech_experience_saq",
 					title: "Tech Experience SAQ",
-					type: "text",
+					type: "array",
+					of: [{ type: "block" }],
 				}),
 				defineField({
 					name: "learn_about_self_saq",
 					title: "Learn About Self SAQ",
-					type: "text",
+					type: "array",
+					of: [{ type: "block" }],
 				}),
 				defineField({
 					name: "pixel_art_saq",
 					title: "Pixel Art SAQ",
-					type: "text",
+					type: "array",
+					of: [{ type: "block" }],
 				}),
 			],
 			options: {

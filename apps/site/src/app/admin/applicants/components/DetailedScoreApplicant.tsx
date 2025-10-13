@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ContentLayout from "@cloudscape-design/components/content-layout";
 import Header from "@cloudscape-design/components/header";
 import SpaceBetween from "@cloudscape-design/components/space-between";
@@ -13,13 +13,19 @@ import ApplicantOverview from "./ApplicantOverview";
 import { ParticipantRole } from "@/lib/userRecord";
 import ZotHacksHackerApplication from "../zothacks-hackers/components/ZotHacksHackerApplication";
 import ZotHacksHackerApplicantActions from "./ZotHacksHackerApplicantActions";
+import { ZothacksScoringGuidelinesType } from "../zothacks-hackers/components/getScoringGuidelines";
 
 interface ApplicantProps {
 	uid: string;
 	applicationType: "hacker" | "mentor" | "volunteer";
+	guidelines: ZothacksScoringGuidelinesType;
 }
 
-function DetailedScoreApplicant({ uid, applicationType }: ApplicantProps) {
+function DetailedScoreApplicant({
+	uid,
+	applicationType,
+	guidelines,
+}: ApplicantProps) {
 	const { applicant, loading, submitDetailedReview } = useApplicant(
 		uid,
 		applicationType,
@@ -65,6 +71,7 @@ function DetailedScoreApplicant({ uid, applicationType }: ApplicantProps) {
 					<ZotHacksHackerApplication
 						application_data={application_data as ZotHacksHackerApplicationData}
 						onScoreChange={setScores}
+						guidelines={guidelines}
 					/>
 				) : applicant.roles.includes(ParticipantRole.Mentor) ? (
 					<></>

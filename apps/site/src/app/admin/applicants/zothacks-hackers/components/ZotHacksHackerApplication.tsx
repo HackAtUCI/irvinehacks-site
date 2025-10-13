@@ -12,6 +12,7 @@ import {
 import ScoreSection from "../../components/ScoreSection";
 import UserContext from "@/lib/admin/UserContext";
 import { isLead } from "@/lib/admin/authorization";
+import { ZothacksScoringGuidelinesType } from "./getScoringGuidelines";
 
 type ZHKeys = Exclude<keyof ZotHacksHackerApplicationData, "reviews">;
 
@@ -40,9 +41,11 @@ const HACKATHON_EXPERIENCE_SCORE_MAP: Record<HackathonExperience, number> = {
 function ZotHacksHackerApplication({
 	application_data,
 	onScoreChange,
+	guidelines,
 }: {
 	application_data: ZotHacksHackerApplicationData;
 	onScoreChange: (scores: object) => void;
+	guidelines: ZothacksScoringGuidelinesType;
 }) {
 	const { uid: reviewer_uid, roles } = useContext(UserContext);
 	const formattedUid = reviewer_uid?.split(".").at(-1);
@@ -166,24 +169,9 @@ function ZotHacksHackerApplication({
 			<ScoreSection
 				title="Resume"
 				leftColumn={
-					<p>
-						<strong>Weak: 5</strong>
-						<br />
-						no cs
-						<br />
-						<strong>Medium: 10</strong>
-						<br />
-						class projects or programming ability
-						<br />
-						<strong>Strong: 0</strong>
-						<br />
-						made a html/css/js project, or ONE react project
-						<br />
-						<strong>OQ: -1000</strong>
-						<br />
-						use sparingly, if clearly overqualified or should’ve been a mentor,
-						not from UCI
-					</p>
+					<p
+						dangerouslySetInnerHTML={{ __html: guidelines.guidelines.resume }}
+					/>
 				}
 				rightColumn={
 					<p>
@@ -208,33 +196,11 @@ function ZotHacksHackerApplication({
 				min={0}
 				max={20}
 				leftColumn={
-					<p>
-						Highest quality responses should include these attributes:
-						<br />
-						<br />
-						<strong>Wow Factor</strong> - do you want this person on your team?
-						<br />
-						<strong>Uniqueness</strong> - memorable, different, stood out
-						<br />
-						<strong>Authenticity</strong> - genuineness, explanation sounds
-						human and not chat
-						<br />
-						<br />
-						<strong>18-20</strong> – amazing – all the good traits and{" "}
-						<strong>MORE</strong>; super special/stood out and I want them on my
-						team
-						<br />
-						<strong>13-17</strong> – good – all the aforementioned good traits
-						<br />
-						<strong>7-12</strong> – mid – effort but less memorable/lacking some
-						of the aforementioned traits
-						<br />
-						<strong>2-6</strong> – poor – nice try but lower effort or they
-						obviously didn’t spend much time
-						<br />
-						<strong>0-1</strong> – not even trying/inappropriate
-						<br />
-					</p>
+					<p
+						dangerouslySetInnerHTML={{
+							__html: guidelines.guidelines.elevator_pitch_saq,
+						}}
+					/>
 				}
 				rightColumn={<p>{application_data.elevator_pitch_saq}</p>}
 				value={elevatorScore}
@@ -246,32 +212,11 @@ function ZotHacksHackerApplication({
 				min={0}
 				max={20}
 				leftColumn={
-					<p>
-						Highest quality responses should include these attributes:
-						<br />
-						<br />
-						<strong>Interesting story</strong> - were you engaged/hooked by it
-						<br />
-						<strong>Uniqueness</strong> - memorable, different, stood out
-						<br />
-						<strong>Authenticity</strong> - genuineness, explanation sounds
-						human and not chat
-						<br />
-						<br />
-						<strong>18-20</strong> – amazing – all the good traits and{" "}
-						<strong>MORE</strong>; super special/stood out and cool story
-						<br />
-						<strong>13-17</strong> – good – all the aforementioned good traits
-						<br />
-						<strong>7-12</strong> – mid – effort but less memorable/lacking some
-						of the aforementioned traits
-						<br />
-						<strong>2-6</strong> – poor – nice try but lower effort or they
-						obviously didn’t spend much time
-						<br />
-						<strong>0-1</strong> – not even trying/inappropriate
-						<br />
-					</p>
+					<p
+						dangerouslySetInnerHTML={{
+							__html: guidelines.guidelines.tech_experience_saq,
+						}}
+					/>
 				}
 				rightColumn={<p>{application_data.tech_experience_saq}</p>}
 				value={techExperienceScore}
@@ -283,35 +228,11 @@ function ZotHacksHackerApplication({
 				min={0}
 				max={20}
 				leftColumn={
-					<p>
-						Highest quality responses should include these attributes:
-						<br />
-						<br />
-						<strong>Tied to Zothack&apos;s Core Mission</strong> - some
-						combination of willingness to try/fail/learn (knows what ZotHacks
-						is)
-						<br />
-						<strong>Uniqueness</strong> - memorable, different, stood out
-						<br />
-						<strong>Authenticity</strong> - genuineness, explanation sounds
-						human and not chat
-						<br />
-						<br />
-						<strong>18-20</strong> – amazing – all the good traits and{" "}
-						<strong>MORE</strong>; super special/stood out and aligns with ZH
-						core values
-						<br />
-						<strong>13-17</strong> – good – all the aforementioned good traits
-						<br />
-						<strong>7-12</strong> – mid – effort but less memorable/lacking some
-						of the aforementioned traits
-						<br />
-						<strong>2-6</strong> – poor – nice try but lower effort or they
-						obviously didn’t spend much time
-						<br />
-						<strong>0-1</strong> – not even trying/inappropriate
-						<br />
-					</p>
+					<p
+						dangerouslySetInnerHTML={{
+							__html: guidelines.guidelines.learn_about_self_saq,
+						}}
+					/>
 				}
 				rightColumn={<p>{application_data.learn_about_self_saq}</p>}
 				value={learnAboutSelfScore}
@@ -323,34 +244,11 @@ function ZotHacksHackerApplication({
 				min={0}
 				max={20}
 				leftColumn={
-					<p>
-						Highest quality responses should include these attributes:
-						<br />
-						<br />
-						<strong>Creativity </strong> - visually appealing, imaginative, cool
-						art concept
-						<br />
-						<strong>Uniqueness</strong> - memorable, different, stood out
-						<br />
-						<strong>Authenticity</strong> - genuineness, explanation sounds
-						human and not chat
-						<br />
-						<br />
-						<strong>18-20</strong> – amazing – all the good traits and{" "}
-						<strong>MORE</strong>; super special/stood out to you, &quot;Your
-						art was amazing wow I love it&quot;
-						<br />
-						<strong>13-17</strong> – good – all the aforementioned good traits
-						<br />
-						<strong>7-12</strong> – mid – effort but less memorable/lacking some
-						of the aforementioned traits
-						<br />
-						<strong>2-6</strong> – poor – nice try but lower effort or they
-						obviously didn’t spend much time
-						<br />
-						<strong>0-1</strong> – not even trying/inappropriate
-						<br />
-					</p>
+					<p
+						dangerouslySetInnerHTML={{
+							__html: guidelines.guidelines.pixel_art_saq,
+						}}
+					/>
 				}
 				rightColumn={
 					<div>

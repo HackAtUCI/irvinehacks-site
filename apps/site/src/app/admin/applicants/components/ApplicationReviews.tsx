@@ -32,7 +32,8 @@ function ApplicationReviews({ reviews, isHacker }: ApplicationReviewsProps) {
 						{isHacker ? (
 							<>
 								You scored this applicant a{" "}
-								{score === OVERQUALIFIED_SCORE ? "OVERQUALIFIED" : score} on {formatDate(date)}
+								{score === OVERQUALIFIED_SCORE ? "OVERQUALIFIED" : score} on{" "}
+								{formatDate(date)}
 							</>
 						) : (
 							<>

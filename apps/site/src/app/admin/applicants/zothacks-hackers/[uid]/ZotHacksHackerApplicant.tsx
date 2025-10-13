@@ -1,14 +1,20 @@
-import Applicant from "@/app/admin/applicants/components/Applicant";
+import DetailedScoreApplicant from "@/app/admin/applicants/components/DetailedScoreApplicant";
+import { getZothacksScoringGuidelines } from "../components/getScoringGuidelines";
 
 interface ApplicantProps {
 	params: { uid: string };
 }
 
-function ZotHacksHackerApplicant({ params }: ApplicantProps) {
+async function ZotHacksHackerApplicant({ params }: ApplicantProps) {
 	const { uid } = params;
+	const guidelines = await getZothacksScoringGuidelines();
 
 	return (
-		<Applicant uid={uid} applicationType="hacker" hackathonName="zothacks" />
+		<DetailedScoreApplicant
+			uid={uid}
+			applicationType="hacker"
+			guidelines={guidelines}
+		/>
 	);
 }
 

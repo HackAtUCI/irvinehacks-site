@@ -38,6 +38,10 @@ export function isReviewer(roles: ReadonlyArray<Role>): boolean {
 	return REVIEWER_ROLES.some((reviewerRole) => roles.includes(reviewerRole));
 }
 
+export function isLead(roles: ReadonlyArray<Role>): boolean {
+	return roles.includes(AdminRole.Lead);
+}
+
 export function isHackerReviewer(roles: ReadonlyArray<Role>): boolean {
 	return (
 		roles.includes(AdminRole.Director) ||

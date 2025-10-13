@@ -24,6 +24,9 @@ import useHackerApplicants, {
 	HackerApplicantSummary,
 } from "@/lib/admin/useHackerApplicants";
 import { ParticipantRole } from "@/lib/userRecord";
+import { OVERQUALIFIED_SCORE } from "@/lib/decisionScores";
+import SpaceBetween from "@cloudscape-design/components/space-between";
+import Badge from "@cloudscape-design/components/badge";
 
 type ColumnDef = {
 	id: string;
@@ -141,16 +144,24 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		hackathonName === "zothacks" ? zothacksExtraColumn : irvinehacksExtraColumn;
 
 	const renderHeader = useCallback(
-		({ _id, first_name, last_name }: HackerApplicantSummary) => (
+		({ _id, first_name, last_name, avg_score }: HackerApplicantSummary) => (
 			<CardHeader
 				_id={_id}
 				first_name={first_name}
 				last_name={last_name}
 				hackathonName={hackathonName}
+				avg_score={avg_score}
 			/>
 		),
 		[hackathonName],
 	);
+
+	const avgScore = ({ avg_score }: { avg_score: number }) => {
+		if (avg_score === -1) return "-";
+		if (avg_score === OVERQUALIFIED_SCORE)
+			return <Box color="text-status-error">OVERQUALIFIED</Box>;
+		return avg_score;
+	};
 
 	return (
 		<Cards
@@ -182,7 +193,7 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 					{
 						id: "avg_score",
 						header: "Averaged Score",
-						content: ({ avg_score }) => (avg_score === -1 ? "-" : avg_score),
+						content: avgScore,
 					},
 					{
 						id: "decision",
@@ -265,7 +276,11 @@ const CardHeader = ({
 	first_name,
 	last_name,
 	hackathonName,
-}: Pick<HackerApplicantSummary, "_id" | "first_name" | "last_name"> & {
+	avg_score,
+}: Pick<
+	HackerApplicantSummary,
+	"_id" | "first_name" | "last_name" | "avg_score"
+> & {
 	hackathonName: "irvinehacks" | "zothacks";
 }) => {
 	const followWithNextLink = useFollowWithNextLink();
@@ -274,9 +289,14 @@ const CardHeader = ({
 			? `/admin/applicants/zothacks-hackers/${_id}`
 			: `/admin/applicants/hackers/${_id}`;
 	return (
-		<Link href={href} fontSize="inherit" onFollow={followWithNextLink}>
-			{first_name} {last_name}
-		</Link>
+		<SpaceBetween direction="horizontal" size="s">
+			<Link href={href} fontSize="inherit" onFollow={followWithNextLink}>
+				{first_name} {last_name}
+			</Link>
+			{avg_score === OVERQUALIFIED_SCORE && (
+				<Badge color="red">OVERQUALIFIED</Badge>
+			)}
+		</SpaceBetween>
 	);
 };
 

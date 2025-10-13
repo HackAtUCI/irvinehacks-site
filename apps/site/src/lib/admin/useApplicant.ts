@@ -16,11 +16,19 @@ interface BaseApplicationData {
 	major: string;
 }
 
+export type HackathonExperience = "first_time" | "some_experience" | "veteran";
+interface ReviewBreakdown {
+	resume: number;
+	elevator_pitch_saq: number;
+	tech_experience_saq: number;
+	learn_about_self_saq: number;
+	pixel_art_saq: number;
+}
 export interface ZotHacksHackerApplicationData extends BaseApplicationData {
 	school_year: string;
 	dietary_restrictions: string[];
 	allergies: string | null;
-	hackathon_experience: string;
+	hackathon_experience: HackathonExperience;
 	elevator_pitch_saq: string;
 	tech_experience_saq: string;
 	learn_about_self_saq: string;
@@ -30,6 +38,8 @@ export interface ZotHacksHackerApplicationData extends BaseApplicationData {
 	resume_url: string | null;
 	submission_time: string;
 	reviews: Review[];
+	review_breakdown: { [reviewer_uid: string]: ReviewBreakdown };
+	global_field_scores?: { resume?: number };
 }
 
 export interface HackerApplicationData extends BaseApplicationData {
@@ -131,14 +141,25 @@ function useApplicant(
 		mutate();
 	}
 
+	async function submitDetailedReview(uid: Uid, scores: object) {
+		await axios.post("/api/admin/detailed-review", {
+			applicant: uid,
+			scores: scores,
+		});
+		// TODO: provide success status to display in alert
+		mutate();
+	}
+
 	return {
 		applicant: data,
 		loading: isLoading,
 		error,
 		submitReview,
+		submitDetailedReview,
 	};
 }
 
 export type submitReview = (uid: Uid, score: number) => Promise<void>;
+export type submitDetailedReview = (uid: Uid, scores: object) => Promise<void>;
 
 export default useApplicant;

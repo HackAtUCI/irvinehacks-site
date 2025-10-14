@@ -188,7 +188,7 @@ function ZotHacksHackerApplication({
 							>
 								<Box>
 									<iframe
-										src={application_data.resume_url as string}
+										src={`${application_data.resume_url as string}/preview`}
 										title="Resume"
 										style={{ width: "100%", height: "80vh", border: 0 }}
 									/>

@@ -1,4 +1,7 @@
 import { useMemo, useState, useEffect, useContext } from "react";
+import { Button } from "@cloudscape-design/components";
+import { Modal } from "@cloudscape-design/components";
+import { Box } from "@cloudscape-design/components";
 import Container from "@cloudscape-design/components/container";
 import Header from "@cloudscape-design/components/header";
 import SpaceBetween from "@cloudscape-design/components/space-between";
@@ -114,6 +117,8 @@ function ZotHacksHackerApplication({
 			: -1,
 	);
 
+	const [showResume, setShowResume] = useState<boolean>(false);
+
 	useEffect(() => {
 		const hackathonExperienceScore =
 			HACKATHON_EXPERIENCE_SCORE_MAP[
@@ -171,15 +176,26 @@ function ZotHacksHackerApplication({
 				title="Resume"
 				leftColumn={<PortableText value={guidelines.guidelines.resume} />}
 				rightColumn={
-					<p>
-						<a
-							href={application_data.resume_url as string}
-							target="_blank"
-							rel="noopener noreferrer"
-						>
-							{application_data.resume_url}
-						</a>
-					</p>
+					<>
+						<Button onClick={() => setShowResume(true)}>View resume</Button>
+						{showResume && (
+							<Modal
+								onDismiss={() => setShowResume(false)}
+								visible={showResume}
+								closeAriaLabel="Close modal"
+								header="Resume"
+								size="max"
+							>
+								<Box>
+									<iframe
+										src={`${application_data.resume_url as string}/preview`}
+										title="Resume"
+										style={{ width: "100%", height: "80vh", border: 0 }}
+									/>
+								</Box>
+							</Modal>
+						)}
+					</>
 				}
 				options={resumeOptions}
 				useDropdown

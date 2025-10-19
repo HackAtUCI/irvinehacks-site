@@ -22,6 +22,7 @@ from auth.user_identity import User, require_user_identity, use_user_identity
 from models.ApplicationData import (
     FIELDS_SUPPORTING_OTHER,
     ProcessedApplicationDataUnion,
+    ProcessedZotHacksHackerApplicationData,
     RawHackerApplicationData,
     RawMentorApplicationData,
     RawVolunteerApplicationData,
@@ -41,6 +42,12 @@ log = getLogger(__name__)
 router = APIRouter()
 
 DEADLINE = datetime(2025, 10, 27, 8, 1, tzinfo=timezone.utc)
+
+HACKATHON_EXPERIENCE_SCORE_MAP = {
+    "first_time": 5,
+    "some_experience": 0,
+    "veteran": -1000,
+}
 
 
 class IdentityResponse(BaseModel):
@@ -241,6 +248,8 @@ async def _apply_flow(
         }
     )
 
+    _add_auto_scores_if_any(processed_application_data)
+
     applicant = Applicant(
         uid=user.uid,
         first_name=raw_application_data.first_name,
@@ -398,3 +407,19 @@ def _parsed_form(form: FormData) -> dict[str, Any]:
             data[field] = [data[field]]
 
     return data
+
+
+def _add_auto_scores_if_any(
+    processed_application_data: ProcessedApplicationDataUnion,
+) -> None:
+    if not isinstance(
+        processed_application_data, ProcessedZotHacksHackerApplicationData
+    ):
+        return
+
+    # Only hackathon_experience is auto-scored for now
+    processed_application_data.global_field_scores = {
+        "hackathon_experience": HACKATHON_EXPERIENCE_SCORE_MAP[
+            processed_application_data.hackathon_experience
+        ]
+    }

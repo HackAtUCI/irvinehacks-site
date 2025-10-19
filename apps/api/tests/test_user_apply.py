@@ -1,4 +1,5 @@
 import copy
+import json
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, Mock, patch
 
@@ -8,7 +9,11 @@ from fastapi import FastAPI
 from pydantic import HttpUrl
 
 from auth.user_identity import NativeUser, UserTestClient
-from models.ApplicationData import ProcessedHackerApplicationData
+from models.ApplicationData import (
+    ProcessedHackerApplicationData,
+    ProcessedZotHacksHackerApplicationData,
+)
+
 from models.user_record import Applicant, Status, Role
 from routers import user
 from services.mongodb_handler import Collection
@@ -47,6 +52,25 @@ SAMPLE_APPLICATION = {
     "email": "pkfire@uci.edu",
 }
 
+SAMPLE_ZOTHACKS_HACKER_APPLICATION = {
+    "first_name": "pk",
+    "last_name": "fire",
+    "pronouns": ["pk"],
+    "is_18_older": "false",
+    "school_year": "2nd Year",
+    "dietary_restrictions": ["No pork"],
+    "allergies": "s",
+    "major": "Computer Science",
+    "hackathon_experience": "veteran",
+    "elevator_pitch_saq": "s",
+    "tech_experience_saq": "ss",
+    "learn_about_self_saq": "s",
+    "pixel_art_saq": "sss",
+    "pixel_art_data": json.dumps([0] * 64),
+    "comments": "a",
+    "application_type": "Hacker",
+}
+
 
 SAMPLE_RESUME = ("my-resume.pdf", b"resume", "application/pdf")
 SAMPLE_FILES = {"resume": SAMPLE_RESUME}
@@ -80,6 +104,18 @@ EXPECTED_APPLICATION_DATA_WITHOUT_RESUME = ProcessedHackerApplicationData(
     verdict_time=SAMPLE_VERDICT_TIME,
 )
 
+EXPECTED_GLOBAL_FIELD_SCORES = {"hackathon_experience": -1000}
+
+EXPECTED_ZOTHACKS_HACKER_APPLICATION_DATA = ProcessedZotHacksHackerApplicationData(
+    **SAMPLE_ZOTHACKS_HACKER_APPLICATION,  # type: ignore[arg-type]
+    resume_url=SAMPLE_RESUME_URL,
+    submission_time=SAMPLE_SUBMISSION_TIME,
+    reviews=[],
+    review_breakdown={},
+    global_field_scores=EXPECTED_GLOBAL_FIELD_SCORES,
+    email=USER_EMAIL,
+)
+
 EXPECTED_USER = Applicant(
     uid="edu.uci.pkfire",
     first_name="pk",
@@ -97,6 +133,16 @@ EXPECTED_USER_WITHOUT_RESUME = Applicant(
     status=Status.PENDING_REVIEW,
     application_data=EXPECTED_APPLICATION_DATA_WITHOUT_RESUME,
 )
+
+EXPECTED_ZOTHACKS_HACKER_USER = Applicant(
+    uid="edu.uci.pkfire",
+    first_name="pk",
+    last_name="fire",
+    roles=(Role.APPLICANT, Role.HACKER),
+    status=Status.PENDING_REVIEW,
+    application_data=EXPECTED_ZOTHACKS_HACKER_APPLICATION_DATA,
+)
+
 
 resume_handler.FOLDER_MAP = {
     HackathonName.IRVINEHACKS: {
@@ -150,6 +196,45 @@ def test_apply_successfully(
     )
     mock_send_application_confirmation_email.assert_awaited_once_with(
         USER_EMAIL, EXPECTED_USER, Role.HACKER
+    )
+    assert res.status_code == 201
+
+
+@patch("utils.email_handler.send_application_confirmation_email", autospec=True)
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("routers.user._is_past_deadline", autospec=True)
+@patch("routers.user.datetime", autospec=True)
+@patch("services.gdrive_handler.upload_file", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_zothacks_hacker_apply_successfully(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_gdrive_handler_upload_file: AsyncMock,
+    mock_datetime: Mock,
+    mock_is_past_deadline: Mock,
+    mock_mongodb_handler_update_one: AsyncMock,
+    mock_send_application_confirmation_email: AsyncMock,
+) -> None:
+    """Test that a valid application is submitted properly."""
+    mock_mongodb_handler_retrieve_one.return_value = None
+    mock_gdrive_handler_upload_file.return_value = SAMPLE_RESUME_URL
+    mock_datetime.now.return_value = SAMPLE_SUBMISSION_TIME
+    mock_is_past_deadline.return_value = False
+    res = client.post(
+        "/apply", data=SAMPLE_ZOTHACKS_HACKER_APPLICATION, files=SAMPLE_FILES
+    )
+
+    mock_gdrive_handler_upload_file.assert_awaited_once_with(
+        resume_handler.FOLDER_MAP[HackathonName.ZOTHACKS]["Hacker"],
+        *EXPECTED_RESUME_UPLOAD,
+    )
+    mock_mongodb_handler_update_one.assert_awaited_once_with(
+        Collection.USERS,
+        {"_id": EXPECTED_ZOTHACKS_HACKER_USER.uid},
+        EXPECTED_ZOTHACKS_HACKER_USER.model_dump(),
+        upsert=True,
+    )
+    mock_send_application_confirmation_email.assert_awaited_once_with(
+        USER_EMAIL, EXPECTED_ZOTHACKS_HACKER_USER, Role.HACKER
     )
     assert res.status_code == 201
 

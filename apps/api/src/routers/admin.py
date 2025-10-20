@@ -536,8 +536,8 @@ async def _handle_detailed_scores_review(
     try:
         await require_lead(reviewer)
         global_scores = GlobalScores(
-            resume=scores.resume,
-            hackathon_experience=scores.hackathon_experience,
+            resume=scores.resume or 0,
+            hackathon_experience=scores.hackathon_experience or 0,
         )
         await _handle_global_only_review(applicant, global_scores, reviewer)
     except HTTPException:

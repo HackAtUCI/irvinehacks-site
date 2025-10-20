@@ -82,7 +82,7 @@ export default function ScoreSection({
 						<Header variant="h3">Applicant Response</Header>
 						{rightColumn}
 						{wordLimit && (
-							<p style={{textAlign: "right"}}>
+							<p style={{ textAlign: "right" }}>
 								({wordCount}/{wordLimit})
 							</p>
 						)}

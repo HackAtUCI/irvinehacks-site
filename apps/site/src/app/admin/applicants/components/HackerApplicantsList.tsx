@@ -23,7 +23,7 @@ import useHackerThresholds from "@/lib/admin/useHackerThresholds";
 import useHackerApplicants, {
 	HackerApplicantSummary,
 } from "@/lib/admin/useHackerApplicants";
-import { ParticipantRole } from "@/lib/userRecord";
+import { ParticipantRole, Status } from "@/lib/userRecord";
 import { OVERQUALIFIED_SCORE } from "@/lib/decisionScores";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import Badge from "@cloudscape-design/components/badge";
@@ -75,8 +75,14 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		}
 	}, [top400]);
 
-	const filteredApplicants = applicantList.filter(
-		(applicant) =>
+	const filteredApplicants = applicantList.filter((applicant) => {
+		if (
+			selectedStatusValues.includes(Status.Pending) &&
+			applicant.avg_score === OVERQUALIFIED_SCORE
+		)
+			return false;
+
+		return (
 			(selectedStatuses.length === 0 ||
 				selectedStatusValues.includes(applicant.status)) &&
 			(selectedDecisions.length === 0 ||
@@ -84,8 +90,9 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 			(uciNetIDFilter.length === 0 ||
 				applicant.reviewers.some((reviewer) =>
 					uciNetIDFilterValues.includes(reviewer),
-				)),
-	);
+				))
+		);
+	});
 
 	const filteredApplicants400 = [...applicantList]
 		.filter((applicant) => applicant.avg_score !== -1)

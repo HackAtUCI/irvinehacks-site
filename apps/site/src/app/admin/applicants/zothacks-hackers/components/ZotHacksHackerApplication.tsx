@@ -15,7 +15,7 @@ import {
 } from "@/lib/admin/useApplicant";
 import ScoreSection from "../../components/ScoreSection";
 import UserContext from "@/lib/admin/UserContext";
-import { isLead } from "@/lib/admin/authorization";
+import { isDirector, isLead } from "@/lib/admin/authorization";
 import { ZothacksScoringGuidelinesType } from "./getScoringGuidelines";
 
 type ZHKeys = Exclude<keyof ZotHacksHackerApplicationData, "reviews">;
@@ -54,13 +54,7 @@ function ZotHacksHackerApplication({
 	const { uid: reviewer_uid, roles } = useContext(UserContext);
 	const formattedUid = reviewer_uid?.split(".").at(-1);
 
-	// Check if resume dropdown should be disabled
-	const isResumeDisabled = useMemo(() => {
-		const hasGlobalResumeScore =
-			application_data?.global_field_scores?.resume !== undefined;
-
-		return hasGlobalResumeScore && !isLead(roles);
-	}, [application_data?.global_field_scores?.resume, roles]);
+	const isResumeDisabled = !isDirector(roles) && !isLead(roles);
 
 	// Resume options used for dropdown-based ScoreSection
 	const resumeOptions = useMemo(

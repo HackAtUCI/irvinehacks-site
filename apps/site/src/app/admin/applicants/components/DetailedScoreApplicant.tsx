@@ -79,6 +79,21 @@ function DetailedScoreApplicant({
 					<></>
 				)}
 			</SpaceBetween>
+			<div
+				style={{
+					display: "flex",
+					width: "100%",
+					justifyContent: "flex-end",
+					margin: "16px",
+				}}
+			>
+				<ZotHacksHackerApplicantActions
+					applicant={applicant._id}
+					reviews={application_data.reviews}
+					scores={scores}
+					submitDetailedReview={submitDetailedReview}
+				/>
+			</div>
 		</ContentLayout>
 	);
 }

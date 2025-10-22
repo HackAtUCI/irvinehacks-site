@@ -10,6 +10,8 @@ interface ApplicationResponseProps {
 	value: string | boolean | string[] | null;
 }
 
+
+
 const titleCase = (str: string) =>
 	str.charAt(0).toUpperCase() + str.substring(1);
 
@@ -45,7 +47,7 @@ function ApplicationResponse({ value }: ApplicationResponseProps) {
 					<p>
 						{
 							HACKATHON_EXPERIENCE_LABELS[
-								value as keyof typeof HACKATHON_EXPERIENCE_LABELS
+							value as keyof typeof HACKATHON_EXPERIENCE_LABELS
 							]
 						}
 					</p>

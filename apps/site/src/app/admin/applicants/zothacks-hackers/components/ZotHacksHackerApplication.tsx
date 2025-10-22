@@ -208,6 +208,7 @@ function ZotHacksHackerApplication({
 				rightColumn={<p>{application_data.elevator_pitch_saq}</p>}
 				value={elevatorScore}
 				onChange={setElevatorScore}
+				wordLimit={75}
 			/>
 			<ScoreSection
 				title="Describe a positive or negative experience dealing with technology
@@ -220,6 +221,7 @@ function ZotHacksHackerApplication({
 				rightColumn={<p>{application_data.tech_experience_saq}</p>}
 				value={techExperienceScore}
 				onChange={setTechExperienceScore}
+				wordLimit={100}
 			/>
 			<ScoreSection
 				title="What’s one thing you hope to learn about yourself at UCI — and how
@@ -232,6 +234,7 @@ function ZotHacksHackerApplication({
 				rightColumn={<p>{application_data.learn_about_self_saq}</p>}
 				value={learnAboutSelfScore}
 				onChange={setLearnAboutSelfScore}
+				wordLimit={100}
 			/>
 			<ScoreSection
 				title="Pixel art: Draw something that represents you. Briefly explain your
@@ -249,6 +252,7 @@ function ZotHacksHackerApplication({
 				}
 				value={pixelArtScore}
 				onChange={setPixelArtScore}
+				wordLimit={100}
 			/>
 		</SpaceBetween>
 	);

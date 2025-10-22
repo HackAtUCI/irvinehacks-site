@@ -81,12 +81,12 @@ class ReviewRequest(BaseModel):
 
 
 class ZotHacksHackerDetailedScores(BaseModel):
-    resume: int
+    resume: Optional[int] = None
     elevator_pitch_saq: int
     tech_experience_saq: int
     learn_about_self_saq: int
     pixel_art_saq: int
-    hackathon_experience: int
+    hackathon_experience: Optional[int] = None
 
 
 class GlobalScores(BaseModel):
@@ -461,8 +461,8 @@ async def _handle_detailed_scores_review(
     applicant: str, scores: ZotHacksHackerDetailedScores, reviewer: User
 ) -> None:
     """Handle detailed scores review submission."""
-    score_breakdown = scores.model_dump()
-    total_score = max(sum(score_breakdown.values()), -3)
+    score_breakdown = scores.model_dump(exclude_none=True)
+    total_score = max(sum(score_breakdown.get(k, 0) for k in scores.model_fields), -3)
 
     if total_score < -3 or total_score > 100:
         log.error("Invalid review score submitted.")
@@ -536,8 +536,8 @@ async def _handle_detailed_scores_review(
     try:
         await require_lead(reviewer)
         global_scores = GlobalScores(
-            resume=scores.resume,
-            hackathon_experience=scores.hackathon_experience,
+            resume=scores.resume or 0,
+            hackathon_experience=scores.hackathon_experience or 0,
         )
         await _handle_global_only_review(applicant, global_scores, reviewer)
     except HTTPException:

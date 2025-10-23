@@ -10,8 +10,6 @@ interface ApplicationResponseProps {
 	value: string | boolean | string[] | null;
 }
 
-
-
 const titleCase = (str: string) =>
 	str.charAt(0).toUpperCase() + str.substring(1);
 
@@ -20,8 +18,8 @@ const formatQuestion = (q: string) => q.split("_").map(titleCase).join(" ");
 // Map of hackathon experience values to labels
 const HACKATHON_EXPERIENCE_LABELS: Record<string, string> = {
 	first_time: "First Time",
-	some_experience: "Some Experience", 
-	veteran: "Veteran"
+	some_experience: "Some Experience",
+	veteran: "Veteran",
 };
 
 function ApplicationResponse({ value }: ApplicationResponseProps) {
@@ -43,7 +41,15 @@ function ApplicationResponse({ value }: ApplicationResponseProps) {
 				);
 			}
 			if (value in HACKATHON_EXPERIENCE_LABELS) {
-				return <p>{HACKATHON_EXPERIENCE_LABELS[value as keyof typeof HACKATHON_EXPERIENCE_LABELS]}</p>;
+				return (
+					<p>
+						{
+							HACKATHON_EXPERIENCE_LABELS[
+								value as keyof typeof HACKATHON_EXPERIENCE_LABELS
+							]
+						}
+					</p>
+				);
 			}
 			return <p>{value}</p>;
 		case "object":

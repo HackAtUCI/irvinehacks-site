@@ -13,7 +13,7 @@ import ApplyReminder from "./components/ApplyReminder";
 import ReleaseNonHackerDecisions from "./components/ReleaseDecisions";
 import ReleaseHackerDecisions from "./components/ReleaseHackerDecisions";
 import RSVPReminder from "./components/RSVPReminder";
-import Logistics from "./components/Logistics"
+import Logistics from "./components/Logistics";
 
 function EmailSender() {
 	const router = useRouter();

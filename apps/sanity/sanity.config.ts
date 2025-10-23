@@ -25,7 +25,7 @@ export default defineConfig({
 									"resourceCategory",
 									"resource",
 									"zothacksScoringGuidelines",
-								].includes(listItem.getId()!)
+								].includes(listItem.getId()!),
 						),
 						S.divider(),
 						S.listItem()
@@ -35,15 +35,15 @@ export default defineConfig({
 								S.document()
 									.schemaType("resourceCategoryOrder")
 									.documentId("resourceCategoryOrder")
-									.title("Resource Categories Order")
+									.title("Resource Categories Order"),
 							),
 						S.listItem()
 							.title("Resource Categories")
 							.icon(Folders)
 							.child(
 								S.documentTypeList("resourceCategory").title(
-									"Resource Categories"
-								)
+									"Resource Categories",
+								),
 							),
 						S.listItem()
 							.title("Resources")
@@ -55,8 +55,8 @@ export default defineConfig({
 							.icon(Newspaper)
 							.child(
 								S.documentTypeList("zothacksScoringGuidelines").title(
-									"Zothacks Scoring Guidelines"
-								)
+									"Zothacks Scoring Guidelines",
+								),
 							),
 					]),
 		}),

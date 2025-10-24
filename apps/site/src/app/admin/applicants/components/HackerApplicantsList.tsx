@@ -50,12 +50,18 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 
 	const [selectedStatuses, setSelectedStatuses] = useState<Options>([]);
 	const [selectedDecisions, setSelectedDecisions] = useState<Options>([]);
+	const [selectedResumeStatuses, setSelectedResumeStatuses] = useState<Options>(
+		[],
+	);
 	const [uciNetIDFilter, setUCINetIDFilter] = useState<Options>([]);
 
 	const { applicantList, loading } = useHackerApplicants();
 
 	const selectedStatusValues = selectedStatuses.map(({ value }) => value);
 	const selectedDecisionValues = selectedDecisions.map(({ value }) => value);
+	const selectedResumeStatusesValues = selectedResumeStatuses.map(
+		({ value }) => value,
+	);
 	const uciNetIDFilterValues = uciNetIDFilter.map(({ value }) => value);
 
 	const [acceptedCount, setAcceptedCount] = useState(0);
@@ -82,11 +88,19 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		)
 			return false;
 
+		const matchesResumeReviewStatuses =
+			selectedResumeStatusesValues.length === 0 ||
+			(selectedResumeStatusesValues.includes("REVIEWED") &&
+				applicant.resume_reviewed) ||
+			(selectedResumeStatusesValues.includes("NOT_REVIEWED") &&
+				!applicant.resume_reviewed);
+
 		return (
 			(selectedStatuses.length === 0 ||
 				selectedStatusValues.includes(applicant.status)) &&
 			(selectedDecisions.length === 0 ||
 				selectedDecisionValues.includes(applicant.decision || "-")) &&
+			matchesResumeReviewStatuses &&
 			(uciNetIDFilter.length === 0 ||
 				applicant.reviewers.some((reviewer) =>
 					uciNetIDFilterValues.includes(reviewer),
@@ -220,6 +234,8 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 					setSelectedStatuses={setSelectedStatuses}
 					selectedDecisions={selectedDecisions}
 					setSelectedDecisions={setSelectedDecisions}
+					selectedResumeStatuses={selectedResumeStatuses}
+					setSelectedResumeStatuses={setSelectedResumeStatuses}
 					uciNetIDFilter={uciNetIDFilter}
 					setUCINetIDFilter={setUCINetIDFilter}
 					applicantType={ParticipantRole.Hacker}

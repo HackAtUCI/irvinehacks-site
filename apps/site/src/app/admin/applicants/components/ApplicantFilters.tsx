@@ -25,6 +25,8 @@ interface ApplicantFiltersProps {
 	setSelectedStatuses: Dispatch<SetStateAction<Options>>;
 	selectedDecisions: Options;
 	setSelectedDecisions: Dispatch<SetStateAction<Options>>;
+	selectedResumeStatuses?: Options;
+	setSelectedResumeStatuses?: Dispatch<SetStateAction<Options>>;
 	uciNetIDFilter?: Options;
 	setUCINetIDFilter?: Dispatch<SetStateAction<Options>>;
 	applicantType: ParticipantRole;
@@ -52,11 +54,22 @@ const STATUS_OPTIONS = Object.values(ReviewStatus).map(statusOption);
 
 const DECISION_OPTIONS = Object.values(Decision).map(statusOption);
 
+const RESUME_REVIEW_OPTIONS: Options = [
+	{ label: "Resume Reviewed", value: "REVIEWED", iconName: "status-positive" },
+	{
+		label: "Resume Not Reviewed",
+		value: "NOT_REVIEWED",
+		iconName: "status-pending",
+	},
+];
+
 function ApplicantFilters({
 	selectedStatuses,
 	setSelectedStatuses,
 	selectedDecisions,
 	setSelectedDecisions,
+	selectedResumeStatuses,
+	setSelectedResumeStatuses,
 	uciNetIDFilter,
 	setUCINetIDFilter,
 	applicantType,
@@ -78,7 +91,7 @@ function ApplicantFilters({
 	}
 
 	return (
-		<ColumnLayout columns={3}>
+		<ColumnLayout columns={4}>
 			<Multiselect
 				selectedOptions={selectedStatuses}
 				onChange={({ detail }) => setSelectedStatuses(detail.selectedOptions)}
@@ -96,14 +109,28 @@ function ApplicantFilters({
 				selectedAriaLabel="Selected"
 			/>
 			{applicantType === ParticipantRole.Hacker && (
-				<Multiselect
-					selectedOptions={uciNetIDFilter ?? []}
-					onChange={({ detail }) => setUCINetIDFilter?.(detail.selectedOptions)}
-					deselectAriaLabel={(e) => `Remove ${e.label}`}
-					options={reviewerOptions}
-					placeholder="Search by Reviewer's UCINetID"
-					selectedAriaLabel="Selected"
-				/>
+				<>
+					<Multiselect
+						selectedOptions={selectedResumeStatuses ?? []}
+						onChange={({ detail }) =>
+							setSelectedResumeStatuses?.(detail.selectedOptions)
+						}
+						deselectAriaLabel={(e) => `Remove ${e.label}`}
+						options={RESUME_REVIEW_OPTIONS}
+						placeholder="Filter by resume review status"
+						selectedAriaLabel="Selected"
+					/>
+					<Multiselect
+						selectedOptions={uciNetIDFilter ?? []}
+						onChange={({ detail }) =>
+							setUCINetIDFilter?.(detail.selectedOptions)
+						}
+						deselectAriaLabel={(e) => `Remove ${e.label}`}
+						options={reviewerOptions}
+						placeholder="Search by Reviewer's UCINetID"
+						selectedAriaLabel="Selected"
+					/>
+				</>
 			)}
 		</ColumnLayout>
 	);

@@ -112,7 +112,7 @@ def test_can_retrieve_applicants(
             "_id": "edu.uci.petr",
             "first_name": "Peter",
             "last_name": "Anteater",
-            "resume_reviwed": False,
+            "resume_reviewed": False,
             "avg_score": 8.5,
             "reviewers": ["edu.uci.albert", "edu.uci.alicia"],
             "status": "REVIEWED",

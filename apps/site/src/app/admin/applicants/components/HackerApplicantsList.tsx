@@ -88,19 +88,21 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		)
 			return false;
 
-		const matchesResumeReviewStatuses =
-			selectedResumeStatusesValues.length === 0 ||
-			(selectedResumeStatusesValues.includes("REVIEWED") &&
+		if (
+			selectedStatusValues.length === 0 ||
+			(selectedStatusValues.includes("RESUME_REVIEWED") &&
 				applicant.resume_reviewed) ||
-			(selectedResumeStatusesValues.includes("NOT_REVIEWED") &&
-				!applicant.resume_reviewed);
+			(selectedStatusValues.includes("RESUME_NOT_REVIEWED") &&
+				!applicant.resume_reviewed)
+		) {
+			return true;
+		}
 
 		return (
 			(selectedStatuses.length === 0 ||
 				selectedStatusValues.includes(applicant.status)) &&
 			(selectedDecisions.length === 0 ||
 				selectedDecisionValues.includes(applicant.decision || "-")) &&
-			matchesResumeReviewStatuses &&
 			(uciNetIDFilter.length === 0 ||
 				applicant.reviewers.some((reviewer) =>
 					uciNetIDFilterValues.includes(reviewer),

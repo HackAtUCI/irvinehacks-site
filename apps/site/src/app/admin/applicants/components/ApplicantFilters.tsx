@@ -50,18 +50,24 @@ const statusOption = (status: Status): MultiselectProps.Option => ({
 	iconName: StatusIcons[status],
 });
 
-const STATUS_OPTIONS = Object.values(ReviewStatus).map(statusOption);
-
-const DECISION_OPTIONS = Object.values(Decision).map(statusOption);
-
 const RESUME_REVIEW_OPTIONS: Options = [
-	{ label: "Resume Reviewed", value: "REVIEWED", iconName: "status-positive" },
+	{
+		label: "Resume Reviewed",
+		value: "RESUME_REVIEWED",
+		iconName: "status-positive",
+	},
 	{
 		label: "Resume Not Reviewed",
-		value: "NOT_REVIEWED",
+		value: "RESUME_NOT_REVIEWED",
 		iconName: "status-pending",
 	},
 ];
+
+const STATUS_OPTIONS = Object.values(ReviewStatus)
+	.map(statusOption)
+	.concat(RESUME_REVIEW_OPTIONS);
+
+const DECISION_OPTIONS = Object.values(Decision).map(statusOption);
 
 function ApplicantFilters({
 	selectedStatuses,
@@ -91,7 +97,7 @@ function ApplicantFilters({
 	}
 
 	return (
-		<ColumnLayout columns={4}>
+		<ColumnLayout columns={3}>
 			<Multiselect
 				selectedOptions={selectedStatuses}
 				onChange={({ detail }) => setSelectedStatuses(detail.selectedOptions)}
@@ -110,7 +116,7 @@ function ApplicantFilters({
 			/>
 			{applicantType === ParticipantRole.Hacker && (
 				<>
-					<Multiselect
+					{/* <Multiselect
 						selectedOptions={selectedResumeStatuses ?? []}
 						onChange={({ detail }) =>
 							setSelectedResumeStatuses?.(detail.selectedOptions)
@@ -119,7 +125,7 @@ function ApplicantFilters({
 						options={RESUME_REVIEW_OPTIONS}
 						placeholder="Filter by resume review status"
 						selectedAriaLabel="Selected"
-					/>
+					/> */}
 					<Multiselect
 						selectedOptions={uciNetIDFilter ?? []}
 						onChange={({ detail }) =>

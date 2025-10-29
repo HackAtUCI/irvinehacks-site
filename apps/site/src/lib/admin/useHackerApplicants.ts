@@ -11,6 +11,7 @@ export interface HackerApplicantSummary {
 	decision: Decision | null;
 	reviewers: ReadonlyArray<string>;
 	avg_score: number;
+	resume_reviewed: boolean;
 	application_data: {
 		school?: string;
 		school_year?: string;

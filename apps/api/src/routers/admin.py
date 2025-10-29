@@ -71,6 +71,7 @@ class HackerApplicantSummary(BaseRecord):
     status: str
     decision: Optional[Decision] = None
     reviewers: list[str] = []
+    resume_reviewed: bool = False
     avg_score: float
     application_data: Union[ApplicationDataSummary, ZotHacksApplicationDataSummary]
 

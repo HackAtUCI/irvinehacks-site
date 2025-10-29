@@ -5,6 +5,7 @@ from typing import Annotated, Any, Literal, Mapping, Optional, Union
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, TypeAdapter, ValidationError
 from typing_extensions import assert_never
+from pymongo import DESCENDING
 
 from admin import applicant_review_processor, participant_manager, summary_handler
 from admin.participant_manager import Participant
@@ -164,6 +165,7 @@ async def hacker_applicants(
             "last_name",
             "application_data",
         ],
+        sort=[("application_data.submission_time", DESCENDING)],
     )
     thresholds: Optional[dict[str, float]] = await retrieve_thresholds()
 

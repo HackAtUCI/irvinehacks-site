@@ -191,3 +191,30 @@ async def test_update_existing_documents_failure(mock_DB: MagicMock) -> None:
         query = {"_id": "my-id"}
         await mongodb_handler.update(Collection.TESTING, query, update)
         mock_collection.update_many.assert_awaited_once_with(query, {"$set": update})
+
+
+@patch("services.mongodb_handler.get_database")
+async def test_retrieve_documents_sorted_descending(mock_DB: MagicMock) -> None:
+    """Test that retrieve applies descending sort correctly"""
+    SAMPLE_DOCUMENTS = [
+        {"_id": 2, "application_data": {"submission_time": 20}},
+        {"_id": 1, "application_data": {"submission_time": 10}},
+    ]
+
+    mock_collection = Mock()
+    mock_cursor = AsyncMock()
+    mock_cursor.to_list.return_value = SAMPLE_DOCUMENTS
+    mock_collection.find.return_value.sort.return_value = mock_cursor
+
+    mock_db_instance = MagicMock()
+    mock_db_instance.__getitem__.return_value = mock_collection
+    mock_DB.return_value = mock_db_instance
+
+    query = {"roles": "Hacker"}
+    sort = [("application_data.submission_time", -1)]
+
+    result = await mongodb_handler.retrieve(Collection.TESTING, query, sort=sort)
+
+    mock_collection.find.assert_called_once_with(query, [])
+    mock_collection.find.return_value.sort.assert_called_once_with(sort)
+    assert result == SAMPLE_DOCUMENTS

@@ -25,8 +25,6 @@ interface ApplicantFiltersProps {
 	setSelectedStatuses: Dispatch<SetStateAction<Options>>;
 	selectedDecisions: Options;
 	setSelectedDecisions: Dispatch<SetStateAction<Options>>;
-	selectedResumeStatuses?: Options;
-	setSelectedResumeStatuses?: Dispatch<SetStateAction<Options>>;
 	uciNetIDFilter?: Options;
 	setUCINetIDFilter?: Dispatch<SetStateAction<Options>>;
 	applicantType: ParticipantRole;

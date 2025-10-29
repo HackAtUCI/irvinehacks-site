@@ -50,9 +50,6 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 
 	const [selectedStatuses, setSelectedStatuses] = useState<Options>([]);
 	const [selectedDecisions, setSelectedDecisions] = useState<Options>([]);
-	const [selectedResumeStatuses, setSelectedResumeStatuses] = useState<Options>(
-		[],
-	);
 	const [uciNetIDFilter, setUCINetIDFilter] = useState<Options>([]);
 
 	const { applicantList, loading } = useHackerApplicants();

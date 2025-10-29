@@ -90,9 +90,7 @@ def _include_avg_score(applicant_record: dict[str, Any]) -> None:
 
 
 def _include_resume_reviewed(applicant_record: dict[str, Any]) -> None:
-
-    review_breakdown = applicant_record["application_data"].get("review_breakdown", {})
-    resume_reviewed = any(
-        "resume" in reviewer_scores for reviewer_scores in review_breakdown.values()
+    global_field_scores = applicant_record["application_data"].get(
+        "global_field_scores", {}
     )
-    applicant_record["resume_reviewed"] = resume_reviewed
+    applicant_record["resume_reviewed"] = "resume" in global_field_scores

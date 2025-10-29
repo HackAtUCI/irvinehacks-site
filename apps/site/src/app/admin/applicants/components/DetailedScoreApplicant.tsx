@@ -70,7 +70,12 @@ function DetailedScoreApplicant({
 								applicant={applicant._id}
 								reviews={application_data.reviews}
 								scores={scores}
-								submitDetailedReview={submitDetailedReview}
+								submitDetailedReview={(Uid, scores) =>
+									submitDetailedReview(Uid, scores).then(() => {
+										if (setNotifications)
+											setNotifications((prev) => [successMessage, ...prev]);
+									})
+								}
 							/>
 						) : (
 							<></>
@@ -119,7 +124,12 @@ function DetailedScoreApplicant({
 					applicant={applicant._id}
 					reviews={application_data.reviews}
 					scores={scores}
-					submitDetailedReview={submitDetailedReview}
+					submitDetailedReview={(Uid, scores) =>
+						submitDetailedReview(Uid, scores).then(() => {
+							if (setNotifications)
+								setNotifications((prev) => [successMessage, ...prev]);
+						})
+					}
 				/>
 			</div>
 		</ContentLayout>

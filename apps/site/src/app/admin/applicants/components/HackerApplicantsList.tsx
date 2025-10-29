@@ -59,9 +59,6 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 
 	const selectedStatusValues = selectedStatuses.map(({ value }) => value);
 	const selectedDecisionValues = selectedDecisions.map(({ value }) => value);
-	const selectedResumeStatusesValues = selectedResumeStatuses.map(
-		({ value }) => value,
-	);
 	const uciNetIDFilterValues = uciNetIDFilter.map(({ value }) => value);
 
 	const [acceptedCount, setAcceptedCount] = useState(0);
@@ -236,8 +233,6 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 					setSelectedStatuses={setSelectedStatuses}
 					selectedDecisions={selectedDecisions}
 					setSelectedDecisions={setSelectedDecisions}
-					selectedResumeStatuses={selectedResumeStatuses}
-					setSelectedResumeStatuses={setSelectedResumeStatuses}
 					uciNetIDFilter={uciNetIDFilter}
 					setUCINetIDFilter={setUCINetIDFilter}
 					applicantType={ParticipantRole.Hacker}

@@ -74,8 +74,6 @@ function ApplicantFilters({
 	setSelectedStatuses,
 	selectedDecisions,
 	setSelectedDecisions,
-	selectedResumeStatuses,
-	setSelectedResumeStatuses,
 	uciNetIDFilter,
 	setUCINetIDFilter,
 	applicantType,
@@ -115,28 +113,14 @@ function ApplicantFilters({
 				selectedAriaLabel="Selected"
 			/>
 			{applicantType === ParticipantRole.Hacker && (
-				<>
-					{/* <Multiselect
-						selectedOptions={selectedResumeStatuses ?? []}
-						onChange={({ detail }) =>
-							setSelectedResumeStatuses?.(detail.selectedOptions)
-						}
-						deselectAriaLabel={(e) => `Remove ${e.label}`}
-						options={RESUME_REVIEW_OPTIONS}
-						placeholder="Filter by resume review status"
-						selectedAriaLabel="Selected"
-					/> */}
-					<Multiselect
-						selectedOptions={uciNetIDFilter ?? []}
-						onChange={({ detail }) =>
-							setUCINetIDFilter?.(detail.selectedOptions)
-						}
-						deselectAriaLabel={(e) => `Remove ${e.label}`}
-						options={reviewerOptions}
-						placeholder="Search by Reviewer's UCINetID"
-						selectedAriaLabel="Selected"
-					/>
-				</>
+				<Multiselect
+					selectedOptions={uciNetIDFilter ?? []}
+					onChange={({ detail }) => setUCINetIDFilter?.(detail.selectedOptions)}
+					deselectAriaLabel={(e) => `Remove ${e.label}`}
+					options={reviewerOptions}
+					placeholder="Search by Reviewer's UCINetID"
+					selectedAriaLabel="Selected"
+				/>
 			)}
 		</ColumnLayout>
 	);

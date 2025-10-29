@@ -94,7 +94,10 @@ async def retrieve_one(
 
 
 async def retrieve(
-    collection: Collection, query: Mapping[str, object], fields: list[str] = []
+    collection: Collection,
+    query: Mapping[str, object],
+    fields: list[str] = [],
+    sort: Optional[list[tuple[str, int]]] = None,
 ) -> list[dict[str, object]]:
     """Search for and retrieve the specified fields of a document (if any exist)
     that satisfy the provided query."""
@@ -102,6 +105,9 @@ async def retrieve(
     COLLECTION = DB[collection.value]
 
     result = COLLECTION.find(query, fields)
+    if sort:
+        result = result.sort(sort)
+
     output: list[dict[str, object]] = await result.to_list(length=None)
     return output
 

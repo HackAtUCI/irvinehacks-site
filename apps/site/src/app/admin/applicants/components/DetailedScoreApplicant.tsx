@@ -1,10 +1,12 @@
 "use client";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import ContentLayout from "@cloudscape-design/components/content-layout";
 import Header from "@cloudscape-design/components/header";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import Spinner from "@cloudscape-design/components/spinner";
+import { FlashbarProps } from "@cloudscape-design/components/flashbar";
 
+import NotificationContext from "@/lib/admin/NotificationContext";
 import useApplicant, {
 	ZotHacksHackerApplicationData,
 } from "@/lib/admin/useApplicant";
@@ -26,6 +28,7 @@ function DetailedScoreApplicant({
 	applicationType,
 	guidelines,
 }: ApplicantProps) {
+	const { setNotifications } = useContext(NotificationContext);
 	const { applicant, loading, submitDetailedReview } = useApplicant(
 		uid,
 		applicationType,
@@ -41,6 +44,19 @@ function DetailedScoreApplicant({
 	}
 
 	const { first_name, last_name, application_data } = applicant;
+
+	const successMessage: FlashbarProps.MessageDefinition = {
+		type: "success",
+		content: "Successfully submitted review!",
+		id: `${Date.now()}`,
+		dismissible: true,
+		onDismiss: () => {
+			if (setNotifications)
+				setNotifications((prev) =>
+					prev.filter((msg) => msg.id !== successMessage.id),
+				);
+		},
+	};
 
 	return (
 		<ContentLayout
@@ -78,6 +94,9 @@ function DetailedScoreApplicant({
 							submitDetailedReview(applicant._id, {
 								resume: resumeScore,
 								hackathon_experience: hackathonExperienceScore,
+							}).then(() => {
+								if (setNotifications)
+									setNotifications((prev) => [successMessage, ...prev]);
 							})
 						}
 						guidelines={guidelines}

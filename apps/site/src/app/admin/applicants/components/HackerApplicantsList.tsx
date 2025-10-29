@@ -83,11 +83,11 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 			return false;
 
 		if (
-			selectedStatusValues.length === 0 ||
-			(selectedStatusValues.includes("RESUME_REVIEWED") &&
+			selectedStatusValues.length !== 0 &&
+			((selectedStatusValues.includes("RESUME_REVIEWED") &&
 				applicant.resume_reviewed) ||
-			(selectedStatusValues.includes("RESUME_NOT_REVIEWED") &&
-				!applicant.resume_reviewed)
+				(selectedStatusValues.includes("RESUME_NOT_REVIEWED") &&
+					!applicant.resume_reviewed))
 		) {
 			return true;
 		}

@@ -197,6 +197,11 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 						content: ApplicantStatus,
 					},
 					{
+						id: "resume_reviewed",
+						header: "Resume Reviewed Status",
+						content: ResumeReviewedStatus,
+					},
+					{
 						id: "reviewers",
 						header: "",
 						content: ApplicantReviewerIndicator,
@@ -319,5 +324,11 @@ const CardHeader = ({
 
 const DecisionStatus = ({ decision }: HackerApplicantSummary) =>
 	decision ? <ApplicantStatus status={decision} /> : "-";
+
+const ResumeReviewedStatus = ({ resume_reviewed }: HackerApplicantSummary) => (
+	<ApplicantStatus
+		status={resume_reviewed ? Status.Reviewed : Status.Pending}
+	/>
+);
 
 export default HackerApplicantsList;

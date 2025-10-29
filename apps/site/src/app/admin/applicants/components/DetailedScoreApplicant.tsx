@@ -71,6 +71,15 @@ function DetailedScoreApplicant({
 					<ZotHacksHackerApplication
 						application_data={application_data as ZotHacksHackerApplicationData}
 						onScoreChange={setScores}
+						onResumeScore={(
+							resumeScore: number,
+							hackathonExperienceScore: number,
+						) =>
+							submitDetailedReview(applicant._id, {
+								resume: resumeScore,
+								hackathon_experience: hackathonExperienceScore,
+							})
+						}
 						guidelines={guidelines}
 					/>
 				) : applicant.roles.includes(ParticipantRole.Mentor) ? (

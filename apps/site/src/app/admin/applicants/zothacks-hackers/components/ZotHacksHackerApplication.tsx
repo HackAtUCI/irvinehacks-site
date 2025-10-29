@@ -44,10 +44,15 @@ const HACKATHON_EXPERIENCE_SCORE_MAP: Record<HackathonExperience, number> = {
 
 function ZotHacksHackerApplication({
 	application_data,
+	onResumeScore,
 	onScoreChange,
 	guidelines,
 }: {
 	application_data: ZotHacksHackerApplicationData;
+	onResumeScore: (
+		resumeScore: number,
+		hackathonExperienceScore: number,
+	) => void;
 	onScoreChange: (scores: object) => void;
 	guidelines: ZothacksScoringGuidelinesType;
 }) {
@@ -113,12 +118,12 @@ function ZotHacksHackerApplication({
 
 	const [showResume, setShowResume] = useState<boolean>(false);
 
-	useEffect(() => {
-		const hackathonExperienceScore =
-			HACKATHON_EXPERIENCE_SCORE_MAP[
-				application_data.hackathon_experience as HackathonExperience
-			] || 0;
+	const hackathonExperienceScore =
+		HACKATHON_EXPERIENCE_SCORE_MAP[
+			application_data.hackathon_experience as HackathonExperience
+		] || 0;
 
+	useEffect(() => {
 		const scoresObject: Record<string, number> = {
 			hackathon_experience: hackathonExperienceScore,
 		};
@@ -142,7 +147,7 @@ function ZotHacksHackerApplication({
 
 		onScoreChange(scoresObject);
 	}, [
-		application_data.hackathon_experience,
+		hackathonExperienceScore,
 		resumeScore,
 		elevatorScore,
 		techExperienceScore,
@@ -194,7 +199,10 @@ function ZotHacksHackerApplication({
 				options={resumeOptions}
 				useDropdown
 				value={resumeScore}
-				onChange={setResumeScore}
+				onChange={(value) => {
+					setResumeScore(value);
+					onResumeScore(value, hackathonExperienceScore);
+				}}
 				disabled={isResumeDisabled}
 			/>
 			<ScoreSection

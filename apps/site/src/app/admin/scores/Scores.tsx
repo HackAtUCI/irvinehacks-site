@@ -171,7 +171,7 @@ function Scores() {
 						id: "index",
 						header: "#",
 						cell: (item) => item.rowIndex,
-						width: 60,
+						width: 40,
 					},
 					{
 						id: "name",
@@ -187,6 +187,7 @@ function Scores() {
 						id: "resume",
 						header: "Resume",
 						cell: ResumeModalButton,
+						minWidth: 350,
 					},
 					{
 						id: "avgScore",

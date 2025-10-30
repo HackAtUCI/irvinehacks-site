@@ -1,5 +1,6 @@
 "use client";
 
+import useHackerApplicants from "@/lib/admin/useHackerApplicants";
 import {
 	Box,
 	ColumnLayout,
@@ -9,6 +10,8 @@ import {
 } from "@cloudscape-design/components";
 
 function Scores() {
+	const { applicantList, loading } = useHackerApplicants();
+
 	return (
 		<SpaceBetween size="l">
 			<Header variant="h1">Scores</Header>

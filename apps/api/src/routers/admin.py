@@ -60,6 +60,7 @@ class ZotHacksApplicationDataSummary(BaseModel):
     school_year: str
     submission_time: Any
     normalized_scores: Optional[dict[str, float]] = None
+    extra_points: Optional[float] = None
     email: str
     resume_url: str
 

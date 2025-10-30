@@ -3,17 +3,16 @@
 import useHackerApplicants, {
 	HackerApplicantSummary,
 } from "@/lib/admin/useHackerApplicants";
+import { OVERQUALIFIED_SCORE } from "@/lib/decisionScores";
 import {
 	Box,
 	Button,
-	ColumnLayout,
-	Container,
 	Header,
 	Modal,
 	SpaceBetween,
 	Table,
 } from "@cloudscape-design/components";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 function sortApplicantsByNormalizedScore(applicants: HackerApplicantSummary[]) {
 	return applicants
@@ -97,12 +96,19 @@ const ResumeModalButton = (
 
 function Scores() {
 	const { applicantList, loading } = useHackerApplicants();
-	const sorted = sortApplicantsByNormalizedScore(applicantList);
+
+	const filteredApplicants = useMemo(
+		() => applicantList.filter((a) => a.avg_score !== OVERQUALIFIED_SCORE),
+		[applicantList],
+	);
+
+	const sorted = sortApplicantsByNormalizedScore(filteredApplicants);
 
 	return (
 		<SpaceBetween size="l">
 			<Header variant="h1">Scores</Header>
 			<Table
+				loading={loading}
 				columnDefinitions={[
 					{
 						id: "name",
@@ -116,7 +122,7 @@ function Scores() {
 					},
 					{
 						id: "resume",
-						header: "Resume URL",
+						header: "Resume",
 						cell: ResumeModalButton,
 					},
 					{
@@ -125,9 +131,7 @@ function Scores() {
 						cell: (item) => item.avgNormalizedScore.toFixed(2),
 					},
 				]}
-				items={sorted.sort(
-					(a, b) => b.avgNormalizedScore - a.avgNormalizedScore,
-				)}
+				items={sorted}
 				header={
 					<div
 						style={{

@@ -10,6 +10,7 @@ import {
 	isApplicationManager,
 	isHackerReviewer,
 	isDirector,
+	isLead,
 } from "@/lib/admin/authorization";
 
 import UserContext from "@/lib/admin/UserContext";
@@ -55,6 +56,14 @@ function AdminSidebar() {
 	// 		href: "/admin/applicants/volunteers",
 	// 	});
 	// }
+
+	if (isLead(roles) || isDirector(roles)) {
+		navigationItems.splice(1, 0, {
+			type: "link",
+			text: "Scores",
+			href: "/admin/scores",
+		});
+	}
 
 	if (isApplicationManager(roles)) {
 		navigationItems.splice(1, 0, {

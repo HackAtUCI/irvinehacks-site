@@ -1,5 +1,6 @@
 "use client";
 
+import NotificationContext from "@/lib/admin/NotificationContext";
 import useHackerApplicants, {
 	HackerApplicantSummary,
 } from "@/lib/admin/useHackerApplicants";
@@ -7,12 +8,14 @@ import { OVERQUALIFIED_SCORE } from "@/lib/decisionScores";
 import {
 	Box,
 	Button,
+	FlashbarProps,
 	Header,
 	Modal,
 	SpaceBetween,
 	Table,
 } from "@cloudscape-design/components";
-import { useState, useMemo } from "react";
+import axios from "axios";
+import { useState, useMemo, useContext } from "react";
 
 function sortApplicantsByNormalizedScore(applicants: HackerApplicantSummary[]) {
 	return applicants
@@ -95,7 +98,8 @@ const ResumeModalButton = (
 };
 
 function Scores() {
-	const { applicantList, loading } = useHackerApplicants();
+	const { setNotifications } = useContext(NotificationContext);
+	const { applicantList, loading, refetch } = useHackerApplicants();
 
 	const filteredApplicants = useMemo(
 		() => applicantList.filter((a) => a.avg_score !== OVERQUALIFIED_SCORE),
@@ -103,6 +107,45 @@ function Scores() {
 	);
 
 	const sorted = sortApplicantsByNormalizedScore(filteredApplicants);
+
+	const handleClick = () => {
+		axios
+			.get("/api/admin/normalize-detailed-scores")
+			.then(() => {
+				const successMessage: FlashbarProps.MessageDefinition = {
+					type: "success",
+					content: "Successfully normalized scores!",
+					id: `${Date.now()}`,
+					dismissible: true,
+					onDismiss: () => {
+						if (setNotifications)
+							setNotifications((prev) =>
+								prev.filter((msg) => msg.id !== successMessage.id),
+							);
+					},
+				};
+				if (setNotifications)
+					setNotifications((prev) => [successMessage, ...prev]);
+
+				refetch();
+			})
+			.catch((error) => {
+				const errorMessage: FlashbarProps.MessageDefinition = {
+					type: "error",
+					content: `Request failed: ${error.message}`,
+					id: `${Date.now()}`,
+					dismissible: true,
+					onDismiss: () => {
+						if (setNotifications)
+							setNotifications((prev) =>
+								prev.filter((msg) => msg.id !== errorMessage.id),
+							);
+					},
+				};
+				if (setNotifications)
+					setNotifications((prev) => [errorMessage, ...prev]);
+			});
+	};
 
 	return (
 		<SpaceBetween size="l">
@@ -141,7 +184,12 @@ function Scores() {
 						}}
 					>
 						<h2>Applicants</h2>
-						<Button onClick={() => downloadCSV(sorted)}>Download CSV</Button>
+						<div style={{ display: "flex", gap: "0.5rem" }}>
+							<Button onClick={() => downloadCSV(sorted)}>Download CSV</Button>
+							<Button variant="primary" onClick={handleClick}>
+								Normalize scores
+							</Button>
+						</div>
 					</div>
 				}
 			/>

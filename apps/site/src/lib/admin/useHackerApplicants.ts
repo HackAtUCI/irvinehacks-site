@@ -28,12 +28,14 @@ const fetcher = async (url: string) => {
 };
 
 function useHackerApplicants() {
-	const { data, error, isLoading } = useSWR<HackerApplicantSummary[]>(
+	const { data, error, isLoading, mutate } = useSWR<HackerApplicantSummary[]>(
 		"/api/admin/applicants/hackers",
 		fetcher,
 	);
 
-	return { applicantList: data || [], loading: isLoading, error };
+	const refetch = () => mutate();
+
+	return { applicantList: data || [], loading: isLoading, error, refetch };
 }
 
 export default useHackerApplicants;

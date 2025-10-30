@@ -174,7 +174,9 @@ async def hacker_applicants(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     for record in records:
-        applicant_review_processor.include_hacker_app_fields(
+        # TODO: If we change back to old avg score for summary, change this function
+        # applicant_review_processor.include_hacker_app_fields
+        applicant_review_processor.include_hacker_app_fields_with_global_and_breakdown(
             record, thresholds["accept"], thresholds["waitlist"]
         )
 

@@ -19,7 +19,11 @@ async def add_normalized_scores_to_all_hacker_applicants() -> None:
 async def get_all_hacker_apps() -> list[dict[str, object]]:
     return await mongodb_handler.retrieve(
         Collection.USERS,
-        {"roles": Role.HACKER},
+        {
+            "roles": Role.HACKER,
+            "application_data.global_field_scores.resume": {"$gte": 0},
+            "application_data.global_field_scores.hackathon_experience": {"$gte": 0},
+        },
         [
             "_id",
             "status",

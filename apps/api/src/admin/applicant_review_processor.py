@@ -12,6 +12,8 @@ scores_to_decisions: dict[Optional[int], Decision] = {
 }
 
 
+# TODO: Make this function only used for old applicant summary
+# meaning remove the resume_reviewed
 def include_hacker_app_fields(
     applicant_record: dict[str, Any], accept_threshold: float, waitlist_threshold: float
 ) -> None:
@@ -20,6 +22,18 @@ def include_hacker_app_fields(
     )
     _include_reviewers(applicant_record)
     _include_avg_score(applicant_record)
+    _include_resume_reviewed(applicant_record)
+
+
+def include_hacker_app_fields_with_global_and_breakdown(
+    applicant_record: dict[str, Any], accept_threshold: float, waitlist_threshold: float
+) -> None:
+    """For applicant summary where global and breakdown scores are used"""
+    _include_decision_based_on_threshold_and_score_breakdown(
+        applicant_record, accept_threshold, waitlist_threshold
+    )
+    _include_reviewers(applicant_record)
+    _include_avg_score_with_global_and_breakdown(applicant_record)
     _include_resume_reviewed(applicant_record)
 
 
@@ -43,6 +57,8 @@ def _get_last_score(reviewer: str, reviews: list[tuple[str, str, float]]) -> flo
     return NOT_FULLY_REVIEWED
 
 
+# TODO: Make this function only used for old applicant summary
+# meaning remove the global_field_scores usage
 def _get_avg_score(
     reviews: list[tuple[str, str, float]], global_field_scores: dict[str, Any]
 ) -> float:
@@ -62,11 +78,51 @@ def _get_avg_score(
     return (last_score + last_score2) / 2
 
 
+def _get_avg_score_with_globals_and_breakdown(
+    review_breakdowns: dict[str, dict[str, int]], global_field_scores: dict[str, int]
+) -> float:
+    # Check global_field_scores first - if any value is less than 0,
+    # return OVERQUALIFIED
+    if global_field_scores and any(score < 0 for score in global_field_scores.values()):
+        return OVERQUALIFIED
+
+    if len(review_breakdowns) < 2:
+        return NOT_FULLY_REVIEWED
+
+    # Review breakdowns should be the most recent scores
+    total_score = 2 * sum(global_field_scores.values())
+    for breakdown in review_breakdowns.values():
+        for field, score in breakdown.items():
+            # TODO: Fields from global_field_scores should not be in breakdowns
+            # This check should be removed once breakdown models remove global fields
+            if field in global_field_scores:
+                continue
+
+            total_score += score
+
+    return total_score / 2
+
+
 def _include_decision_based_on_threshold(
     applicant_record: dict[str, Any], accept: float, waitlist: float
 ) -> None:
     avg_score = _get_avg_score(
         applicant_record["application_data"]["reviews"],
+        applicant_record["application_data"].get("global_field_scores", {}),
+    )
+    if avg_score >= accept:
+        applicant_record["decision"] = Decision.ACCEPTED
+    elif avg_score >= waitlist:
+        applicant_record["decision"] = Decision.WAITLISTED
+    else:
+        applicant_record["decision"] = Decision.REJECTED
+
+
+def _include_decision_based_on_threshold_and_score_breakdown(
+    applicant_record: dict[str, Any], accept: float, waitlist: float
+) -> None:
+    avg_score = _get_avg_score_with_globals_and_breakdown(
+        applicant_record["application_data"]["review_breakdown"],
         applicant_record["application_data"].get("global_field_scores", {}),
     )
     if avg_score >= accept:
@@ -85,6 +141,15 @@ def _include_reviewers(applicant_record: dict[str, Any]) -> None:
 def _include_avg_score(applicant_record: dict[str, Any]) -> None:
     applicant_record["avg_score"] = _get_avg_score(
         applicant_record["application_data"]["reviews"],
+        applicant_record["application_data"].get("global_field_scores", {}),
+    )
+
+
+def _include_avg_score_with_global_and_breakdown(
+    applicant_record: dict[str, Any]
+) -> None:
+    applicant_record["avg_score"] = _get_avg_score_with_globals_and_breakdown(
+        applicant_record["application_data"]["review_breakdown"],
         applicant_record["application_data"].get("global_field_scores", {}),
     )
 

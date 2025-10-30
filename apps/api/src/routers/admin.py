@@ -60,6 +60,8 @@ class ZotHacksApplicationDataSummary(BaseModel):
     school_year: str
     submission_time: Any
     normalized_scores: Optional[dict[str, float]] = None
+    email: str
+    resume_url: str
 
 
 class ApplicantSummary(BaseRecord):
@@ -186,7 +188,6 @@ async def hacker_applicants(
 
     try:
         return TypeAdapter(list[HackerApplicantSummary]).validate_python(records)
-
     except ValidationError:
         raise RuntimeError("Could not parse applicant data.")
 

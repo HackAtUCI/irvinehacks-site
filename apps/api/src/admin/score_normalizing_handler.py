@@ -19,8 +19,10 @@ async def add_normalized_scores_to_all_hacker_applicants() -> None:
     all_apps = await get_all_hacker_apps()
     reviewer_stats = get_reviewer_stats(all_apps)
 
-    update_normalized_scores_for_hacker_applicants(all_apps, reviewer_stats)
-    await update_hacker_applicants_in_collection(all_apps)
+    normalized_scores = get_normalized_scores_for_hacker_applicants(
+        all_apps, reviewer_stats
+    )
+    await update_hacker_applicants_in_collection(all_apps, normalized_scores)
 
 
 async def get_all_hacker_apps() -> list[dict[str, object]]:
@@ -67,51 +69,42 @@ def get_reviewer_stats(all_apps: list[dict[str, Any]]) -> dict[str, dict[str, fl
     return reviewer_stats
 
 
-def update_normalized_scores_for_hacker_applicants(
+def get_normalized_scores_for_hacker_applicants(
     all_apps: list[dict[str, Any]], reviewer_stats: dict[str, dict[str, float]]
-) -> None:
+) -> dict[str, dict[str, float]]:
     """
-    Update each application in all_apps in-place to include
-    normalized scores per reviewer under application_data.normalized_scores.
-
-    all_apps is a list of dicts like:
+    Compute normalized scores for each applicant and return a dict in the format:
     {
-        "_id": "...",
-        "application_data": {
-            "review_breakdown": {
-                "reviewer1": { "field1": 5, "field2": 20, ... },
-                ...
-            },
-            ...
-        }
+        "app1": {"ian": 0.5, "bob": -0.3},
+        "app2": {"ian": 1.2}
     }
 
-    reviewer_stats is a dict like:
-    {
-        "reviewer1": {"mean": 50.0, "std": 10.0},
-        ...
-    }
+    - all_apps: list of applicant dicts
+    - reviewer_stats: dict of reviewer mean/std
     """
+    result: dict[str, dict[str, float]] = {}
+
     for app in all_apps:
+        app_id = app["_id"]
         breakdown = app.get("application_data", {}).get("review_breakdown", {})
-        normalized_scores = {}
+        normalized_scores: dict[str, float] = {}
 
         for reviewer, scores_dict in breakdown.items():
             total_score = sum(
-                [
-                    score
-                    for field, score in scores_dict.items()
-                    if field not in GLOBAL_FIELDS
-                ]
+                score
+                for field, score in scores_dict.items()
+                if field not in GLOBAL_FIELDS  # exclude global fields if needed
             )
             stats = reviewer_stats.get(reviewer, {"mean": 0, "std": 1})
             normalized = (total_score - stats["mean"]) / stats["std"]
             normalized_scores[reviewer] = normalized
 
-        app["application_data"]["normalized_scores"] = normalized_scores
+        result[app_id] = normalized_scores
+
+    return result
 
 
 async def update_hacker_applicants_in_collection(
-    all_apps: list[dict[str, object]]
+    all_apps: list[dict[str, object]], normalized_scores: dict[str, dict[str, float]]
 ) -> None:
     pass

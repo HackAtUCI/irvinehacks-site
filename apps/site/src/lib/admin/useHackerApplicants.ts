@@ -16,6 +16,9 @@ export interface HackerApplicantSummary {
 		school?: string;
 		school_year?: string;
 		submission_time: string;
+		normalized_scores?: Record<string, number>;
+		email: string;
+		resume_url: string;
 	};
 }
 
@@ -25,12 +28,14 @@ const fetcher = async (url: string) => {
 };
 
 function useHackerApplicants() {
-	const { data, error, isLoading } = useSWR<HackerApplicantSummary[]>(
+	const { data, error, isLoading, mutate } = useSWR<HackerApplicantSummary[]>(
 		"/api/admin/applicants/hackers",
 		fetcher,
 	);
 
-	return { applicantList: data || [], loading: isLoading, error };
+	const refetch = () => mutate();
+
+	return { applicantList: data || [], loading: isLoading, error, refetch };
 }
 
 export default useHackerApplicants;

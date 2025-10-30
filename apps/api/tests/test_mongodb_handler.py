@@ -1,5 +1,6 @@
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
+from pymongo import UpdateOne
 import pytest
 from pymongo.results import InsertOneResult, UpdateResult
 
@@ -218,3 +219,60 @@ async def test_retrieve_documents_sorted_descending(mock_DB: MagicMock) -> None:
     mock_collection.find.assert_called_once_with(query, [])
     mock_collection.find.return_value.sort.assert_called_once_with(sort)
     assert result == SAMPLE_DOCUMENTS
+
+
+@patch("services.mongodb_handler.get_database")
+async def test_bulk_update_success(mock_DB: MagicMock) -> None:
+    """Test that bulk_update returns True if at least one document modified"""
+    mock_collection = AsyncMock()
+    mock_result = MagicMock()
+    mock_result.acknowledged = True
+    mock_result.modified_count = 2
+    mock_collection.bulk_write.return_value = mock_result
+
+    mock_db_instance = MagicMock()
+    mock_db_instance.__getitem__.return_value = mock_collection
+    mock_DB.return_value = mock_db_instance
+
+    operations = [
+        UpdateOne({"_id": "app1"}, {"$set": {"score": 1}}),
+        UpdateOne({"_id": "app2"}, {"$set": {"score": 2}}),
+    ]
+
+    result = await mongodb_handler.bulk_update(Collection.TESTING, operations)
+
+    mock_collection.bulk_write.assert_awaited_once_with(operations)
+    assert result is True
+
+
+@patch("services.mongodb_handler.get_database")
+async def test_bulk_update_no_acknowledgement(mock_DB: MagicMock) -> None:
+    """Test that bulk_update raises RuntimeError if not acknowledged"""
+    mock_collection = AsyncMock()
+    mock_result = MagicMock()
+    mock_result.acknowledged = False
+    mock_result.modified_count = 0
+    mock_collection.bulk_write.return_value = mock_result
+
+    mock_db_instance = MagicMock()
+    mock_db_instance.__getitem__.return_value = mock_collection
+    mock_DB.return_value = mock_db_instance
+
+    operations = [UpdateOne({"_id": "app1"}, {"$set": {"score": 1}})]
+
+    with pytest.raises(RuntimeError):
+        await mongodb_handler.bulk_update(Collection.TESTING, operations)
+
+
+@patch("services.mongodb_handler.get_database")
+async def test_bulk_update_empty_operations(mock_DB: MagicMock) -> None:
+    """Test that bulk_update returns False if no operations are provided"""
+    mock_collection = AsyncMock()
+    mock_db_instance = MagicMock()
+    mock_db_instance.__getitem__.return_value = mock_collection
+    mock_DB.return_value = mock_db_instance
+
+    result = await mongodb_handler.bulk_update(Collection.TESTING, [])
+
+    assert result is False
+    mock_collection.bulk_write.assert_not_called()

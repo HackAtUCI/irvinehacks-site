@@ -108,9 +108,6 @@ def update_normalized_scores_for_hacker_applicants(
             normalized = (total_score - stats["mean"]) / stats["std"]
             normalized_scores[reviewer] = normalized
 
-        # Store normalized scores inside application_data
-        if "application_data" not in app:
-            app["application_data"] = {}
         app["application_data"]["normalized_scores"] = normalized_scores
 
 

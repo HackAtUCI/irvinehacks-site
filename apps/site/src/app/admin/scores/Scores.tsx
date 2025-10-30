@@ -115,7 +115,12 @@ function Scores() {
 		[applicantList],
 	);
 
-	const sorted = sortApplicantsByNormalizedScore(filteredApplicants);
+	const sorted = sortApplicantsByNormalizedScore(filteredApplicants).map(
+		(item, index) => ({
+			...item,
+			rowIndex: index + 1,
+		}),
+	);
 
 	const handleClick = () => {
 		axios
@@ -162,6 +167,12 @@ function Scores() {
 			<Table
 				loading={loading}
 				columnDefinitions={[
+					{
+						id: "index",
+						header: "#",
+						cell: (item) => item.rowIndex,
+						width: 60,
+					},
 					{
 						id: "name",
 						header: "Name",

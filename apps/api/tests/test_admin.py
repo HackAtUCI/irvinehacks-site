@@ -73,59 +73,6 @@ def test_restricted_admin_route_is_forbidden(
     assert res.status_code == 403
 
 
-# TODO: Should uncomment once new applicant summary is created at different route
-# @patch("services.mongodb_handler.retrieve", autospec=True)
-# @patch("services.mongodb_handler.retrieve_one", autospec=True)
-# def test_can_retrieve_applicants(
-#     mock_mongodb_handler_retrieve_one: AsyncMock,
-#     mock_mongodb_handler_retrieve: AsyncMock,
-# ) -> None:
-#     """Test that the applicants summary can be processed."""
-
-#     mock_mongodb_handler_retrieve_one.side_effect = [
-#         HACKER_REVIEWER_IDENTITY,
-#         {"accept": 8, "waitlist": 5},
-#     ]
-#     mock_mongodb_handler_retrieve.return_value = [
-#         {
-#             "_id": "edu.uci.petr",
-#             "first_name": "Peter",
-#             "last_name": "Anteater",
-#             "status": "REVIEWED",
-#             "application_data": {
-#                 "school": "UC Irvine",
-#                 "submission_time": datetime(2023, 1, 12, 9, 0, 0),
-#                 "reviews": [
-#                     [datetime(2023, 1, 18), "edu.uci.alicia", 8],
-#                     [datetime(2023, 1, 18), "edu.uci.albert", 9],
-#                 ],
-#             },
-#         },
-#     ]
-
-#     res = reviewer_client.get("/applicants/hackers")
-
-#     assert res.status_code == 200
-#     mock_mongodb_handler_retrieve.assert_awaited_once()
-#     data = res.json()
-#     assert data == [
-#         {
-#             "_id": "edu.uci.petr",
-#             "first_name": "Peter",
-#             "last_name": "Anteater",
-#             "resume_reviewed": False,
-#             "avg_score": 8.5,
-#             "reviewers": ["edu.uci.albert", "edu.uci.alicia"],
-#             "status": "REVIEWED",
-#             "decision": "ACCEPTED",
-#             "application_data": {
-#                 "school": "UC Irvine",
-#                 "submission_time": "2023-01-12T09:00:00",
-#             },
-#         },
-#     ]
-
-
 @patch("services.mongodb_handler.retrieve", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 def test_cannot_retrieve_applicants_without_role(

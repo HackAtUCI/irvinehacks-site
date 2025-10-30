@@ -68,19 +68,50 @@ def get_reviewer_stats(all_apps: list[dict[str, Any]]) -> dict[str, dict[str, fl
 
 
 def update_normalized_scores_for_hacker_applicants(
-    all_apps: list[dict[str, object]], reviewer_stats: dict[str, dict[str, float]]
+    all_apps: list[dict[str, Any]], reviewer_stats: dict[str, dict[str, float]]
 ) -> None:
     """
-    normalized scores should be in application_data
+    Update each application in all_apps in-place to include
+    normalized scores per reviewer under application_data.normalized_scores.
 
-    application_data: {
-        normalized_scores: {
-            reviewer1: 1,
-            reviewer2: 0.2
+    all_apps is a list of dicts like:
+    {
+        "_id": "...",
+        "application_data": {
+            "review_breakdown": {
+                "reviewer1": { "field1": 5, "field2": 20, ... },
+                ...
+            },
+            ...
         }
     }
+
+    reviewer_stats is a dict like:
+    {
+        "reviewer1": {"mean": 50.0, "std": 10.0},
+        ...
+    }
     """
-    pass
+    for app in all_apps:
+        breakdown = app.get("application_data", {}).get("review_breakdown", {})
+        normalized_scores = {}
+
+        for reviewer, scores_dict in breakdown.items():
+            total_score = sum(
+                [
+                    score
+                    for field, score in scores_dict.items()
+                    if field not in GLOBAL_FIELDS
+                ]
+            )
+            stats = reviewer_stats.get(reviewer, {"mean": 0, "std": 1})
+            normalized = (total_score - stats["mean"]) / stats["std"]
+            normalized_scores[reviewer] = normalized
+
+        # Store normalized scores inside application_data
+        if "application_data" not in app:
+            app["application_data"] = {}
+        app["application_data"]["normalized_scores"] = normalized_scores
 
 
 async def update_hacker_applicants_in_collection(

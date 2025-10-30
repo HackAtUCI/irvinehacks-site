@@ -1,6 +1,12 @@
+from collections import defaultdict
+from statistics import mean, pstdev
+from typing import Any
+
 from models.user_record import Role
 from services import mongodb_handler
 from services.mongodb_handler import Collection
+
+GLOBAL_FIELDS = {"resume", "hackathon_experience"}
 
 
 async def add_normalized_scores_to_all_hacker_applicants() -> None:
@@ -12,6 +18,7 @@ async def add_normalized_scores_to_all_hacker_applicants() -> None:
     """
     all_apps = await get_all_hacker_apps()
     reviewer_stats = get_reviewer_stats(all_apps)
+
     update_normalized_scores_for_hacker_applicants(all_apps, reviewer_stats)
     await update_hacker_applicants_in_collection(all_apps)
 
@@ -33,12 +40,35 @@ async def get_all_hacker_apps() -> list[dict[str, object]]:
     )
 
 
-def get_reviewer_stats(all_apps: list[dict[str, object]]) -> dict[str, dict[str, int]]:
-    return {"ian": {"mean": 10, "sd": 3}}
+def get_reviewer_stats(all_apps: list[dict[str, Any]]) -> dict[str, dict[str, float]]:
+    """Compute mean and std for each reviewer across all applications."""
+    reviewer_totals: dict[str, list[float]] = defaultdict(list)
+
+    for app in all_apps:
+        breakdown = app.get("application_data", {}).get("review_breakdown", {})
+        for reviewer, scores_dict in breakdown.items():
+            total_score = sum(
+                [
+                    score
+                    for field, score in scores_dict.items()
+                    if field not in GLOBAL_FIELDS
+                ]
+            )
+            reviewer_totals[reviewer].append(total_score)
+
+    reviewer_stats = {
+        reviewer: {
+            "mean": mean(scores),
+            "std": pstdev(scores) or 1.0,  # avoid divide-by-zero if all same
+        }
+        for reviewer, scores in reviewer_totals.items()
+    }
+
+    return reviewer_stats
 
 
 def update_normalized_scores_for_hacker_applicants(
-    all_apps: list[dict[str, object]], reviewer_stats: dict[str, dict[str, int]]
+    all_apps: list[dict[str, object]], reviewer_stats: dict[str, dict[str, float]]
 ) -> None:
     """
     normalized scores should be in application_data

@@ -20,6 +20,9 @@ function Scores() {
 					<ColumnLayout columns={3} borders="vertical">
 						<Box>
 							<Header variant="h3">Accepted</Header>
+							<Box variant="h2" color="text-status-info">
+								hi
+							</Box>
 						</Box>
 
 						<Box>

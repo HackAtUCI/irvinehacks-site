@@ -59,6 +59,7 @@ class ApplicationDataSummary(BaseModel):
 class ZotHacksApplicationDataSummary(BaseModel):
     school_year: str
     submission_time: Any
+    normalized_scores: Optional[dict[str, float]] = None
 
 
 class ApplicantSummary(BaseRecord):

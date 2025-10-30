@@ -9,6 +9,9 @@ from pymongo import DESCENDING
 
 from admin import applicant_review_processor, participant_manager, summary_handler
 from admin.participant_manager import Participant
+from admin.score_normalizing_handler import (
+    add_normalized_scores_to_all_hacker_applicants,
+)
 from auth.authorization import require_role
 from auth.user_identity import User, utc_now
 from models.ApplicationData import Decision, Review
@@ -438,6 +441,18 @@ async def subevent_checkin(
     organizer: Annotated[User, Depends(require_organizer)],
 ) -> None:
     await participant_manager.subevent_checkin(event, uid, organizer)
+
+
+@router.get(
+    "/normalize-detailed-scores",
+    dependencies=[Depends(require_role({Role.DIRECTOR, Role.LEAD}))],
+)
+async def normalize_detailed_scores_for_all_hacker_apps() -> None:
+    try:
+        await add_normalized_scores_to_all_hacker_applicants()
+    except RuntimeError:
+        log.error("Could not update/add normalized scores to hacker applicants")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 async def retrieve_thresholds() -> Optional[dict[str, Any]]:

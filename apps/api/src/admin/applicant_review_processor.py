@@ -122,7 +122,7 @@ def _include_decision_based_on_threshold_and_score_breakdown(
     applicant_record: dict[str, Any], accept: float, waitlist: float
 ) -> None:
     avg_score = _get_avg_score_with_globals_and_breakdown(
-        applicant_record["application_data"]["review_breakdown"],
+        applicant_record["application_data"].get("review_breakdown", {}),
         applicant_record["application_data"].get("global_field_scores", {}),
     )
     if avg_score >= accept:
@@ -149,7 +149,7 @@ def _include_avg_score_with_global_and_breakdown(
     applicant_record: dict[str, Any]
 ) -> None:
     applicant_record["avg_score"] = _get_avg_score_with_globals_and_breakdown(
-        applicant_record["application_data"]["review_breakdown"],
+        applicant_record["application_data"].get("review_breakdown", {}),
         applicant_record["application_data"].get("global_field_scores", {}),
     )
 

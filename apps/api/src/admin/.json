@@ -1,0 +1,116 @@
+{
+	"apps": [
+		{
+			"_id": "edu.uci.josel35",
+			"application_data": {
+				"review_breakdown": {
+					"ian": {
+						"resume": 0,
+						"elevator_pitch_saq": 7,
+						"tech_experience_saq": 4,
+						"learn_about_self_saq": 9,
+						"pixel_art_saq": 7,
+						"hackathon_experience": 5
+					},
+					"ian1": {
+						"resume": 0,
+						"elevator_pitch_saq": 9,
+						"tech_experience_saq": 7,
+						"learn_about_self_saq": 16,
+						"pixel_art_saq": 9,
+						"hackathon_experience": 5
+					}
+				},
+				"global_field_scores": {
+					"resume": 0,
+					"hackathon_experience": 5
+				}
+			},
+			"status": "REVIEWED"
+		},
+		{
+			"_id": "edu.uci.ian101",
+			"application_data": {
+				"review_breakdown": {
+					"ian": {
+						"resume": 5,
+						"elevator_pitch_saq": 20,
+						"tech_experience_saq": 20,
+						"learn_about_self_saq": 20,
+						"pixel_art_saq": 20,
+						"hackathon_experience": 5
+					},
+					"ian1": {
+						"resume": 5,
+						"elevator_pitch_saq": 14,
+						"tech_experience_saq": 5,
+						"learn_about_self_saq": 20,
+						"pixel_art_saq": 19,
+						"hackathon_experience": 5
+					}
+				},
+				"global_field_scores": {
+					"resume": 5,
+					"hackathon_experience": 5
+				}
+			},
+			"status": "REVIEWED"
+		},
+		{
+			"_id": "edu.uci.leave",
+			"application_data": {
+				"review_breakdown": {
+					"ian": {
+						"resume": 15,
+						"elevator_pitch_saq": 6,
+						"tech_experience_saq": 6,
+						"learn_about_self_saq": 8,
+						"pixel_art_saq": 16,
+						"hackathon_experience": -1000
+					},
+					"ian69": {
+						"resume": 15,
+						"elevator_pitch_saq": 10,
+						"tech_experience_saq": 10,
+						"learn_about_self_saq": 10,
+						"pixel_art_saq": 10,
+						"hackathon_experience": 5
+					}
+				},
+				"global_field_scores": {
+					"resume": 15,
+					"hackathon_experience": 10
+				}
+			},
+			"status": "REVIEWED"
+		}
+	],
+	"rev": {
+		"ian": {
+			"mean": 47.666666666666664,
+			"std": 23.156472577277874
+		},
+		"ian1": {
+			"mean": 49.5,
+			"std": 8.5
+		},
+		"ian69": {
+			"mean": 40,
+			"std": 1.0
+		}
+	},
+	"norm": {
+		"edu.uci.josel35": {
+			"ian": -0.8924790508441119,
+			"ian1": -1.0
+		},
+		"edu.uci.ian101": {
+			"ian": 1.396297869869014,
+			"ian1": 1.0
+		},
+		"edu.uci.leave": {
+			"ian": -0.5038188190249019,
+			"ian69": 0.0
+		}
+	}
+}

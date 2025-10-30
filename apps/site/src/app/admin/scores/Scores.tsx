@@ -1,5 +1,8 @@
 "use client";
 
+import { useState, useMemo, useContext } from "react";
+import axios from "axios";
+
 import NotificationContext from "@/lib/admin/NotificationContext";
 import useHackerApplicants, {
 	HackerApplicantSummary,
@@ -14,8 +17,6 @@ import {
 	SpaceBetween,
 	Table,
 } from "@cloudscape-design/components";
-import axios from "axios";
-import { useState, useMemo, useContext } from "react";
 
 function sortApplicantsByNormalizedScore(applicants: HackerApplicantSummary[]) {
 	return applicants

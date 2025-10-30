@@ -2,6 +2,8 @@ from collections import defaultdict
 from statistics import mean, pstdev
 from typing import Any
 
+from pymongo import UpdateOne
+
 from models.user_record import Role
 from services import mongodb_handler
 from services.mongodb_handler import Collection
@@ -10,19 +12,14 @@ GLOBAL_FIELDS = {"resume", "hackathon_experience"}
 
 
 async def add_normalized_scores_to_all_hacker_applicants() -> None:
-    """
-    This should be bound to a button.
-
-    1. Loop through all apps to get reviewer stats
-    2. Loop through all apps again to apply reviewer z score
-    """
+    """Calculates normalized scores and adds them to all hacker apps"""
     all_apps = await get_all_hacker_apps()
     reviewer_stats = get_reviewer_stats(all_apps)
 
     normalized_scores = get_normalized_scores_for_hacker_applicants(
         all_apps, reviewer_stats
     )
-    await update_hacker_applicants_in_collection(all_apps, normalized_scores)
+    await update_hacker_applicants_in_collection(normalized_scores)
 
 
 async def get_all_hacker_apps() -> list[dict[str, object]]:
@@ -105,6 +102,13 @@ def get_normalized_scores_for_hacker_applicants(
 
 
 async def update_hacker_applicants_in_collection(
-    all_apps: list[dict[str, object]], normalized_scores: dict[str, dict[str, float]]
+    normalized_scores: dict[str, dict[str, float]]
 ) -> None:
-    pass
+    operations = [
+        UpdateOne(
+            {"_id": app_id}, {"$set": {"application_data.normalized_scores": scores}}
+        )
+        for app_id, scores in normalized_scores.items()
+    ]
+
+    await mongodb_handler.bulk_update(Collection.USERS, operations)

@@ -17,6 +17,7 @@ export interface HackerApplicantSummary {
 		school_year?: string;
 		submission_time: string;
 		normalized_scores?: Record<string, number>;
+		extra_points?: number;
 		email: string;
 		resume_url: string;
 	};

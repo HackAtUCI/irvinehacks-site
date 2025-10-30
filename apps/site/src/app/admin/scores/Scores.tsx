@@ -26,7 +26,9 @@ function sortApplicantsByNormalizedScore(applicants: HackerApplicantSummary[]) {
 				return { ...applicant, avgNormalizedScore: 0 };
 
 			const total = Object.values(scores).reduce((sum, val) => sum + val, 0);
-			const avg = total / Object.keys(scores).length;
+			let avg = total / Object.keys(scores).length;
+			if (applicant.application_data.extra_points)
+				avg += applicant.application_data.extra_points;
 
 			return { ...applicant, avgNormalizedScore: avg };
 		})
@@ -34,7 +36,10 @@ function sortApplicantsByNormalizedScore(applicants: HackerApplicantSummary[]) {
 }
 
 const downloadCSV = (
-	data: (HackerApplicantSummary & { avgNormalizedScore: number })[],
+	data: (HackerApplicantSummary & {
+		avgNormalizedScore: number;
+		extraPoints?: number;
+	})[],
 ) => {
 	const headers = ["Name", "Email", "Resume URL", "Average Normalized Score"];
 	const rows = data.map((a) => [
@@ -58,7 +63,10 @@ const downloadCSV = (
 };
 
 const ResumeModalButton = (
-	item: HackerApplicantSummary & { avgNormalizedScore: number },
+	item: HackerApplicantSummary & {
+		avgNormalizedScore: number;
+		extraPoints?: number;
+	},
 ) => {
 	const [showResume, setShowResume] = useState(false);
 

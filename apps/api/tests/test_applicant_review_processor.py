@@ -188,7 +188,9 @@ def test_avg_score_not_fully_reviewed() -> None:
 
 
 def test_avg_score_with_globals_and_breakdown_one_reviewer() -> None:
-    """Test that avg_score_with_globals_and_breakdown calculates correctly with 1 reviewer."""
+    """Test that avg_score_with_globals_and_breakdown calculates correctly
+    with 1 reviewer.
+    """
     record: dict[str, Any] = {
         "_id": "edu.uci.eric",
         "status": "REVIEWED",
@@ -214,7 +216,9 @@ def test_avg_score_with_globals_and_breakdown_one_reviewer() -> None:
 
 
 def test_avg_score_with_globals_and_breakdown_no_reviewers() -> None:
-    """Test that avg_score_with_globals_and_breakdown returns NOT_FULLY_REVIEWED with 0 reviewers."""
+    """Test that avg_score_with_globals_and_breakdown returns NOT_FULLY_REVIEWED
+    with 0 reviewers.
+    """
     record: dict[str, Any] = {
         "_id": "edu.uci.eric",
         "status": "REVIEWED",

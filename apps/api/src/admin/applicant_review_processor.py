@@ -86,11 +86,13 @@ def _get_avg_score_with_globals_and_breakdown(
     if global_field_scores and any(score < 0 for score in global_field_scores.values()):
         return OVERQUALIFIED
 
-    if len(review_breakdowns) < 2:
+    if len(review_breakdowns) < 1:
         return NOT_FULLY_REVIEWED
 
+    num_reviewers = len(review_breakdowns)
+
     # Review breakdowns should be the most recent scores
-    total_score = 2 * sum(global_field_scores.values())
+    total_score = num_reviewers * sum(global_field_scores.values())
     for breakdown in review_breakdowns.values():
         for field, score in breakdown.items():
             # TODO: Fields from global_field_scores should not be in breakdowns
@@ -100,7 +102,7 @@ def _get_avg_score_with_globals_and_breakdown(
 
             total_score += score
 
-    return total_score / 2
+    return total_score / num_reviewers
 
 
 def _include_decision_based_on_threshold(
@@ -146,7 +148,7 @@ def _include_avg_score(applicant_record: dict[str, Any]) -> None:
 
 
 def _include_avg_score_with_global_and_breakdown(
-    applicant_record: dict[str, Any]
+    applicant_record: dict[str, Any],
 ) -> None:
     applicant_record["avg_score"] = _get_avg_score_with_globals_and_breakdown(
         applicant_record["application_data"].get("review_breakdown", {}),

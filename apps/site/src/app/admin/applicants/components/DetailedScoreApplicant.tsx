@@ -34,6 +34,7 @@ function DetailedScoreApplicant({
 		applicationType,
 	);
 	const [scores, setScores] = useState({});
+	const [notes, setNotes] = useState("");
 
 	if (loading || !applicant) {
 		return (
@@ -70,12 +71,8 @@ function DetailedScoreApplicant({
 								applicant={applicant._id}
 								reviews={application_data.reviews}
 								scores={scores}
-								submitDetailedReview={(Uid, scores) =>
-									submitDetailedReview(Uid, scores).then(() => {
-										if (setNotifications)
-											setNotifications((prev) => [successMessage, ...prev]);
-									})
-								}
+								notes={notes}
+								submitDetailedReview={submitDetailedReview}
 							/>
 						) : (
 							<></>
@@ -105,6 +102,9 @@ function DetailedScoreApplicant({
 							})
 						}
 						guidelines={guidelines}
+						notes={notes}
+						onNotesChange={setNotes}
+						reviews={application_data.reviews}
 					/>
 				) : applicant.roles.includes(ParticipantRole.Mentor) ? (
 					<></>

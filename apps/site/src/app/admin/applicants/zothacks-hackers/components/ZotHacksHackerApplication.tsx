@@ -5,6 +5,7 @@ import { Box } from "@cloudscape-design/components";
 import Container from "@cloudscape-design/components/container";
 import Header from "@cloudscape-design/components/header";
 import SpaceBetween from "@cloudscape-design/components/space-between";
+import Textarea from "@cloudscape-design/components/textarea";
 import { PortableText } from "@portabletext/react";
 
 import PixelArtDisplay from "./PixelArtDisplay";
@@ -14,9 +15,11 @@ import {
 	ZotHacksHackerApplicationData,
 } from "@/lib/admin/useApplicant";
 import ScoreSection from "../../components/ScoreSection";
+import ReviewerNotes from "@/app/admin/applicants/components/ReviewerNotes";
 import UserContext from "@/lib/admin/UserContext";
 import { isDirector, isLead } from "@/lib/admin/authorization";
 import { ZothacksScoringGuidelinesType } from "./getScoringGuidelines";
+import { Review } from "@/lib/admin/useApplicant";
 
 type ZHKeys = Exclude<keyof ZotHacksHackerApplicationData, "reviews">;
 
@@ -47,6 +50,9 @@ function ZotHacksHackerApplication({
 	onResumeScore,
 	onScoreChange,
 	guidelines,
+	notes,
+	onNotesChange,
+	reviews,
 }: {
 	application_data: ZotHacksHackerApplicationData;
 	onResumeScore: (
@@ -55,6 +61,9 @@ function ZotHacksHackerApplication({
 	) => void;
 	onScoreChange: (scores: object) => void;
 	guidelines: ZothacksScoringGuidelinesType;
+	notes: string;
+	onNotesChange: (notes: string) => void;
+	reviews: Review[];
 }) {
 	const { uid: reviewer_uid, roles } = useContext(UserContext);
 	const formattedUid = reviewer_uid?.split(".").at(-1);
@@ -261,6 +270,11 @@ function ZotHacksHackerApplication({
 				value={pixelArtScore}
 				onChange={setPixelArtScore}
 				wordLimit={100}
+			/>
+			<ReviewerNotes
+				notes={notes}
+				onNotesChange={onNotesChange}
+				reviews={reviews}
 			/>
 		</SpaceBetween>
 	);

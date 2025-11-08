@@ -31,6 +31,7 @@ function DetailedScoreApplicant({
 		applicationType,
 	);
 	const [scores, setScores] = useState({});
+	const [notes, setNotes] = useState("");
 
 	if (loading || !applicant) {
 		return (
@@ -54,6 +55,7 @@ function DetailedScoreApplicant({
 								applicant={applicant._id}
 								reviews={application_data.reviews}
 								scores={scores}
+								notes={notes}
 								submitDetailedReview={submitDetailedReview}
 							/>
 						) : (
@@ -72,6 +74,9 @@ function DetailedScoreApplicant({
 						application_data={application_data as ZotHacksHackerApplicationData}
 						onScoreChange={setScores}
 						guidelines={guidelines}
+						notes={notes}
+						onNotesChange={setNotes}
+						reviews={application_data.reviews}
 					/>
 				) : applicant.roles.includes(ParticipantRole.Mentor) ? (
 					<></>

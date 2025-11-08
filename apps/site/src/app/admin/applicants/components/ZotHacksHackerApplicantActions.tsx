@@ -25,6 +25,7 @@ interface ApplicantActionsProps {
 	applicant: Uid;
 	reviews: Review[];
 	scores: object;
+	notes?: string;
 	submitDetailedReview: submitDetailedReview;
 }
 
@@ -32,6 +33,7 @@ function ZotHacksHackerApplicantActions({
 	applicant,
 	reviews,
 	scores,
+	notes,
 	submitDetailedReview,
 }: ApplicantActionsProps) {
 	const { uid, roles } = useContext(UserContext);
@@ -51,7 +53,7 @@ function ZotHacksHackerApplicantActions({
 
 	const handleClick = () => {
 		// TODO: use flashbar or modal for submit status
-		submitDetailedReview(applicant, scores);
+		submitDetailedReview(applicant, scores, notes ? notes.trim() : null);
 	};
 
 	const totalScore = Object.values(scores).reduce(

@@ -17,7 +17,7 @@ import {
 import ScoreSection from "../../components/ScoreSection";
 import ReviewerNotes from "@/app/admin/applicants/components/ReviewerNotes";
 import UserContext from "@/lib/admin/UserContext";
-import { isLead } from "@/lib/admin/authorization";
+import { isDirector, isLead } from "@/lib/admin/authorization";
 import { ZothacksScoringGuidelinesType } from "./getScoringGuidelines";
 import { Review } from "@/lib/admin/useApplicant";
 
@@ -47,6 +47,7 @@ const HACKATHON_EXPERIENCE_SCORE_MAP: Record<HackathonExperience, number> = {
 
 function ZotHacksHackerApplication({
 	application_data,
+	onResumeScore,
 	onScoreChange,
 	guidelines,
 	notes,
@@ -54,6 +55,10 @@ function ZotHacksHackerApplication({
 	reviews,
 }: {
 	application_data: ZotHacksHackerApplicationData;
+	onResumeScore: (
+		resumeScore: number,
+		hackathonExperienceScore: number,
+	) => void;
 	onScoreChange: (scores: object) => void;
 	guidelines: ZothacksScoringGuidelinesType;
 	notes: string;
@@ -63,13 +68,7 @@ function ZotHacksHackerApplication({
 	const { uid: reviewer_uid, roles } = useContext(UserContext);
 	const formattedUid = reviewer_uid?.split(".").at(-1);
 
-	// Check if resume dropdown should be disabled
-	const isResumeDisabled = useMemo(() => {
-		const hasGlobalResumeScore =
-			application_data?.global_field_scores?.resume !== undefined;
-
-		return hasGlobalResumeScore && !isLead(roles);
-	}, [application_data?.global_field_scores?.resume, roles]);
+	const isResumeDisabled = !isDirector(roles) && !isLead(roles);
 
 	// Resume options used for dropdown-based ScoreSection
 	const resumeOptions = useMemo(
@@ -128,12 +127,12 @@ function ZotHacksHackerApplication({
 
 	const [showResume, setShowResume] = useState<boolean>(false);
 
-	useEffect(() => {
-		const hackathonExperienceScore =
-			HACKATHON_EXPERIENCE_SCORE_MAP[
-				application_data.hackathon_experience as HackathonExperience
-			] || 0;
+	const hackathonExperienceScore =
+		HACKATHON_EXPERIENCE_SCORE_MAP[
+			application_data.hackathon_experience as HackathonExperience
+		] || 0;
 
+	useEffect(() => {
 		const scoresObject: Record<string, number> = {
 			hackathon_experience: hackathonExperienceScore,
 		};
@@ -157,7 +156,7 @@ function ZotHacksHackerApplication({
 
 		onScoreChange(scoresObject);
 	}, [
-		application_data.hackathon_experience,
+		hackathonExperienceScore,
 		resumeScore,
 		elevatorScore,
 		techExperienceScore,
@@ -209,7 +208,10 @@ function ZotHacksHackerApplication({
 				options={resumeOptions}
 				useDropdown
 				value={resumeScore}
-				onChange={setResumeScore}
+				onChange={(value) => {
+					setResumeScore(value);
+					onResumeScore(value, hackathonExperienceScore);
+				}}
 				disabled={isResumeDisabled}
 			/>
 			<ScoreSection
@@ -223,6 +225,7 @@ function ZotHacksHackerApplication({
 				rightColumn={<p>{application_data.elevator_pitch_saq}</p>}
 				value={elevatorScore}
 				onChange={setElevatorScore}
+				wordLimit={75}
 			/>
 			<ScoreSection
 				title="Describe a positive or negative experience dealing with technology
@@ -235,6 +238,7 @@ function ZotHacksHackerApplication({
 				rightColumn={<p>{application_data.tech_experience_saq}</p>}
 				value={techExperienceScore}
 				onChange={setTechExperienceScore}
+				wordLimit={100}
 			/>
 			<ScoreSection
 				title="What’s one thing you hope to learn about yourself at UCI — and how
@@ -247,6 +251,7 @@ function ZotHacksHackerApplication({
 				rightColumn={<p>{application_data.learn_about_self_saq}</p>}
 				value={learnAboutSelfScore}
 				onChange={setLearnAboutSelfScore}
+				wordLimit={100}
 			/>
 			<ScoreSection
 				title="Pixel art: Draw something that represents you. Briefly explain your
@@ -264,6 +269,7 @@ function ZotHacksHackerApplication({
 				}
 				value={pixelArtScore}
 				onChange={setPixelArtScore}
+				wordLimit={100}
 			/>
 			<ReviewerNotes
 				notes={notes}

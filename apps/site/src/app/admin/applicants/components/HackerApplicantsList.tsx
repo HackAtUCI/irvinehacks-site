@@ -23,7 +23,7 @@ import useHackerThresholds from "@/lib/admin/useHackerThresholds";
 import useHackerApplicants, {
 	HackerApplicantSummary,
 } from "@/lib/admin/useHackerApplicants";
-import { ParticipantRole } from "@/lib/userRecord";
+import { ParticipantRole, Status } from "@/lib/userRecord";
 import { OVERQUALIFIED_SCORE } from "@/lib/decisionScores";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import Badge from "@cloudscape-design/components/badge";
@@ -75,8 +75,24 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		}
 	}, [top400]);
 
-	const filteredApplicants = applicantList.filter(
-		(applicant) =>
+	const filteredApplicants = applicantList.filter((applicant) => {
+		if (
+			selectedStatusValues.includes(Status.Pending) &&
+			applicant.avg_score === OVERQUALIFIED_SCORE
+		)
+			return false;
+
+		if (
+			selectedStatusValues.length !== 0 &&
+			((selectedStatusValues.includes("RESUME_REVIEWED") &&
+				applicant.resume_reviewed) ||
+				(selectedStatusValues.includes("RESUME_NOT_REVIEWED") &&
+					!applicant.resume_reviewed))
+		) {
+			return true;
+		}
+
+		return (
 			(selectedStatuses.length === 0 ||
 				selectedStatusValues.includes(applicant.status)) &&
 			(selectedDecisions.length === 0 ||
@@ -84,8 +100,9 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 			(uciNetIDFilter.length === 0 ||
 				applicant.reviewers.some((reviewer) =>
 					uciNetIDFilterValues.includes(reviewer),
-				)),
-	);
+				))
+		);
+	});
 
 	const filteredApplicants400 = [...applicantList]
 		.filter((applicant) => applicant.avg_score !== -1)
@@ -178,6 +195,11 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 						id: "status",
 						header: "Status",
 						content: ApplicantStatus,
+					},
+					{
+						id: "resume_reviewed",
+						header: "Resume Reviewed Status",
+						content: ResumeReviewedStatus,
 					},
 					{
 						id: "reviewers",
@@ -302,5 +324,11 @@ const CardHeader = ({
 
 const DecisionStatus = ({ decision }: HackerApplicantSummary) =>
 	decision ? <ApplicantStatus status={decision} /> : "-";
+
+const ResumeReviewedStatus = ({ resume_reviewed }: HackerApplicantSummary) => (
+	<ApplicantStatus
+		status={resume_reviewed ? Status.Reviewed : Status.Pending}
+	/>
+);
 
 export default HackerApplicantsList;

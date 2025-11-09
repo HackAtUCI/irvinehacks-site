@@ -11,10 +11,15 @@ export interface HackerApplicantSummary {
 	decision: Decision | null;
 	reviewers: ReadonlyArray<string>;
 	avg_score: number;
+	resume_reviewed: boolean;
 	application_data: {
 		school?: string;
 		school_year?: string;
 		submission_time: string;
+		normalized_scores?: Record<string, number>;
+		extra_points?: number;
+		email: string;
+		resume_url: string;
 	};
 }
 
@@ -24,12 +29,14 @@ const fetcher = async (url: string) => {
 };
 
 function useHackerApplicants() {
-	const { data, error, isLoading } = useSWR<HackerApplicantSummary[]>(
+	const { data, error, isLoading, mutate } = useSWR<HackerApplicantSummary[]>(
 		"/api/admin/applicants/hackers",
 		fetcher,
 	);
 
-	return { applicantList: data || [], loading: isLoading, error };
+	const refetch = () => mutate();
+
+	return { applicantList: data || [], loading: isLoading, error, refetch };
 }
 
 export default useHackerApplicants;

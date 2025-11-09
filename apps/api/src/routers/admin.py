@@ -5,9 +5,13 @@ from typing import Annotated, Any, Literal, Mapping, Optional, Union
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, TypeAdapter, ValidationError
 from typing_extensions import assert_never
+from pymongo import DESCENDING
 
 from admin import applicant_review_processor, participant_manager, summary_handler
 from admin.participant_manager import Participant
+from admin.score_normalizing_handler import (
+    add_normalized_scores_to_all_hacker_applicants,
+)
 from auth.authorization import require_role
 from auth.user_identity import User, utc_now
 from models.ApplicationData import Decision, Review
@@ -55,6 +59,10 @@ class ApplicationDataSummary(BaseModel):
 class ZotHacksApplicationDataSummary(BaseModel):
     school_year: str
     submission_time: Any
+    normalized_scores: Optional[dict[str, float]] = None
+    extra_points: Optional[float] = None
+    email: str
+    resume_url: str
 
 
 class ApplicantSummary(BaseRecord):
@@ -71,6 +79,7 @@ class HackerApplicantSummary(BaseRecord):
     status: str
     decision: Optional[Decision] = None
     reviewers: list[str] = []
+    resume_reviewed: bool = False
     avg_score: float
     application_data: Union[ApplicationDataSummary, ZotHacksApplicationDataSummary]
 
@@ -82,12 +91,12 @@ class ReviewRequest(BaseModel):
 
 
 class ZotHacksHackerDetailedScores(BaseModel):
-    resume: int
+    resume: Optional[int] = None
     elevator_pitch_saq: int
     tech_experience_saq: int
     learn_about_self_saq: int
     pixel_art_saq: int
-    hackathon_experience: int
+    hackathon_experience: Optional[int] = None
 
 
 class GlobalScores(BaseModel):
@@ -164,6 +173,7 @@ async def hacker_applicants(
             "last_name",
             "application_data",
         ],
+        sort=[("application_data.submission_time", DESCENDING)],
     )
     thresholds: Optional[dict[str, float]] = await retrieve_thresholds()
 
@@ -172,13 +182,14 @@ async def hacker_applicants(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     for record in records:
-        applicant_review_processor.include_hacker_app_fields(
+        # TODO: If we change back to old avg score for summary, change this function
+        # applicant_review_processor.include_hacker_app_fields
+        applicant_review_processor.include_hacker_app_fields_with_global_and_breakdown(
             record, thresholds["accept"], thresholds["waitlist"]
         )
 
     try:
         return TypeAdapter(list[HackerApplicantSummary]).validate_python(records)
-
     except ValidationError:
         raise RuntimeError("Could not parse applicant data.")
 
@@ -437,6 +448,18 @@ async def subevent_checkin(
     await participant_manager.subevent_checkin(event, uid, organizer)
 
 
+@router.get(
+    "/normalize-detailed-scores",
+    dependencies=[Depends(require_role({Role.DIRECTOR, Role.LEAD}))],
+)
+async def normalize_detailed_scores_for_all_hacker_apps() -> None:
+    try:
+        await add_normalized_scores_to_all_hacker_applicants()
+    except RuntimeError:
+        log.error("Could not update/add normalized scores to hacker applicants")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 async def retrieve_thresholds() -> Optional[dict[str, Any]]:
     return await mongodb_handler.retrieve_one(
         Collection.SETTINGS, {"_id": "hacker_score_thresholds"}, ["accept", "waitlist"]
@@ -463,8 +486,8 @@ async def _handle_detailed_scores_review(
     applicant: str, scores: ZotHacksHackerDetailedScores, reviewer: User, notes: Optional[str] = None
 ) -> None:
     """Handle detailed scores review submission."""
-    score_breakdown = scores.model_dump()
-    total_score = max(sum(score_breakdown.values()), -3)
+    score_breakdown = scores.model_dump(exclude_none=True)
+    total_score = max(sum(score_breakdown.get(k, 0) for k in scores.model_fields), -3)
 
     if total_score < -3 or total_score > 100:
         log.error("Invalid review score submitted.")
@@ -538,8 +561,8 @@ async def _handle_detailed_scores_review(
     try:
         await require_lead(reviewer)
         global_scores = GlobalScores(
-            resume=scores.resume,
-            hackathon_experience=scores.hackathon_experience,
+            resume=scores.resume or 0,
+            hackathon_experience=scores.hackathon_experience or 0,
         )
         await _handle_global_only_review(applicant, global_scores, reviewer)
     except HTTPException:

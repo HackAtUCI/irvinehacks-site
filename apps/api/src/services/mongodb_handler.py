@@ -2,12 +2,13 @@ import asyncio
 import os
 from enum import Enum
 from logging import getLogger
-from typing import Any, Mapping, Optional, Union
+from typing import Any, Mapping, Optional, Sequence, Union
 
 from bson import CodecOptions
 from motor.core import AgnosticClient, AgnosticDatabase
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, ConfigDict, Field
+from pymongo import UpdateMany, UpdateOne
 
 from utils.hackathon_context import hackathon_name_ctx, HackathonName
 
@@ -94,7 +95,10 @@ async def retrieve_one(
 
 
 async def retrieve(
-    collection: Collection, query: Mapping[str, object], fields: list[str] = []
+    collection: Collection,
+    query: Mapping[str, object],
+    fields: list[str] = [],
+    sort: Optional[list[tuple[str, int]]] = None,
 ) -> list[dict[str, object]]:
     """Search for and retrieve the specified fields of a document (if any exist)
     that satisfy the provided query."""
@@ -102,6 +106,9 @@ async def retrieve(
     COLLECTION = DB[collection.value]
 
     result = COLLECTION.find(query, fields)
+    if sort:
+        result = result.sort(sort)
+
     output: list[dict[str, object]] = await result.to_list(length=None)
     return output
 
@@ -146,4 +153,31 @@ async def update(
         log.error("MongoDB document update was not acknowledged")
         raise RuntimeError("Could not update documents in MongoDB collection")
 
+    return result.modified_count > 0
+
+
+async def bulk_update(
+    collection: Collection,
+    operations: Sequence[Union[UpdateOne, UpdateMany]],
+) -> bool:
+    """
+    Perform multiple updates in bulk on a collection.
+
+    operations should be a list of pymongo UpdateOne or UpdateMany objects.
+    Returns True if at least one document was modified.
+    """
+    if not operations:
+        log.warning("No operations provided to bulk_update")
+        return False
+
+    DB = get_database()
+    COLLECTION = DB[collection.value]
+
+    result = await COLLECTION.bulk_write(operations)
+
+    if not result.acknowledged:
+        log.error("MongoDB bulk write was not acknowledged")
+        raise RuntimeError("Could not perform bulk write in MongoDB collection")
+
+    log.info(f"Bulk write completed: {result.modified_count} documents modified")
     return result.modified_count > 0

@@ -119,7 +119,7 @@ class BaseZotHacksHackerApplicationData(BaseModel):
     dietary_restrictions: list[str] = []
     allergies: Union[str, None] = Field(None, max_length=2048)
     major: str
-    hackathon_experience: str
+    hackathon_experience: Literal["first_time", "some_experience", "veteran"]
 
     elevator_pitch_saq: str = Field(max_length=1024)
     tech_experience_saq: str = Field(max_length=2048)

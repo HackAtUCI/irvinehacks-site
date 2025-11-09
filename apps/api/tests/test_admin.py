@@ -121,7 +121,7 @@ def test_can_submit_nonhacker_review(
         Collection.USERS,
         {"_id": "edu.uci.sydnee"},
         {
-            "$push": {"application_data.reviews": (ANY, "edu.uci.alicia", 0)},
+            "$push": {"application_data.reviews": (ANY, "edu.uci.alicia", 0, None)},
             "$set": {"status": "REVIEWED"},
         },
     )
@@ -159,7 +159,7 @@ def test_submit_hacker_review_with_one_reviewer_works(
         Collection.USERS,
         {"_id": "edu.uci.sydnee"},
         {
-            "$push": {"application_data.reviews": (ANY, "edu.uci.alicia", 0)},
+            "$push": {"application_data.reviews": (ANY, "edu.uci.alicia", 0, None)},
             "$set": {"status": "REVIEWED"},
         },
     )
@@ -198,7 +198,7 @@ def test_submit_hacker_review_with_two_reviewers_works(
         Collection.USERS,
         {"_id": "edu.uci.sydnee"},
         {
-            "$push": {"application_data.reviews": (ANY, "edu.uci.alicia", 0)},
+            "$push": {"application_data.reviews": (ANY, "edu.uci.alicia", 0, None)},
             "$set": {"status": "REVIEWED"},
         },
     )

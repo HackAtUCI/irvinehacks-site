@@ -87,6 +87,7 @@ class HackerApplicantSummary(BaseRecord):
 class ReviewRequest(BaseModel):
     applicant: str
     score: float
+    notes: Optional[str] = None # notes from reviewer
 
 
 class ZotHacksHackerDetailedScores(BaseModel):
@@ -106,7 +107,7 @@ class GlobalScores(BaseModel):
 class DetailedReviewRequest(BaseModel):
     applicant: str
     scores: Union[GlobalScores, ZotHacksHackerDetailedScores]
-
+    notes: Optional[str] = None # notes from reviewer
 
 async def mentor_volunteer_applicants(
     application_type: Literal["Mentor", "Volunteer"],
@@ -269,7 +270,8 @@ async def submit_review(
         log.error("Invalid review score submitted.")
         raise HTTPException(status.HTTP_400_BAD_REQUEST)
 
-    review: Review = (utc_now(), reviewer.uid, applicant_review.score)
+    review: Review = (utc_now(), reviewer.uid, applicant_review.score, applicant_review.notes)
+        
     app = applicant_review.applicant
 
     applicant_record = await mongodb_handler.retrieve_one(
@@ -339,7 +341,7 @@ async def submit_detailed_review(
         )
     elif isinstance(applicant_review.scores, ZotHacksHackerDetailedScores):
         await _handle_detailed_scores_review(
-            applicant_review.applicant, applicant_review.scores, reviewer
+            applicant_review.applicant, applicant_review.scores, reviewer, applicant_review.notes
         )
     else:
         assert_never(applicant_review.scores)
@@ -481,7 +483,7 @@ async def _handle_global_only_review(
 
 
 async def _handle_detailed_scores_review(
-    applicant: str, scores: ZotHacksHackerDetailedScores, reviewer: User
+    applicant: str, scores: ZotHacksHackerDetailedScores, reviewer: User, notes: Optional[str] = None
 ) -> None:
     """Handle detailed scores review submission."""
     score_breakdown = scores.model_dump(exclude_none=True)
@@ -491,7 +493,7 @@ async def _handle_detailed_scores_review(
         log.error("Invalid review score submitted.")
         raise HTTPException(status.HTTP_400_BAD_REQUEST)
 
-    review: Review = (utc_now(), reviewer.uid, total_score)
+    review: Review = (utc_now(), reviewer.uid, total_score, notes)
 
     applicant_record = await mongodb_handler.retrieve_one(
         Collection.USERS,

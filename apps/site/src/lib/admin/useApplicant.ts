@@ -3,7 +3,7 @@ import useSWR from "swr";
 
 import { ParticipantRole, Status, Uid, Score } from "@/lib/userRecord";
 
-export type Review = [string, Uid, Score];
+export type Review = [string, Uid, Score, string | null];
 
 // The application responses submitted by an applicant
 interface BaseApplicationData {
@@ -135,16 +135,29 @@ function useApplicant(
 		[string, string, Uid]
 	>(["/api/admin/applicant/", applicationType, uid], fetcher);
 
-	async function submitReview(uid: Uid, score: number) {
-		await axios.post("/api/admin/review", { applicant: uid, score: score });
+	async function submitReview(
+		uid: Uid,
+		score: number,
+		notes: string | null = null,
+	) {
+		await axios.post("/api/admin/review", {
+			applicant: uid,
+			score: score,
+			notes: notes,
+		});
 		// TODO: provide success status to display in alert
 		mutate();
 	}
 
-	async function submitDetailedReview(uid: Uid, scores: object) {
+	async function submitDetailedReview(
+		uid: Uid,
+		scores: object,
+		notes: string | null = null,
+	) {
 		await axios.post("/api/admin/detailed-review", {
 			applicant: uid,
 			scores: scores,
+			notes: notes,
 		});
 		// TODO: provide success status to display in alert
 		mutate();
@@ -159,7 +172,15 @@ function useApplicant(
 	};
 }
 
-export type submitReview = (uid: Uid, score: number) => Promise<void>;
-export type submitDetailedReview = (uid: Uid, scores: object) => Promise<void>;
+export type submitReview = (
+	uid: Uid,
+	score: number,
+	notes?: string | null,
+) => Promise<void>;
+export type submitDetailedReview = (
+	uid: Uid,
+	scores: object,
+	notes?: string | null,
+) => Promise<void>;
 
 export default useApplicant;

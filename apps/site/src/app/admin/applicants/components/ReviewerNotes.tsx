@@ -37,7 +37,6 @@ export default function ReviewerNotes({
 	reviews,
 }: ReviewerNotesProps) {
 	const pastReviews = (reviews ?? []).filter((review) => {
-		console.log(review);
 		return review[3] !== null;
 	});
 

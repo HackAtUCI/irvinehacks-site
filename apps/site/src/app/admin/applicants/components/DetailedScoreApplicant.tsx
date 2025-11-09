@@ -72,8 +72,8 @@ function DetailedScoreApplicant({
 								reviews={application_data.reviews}
 								scores={scores}
 								notes={notes}
-								submitDetailedReview={(Uid, scores) =>
-									submitDetailedReview(Uid, scores).then(() => {
+								submitDetailedReview={(Uid, scores, notes) =>
+									submitDetailedReview(Uid, scores, notes).then(() => {
 										if (setNotifications)
 											setNotifications((prev) => [successMessage, ...prev]);
 									})
@@ -129,8 +129,9 @@ function DetailedScoreApplicant({
 					applicant={applicant._id}
 					reviews={application_data.reviews}
 					scores={scores}
-					submitDetailedReview={(Uid, scores) =>
-						submitDetailedReview(Uid, scores).then(() => {
+					notes={notes}
+					submitDetailedReview={(Uid, scores, notes) =>
+						submitDetailedReview(Uid, scores, notes).then(() => {
 							if (setNotifications)
 								setNotifications((prev) => [successMessage, ...prev]);
 						})

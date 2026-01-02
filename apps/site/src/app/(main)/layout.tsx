@@ -21,11 +21,11 @@ export default function Layout({ children }: PropsWithChildren) {
 			style={{ backgroundImage: `url(${stars.src})` }}
 			className="overflow-x-hidden bg-top bg-repeat-y bg-[length:100%] relative"
 		>
-			<Suspense fallback={<BaseNavbar />}>
+			{/* <Suspense fallback={<BaseNavbar />}>
 				<NavbarParent />
-			</Suspense>
+			</Suspense> */}
 			{children}
-			<Footer />
+			{/* <Footer /> */}
 		</div>
 	);
 }

@@ -25,12 +25,9 @@ const config: Config = {
 					"conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
 			},
 			fontFamily: {
-				display: ["Aref Ruqaa"],
-				body: ["Cantarell"],
-				sans: ["Cantarell"],
 				heading: ["Ethnocentric"],
-				lexend: ["Lexend Giga"],
-				moji: ["NicoMoji"],
+				display: ["NicoMoji"],
+				sans: ["Lexend Giga"],
 			},
 		},
 		screens: {

@@ -1,8 +1,8 @@
 const About = () => {
 	return (
-		<div className="w-full">
+		<div className="w-full bg-[#00001c] pb-20">
 			<div className=" flex flex-col justify-center items-center gap-14 text-center px-20 max-w-[1500px]">
-				<h2 className="font-display text-4xl md:text-6xl lg:text-8xl">
+				<h2 className="font-display text-pink text-4xl md:text-6xl lg:text-8xl">
 					What is IrvineHacks?
 				</h2>
 				<div>

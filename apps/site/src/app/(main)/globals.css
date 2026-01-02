@@ -33,13 +33,13 @@
 	--color-yellow: #e5f200;
 	--color-pink: #ff4def;
 	--color-dark-blue: #170f51;
-	--color-blue: #1e2a91;
+	--color-blue: #0a0e8f;
 	--color-turquoise: #00ffff;
 }
 
 body {
-	color: var(--color-white);
-	background-color: var(--color-midnight);
+	color: var(--color-turquoise);
+	background-color: var(--color-blue);
 }
 
 /* based on Bootstrap Reboot */

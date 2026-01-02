@@ -8,6 +8,7 @@ import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
 import haveApplicationsOpened from "@/lib/utils/haveApplicationsOpened";
 
 import styles from "./Landing.module.css";
+import About from "./About/About";
 
 const Landing = () => {
 	const deadlinePassed = hasDeadlinePassed();
@@ -40,6 +41,7 @@ const Landing = () => {
 					alt="landing background"
 					className="bg-[#00001c] w-screen"
 				/>
+				<About />
 			</section>
 			<div ref={scrollTo} />
 		</>

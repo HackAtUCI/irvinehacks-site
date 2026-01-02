@@ -28,6 +28,9 @@ const config: Config = {
 				display: ["Aref Ruqaa"],
 				body: ["Cantarell"],
 				sans: ["Cantarell"],
+				heading: ["Ethnocentric"],
+				lexend: ["Lexend Giga"],
+				moji: ["NicoMoji"],
 			},
 		},
 		screens: {

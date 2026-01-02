@@ -6,14 +6,20 @@
 @tailwind utilities;
 
 :root {
+	/* 2025 colors, remove later */
 	--color-white: #fff;
 	--color-offwhite: #fffce2;
 	--color-black: #0c071b;
 	--color-brown: #432810;
 	--color-light-blue: #39befd;
-	--color-blue: #006fb2;
-	--color-dark-blue: #0b004c;
 	--color-midnight: #0c071b;
+
+	/* 2026 colors */
+	--color-yellow: #e5f200;
+	--color-pink: #ff4def;
+	--color-dark-blue: #170f51;
+	--color-blue: #1e2a91;
+	--color-turquoise: #00ffff;
 }
 
 body {

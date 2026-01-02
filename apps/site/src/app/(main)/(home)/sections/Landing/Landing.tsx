@@ -21,7 +21,7 @@ const Landing = () => {
 
 	return (
 		<>
-			<section>
+			<section className="bg-[#00001c]">
 				<div
 					className={`min-h-screen absolute overflow-hidden z-10 w-full flex flex-col items-center justify-center`}
 				>
@@ -36,11 +36,14 @@ const Landing = () => {
 						</h1>
 					</div>
 				</div>
-				<Image
-					src={LandingBackground}
-					alt="landing background"
-					className="bg-[#00001c] w-screen"
-				/>
+				<div className="min-h-screen">
+					<Image
+						src={LandingBackground}
+						alt="landing background"
+						className="bg-[#00001c] w-screen"
+					/>
+				</div>
+
 				<About />
 			</section>
 			<div ref={scrollTo} />

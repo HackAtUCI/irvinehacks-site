@@ -1,10 +1,7 @@
-import { PropsWithChildren, Suspense } from "react";
+import { PropsWithChildren } from "react";
 
 import type { Metadata } from "next";
 
-import Footer from "@/lib/components/Footer/Footer";
-import BaseNavbar from "@/lib/components/Navbar/BaseNavbar";
-import NavbarParent from "@/lib/components/Navbar/NavbarParent";
 import stars from "@/assets/backgrounds/starry_repeatable.png";
 
 import "./globals.css";

@@ -22,12 +22,6 @@ const Landing = () => {
 		scrollTo.current?.scrollIntoView({ behavior: "smooth" });
 	};
 
-	const applyButtonText = deadlinePassed
-		? "CLOSED"
-		: applicationsOpened
-			? "OPEN"
-			: "COMING SOON";
-
 	return (
 		<>
 			<section className="bg-[#00001c]">
@@ -46,7 +40,11 @@ const Landing = () => {
 						</h1>
 
 						<div
-							className={`${!deadlinePassed && applicationsOpened && styles.applicationButton + " cursor-pointer"} relative flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-8 border-8 border-pink py-4 px-4`}
+							className={`${
+								!deadlinePassed &&
+								applicationsOpened &&
+								styles.applicationButton + " cursor-pointer"
+							} relative flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-8 border-8 border-pink py-4 px-4`}
 							onClick={() => {
 								if (!deadlinePassed && applicationsOpened) applyClick();
 							}}
@@ -59,7 +57,11 @@ const Landing = () => {
 							<p className="text-pink font-display text-xl sm:text-3xl z-10 m-0">
 								APPLICATIONS
 								<br />
-								{applyButtonText}
+								{deadlinePassed
+									? "CLOSED"
+									: applicationsOpened
+										? "OPEN"
+										: "COMING SOON"}
 							</p>
 							<div className="absolute bg-[#0040EE] opacity-50 w-full h-full" />
 						</div>

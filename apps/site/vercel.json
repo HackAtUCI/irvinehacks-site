@@ -3,8 +3,8 @@
 	"functions": {
 		"api/index.py": {
 			"memory": 512,
-			"maxDuration": 10
-			
+			"maxDuration": 10,
+			"excludeFiles": "{*.{js,ts,json},@(.next|.turbo|node_modules|public)/**,src/{*,!(api)/**}}"
 		}
 	}
 }

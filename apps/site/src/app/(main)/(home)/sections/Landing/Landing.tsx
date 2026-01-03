@@ -22,6 +22,13 @@ const Landing = () => {
 		scrollTo.current?.scrollIntoView({ behavior: "smooth" });
 	};
 
+	let applyButtonText = "COMING SOON";
+	if (deadlinePassed) {
+		applyButtonText = "CLOSED";
+	} else if (applicationsOpened) {
+		applyButtonText = "OPEN";
+	}
+
 	return (
 		<>
 			<section className="bg-[#00001c]">
@@ -57,11 +64,7 @@ const Landing = () => {
 							<p className="text-pink font-display text-xl sm:text-3xl z-10 m-0">
 								APPLICATIONS
 								<br />
-								{deadlinePassed
-									? "CLOSED"
-									: applicationsOpened
-									  ? "OPEN"
-									  : "COMING SOON"}
+								{applyButtonText}
 							</p>
 							<div className="absolute bg-[#0040EE] opacity-50 w-full h-full" />
 						</div>

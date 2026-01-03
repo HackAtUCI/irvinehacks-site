@@ -60,8 +60,8 @@ const Landing = () => {
 								{deadlinePassed
 									? "CLOSED"
 									: applicationsOpened
-										? "OPEN"
-										: "COMING SOON"}
+									  ? "OPEN"
+									  : "COMING SOON"}
 							</p>
 							<div className="absolute bg-[#0040EE] opacity-50 w-full h-full" />
 						</div>

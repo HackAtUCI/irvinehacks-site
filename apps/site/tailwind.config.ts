@@ -25,9 +25,23 @@ const config: Config = {
 					"conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
 			},
 			fontFamily: {
-				display: ["Aref Ruqaa"],
-				body: ["Cantarell"],
-				sans: ["Cantarell"],
+				heading: ["Ethnocentric"],
+				display: ["NicoMoji"],
+				sans: ["Lexend Giga"],
+			},
+			colors: {
+				white: "var(--color-white)",
+				offwhite: "var(--color-offwhite)",
+				black: "var(--color-black)",
+				brown: "var(--color-brown)",
+				"light-blue": "var(--color-light-blue)",
+				midnight: "var(--color-midnight)",
+
+				yellow: "var(--color-yellow)",
+				pink: "var(--color-pink)",
+				"dark-blue": "var(--color-dark-blue)",
+				blue: "var(--color-blue)",
+				turquoise: "var(--color-turquoise)",
 			},
 		},
 		screens: {

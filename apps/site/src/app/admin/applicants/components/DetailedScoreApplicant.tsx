@@ -29,10 +29,8 @@ function DetailedScoreApplicant({
 	guidelines,
 }: ApplicantProps) {
 	const { setNotifications } = useContext(NotificationContext);
-	const { applicant, loading, submitDetailedReview, deleteNotes } = useApplicant(
-		uid,
-		applicationType,
-	);
+	const { applicant, loading, submitDetailedReview, deleteNotes } =
+		useApplicant(uid, applicationType);
 	const [scores, setScores] = useState({});
 	const [notes, setNotes] = useState("");
 

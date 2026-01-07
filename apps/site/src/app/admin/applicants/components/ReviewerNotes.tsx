@@ -13,7 +13,6 @@ import { Review } from "@/lib/admin/useApplicant";
 import { Uid } from "@/lib/userRecord";
 import { useState } from "react";
 
-
 interface ReviewerNotesProps {
 	notes: string;
 	onNotesChange: (notes: string) => void;
@@ -36,25 +35,26 @@ export default function ReviewerNotes({
 	reviewerId,
 	onDeleteNotes,
 }: ReviewerNotesProps) {
-
 	/*
 	Filter out reviews with null notes, keeping the original index with the review.
 	This is because the backend endpoint needs the original index of the review in 
 	the mongodb document to delete the correct note.
 	*/
-	const [reviewsWithNotes, setReviewsWithNotes] = useState<ReviewWithOriginalIdx[]>(
+	const [reviewsWithNotes, setReviewsWithNotes] = useState<
+		ReviewWithOriginalIdx[]
+	>(
 		(reviews ?? [])
-		.map((review, originalIdx) => ({ review, originalIdx }))
-		.filter(({ review }) => review[3] !== null),
+			.map((review, originalIdx) => ({ review, originalIdx }))
+			.filter(({ review }) => review[3] !== null),
 	);
-
 
 	// Lazy delete notes and update the component without re-rendering the entire list in the frontend
 	const deleteNotesAndUpdateComponent = (originalIdx: number) => {
 		onDeleteNotes(applicant, originalIdx);
-		setReviewsWithNotes((prev) => prev.filter(({ originalIdx: idx }) => idx !== originalIdx));
-	}
-
+		setReviewsWithNotes((prev) =>
+			prev.filter(({ originalIdx: idx }) => idx !== originalIdx),
+		);
+	};
 
 	return (
 		<Container header={<Header variant="h2">Reviewer Notes</Header>}>
@@ -63,33 +63,38 @@ export default function ReviewerNotes({
 					<TextContent>
 						Past Notes
 						<ul>
-							{reviewsWithNotes.map(({ review: [date, reviewer, score, note], originalIdx }) => {
-
-								return (
-									<li
-										key={originalIdx}
-										style={{
-											marginBottom: "0.5rem",
-										}}
-									>
-										<div
+							{reviewsWithNotes.map(
+								({ review: [date, reviewer, score, note], originalIdx }) => {
+									return (
+										<li
+											key={originalIdx}
 											style={{
-												display: "flex",
-												alignItems: "center",
-												justifyContent: "space-between",
+												marginBottom: "0.5rem",
 											}}
 										>
-											<Box fontWeight="bold">{reviewer}</Box>
-											{reviewer == reviewerId && (
-												<Button onClick={() => deleteNotesAndUpdateComponent(originalIdx)}>
-													Delete
-												</Button>
-											)}
-										</div>
-										<Box>{note}</Box>
-									</li>	
-								);
-							})}
+											<div
+												style={{
+													display: "flex",
+													alignItems: "center",
+													justifyContent: "space-between",
+												}}
+											>
+												<Box fontWeight="bold">{reviewer}</Box>
+												{reviewer == reviewerId && (
+													<Button
+														onClick={() =>
+															deleteNotesAndUpdateComponent(originalIdx)
+														}
+													>
+														Delete
+													</Button>
+												)}
+											</div>
+											<Box>{note}</Box>
+										</li>
+									);
+								},
+							)}
 						</ul>
 					</TextContent>
 				)}
@@ -103,4 +108,3 @@ export default function ReviewerNotes({
 		</Container>
 	);
 }
-

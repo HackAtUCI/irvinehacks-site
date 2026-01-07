@@ -658,13 +658,3 @@ async def _try_update_applicant_with_query(
     except RuntimeError:
         log.error(err_msg)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-"""
-
-git checkout 2a0d7f1f~1 -- path/to/config/file
-
-
-
-git show --name-only 2a0d7f1f
-""

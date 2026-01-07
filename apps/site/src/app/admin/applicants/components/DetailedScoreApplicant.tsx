@@ -29,7 +29,7 @@ function DetailedScoreApplicant({
 	guidelines,
 }: ApplicantProps) {
 	const { setNotifications } = useContext(NotificationContext);
-	const { applicant, loading, submitDetailedReview } = useApplicant(
+	const { applicant, loading, submitDetailedReview, deleteNotes } = useApplicant(
 		uid,
 		applicationType,
 	);
@@ -92,6 +92,7 @@ function DetailedScoreApplicant({
 				<ApplicantOverview applicant={applicant} />
 				{applicant.roles.includes(ParticipantRole.Hacker) ? (
 					<ZotHacksHackerApplication
+						applicant={applicant._id}
 						application_data={application_data as ZotHacksHackerApplicationData}
 						onScoreChange={setScores}
 						onResumeScore={(
@@ -106,6 +107,7 @@ function DetailedScoreApplicant({
 									setNotifications((prev) => [successMessage, ...prev]);
 							})
 						}
+						onDeleteNotes={(uid, idx) => deleteNotes(uid, idx)}
 						guidelines={guidelines}
 						notes={notes}
 						onNotesChange={setNotes}

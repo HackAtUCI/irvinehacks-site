@@ -7,52 +7,61 @@ import {
 	SpaceBetween,
 	TextContent,
 	Box,
+	Button,
 } from "@cloudscape-design/components";
 import { Review } from "@/lib/admin/useApplicant";
+import { Uid } from "@/lib/userRecord";
+import { useState } from "react";
+
 
 interface ReviewerNotesProps {
 	notes: string;
 	onNotesChange: (notes: string) => void;
 	reviews?: Review[];
+	applicant: Uid;
+	onDeleteNotes: (uid: Uid, idx: number) => void;
+	reviewerId: Uid | null;
 }
 
-const formatReviewDate = (date: string) => {
-	const parsedDate = new Date(date);
-	if (Number.isNaN(parsedDate.getTime())) {
-		return date;
-	}
-
-	return parsedDate.toLocaleString(undefined, {
-		month: "short",
-		day: "numeric",
-		year: "numeric",
-		hour: "numeric",
-		minute: "2-digit",
-	});
-};
+interface ReviewWithOriginalIdx {
+	review: Review;
+	originalIdx: number;
+}
 
 export default function ReviewerNotes({
 	notes,
 	onNotesChange,
 	reviews,
+	applicant,
+	reviewerId,
+	onDeleteNotes,
 }: ReviewerNotesProps) {
-	const pastReviews = (reviews ?? []).filter((review) => {
-		return review[3] !== null;
-	});
+
+	const [reviewsWithNotes, setReviewsWithNotes] = useState<ReviewWithOriginalIdx[]>(
+		(reviews ?? [])
+		.map((review, originalIdx) => ({ review, originalIdx }))
+		.filter(({ review }) => review[3] !== null),
+	);
+
+
+	const deleteNotesAndUpdateComponent = (originalIdx: number) => {
+		onDeleteNotes(applicant, originalIdx);
+		setReviewsWithNotes((prev) => prev.filter(({ originalIdx: idx }) => idx !== originalIdx));
+	}
+
 
 	return (
 		<Container header={<Header variant="h2">Reviewer Notes</Header>}>
 			<SpaceBetween direction="vertical" size="s">
-				{pastReviews.length > 0 && (
+				{reviewsWithNotes.length > 0 && (
 					<TextContent>
 						Past Notes
 						<ul>
-							{pastReviews.map(([date, reviewer, score, note]) => {
-								const formattedDate = formatReviewDate(date);
+							{reviewsWithNotes.map(({ review: [date, reviewer, _, note], originalIdx }) => {
 
 								return (
 									<li
-										key={`${date}-${reviewer}`}
+										key={originalIdx}
 										style={{
 											marginBottom: "0.5rem",
 										}}
@@ -65,10 +74,14 @@ export default function ReviewerNotes({
 											}}
 										>
 											<Box fontWeight="bold">{reviewer}</Box>
-											<Box color="text-status-inactive">{formattedDate}</Box>
+											{reviewer == reviewerId && (
+												<Button onClick={() => deleteNotesAndUpdateComponent(originalIdx)}>
+													Delete
+												</Button>
+											)}
 										</div>
 										<Box>{note}</Box>
-									</li>
+									</li>	
 								);
 							})}
 						</ul>

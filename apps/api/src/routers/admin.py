@@ -109,6 +109,10 @@ class DetailedReviewRequest(BaseModel):
     scores: Union[GlobalScores, ZotHacksHackerDetailedScores]
     notes: Optional[str] = None # notes from reviewer
 
+class DeleteNotesRequest(BaseModel):
+    applicant: str
+    review_index: int
+
 async def mentor_volunteer_applicants(
     application_type: Literal["Mentor", "Volunteer"],
 ) -> list[ApplicantSummary]:
@@ -347,6 +351,51 @@ async def submit_detailed_review(
         assert_never(applicant_review.scores)
 
 
+@router.delete("/delete-notes")
+async def delete_notes(
+    delete_notes_request: DeleteNotesRequest,
+    reviewer: User = Depends(require_reviewer),
+) -> None:
+    """Delete notes from a review."""
+    
+    # Get applicant record
+    applicant_record = await mongodb_handler.retrieve_one(
+        Collection.USERS,
+        {"_id": delete_notes_request.applicant},
+        ["_id", "application_data.reviews", "roles"],
+    )
+
+    # Check if applicant record exists
+    if not applicant_record:
+        log.error("Could not retrieve applicant after deleting notes")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+    print(applicant_record)
+    # Check if review index is valid and belongs to reviewer
+    reviews = applicant_record.get("application_data", {}).get("reviews", [])
+    if (not (0 <= delete_notes_request.review_index < len(reviews)) 
+    or reviews[delete_notes_request.review_index][1] != reviewer.uid):
+        log.error("Invalid review index or reviewer submitted.")
+        raise HTTPException(status.HTTP_403_FORBIDDEN)
+    
+    # Update review in applicant record
+    update_query = {
+        "$set": {
+            f"application_data.reviews.{delete_notes_request.review_index}.3": None
+        }
+    }
+    print(update_query)
+    await _try_update_applicant_with_query(
+        delete_notes_request.applicant,
+        update_query=update_query,
+        err_msg=f"{reviewer} could not delete notes from review {delete_notes_request.review_index} for {delete_notes_request.applicant}",
+    )
+
+    log.info("%s deleted notes from review %d for %s", reviewer, delete_notes_request.applicant)
+
+
+
+
 @router.get("/get-thresholds")
 async def get_hacker_score_thresholds(
     user: Annotated[User, Depends(require_manager)],
@@ -579,11 +628,13 @@ async def _try_update_applicant_with_query(
     err_msg: str = "",
 ) -> None:
     try:
-        await mongodb_handler.raw_update_one(
+        modified = await mongodb_handler.raw_update_one(
             Collection.USERS,
             {"_id": applicant},
             update_query,
         )
+        if not modified:
+            log.warning(f"Update query did not modify any documents for {applicant}: {update_query}")
     except RuntimeError:
         log.error(err_msg)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -87,7 +87,7 @@ class HackerApplicantSummary(BaseRecord):
 class ReviewRequest(BaseModel):
     applicant: str
     score: float
-    notes: Optional[str] = None # notes from reviewer
+    notes: Optional[str] = None  # notes from reviewer
 
 
 class ZotHacksHackerDetailedScores(BaseModel):
@@ -107,11 +107,13 @@ class GlobalScores(BaseModel):
 class DetailedReviewRequest(BaseModel):
     applicant: str
     scores: Union[GlobalScores, ZotHacksHackerDetailedScores]
-    notes: Optional[str] = None # notes from reviewer
+    notes: Optional[str] = None  # notes from reviewer
+
 
 class DeleteNotesRequest(BaseModel):
     applicant: str
     review_index: int
+
 
 async def mentor_volunteer_applicants(
     application_type: Literal["Mentor", "Volunteer"],
@@ -274,8 +276,13 @@ async def submit_review(
         log.error("Invalid review score submitted.")
         raise HTTPException(status.HTTP_400_BAD_REQUEST)
 
-    review: Review = (utc_now(), reviewer.uid, applicant_review.score, applicant_review.notes)
-        
+    review: Review = (
+        utc_now(),
+        reviewer.uid,
+        applicant_review.score,
+        applicant_review.notes,
+    )
+
     app = applicant_review.applicant
 
     applicant_record = await mongodb_handler.retrieve_one(
@@ -345,7 +352,10 @@ async def submit_detailed_review(
         )
     elif isinstance(applicant_review.scores, ZotHacksHackerDetailedScores):
         await _handle_detailed_scores_review(
-            applicant_review.applicant, applicant_review.scores, reviewer, applicant_review.notes
+            applicant_review.applicant,
+            applicant_review.scores,
+            reviewer,
+            applicant_review.notes,
         )
     else:
         assert_never(applicant_review.scores)
@@ -357,7 +367,7 @@ async def delete_notes(
     reviewer: User = Depends(require_reviewer),
 ) -> None:
     """Delete notes from a review."""
-    
+
     # Get applicant record
     applicant_record = await mongodb_handler.retrieve_one(
         Collection.USERS,
@@ -369,31 +379,35 @@ async def delete_notes(
     if not applicant_record:
         log.error("Could not retrieve applicant after deleting notes")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-    print(applicant_record)
+
     # Check if review index is valid and belongs to reviewer
     reviews = applicant_record.get("application_data", {}).get("reviews", [])
-    if (not (0 <= delete_notes_request.review_index < len(reviews)) 
-    or reviews[delete_notes_request.review_index][1] != reviewer.uid):
+    if (
+        not (0 <= delete_notes_request.review_index < len(reviews))
+        or reviews[delete_notes_request.review_index][1] != reviewer.uid
+    ):
         log.error("Invalid review index or reviewer submitted.")
         raise HTTPException(status.HTTP_403_FORBIDDEN)
-    
-    # Update review in applicant record
+
+    # Update query to set the note to be deleted to null
     update_query = {
         "$set": {
             f"application_data.reviews.{delete_notes_request.review_index}.3": None
         }
     }
-    print(update_query)
+
+    # Update review in applicant record to set note to null
     await _try_update_applicant_with_query(
         delete_notes_request.applicant,
         update_query=update_query,
         err_msg=f"{reviewer} could not delete notes from review {delete_notes_request.review_index} for {delete_notes_request.applicant}",
     )
 
-    log.info("%s deleted notes from review %d for %s", reviewer, delete_notes_request.applicant)
-
-
+    log.info(
+        "%s deleted notes from review %d for %s",
+        reviewer,
+        delete_notes_request.applicant,
+    )
 
 
 @router.get("/get-thresholds")
@@ -532,7 +546,10 @@ async def _handle_global_only_review(
 
 
 async def _handle_detailed_scores_review(
-    applicant: str, scores: ZotHacksHackerDetailedScores, reviewer: User, notes: Optional[str] = None
+    applicant: str,
+    scores: ZotHacksHackerDetailedScores,
+    reviewer: User,
+    notes: Optional[str] = None,
 ) -> None:
     """Handle detailed scores review submission."""
     score_breakdown = scores.model_dump(exclude_none=True)
@@ -634,7 +651,9 @@ async def _try_update_applicant_with_query(
             update_query,
         )
         if not modified:
-            log.warning(f"Update query did not modify any documents for {applicant}: {update_query}")
+            log.warning(
+                f"Update query did not modify any documents for {applicant}: {update_query}"
+            )
     except RuntimeError:
         log.error(err_msg)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)

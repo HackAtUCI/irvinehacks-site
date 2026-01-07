@@ -37,6 +37,11 @@ export default function ReviewerNotes({
 	onDeleteNotes,
 }: ReviewerNotesProps) {
 
+	/*
+	Filter out reviews with null notes, keeping the original index with the review.
+	This is because the backend endpoint needs the original index of the review in 
+	the mongodb document to delete the correct note.
+	*/
 	const [reviewsWithNotes, setReviewsWithNotes] = useState<ReviewWithOriginalIdx[]>(
 		(reviews ?? [])
 		.map((review, originalIdx) => ({ review, originalIdx }))
@@ -44,6 +49,7 @@ export default function ReviewerNotes({
 	);
 
 
+	// Lazy delete notes and update the component without re-rendering the entire list in the frontend
 	const deleteNotesAndUpdateComponent = (originalIdx: number) => {
 		onDeleteNotes(applicant, originalIdx);
 		setReviewsWithNotes((prev) => prev.filter(({ originalIdx: idx }) => idx !== originalIdx));
@@ -57,7 +63,7 @@ export default function ReviewerNotes({
 					<TextContent>
 						Past Notes
 						<ul>
-							{reviewsWithNotes.map(({ review: [date, reviewer, _, note], originalIdx }) => {
+							{reviewsWithNotes.map(({ review: [date, reviewer, score, note], originalIdx }) => {
 
 								return (
 									<li
@@ -97,3 +103,4 @@ export default function ReviewerNotes({
 		</Container>
 	);
 }
+

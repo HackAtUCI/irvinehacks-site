@@ -390,6 +390,7 @@ async def delete_notes(
         raise HTTPException(status.HTTP_403_FORBIDDEN)
 
     # Update query to set the note to be deleted to null
+    # The note index is 3 because the review is a tuple with the date, reviewer, score, and note
     update_query = {
         "$set": {
             f"application_data.reviews.{delete_notes_request.review_index}.3": None
@@ -657,3 +658,13 @@ async def _try_update_applicant_with_query(
     except RuntimeError:
         log.error(err_msg)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+"""
+
+git checkout 2a0d7f1f~1 -- path/to/config/file
+
+
+
+git show --name-only 2a0d7f1f
+""

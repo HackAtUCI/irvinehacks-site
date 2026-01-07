@@ -20,6 +20,7 @@ import UserContext from "@/lib/admin/UserContext";
 import { isDirector, isLead } from "@/lib/admin/authorization";
 import { ZothacksScoringGuidelinesType } from "./getScoringGuidelines";
 import { Review } from "@/lib/admin/useApplicant";
+import { Uid } from "@/lib/userRecord";
 
 type ZHKeys = Exclude<keyof ZotHacksHackerApplicationData, "reviews">;
 
@@ -51,8 +52,10 @@ function ZotHacksHackerApplication({
 	onScoreChange,
 	guidelines,
 	notes,
+	applicant,
 	onNotesChange,
 	reviews,
+	onDeleteNotes,
 }: {
 	application_data: ZotHacksHackerApplicationData;
 	onResumeScore: (
@@ -63,7 +66,9 @@ function ZotHacksHackerApplication({
 	guidelines: ZothacksScoringGuidelinesType;
 	notes: string;
 	onNotesChange: (notes: string) => void;
+	applicant: Uid;
 	reviews: Review[];
+	onDeleteNotes: (uid: Uid, idx: number) => void;
 }) {
 	const { uid: reviewer_uid, roles } = useContext(UserContext);
 	const formattedUid = reviewer_uid?.split(".").at(-1);
@@ -272,9 +277,12 @@ function ZotHacksHackerApplication({
 				wordLimit={100}
 			/>
 			<ReviewerNotes
+				applicant={applicant}
 				notes={notes}
 				onNotesChange={onNotesChange}
 				reviews={reviews}
+				onDeleteNotes={onDeleteNotes}
+				reviewerId={reviewer_uid}
 			/>
 		</SpaceBetween>
 	);

@@ -169,7 +169,21 @@ function useApplicant(
 		error,
 		submitReview,
 		submitDetailedReview,
+		deleteNotes,
 	};
+
+
+	async function deleteNotes(
+		uid: Uid,
+		reviewIndex: number,
+	) {
+		await axios.delete("/api/admin/delete-notes", {
+			data: {
+				applicant: uid,
+				review_index: reviewIndex,
+			}
+		});
+	}
 }
 
 export type submitReview = (
@@ -181,6 +195,10 @@ export type submitDetailedReview = (
 	uid: Uid,
 	scores: object,
 	notes?: string | null,
+) => Promise<void>;
+export type deleteNotes = (
+	uid: Uid,
+	reviewIndex: number,
 ) => Promise<void>;
 
 export default useApplicant;

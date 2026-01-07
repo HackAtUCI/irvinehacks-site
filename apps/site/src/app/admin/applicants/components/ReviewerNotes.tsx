@@ -64,7 +64,7 @@ export default function ReviewerNotes({
 						Past Notes
 						<ul>
 							{reviewsWithNotes.map(
-								({ review: [date, reviewer, score, note], originalIdx }) => {
+								({ review: [ , reviewer, , note], originalIdx }) => {
 									return (
 										<li
 											key={originalIdx}
@@ -80,7 +80,7 @@ export default function ReviewerNotes({
 												}}
 											>
 												<Box fontWeight="bold">{reviewer}</Box>
-												{reviewer == reviewerId && (
+												{reviewer === reviewerId && (
 													<Button
 														onClick={() =>
 															deleteNotesAndUpdateComponent(originalIdx)

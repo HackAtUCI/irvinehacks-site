@@ -21,6 +21,7 @@ export default function EventCard({
 	isHappening,
 }: EventCardProps) {
 	console.log(title, startTime.getTime() === endTime.getTime());
+	isHappening = true
 	return (
 		<div
 			className={`w-[90%] min-w-[200px] h-full bg-black border-4 border-white relative p-16 font-display max-lg:w-full ${

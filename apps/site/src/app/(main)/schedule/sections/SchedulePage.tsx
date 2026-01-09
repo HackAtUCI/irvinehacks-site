@@ -82,6 +82,7 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 
 	return (
 		<div className="relative w-full h-fit flex gap-10 flex-col max-md:gap-2">
+			{/* Top Scroll bar with Friday, Saturday, Sunday (example) */}
 			<ScheduleScroll
 				weekdays={allDays}
 				setSelectedEventDay={setSelectedEventDay}

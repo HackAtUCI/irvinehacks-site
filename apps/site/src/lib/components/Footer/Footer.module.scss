@@ -1,6 +1,47 @@
 .footer {
+	background-color: var(--color-blue);
+	padding: 18px 28px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.topRow {
+	display: flex;
+	justify-content: flex-end;
+}
+
+.socials {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+}
+
+.bottomRow {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 18px;
+}
+
+.hackLogo {
+	display: flex;
+	align-items: center;
+}
+
+.footerText {
+	margin: 0;
+	font-family: "NicoMoji", sans-serif;
 	color: white;
-	border-top-left-radius: 500rem 20rem;
-	border-top-right-radius: 500rem 20rem;
-	padding-bottom: 20px;
+	text-align: right;
+	white-space: nowrap;
+}
+
+.bullet {
+	margin: 0 6px;
+}
+
+.link {
+	color: var(--color-pink);
+	text-decoration: none;
 }

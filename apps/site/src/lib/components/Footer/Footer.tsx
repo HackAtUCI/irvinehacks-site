@@ -55,7 +55,7 @@ const Footer = () => {
 							rel="noopener noreferrer"
 							aria-label={item.alt}
 						>
-							<Image src={item.logo} alt={item.alt} width={22} height={22} />
+							<Image src={item.logo} alt={item.alt} width={30} height={30} />
 						</a>
 					))}
 				</div>
@@ -71,8 +71,8 @@ const Footer = () => {
 					<Image
 						src={hack}
 						alt="Hack logo that links to Hack at UCI's website"
-						width={36}
-						height={36}
+						width={42}
+						height={42}
 					/>
 				</a>
 

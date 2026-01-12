@@ -24,7 +24,9 @@ class Decision(str, Enum):
     REJECTED = "REJECTED"
 
 
-Review = tuple[datetime, str, float, Optional[str]] # (timestamp, reviewer_uid, score, notes)
+Review = tuple[
+    datetime, str, float, Optional[str]
+]  # (timestamp, reviewer_uid, score, notes)
 
 
 def make_empty_none(val: Union[str, None]) -> Union[str, None]:

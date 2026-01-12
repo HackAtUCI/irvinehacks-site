@@ -107,12 +107,12 @@ class GlobalScores(BaseModel):
 class DetailedReviewRequest(BaseModel):
     applicant: str
     scores: Union[GlobalScores, ZotHacksHackerDetailedScores]
-    notes: Optional[str] = None  # notes from reviewer
+    notes: Optional[str] = None  # Notes from reviewer
 
 
 class DeleteNotesRequest(BaseModel):
     applicant: str
-    review_index: int
+    review_index: int  # Index of the review in the applicant's application_data.reviews array (0-indexed) for quick lookup
 
 
 async def mentor_volunteer_applicants(
@@ -377,7 +377,9 @@ async def delete_notes(
 
     # Check if applicant record exists
     if not applicant_record:
-        log.error("Could not retrieve applicant after deleting notes")
+        log.error(
+            "Could not retrieve applicant while attempting to delete reviewer notes"
+        )
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     # Check if review index is valid and belongs to reviewer

@@ -57,6 +57,18 @@ function DetailedScoreApplicant({
 		},
 	};
 
+	const handleSubmitDetailedReview = (
+		Uid: string,
+		scores: object,
+		notes: string | null,
+	) => {
+		submitDetailedReview(Uid, scores, notes).then(() => {
+			if (setNotifications)
+				setNotifications((prev) => [successMessage, ...prev]);
+			setNotes("");
+		});
+	};
+
 	return (
 		<ContentLayout
 			header={
@@ -70,12 +82,7 @@ function DetailedScoreApplicant({
 								reviews={application_data.reviews}
 								scores={scores}
 								notes={notes}
-								submitDetailedReview={(Uid, scores, notes) =>
-									submitDetailedReview(Uid, scores, notes).then(() => {
-										if (setNotifications)
-											setNotifications((prev) => [successMessage, ...prev]);
-									})
-								}
+								onSubmitDetailedReview={handleSubmitDetailedReview}
 							/>
 						) : (
 							<></>
@@ -130,12 +137,7 @@ function DetailedScoreApplicant({
 					reviews={application_data.reviews}
 					scores={scores}
 					notes={notes}
-					submitDetailedReview={(Uid, scores, notes) =>
-						submitDetailedReview(Uid, scores, notes).then(() => {
-							if (setNotifications)
-								setNotifications((prev) => [successMessage, ...prev]);
-						})
-					}
+					onSubmitDetailedReview={handleSubmitDetailedReview}
 				/>
 			</div>
 		</ContentLayout>

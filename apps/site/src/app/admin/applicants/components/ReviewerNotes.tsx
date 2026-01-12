@@ -11,7 +11,6 @@ import {
 } from "@cloudscape-design/components";
 import { Review } from "@/lib/admin/useApplicant";
 import { Uid } from "@/lib/userRecord";
-import { useState } from "react";
 
 interface ReviewerNotesProps {
 	notes: string;
@@ -35,26 +34,9 @@ export default function ReviewerNotes({
 	reviewerId,
 	onDeleteNotes,
 }: ReviewerNotesProps) {
-	/*
-	Filter out reviews with null notes, keeping the original index with the review.
-	This is because the backend endpoint needs the original index of the review in 
-	the mongodb document to delete the correct note.
-	*/
-	const [reviewsWithNotes, setReviewsWithNotes] = useState<
-		ReviewWithOriginalIdx[]
-	>(
-		(reviews ?? [])
-			.map((review, originalIdx) => ({ review, originalIdx }))
-			.filter(({ review }) => review[3] !== null),
-	);
-
-	// Lazy delete notes and update the component without re-rendering the entire list in the frontend
-	const deleteNotesAndUpdateComponent = (originalIdx: number) => {
-		onDeleteNotes(applicant, originalIdx);
-		setReviewsWithNotes((prev) =>
-			prev.filter(({ originalIdx: idx }) => idx !== originalIdx),
-		);
-	};
+	const reviewsWithNotes: ReviewWithOriginalIdx[] = (reviews ?? [])
+		.map((review, originalIdx) => ({ review, originalIdx }))
+		.filter(({ review }) => review[3] !== null);
 
 	return (
 		<Container header={<Header variant="h2">Reviewer Notes</Header>}>
@@ -64,7 +46,7 @@ export default function ReviewerNotes({
 						Past Notes
 						<ul>
 							{reviewsWithNotes.map(
-								({ review: [ , reviewer, , note], originalIdx }) => {
+								({ review: [, reviewer, , note], originalIdx }) => {
 									return (
 										<li
 											key={originalIdx}
@@ -83,7 +65,7 @@ export default function ReviewerNotes({
 												{reviewer === reviewerId && (
 													<Button
 														onClick={() =>
-															deleteNotesAndUpdateComponent(originalIdx)
+															onDeleteNotes(applicant, originalIdx)
 														}
 													>
 														Delete

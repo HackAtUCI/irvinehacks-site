@@ -157,7 +157,7 @@ function useApplicant(
 		await axios.post("/api/admin/detailed-review", {
 			applicant: uid,
 			scores: scores,
-			notes: notes,
+			notes: notes?.trim() || null,
 		});
 		// TODO: provide success status to display in alert
 		mutate();
@@ -179,6 +179,8 @@ function useApplicant(
 				review_index: reviewIndex,
 			},
 		});
+		// Re-fetch the applicant to get the updated reviews
+		mutate();
 	}
 }
 

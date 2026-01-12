@@ -12,8 +12,9 @@ from routers import admin
 from routers.admin import (
     _handle_detailed_scores_review,
     _handle_global_only_review,
+    delete_notes,
     GlobalScores,
-    ZotHacksHackerDetailedScores,
+    DeleteNotesRequest,
 )
 from services.mongodb_handler import Collection
 from services.sendgrid_handler import Template
@@ -673,3 +674,49 @@ async def test_handle_detailed_scores_review_applicant_not_found(
 
     assert exc_info.value.status_code == 500
     mock_mongodb_handler_retrieve_one.assert_awaited_once()
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_delete_reviewer_notes_success(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+    """Test deleting reviewer notes successfully."""
+
+    # Mock the applicant record retrieval with a review and notes
+    applicant = "edu.uci.test"
+    reviewer = USER_REVIEWER
+    review_index = 0
+    notes_field_index = 3  # Position of notes in review tuple
+
+    notes = "This is a test note"
+    applicant_record = {
+        "_id": applicant,
+        "roles": ["Applicant", "Hacker"],
+        "application_data": {
+            "reviews": [[datetime(2026, 1, 11), reviewer.uid, 100, notes]],
+        },
+    }
+    delete_notes_request = DeleteNotesRequest(
+        applicant=applicant, review_index=review_index
+    )
+
+    # Mock the applicant record retrieval
+    mock_mongodb_handler_retrieve_one.return_value = applicant_record
+    # Mock the raw update one
+    mock_mongodb_handler_raw_update_one.return_value = True
+
+    # Make the request
+    await delete_notes(delete_notes_request, reviewer)
+
+    # Assert the applicant record retrieval was called once
+    mock_mongodb_handler_retrieve_one.assert_awaited_once()
+    # Assert the raw update one was called once with the correct arguments
+    mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
+        Collection.USERS,
+        {"_id": applicant},
+        {
+            "$set": {f"application_data.reviews.0.{notes_field_index}": None},
+        },
+    )

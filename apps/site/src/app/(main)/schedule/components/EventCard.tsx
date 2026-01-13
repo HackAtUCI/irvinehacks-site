@@ -76,7 +76,9 @@ export default function EventCard({
 								", ",
 							)}`}</div>
 						)}
-						<div className="text-2xl text-[#FFFFFF] font-sans leading-[150%] font-normal pt-5">{description}</div>
+						<div className="text-2xl text-[#FFFFFF] font-sans leading-[150%] font-normal pt-5">
+							{description}
+						</div>
 					</div>
 				</>
 			) : (

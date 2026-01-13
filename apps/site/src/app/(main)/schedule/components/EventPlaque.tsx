@@ -29,7 +29,7 @@ export default forwardRef(function EventPlaque(
 
 	return (
 		<div
-			className="duration-500 relative min-w-[200px] h-fit cursor-pointer"
+			className="duration-500 relative min-w-[200px] h-fit cursor-pointer px-12 text-[--color-yellow]"
 			onMouseEnter={() => setHovered(true)}
 			onMouseLeave={() => setHovered(false)}
 			ref={ref}
@@ -38,11 +38,9 @@ export default forwardRef(function EventPlaque(
 			<div
 				className={
 					isHappening
-						? "duration-500 font-display p-5 w-full h-fit border-4 bg-blue-100 border-blue-900 text-blue-950 top-[-8px] left-[-8px]"
-						: `duration-500 font-display p-5 w-full h-fit border-4 top-0 left-0 ${
-								hovered
-									? `bg-white border-black text-black top-[-5px] left-[-5px] ${styles.plaqueHover}`
-									: "bg-black border-white"
+						? "duration-500 font-display p-5 w-full h-fit border-4 bg-blue-100 border-blue-900 text-[blue-950] top-[-8px] left-[-8px]"
+						: `duration-500 font-display p-5 w-full h-fit top-0 left-0 rounded-[30px] ${
+								hovered ? `${styles.plaqueHover}` : ""
 						  }`
 				}
 			>
@@ -53,7 +51,12 @@ export default forwardRef(function EventPlaque(
 							: `text-2xl`
 					}
 				>
-					<span>{title}</span>
+					<div className="flex flex-col gap-4">
+						<div className="text-5xl">
+							{`${start.compositeTimeHourMinute} ${start.amPm}`}
+						</div>
+						<span className="text-2xl">{title}</span>
+					</div>
 					{isHappening && (
 						<motion.div
 							className="min-w-[50px]"
@@ -68,19 +71,12 @@ export default forwardRef(function EventPlaque(
 						</motion.div>
 					)}
 				</div>
-				<div className="text-lg">
-					<div>
-						{startTime.getTime() === endTime.getTime()
-							? `${end.compositeTimeHourMinute} ${end.amPm}`
-							: `${start.compositeTimeHourMinute} - ${end.compositeTimeHourMinute} ${end.amPm}`}
-					</div>
-				</div>
 			</div>
 			<div
 				className={
 					isHappening
 						? "absolute w-full h-full top-[9px] left-[9px] z-[-1] duration-500 bg-blue-100"
-						: `absolute w-full h-full top-0 left-0 z-[-1] duration-500 bg-white ${
+						: `absolute w-full h-full top-0 left-0 z-[-1] duration-500 ${
 								hovered && styles.decorHover
 						  }`
 				}

@@ -1,5 +1,13 @@
 .plaqueHover {
-	transform: translate(-3px, -3px);
+	color: var(--color-turquoise);
+	background: linear-gradient(
+		135deg,
+		rgba(255, 255, 255, 0.06),
+		rgba(0, 255, 255, 0.35),
+		rgba(0, 255, 255, 0.35)
+	  );
+	box-shadow: 3px 5px 50px rgba(0, 0, 0, 0.4);
+	transition: transform 300ms ease, box-shadow 300ms ease;
 }
 
 .decorHover {

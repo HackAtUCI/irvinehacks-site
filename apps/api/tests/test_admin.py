@@ -15,7 +15,7 @@ from routers.admin import (
     delete_notes,
     GlobalScores,
     DeleteNotesRequest,
-    ZotHacksHackerDetailedScores
+    ZotHacksHackerDetailedScores,
 
 )
 from services.mongodb_handler import Collection

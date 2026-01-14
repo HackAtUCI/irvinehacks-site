@@ -1,6 +1,6 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { SwordsIcon } from "lucide-react";
-import { motion } from "framer-motion";
 
 import EventProps from "../EventProps";
 import getTimeAndDates from "@/lib/utils/getTimeAndDates";
@@ -20,13 +20,9 @@ export default function EventCard({
 	description,
 	isHappening,
 }: EventCardProps) {
-	console.log(title, startTime.getTime() === endTime.getTime());
 	return (
 		<div
-			className={`w-[90%] min-w-[200px] h-full bg-[#170f51]/50 border-[9px] border-[--color-yellow] relative p-12 font-display max-lg:w-full ${
-				isHappening &&
-				"max-lg:bg-blue-100 max-lg:border-blue-900 max-lg:text-blue-950 max-lg:top-[-8px] max-lg:left-[-8px]"
-			}`}
+			className={`w-[90%] min-w-[200px] h-full bg-[#170f51]/50 border-[9px] border-yellow relative p-12 font-display max-lg:w-full ${"max-lg:bg-blue-100 max-lg:border-blue-900 max-lg:text-blue-950 max-lg:top-[-8px] max-lg:left-[-8px]"}`}
 		>
 			{title ? (
 				<>
@@ -36,22 +32,12 @@ export default function EventCard({
 								<h1 className="text-4xl [text-shadow:0_0_25px] max-w-[80%] max-sm:text-3xl">
 									{title}
 								</h1>
-								{isHappening && (
-									<motion.div
-										className="min-w-[50px] max-[400px]:hidden"
-										animate={{ y: ["0%", "-10%", "0%"] }}
-										transition={{
-											repeat: Infinity,
-											duration: 2,
-											ease: "easeInOut",
-										}}
-									>
-										<SwordsIcon width={50} height={50} color="rgb(23 37 84)" />
-									</motion.div>
-								)}
+								<div className="min-w-[50px] max-[400px]:hidden">
+									<SwordsIcon width={50} height={50} color="rgb(23 37 84)" />
+								</div>
 							</div>
 						</div>
-						<div className="pt-6 text-[--color-yellow]">
+						<div className="pt-6 text-yellow">
 							<div className="w-full flex justify-between gap-5 max-lg:flex-col ">
 								<p className="text-2xl mb-0">
 									<span>Location: </span>
@@ -82,7 +68,7 @@ export default function EventCard({
 					</div>
 				</>
 			) : (
-				<div className="text-4xl w-full h-full flex justify-center items-center">
+				<div className="text-4xl w-full h-full flex justify-center border-yellow items-center">
 					No Event Selected...
 				</div>
 			)}

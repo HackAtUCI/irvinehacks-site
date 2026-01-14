@@ -63,8 +63,7 @@ export default function EventSidebar({
 	const handlePlaqueClick = (title: string) => {
 		setSelectedTitle(title);
 		scrollToEventPlaqueOnClick(title);
-	  };
-	  
+	};
 
 	useEffect(() => {
 		if (currentTitle) {

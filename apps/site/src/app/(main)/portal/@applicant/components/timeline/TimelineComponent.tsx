@@ -11,7 +11,7 @@ export const TimelineComponent: React.FC<TimelineComponentProps> = ({
 	finished,
 }) => {
 	const baseStyles =
-		"flex items-center justify-start border-[3px] md:border-[5px] w-full max-w-[865px] min-h-[80px] md:min-h-[120px] rounded-xl backdrop-blur-[20px]";
+		"flex items-center justify-start border-[3px] md:border-[5px] w-full max-w-[865px] min-h-[80px] md:min-h-[120px] backdrop-blur-[20px]";
 	const colorStyles = finished
 		? "text-[var(--color-turquoise)] bg-[var(--color-black)] border-[var(--color-turquoise)]"
 		: "text-[var(--color-pink)] bg-[var(--color-black)] border-[var(--color-pink)]";

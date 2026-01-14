@@ -2,8 +2,7 @@
 
 import clsx from "clsx";
 
-import Button from "@/lib/components/Button/Button";
-import NavLinkItem from "./NavbarHelpers";
+	import NavLinkItem from "./NavbarHelpers";
 
 // import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
 import buttonStyles from "@/lib/components/Button/Button.module.scss";
@@ -21,15 +20,13 @@ export default function Navbar({ identity }: NavbarProps) {
 	return (
 		<BaseNavbar>
 			{status !== null && <NavLinkItem href="/portal">Portal</NavLinkItem>}
-			{isLoggedIn ? (
+			{isLoggedIn && (
 				<a
 					href="/logout"
 					className={clsx(buttonStyles.buttonBox, buttonStyles.navButton)}
 				>
 					Log Out
 				</a>
-			) : (
-				<Button text="Log In" href="/login" usePrefetch={false} isNavButton />
 			)}
 		</BaseNavbar>
 	);

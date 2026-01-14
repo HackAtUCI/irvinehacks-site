@@ -12,7 +12,11 @@ const NavLinkItem = React.forwardRef<
 	return (
 		<NavMenu.Item>
 			<NavMenu.Link
-				className={clsx(styles.navMenuLink, className)}
+				className={clsx(
+					"font-display text-[#E5F200]",
+					styles.navMenuLink,
+					className,
+				)}
 				{...props}
 				ref={forwardedRef}
 				asChild

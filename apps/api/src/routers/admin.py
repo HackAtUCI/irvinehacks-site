@@ -112,9 +112,9 @@ class DetailedReviewRequest(BaseModel):
 
 class DeleteNotesRequest(BaseModel):
     applicant: str
-    # Index of the review in the applicant's 
+    # Index of the review in the applicant's
     # application_data.reviews array for quick lookup
-    review_index: int 
+    review_index: int
 
 
 async def mentor_volunteer_applicants(
@@ -394,7 +394,7 @@ async def delete_notes(
         raise HTTPException(status.HTTP_403_FORBIDDEN)
 
     # Update query to set the note to be deleted to null
-    # The note index is 3 because the review is a tuple 
+    # The note index is 3 because the review is a tuple
     # with the date, reviewer, score, and note fields
     update_query = {
         "$set": {
@@ -407,10 +407,10 @@ async def delete_notes(
         delete_notes_request.applicant,
         update_query=update_query,
         err_msg=f"""
-            {reviewer} could not delete notes from review 
-            {delete_notes_request.review_index} for 
+            {reviewer} could not delete notes from review
+            {delete_notes_request.review_index} for
             {delete_notes_request.applicant}
-        """
+        """,
     )
 
     log.info(
@@ -663,7 +663,7 @@ async def _try_update_applicant_with_query(
         if not modified:
             log.warning(
                 f"""
-                Update query did not modify any documents 
+                Update query did not modify any documents
                 for {applicant}: {update_query}
                 """
             )

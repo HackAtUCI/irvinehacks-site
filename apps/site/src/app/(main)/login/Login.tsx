@@ -14,9 +14,9 @@ async function Login({
 	const { return_to } = searchParams;
 
 	const identity = await getUserIdentity();
-	// if (identity.uid !== null) {
-	// 	redirect(return_to ?? "/portal");
-	// }
+	if (identity.uid !== null) {
+		redirect(return_to ?? "/portal");
+	}
 
 	return (
 		<div className="bg-[#00001c]">

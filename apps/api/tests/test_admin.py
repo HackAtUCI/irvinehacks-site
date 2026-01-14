@@ -16,7 +16,6 @@ from routers.admin import (
     GlobalScores,
     DeleteNotesRequest,
     ZotHacksHackerDetailedScores,
-
 )
 from services.mongodb_handler import Collection
 from services.sendgrid_handler import Template

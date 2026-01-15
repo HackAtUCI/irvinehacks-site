@@ -66,12 +66,18 @@
 	color: #170f51;
 	border: 5px solid #ff4def;
 	height: 50px;
-	width: 150px;
+	width: 120px;
 
 	display: flex;
 	align-items: center;
 	justify-content: center;
 
+	@media (min-width: 225px) {
+		font-size: 1rem;
+		height: 50px;
+		width: 150px;
+	}
+		
 	@media (min-width: 640px) {
 		font-size: 1.25rem; // text-base (16px) - sm breakpoint
 		height: 50px;

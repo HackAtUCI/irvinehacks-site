@@ -4,7 +4,7 @@ import PortalCheck from "@/assets/icons/portal-check.svg";
 
 export const SubmissionComponent = () => {
 	return (
-		<div className="flex items-center gap-4 md:gap-6">
+		<div className="flex items-center gap-6 md:gap-10">
 			<TimelineComponent
 				text="Application Submitted"
 				finished={true}

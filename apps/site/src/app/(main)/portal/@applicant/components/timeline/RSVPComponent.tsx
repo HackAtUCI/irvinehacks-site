@@ -27,7 +27,7 @@ export const RSVPComponent = ({ status }: { status: Status }) => {
 	if (!verdict) return null;
 
 	return (
-		<div className="flex items-center gap-4 md:gap-6">
+		<div className="flex items-center gap-6 md:gap-10">
 			<TimelineComponent
 				text={verdict.text}
 				finished={verdict.finished}
@@ -36,9 +36,12 @@ export const RSVPComponent = ({ status }: { status: Status }) => {
 			<Image
 				src={verdict.finished ? PortalCheck : PortalWarning}
 				alt={verdict.finished ? "Completed" : "Pending"}
-				width={178}
-				height={178}
-				className="w-16 h-16 sm:w-24 sm:h-24 md:w-[120px] md:h-[120px] flex-shrink-0"
+				width={verdict.finished ? 178 : 108}
+				height={verdict.finished ? 178 : 94}
+				className={verdict.finished
+					? "w-16 h-16 sm:w-24 sm:h-24 md:w-[120px] md:h-[120px] flex-shrink-0"
+					: "w-12 h-10 sm:w-16 sm:h-14 md:w-[108px] md:h-[94px] flex-shrink-0"
+				}
 			/>
 		</div>
 	);

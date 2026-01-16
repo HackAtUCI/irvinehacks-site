@@ -1,40 +1,29 @@
 .footer {
-	background-color: var(--color-blue);
+	background-color: rgba(23, 15, 81, 0.6);
 	padding: 22px 32px;
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
-}
-
-.topRow {
-	display: flex;
-	justify-content: flex-end;
-}
-
-.socials {
-	display: flex;
-	align-items: center;
-	gap: 26px;
-}
-
-.bottomRow {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 18px;
-}
+}	
 
 .hackLogo {
 	display: flex;
 	align-items: center;
 }
 
-.footerText {
+.footerText {	
 	margin: 0;
 	font-family: "NicoMoji", sans-serif;
 	color: white;
 	text-align: right;
 	white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .footerText {
+    white-space: normal;
+    text-align: center;
+  }
 }
 
 .bullet {

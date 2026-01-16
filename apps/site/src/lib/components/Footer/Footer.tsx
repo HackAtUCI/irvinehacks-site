@@ -11,36 +11,36 @@ import hack from "@/assets/logos/hack.svg";
 import styles from "./Footer.module.scss";
 
 const socials = [
-  {
-    logo: mail,
-    alt: "Email that directs to contact@irvinehacks.com",
-    link: "mailto:contact@irvinehacks.com",
-  },
-  {
-    logo: discord,
-    alt: "Discord logo that links to Hack at UCI's Discord invite",
-    link: "https://discord.com/invite/pvkGxq2AWM",
-  },
-  {
-    logo: instagram,
-    alt: "Instagram logo that links to Hack at UCI's instagram",
-    link: "https://www.instagram.com/hackatuci/",
-  },
-  {
-    logo: tiktok,
-    alt: "Tiktok logo that links to Hack at UCI's tiktok",
-    link: "https://www.tiktok.com/@hackatuci",
-  },
-  {
-    logo: linkedin,
-    alt: "Linkedin logo that links to Hack at UCI's Linkedin",
-    link: "https://www.linkedin.com/company/hackuci",
-  },
-  {
-    logo: facebook,
-    alt: "Facebook logo that links to Hack at UCI's Facebook",
-    link: "https://www.facebook.com/groups/HackAtUCI/",
-  },
+	{
+		logo: mail,
+		alt: "Email that directs to contact@irvinehacks.com",
+		link: "mailto:contact@irvinehacks.com",
+	},
+	{
+		logo: discord,
+		alt: "Discord logo that links to Hack at UCI's Discord invite",
+		link: "https://discord.com/invite/pvkGxq2AWM",
+	},
+	{
+		logo: instagram,
+		alt: "Instagram logo that links to Hack at UCI's instagram",
+		link: "https://www.instagram.com/hackatuci/",
+	},
+	{
+		logo: tiktok,
+		alt: "Tiktok logo that links to Hack at UCI's tiktok",
+		link: "https://www.tiktok.com/@hackatuci",
+	},
+	{
+		logo: linkedin,
+		alt: "Linkedin logo that links to Hack at UCI's Linkedin",
+		link: "https://www.linkedin.com/company/hackuci",
+	},
+	{
+		logo: facebook,
+		alt: "Facebook logo that links to Hack at UCI's Facebook",
+		link: "https://www.facebook.com/groups/HackAtUCI/",
+	},
 ];
 
 const Footer = () => {

@@ -1,5 +1,5 @@
 .footer {
-	background-color: rgba(23, 15, 81, 0.6);
+	background-color: rgba(23, 15, 81, 0.6); // --color-dark-blue
 	padding: 22px 32px;
 	display: flex;
 	flex-direction: column;
@@ -9,14 +9,6 @@
 .hackLogo {
 	display: flex;
 	align-items: center;
-}
-
-.footerText {	
-	margin: 0;
-	font-family: "NicoMoji", sans-serif;
-	color: white;
-	text-align: right;
-	white-space: nowrap;
 }
 
 @media (max-width: 600px) {

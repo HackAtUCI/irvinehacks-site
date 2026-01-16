@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 import mail from "@/assets/logos/mail-pink.svg";
 import discord from "@/assets/logos/discord-pink.svg";
 import instagram from "@/assets/logos/instagram-pink.svg";
@@ -6,7 +8,6 @@ import linkedin from "@/assets/logos/linkedin-pink.svg"
 import facebook from "@/assets/logos/facebook-pink.svg"
 import hack from "@/assets/logos/hack.svg";
 
-import Image from "next/image";
 import styles from "./Footer.module.scss";
 
 const socials = [

@@ -3,7 +3,6 @@
 
 import { useState } from "react";
 import { forwardRef } from "react";
-import { SwordsIcon } from "lucide-react";
 import { motion } from "framer-motion";
 
 import getTimeAndDates from "@/lib/utils/getTimeAndDates";
@@ -64,7 +63,6 @@ export default forwardRef(function EventPlaque(
 								ease: "easeInOut",
 							}}
 						>
-							<SwordsIcon width={50} height={50} color="rgb(23 37 84)" />
 						</motion.div>
 					)}
 				</div>

@@ -1,6 +1,5 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { SwordsIcon } from "lucide-react";
 
 import EventProps from "../EventProps";
 import getTimeAndDates from "@/lib/utils/getTimeAndDates";
@@ -32,9 +31,6 @@ export default function EventCard({
 								<h1 className="text-4xl [text-shadow:0_0_25px] max-w-[80%] max-sm:text-3xl">
 									{title}
 								</h1>
-								<div className="min-w-[50px] max-[400px]:hidden">
-									<SwordsIcon width={50} height={50} color="rgb(23 37 84)" />
-								</div>
 							</div>
 						</div>
 						<div className="pt-6 text-yellow">

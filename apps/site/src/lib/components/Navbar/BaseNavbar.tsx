@@ -45,7 +45,7 @@ export default function BaseNavbar({ children }: PropsWithChildren) {
 				hidden ? "max-md:h-[4rem] max-md:overflow-hidden" : ""
 			} transition-colors duration-0 md:duration-700 ease-out w-full z-50 flex flex-col fixed bg-midnight/40 backdrop-blur md:flex-row md:items-center`}
 		>
-			<NavMenu.List className="bg-midnight/60 md:bg-transparent flex p-3 text-[#E5F200] font-display">
+			<NavMenu.List className="bg-midnight/60 md:bg-transparent flex p-3 text-yellow font-display">
 				<NavLinkItem href="/">
 					<HackLogo />
 				</NavLinkItem>
@@ -68,7 +68,7 @@ export default function BaseNavbar({ children }: PropsWithChildren) {
 						(hidden ? "opacity-0 " : "opacity-100 ") +
 						(listShown ? "" : "-translate-y-full ") +
 						"transition-transform duration-500 ease-in-out md:transition-none md:translate-y-0 md:opacity-100 " +
-						"[&>*]:mb-5 [&>*]:md:mb-0 font-display text-[#E5F200] gap-10 p-5 pt-3 bg-midnight/60 md:bg-transparent md:p-0 md:flex md:items-center"
+						"[&>*]:mb-5 [&>*]:md:mb-0 font-display text-yellow gap-10 p-5 pt-3 bg-midnight/60 md:bg-transparent md:p-0 md:flex md:items-center"
 					}
 					onTransitionEnd={() => setHidden(!listShown)}
 				>

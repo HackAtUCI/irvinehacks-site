@@ -13,7 +13,7 @@ const NavLinkItem = React.forwardRef<
 		<NavMenu.Item>
 			<NavMenu.Link
 				className={clsx(
-					"font-display text-[#E5F200]",
+					"font-display text-yellow",
 					styles.navMenuLink,
 					className,
 				)}

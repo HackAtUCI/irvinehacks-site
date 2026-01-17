@@ -38,9 +38,10 @@ export const RSVPComponent = ({ status }: { status: Status }) => {
 				alt={verdict.finished ? "Completed" : "Pending"}
 				width={verdict.finished ? 178 : 108}
 				height={verdict.finished ? 178 : 94}
-				className={verdict.finished
-					? "w-16 h-16 sm:w-24 sm:h-24 md:w-[120px] md:h-[120px] flex-shrink-0"
-					: "w-12 h-10 sm:w-16 sm:h-14 md:w-[108px] md:h-[94px] flex-shrink-0"
+				className={
+					verdict.finished
+						? "w-16 h-16 sm:w-24 sm:h-24 md:w-[120px] md:h-[120px] flex-shrink-0"
+						: "w-12 h-10 sm:w-16 sm:h-14 md:w-[108px] md:h-[94px] flex-shrink-0"
 				}
 			/>
 		</div>

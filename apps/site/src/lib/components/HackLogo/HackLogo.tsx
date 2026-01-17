@@ -1,13 +1,25 @@
 import Image from "next/image";
 
-import irvineHacksLogo from "@/assets/logos/irvinehacks-logo-yellow.svg";
+import hackAnteater from "@/assets/logos/hackuci-anteater.svg";
+import hackGear from "@/assets/logos/hackuci-gear.svg";
 
 import styles from "./HackLogo.module.scss";
 
 const HackLogo = () => {
 	return (
 		<div className={styles.hackLogo}>
-			<Image src={irvineHacksLogo} alt="IrvineHacks Logo" />
+			<Image
+				src={hackGear}
+				alt="IrvineHacks gear logo"
+				fill
+				className={styles.gearImage}
+			/>
+			<Image
+				src={hackAnteater}
+				alt="IrvineHacks anteater logo"
+				fill
+				className={styles.anteaterImage}
+			/>
 		</div>
 	);
 };

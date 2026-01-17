@@ -22,7 +22,7 @@ export default forwardRef(function EventPlaque(
 	{
 		title,
 		startTime,
-		endTime,
+		// endTime,
 		isHappening,
 		selected,
 		onClick,

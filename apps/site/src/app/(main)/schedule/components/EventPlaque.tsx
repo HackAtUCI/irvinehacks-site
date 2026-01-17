@@ -33,7 +33,7 @@ export default forwardRef(function EventPlaque(
 	const isSelected = hovered || selected;
 
 	const start = getTimeAndDates(startTime);
-	const end = getTimeAndDates(endTime);
+	// const end = getTimeAndDates(endTime);
 
 	return (
 		<div

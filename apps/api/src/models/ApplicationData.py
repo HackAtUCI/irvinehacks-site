@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 import json
-from typing import Annotated, Any, Literal, Union
+from typing import Annotated, Any, Literal, Union, Optional
 
 from fastapi import UploadFile
 from pydantic import (
@@ -24,7 +24,9 @@ class Decision(str, Enum):
     REJECTED = "REJECTED"
 
 
-Review = tuple[datetime, str, float]
+Review = tuple[
+    datetime, str, float, Optional[str]
+]  # (timestamp, reviewer_uid, score, notes)
 
 
 def make_empty_none(val: Union[str, None]) -> Union[str, None]:

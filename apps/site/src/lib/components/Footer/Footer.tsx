@@ -91,10 +91,22 @@ const Footer = () => {
 				>
 					Hack @ UCI team
 				</a>
-			</p>
-		</div>
-	</footer>
-  );
+
+				<p className="m-0 font-display text-right whitespace-nowrap text-white max-[600px]:text-center max-[600px]:whitespace-normal">
+					Made with &lt;3 in Irvine, CA <span className={styles.bullet}>•</span>{" "}
+					Learn more about the{" "}
+					<a
+						href="https://hack.ics.uci.edu"
+						target="_blank"
+						rel="noopener noreferrer"
+						className={styles.link}
+					>
+						Hack @ UCI team
+					</a>
+				</p>
+			</div>
+		</footer>
+	);
 };
 
 export default Footer;

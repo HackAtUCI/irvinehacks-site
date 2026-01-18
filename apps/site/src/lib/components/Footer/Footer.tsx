@@ -44,52 +44,42 @@ const socials = [
 ];
 
 const Footer = () => {
-  return (
-	<footer className={styles.footer}>
-		<div className="flex w-full justify-end max-[600px]:order-1 max-[600px]:justify-center">
-			<div className="flex flex-wrap items-center justify-end gap-[26px] max-[600px]:justify-center">
-			{socials.map((item) => {
-				const isExternal = item.link.startsWith("http");
-				return (
-				<a
-					key={item.link}
-					href={item.link}
-					{...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-					aria-label={item.alt}
-				>
-					<Image src={item.logo} alt={item.alt} width={30} height={30} />
-				</a>
-				);
-			})}
+	return (
+		<footer className={styles.footer}>
+			<div className="flex w-full justify-end max-[600px]:order-1 max-[600px]:justify-center">
+				<div className="flex flex-wrap items-center justify-end gap-[26px] max-[600px]:justify-center">
+					{socials.map((item) => {
+						const isExternal = item.link.startsWith("http");
+						return (
+							<a
+								key={item.link}
+								href={item.link}
+								{...(isExternal
+									? { target: "_blank", rel: "noopener noreferrer" }
+									: {})}
+								aria-label={item.alt}
+							>
+								<Image src={item.logo} alt={item.alt} width={30} height={30} />
+							</a>
+						);
+					})}
+				</div>
 			</div>
-		</div>
 
-		<div className="mt-2 flex w-full items-center justify-between gap-[18px] max-[600px]:order-0 max-[600px]:flex-col max-[600px]:items-center">
-			<a
-			href="https://hack.ics.uci.edu/"
-			target="_blank"
-			rel="noopener noreferrer"
-			className={styles.hackLogo}
-			aria-label="Hack at UCI website"
-			>
-			<Image
-				src={hack}
-				alt="Hack logo that links to Hack at UCI's website"
-				width={42}
-				height={42}
-			/>
-			</a>
-
-			<p className="m-0 font-display text-right whitespace-nowrap text-white max-[600px]:text-center max-[600px]:whitespace-normal">
-				Made with &lt;3 in Irvine, CA <span className={styles.bullet}>•</span>{" "}
-				Learn more about the{" "}
+			<div className="mt-2 flex w-full items-center justify-between gap-[18px] max-[600px]:order-0 max-[600px]:flex-col max-[600px]:items-center">
 				<a
-					href="https://hack.ics.uci.edu"
+					href="https://hack.ics.uci.edu/"
 					target="_blank"
 					rel="noopener noreferrer"
-					className={styles.link}
+					className={styles.hackLogo}
+					aria-label="Hack at UCI website"
 				>
-					Hack @ UCI team
+					<Image
+						src={hack}
+						alt="Hack logo that links to Hack at UCI's website"
+						width={42}
+						height={42}
+					/>
 				</a>
 
 				<p className="m-0 font-display text-right whitespace-nowrap text-white max-[600px]:text-center max-[600px]:whitespace-normal">

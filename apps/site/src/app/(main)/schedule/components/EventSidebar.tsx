@@ -1,14 +1,11 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
-import Image from "next/image";
 
 import EventPlaque from "./EventPlaque";
 import EventProps from "../EventProps";
 import EventCard from "./EventCard";
-
-import star from "@/assets/images/large_star.svg";
 
 import styles from "./EventSidebar.module.scss";
 
@@ -26,6 +23,7 @@ export default function EventSidebar({
 	const scheduleBarRef = useRef<Map<string, HTMLDivElement>>(new Map());
 	const scheduleContainerRef = useRef<HTMLDivElement>(null);
 	const scheduleScrollerRef = useRef<HTMLDivElement>(null);
+	const [selectedTitle, setSelectedTitle] = useState<string | null>(null);
 
 	const getScheduleRef = () => {
 		if (!scheduleBarRef.current) scheduleBarRef.current = new Map();
@@ -57,6 +55,11 @@ export default function EventSidebar({
 		});
 
 		setSelectedEvent(events.filter((event) => event.title === title)[0]);
+	};
+
+	const handlePlaqueClick = (title: string) => {
+		setSelectedTitle(title);
+		scrollToEventPlaqueOnClick(title);
 	};
 
 	useEffect(() => {
@@ -92,7 +95,7 @@ export default function EventSidebar({
 								className="max-lg:hidden"
 							>
 								<EventPlaque
-									onClick={scrollToEventPlaqueOnClick}
+									onClick={handlePlaqueClick}
 									ref={(node: HTMLDivElement) => {
 										const m = getScheduleRef();
 										m.set(event.title, node);
@@ -106,6 +109,7 @@ export default function EventSidebar({
 										currentTitle ===
 										`${event.title}${event.startTime.toISOString()}`
 									}
+									selected={selectedTitle === event.title}
 								/>
 							</div>
 						);
@@ -127,15 +131,6 @@ export default function EventSidebar({
 							</div>
 						);
 					})}
-					<div className="h-[300px] w-full flex justify-center items-center">
-						<Image
-							src={star}
-							width={80}
-							height={80}
-							alt="✦"
-							className="opacity-60"
-						/>
-					</div>
 				</div>
 			</div>
 		</div>

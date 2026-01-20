@@ -134,15 +134,6 @@ export default function EventSidebar({
 							</div>
 						);
 					})}
-					<div className="h-[300px] w-full flex justify-center items-center">
-						<Image
-							src={star}
-							width={80}
-							height={80}
-							alt="✦"
-							className="opacity-60"
-						/>
-					</div>
 				</div>
 			</div>
 		</div>

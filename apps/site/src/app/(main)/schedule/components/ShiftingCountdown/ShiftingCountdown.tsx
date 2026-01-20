@@ -46,56 +46,44 @@ const ShiftingCountdown = () => {
 
 	return (
 		<div className="flex items-center justify-center p-4 sm:p-8">
-				<div className="w-full max-w-6xl">
-					<div className="bg-gradient-to-br from-[#2B3FD9]/90 via-[#1E2B8F]/90 to-[#0F1654]/90 rounded-[32px] sm:rounded-[48px] p-6 sm:p-12 md:p-16 backdrop-blur-sm border border-cyan-400/20 shadow-2xl">
-						<div className="flex flex-col items-center justify-center gap-4 sm:gap-6 md:gap-8">
-							{!hasEnded && (
-								<div className="font-display text-cyan-300 text-xl sm:text-2xl md:text-3xl lg:text-4xl text-center tracking-wider">
-									{countdown.label}
+			<div className="w-full max-w-6xl">
+				<div className="bg-gradient-to-br from-[#2B3FD9]/90 via-[#1E2B8F]/90 to-[#0F1654]/90 rounded-[32px] sm:rounded-[48px] p-6 sm:p-12 md:p-16 backdrop-blur-sm border border-cyan-400/20 shadow-2xl">
+					<div className="flex flex-col items-center justify-center gap-4 sm:gap-6 md:gap-8">
+						{!hasEnded && (
+							<div className="font-display text-cyan-300 text-xl sm:text-2xl md:text-3xl lg:text-4xl text-center tracking-wider">
+								{countdown.label}
+							</div>
+						)}
+
+						<div className="flex flex-col items-center justify-center gap-4">
+							{!hasEnded ? (
+								<>
+									{countdown.days > 0 && (
+										<div className="flex items-center justify-center gap-3">
+											<CountdownItem num={countdown.days} isColon={false} />
+											<span className="font-display text-cyan-300 text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
+												{countdown.days === 1 ? "day" : "days"}
+											</span>
+										</div>
+									)}
+									<div className="flex items-center justify-center">
+										<CountdownItem num={countdown.hours} isColon={false} />
+										<CountdownItem num=":" isColon={true} />
+										<CountdownItem num={countdown.minutes} isColon={false} />
+										<CountdownItem num=":" isColon={true} />
+										<CountdownItem num={countdown.seconds} isColon={false} />
+									</div>
+								</>
+							) : (
+								<div className="font-display text-cyan-300 text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-center">
+									Hacking has Ended!
 								</div>
 							)}
-							
-							<div className="flex flex-col items-center justify-center gap-4">
-								{!hasEnded ? (
-									<>
-										{countdown.days > 0 && (
-											<div className="flex items-center justify-center gap-3">
-												<CountdownItem
-													num={countdown.days}
-													isColon={false}
-												/>
-												<span className="font-display text-cyan-300 text-2xl sm:text-3xl md:text-4xl lg:text-5xl">
-													{countdown.days === 1 ? 'day' : 'days'}
-												</span>
-											</div>
-										)}
-										<div className="flex items-center justify-center">
-											<CountdownItem
-												num={countdown.hours}
-												isColon={false}
-											/>
-											<CountdownItem num=":" isColon={true} />
-											<CountdownItem
-												num={countdown.minutes}
-												isColon={false}
-											/>
-											<CountdownItem num=":" isColon={true} />
-											<CountdownItem
-												num={countdown.seconds}
-												isColon={false}
-											/>
-										</div>
-									</>
-								) : (
-									<div className="font-display text-cyan-300 text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-center">
-										Hacking has Ended!
-									</div>
-								)}
-							</div>
 						</div>
 					</div>
 				</div>
 			</div>
+		</div>
 	);
 };
 

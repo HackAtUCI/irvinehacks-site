@@ -2,13 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
-import Image from "next/image";
 
 import EventPlaque from "./EventPlaque";
 import EventProps from "../EventProps";
 import EventCard from "./EventCard";
-
-import star from "@/assets/images/large_star.svg";
 
 import styles from "./EventSidebar.module.scss";
 

@@ -3,7 +3,6 @@
 
 import { useState } from "react";
 import { forwardRef } from "react";
-import { SwordsIcon } from "lucide-react";
 
 import getTimeAndDates from "@/lib/utils/getTimeAndDates";
 
@@ -65,11 +64,6 @@ export default forwardRef(function EventPlaque(
 						</div>
 						<span className="text-2xl">{title}</span>
 					</div>
-					{isHappening && (
-						<div className="min-w-[50px]">
-							<SwordsIcon width={50} height={50} color="rgb(23 37 84)" />
-						</div>
-					)}
 				</div>
 			</div>
 			<div

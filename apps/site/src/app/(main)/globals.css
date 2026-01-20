@@ -1,24 +1,45 @@
 @import url("https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Cantarell:ital,wght@0,400;0,700;1,400;1,700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Lexend+Giga:wght@100..900&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+	font-family: "NicoMoji";
+	src: url("/fonts/NicoMoji-Regular.ttf") format("truetype");
+	font-weight: 400;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: "Ethnocentric";
+	src: url("/fonts/Ethnocentric-Regular.otf") format("opentype");
+	font-weight: 400;
+	font-style: normal;
+}
+
 :root {
+	/* 2025 colors, remove later */
 	--color-white: #fff;
 	--color-offwhite: #fffce2;
 	--color-black: #0c071b;
 	--color-brown: #432810;
 	--color-light-blue: #39befd;
-	--color-blue: #006fb2;
-	--color-dark-blue: #0b004c;
 	--color-midnight: #0c071b;
+
+	/* 2026 colors */
+	--color-yellow: #e5f200;
+	--color-pink: #ff4def;
+	--color-dark-blue: #170f51;
+	--color-blue: #0a0e8f;
+	--color-turquoise: #00ffff;
 }
 
 body {
-	color: var(--color-white);
-	background-color: var(--color-midnight);
+	color: var(--color-turquoise);
+	background-color: var(--color-blue);
 }
 
 /* based on Bootstrap Reboot */

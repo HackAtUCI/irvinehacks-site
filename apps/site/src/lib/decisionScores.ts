@@ -6,13 +6,15 @@ const waitlistScore = -2;
 const rejectScore = 0;
 
 export const decisionsToScores: Record<Decision, number> = {
-	[Decision.accepted]: acceptScore,
-	[Decision.waitlisted]: waitlistScore,
-	[Decision.rejected]: rejectScore,
+	[Decision.Accepted]: acceptScore,
+	[Decision.Waitlisted]: waitlistScore,
+	[Decision.Rejected]: rejectScore,
 };
 
 export const scoresToDecisions: Record<string, Decision> = {
-	[acceptScore]: Decision.accepted,
-	[waitlistScore]: Decision.waitlisted,
-	[rejectScore]: Decision.rejected,
+	[acceptScore]: Decision.Accepted,
+	[waitlistScore]: Decision.Waitlisted,
+	[rejectScore]: Decision.Rejected,
 };
+
+export const OVERQUALIFIED_SCORE = -3;

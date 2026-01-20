@@ -29,6 +29,11 @@ function AdminLayout({ children }: PropsWithChildren) {
 
 	useEffect(() => {
 		setNotifications(() => []);
+
+		if (!document.cookie.includes("hackathon=zothacks")) {
+			document.cookie =
+				"hackathon=zothacks; path=/; max-age=" + 60 * 60 * 24 * 30;
+		}
 	}, [pathName]);
 
 	if (!identity) {
@@ -63,23 +68,32 @@ function AdminLayout({ children }: PropsWithChildren) {
 						content={children}
 						navigation={<AdminSidebar />}
 						breadcrumbs={<Breadcrumbs />}
-						notifications={
-							<Flashbar
-								items={notifications}
-								i18nStrings={{
-									ariaLabel: "Notifications",
-									notificationBarAriaLabel: "View all notifications",
-									notificationBarText: "Notifications",
-									errorIconAriaLabel: "Error",
-									warningIconAriaLabel: "Warning",
-									successIconAriaLabel: "Success",
-									infoIconAriaLabel: "Info",
-									inProgressIconAriaLabel: "In progress",
-								}}
-								stackItems
-							/>
-						}
 					/>
+					<div
+						style={{
+							position: "fixed",
+							top: "1rem",
+							right: "1rem",
+							zIndex: 1000,
+							width: "400px",
+							maxWidth: "calc(100% - 2rem)",
+						}}
+					>
+						<Flashbar
+							items={notifications}
+							i18nStrings={{
+								ariaLabel: "Notifications",
+								notificationBarAriaLabel: "View all notifications",
+								notificationBarText: "Notifications",
+								errorIconAriaLabel: "Error",
+								warningIconAriaLabel: "Warning",
+								successIconAriaLabel: "Success",
+								infoIconAriaLabel: "Info",
+								inProgressIconAriaLabel: "In progress",
+							}}
+							stackItems
+						/>
+					</div>
 				</NotificationContext.Provider>
 			</UserContext.Provider>
 		</SWRConfig>

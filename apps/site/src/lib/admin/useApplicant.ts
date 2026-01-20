@@ -3,7 +3,7 @@ import useSWR from "swr";
 
 import { ParticipantRole, Status, Uid, Score } from "@/lib/userRecord";
 
-export type Review = [string, Uid, Score];
+export type Review = [string, Uid, Score, string | null];
 
 // The application responses submitted by an applicant
 interface BaseApplicationData {
@@ -14,6 +14,32 @@ interface BaseApplicationData {
 	school: string;
 	education_level: string;
 	major: string;
+}
+
+export type HackathonExperience = "first_time" | "some_experience" | "veteran";
+interface ReviewBreakdown {
+	resume: number;
+	elevator_pitch_saq: number;
+	tech_experience_saq: number;
+	learn_about_self_saq: number;
+	pixel_art_saq: number;
+}
+export interface ZotHacksHackerApplicationData extends BaseApplicationData {
+	school_year: string;
+	dietary_restrictions: string[];
+	allergies: string | null;
+	hackathon_experience: HackathonExperience;
+	elevator_pitch_saq: string;
+	tech_experience_saq: string;
+	learn_about_self_saq: string;
+	pixel_art_saq: string;
+	pixel_art_data: number[];
+	comments: string | null;
+	resume_url: string | null;
+	submission_time: string;
+	reviews: Review[];
+	review_breakdown: { [reviewer_uid: string]: ReviewBreakdown };
+	global_field_scores?: { resume?: number };
 }
 
 export interface HackerApplicationData extends BaseApplicationData {
@@ -71,10 +97,16 @@ export type VolunteerApplicationQuestion = Exclude<
 	"reviews"
 >;
 
+export type ZotHacksHackerApplicationQuestion = Exclude<
+	keyof ZotHacksHackerApplicationData,
+	"reviews"
+>;
+
 type ApplicationData =
 	| HackerApplicationData
 	| MentorApplicationData
-	| VolunteerApplicationData;
+	| VolunteerApplicationData
+	| ZotHacksHackerApplicationData;
 
 export interface Applicant {
 	_id: Uid;
@@ -103,8 +135,30 @@ function useApplicant(
 		[string, string, Uid]
 	>(["/api/admin/applicant/", applicationType, uid], fetcher);
 
-	async function submitReview(uid: Uid, score: number) {
-		await axios.post("/api/admin/review", { applicant: uid, score: score });
+	async function submitReview(
+		uid: Uid,
+		score: number,
+		notes: string | null = null,
+	) {
+		await axios.post("/api/admin/review", {
+			applicant: uid,
+			score: score,
+			notes: notes,
+		});
+		// TODO: provide success status to display in alert
+		mutate();
+	}
+
+	async function submitDetailedReview(
+		uid: Uid,
+		scores: object,
+		notes: string | null = null,
+	) {
+		await axios.post("/api/admin/detailed-review", {
+			applicant: uid,
+			scores: scores,
+			notes: notes?.trim() || null,
+		});
 		// TODO: provide success status to display in alert
 		mutate();
 	}
@@ -114,9 +168,32 @@ function useApplicant(
 		loading: isLoading,
 		error,
 		submitReview,
+		submitDetailedReview,
+		deleteNotes,
 	};
+
+	async function deleteNotes(uid: Uid, reviewIndex: number) {
+		await axios.delete("/api/admin/delete-notes", {
+			data: {
+				applicant: uid,
+				review_index: reviewIndex,
+			},
+		});
+		// Re-fetch the applicant to get the updated reviews
+		mutate();
+	}
 }
 
-export type submitReview = (uid: Uid, score: number) => Promise<void>;
+export type submitReview = (
+	uid: Uid,
+	score: number,
+	notes?: string | null,
+) => Promise<void>;
+export type submitDetailedReview = (
+	uid: Uid,
+	scores: object,
+	notes?: string | null,
+) => Promise<void>;
+export type deleteNotes = (uid: Uid, reviewIndex: number) => Promise<void>;
 
 export default useApplicant;

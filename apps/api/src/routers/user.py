@@ -1,12 +1,20 @@
 from datetime import datetime, timezone
 from logging import getLogger
-from typing import Annotated, Union
+from typing import Annotated, Any, Union
 from urllib.parse import urlencode
 
-from fastapi import APIRouter, Depends, Form, Header, HTTPException, Request, status
-from fastapi.datastructures import URL
+from fastapi import (
+    APIRouter,
+    Depends,
+    Form,
+    Header,
+    HTTPException,
+    Request,
+    status,
+)
+from fastapi.datastructures import URL, FormData
 from fastapi.responses import RedirectResponse
-from pydantic import BaseModel, EmailStr, TypeAdapter
+from pydantic import BaseModel, EmailStr, TypeAdapter, ValidationError
 
 from auth import user_identity
 from auth.authorization import require_accepted_applicant
@@ -14,9 +22,14 @@ from auth.user_identity import User, require_user_identity, use_user_identity
 from models.ApplicationData import (
     FIELDS_SUPPORTING_OTHER,
     ProcessedApplicationDataUnion,
+    ProcessedZotHacksHackerApplicationData,
     RawHackerApplicationData,
     RawMentorApplicationData,
     RawVolunteerApplicationData,
+    RawZotHacksHackerApplicationData,
+    RawZotHacksMentorApplicationData,
+    get_raw_hacker_discriminator_value,
+    get_raw_mentor_discriminator_value,
 )
 from models.user_record import Applicant, BareApplicant, Role, Status
 from services import docusign_handler, mongodb_handler
@@ -28,7 +41,13 @@ log = getLogger(__name__)
 
 router = APIRouter()
 
-DEADLINE = datetime(2025, 1, 13, 8, 1, tzinfo=timezone.utc)
+DEADLINE = datetime(2025, 10, 28, 8, 1, tzinfo=timezone.utc)
+
+HACKATHON_EXPERIENCE_SCORE_MAP = {
+    "first_time": 5,
+    "some_experience": 0,
+    "veteran": -1000,
+}
 
 
 class IdentityResponse(BaseModel):
@@ -48,7 +67,7 @@ async def login(
     log.info("%s requested to log in", email)
     query = urlencode({"return_to": return_to})
 
-    if user_identity.uci_email(email):
+    if user_identity.uci_email(email) and user_identity.UCI_SSO_ENABLED:
         # redirect user for UCI SSO, changing to GET method
         return RedirectResponse(
             URL(path="/api/saml/login", query=query), status.HTTP_303_SEE_OTHER
@@ -70,7 +89,7 @@ async def logout() -> RedirectResponse:
 
 @router.get("/me")
 async def me(
-    user: Annotated[Union[User, None], Depends(use_user_identity)]
+    user: Annotated[Union[User, None], Depends(use_user_identity)],
 ) -> IdentityResponse:
     log.info(user)
     if not user:
@@ -88,22 +107,50 @@ async def me(
 @router.post("/apply", status_code=status.HTTP_201_CREATED)
 async def apply(
     user: Annotated[User, Depends(require_user_identity)],
-    # media type should be automatically detected but seems like a bug as of now
-    raw_application_data: Annotated[
-        RawHackerApplicationData, Form(media_type="multipart/form-data")
-    ],
+    request: Request,
 ) -> str:
+    form = await request.form()
+    data = _parsed_form(form)
+
+    discriminator = get_raw_hacker_discriminator_value(data)
+    raw_application_data: Union[
+        RawHackerApplicationData, RawZotHacksHackerApplicationData
+    ]
+    try:
+        if discriminator == "hacker":
+            raw_application_data = RawHackerApplicationData.model_validate(data)
+        elif discriminator == "zothacks_hacker":
+            raw_application_data = RawZotHacksHackerApplicationData.model_validate(data)
+        else:
+            raise ValueError("Cannot determine hacker application type")
+    except ValidationError as e:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, str(e))
+
     return await _apply_flow(user, raw_application_data)
 
 
 @router.post("/mentor", status_code=status.HTTP_201_CREATED)
 async def mentor(
-    user: Annotated[User, Depends(require_user_identity)],
-    # media type should be automatically detected but seems like a bug as of now
-    raw_application_data: Annotated[
-        RawMentorApplicationData, Form(media_type="multipart/form-data")
-    ],
+    user: Annotated[User, Depends(require_user_identity)], request: Request
 ) -> str:
+    form = await request.form()
+    data = _parsed_form(form)
+
+    # Manually determine model to use
+    discriminator = get_raw_mentor_discriminator_value(data)
+    raw_application_data: Union[
+        RawMentorApplicationData, RawZotHacksMentorApplicationData
+    ]
+    try:
+        if discriminator == "mentor":
+            raw_application_data = RawMentorApplicationData.model_validate(data)
+        elif discriminator == "zothacks_mentor":
+            raw_application_data = RawZotHacksMentorApplicationData.model_validate(data)
+        else:
+            raise ValueError("Cannot determine mentor application type")
+    except ValidationError as e:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, str(e))
+
     return await _apply_flow(user, raw_application_data)
 
 
@@ -118,7 +165,11 @@ async def volunteer(
 async def _apply_flow(
     user: User,
     raw_application_data: Union[
-        RawHackerApplicationData, RawMentorApplicationData, RawVolunteerApplicationData
+        RawHackerApplicationData,
+        RawMentorApplicationData,
+        RawVolunteerApplicationData,
+        RawZotHacksHackerApplicationData,
+        RawZotHacksMentorApplicationData,
     ],
 ) -> str:
     """Common flow for all three types of applications."""
@@ -158,7 +209,12 @@ async def _apply_flow(
             resume_url = await resume_handler.upload_resume(
                 # TODO: reexamine why adapter is needed
                 TypeAdapter(
-                    Union[RawHackerApplicationData, RawMentorApplicationData]
+                    Union[
+                        RawHackerApplicationData,
+                        RawMentorApplicationData,
+                        RawZotHacksHackerApplicationData,
+                        RawZotHacksMentorApplicationData,
+                    ]
                 ).validate_python(raw_application_data),
                 resume,
             )
@@ -191,6 +247,8 @@ async def _apply_flow(
             "submission_time": now,
         }
     )
+
+    _add_auto_scores_if_any(processed_application_data)
 
     applicant = Applicant(
         uid=user.uid,
@@ -225,14 +283,14 @@ async def _apply_flow(
 
     log.info("%s submitted an application", user.uid)
     return (
-        "Thank you for submitting an application to IrvineHacks 2025! Please "
-        + "visit https://irvinehacks.com/portal to see your application status."
+        "Thank you for submitting an application to ZotHacks 2025! Please "
+        + "visit https://zothacks.com/portal to see your application status."
     )
 
 
 @router.get("/waiver")
 async def request_waiver(
-    user: Annotated[tuple[User, BareApplicant], Depends(require_accepted_applicant)]
+    user: Annotated[tuple[User, BareApplicant], Depends(require_accepted_applicant)],
 ) -> RedirectResponse:
     """Request to sign the participant waiver through DocuSign."""
     # TODO: non-applicants might also want to request a waiver
@@ -277,7 +335,7 @@ async def waiver_webhook(
 
 @router.post("/rsvp")
 async def rsvp(
-    user: Annotated[User, Depends(require_user_identity)]
+    user: Annotated[User, Depends(require_user_identity)],
 ) -> RedirectResponse:
     """Change user status for RSVP"""
     user_record = await mongodb_handler.retrieve_one(
@@ -309,3 +367,59 @@ async def rsvp(
     log.info(f"User {user.uid} changed status from {old_status} to {new_status}.")
 
     return RedirectResponse("/portal", status.HTTP_303_SEE_OTHER)
+
+
+def _parsed_form(form: FormData) -> dict[str, Any]:
+    """Manually parse form data.
+    This function combines repeated keys into lists
+
+    Normally, FastAPI will automatically parse the same key into a list
+    ex. ...skills=Java&skills=C&skills=C++ will be parsed as ["Java", "C", "C++"]
+
+    This function is needed for the mentor application form because
+    discriminated unions don't work with FastAPI's Annotated Form()
+    """
+
+    # Fields that should always be lists, even with single values
+    MULTI_SELECT_FIELDS = {
+        "pronouns",
+        "experienced_technologies",
+        "dietary_restrictions",
+        "skills",
+        "friday_availability",
+        "saturday_availability",
+        "sunday_availability",
+    }
+
+    data: dict[str, Any] = {}
+    for k, v in form.multi_items():
+        if k in data:
+            if isinstance(data[k], list):
+                data[k].append(v)
+            else:
+                data[k] = [data[k], v]
+        else:
+            data[k] = v
+
+    # Ensure multi-select fields are always lists
+    for field in MULTI_SELECT_FIELDS:
+        if field in data and not isinstance(data[field], list):
+            data[field] = [data[field]]
+
+    return data
+
+
+def _add_auto_scores_if_any(
+    processed_application_data: ProcessedApplicationDataUnion,
+) -> None:
+    if not isinstance(
+        processed_application_data, ProcessedZotHacksHackerApplicationData
+    ):
+        return
+
+    # Only hackathon_experience is auto-scored for now
+    processed_application_data.global_field_scores = {
+        "hackathon_experience": HACKATHON_EXPERIENCE_SCORE_MAP[
+            processed_application_data.hackathon_experience
+        ]
+    }

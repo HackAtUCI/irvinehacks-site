@@ -31,16 +31,15 @@ interface ApplicantFiltersProps {
 }
 
 const StatusIcons: Record<Status, IconProps.Name> = {
-	[ReviewStatus.pending]: "status-pending",
-	[ReviewStatus.reviewed]: "status-in-progress",
-	[ReviewStatus.released]: "status-positive",
-	[Decision.accepted]: "status-positive",
-	[Decision.rejected]: "status-pending",
-	[Decision.waitlisted]: "status-negative",
-	[PostAcceptedStatus.signed]: "status-in-progress",
-	[PostAcceptedStatus.confirmed]: "status-positive",
-	[PostAcceptedStatus.attending]: "status-positive",
-	[PostAcceptedStatus.void]: "status-negative",
+	[ReviewStatus.Pending]: "status-pending",
+	[ReviewStatus.Reviewed]: "status-in-progress",
+	[Decision.Accepted]: "status-positive",
+	[Decision.Rejected]: "status-pending",
+	[Decision.Waitlisted]: "status-negative",
+	[PostAcceptedStatus.Signed]: "status-in-progress",
+	[PostAcceptedStatus.Confirmed]: "status-positive",
+	[PostAcceptedStatus.Attending]: "status-positive",
+	[PostAcceptedStatus.Void]: "status-negative",
 };
 
 const statusOption = (status: Status): MultiselectProps.Option => ({
@@ -49,7 +48,22 @@ const statusOption = (status: Status): MultiselectProps.Option => ({
 	iconName: StatusIcons[status],
 });
 
-const STATUS_OPTIONS = Object.values(ReviewStatus).map(statusOption);
+const RESUME_REVIEW_OPTIONS: Options = [
+	{
+		label: "Resume Reviewed",
+		value: "RESUME_REVIEWED",
+		iconName: "status-positive",
+	},
+	{
+		label: "Resume Not Reviewed",
+		value: "RESUME_NOT_REVIEWED",
+		iconName: "status-pending",
+	},
+];
+
+const STATUS_OPTIONS = Object.values(ReviewStatus)
+	.map(statusOption)
+	.concat(RESUME_REVIEW_OPTIONS);
 
 const DECISION_OPTIONS = Object.values(Decision).map(statusOption);
 

@@ -3,7 +3,7 @@ import TextContent from "@cloudscape-design/components/text-content";
 
 import {
 	HackerApplicationData,
-	HackerApplicationQuestion,
+	ZotHacksHackerApplicationData,
 } from "@/lib/admin/useApplicant";
 
 interface ApplicationResponseProps {
@@ -14,6 +14,13 @@ const titleCase = (str: string) =>
 	str.charAt(0).toUpperCase() + str.substring(1);
 
 const formatQuestion = (q: string) => q.split("_").map(titleCase).join(" ");
+
+// Map of hackathon experience values to labels
+const HACKATHON_EXPERIENCE_LABELS: Record<string, string> = {
+	first_time: "First Time",
+	some_experience: "Some Experience",
+	veteran: "Veteran",
+};
 
 function ApplicationResponse({ value }: ApplicationResponseProps) {
 	if (value === null) {
@@ -33,6 +40,17 @@ function ApplicationResponse({ value }: ApplicationResponseProps) {
 					</p>
 				);
 			}
+			if (value in HACKATHON_EXPERIENCE_LABELS) {
+				return (
+					<p>
+						{
+							HACKATHON_EXPERIENCE_LABELS[
+								value as keyof typeof HACKATHON_EXPERIENCE_LABELS
+							]
+						}
+					</p>
+				);
+			}
 			return <p>{value}</p>;
 		case "object":
 			return (
@@ -47,17 +65,14 @@ function ApplicationResponse({ value }: ApplicationResponseProps) {
 	}
 }
 
-interface ApplicationSectionProps {
-	title: string;
-	data: Omit<HackerApplicationData, "reviews">;
-	propsToShow: HackerApplicationQuestion[];
-}
+type BaseData =
+	| Omit<HackerApplicationData, "reviews">
+	| Omit<ZotHacksHackerApplicationData, "reviews">;
 
-function HackerApplicationSection({
-	title,
-	data,
-	propsToShow,
-}: ApplicationSectionProps) {
+function HackerApplicationSection<
+	T extends BaseData,
+	K extends keyof T & string,
+>({ title, data, propsToShow }: { title: string; data: T; propsToShow: K[] }) {
 	return (
 		<TextContent>
 			<h3>{title}</h3>
@@ -67,8 +82,10 @@ function HackerApplicationSection({
 			>
 				{propsToShow.map((prop) => (
 					<div key={prop}>
-						<h4>{formatQuestion(prop)}</h4>
-						<ApplicationResponse value={data[prop]} />
+						<h4>{formatQuestion(prop as string)}</h4>
+						<ApplicationResponse
+							value={data[prop] as string | boolean | string[] | null}
+						/>
 					</div>
 				))}
 			</ColumnLayout>

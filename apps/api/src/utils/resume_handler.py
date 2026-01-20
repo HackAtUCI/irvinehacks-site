@@ -2,7 +2,6 @@ import hashlib
 import os
 from logging import getLogger
 from typing import Protocol, Literal
-from typing_extensions import assert_never
 
 from aiogoogle import HTTPError
 from fastapi import UploadFile
@@ -10,11 +9,27 @@ from pydantic import HttpUrl
 
 from services import gdrive_handler
 
+from utils.hackathon_context import hackathon_name_ctx, HackathonName
+
 log = getLogger(__name__)
 
-HACKER_RESUMES_FOLDER_ID = os.getenv("HACKER_RESUMES_FOLDER_ID")
-MENTOR_RESUMES_FOLDER_ID = os.getenv("MENTOR_RESUMES_FOLDER_ID")
-SIZE_LIMIT = 500_000
+IRVINEHACKS_HACKER_RESUMES_FOLDER_ID = os.getenv("IRVINEHACKS_HACKER_RESUMES_FOLDER_ID")
+IRVINEHACKS_MENTOR_RESUMES_FOLDER_ID = os.getenv("IRVINEHACKS_MENTOR_RESUMES_FOLDER_ID")
+ZOTHACKS_HACKER_RESUMES_FOLDER_ID = os.getenv("ZOTHACKS_HACKER_RESUMES_FOLDER_ID")
+ZOTHACKS_MENTOR_RESUMES_FOLDER_ID = os.getenv("ZOTHACKS_MENTOR_RESUMES_FOLDER_ID")
+
+FOLDER_MAP = {
+    HackathonName.IRVINEHACKS: {
+        "Hacker": IRVINEHACKS_HACKER_RESUMES_FOLDER_ID,
+        "Mentor": IRVINEHACKS_MENTOR_RESUMES_FOLDER_ID,
+    },
+    HackathonName.ZOTHACKS: {
+        "Hacker": ZOTHACKS_HACKER_RESUMES_FOLDER_ID,
+        "Mentor": ZOTHACKS_MENTOR_RESUMES_FOLDER_ID,
+    },
+}
+
+SIZE_LIMIT = 1 * 1024 * 1024  # 1MB
 ACCEPTED_TYPES = ("application/pdf",)
 
 
@@ -28,14 +43,8 @@ async def upload_resume(person: Person, resume_upload: UploadFile) -> HttpUrl:
     """Upload resume file to Google Drive and provide url to uploaded file.
     Reject files larger than size limit"""
 
-    RESUME_FOLDER_ID = None
-    if person.application_type == "Hacker":
-        RESUME_FOLDER_ID = HACKER_RESUMES_FOLDER_ID
-    elif person.application_type == "Mentor":
-        RESUME_FOLDER_ID = MENTOR_RESUMES_FOLDER_ID
-    else:
-        assert_never(person.application_type)
-
+    hackathon_name = hackathon_name_ctx.get()
+    RESUME_FOLDER_ID = FOLDER_MAP[hackathon_name][person.application_type]
     if not RESUME_FOLDER_ID:
         raise RuntimeError("RESUMES_FOLDER_ID is not defined")
 

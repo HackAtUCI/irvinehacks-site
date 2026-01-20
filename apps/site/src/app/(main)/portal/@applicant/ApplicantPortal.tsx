@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 
 import useUserIdentity from "@/lib/utils/useUserIdentity";
+import { Status } from "@/lib/userRecord";
 
 import ConfirmAttendance from "./components/ConfirmAttendance";
 import Message from "./components/Message";
@@ -11,20 +12,6 @@ import ReturnHome from "./components/ReturnHome";
 import VerticalTimeline from "./components/timeline/VerticalTimeline";
 import BackgroundStars from "./components/BackgroundStars";
 import QRCodeComponent from "./components/QRCode";
-
-// TODO: use common Status enum from userRecord.ts
-
-export const enum PortalStatus {
-	pending = "PENDING_REVIEW",
-	reviewed = "REVIEWED",
-	accepted = "ACCEPTED",
-	rejected = "REJECTED",
-	waitlisted = "WAITLISTED",
-	waived = "WAIVER_SIGNED",
-	confirmed = "CONFIRMED",
-	attending = "ATTENDING",
-	void = "VOID",
-}
 
 const rolesArray = ["Mentor", "Hacker", "Volunteer"];
 
@@ -46,12 +33,12 @@ function Portal() {
 	);
 
 	const submittedWaiver =
-		status === PortalStatus.waived ||
-		status === PortalStatus.confirmed ||
-		status === PortalStatus.attending;
+		status === Status.Signed ||
+		status === Status.Confirmed ||
+		status === Status.Attending;
 
-	const needsToSignWaiver = status === PortalStatus.accepted;
-	const rejected = status === PortalStatus.rejected;
+	const needsToSignWaiver = status === Status.Accepted;
+	const rejected = status === Status.Rejected;
 
 	return (
 		<div className="relative">
@@ -68,12 +55,10 @@ function Portal() {
 				<h2 className="font-bold font-display text-[var(--color-white)] mb-4 md:mb-[42px] text-[15px] sm:text-2xl md:text-[40px] md:leading-10">
 					{roleToDisplay} Application Status
 				</h2>
-				<VerticalTimeline status={status as PortalStatus} />
-				<Message status={status as PortalStatus} />
+				<VerticalTimeline status={status as Status} />
+				<Message status={status as Status} />
 				{needsToSignWaiver && <SignWaiver />}
-				{submittedWaiver && (
-					<ConfirmAttendance status={status as PortalStatus} />
-				)}
+				{submittedWaiver && <ConfirmAttendance status={status as Status} />}
 				{rejected && <ReturnHome />}
 			</div>
 			<BackgroundStars className="right-[-15%] bottom-[21%]" />

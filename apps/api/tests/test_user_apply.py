@@ -1,3 +1,5 @@
+import copy
+import json
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, Mock, patch
 
@@ -7,14 +9,21 @@ from fastapi import FastAPI
 from pydantic import HttpUrl
 
 from auth.user_identity import NativeUser, UserTestClient
-from models.ApplicationData import ProcessedHackerApplicationData
+from models.ApplicationData import (
+    ProcessedHackerApplicationData,
+    ProcessedZotHacksHackerApplicationData,
+)
+
 from models.user_record import Applicant, Status, Role
 from routers import user
 from services.mongodb_handler import Collection
 from utils import resume_handler
 
+from utils.hackathon_context import HackathonName
+from middleware.hackathon_context_middleware import HackathonContextMiddleware
+
 # Tests will break again next year, tech should notice and fix :P
-TEST_DEADLINE = datetime(2025, 10, 1, 8, 0, 0, tzinfo=timezone.utc)
+TEST_DEADLINE = datetime(2026, 10, 1, 8, 0, 0, tzinfo=timezone.utc)
 user.DEADLINE = TEST_DEADLINE
 
 USER_EMAIL = "pkfire@uci.edu"
@@ -43,11 +52,30 @@ SAMPLE_APPLICATION = {
     "email": "pkfire@uci.edu",
 }
 
+SAMPLE_ZOTHACKS_HACKER_APPLICATION = {
+    "first_name": "pk",
+    "last_name": "fire",
+    "pronouns": ["pk"],
+    "is_18_older": "false",
+    "school_year": "2nd Year",
+    "dietary_restrictions": ["No pork"],
+    "allergies": "s",
+    "major": "Computer Science",
+    "hackathon_experience": "veteran",
+    "elevator_pitch_saq": "s",
+    "tech_experience_saq": "ss",
+    "learn_about_self_saq": "s",
+    "pixel_art_saq": "sss",
+    "pixel_art_data": json.dumps([0] * 64),
+    "comments": "a",
+    "application_type": "Hacker",
+}
+
 
 SAMPLE_RESUME = ("my-resume.pdf", b"resume", "application/pdf")
 SAMPLE_FILES = {"resume": SAMPLE_RESUME}
 BAD_RESUME = ("bad-resume.doc", b"resume", "application/msword")
-LARGE_RESUME = ("large-resume.pdf", b"resume" * 100_000, "application/pdf")
+LARGE_RESUME = ("large-resume.pdf", b"resume" * 2_000_000, "application/pdf")
 # The browser will send an empty file if not selected
 EMPTY_RESUME = (
     "",
@@ -76,6 +104,18 @@ EXPECTED_APPLICATION_DATA_WITHOUT_RESUME = ProcessedHackerApplicationData(
     verdict_time=SAMPLE_VERDICT_TIME,
 )
 
+EXPECTED_GLOBAL_FIELD_SCORES = {"hackathon_experience": -1000}
+
+EXPECTED_ZOTHACKS_HACKER_APPLICATION_DATA = ProcessedZotHacksHackerApplicationData(
+    **SAMPLE_ZOTHACKS_HACKER_APPLICATION,  # type: ignore[arg-type]
+    resume_url=SAMPLE_RESUME_URL,
+    submission_time=SAMPLE_SUBMISSION_TIME,
+    reviews=[],
+    review_breakdown={},
+    global_field_scores=EXPECTED_GLOBAL_FIELD_SCORES,
+    email=USER_EMAIL,
+)
+
 EXPECTED_USER = Applicant(
     uid="edu.uci.pkfire",
     first_name="pk",
@@ -94,12 +134,33 @@ EXPECTED_USER_WITHOUT_RESUME = Applicant(
     application_data=EXPECTED_APPLICATION_DATA_WITHOUT_RESUME,
 )
 
-resume_handler.HACKER_RESUMES_FOLDER_ID = "HACKER_RESUMES_FOLDER_ID"
+EXPECTED_ZOTHACKS_HACKER_USER = Applicant(
+    uid="edu.uci.pkfire",
+    first_name="pk",
+    last_name="fire",
+    roles=(Role.APPLICANT, Role.HACKER),
+    status=Status.PENDING_REVIEW,
+    application_data=EXPECTED_ZOTHACKS_HACKER_APPLICATION_DATA,
+)
+
+
+resume_handler.FOLDER_MAP = {
+    HackathonName.IRVINEHACKS: {
+        "Hacker": "HACKER_RESUMES_FOLDER_ID",
+        "Mentor": "MENTOR_RESUMES_FOLDER_ID",
+    },
+    HackathonName.ZOTHACKS: {
+        "Hacker": "HACKER_RESUMES_FOLDER_ID",
+        "Mentor": "MENTOR_RESUMES_FOLDER_ID",
+    },
+}
 
 app = FastAPI()
 app.include_router(user.router)
+app.add_middleware(HackathonContextMiddleware)
 
 client = UserTestClient(USER_PKFIRE, app)
+client.headers.update({"X-Hackathon-Name": HackathonName.IRVINEHACKS})
 
 
 @patch("utils.email_handler.send_application_confirmation_email", autospec=True)
@@ -124,7 +185,8 @@ def test_apply_successfully(
     res = client.post("/apply", data=SAMPLE_APPLICATION, files=SAMPLE_FILES)
 
     mock_gdrive_handler_upload_file.assert_awaited_once_with(
-        resume_handler.HACKER_RESUMES_FOLDER_ID, *EXPECTED_RESUME_UPLOAD
+        resume_handler.FOLDER_MAP[HackathonName.IRVINEHACKS]["Hacker"],
+        *EXPECTED_RESUME_UPLOAD,
     )
     mock_mongodb_handler_update_one.assert_awaited_once_with(
         Collection.USERS,
@@ -138,12 +200,51 @@ def test_apply_successfully(
     assert res.status_code == 201
 
 
+@patch("utils.email_handler.send_application_confirmation_email", autospec=True)
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("routers.user._is_past_deadline", autospec=True)
+@patch("routers.user.datetime", autospec=True)
+@patch("services.gdrive_handler.upload_file", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_zothacks_hacker_apply_successfully(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_gdrive_handler_upload_file: AsyncMock,
+    mock_datetime: Mock,
+    mock_is_past_deadline: Mock,
+    mock_mongodb_handler_update_one: AsyncMock,
+    mock_send_application_confirmation_email: AsyncMock,
+) -> None:
+    """Test that a valid application is submitted properly."""
+    mock_mongodb_handler_retrieve_one.return_value = None
+    mock_gdrive_handler_upload_file.return_value = SAMPLE_RESUME_URL
+    mock_datetime.now.return_value = SAMPLE_SUBMISSION_TIME
+    mock_is_past_deadline.return_value = False
+    res = client.post(
+        "/apply", data=SAMPLE_ZOTHACKS_HACKER_APPLICATION, files=SAMPLE_FILES
+    )
+
+    mock_gdrive_handler_upload_file.assert_awaited_once_with(
+        resume_handler.FOLDER_MAP[HackathonName.ZOTHACKS]["Hacker"],
+        *EXPECTED_RESUME_UPLOAD,
+    )
+    mock_mongodb_handler_update_one.assert_awaited_once_with(
+        Collection.USERS,
+        {"_id": EXPECTED_ZOTHACKS_HACKER_USER.uid},
+        EXPECTED_ZOTHACKS_HACKER_USER.model_dump(),
+        upsert=True,
+    )
+    mock_send_application_confirmation_email.assert_awaited_once_with(
+        USER_EMAIL, EXPECTED_ZOTHACKS_HACKER_USER, Role.HACKER
+    )
+    assert res.status_code == 201
+
+
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 def test_apply_with_invalid_data_causes_422(
     mock_mongodb_handler_retrieve_one: AsyncMock,
 ) -> None:
     """Test that applying with invalid data is unprocessable."""
-    bad_application = SAMPLE_APPLICATION.copy()
+    bad_application = copy.deepcopy(SAMPLE_APPLICATION)
     bad_application["is_18_older"] = "maybe"
     res = client.post("/apply", data=bad_application, files=SAMPLE_FILES)
 
@@ -156,7 +257,7 @@ def test_apply_with_invalid_application_type_causes_422(
     mock_mongodb_handler_retrieve_one: AsyncMock,
 ) -> None:
     """Test that applying with invalid data is unprocessable."""
-    bad_application = SAMPLE_APPLICATION.copy()
+    bad_application = copy.deepcopy(SAMPLE_APPLICATION)
     bad_application["application_type"] = "NotValid"
     res = client.post("/apply", data=bad_application, files=SAMPLE_FILES)
 
@@ -311,7 +412,7 @@ def test_application_data_with_other_throws_422(
     mock_mongodb_handler_retrieve_one: AsyncMock,
 ) -> None:
     mock_mongodb_handler_retrieve_one.return_value = None
-    contains_other = SAMPLE_APPLICATION.copy()
+    contains_other = copy.deepcopy(SAMPLE_APPLICATION)
     contains_other["pronouns"].append("other")  # type: ignore[attr-defined]
     res = client.post("/apply", data=contains_other, files=SAMPLE_FILES)
     assert res.status_code == 422

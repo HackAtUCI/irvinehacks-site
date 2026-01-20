@@ -3,7 +3,7 @@ import { deskTool } from "sanity/desk";
 import { visionTool } from "@sanity/vision";
 import { colorInput } from "@sanity/color-input";
 import { schemaTypes } from "./schemas";
-import { ListOrdered, Folders, Globe } from "lucide-react";
+import { ListOrdered, Folders, Globe, Newspaper } from "lucide-react";
 
 export default defineConfig({
 	name: "default",
@@ -24,7 +24,8 @@ export default defineConfig({
 									"resourceCategoryOrder",
 									"resourceCategory",
 									"resource",
-								].includes(listItem.getId()!)
+									"zothacksScoringGuidelines",
+								].includes(listItem.getId()!),
 						),
 						S.divider(),
 						S.listItem()
@@ -34,20 +35,29 @@ export default defineConfig({
 								S.document()
 									.schemaType("resourceCategoryOrder")
 									.documentId("resourceCategoryOrder")
-									.title("Resource Categories Order")
+									.title("Resource Categories Order"),
 							),
 						S.listItem()
 							.title("Resource Categories")
 							.icon(Folders)
 							.child(
 								S.documentTypeList("resourceCategory").title(
-									"Resource Categories"
-								)
+									"Resource Categories",
+								),
 							),
 						S.listItem()
 							.title("Resources")
 							.icon(Globe)
 							.child(S.documentTypeList("resource").title("Resources")),
+						S.divider(),
+						S.listItem()
+							.title("Zothacks Scoring Guidelines")
+							.icon(Newspaper)
+							.child(
+								S.documentTypeList("zothacksScoringGuidelines").title(
+									"Zothacks Scoring Guidelines",
+								),
+							),
 					]),
 		}),
 		visionTool(),

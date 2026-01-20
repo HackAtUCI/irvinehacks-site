@@ -1,3 +1,4 @@
+import copy
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, Mock, patch
 
@@ -14,7 +15,7 @@ from services.mongodb_handler import Collection
 from utils import resume_handler
 
 # Tests will break again next year, tech should notice and fix :P
-TEST_DEADLINE = datetime(2025, 10, 1, 8, 0, 0, tzinfo=timezone.utc)
+TEST_DEADLINE = datetime(2026, 10, 1, 8, 0, 0, tzinfo=timezone.utc)
 user.DEADLINE = TEST_DEADLINE
 
 USER_EMAIL = "pkfire@uci.edu"
@@ -53,7 +54,7 @@ SAMPLE_APPLICATION = {
 SAMPLE_RESUME = ("my-resume.pdf", b"resume", "application/pdf")
 SAMPLE_FILES = {"resume": SAMPLE_RESUME}
 BAD_RESUME = ("bad-resume.doc", b"resume", "application/msword")
-LARGE_RESUME = ("large-resume.pdf", b"resume" * 100_000, "application/pdf")
+LARGE_RESUME = ("large-resume.pdf", b"resume" * 2_000_000, "application/pdf")
 
 EXPECTED_RESUME_UPLOAD = ("pk-fire-69f2afc2.pdf", b"resume", "application/pdf")
 SAMPLE_RESUME_URL = HttpUrl("https://drive.google.com/file/d/...")
@@ -78,7 +79,7 @@ EXPECTED_USER = Applicant(
     status=Status.PENDING_REVIEW,
 )
 
-resume_handler.MENTOR_RESUMES_FOLDER_ID = "MENTOR_RESUMES_FOLDER_ID"
+resume_handler.IRVINEHACKS_MENTOR_RESUMES_FOLDER_ID = "MENTOR_RESUMES_FOLDER_ID"
 
 app = FastAPI()
 app.include_router(user.router)
@@ -108,7 +109,7 @@ def test_mentor_apply_successfully(
     res = client.post("/mentor", data=SAMPLE_APPLICATION, files=SAMPLE_FILES)
 
     mock_gdrive_handler_upload_file.assert_awaited_once_with(
-        resume_handler.MENTOR_RESUMES_FOLDER_ID, *EXPECTED_RESUME_UPLOAD
+        resume_handler.IRVINEHACKS_MENTOR_RESUMES_FOLDER_ID, *EXPECTED_RESUME_UPLOAD
     )
     mock_mongodb_handler_update_one.assert_awaited_once_with(
         Collection.USERS,
@@ -263,7 +264,7 @@ def test_mentor_application_data_with_other_throws_422(
     mock_mongodb_handler_retrieve_one: AsyncMock,
 ) -> None:
     mock_mongodb_handler_retrieve_one.return_value = None
-    contains_other = SAMPLE_APPLICATION.copy()
+    contains_other = copy.deepcopy(SAMPLE_APPLICATION)
     contains_other["pronouns"].append("other")  # type: ignore[attr-defined]
     res = client.post("/mentor", data=contains_other, files=SAMPLE_FILES)
     assert res.status_code == 422

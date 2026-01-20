@@ -9,9 +9,8 @@ import SideNavigation, {
 import {
 	isApplicationManager,
 	isHackerReviewer,
-	isMentorReviewer,
-	isVolunteerReviewer,
 	isDirector,
+	isLead,
 } from "@/lib/admin/authorization";
 
 import UserContext from "@/lib/admin/UserContext";
@@ -37,24 +36,32 @@ function AdminSidebar() {
 	if (isHackerReviewer(roles)) {
 		applicationLinks.push({
 			type: "link",
-			text: "Hacker Applications",
-			href: "/admin/applicants/hackers",
+			text: "ZotHacks Hacker Applications",
+			href: "/admin/applicants/zothacks-hackers",
 		});
 	}
 
-	if (isMentorReviewer(roles)) {
-		applicationLinks.push({
-			type: "link",
-			text: "Mentor Applications",
-			href: "/admin/applicants/mentors",
-		});
-	}
+	// if (isMentorReviewer(roles)) {
+	// 	applicationLinks.push({
+	// 		type: "link",
+	// 		text: "Mentor Applications",
+	// 		href: "/admin/applicants/mentors",
+	// 	});
+	// }
 
-	if (isVolunteerReviewer(roles)) {
-		applicationLinks.push({
+	// if (isVolunteerReviewer(roles)) {
+	// 	applicationLinks.push({
+	// 		type: "link",
+	// 		text: "Volunteer Applications",
+	// 		href: "/admin/applicants/volunteers",
+	// 	});
+	// }
+
+	if (isLead(roles) || isDirector(roles)) {
+		navigationItems.splice(1, 0, {
 			type: "link",
-			text: "Volunteer Applications",
-			href: "/admin/applicants/volunteers",
+			text: "Scores",
+			href: "/admin/scores",
 		});
 	}
 
@@ -90,7 +97,7 @@ function AdminSidebar() {
 	return (
 		<SideNavigation
 			activeHref={pathname}
-			header={{ href: BASE_PATH, text: "IrvineHacks 2025" }}
+			header={{ href: BASE_PATH, text: "Admin Dashboard" }}
 			onFollow={followWithNextLink}
 			items={navigationItems}
 		/>

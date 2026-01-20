@@ -1,13 +1,17 @@
 from datetime import date, datetime
 from logging import getLogger
-from typing import Annotated, Any, Literal, Mapping, Optional
+from typing import Annotated, Any, Literal, Mapping, Optional, Union
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, TypeAdapter, ValidationError
 from typing_extensions import assert_never
+from pymongo import DESCENDING
 
 from admin import applicant_review_processor, participant_manager, summary_handler
 from admin.participant_manager import Participant
+from admin.score_normalizing_handler import (
+    add_normalized_scores_to_all_hacker_applicants,
+)
 from auth.authorization import require_role
 from auth.user_identity import User, utc_now
 from models.ApplicationData import Decision, Review
@@ -15,6 +19,7 @@ from models.user_record import Applicant, ApplicantStatus, Role
 from services import mongodb_handler
 from services.mongodb_handler import BaseRecord, Collection
 from utils import email_handler
+
 
 log = getLogger(__name__)
 
@@ -30,8 +35,15 @@ require_manager = require_role(
     }
 )
 require_reviewer = require_role(
-    {Role.DIRECTOR, Role.HACKER_REVIEWER, Role.MENTOR_REVIEWER, Role.VOLUNTEER_REVIEWER}
+    {
+        Role.DIRECTOR,
+        Role.LEAD,
+        Role.HACKER_REVIEWER,
+        Role.MENTOR_REVIEWER,
+        Role.VOLUNTEER_REVIEWER,
+    }
 )
+require_lead = require_role({Role.LEAD})
 require_hacker_reviewer = require_role({Role.DIRECTOR, Role.HACKER_REVIEWER})
 require_mentor_reviewer = require_role({Role.DIRECTOR, Role.MENTOR_REVIEWER})
 require_volunteer_reviewer = require_role({Role.DIRECTOR, Role.VOLUNTEER_REVIEWER})
@@ -42,6 +54,15 @@ require_organizer = require_role({Role.ORGANIZER})
 class ApplicationDataSummary(BaseModel):
     school: str
     submission_time: datetime
+
+
+class ZotHacksApplicationDataSummary(BaseModel):
+    school_year: str
+    submission_time: Any
+    normalized_scores: Optional[dict[str, float]] = None
+    extra_points: Optional[float] = None
+    email: str
+    resume_url: str
 
 
 class ApplicantSummary(BaseRecord):
@@ -58,17 +79,46 @@ class HackerApplicantSummary(BaseRecord):
     status: str
     decision: Optional[Decision] = None
     reviewers: list[str] = []
+    resume_reviewed: bool = False
     avg_score: float
-    application_data: ApplicationDataSummary
+    application_data: Union[ApplicationDataSummary, ZotHacksApplicationDataSummary]
 
 
 class ReviewRequest(BaseModel):
     applicant: str
     score: float
+    notes: Optional[str] = None  # notes from reviewer
+
+
+class ZotHacksHackerDetailedScores(BaseModel):
+    resume: Optional[int] = None
+    elevator_pitch_saq: int
+    tech_experience_saq: int
+    learn_about_self_saq: int
+    pixel_art_saq: int
+    hackathon_experience: Optional[int] = None
+
+
+class GlobalScores(BaseModel):
+    resume: int
+    hackathon_experience: int
+
+
+class DetailedReviewRequest(BaseModel):
+    applicant: str
+    scores: Union[GlobalScores, ZotHacksHackerDetailedScores]
+    notes: Optional[str] = None  # Notes from reviewer
+
+
+class DeleteNotesRequest(BaseModel):
+    applicant: str
+    # Index of the review in the applicant's
+    # application_data.reviews array for quick lookup
+    review_index: int
 
 
 async def mentor_volunteer_applicants(
-    application_type: Literal["Mentor", "Volunteer"]
+    application_type: Literal["Mentor", "Volunteer"],
 ) -> list[ApplicantSummary]:
     """Get records of all mentor and volunteer applicants."""
     records: list[dict[str, object]] = await mongodb_handler.retrieve(
@@ -96,7 +146,7 @@ async def mentor_volunteer_applicants(
 
 @router.get("/applicants/mentors")
 async def mentor_applicants(
-    user: Annotated[User, Depends(require_mentor_reviewer)]
+    user: Annotated[User, Depends(require_mentor_reviewer)],
 ) -> list[ApplicantSummary]:
     """Get records of all mentor applicants."""
     log.info("%s requested mentor applicants", user)
@@ -106,7 +156,7 @@ async def mentor_applicants(
 
 @router.get("/applicants/volunteers")
 async def volunteer_applicants(
-    user: Annotated[User, Depends(require_volunteer_reviewer)]
+    user: Annotated[User, Depends(require_volunteer_reviewer)],
 ) -> list[ApplicantSummary]:
     """Get records of all volunteer applicants."""
     log.info("%s requested volunteer applicants", user)
@@ -116,7 +166,7 @@ async def volunteer_applicants(
 
 @router.get("/applicants/hackers")
 async def hacker_applicants(
-    user: Annotated[User, Depends(require_hacker_reviewer)]
+    user: Annotated[User, Depends(require_hacker_reviewer)],
 ) -> list[HackerApplicantSummary]:
     """Get records of all hacker applicants."""
     log.info("%s requested hacker applicants", user)
@@ -129,12 +179,10 @@ async def hacker_applicants(
             "status",
             "first_name",
             "last_name",
-            "application_data.school",
-            "application_data.submission_time",
-            "application_data.reviews",
+            "application_data",
         ],
+        sort=[("application_data.submission_time", DESCENDING)],
     )
-
     thresholds: Optional[dict[str, float]] = await retrieve_thresholds()
 
     if not thresholds:
@@ -142,7 +190,9 @@ async def hacker_applicants(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     for record in records:
-        applicant_review_processor.include_hacker_app_fields(
+        # TODO: If we change back to old avg score for summary, change this function
+        # applicant_review_processor.include_hacker_app_fields
+        applicant_review_processor.include_hacker_app_fields_with_global_and_breakdown(
             record, thresholds["accept"], thresholds["waitlist"]
         )
 
@@ -208,7 +258,7 @@ async def applicant_summary() -> dict[ApplicantStatus, int]:
     dependencies=[Depends(require_manager)],
 )
 async def applications(
-    group_by: Literal["school", "role"]
+    group_by: Literal["school", "role"],
 ) -> dict[str, dict[date, int]]:
     if group_by == "school":
         return await summary_handler.applications_by_school()
@@ -228,9 +278,13 @@ async def submit_review(
         log.error("Invalid review score submitted.")
         raise HTTPException(status.HTTP_400_BAD_REQUEST)
 
-    log.info("%s reviewed hacker %s", reviewer, applicant_review.applicant)
+    review: Review = (
+        utc_now(),
+        reviewer.uid,
+        applicant_review.score,
+        applicant_review.notes,
+    )
 
-    review: Review = (utc_now(), reviewer.uid, applicant_review.score)
     app = applicant_review.applicant
 
     applicant_record = await mongodb_handler.retrieve_one(
@@ -243,7 +297,6 @@ async def submit_review(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     if Role.HACKER in applicant_record["roles"]:
-
         if applicant_review.score < 0 or applicant_review.score > 10:
             log.error("Invalid review score submitted.")
             raise HTTPException(status.HTTP_400_BAD_REQUEST)
@@ -271,14 +324,14 @@ async def submit_review(
             update_query.update({"$set": {"status": "REVIEWED"}})
 
         await _try_update_applicant_with_query(
-            applicant_review,
+            applicant_review.applicant,
             update_query=update_query,
             err_msg=f"{reviewer} could not submit review for {app}",
         )
 
     else:
         await _try_update_applicant_with_query(
-            applicant_review,
+            applicant_review.applicant,
             update_query={
                 "$push": {"application_data.reviews": review},
                 "$set": {"status": "REVIEWED"},
@@ -286,10 +339,90 @@ async def submit_review(
             err_msg=f"{reviewer} could not submit review for {app}",
         )
 
+    log.info("%s reviewed hacker %s", reviewer, applicant_review.applicant)
+
+
+@router.post("/detailed-review")
+async def submit_detailed_review(
+    applicant_review: DetailedReviewRequest,
+    reviewer: User = Depends(require_reviewer),
+) -> None:
+    """Submit a review decision from the reviewer for the given hacker applicant."""
+    if isinstance(applicant_review.scores, GlobalScores):
+        await _handle_global_only_review(
+            applicant_review.applicant, applicant_review.scores, reviewer
+        )
+    elif isinstance(applicant_review.scores, ZotHacksHackerDetailedScores):
+        await _handle_detailed_scores_review(
+            applicant_review.applicant,
+            applicant_review.scores,
+            reviewer,
+            applicant_review.notes,
+        )
+    else:
+        assert_never(applicant_review.scores)
+
+
+@router.delete("/delete-notes")
+async def delete_notes(
+    delete_notes_request: DeleteNotesRequest,
+    reviewer: User = Depends(require_reviewer),
+) -> None:
+    """Delete notes from a review."""
+
+    # Get applicant record
+    applicant_record = await mongodb_handler.retrieve_one(
+        Collection.USERS,
+        {"_id": delete_notes_request.applicant},
+        ["_id", "application_data.reviews", "roles"],
+    )
+
+    # Check if applicant record exists
+    if not applicant_record:
+        log.error(
+            "Could not retrieve applicant while attempting to delete reviewer notes"
+        )
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    # Check if review index is valid and belongs to reviewer
+    reviews = applicant_record.get("application_data", {}).get("reviews", [])
+    if (
+        not (0 <= delete_notes_request.review_index < len(reviews))
+        or reviews[delete_notes_request.review_index][1] != reviewer.uid
+    ):
+        log.error("Invalid review index or reviewer submitted.")
+        raise HTTPException(status.HTTP_403_FORBIDDEN)
+
+    # Update query to set the note to be deleted to null
+    # The note index is 3 because the review is a tuple
+    # with the date, reviewer, score, and note fields
+    update_query = {
+        "$set": {
+            f"application_data.reviews.{delete_notes_request.review_index}.3": None
+        }
+    }
+
+    # Update review in applicant record to set note to null
+    await _try_update_applicant_with_query(
+        delete_notes_request.applicant,
+        update_query=update_query,
+        err_msg=f"""
+            {reviewer} could not delete notes from review
+            {delete_notes_request.review_index} for
+            {delete_notes_request.applicant}
+        """,
+    )
+
+    log.info(
+        "%s deleted notes from review %d for %s",
+        reviewer,
+        delete_notes_request.applicant,
+    )
+
 
 @router.get("/get-thresholds")
 async def get_hacker_score_thresholds(
-    user: Annotated[User, Depends(require_manager)]
+    user: Annotated[User, Depends(require_manager)],
 ) -> Optional[dict[str, Any]]:
     """
     Gets accepted and waitlisted thresholds
@@ -388,24 +521,152 @@ async def subevent_checkin(
     await participant_manager.subevent_checkin(event, uid, organizer)
 
 
+@router.get(
+    "/normalize-detailed-scores",
+    dependencies=[Depends(require_role({Role.DIRECTOR, Role.LEAD}))],
+)
+async def normalize_detailed_scores_for_all_hacker_apps() -> None:
+    try:
+        await add_normalized_scores_to_all_hacker_applicants()
+    except RuntimeError:
+        log.error("Could not update/add normalized scores to hacker applicants")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 async def retrieve_thresholds() -> Optional[dict[str, Any]]:
     return await mongodb_handler.retrieve_one(
         Collection.SETTINGS, {"_id": "hacker_score_thresholds"}, ["accept", "waitlist"]
     )
 
 
+async def _handle_global_only_review(
+    applicant: str, scores: GlobalScores, reviewer: User
+) -> None:
+    """Handle resume-only review submission."""
+    # Check if user has LEAD role for resume-only reviews
+    await require_lead(reviewer)
+
+    # Update the user record with global field scores
+    await mongodb_handler.update_one(
+        Collection.USERS,
+        {"_id": applicant},
+        {"application_data.global_field_scores": scores.model_dump()},
+        upsert=True,
+    )
+
+
+async def _handle_detailed_scores_review(
+    applicant: str,
+    scores: ZotHacksHackerDetailedScores,
+    reviewer: User,
+    notes: Optional[str] = None,
+) -> None:
+    """Handle detailed scores review submission."""
+    score_breakdown = scores.model_dump(exclude_none=True)
+    total_score = max(sum(score_breakdown.get(k, 0) for k in scores.model_fields), -3)
+
+    if total_score < -3 or total_score > 100:
+        log.error("Invalid review score submitted.")
+        raise HTTPException(status.HTTP_400_BAD_REQUEST)
+
+    review: Review = (utc_now(), reviewer.uid, total_score, notes)
+
+    applicant_record = await mongodb_handler.retrieve_one(
+        Collection.USERS,
+        {"_id": applicant},
+        [
+            "_id",
+            "application_data.reviews",
+            "roles",
+        ],
+    )
+    if not applicant_record:
+        log.error("Could not retrieve applicant after submitting review")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    if Role.HACKER in applicant_record["roles"]:
+        unique_reviewers = applicant_review_processor.get_unique_reviewers(
+            applicant_record
+        )
+
+        # Only add a review if there are either less than 2 reviewers
+        # or reviewer is one of the reviewers
+        if len(unique_reviewers) >= 2 and reviewer.uid not in unique_reviewers:
+            log.error(
+                "%s tried to submit a review, but %s already has two reviewers",
+                reviewer,
+                applicant,
+            )
+            raise HTTPException(status.HTTP_403_FORBIDDEN)
+
+        update_query: dict[str, object] = {
+            "$push": {"application_data.reviews": review}
+        }
+        # Because reviewing a hacker requires 2 reviewers, only set the
+        # applicant's status to REVIEWED if there are at least 2 reviewers
+        if len(unique_reviewers | {reviewer.uid}) >= 2:
+            update_query.update({"$set": {"status": "REVIEWED"}})
+
+        await _try_update_applicant_with_query(
+            applicant,
+            update_query=update_query,
+            err_msg=f"{reviewer} could not submit review for {applicant}",
+        )
+    else:
+        await _try_update_applicant_with_query(
+            applicant,
+            update_query={
+                "$push": {"application_data.reviews": review},
+                "$set": {"status": "REVIEWED"},
+            },
+            err_msg=f"{reviewer} could not submit review for {applicant}",
+        )
+
+    uid_no_domain = reviewer.uid.split(".")[-1]
+    await _try_update_applicant_with_query(
+        applicant,
+        update_query={
+            "$set": {
+                f"application_data.review_breakdown.{uid_no_domain}": (score_breakdown)
+            }
+        },
+        err_msg=f"{reviewer} could not submit review for {applicant}",
+    )
+
+    # If user has Lead role, also update global field scores
+    try:
+        await require_lead(reviewer)
+        global_scores = GlobalScores(
+            resume=scores.resume or 0,
+            hackathon_experience=scores.hackathon_experience or 0,
+        )
+        await _handle_global_only_review(applicant, global_scores, reviewer)
+    except HTTPException:
+        # User doesn't have Lead role, skip global field scores update
+        pass
+
+    log.info("%s reviewed hacker %s", reviewer, applicant)
+
+
 async def _try_update_applicant_with_query(
-    applicant_review: ReviewRequest,
+    applicant: str,
     *,
     update_query: Mapping[str, object],
     err_msg: str = "",
 ) -> None:
     try:
-        await mongodb_handler.raw_update_one(
+        modified = await mongodb_handler.raw_update_one(
             Collection.USERS,
-            {"_id": applicant_review.applicant},
+            {"_id": applicant},
             update_query,
         )
+        if not modified:
+            log.warning(
+                f"""
+                Update query did not modify any documents
+                for {applicant}: {update_query}
+                """
+            )
     except RuntimeError:
         log.error(err_msg)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)

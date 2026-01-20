@@ -1,4 +1,5 @@
 import { PropsWithChildren } from "react";
+import Footer from "@/lib/components/Footer/Footer";
 
 import type { Metadata } from "next";
 
@@ -20,6 +21,7 @@ export default function Layout({ children }: PropsWithChildren) {
 			</Suspense> */}
 			{children}
 			{/* <Footer /> */}
+			<Footer />
 		</div>
 	);
 }

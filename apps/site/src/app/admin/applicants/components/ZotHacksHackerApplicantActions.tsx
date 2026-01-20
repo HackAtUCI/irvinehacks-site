@@ -4,7 +4,7 @@ import Box from "@cloudscape-design/components/box";
 import Button from "@cloudscape-design/components/button";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 
-import { Review, submitDetailedReview } from "@/lib/admin/useApplicant";
+import { Review } from "@/lib/admin/useApplicant";
 import { Uid } from "@/lib/userRecord";
 import UserContext from "@/lib/admin/UserContext";
 import { isReviewer } from "@/lib/admin/authorization";
@@ -25,14 +25,20 @@ interface ApplicantActionsProps {
 	applicant: Uid;
 	reviews: Review[];
 	scores: object;
-	submitDetailedReview: submitDetailedReview;
+	notes?: string;
+	onSubmitDetailedReview: (
+		uid: Uid,
+		scores: object,
+		notes: string | null,
+	) => void;
 }
 
 function ZotHacksHackerApplicantActions({
 	applicant,
 	reviews,
 	scores,
-	submitDetailedReview,
+	notes,
+	onSubmitDetailedReview,
 }: ApplicantActionsProps) {
 	const { uid, roles } = useContext(UserContext);
 
@@ -51,7 +57,7 @@ function ZotHacksHackerApplicantActions({
 
 	const handleClick = () => {
 		// TODO: use flashbar or modal for submit status
-		submitDetailedReview(applicant, scores);
+		onSubmitDetailedReview(applicant, scores, notes ?? null);
 	};
 
 	const totalScore = Object.values(scores).reduce(

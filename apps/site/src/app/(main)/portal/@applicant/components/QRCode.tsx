@@ -54,7 +54,7 @@ export default function QRCodeComponent({
 		if (!user) return "";
 
 		if (includeEventInfo) {
-			return `IrvineHacks2025|${user.uid}`;
+			return `IrvineHacks2026|${user.uid}`;
 		} else {
 			return user.uid;
 		}

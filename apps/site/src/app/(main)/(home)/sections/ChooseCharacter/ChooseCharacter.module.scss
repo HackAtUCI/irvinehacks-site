@@ -1,5 +1,63 @@
 $zoom-animation-time: 0.15s;
 
+.applicationNoticeContainer {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	margin-bottom: 2.5rem;
+	padding-left: 2.5rem;
+	padding-right: 2.5rem;
+
+	// Left align the subheader container on desktop
+	@media (min-width: 1024px) {
+		width: fit-content;
+		justify-content: start;
+	}
+}
+
+.applicationBadge {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: fit-content;
+	border: 5px solid var(--color-yellow);
+	border-radius: 0.375rem;
+	padding: 1rem;
+}
+
+.applicationText {
+	font-family: "NicoMoji", sans-serif;
+	margin-bottom: 0;
+	color: #00ffff;
+	font-size: 20px;
+	text-align: center;
+
+	@media (min-width: 768px) {
+		font-size: 1.5rem;
+	}
+
+	@media (min-width: 1024px) {
+		font-size: 1.875rem;
+	}
+}
+
+.applicationDescription {
+	font-family: "Lexend Giga", sans-serif;
+	margin-bottom: 0;
+	color: #00ffff;
+	font-size: 16px;
+	text-align: center;
+
+	@media (min-width: 768px) {
+		font-size: 1.25rem;
+	}
+
+	@media (min-width: 1024px) {
+		font-size: 1.5rem;
+	}
+}
+
 .hoverGroup {
 	.chatBox,
 	.spriteTitle,

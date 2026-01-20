@@ -5,7 +5,7 @@ import { getSchedule } from "./components/getSchedule";
 
 import Image from "next/image";
 
-import illus_bg from "@/assets/backgrounds/schedule-bg-illus-moonless.png";
+import illus_bg from "@/assets/backgrounds/alt_illus_moonless-blur.png";
 
 import ShiftingCountdown from "./components/ShiftingCountdown/ShiftingCountdown";
 import SchedulePage from "./sections/SchedulePage";
@@ -37,7 +37,7 @@ export default async function Schedule() {
 					<Image
 						src={illus_bg}
 						alt="City background"
-						className="absolute bottom-0 left-0 w-full blur-sm"
+						className="absolute bottom-0 left-0 w-full"
 					/>
 				</div>
 				<div className="p-36 relative">

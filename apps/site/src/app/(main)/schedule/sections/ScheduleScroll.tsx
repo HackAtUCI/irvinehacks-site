@@ -61,32 +61,12 @@ export default function ScheduleScroll({
 		}
 	}, [weekdays]);
 
-	function scrollDir(action: string) {
-		const ind = getCurrentDateIndex();
-
-		const nextIndex =
-			action === "left"
-				? (ind + (weekdays.length - 1)) % weekdays.length
-				: (ind + 1) % weekdays.length;
-
-		scrollTo(nextIndex);
-		setSelectedEventDay(weekdays[nextIndex]);
-	}
-
 	return (
 		<div className="w-full flex flex-col items-center select-none gap-20 max-md:gap-5">
 			<div className="w-full flex gap-40 justify-center h-[100px] max-lg:gap-2">
-				<div className="h-full flex items-center max-sm:hidden">
-					<ChevronLeft
-						height={40}
-						width={40}
-						onClick={() => scrollDir("left")}
-						className="cursor-pointer"
-					/>
-				</div>
 				<div
 					className={clsx(
-						"w-[600px] h-full gap-20 font-display overflow-auto relative max-lg:min-w-[400px] max-lg:w-[400px]",
+						"h-full gap-20 font-display overflow-auto relative",
 						styles.background,
 						styles.hideScroll,
 					)}
@@ -117,14 +97,6 @@ export default function ScheduleScroll({
 							);
 						})}
 					</div>
-				</div>
-				<div className="h-full flex items-center max-sm:hidden">
-					<ChevronRight
-						height={40}
-						width={40}
-						onClick={() => scrollDir("right")}
-						className="cursor-pointer"
-					/>
 				</div>
 			</div>
 		</div>

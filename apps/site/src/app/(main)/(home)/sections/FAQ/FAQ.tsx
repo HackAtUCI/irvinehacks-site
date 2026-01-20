@@ -39,9 +39,9 @@ const FAQ = async () => {
 
 				<div className="mt-8">
 					<div className="flex items-stretch gap-4">
-						<div className="bg-[#E5F200] w-12 sm:w-8 flex-shrink-0" />
-						<div className="bg-[#E5F200] text-black font-display text-xl sm:text-2xl md:text-3xl flex items-center px-4 py-3 flex-1">
-							<div className="w-24 sm:w-32">RANK</div>
+						<div className="hidden lg:block bg-yellow w-16 flex-shrink-0" />
+						<div className="bg-yellow text-black font-display text-base sm:text-xl md:text-2xl lg:text-3xl flex items-center px-3 sm:px-4 py-2 sm:py-3 flex-1">
+							<div className="w-16 sm:w-20 lg:w-24 xl:w-32">RANK</div>
 							<div className="flex-1">NAME</div>
 						</div>
 					</div>

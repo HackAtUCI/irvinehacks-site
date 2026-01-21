@@ -28,7 +28,7 @@ export default function CharacterBox({
 			className={`${className} ${styles.hoverGroup} flex flex-col items-center justify-center mb-20 lg:mb-0`}
 		>
 			<Link
-				className="relative w-5/6 h-[300px] flex justify-center items-center"
+				className="relative w-5/6 h-[300px] flex justify-center items-center mb-10"
 				href={href}
 			>
 				<div className={`${clipClass} absolute w-full h-full z-10`} />
@@ -36,8 +36,7 @@ export default function CharacterBox({
 					className={`${styles.sprite} relative object-contain`}
 					src={imageSrc}
 					alt="app sprite"
-					width={500}
-					height={500}
+					width={350}
 				/>
 			</Link>
 

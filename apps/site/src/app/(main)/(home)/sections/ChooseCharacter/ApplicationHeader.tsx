@@ -8,7 +8,7 @@ export default function ApplicationHeader() {
 			<Image
 				src={ApplicationHeaderImage}
 				alt="application header"
-				className="w-20 md:w-32 lg:w-40"
+				className="w-[100px] md:w-[125px] lg:w-[150px]"
 			/>
 			<h2 className="font-display text-center text-[#FF4DEF] text-3xl md:text-4xl lg:text-5xl">
 				Attention

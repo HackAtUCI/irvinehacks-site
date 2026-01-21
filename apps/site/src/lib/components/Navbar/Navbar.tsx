@@ -2,10 +2,10 @@
 
 import clsx from "clsx";
 
-import Button from "@/lib/components/Button/Button";
 import NavLinkItem from "./NavbarHelpers";
 
 // import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
+import Button from "@/lib/components/Button/Button";
 import buttonStyles from "@/lib/components/Button/Button.module.scss";
 import { Identity } from "@/lib/utils/getUserIdentity";
 import BaseNavbar from "./BaseNavbar";

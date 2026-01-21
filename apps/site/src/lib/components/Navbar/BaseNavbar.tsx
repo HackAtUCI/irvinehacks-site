@@ -41,11 +41,11 @@ export default function BaseNavbar({ children }: PropsWithChildren) {
 
 	return (
 		<NavMenu.Root
-			className={`${hasScrolled ? "md:bg-opacity-50" : ""} ${
+			className={`${hasScrolled ? "md:bg-midnight/60" : "md:bg-midnight/40"} ${
 				hidden ? "max-md:h-[4rem] max-md:overflow-hidden" : ""
-			} transition-colors duration-0 md:duration-700 ease-out w-full z-50 flex flex-col fixed bg-black bg-opacity-0 md:flex-row md:items-center`}
+			} transition-colors duration-0 md:duration-700 ease-out w-full z-50 flex flex-col fixed bg-midnight/40 backdrop-blur md:flex-row md:items-center`}
 		>
-			<NavMenu.List className="bg-black bg-opacity-50 md:bg-opacity-0 flex p-3">
+			<NavMenu.List className="bg-midnight/60 md:bg-transparent flex p-3 text-yellow font-display">
 				<NavLinkItem href="/">
 					<HackLogo />
 				</NavLinkItem>
@@ -68,7 +68,7 @@ export default function BaseNavbar({ children }: PropsWithChildren) {
 						(hidden ? "opacity-0 " : "opacity-100 ") +
 						(listShown ? "" : "-translate-y-full ") +
 						"transition-transform duration-500 ease-in-out md:transition-none md:translate-y-0 md:opacity-100 " +
-						"[&>*]:mb-5 [&>*]:md:mb-0 font-display gap-10 p-5 pt-3 bg-black bg-opacity-50 md:bg-opacity-0 md:p-0 md:flex md:items-center"
+						"[&>*]:mb-5 [&>*]:md:mb-0 font-display text-yellow gap-10 p-5 pt-3 bg-midnight/60 md:bg-transparent md:p-0 md:flex md:items-center"
 					}
 					onTransitionEnd={() => setHidden(!listShown)}
 				>
@@ -86,7 +86,7 @@ export default function BaseNavbar({ children }: PropsWithChildren) {
 
 					<NavLinkItem href="/schedule">Schedule</NavLinkItem>
 
-					<NavLinkItem
+					{/* <NavLinkItem
 						href="/incident"
 						target="_blank"
 						rel="noopener noreferrer"
@@ -108,7 +108,7 @@ export default function BaseNavbar({ children }: PropsWithChildren) {
 						rel="noopener noreferrer"
 					>
 						Feedback Form
-					</NavLinkItem>
+					</NavLinkItem> */}
 
 					{children}
 				</NavMenu.List>

@@ -28,7 +28,7 @@ SAMPLE_APPLICATION = {
     # "ethnicity": "E#",
     "pronouns": ["adjectives"],
     "is_18_older": "true",
-    "t_shirt_size": "L"
+    "t_shirt_size": "L",
     "school": "UC Irvine",
     "education_level": "Fifth+ Year Undergraduate",
     "major": "Computer Science",

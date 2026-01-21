@@ -21,7 +21,9 @@ const FAQList = ({ faqs }: { faqs: FAQ[] }) => {
 						<div className="w-16 sm:w-20 lg:w-24 xl:w-32 text-sm sm:text-base lg:text-lg flex-shrink-0">
 							{index + 1}.
 						</div>
-						<div className="flex-1 text-sm sm:text-base lg:text-lg">{faq.question}</div>
+						<div className="flex-1 text-sm sm:text-base lg:text-lg">
+							{faq.question}
+						</div>
 					</button>
 
 					{selectedIndex === index && (

@@ -101,7 +101,7 @@ export default function BaseForm({
 	return (
 		<form
 			method="post"
-			className="bg-black border-[5px] border-white text-[var(--color-white)] w-8/12 flex flex-col items-center py-12 gap-14 z-1 max-[800px]:w-9/12 max-[400px]:w-11/12 drop-shadow-[25px_33px_0px_rgba(255,255,255,1)]"
+			className="bg-black border-[4px] border-white text-[var(--color-white)] font-cantarell w-8/12 flex flex-col items-center py-12 gap-14 z-1 max-[800px]:w-9/12 max-[400px]:w-11/12"
 			action={applyPath}
 			encType="multipart/form-data"
 			onSubmit={handleSubmit}

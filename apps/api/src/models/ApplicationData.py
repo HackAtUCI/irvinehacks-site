@@ -95,15 +95,17 @@ class BaseVolunteerApplicationData(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, str_max_length=1024)
 
     pronouns: list[str] = []
-    ethnicity: str
+    # ethnicity: str
     is_18_older: bool
+    t_shirt_size: Literal['S', 'M', 'L', 'XL']
     school: str
     education_level: str
     major: str
-    frq_volunteer: str = Field(max_length=2048)
-    frq_utensil: str = Field(max_length=2048)
+    ih_reference: list[str] = []    # Field for question: "How did you hear about IrvineHacks?"
+    frq_volunteer: str = Field(max_length=150)
+    frq_memory: str = Field(max_length=100)
+    dietary_restrictions: list[str] = []
     allergies: Union[str, None] = Field(None, max_length=2048)
-    extra_questions: Union[str, None] = Field(None, max_length=2048)
 
     friday_availability: list[Hour] = []
     saturday_availability: list[Hour] = []

@@ -12,8 +12,8 @@ export default function VolunteerFRQ() {
 				maxLength={1500}
 			/>
 			<Textfield
-				name="frq_utensil"
-				labelText="If you were a kitchen utensil, what would you be and why?"
+				name="frq_memory"
+				labelText="If memories could be edited like a video, which memory would you never want to change and why?"
 				containerClass="w-full"
 				isRequired={true}
 				maxLength={1500}

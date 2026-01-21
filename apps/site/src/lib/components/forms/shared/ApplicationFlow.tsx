@@ -39,7 +39,7 @@ export default async function ApplicationFlow({
 	const deadlinePassed = hasDeadlinePassed();
 	const applicationsOpened = haveApplicationsOpened();
 	const applyBody = hasAcceptedQueryParam ? (
-		<div className="my-32">
+		<div className="container my-32">
 			<Title applicationType={applicationType} />
 			<div className="flex justify-center">{children}</div>
 		</div>

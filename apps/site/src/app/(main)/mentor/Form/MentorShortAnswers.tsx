@@ -1,35 +1,45 @@
 import Textfield from "@/lib/components/forms/Textfield";
 
-export default function ShortAnswers() {
+interface ShortAnswersProps {
+	isTechMentor: boolean;
+	isDesignMentor: boolean;
+	hidden: boolean;
+}
+
+export default function ShortAnswers({
+	isTechMentor,
+	isDesignMentor,
+	hidden,
+}: ShortAnswersProps) {
 	return (
-		<div className="flex flex-col gap-5 w-11/12">
+		<div className={`${hidden && "hidden"} flex flex-col gap-5 w-11/12`}>
 			<p className="text-4xl m-0 font-bold max-[700px]:text-3xl">
-				Profile Information
+				Question Prompts
 			</p>
 			<Textfield
-				name="mentor_prev_experience_saq1"
-				labelText="Have you participated or mentored at a hackathon before? If so, please list which ones. e.g. IrvineHacks 2024 (Hacker), ZotHacks 2024 (Mentor)"
-				containerClass="flex flex-col w-full"
-				isRequired={false}
-				maxLength={1500}
-			/>
-			<Textfield
 				name="mentor_interest_saq2"
-				labelText="Why are you interested in being a mentor for IrvineHacks 2025? (100+ words recommended)"
+				labelText="Why are you interested in being a mentor for IrvineHacks 2026? (100+ words recommended)"
 				containerClass="flex flex-col w-full"
 				isRequired={true}
 				maxLength={1500}
 			/>
 			<Textfield
-				name="mentor_team_help_saq3"
+				name="mentor_tech_saq3"
 				labelText="How would you go about helping a team that is struggling with a bug?"
-				containerClass="flex flex-col w-full"
+				containerClass={`${!isTechMentor && "hidden"} flex flex-col w-full`}
 				isRequired={true}
 				maxLength={1500}
 			/>
 			<Textfield
-				name="mentor_team_help_saq4"
-				labelText="How would you go about helping a team that is struggling to work together?"
+				name="mentor_design_saq4"
+				labelText="How would you go about helping a team that is struggling with a design problem?"
+				containerClass={`${!isDesignMentor && "hidden"} flex flex-col w-full`}
+				isRequired={true}
+				maxLength={1500}
+			/>
+			<Textfield
+				name="mentor_interest_saq5"
+				labelText="How would you help participants turn an ambitious idea into something achievable within the hackathon?"
 				containerClass="flex flex-col w-full"
 				isRequired={true}
 				maxLength={1500}

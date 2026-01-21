@@ -1,7 +1,10 @@
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, Suspense } from "react";
 import Footer from "@/lib/components/Footer/Footer";
 
 import type { Metadata } from "next";
+
+import NavbarParent from "@/lib/components/Navbar/NavbarParent";
+import BaseNavbar from "@/lib/components/Navbar/BaseNavbar";
 
 import "./globals.css";
 
@@ -16,9 +19,9 @@ export default function Layout({ children }: PropsWithChildren) {
 		<div
 			className="overflow-x-hidden bg-top bg-repeat-y bg-[length:100%] relative"
 		>
-			{/* <Suspense fallback={<BaseNavbar />}>
+			<Suspense fallback={<BaseNavbar />}>
 				<NavbarParent />
-			</Suspense> */}
+			</Suspense>
 			{children}
 			{/* <Footer /> */}
 			<Footer />

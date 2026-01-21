@@ -16,7 +16,7 @@ const dietary_restrictions = [
 	{ value: "no_pork", text: "No Pork" },
 	{ value: "gluten_free", text: "Gluten-free" },
 	{ value: "other", text: "Other:" },
-]
+];
 
 export default function ExtraQuestions() {
 	return (

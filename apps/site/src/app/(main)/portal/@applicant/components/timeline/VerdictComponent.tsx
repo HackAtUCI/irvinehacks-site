@@ -1,8 +1,6 @@
-import Image from "next/image";
 import { TimelineComponent } from "./TimelineComponent";
 import { Status } from "@/lib/userRecord";
 import { StatusImageProps } from "./StatusImage";
-import PortalCheck from "@/assets/icons/portal-check.svg";
 
 export const VerdictComponent = ({ status }: { status: Status }) => {
 	let verdict: {
@@ -24,7 +22,6 @@ export const VerdictComponent = ({ status }: { status: Status }) => {
 			};
 			break;
 		}
-
 		case Status.Rejected: {
 			verdict = {
 				text: "Application Rejected",
@@ -42,7 +39,6 @@ export const VerdictComponent = ({ status }: { status: Status }) => {
 			};
 			break;
 		}
-
 		case Status.Pending:
 		case Status.Reviewed: {
 			verdict = {
@@ -52,7 +48,6 @@ export const VerdictComponent = ({ status }: { status: Status }) => {
 			};
 			break;
 		}
-
 		default: {
 			const exhaustiveCheck: never = status;
 			throw new Error(`Unhandled status: ${exhaustiveCheck}`);
@@ -60,19 +55,10 @@ export const VerdictComponent = ({ status }: { status: Status }) => {
 	}
 
 	return verdict ? (
-		<div className="flex items-center gap-6 md:gap-10">
-			<TimelineComponent
-				text={verdict.text}
-				finished={verdict.finished}
-				statusIcon={verdict.statusIcon}
-			/>
-			<Image
-				src={PortalCheck}
-				alt="Completed"
-				width={178}
-				height={178}
-				className="w-16 h-16 sm:w-24 sm:h-24 md:w-[120px] md:h-[120px] flex-shrink-0"
-			/>
-		</div>
+		<TimelineComponent
+			text={verdict.text}
+			finished={verdict.finished}
+			statusIcon={verdict.statusIcon}
+		/>
 	) : null;
 };

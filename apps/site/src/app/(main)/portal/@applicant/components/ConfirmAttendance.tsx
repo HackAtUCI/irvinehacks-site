@@ -32,7 +32,7 @@ function ConfirmAttendance({ status }: ConfirmAttendanceProps) {
 				</>
 			) : (
 				<p className="text-xs sm:text-base md:text-2xl">
-					If you plan on attending IrvineHacks 2025, please confirm your
+					If you plan on attending IrvineHacks 2026, please confirm your
 					attendance using the button below!
 				</p>
 			)}

@@ -7,7 +7,7 @@ export default function ReturnHome() {
 				text="Return to Homepage"
 				href="/"
 				isLightVersion={true}
-				className="text-xs sm:text-base md:text-4xl"
+				className="text-xs sm:text-base md:text-4xl !bg-pink"
 			/>
 		</div>
 	);

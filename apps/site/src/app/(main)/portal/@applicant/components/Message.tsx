@@ -21,13 +21,18 @@ function Message({ status }: MessageProps) {
 
 		case Status.Rejected: {
 			message = (
-				<p className="mt-4">
-					Thank you for applying to IrvineHacks this year. We have read through
-					many applications so far, and unfortunately are unable to offer you a
-					spot at our event. We highly encourage you to continue developing your
-					skills and passion for technology. We would love to see you apply
-					again next year!
-				</p>
+				<>
+					<h2 className="font-display text-2xl md:text-[40px] leading-none">
+						Sorry
+					</h2>
+					<p className="mt-4">
+						Thank you for applying to IrvineHacks this year. We have read through
+						many applications so far, and unfortunately are unable to offer you a
+						spot at our event. We highly encourage you to continue developing your
+						skills and passion for technology. We would love to see you apply
+						again next year!
+					</p>
+				</>
 			);
 			break;
 		}
@@ -70,7 +75,7 @@ function Message({ status }: MessageProps) {
 	}
 
 	return (
-		<div className="font-body text-[var(--color-white)] text-xs sm:text-base md:text-2xl">
+		<div className="font-body text-[var(--color-white)] text-xs sm:text-base md:text-2xl pt-6 md:pt-10">
 			{message}
 		</div>
 	);

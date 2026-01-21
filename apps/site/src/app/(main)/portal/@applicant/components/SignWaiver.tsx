@@ -7,10 +7,10 @@ function SignWaiver() {
 				RSVP
 			</h3>
 			<p className="font-sans font-normal text-xs sm:text-base md:text-[24px] leading-[1.39] tracking-normal">
-				Short description of the event. Lorem ipsum dolor sit amet, consectetur
-				adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore
-				magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco
-				laboris nisi ut aliquip ex ea commodo consequat.
+				In order to attend IrvineHacks 2026, all participants must complete the
+				Participation Waiver and review the Code of Conduct. The button below
+				will take you to a DocuSign form to sign the waiver. After signing the
+				waiver, please return to this Portal to confirm your attendance.
 			</p>
 			<div className="mt-6 md:mt-12">
 				<Button
@@ -19,17 +19,13 @@ function SignWaiver() {
 					newWindow={true}
 					usePrefetch={false}
 					isLightVersion={true}
-					className="!bg-pink !w-full md:!w-[875px] !h-[56px] sm:!h-[80px] md:!h-[112px]"
-					style={{
-						fontFamily: "Lexend Giga",
-						fontWeight: 500,
-						fontSize: "32px",
-						lineHeight: "100%",
-						letterSpacing: "0%",
-						textAlign: "center",
-					}}
+					className="!bg-pink !w-full md:!w-[875px] !h-[56px] sm:!h-[80px] md:!h-[112px] !font-sans !font-medium !text-[32px] !leading-none !tracking-normal !text-center"
 				/>
 			</div>
+			<p className="text-xl w-full text-center mt-2 text-yellow-500">
+				It may take up to a minute for this site to update after waiver is
+				signed
+			</p>
 		</div>
 	);
 }

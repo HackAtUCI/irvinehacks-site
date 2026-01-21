@@ -14,9 +14,7 @@ export default async function Partners() {
 
 	return (
 		<section className="container py-24 relative mx-auto w-full ">
-			<h2
-				className={`text-center text-4xl sm:text-[3rem] font-display mb-14 text-pink`}
-			>
+			<h2 className="text-center text-4xl sm:text-[3rem] font-display mb-14 text-pink">
 				Partners
 			</h2>
 

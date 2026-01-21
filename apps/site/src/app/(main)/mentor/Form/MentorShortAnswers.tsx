@@ -27,14 +27,14 @@ export default function ShortAnswers({
 				name="mentor_tech_saq3"
 				labelText="How would you go about helping a team that is struggling with a bug?"
 				containerClass={`${!isTechMentor && "hidden"} flex flex-col w-full`}
-				isRequired={true}
+				isRequired={isTechMentor}
 				maxLength={1500}
 			/>
 			<Textfield
 				name="mentor_design_saq4"
 				labelText="How would you go about helping a team that is struggling with a design problem?"
 				containerClass={`${!isDesignMentor && "hidden"} flex flex-col w-full`}
-				isRequired={true}
+				isRequired={isDesignMentor}
 				maxLength={1500}
 			/>
 			<Textfield

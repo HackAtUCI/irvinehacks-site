@@ -7,7 +7,7 @@ const sizes = [
 	{ labelText: "M", inputValue: "M" },
 	{ labelText: "L", inputValue: "L" },
 	{ labelText: "XL", inputValue: "XL" },
-]
+];
 
 const dietary_restrictions = [
 	{ value: "vegetarian", text: "Vegetarian" },

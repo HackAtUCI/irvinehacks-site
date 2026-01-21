@@ -1,11 +1,10 @@
 import clsx from "clsx";
+import Image from "next/image";
 
 import ValidatingForm from "@/lib/components/ValidatingForm/ValidatingForm";
 import RequiredAsterisk from "@/lib/components/forms/RequiredAsterisk";
 
 import Graphic from "@/assets/images/login-page-graphic.png";
-
-import Image from "next/image";
 
 import loginFormStyles from "./LoginForm.module.scss";
 import styles from "@/lib/components/ValidatingForm/ValidatingForm.module.scss";
@@ -43,6 +42,10 @@ function LoginForm({ return_to }: { return_to?: string }) {
 						aria-describedby="email-description"
 						required
 					/>
+					<small id="email-description">
+						UCI students will log in with UCI SSO. Please make sure to use your
+						school email address if you have one.
+					</small>
 					<p className={clsx(styles.invalidFeedback, "text-red-500")}>
 						Sorry, that email address is invalid.
 					</p>

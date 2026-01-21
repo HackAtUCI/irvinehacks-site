@@ -16,10 +16,12 @@ class InvalidFile extends Error {
 
 interface ResumeInformationProps {
 	isRequired?: boolean;
+	hidden?: boolean;
 }
 
 export default function ResumeInformation({
 	isRequired,
+	hidden,
 }: ResumeInformationProps) {
 	const [resumePath, setResumePath] = useState<string>("");
 	const [hasUploaded, setHasUploaded] = useState<boolean>(false);
@@ -59,7 +61,7 @@ export default function ResumeInformation({
 	};
 
 	return (
-		<div className="flex flex-col items-start w-11/12">
+		<div className={`${hidden && "hidden"} flex flex-col items-start w-11/12`}>
 			<label className="text-lg mb-2">
 				Resume (PDF, 0.5 MB max) {isRequired && <RequiredAsterisk />}
 			</label>

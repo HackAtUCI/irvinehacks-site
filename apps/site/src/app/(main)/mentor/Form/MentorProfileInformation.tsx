@@ -1,8 +1,12 @@
 import TextInput from "@/lib/components/forms/TextInput";
 
-export default function MentorProfileInformation() {
+export default function MentorProfileInformation({
+	hidden,
+}: {
+	hidden: boolean;
+}) {
 	return (
-		<div className="flex flex-col gap-5 w-11/12">
+		<div className={`${hidden && "hidden"} flex flex-col gap-5 w-11/12`}>
 			<p className="text-4xl m-0 font-bold max-[700px]:text-3xl">Links</p>
 
 			<TextInput

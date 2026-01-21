@@ -99,7 +99,7 @@ class BaseVolunteerApplicationData(BaseModel):
     pronouns: list[str] = []
     # ethnicity: str
     is_18_older: bool
-    t_shirt_size: Literal['S', 'M', 'L', 'XL']
+    t_shirt_size: Literal["S", "M", "L", "XL"]
     school: str
     education_level: str
     major: str

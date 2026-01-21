@@ -18,7 +18,7 @@ const FAQList = ({ faqs }: { faqs: FAQ[] }) => {
 						}
 						className="w-full text-left text-turquoise hover:underline flex items-start px-3 sm:px-4 py-3 transition-all duration-200"
 					>
-						<div className="w-16 sm:w-20 lg:w-24 xl:w-32 text-sm sm:text-base lg:text-lg flex-shrink-0">
+						<div className="w-14 sm:w-20 lg:w-24 xl:w-32 text-sm sm:text-base lg:text-lg flex-shrink-0">
 							{index + 1}.
 						</div>
 						<div className="flex-1 text-sm sm:text-base lg:text-lg">
@@ -28,7 +28,7 @@ const FAQList = ({ faqs }: { faqs: FAQ[] }) => {
 
 					{selectedIndex === index && (
 						<div className="px-3 sm:px-4 py-4 sm:py-6 text-turquoise">
-							<div className="pl-16 sm:pl-20 lg:pl-24 xl:pl-32 prose prose-sm sm:prose-base prose-invert max-w-none">
+							<div className="pl-0 sm:pl-20 lg:pl-24 xl:pl-32 text-xs sm:text-sm lg:text-base">
 								<PortableText value={faq.answer} />
 							</div>
 						</div>

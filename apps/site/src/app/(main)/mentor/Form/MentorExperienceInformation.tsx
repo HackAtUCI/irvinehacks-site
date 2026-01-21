@@ -42,6 +42,7 @@ const hardwareExperienceOptions = [
 ];
 
 const designToolOptions = [
+	{ value: "figma", text: "Figma" },
 	{ value: "affinity", text: "Affinity" },
 	{ value: "photoshop", text: "Adobe Photoshop" },
 	{ value: "illustrator", text: "Illustrator" },

@@ -15,7 +15,7 @@ export default function MentorProfileInformation() {
 			/>
 			<TextInput
 				name="github"
-				labelText="GitHub Profile"
+				labelText="GitHub Profile / Portfolio"
 				containerClass="flex flex-col w-full"
 				isRequired={false}
 				type="url"
@@ -23,7 +23,7 @@ export default function MentorProfileInformation() {
 			/>
 			<TextInput
 				name="portfolio"
-				labelText="Personal Website / Portfolio"
+				labelText="Personal Website"
 				containerClass="flex flex-col w-full"
 				isRequired={false}
 				type="url"

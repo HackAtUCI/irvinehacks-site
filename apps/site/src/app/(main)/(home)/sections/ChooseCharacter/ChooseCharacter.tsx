@@ -33,7 +33,6 @@ const ChooseCharacter = () => {
 						titleText="Mentor"
 						clipClass={styles.glasses}
 						imageSrc={mentorSprite}
-						textAlign="text-left"
 						href="/mentor"
 					/>
 					<CharacterBox
@@ -42,7 +41,6 @@ const ChooseCharacter = () => {
 						titleText="Hacker"
 						clipClass={styles.sword}
 						imageSrc={hackerSprite}
-						textAlign="text-center"
 						href="/apply"
 					/>
 					<CharacterBox
@@ -51,7 +49,6 @@ const ChooseCharacter = () => {
 						titleText="Volunteer"
 						clipClass={styles.orb}
 						imageSrc={volunteerSprite}
-						textAlign="text-right"
 						href="/volunteer"
 					/>
 				</div>

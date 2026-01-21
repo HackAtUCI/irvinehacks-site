@@ -10,7 +10,6 @@ interface CharacterBoxProps {
 	chatText: string;
 	titleText: string;
 	clipClass: string;
-	textAlign: string;
 	href: string;
 }
 
@@ -20,7 +19,6 @@ export default function CharacterBox({
 	chatText,
 	titleText,
 	clipClass,
-	textAlign,
 	href,
 }: CharacterBoxProps) {
 	return (

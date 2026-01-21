@@ -5,9 +5,9 @@ const yesNoOptions = [
 	{ labelText: "No", inputValue: "No" },
 ];
 
-export default function AgeInformation() {
+export default function AgeInformation({ hidden }: { hidden: boolean }) {
 	return (
-		<div className="flex flex-col gap-5 w-11/12">
+		<div className={`${hidden && "hidden"} flex flex-col gap-5 w-11/12`}>
 			<div className="flex flex-col gap-5">
 				<p className="m-0 text-lg">
 					Because of limitations imposed by UCI, we are legally not allowed to

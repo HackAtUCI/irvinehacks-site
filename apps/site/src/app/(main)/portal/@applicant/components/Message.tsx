@@ -26,11 +26,11 @@ function Message({ status }: MessageProps) {
 						Sorry
 					</h2>
 					<p className="mt-4">
-						Thank you for applying to IrvineHacks this year. We have read through
-						many applications so far, and unfortunately are unable to offer you a
-						spot at our event. We highly encourage you to continue developing your
-						skills and passion for technology. We would love to see you apply
-						again next year!
+						Thank you for applying to IrvineHacks this year. We have read
+						through many applications so far, and unfortunately are unable to
+						offer you a spot at our event. We highly encourage you to continue
+						developing your skills and passion for technology. We would love to
+						see you apply again next year!
 					</p>
 				</>
 			);

@@ -1,6 +1,4 @@
 /* eslint-disable @next/next/no-img-element */
-import Image from "next/image";
-
 import { getPartners } from "./getPartners";
 import { client } from "@/lib/sanity/client";
 import imageUrlBuilder from "@sanity/image-url";
@@ -18,26 +16,34 @@ export default async function Partners() {
 				Partners
 			</h2>
 
-			<div className="relative mx-auto w-full flex items-center justify-center mt-10">
-				<Image
-					src={NeonSectionFrame}
-					alt=""
-					className="absolute inset-0 w-full h-full object-contain pointer-events-none"
-					style={{ transform: "scale(1.4)" }}
-				/>
-				<div className="relative grid grid-cols-1 lg:grid-cols-4 gap-8 lg:max-w-4xl xl:max-w-5xl max-w-xl mx-auto p-12 lg:p-16 overflow-hidden">
+			<div
+				className="relative mx-auto mt-10 w-full max-w-xl lg:max-w-4xl xl:max-w-5xl bg-center bg-no-repeat"
+				style={{
+					backgroundImage: `url(${NeonSectionFrame.src})`,
+					backgroundSize: "100% 100%",
+				}}
+			>
+				<div
+					className="grid grid-cols-1 min-[420px]:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 overflow-hidden"
+					style={{
+						paddingLeft: "clamp(2.25rem, 8vw, 4rem)",
+						paddingRight: "clamp(2.25rem, 8vw, 4rem)",
+						paddingTop: "clamp(4.25rem, 14vw, 5.5rem)",
+						paddingBottom: "clamp(3.75rem, 10vw, 5rem)",
+					}}
+				>
 					{partners.map(({ _key, name, url, logo }) => (
 						<a
 							key={_key}
 							href={url}
 							target="_blank"
 							rel="noopener noreferrer"
-							className="bg-white/5 backdrop-blur-sm p-6 aspect-video flex items-center justify-center hover:bg-white/10 transition-colors overflow-hidden"
+							className="p-4 sm:p-6 flex items-center justify-center transition-transform hover:scale-[1.02] overflow-hidden h-24 sm:h-28 md:h-32 lg:h-auto lg:aspect-video"
 						>
 							<img
 								src={builder.image(logo).format("webp").url()}
 								alt={`${name} logo`}
-								className="h-full max-w-full max-h-full object-contain"
+								className="max-w-full max-h-full object-contain"
 							/>
 						</a>
 					))}

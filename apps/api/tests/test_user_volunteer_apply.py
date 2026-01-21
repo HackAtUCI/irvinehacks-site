@@ -25,14 +25,15 @@ USER_PKFIRE = NativeUser(
 SAMPLE_APPLICATION = {
     "first_name": "pk",
     "last_name": "fire",
-    "ethnicity": "E#",
+    # "ethnicity": "E#",
     "pronouns": ["adjectives"],
     "is_18_older": "true",
+    "t_shirt_size": "L"
     "school": "UC Irvine",
     "education_level": "Fifth+ Year Undergraduate",
     "major": "Computer Science",
     "frq_volunteer": "",
-    "frq_utensil": "",
+    "frq_memory": "",
     "other_questions": "",
     "application_type": "Volunteer",
     "friday_availability": ["12", "13"],

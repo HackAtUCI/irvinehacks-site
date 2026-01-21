@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import getUserIdentity from "@/lib/utils/getUserIdentity";
 import LoginForm from "./components/LoginForm";
-import LoginBackground from "@/assets/backgrounds/login-background.png";
+import LoginBackground from "@/assets/backgrounds/login-background.jpg";
 import Image from "next/image";
 
 async function Login({
@@ -20,6 +20,7 @@ async function Login({
 
 	return (
 		<div className="bg-[#00001c]">
+
 			<div className="min-h-screen absolute overflow-hidden z-10 w-full flex flex-col items-center justify-center">
 				<h1 className="font-heading text-yellow mb-20 [text-shadow:0_0_25px_#E5F200] text-4xl md:text-5xl lg:text-7xl">
 					Log In

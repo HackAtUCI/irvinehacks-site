@@ -16,6 +16,8 @@ const FIELDS_WITH_OTHER = [
 	"school",
 	"major",
 	"experienced_technologies",
+	"ih_reference",
+	"dietary_restrictions",
 ];
 
 interface BaseFormProps {

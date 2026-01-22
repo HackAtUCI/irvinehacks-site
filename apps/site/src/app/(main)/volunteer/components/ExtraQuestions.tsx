@@ -10,11 +10,24 @@ const sizes = [
 ];
 
 const dietary_restrictions = [
+	{
+		value: "anything",
+		text: "I can eat anything, including the following: chicken, beef, pork",
+	},
 	{ value: "vegetarian", text: "Vegetarian" },
 	{ value: "vegan", text: "Vegan" },
 	{ value: "no_beef", text: "No Beef" },
 	{ value: "no_pork", text: "No Pork" },
 	{ value: "gluten_free", text: "Gluten-free" },
+	{ value: "other", text: "Other:" },
+];
+
+const ihReferences = [
+	{ value: "aif", text: "Anteater Involvement Fair (AIF)" },
+	{ value: "discord", text: "Discord" },
+	{ value: "instagram", text: "Instagram" },
+	{ value: "classes", text: "Classes (Ed, Canvas, Announcements, etc.)" },
+	{ value: "word_of_mouth", text: "Word of Mouth" },
 	{ value: "other", text: "Other:" },
 ];
 
@@ -46,6 +59,16 @@ export default function ExtraQuestions() {
 				isRequired={false}
 				maxLength={1500}
 			/>
+			{/* <div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center"> */}
+			<MultipleSelect
+				name="ih_reference"
+				labelText="Where did you hear about IrvineHacks? (select all that apply)"
+				containerClass="flex flex-col w-11/12"
+				inputType="checkbox"
+				values={ihReferences}
+				isRequired={true}
+			/>
+			{/* </div> */}
 			{/* <Textfield
 				name="extra_questions"
 				labelText="Any questions, comments, or concerns?"

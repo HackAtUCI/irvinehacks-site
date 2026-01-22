@@ -1,4 +1,3 @@
-import MultipleSelect from "@/lib/components/forms/MultipleSelect";
 import TextInput from "@/lib/components/forms/TextInput";
 import DropdownSelect from "@/lib/components/forms/DropdownSelect";
 
@@ -6,15 +5,6 @@ const pronouns = [
 	{ value: "he", text: "He/him/his" },
 	{ value: "she", text: "She/her/hers" },
 	{ value: "they", text: "They/them/theirs" },
-	{ value: "other", text: "Other:" },
-];
-
-const ihReferences = [
-	{ value: "aif", text: "Anteater Involvement Fair (AIF)" },
-	{ value: "discord", text: "Discord" },
-	{ value: "instagram", text: "Instagram" },
-	{ value: "classes", text: "Classes (Ed, Canvas, Announcements, etc.)" },
-	{ value: "word_of_mouth", text: "Word of Mouth" },
 	{ value: "other", text: "Other:" },
 ];
 
@@ -69,17 +59,6 @@ export default function BasicInformation() {
 					labelText="Preferred Pronouns"
 					values={pronouns}
 					containerClass="flex flex-col w-[400px] max-[1000px]:w-full"
-				/>
-			</div>
-
-			<div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
-				<MultipleSelect
-					name="ih_reference"
-					labelText="Where did you hear about IrvineHacks? (select all that apply)"
-					containerClass="flex flex-col w-full"
-					inputType="checkbox"
-					values={ihReferences}
-					isRequired={true}
 				/>
 			</div>
 		</div>

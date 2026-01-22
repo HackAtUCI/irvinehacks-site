@@ -39,17 +39,23 @@ SAMPLE_APPLICATION = {
     "last_name": "fire",
     "pronouns": ["pk"],
     "ethnicity": "fire",
-    "is_18_older": "true",
-    "school": "UC Irvine",
-    "education_level": "Fifth+ Year Undergraduate",
-    "major": "Computer Science",
     "is_first_hackathon": "false",
-    "linkedin": "",
+    "school": "UC Irvine",
+    "major": "Computer Science",
+    "education_level": "Fifth+ Year Undergraduate",
+    "t_shirt_size": "XL",
+    "dietary_restrictions": ["none"],
+    "allergies": "",
+    "ih_reference": ["friend"],
     "portfolio": "https://github.com",
+    "linkedin": "",
+    "areas_interested": ["magic"],
     "frq_change": "I am pkfire",
-    "frq_video_game": "I am pkfire",
+    "frq_ambition": "I am pkfire",
+    "frq_character": "I am pkfire",
     "application_type": "Hacker",
     "email": "pkfire@uci.edu",
+    "is_18_older": "true",
 }
 
 SAMPLE_ZOTHACKS_HACKER_APPLICATION = {
@@ -404,7 +410,7 @@ def test_application_data_is_bson_encodable() -> None:
     data = EXPECTED_APPLICATION_DATA.model_copy()
     data.linkedin = HttpUrl("https://linkedin.com")
     encoded = bson.encode(EXPECTED_APPLICATION_DATA.model_dump())
-    assert len(encoded) == 404
+    assert len(encoded) == 578
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)

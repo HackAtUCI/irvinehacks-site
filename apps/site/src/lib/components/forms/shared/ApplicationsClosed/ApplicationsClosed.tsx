@@ -19,7 +19,7 @@ async function ApplicationsClosed() {
 				quality={100}
 				fill
 				sizes="100vh"
-				style={{ objectFit: 'cover', zIndex: -1 }} // cover ensures it covers the area and z-index places it behind content
+				style={{ objectFit: "cover", zIndex: -1 }} // cover ensures it covers the area and z-index places it behind content
 				priority
 			/>
 			<hr className="my-10 w-full h-0.5 bg-[#432810]" />

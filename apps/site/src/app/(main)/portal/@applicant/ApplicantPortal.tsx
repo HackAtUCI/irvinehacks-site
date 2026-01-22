@@ -41,6 +41,9 @@ function Portal() {
 	return (
 		<div className="relative">
 			<div className="bg-transparent text-black max-w-6xl rounded-2xl p-6 flex flex-col mb-24 w-full">
+				<h2 className="text-center font-bold font-display text-[var(--color-white)] mb-4 md:mb-[42px] text-[15px] sm:text-2xl md:text-[40px] md:leading-10">
+					{roleToDisplay} Application Status
+				</h2>
 				<VerticalTimeline status={status as Status} />
 				<Message status={status as Status} />
 				{needsToSignWaiver && <SignWaiver />}

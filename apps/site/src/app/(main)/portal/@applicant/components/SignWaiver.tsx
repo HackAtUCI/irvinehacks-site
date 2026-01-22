@@ -19,7 +19,7 @@ function SignWaiver() {
 					newWindow={true}
 					usePrefetch={false}
 					isLightVersion={true}
-					className="!bg-pink !w-full md:!w-[875px] !h-[56px] sm:!h-[80px] md:!h-[112px] !font-sans !font-medium !text-[32px] !leading-none !tracking-normal !text-center"
+					className="!bg-pink !w-full md:!w-[875px] !font-sans !font-medium md:text-3xl !leading-none !tracking-normal !text-center"
 				/>
 			</div>
 			<p className="text-xl w-full text-center mt-2 text-yellow-500">

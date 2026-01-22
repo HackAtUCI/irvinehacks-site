@@ -3,7 +3,6 @@ import { StatusImage } from "./StatusImage";
 
 interface TimelineComponentProps {
 	text: string;
-	finished: boolean;
 	statusIcon: "Accepted" | "Rejected" | "Pending";
 }
 
@@ -15,7 +14,6 @@ const colorStyles = {
 
 export const TimelineComponent: React.FC<TimelineComponentProps> = ({
 	text,
-	finished,
 	statusIcon,
 }) => {
 	const baseStyles =

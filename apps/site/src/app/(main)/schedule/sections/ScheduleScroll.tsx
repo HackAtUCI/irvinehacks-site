@@ -120,6 +120,9 @@ export default function ScheduleScroll({
 						<div className="h-full w-[150px] max-lg:w-[50px]" />
 						{weekdays.map((weekday, i) => {
 							const weekdayStr = getTimeAndDates(weekday).day;
+							const isSelected =
+								selectedEventDay &&
+								weekday.getTime() === selectedEventDay.getTime();
 							return (
 								<div
 									className="whitespace-nowrap cursor-pointer relative flex justify-center items-center"
@@ -129,11 +132,26 @@ export default function ScheduleScroll({
 										scrollTo(i);
 									}}
 								>
-									<span className="invisible font-display text-6xl">
+									<span
+										className={clsx(
+											"invisible font-display",
+											isSelected ? "text-[96px]" : "text-[40px]",
+										)}
+									>
 										{weekdayStr}
 									</span>
 									<div className="absolute w-full h-full top-0 left-0 flex justify-center items-center">
-										<span className="absolute">{weekdayStr}</span>
+										<span
+											className={clsx(
+												"absolute font-display text-[#FF4DEF]",
+												isSelected ? "text-[96px]" : "text-[40px]",
+											)}
+											style={{
+												textShadow: "0px 0px 25px #FF4DEF",
+											}}
+										>
+											{weekdayStr}
+										</span>
 									</div>
 								</div>
 							);

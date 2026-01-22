@@ -16,14 +16,14 @@ export const VerdictComponent = ({ status }: { status: Status }) => {
 		case Status.Attending: {
 			verdict = {
 				text: "Application Accepted",
-								statusIcon: "Accepted",
+				statusIcon: "Accepted",
 			};
 			break;
 		}
 		case Status.Rejected: {
 			verdict = {
 				text: "Application Rejected",
-								statusIcon: "Rejected",
+				statusIcon: "Rejected",
 			};
 			break;
 		}
@@ -31,7 +31,7 @@ export const VerdictComponent = ({ status }: { status: Status }) => {
 		case Status.Waitlisted: {
 			verdict = {
 				text: "Application Waitlisted",
-								statusIcon: "Pending",
+				statusIcon: "Pending",
 			};
 			break;
 		}
@@ -39,7 +39,7 @@ export const VerdictComponent = ({ status }: { status: Status }) => {
 		case Status.Reviewed: {
 			verdict = {
 				text: "Application Under Review",
-								statusIcon: "Pending",
+				statusIcon: "Pending",
 			};
 			break;
 		}

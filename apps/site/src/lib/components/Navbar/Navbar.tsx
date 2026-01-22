@@ -1,12 +1,12 @@
 "use client";
 
-import clsx from "clsx";
+// import clsx from "clsx";
 
-import NavLinkItem from "./NavbarHelpers";
+// import NavLinkItem from "./NavbarHelpers";
 
 // import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
-import Button from "@/lib/components/Button/Button";
-import buttonStyles from "@/lib/components/Button/Button.module.scss";
+// import Button from "@/lib/components/Button/Button";
+// import buttonStyles from "@/lib/components/Button/Button.module.scss";
 import { Identity } from "@/lib/utils/getUserIdentity";
 import BaseNavbar from "./BaseNavbar";
 
@@ -16,11 +16,12 @@ interface NavbarProps {
 
 export default function Navbar({ identity }: NavbarProps) {
 	const { uid, status } = identity;
-	const isLoggedIn = uid !== null;
+	console.log(uid, status);
+	// const isLoggedIn = uid !== null;
 
 	return (
 		<BaseNavbar>
-			{status !== null && <NavLinkItem href="/portal">Portal</NavLinkItem>}
+			{/* {status !== null && <NavLinkItem href="/portal">Portal</NavLinkItem>}
 			{isLoggedIn ? (
 				<a
 					href="/logout"
@@ -30,7 +31,7 @@ export default function Navbar({ identity }: NavbarProps) {
 				</a>
 			) : (
 				<Button text="Log In" href="/login" usePrefetch={false} isNavButton />
-			)}
+			)} */}
 		</BaseNavbar>
 	);
 }

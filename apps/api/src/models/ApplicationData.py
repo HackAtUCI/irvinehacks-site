@@ -36,12 +36,15 @@ def make_empty_none(val: Union[str, None]) -> Union[str, None]:
     return val
 
 
+# Ensure this array matches FIELDS_With_OTHER in frontend BaseForm.tsx
 FIELDS_SUPPORTING_OTHER = [
     "pronouns",
     "ethnicity",
     "school",
     "major",
-    "experienced_technologies",
+    "tech_experienced_technologies",
+    "hardware_experienced_technologies",
+    "design_experienced_tools",
     "dietary_restrictions",
     "ih_reference",
 ]
@@ -71,24 +74,33 @@ class BaseApplicationData(BaseModel):
 class BaseMentorApplicationData(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, str_max_length=254)
 
-    experienced_technologies: list[str] = []
-    pronouns: list[str] = []
+    mentor_type: list[str] = []
 
-    ethnicity: str
+    pronouns: list[str] = []
+    # ethnicity: str
     school: str
     major: str
     education_level: str
-    is_18_older: bool
+
+    tech_experienced_technologies: list[str] = []
+    hardware_experienced_technologies: list[str] = []
+    design_experienced_tools: list[str] = []
+
     git_experience: str
+    arduino_experience: str
+    figma_experience: str
+
     github: NullableHttpUrl = None
     portfolio: NullableHttpUrl = None
     linkedin: NullableHttpUrl = None
     mentor_prev_experience_saq1: Union[str, None] = Field(None, max_length=2048)
     mentor_interest_saq2: str = Field(max_length=2048)
-    mentor_team_help_saq3: str = Field(max_length=2048)
-    mentor_team_help_saq4: str = Field(max_length=2048)
+    mentor_tech_saq3: str = Field(max_length=2048)
+    mentor_design_saq4: str = Field(max_length=2048)
+    mentor_interest_saq5: str = Field(max_length=2048)
     resume_share_to_sponsors: bool = False
-    other_questions: Union[str, None] = Field(None, max_length=2048)
+    # other_questions: Union[str, None] = Field(None, max_length=2048)
+    is_18_older: bool
 
 
 Hour = Annotated[int, Field(ge=7, lt=24)]
@@ -143,6 +155,7 @@ class BaseZotHacksHackerApplicationData(BaseModel):
         return v
 
 
+# Not tested for ZH 2025
 class BaseZotHacksMentorApplicationData(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, str_max_length=1024)
 

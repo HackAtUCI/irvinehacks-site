@@ -10,14 +10,17 @@ import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
 
 import cityBackground from "@/assets/backgrounds/alt_illus_moonless.png";
 
+// Ensure this array matches FIELDS_SUPPORTING_OTHER in ApplicationData.py
 const FIELDS_WITH_OTHER = [
 	"pronouns",
 	"ethnicity",
 	"school",
 	"major",
-	"experienced_technologies",
-	"ih_reference",
+	"tech_experienced_technologies",
+	"hardware_experienced_technologies",
+	"design_experienced_tools",
 	"dietary_restrictions",
+	"ih_reference",
 ];
 
 interface BaseFormProps {

@@ -5,15 +5,15 @@ const yesNoOptions = [
 	{ labelText: "No", inputValue: "No" },
 ];
 
-export default function AgeInformation() {
+export default function AgeInformation({ hidden }: { hidden?: boolean }) {
 	return (
-		<div className="flex flex-col gap-5 w-11/12">
+		<div className={`${hidden && "hidden"} flex flex-col gap-5 w-11/12`}>
 			<div className="flex flex-col gap-5">
 				<p className="m-0 text-lg">
 					Because of limitations imposed by UCI, we are legally not allowed to
 					host minors (those under 18) for IrvineHacks 2026. By answering yes,
-					you affirm that you are and will be 18 years or older by February
-					27th, 2026.
+					you affirm that you are or will be 18 years or older by February 27th,
+					2026.
 				</p>
 				<p className="text-[#FF2222] m-0 text-lg">
 					We will be checking ID. If you are a minor, you will be turned away at

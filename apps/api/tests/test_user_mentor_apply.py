@@ -29,25 +29,31 @@ USER_PKFIRE = NativeUser(
 SAMPLE_APPLICATION = {
     "first_name": "pk",
     "last_name": "fire",
-    "experienced_technologies": [],
+    "mentor_type": ["is_tech_mentor"],
     "pronouns": [],
     "ethnicity": "eth",
-    "is_18_older": "true",
     "school": "UC Irvine",
-    "education_level": "Fifth+ Year Undergraduate",
     "major": "Computer Science",
+    "education_level": "Fifth+ Year Undergraduate",
+    "tech_experienced_technologies": [],
+    "hardware_experienced_technologies": [],
+    "design_experienced_tools": [],
     "git_experience": "2",
+    "arduino_experience": "4",
+    "figma_experience": "2",
     "github": "https://github.com",
     "portfolio": "",
     "linkedin": "",
     "mentor_prev_experience_saq1": "",
     "mentor_interest_saq2": "",
-    "mentor_team_help_saq3": "",
-    "mentor_team_help_saq4": "",
-    "other_questions": "",
+    "mentor_tech_saq3": "",
+    "mentor_design_saq4": "",
+    "mentor_interest_saq5": "",
+    # "other_questions": "",
     "resume_share_to_sponsors": "true",
     "application_type": "Mentor",
     "email": "pkfire@uci.edu",
+    "is_18_older": "true",
 }
 
 
@@ -256,7 +262,7 @@ def test_mentor_application_data_is_bson_encodable() -> None:
     data = EXPECTED_APPLICATION_DATA.model_copy()
     data.linkedin = HttpUrl("https://linkedin.com")
     encoded = bson.encode(EXPECTED_APPLICATION_DATA.model_dump())
-    assert len(encoded) == 539
+    assert len(encoded) == 683
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)

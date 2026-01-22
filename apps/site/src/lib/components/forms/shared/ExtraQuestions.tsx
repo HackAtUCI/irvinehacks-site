@@ -31,9 +31,9 @@ const ihReferences = [
 	{ value: "other", text: "Other:" },
 ];
 
-export default function ExtraQuestions() {
+export default function ExtraQuestions({ hidden }: { hidden?: boolean }) {
 	return (
-		<>
+		<div className={`${hidden && "hidden"} flex flex-col gap-14 w-11/12`}>
 			<SimpleRadio
 				name="t_shirt_size"
 				values={sizes}
@@ -59,7 +59,6 @@ export default function ExtraQuestions() {
 				isRequired={false}
 				maxLength={1500}
 			/>
-			{/* <div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center"> */}
 			<MultipleSelect
 				name="ih_reference"
 				labelText="Where did you hear about IrvineHacks? (select all that apply)"
@@ -68,7 +67,6 @@ export default function ExtraQuestions() {
 				values={ihReferences}
 				isRequired={true}
 			/>
-			{/* </div> */}
 			{/* <Textfield
 				name="extra_questions"
 				labelText="Any questions, comments, or concerns?"
@@ -76,6 +74,6 @@ export default function ExtraQuestions() {
 				isRequired={false}
 				maxLength={1500}
 			/> */}
-		</>
+		</div>
 	);
 }

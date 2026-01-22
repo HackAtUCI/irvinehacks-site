@@ -13,14 +13,14 @@ const educationLevels = [
 ];
 const universityOptions = [
 	{ value: "UC Irvine", text: "UC Irvine" },
-	{ value: "Cal Poly Pomona", text: "Cal Poly Pomona" },
-	{ value: "Cal State Fullerton", text: "Cal State Fullerton" },
-	{ value: "Cal State Long Beach", text: "Cal State Long Beach" },
 	{ value: "UC Berkeley", text: "UC Berkeley" },
 	{ value: "UCLA", text: "UCLA" },
 	{ value: "UC Riverside", text: "UC Riverside" },
 	{ value: "UC San Diego", text: "UC San Diego" },
 	{ value: "UC Santa Barbara", text: "UC Santa Barbara" },
+	{ value: "Cal Poly Pomona", text: "Cal Poly Pomona" },
+	{ value: "Cal State Fullerton", text: "Cal State Fullerton" },
+	{ value: "Cal State Long Beach", text: "Cal State Long Beach" },
 	{ value: "other", text: "Other" },
 ];
 
@@ -44,9 +44,9 @@ const majorOptions = [
 	{ value: "other", text: "Other" },
 ];
 
-export default function SchoolInformation() {
+export default function SchoolInformation({ hidden }: { hidden?: boolean }) {
 	return (
-		<div className="flex flex-col gap-5 w-11/12">
+		<div className={`${hidden && "hidden"} flex flex-col gap-5 w-11/12`}>
 			<p className="text-4xl m-0 font-bold max-[700px]:text-3xl">
 				School Information
 			</p>

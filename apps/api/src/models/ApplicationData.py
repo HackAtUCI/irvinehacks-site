@@ -92,6 +92,11 @@ class BaseMentorApplicationData(BaseModel):
     school: str
     major: str
     education_level: str
+    t_shirt_size: Literal["S", "M", "L", "XL"]
+    dietary_restrictions: list[str] = []
+    allergies: Union[str, None] = Field(None, max_length=2048)
+    # Field for question: "How did you hear about IrvineHacks?"
+    ih_reference: list[str] = []
 
     tech_experienced_technologies: list[str] = []
     hardware_experienced_technologies: list[str] = []

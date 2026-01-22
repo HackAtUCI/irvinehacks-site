@@ -60,15 +60,26 @@ class BaseApplicationData(BaseModel):
     pronouns: list[str] = []
 
     ethnicity: str
-    is_18_older: bool
-    school: str
-    education_level: str
-    major: str
     is_first_hackathon: bool
-    linkedin: NullableHttpUrl = None
+
+    school: str
+    major: str
+    education_level: str
+    t_shirt_size: Literal["S", "M", "L", "XL"]
+    dietary_restrictions: list[str] = []
+    allergies: Union[str, None] = Field(None, max_length=2048)
+    # Field for question: "How did you hear about IrvineHacks?"
+    ih_reference: list[str] = []
+
     portfolio: NullableHttpUrl = None
+    linkedin: NullableHttpUrl = None
+
+    areas_interested: list[str] = []
     frq_change: str = Field(max_length=2048)
-    frq_video_game: str = Field(max_length=2048)
+    frq_ambition: str = Field(max_length=2048)
+    frq_character: str = Field(max_length=2048)
+
+    is_18_older: bool
 
 
 class BaseMentorApplicationData(BaseModel):
@@ -287,7 +298,7 @@ class ProcessedZotHacksMentorApplication(BaseZotHacksMentorApplicationData):
 # that doesn't appear in any other form
 def get_discriminator_value(v: Any) -> str:
     if isinstance(v, dict):
-        if "frq_video_game" in v:
+        if "frq_ambition" in v:
             return "hacker"
         if "mentor_prev_experience_saq1" in v:
             return "mentor"
@@ -298,7 +309,7 @@ def get_discriminator_value(v: Any) -> str:
         if "help_participants_frq" in v:
             return "zothacks_mentor"
 
-    if "frq_video_game" in dir(v):
+    if "frq_ambition" in dir(v):
         return "hacker"
     if "mentor_prev_experience_saq1" in dir(v):
         return "mentor"
@@ -326,13 +337,13 @@ ProcessedApplicationDataUnion = Annotated[
 def get_raw_hacker_discriminator_value(v: Any) -> str:
     """Discriminator function for raw hacker application data."""
     if isinstance(v, dict):
-        if "frq_video_game" in v:
+        if "frq_ambition" in v:
             return "hacker"
         if "elevator_pitch_saq" in v:
             return "zothacks_hacker"
 
     # For object instances, check attributes
-    if hasattr(v, "frq_video_game"):
+    if hasattr(v, "frq_ambition"):
         return "hacker"
     if hasattr(v, "elevator_pitch_saq"):
         return "zothacks_hacker"

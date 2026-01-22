@@ -9,7 +9,6 @@ interface CharacterBoxProps {
 	imageSrc: ComponentProps<typeof Image>["src"];
 	chatText: string;
 	titleText: string;
-	clipClass: string;
 	href: string;
 }
 
@@ -18,7 +17,6 @@ export default function CharacterBox({
 	imageSrc,
 	chatText,
 	titleText,
-	clipClass,
 	href,
 }: CharacterBoxProps) {
 	return (
@@ -29,7 +27,6 @@ export default function CharacterBox({
 				className="relative w-5/6 h-[300px] flex justify-center items-center mb-10"
 				href={href}
 			>
-				<div className={`${clipClass} absolute w-full h-full z-10`} />
 				<Image
 					className={`${styles.sprite} relative object-contain`}
 					src={imageSrc}

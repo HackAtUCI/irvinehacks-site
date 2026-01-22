@@ -70,22 +70,12 @@ $zoom-animation-time: 0.15s;
 		filter: drop-shadow(0 0 0 #ffffff00);
 	}
 
-	.sword,
-	.orb,
-	.glasses {
-		transition: transform $zoom-animation-time ease-out;
-		transition: background-position-x 0.75s ease-out;
-	}
-
 	&:hover {
 		.chatBox {
 			transform: translate(-8px, -8px);
 		}
 		.spriteTitle,
-		.sprite,
-		.sword,
-		.orb,
-		.glasses {
+		.sprite {
 			transform: scale(1.05);
 		}
 

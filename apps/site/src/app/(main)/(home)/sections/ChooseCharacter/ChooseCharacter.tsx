@@ -28,26 +28,23 @@ const ChooseCharacter = () => {
 				{/* Character boxes */}
 				<div className="flex flex-col lg:flex-row items-center justify-center gap-x-4">
 					<CharacterBox
-						className="order-2 lg:order-1"
+						className="order-1"
 						chatText="A creative problem-solver who builds innovative projects that bring ideas to life."
-						titleText="Mentor"
-						clipClass={styles.glasses}
-						imageSrc={mentorSprite}
-						href="/mentor"
-					/>
-					<CharacterBox
-						className="order-1 lg:order-2"
-						chatText="An experienced guide who supports teams with feedback, advice, and technical expertises."
 						titleText="Hacker"
-						clipClass={styles.sword}
 						imageSrc={hackerSprite}
 						href="/apply"
+					/>
+					<CharacterBox
+						className="order-2"
+						chatText="An experienced guide who supports teams with feedback, advice, and technical expertises."
+						titleText="Mentor"
+						imageSrc={mentorSprite}
+						href="/mentor"
 					/>
 					<CharacterBox
 						className="order-3"
 						chatText="A dedicated helper who keeps the event organized and running smoothly for everyone."
 						titleText="Volunteer"
-						clipClass={styles.orb}
 						imageSrc={volunteerSprite}
 						href="/volunteer"
 					/>

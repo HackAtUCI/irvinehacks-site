@@ -1,6 +1,9 @@
 import Link from "next/link";
+import Image from "next/image";
 
 import getUserIdentity from "@/lib/utils/getUserIdentity";
+
+import cityBackground from "@/assets/backgrounds/alt_illus_moonless.png";
 
 async function ApplicationsClosed() {
 	const identity = await getUserIdentity();
@@ -10,6 +13,15 @@ async function ApplicationsClosed() {
 			<h1 className="text-4xl p-10 font-semibold max-[800px]:p-0">
 				Applications for IrvineHacks 2025 closed on January 12th.
 			</h1>
+			<Image
+				src={cityBackground}
+				alt="Background image"
+				quality={100}
+				fill
+				sizes="100vh"
+				style={{ objectFit: "cover", zIndex: -1 }} // cover ensures it covers the area and z-index places it behind content
+				priority
+			/>
 			<hr className="my-10 w-full h-0.5 bg-[#432810]" />
 			{identity.uid === null && (
 				<p className="text-lg">

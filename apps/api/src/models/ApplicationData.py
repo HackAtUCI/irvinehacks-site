@@ -103,9 +103,8 @@ class BaseVolunteerApplicationData(BaseModel):
     school: str
     education_level: str
     major: str
-    ih_reference: list[str] = (
-        []
-    )  # Field for question: "How did you hear about IrvineHacks?"
+    # Field for question: "How did you hear about IrvineHacks?"
+    ih_reference: list[str] = []
     frq_volunteer: str = Field(max_length=150)
     frq_memory: str = Field(max_length=100)
     dietary_restrictions: list[str] = []

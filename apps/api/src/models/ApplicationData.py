@@ -110,6 +110,7 @@ class BaseVolunteerApplicationData(BaseModel):
     frq_memory: str = Field(max_length=100)
     dietary_restrictions: list[str] = []
     allergies: Union[str, None] = Field(None, max_length=2048)
+    frq_volunteer_allergy: Optional[str] = ""
 
     friday_availability: list[Hour] = []
     saturday_availability: list[Hour] = []

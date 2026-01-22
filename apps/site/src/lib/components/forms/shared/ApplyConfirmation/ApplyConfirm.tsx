@@ -32,8 +32,8 @@ export default async function ApplyConfirm({
 		role === "Mentor"
 			? mentorDetails
 			: role === "Volunteer"
-				? volunteerDetails // eslint-disable-line
-				: ""; // eslint-disable-line
+			  ? volunteerDetails // eslint-disable-line
+			  : ""; // eslint-disable-line
 
 	return (
 		<div className="flex items-center pt-24 pb-16">

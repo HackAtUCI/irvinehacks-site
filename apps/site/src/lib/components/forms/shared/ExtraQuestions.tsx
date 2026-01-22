@@ -31,9 +31,9 @@ const ihReferences = [
 	{ value: "other", text: "Other:" },
 ];
 
-export default function ExtraQuestions() {
+export default function ExtraQuestions({ hidden }: { hidden?: boolean }) {
 	return (
-		<>
+		<div className={`${hidden && "hidden"} flex flex-col gap-14 w-11/12`}>
 			<SimpleRadio
 				name="t_shirt_size"
 				values={sizes}
@@ -74,6 +74,6 @@ export default function ExtraQuestions() {
 				isRequired={false}
 				maxLength={1500}
 			/> */}
-		</>
+		</div>
 	);
 }

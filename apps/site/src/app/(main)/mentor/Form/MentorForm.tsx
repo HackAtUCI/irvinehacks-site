@@ -10,8 +10,8 @@ import ProfileInformation from "./MentorProfileInformation";
 import ShortAnswers from "./MentorShortAnswers";
 import ExperienceInformation from "./MentorExperienceInformation";
 import MultipleSelect from "@/lib/components/forms/MultipleSelect";
-import Textfield from "@/lib/components/forms/Textfield";
 import ControlledMultipleSelect from "@/lib/components/forms/ControlledMultipleSelect";
+import ExtraQuestions from "@/lib/components/forms/shared/ExtraQuestions";
 
 export default function MentorForm() {
 	const [mentorSelection, setMentorSelection] = useState<
@@ -43,12 +43,8 @@ export default function MentorForm() {
 
 			<BasicInformation hidden={hidden} />
 			<SchoolInformation hidden={hidden} />
-			{/* T-shirt size dropdown and image*/}
-			{/* dietary restrictions multi select with other */}
-			{/* allergies radio button, if yes, show input? could be blank */}
-			{/* Where did you hear about IH multiselect with other */}
+			<ExtraQuestions hidden={hidden} />
 
-			{/* conditionally render */}
 			<ExperienceInformation
 				isTechMentor={mentorSelection.is_tech_mentor}
 				isDesignMentor={mentorSelection.is_design_mentor}
@@ -76,12 +72,12 @@ export default function MentorForm() {
 			/>
 
 			{/* optional cyberpunk avatar */}
-			<Textfield
+			{/* <Textfield
 				name="other_questions"
 				labelText="Questions/comments/concerns?"
 				containerClass={`${hidden && "hidden"} flex flex-col w-11/12`}
 				isRequired={false}
-			/>
+			/> */}
 			<AgeInformation hidden={hidden} />
 		</BaseForm>
 	);

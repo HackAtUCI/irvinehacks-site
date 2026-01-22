@@ -1,5 +1,9 @@
+import Image from "next/image";
+
 import getUserIdentity from "@/lib/utils/getUserIdentity";
 import ConfirmationDetails from "./ConfirmationDetails";
+
+import cityBackground from "@/assets/backgrounds/alt_illus_moonless.png";
 
 interface ApplyConfirmProps {
 	applicationURL: "/apply" | "/mentor" | "/volunteer";
@@ -28,11 +32,20 @@ export default async function ApplyConfirm({
 		role === "Mentor"
 			? mentorDetails
 			: role === "Volunteer"
-			  ? volunteerDetails // eslint-disable-line
-			  : ""; // eslint-disable-line
+				? volunteerDetails // eslint-disable-line
+				: ""; // eslint-disable-line
 
 	return (
 		<div className="flex items-center pt-24 pb-16">
+			<Image
+				src={cityBackground}
+				alt="Background image"
+				quality={100}
+				fill
+				sizes="100vh"
+				style={{ objectFit: 'cover', zIndex: -1 }} // cover ensures it covers the area and z-index places it behind content
+				priority
+			/>
 			<ConfirmationDetails
 				isLoggedIn={identity.uid !== null}
 				applicationURL={applicationURL}

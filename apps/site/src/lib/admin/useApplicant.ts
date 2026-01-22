@@ -9,7 +9,6 @@ export type Review = [string, Uid, Score, string | null];
 interface BaseApplicationData {
 	email: string;
 	pronouns: string[];
-	ih_reference: string[];
 	ethnicity: string;
 	is_18_older: boolean;
 	school: string;
@@ -72,7 +71,7 @@ export interface MentorApplicationData extends BaseApplicationData {
 
 export interface VolunteerApplicationData extends BaseApplicationData {
 	frq_volunteer: string;
-	frq_memory: string;
+	frq_utensil: string;
 	allergies: string | null;
 	extra_questions: string | null;
 	other_questions: string | null;

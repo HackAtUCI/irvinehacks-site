@@ -33,7 +33,6 @@ SAMPLE_APPLICATION = {
     "pronouns": [],
     "ethnicity": "eth",
     "is_18_older": "true",
-    "ih_reference"
     "school": "UC Irvine",
     "education_level": "Fifth+ Year Undergraduate",
     "major": "Computer Science",

@@ -16,9 +16,9 @@ const VOLUNTEER_APPLICATION_SECTIONS: VolunteerApplicationSections = {
 	Education: ["school", "education_level", "major"],
 	"Free Response Questions": [
 		"frq_volunteer",
-		"frq_memory",
+		"frq_utensil",
 		"allergies",
-		// "extra_questions",
+		"extra_questions",
 	],
 	Availability: [
 		"friday_availability",

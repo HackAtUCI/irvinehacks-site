@@ -11,40 +11,28 @@ export interface StatusImageProps {
 const statusIcons = {
 	Accepted: {
 		src: PortalCheck,
-		alt: "Accepted",
-		width: 178,
-		height: 178,
-		className:
-			"w-16 h-16 sm:w-24 sm:h-24 md:w-[120px] md:h-[120px] flex-shrink-0",
+		alt: "Accepted icon",
 	},
 	Rejected: {
 		src: PortalWarning,
-		alt: "Rejected",
-		width: 108,
-		height: 94,
-		className:
-			"w-12 h-10 sm:w-16 sm:h-14 md:w-[108px] md:h-[94px] flex-shrink-0",
+		alt: "Rejected icon",
 	},
 	Pending: {
 		src: PortalPending,
-		alt: "Pending",
-		width: 178,
-		height: 178,
-		className:
-			"w-16 h-16 sm:w-24 sm:h-24 md:w-[120px] md:h-[120px] flex-shrink-0",
+		alt: "Pending icon",
 	},
 };
 
 export const StatusImage: React.FC<StatusImageProps> = ({ statusIcon }) => {
-	const { src, alt, width, height, className } = statusIcons[statusIcon];
+	const { src, alt } = statusIcons[statusIcon];
 
 	return (
 		<Image
 			src={src}
 			alt={alt}
-			width={width}
-			height={height}
-			className={className}
+			width={120}
+			height={120}
+			className="w-16 sm:w-24 md:w-[120px] flex-shrink-0"
 		/>
 	);
 };

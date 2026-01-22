@@ -7,15 +7,16 @@
 // import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
 // import Button from "@/lib/components/Button/Button";
 // import buttonStyles from "@/lib/components/Button/Button.module.scss";
-// import { Identity } from "@/lib/utils/getUserIdentity";
+import { Identity } from "@/lib/utils/getUserIdentity";
 import BaseNavbar from "./BaseNavbar";
 
-// interface NavbarProps {
-// 	identity: Identity;
-// }
+interface NavbarProps {
+	identity: Identity;
+}
 
-export default function Navbar() {
-	// const { uid, status } = identity;
+export default function Navbar({ identity }: NavbarProps) {
+	const { uid, status } = identity;
+	console.log(uid, status);
 	// const isLoggedIn = uid !== null;
 
 	return (

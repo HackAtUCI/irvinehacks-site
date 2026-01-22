@@ -24,7 +24,7 @@ export default function CharacterBox({
 			className={`${className} ${styles.hoverGroup} flex flex-col items-center justify-center mb-20 lg:mb-0`}
 		>
 			<Link
-				className="relative w-5/6 h-[300px] flex justify-center items-center mb-10"
+				className="relative w-5/6 h-[300px] flex justify-center items-center sm:mb-10"
 				href={href}
 			>
 				<Image

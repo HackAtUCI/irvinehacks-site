@@ -10,5 +10,5 @@ class HackathonName(str, Enum):
 ALLOWED_HACKATHONS = {HackathonName.IRVINEHACKS, HackathonName.ZOTHACKS}
 
 hackathon_name_ctx: ContextVar[HackathonName] = ContextVar(
-    "hackathon_name", default=HackathonName.ZOTHACKS
+    "hackathon_name", default=HackathonName.IRVINEHACKS
 )

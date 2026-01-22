@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, forwardRef } from "react";
+import clsx from "clsx";
 
 import RequiredAsterisk from "./RequiredAsterisk";
 
@@ -12,6 +13,7 @@ interface MultipleSelectProps {
 	inputType: "radio" | "checkbox";
 	horizontal?: boolean;
 	isRequired?: boolean;
+	hidden?: boolean;
 }
 
 interface OtherInputProps {
@@ -45,6 +47,7 @@ export default function MultipleSelect({
 	containerClass,
 	horizontal,
 	isRequired,
+	hidden,
 }: MultipleSelectProps) {
 	const [isOtherChecked, setIsOtherChecked] = useState(false);
 	const otherRef = useRef<HTMLInputElement>(null);
@@ -56,7 +59,7 @@ export default function MultipleSelect({
 	}, [isOtherChecked]);
 
 	return (
-		<div className={containerClass}>
+		<div className={clsx(hidden && "hidden", containerClass)}>
 			<p className="m-0 text-lg mb-4">
 				{labelText} {isRequired && <RequiredAsterisk />}
 			</p>

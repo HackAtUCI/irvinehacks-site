@@ -6,14 +6,14 @@ export default function VolunteerFRQ() {
 			<div className="text-4xl font-bold">Volunteer Information</div>
 			<Textfield
 				name="frq_volunteer"
-				labelText="Why are you interested in volunteering, and what do you expect to gain from this experience?"
+				labelText="Why are you interested in volunteering, and what do you expect to gain from this experience? (max word count 150)"
 				containerClass="w-full"
 				isRequired={true}
 				maxLength={1500}
 			/>
 			<Textfield
-				name="frq_utensil"
-				labelText="If you were a kitchen utensil, what would you be and why?"
+				name="frq_memory"
+				labelText="If memories could be edited like a video, which memory would you never want to change and why? (max word count 100)"
 				containerClass="w-full"
 				isRequired={true}
 				maxLength={1500}

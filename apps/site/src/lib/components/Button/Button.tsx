@@ -9,6 +9,7 @@ interface ButtonProps {
 	className?: string;
 	href?: ComponentProps<typeof Link>["href"];
 	isLightVersion?: boolean;
+	isPinkVersion?: boolean;
 	isNavButton?: boolean;
 	usePrefetch?: boolean;
 	newWindow?: boolean;
@@ -22,6 +23,7 @@ const Button: React.FC<ButtonProps> = ({
 	className,
 	style,
 	isLightVersion,
+	isPinkVersion,
 	isNavButton,
 	disabled,
 	usePrefetch = true,
@@ -36,6 +38,7 @@ const Button: React.FC<ButtonProps> = ({
 					rel={newWindow ? "noopener noreferrer" : ""}
 					className={clsx(
 						styles.button,
+						isPinkVersion && styles.pinkButton,
 						isLightVersion && styles.lightButton,
 						isNavButton && styles.navButton,
 						isLightVersion ? "font-body" : "font-display",
@@ -50,11 +53,14 @@ const Button: React.FC<ButtonProps> = ({
 		);
 	}
 	return (
-		<div className={clsx(!isLightVersion && styles.buttonBox)}>
+		<div
+			className={clsx(!isLightVersion && !isPinkVersion && styles.buttonBox)}
+		>
 			<button
 				type="submit"
 				className={clsx(
 					styles.button,
+					isPinkVersion && styles.pinkButton,
 					isLightVersion && styles.lightButton,
 					isLightVersion ? "font-body" : "font-display",
 					"text-2xl",

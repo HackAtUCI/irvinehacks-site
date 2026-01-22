@@ -1,6 +1,28 @@
 .footer {
-	color: white;
-	border-top-left-radius: 500rem 20rem;
-	border-top-right-radius: 500rem 20rem;
-	padding-bottom: 20px;
+	background-color: rgba(23, 15, 81, 0.6); // --color-dark-blue
+	padding: 22px 32px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+.hackLogo {
+	display: flex;
+	align-items: center;
+}
+
+@media (max-width: 600px) {
+	.footerText {
+		white-space: normal;
+		text-align: center;
+	}
+}
+
+.bullet {
+	margin: 0 6px;
+}
+
+.link {
+	color: var(--color-pink);
+	text-decoration: none;
 }

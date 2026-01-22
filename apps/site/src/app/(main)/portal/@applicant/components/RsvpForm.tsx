@@ -24,7 +24,7 @@ export default function RsvpForm({ buttonText, showWarning }: RsvpFormProps) {
 			<Button
 				text={buttonText}
 				isLightVersion={true}
-				className="text-xs sm:text-base md:text-4xl"
+				className="text-xs sm:text-base md:text-4xl !bg-pink"
 			/>
 		</form>
 	);

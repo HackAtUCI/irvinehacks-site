@@ -10,7 +10,6 @@ import Message from "./components/Message";
 import SignWaiver from "./components/SignWaiver";
 import ReturnHome from "./components/ReturnHome";
 import VerticalTimeline from "./components/timeline/VerticalTimeline";
-import BackgroundStars from "./components/BackgroundStars";
 import QRCodeComponent from "./components/QRCode";
 
 const rolesArray = ["Mentor", "Hacker", "Volunteer"];
@@ -42,7 +41,6 @@ function Portal() {
 
 	return (
 		<div className="relative">
-			<BackgroundStars className="left-[-15%] top-[21%]" />
 			<div className="bg-transparent text-black max-w-6xl rounded-2xl p-6 flex flex-col mb-24 w-full">
 				<div className="mb-12">
 					<QRCodeComponent
@@ -61,7 +59,6 @@ function Portal() {
 				{submittedWaiver && <ConfirmAttendance status={status as Status} />}
 				{rejected && <ReturnHome />}
 			</div>
-			<BackgroundStars className="right-[-15%] bottom-[21%]" />
 		</div>
 	);
 }

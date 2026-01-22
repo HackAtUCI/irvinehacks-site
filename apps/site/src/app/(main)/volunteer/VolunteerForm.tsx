@@ -5,16 +5,18 @@ import BaseForm from "@/lib/components/forms/shared/BaseForm";
 
 import ShiftAvailability from "./components/ShiftAvailability";
 import VolunteerFRQ from "./components/VolunteerFRQ";
-import ExtraQuestions from "./components/ExtraQuestions";
+import ExtraQuestions from "@/lib/components/forms/shared/ExtraQuestions";
 
 export default function VolunteerForm() {
 	return (
 		<BaseForm applicationType="Volunteer" applyPath="/api/user/volunteer">
 			<BasicInformation />
-			<SchoolInformation />
-			<VolunteerFRQ />
-			<ShiftAvailability />
 			<ExtraQuestions />
+			<SchoolInformation />
+
+			<ShiftAvailability />
+			<VolunteerFRQ />
+
 			<AgeInformation />
 		</BaseForm>
 	);

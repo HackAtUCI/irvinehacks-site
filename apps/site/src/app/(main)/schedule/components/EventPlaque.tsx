@@ -13,21 +13,30 @@ interface EventPlaqueProps {
 	startTime: Date;
 	endTime: Date;
 	isHappening: boolean;
+	selected: boolean;
 	onClick: (title: string) => void;
 }
 
 export default forwardRef(function EventPlaque(
-	{ title, startTime, endTime, isHappening, onClick }: EventPlaqueProps,
+	{
+		title,
+		startTime,
+		// endTime,
+		isHappening,
+		selected,
+		onClick,
+	}: EventPlaqueProps,
 	ref: React.LegacyRef<HTMLDivElement>,
 ) {
 	const [hovered, setHovered] = useState(false);
+	const isSelected = hovered || selected;
 
 	const start = getTimeAndDates(startTime);
-	const end = getTimeAndDates(endTime);
+	// const end = getTimeAndDates(endTime);
 
 	return (
 		<div
-			className="duration-500 relative min-w-[200px] h-fit cursor-pointer"
+			className="duration-500 relative min-w-[200px] h-fit cursor-pointer text-yellow"
 			onMouseEnter={() => setHovered(true)}
 			onMouseLeave={() => setHovered(false)}
 			ref={ref}
@@ -35,37 +44,33 @@ export default forwardRef(function EventPlaque(
 		>
 			<div
 				className={
-					isHappening
-						? "duration-500 font-display p-5 w-full h-fit border-4 bg-blue-100 border-blue-900 text-blue-950 top-[-8px] left-[-8px]"
-						: `duration-500 font-display p-5 w-full h-fit border-4 top-0 left-0 ${
-								hovered
-									? `bg-white border-black text-black top-[-5px] left-[-5px] ${styles.plaqueHover}`
-									: "bg-black border-white"
+					isSelected
+						? `duration-500 font-display p-5 w-full h-fit rounded-[30px] ${styles.plaqueHover}`
+						: `duration-500 font-display p-5 w-full h-fit rounded-[30px] ${
+								hovered ? `${styles.plaqueHover}` : ""
 						  }`
 				}
 			>
 				<div
 					className={
-						isHappening
+						isSelected
 							? "text-2xl flex justify-between min-h-[50px] gap-5 items-center"
 							: `text-2xl`
 					}
 				>
-					<span>{title}</span>
-				</div>
-				<div className="text-lg">
-					<div>
-						{startTime.getTime() === endTime.getTime()
-							? `${end.compositeTimeHourMinute} ${end.amPm}`
-							: `${start.compositeTimeHourMinute} - ${end.compositeTimeHourMinute} ${end.amPm}`}
+					<div className="flex flex-col gap-4">
+						<div className="text-5xl">
+							{`${start.compositeTimeHourMinute} ${start.amPm}`}
+						</div>
+						<span className="text-2xl">{title}</span>
 					</div>
 				</div>
 			</div>
 			<div
 				className={
 					isHappening
-						? "absolute w-full h-full top-[9px] left-[9px] z-[-1] duration-500 bg-blue-100"
-						: `absolute w-full h-full top-0 left-0 z-[-1] duration-500 bg-white ${
+						? `absolute w-full h-full top-[9px] left-[9px] z-[-1] duration-500${styles.decorHover}`
+						: `absolute w-full h-full top-0 left-0 z-[-1] duration-500 ${
 								hovered && styles.decorHover
 						  }`
 				}

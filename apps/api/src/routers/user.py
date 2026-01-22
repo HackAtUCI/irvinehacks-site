@@ -376,14 +376,19 @@ def _parsed_form(form: FormData) -> dict[str, Any]:
     Normally, FastAPI will automatically parse the same key into a list
     ex. ...skills=Java&skills=C&skills=C++ will be parsed as ["Java", "C", "C++"]
 
-    This function is needed for the mentor application form because
+    This function is needed for the application forms  because
     discriminated unions don't work with FastAPI's Annotated Form()
     """
 
     # Fields that should always be lists, even with single values
     MULTI_SELECT_FIELDS = {
         "pronouns",
-        "experienced_technologies",
+        "mentor_type",
+        "tech_experienced_technologies",
+        "hardware_experienced_technologies",
+        "design_experienced_tools",
+        "ih_reference",
+        "areas_interested",
         "dietary_restrictions",
         "skills",
         "friday_availability",

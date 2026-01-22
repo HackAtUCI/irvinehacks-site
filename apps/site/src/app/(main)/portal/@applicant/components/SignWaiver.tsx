@@ -4,7 +4,7 @@ function SignWaiver() {
 	return (
 		<div className="mt-4 md:mt-10 text-[var(--color-white)]">
 			<h3 className="font-bold font-display mb-[9px] md:mb-[20px] text-[0.9375rem] sm:text-2xl md:text-[2.5rem] md:leading-10">
-				RSVP
+				Waiver
 			</h3>
 			<p className="font-sans font-normal text-xs sm:text-base md:text-[24px] leading-[1.39] tracking-normal">
 				In order to attend IrvineHacks 2026, all participants must complete the
@@ -19,7 +19,7 @@ function SignWaiver() {
 					newWindow={true}
 					usePrefetch={false}
 					isLightVersion={true}
-					className="!bg-pink !w-full md:!w-[875px] !h-[56px] sm:!h-[80px] md:!h-[112px] !font-sans !font-medium !text-[32px] !leading-none !tracking-normal !text-center"
+					className="!bg-pink !w-full md:!w-[875px] !h-[56px] sm:!h-[80px] md:!h-[112px] !font-sans !font-medium !text-[32px] !leading-none !tracking-normal !text-center !flex !items-center !justify-center"
 				/>
 			</div>
 			<p className="text-xl w-full text-center mt-2 text-yellow-500">

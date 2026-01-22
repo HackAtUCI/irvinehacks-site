@@ -22,9 +22,6 @@ function Message({ status }: MessageProps) {
 		case Status.Rejected: {
 			message = (
 				<>
-					<h2 className="font-display text-2xl md:text-[40px] leading-none">
-						Sorry
-					</h2>
 					<p className="mt-4">
 						Thank you for applying to IrvineHacks this year. We have read
 						through many applications so far, and unfortunately are unable to

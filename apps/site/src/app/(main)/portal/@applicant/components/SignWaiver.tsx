@@ -4,7 +4,7 @@ function SignWaiver() {
 	return (
 		<div className="mt-4 md:mt-10 text-[var(--color-white)]">
 			<h3 className="font-bold font-display mb-[9px] md:mb-[20px] text-[0.9375rem] sm:text-2xl md:text-[2.5rem] md:leading-10">
-				RSVP
+				Waiver
 			</h3>
 			<p className="font-sans font-normal text-xs sm:text-base md:text-[24px] leading-[1.39] tracking-normal">
 				In order to attend IrvineHacks 2026, all participants must complete the

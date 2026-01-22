@@ -5,7 +5,6 @@ import { StatusImageProps } from "./StatusImage";
 export const VerdictComponent = ({ status }: { status: Status }) => {
 	let verdict: {
 		text: string;
-		finished: boolean;
 		statusIcon: StatusImageProps["statusIcon"];
 	} | null = null;
 
@@ -17,7 +16,6 @@ export const VerdictComponent = ({ status }: { status: Status }) => {
 		case Status.Attending: {
 			verdict = {
 				text: "Application Accepted",
-				finished: true,
 				statusIcon: "Accepted",
 			};
 			break;
@@ -25,7 +23,6 @@ export const VerdictComponent = ({ status }: { status: Status }) => {
 		case Status.Rejected: {
 			verdict = {
 				text: "Application Rejected",
-				finished: true,
 				statusIcon: "Rejected",
 			};
 			break;
@@ -34,7 +31,6 @@ export const VerdictComponent = ({ status }: { status: Status }) => {
 		case Status.Waitlisted: {
 			verdict = {
 				text: "Application Waitlisted",
-				finished: true,
 				statusIcon: "Pending",
 			};
 			break;
@@ -43,7 +39,6 @@ export const VerdictComponent = ({ status }: { status: Status }) => {
 		case Status.Reviewed: {
 			verdict = {
 				text: "Application Under Review",
-				finished: true,
 				statusIcon: "Pending",
 			};
 			break;
@@ -55,10 +50,6 @@ export const VerdictComponent = ({ status }: { status: Status }) => {
 	}
 
 	return verdict ? (
-		<TimelineComponent
-			text={verdict.text}
-			finished={verdict.finished}
-			statusIcon={verdict.statusIcon}
-		/>
+		<TimelineComponent text={verdict.text} statusIcon={verdict.statusIcon} />
 	) : null;
 };

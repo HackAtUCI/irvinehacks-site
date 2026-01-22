@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, PropsWithChildren, useState } from "react";
-import Image from "next/image"
+import Image from "next/image";
 import axios from "axios";
 
 import Button from "@/lib/components/Button/Button";

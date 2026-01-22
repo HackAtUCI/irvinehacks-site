@@ -39,6 +39,7 @@ def make_empty_none(val: Union[str, None]) -> Union[str, None]:
 FIELDS_SUPPORTING_OTHER = [
     "pronouns",
     "ethnicity",
+    "ih_reference",
     "school",
     "major",
     "experienced_technologies",

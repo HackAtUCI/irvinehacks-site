@@ -36,8 +36,10 @@ export default async function ApplicationFlow({
 		redirect("/login");
 	}
 
-	const deadlinePassed = hasDeadlinePassed();
-	const applicationsOpened = haveApplicationsOpened();
+	// const deadlinePassed = hasDeadlinePassed();
+	// const applicationsOpened = haveApplicationsOpened();
+	const deadlinePassed = false;
+	const applicationsOpened = true;
 	const applyBody = hasAcceptedQueryParam ? (
 		<div className="my-32">
 			<Title applicationType={applicationType} />

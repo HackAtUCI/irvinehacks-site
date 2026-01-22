@@ -12,6 +12,7 @@ import cityBackground from "@/assets/backgrounds/alt_illus_moonless.png";
 
 const FIELDS_WITH_OTHER = [
 	"pronouns",
+	"ih_reference",
 	"ethnicity",
 	"school",
 	"major",

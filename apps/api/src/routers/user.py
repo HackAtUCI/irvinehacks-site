@@ -176,8 +176,8 @@ async def _apply_flow(
     # Check if current datetime is past application deadline
     now = datetime.now(timezone.utc)
 
-    if _is_past_deadline(now):
-        raise HTTPException(status.HTTP_403_FORBIDDEN, "Applications have closed.")
+    # if _is_past_deadline(now):
+    #     raise HTTPException(status.HTTP_403_FORBIDDEN, "Applications have closed.")
 
     # check if user already has a role
     existing_record = await mongodb_handler.retrieve_one(
@@ -194,10 +194,14 @@ async def _apply_flow(
 
     raw_app_data_dump = raw_application_data.model_dump()
 
+    print(raw_app_data_dump)
+    print(FIELDS_SUPPORTING_OTHER)
+
     # Reject unprocessed other values
     for field in FIELDS_SUPPORTING_OTHER:
         value = raw_app_data_dump.get(field)
         if value == "other" or (isinstance(value, list) and "other" in value):
+            log.info("this is error ")
             raise HTTPException(
                 status.HTTP_422_UNPROCESSABLE_ENTITY,
                 "Please enable JavaScript on your browser.",

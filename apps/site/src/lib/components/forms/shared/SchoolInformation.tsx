@@ -44,7 +44,7 @@ const majorOptions = [
 	{ value: "other", text: "Other" },
 ];
 
-export default function SchoolInformation({ hidden }: { hidden: boolean }) {
+export default function SchoolInformation({ hidden }: { hidden?: boolean }) {
 	return (
 		<div className={`${hidden && "hidden"} flex flex-col gap-5 w-11/12`}>
 			<p className="text-4xl m-0 font-bold max-[700px]:text-3xl">

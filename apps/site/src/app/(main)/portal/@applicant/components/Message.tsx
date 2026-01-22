@@ -70,7 +70,7 @@ function Message({ status }: MessageProps) {
 	}
 
 	return (
-		<div className="font-body text-[var(--color-white)] text-xs sm:text-base md:text-2xl">
+		<div className="font-body text-[var(--color-white)] text-xs sm:text-base md:text-2xl pt-6 md:pt-10">
 			{message}
 		</div>
 	);

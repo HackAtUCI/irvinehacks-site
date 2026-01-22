@@ -8,8 +8,8 @@ interface ConfirmAttendanceProps {
 function ConfirmAttendance({ status }: ConfirmAttendanceProps) {
 	const buttonText =
 		status === Status.Confirmed || status === Status.Attending
-			? "I am no longer able to attend IrvineHacks 2025"
-			: "I will be attending IrvineHacks 2025";
+			? "I am no longer able to attend IrvineHacks 2026"
+			: "I will be attending IrvineHacks 2026";
 
 	return (
 		<div className="mt-2 md:mt-8 text-[var(--color-white)]">
@@ -32,7 +32,7 @@ function ConfirmAttendance({ status }: ConfirmAttendanceProps) {
 				</>
 			) : (
 				<p className="text-xs sm:text-base md:text-2xl">
-					If you plan on attending IrvineHacks 2025, please confirm your
+					If you plan on attending IrvineHacks 2026, please confirm your
 					attendance using the button below!
 				</p>
 			)}

@@ -43,7 +43,7 @@ export default async function ApplyConfirm({
 				quality={100}
 				fill
 				sizes="100vh"
-				style={{ objectFit: 'cover', zIndex: -1 }} // cover ensures it covers the area and z-index places it behind content
+				style={{ objectFit: "cover", zIndex: -1 }} // cover ensures it covers the area and z-index places it behind content
 				priority
 			/>
 			<ConfirmationDetails

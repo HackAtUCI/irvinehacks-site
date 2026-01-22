@@ -39,6 +39,16 @@ export default function ExtraQuestions({ hidden }: { hidden?: boolean }) {
 				values={sizes}
 				title="T-Shirt Size"
 				titleClass="text-xl mb-0.5"
+				subtitle={
+					<a
+						href="https://drive.google.com/file/d/1Pzz5KYmFGCSGXuVOg2E9znkYVfun0X4w/view?usp=sharing"
+						className="underline text-[#0084ff]"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						Size guide
+					</a>
+				}
 				containerClassTotal="w-11/12 flex flex-col gap-5"
 				isRequired={true}
 				labelClass="text-xl"

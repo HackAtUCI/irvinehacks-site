@@ -43,7 +43,7 @@ FIELDS_SUPPORTING_OTHER = [
     "major",
     "experienced_technologies",
     "dietary_restrictions",
-    "ih_reference"
+    "ih_reference",
 ]
 
 

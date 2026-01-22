@@ -12,7 +12,7 @@ const ChooseCharacter = () => {
 		<section className="bg-[#00001c] py-14" id="apply">
 			<ApplicationHeader />
 
-			<div className="w-fit mx-auto flex flex-col justify-center">
+			<div className="mx-auto max-w-[1500px] w-11/12 flex flex-col justify-center">
 				<div className={styles.applicationNoticeContainer}>
 					<div className={styles.applicationBadge}>
 						<p className={styles.applicationText}>APPLICATION NEEDED</p>

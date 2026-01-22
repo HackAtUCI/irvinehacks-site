@@ -47,9 +47,7 @@ export default function CharacterBox({
 
 			<div className="bg-[#00FFFF4F] lg:h-[175px] flex justify-center items-center w-5/6 min-h-[120px]">
 				<Link href={href}>
-					<p
-						className={`text-center text-[1rem] text-wrap mb-0 mt-4 p-6 pointer-events-none`}
-					>
+					<p className="text-center text-[1rem] text-wrap m-0 p-6 pointer-events-none">
 						{chatText}
 					</p>
 				</Link>

@@ -388,6 +388,7 @@ def _parsed_form(form: FormData) -> dict[str, Any]:
         "hardware_experienced_technologies",
         "design_experienced_tools",
         "ih_reference",
+        "areas_interested",
         "dietary_restrictions",
         "skills",
         "friday_availability",

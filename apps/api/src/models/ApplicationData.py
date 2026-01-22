@@ -36,12 +36,15 @@ def make_empty_none(val: Union[str, None]) -> Union[str, None]:
     return val
 
 
+# Ensure this array matches FIELDS_With_OTHER in frontend BaseForm.tsx
 FIELDS_SUPPORTING_OTHER = [
     "pronouns",
     "ethnicity",
     "school",
     "major",
-    "experienced_technologies",
+    "tech_experienced_technologies",
+    "hardware_experienced_technologies",
+    "design_experienced_tools",
     "dietary_restrictions",
     "ih_reference",
 ]

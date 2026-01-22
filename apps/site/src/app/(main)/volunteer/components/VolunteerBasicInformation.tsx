@@ -1,25 +1,23 @@
-import DropdownSelect from "@/lib/components/forms/DropdownSelect";
-import MultipleSelect from "@/lib/components/forms/MultipleSelect";
 import TextInput from "@/lib/components/forms/TextInput";
+import DropdownSelect from "@/lib/components/forms/DropdownSelect";
 
 const pronouns = [
 	{ value: "he", text: "He/him/his" },
 	{ value: "she", text: "She/her/hers" },
 	{ value: "they", text: "They/them/theirs" },
-	{ value: "ze", text: "Ze/zir/zirs" },
 	{ value: "other", text: "Other:" },
 ];
 
-const ethnicity = [
-	{ value: "American", text: "American Indian or Alaskan" },
-	{ value: "Asian", text: "Asian or Pacific Islander" },
-	{ value: "Black", text: "Black or African American" },
-	{ value: "Hispanic", text: "Hispanic" },
-	{ value: "White", text: "White or Caucasian" },
-	{ value: "Two-or-more", text: "Two or more races" },
-	{ value: "Prefer not to answer", text: "Prefer not to answer" },
-	{ value: "other", text: "Other:" },
-];
+// const ethnicity = [
+// 	{ value: "American", text: "American Indian or Alaskan" },
+// 	{ value: "Asian", text: "Asian or Pacific Islander" },
+// 	{ value: "Black", text: "Black or African American" },
+// 	{ value: "Hispanic", text: "Hispanic" },
+// 	{ value: "White", text: "White or Caucasian" },
+// 	{ value: "Two-or-more", text: "Two or more races" },
+// 	{ value: "Prefer not to answer", text: "Prefer not to answer" },
+// 	{ value: "other", text: "Other:" },
+// ];
 
 export default function BasicInformation() {
 	return (
@@ -45,7 +43,7 @@ export default function BasicInformation() {
 					placeholder="Anteater"
 				/>
 			</div>
-
+			{/* 
 			<div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
 				<DropdownSelect
 					name="ethnicity"
@@ -53,15 +51,14 @@ export default function BasicInformation() {
 					containerClass="flex flex-col w-full max-[1000px]:w-full"
 					values={ethnicity}
 				/>
-			</div>
+			</div> */}
 
 			<div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
-				<MultipleSelect
+				<DropdownSelect
 					name="pronouns"
 					labelText="Preferred Pronouns"
-					containerClass="flex flex-col w-full"
-					inputType="checkbox"
 					values={pronouns}
+					containerClass="flex flex-col w-[400px] max-[1000px]:w-full"
 				/>
 			</div>
 		</div>

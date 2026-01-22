@@ -1,0 +1,25 @@
+.loginFormGraphic {
+	position: absolute;
+	top: 0;
+	right: 0;
+	translate: 10% -50%;
+
+	width: 150px;
+	height: 150px;
+
+	@media (min-width: 640px) {
+		width: 200px;
+		height: 200px;
+		translate: 15% -50%;
+	}
+	@media (min-width: 768px) {
+		width: 300px;
+		height: 300px;
+		translate: 15% -50%;
+	}
+	@media (min-width: 1024px) {
+		width: 400px;
+		height: 400px;
+		translate: 25% -50%;
+	}
+}

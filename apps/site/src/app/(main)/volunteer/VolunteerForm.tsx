@@ -11,10 +11,12 @@ export default function VolunteerForm() {
 	return (
 		<BaseForm applicationType="Volunteer" applyPath="/api/user/volunteer">
 			<BasicInformation />
-			<SchoolInformation />
-			<VolunteerFRQ />
-			<ShiftAvailability />
 			<ExtraQuestions />
+			<SchoolInformation />
+
+			<ShiftAvailability />
+			<VolunteerFRQ />
+
 			<AgeInformation />
 		</BaseForm>
 	);

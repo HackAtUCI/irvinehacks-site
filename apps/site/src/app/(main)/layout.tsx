@@ -3,7 +3,6 @@ import Footer from "@/lib/components/Footer/Footer";
 
 import type { Metadata } from "next";
 
-import stars from "@/assets/backgrounds/starry_repeatable.png";
 import NavbarParent from "@/lib/components/Navbar/NavbarParent";
 import BaseNavbar from "@/lib/components/Navbar/BaseNavbar";
 
@@ -17,10 +16,7 @@ export const metadata: Metadata = {
 
 export default function Layout({ children }: PropsWithChildren) {
 	return (
-		<div
-			style={{ backgroundImage: `url(${stars.src})` }}
-			className="overflow-x-hidden bg-top bg-repeat-y bg-[length:100%] relative"
-		>
+		<div className="overflow-x-hidden bg-top bg-repeat-y bg-[length:100%] relative">
 			<Suspense fallback={<BaseNavbar />}>
 				<NavbarParent />
 			</Suspense>

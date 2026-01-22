@@ -4,6 +4,5 @@ export default function haveApplicationsOpened() {
 
 	const deadline = new Date(pstDeadline + utcOffset);
 	const now = new Date();
-
 	return now > deadline;
 }

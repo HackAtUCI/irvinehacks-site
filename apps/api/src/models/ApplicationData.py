@@ -43,6 +43,7 @@ FIELDS_SUPPORTING_OTHER = [
     "major",
     "experienced_technologies",
     "dietary_restrictions",
+    "ih_reference",
 ]
 
 
@@ -97,15 +98,19 @@ class BaseVolunteerApplicationData(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, str_max_length=1024)
 
     pronouns: list[str] = []
-    ethnicity: str
+    # ethnicity: str
     is_18_older: bool
+    t_shirt_size: Literal["S", "M", "L", "XL"]
     school: str
     education_level: str
     major: str
-    frq_volunteer: str = Field(max_length=2048)
-    frq_utensil: str = Field(max_length=2048)
+    # Field for question: "How did you hear about IrvineHacks?"
+    ih_reference: list[str] = []
+    frq_volunteer: str = Field(max_length=150)
+    frq_memory: str = Field(max_length=100)
+    dietary_restrictions: list[str] = []
     allergies: Union[str, None] = Field(None, max_length=2048)
-    extra_questions: Union[str, None] = Field(None, max_length=2048)
+    frq_volunteer_allergy: Optional[str] = ""
 
     friday_availability: list[Hour] = []
     saturday_availability: list[Hour] = []

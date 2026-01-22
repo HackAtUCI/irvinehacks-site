@@ -8,7 +8,7 @@ import Button from "@/lib/components/Button/Button";
 
 import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
 
-import cityBackground from "@/assets/backgrounds/alt_illus_moonless.png"
+import cityBackground from "@/assets/backgrounds/alt_illus_moonless.png";
 
 const FIELDS_WITH_OTHER = [
 	"pronouns",

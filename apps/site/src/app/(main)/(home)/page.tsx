@@ -2,9 +2,9 @@ import {
 	Landing,
 	ChooseCharacter,
 	FAQ,
-	Sponsors,
-	Partners,
-	Organizers,
+	// Sponsors,
+	// Partners,
+	// Organizers,
 } from "./sections";
 
 export const revalidate = 60;

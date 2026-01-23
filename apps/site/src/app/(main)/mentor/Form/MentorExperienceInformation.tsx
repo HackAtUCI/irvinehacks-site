@@ -1,4 +1,5 @@
 import MultipleSelect from "@/lib/components/forms/MultipleSelect";
+import { MultipleSelectSet } from "@/lib/components/forms/MultipleSelectSet/MultipleSelectSet";
 import RequiredAsterisk from "@/lib/components/forms/RequiredAsterisk";
 import Slider from "@/lib/components/forms/Slider";
 import Textfield from "@/lib/components/forms/Textfield";
@@ -76,10 +77,11 @@ function TechMentorQuestions({ isTechMentor }: { isTechMentor: boolean }) {
 					name="arduino_experience"
 				/>
 			</div>
-			<div className="flex flex-col gap-10 w-full">
-				<p className="text-4xl m-0 font-bold max-[700px]:text-3xl">
-					List of Technical Skills <RequiredAsterisk />
-				</p>
+			<MultipleSelectSet
+				className="flex flex-col gap-10 w-full"
+				labelText="List of Technical Skills"
+				isRequired={isTechMentor}
+			>
 				<div className="w-full flex flex-col gap-10 sm:gap-0 sm:flex-row">
 					<div className="w-full sm:w-1/2">
 						<p className="text-2xl m-0 font-bold max-[700px]:text-1xl">Tech</p>
@@ -104,7 +106,7 @@ function TechMentorQuestions({ isTechMentor }: { isTechMentor: boolean }) {
 						/>
 					</div>
 				</div>
-			</div>
+			</MultipleSelectSet>
 		</div>
 	);
 }
@@ -136,6 +138,7 @@ function DesignMentorQuestions({
 						containerClass="w-full"
 						inputType="checkbox"
 						values={designToolOptions}
+						isRequired={isDesignMentor}
 					/>
 				</div>
 			</div>
@@ -158,8 +161,8 @@ export default function ExperienceInformation({
 					name="mentor_prev_experience_saq1"
 					labelText="Have you participated or mentored at a hackathon before? If so, please list which ones. e.g. IrvineHacks 2024 (Hacker), ZotHacks 2024 (Mentor)"
 					containerClass="flex flex-col w-full"
+					textAreaClass="h-36"
 					isRequired={false}
-					maxLength={1500}
 				/>
 			</div>
 

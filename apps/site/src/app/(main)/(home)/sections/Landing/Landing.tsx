@@ -22,11 +22,29 @@ const Landing = () => {
 		scrollTo.current?.scrollIntoView({ behavior: "smooth" });
 	};
 
-	let applyButtonText = "COMING SOON";
+	let applyButtonText = (
+		<>
+			APPLICATIONS
+			<br />
+			COMING SOON
+		</>
+	);
 	if (deadlinePassed) {
-		applyButtonText = "CLOSED";
+		applyButtonText = (
+			<>
+				APPLICATIONS
+				<br />
+				CLOSED
+			</>
+		);
 	} else if (applicationsOpened) {
-		applyButtonText = "OPEN";
+		applyButtonText = (
+			<>
+				CLICK TO
+				<br />
+				APPLY NOW
+			</>
+		);
 	}
 
 	return (
@@ -62,8 +80,6 @@ const Landing = () => {
 								className="relative z-10 w-20"
 							/>
 							<p className="text-pink font-display text-xl sm:text-3xl z-10 m-0">
-								APPLICATIONS
-								<br />
 								{applyButtonText}
 							</p>
 							<div className="absolute bg-[#0040EE] opacity-50 w-full h-full" />

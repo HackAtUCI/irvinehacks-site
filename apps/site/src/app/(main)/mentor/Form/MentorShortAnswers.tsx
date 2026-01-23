@@ -1,3 +1,4 @@
+import CharacterCustomizer from "@/lib/components/forms/shared/CharacterCustomizer";
 import Textfield from "@/lib/components/forms/Textfield";
 
 interface ShortAnswersProps {
@@ -20,30 +21,32 @@ export default function ShortAnswers({
 				name="mentor_interest_saq2"
 				labelText="Why are you interested in being a mentor for IrvineHacks 2026? (100+ words recommended)"
 				containerClass="flex flex-col w-full"
-				isRequired={true}
-				maxLength={1500}
+				isRequired
 			/>
 			<Textfield
 				name="mentor_tech_saq3"
 				labelText="How would you go about helping a team that is struggling with a bug?"
 				containerClass={`${!isTechMentor && "hidden"} flex flex-col w-full`}
 				isRequired={isTechMentor}
-				maxLength={1500}
 			/>
 			<Textfield
 				name="mentor_design_saq4"
 				labelText="How would you go about helping a team that is struggling with a design problem?"
 				containerClass={`${!isDesignMentor && "hidden"} flex flex-col w-full`}
 				isRequired={isDesignMentor}
-				maxLength={1500}
 			/>
 			<Textfield
 				name="mentor_interest_saq5"
 				labelText="How would you help participants turn an ambitious idea into something achievable within the hackathon?"
 				containerClass="flex flex-col w-full"
-				isRequired={true}
-				maxLength={1500}
+				isRequired
 			/>
+			<p className="text-lg mb-2">
+				Our IrvineHacks 2026 theme is cyberpunk! Want to design a cyberpunk
+				avatar? Pick their augmentations, accessories, and companion, and just
+				have fun creating your character.
+			</p>
+			<CharacterCustomizer />
 		</div>
 	);
 }

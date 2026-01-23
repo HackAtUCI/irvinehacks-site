@@ -1,4 +1,7 @@
+"use client";
+
 import clsx from "clsx";
+import { useState } from "react";
 import Image from "next/image";
 
 import ValidatingForm from "@/lib/components/ValidatingForm/ValidatingForm";
@@ -19,6 +22,10 @@ function LoginForm({ return_to }: { return_to?: string }) {
 	if (return_to !== undefined) {
 		searchParams.append("return_to", return_to);
 	}
+
+	const [email, setEmail] = useState("");
+
+	const normalizedEmail = email.trim().toLowerCase();
 
 	return (
 		<div className="relative mx-8 md:m-0 p-6 md:px-10 md:py-8 border-[5px] border-[var(--color-yellow)] text-[var(--color-yellow)] bg-[#000] lg:w-[75%] w-[90%]">
@@ -41,6 +48,8 @@ function LoginForm({ return_to }: { return_to?: string }) {
 						placeholder="Enter email"
 						aria-describedby="email-description"
 						required
+						value={normalizedEmail}
+						onChange={(e) => setEmail(e.target.value)}
 					/>
 					<small id="email-description">
 						UCI students will log in with UCI SSO. Please make sure to use your

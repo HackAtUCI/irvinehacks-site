@@ -10,6 +10,7 @@ from models.user_record import Applicant, Role, Status
 from routers import user
 from services.mongodb_handler import Collection
 
+
 # Tests will break again next year, tech should notice and fix :P
 TEST_DEADLINE = datetime(2026, 10, 1, 8, 0, 0, tzinfo=timezone.utc)
 user.DEADLINE = TEST_DEADLINE
@@ -36,6 +37,10 @@ SAMPLE_APPLICATION = {
     "frq_memory": "",
     "other_questions": "",
     "application_type": "Volunteer",
+    "character_head_index": "0",
+    "character_body_index": "0",
+    "character_feet_index": "0",
+    "character_companion_index": "0",
     "friday_availability": ["12", "13"],
     "saturday_availability": ["14", "18"],
     "sunday_availability": ["9", "10"],
@@ -171,7 +176,7 @@ def test_volunteer_apply_with_confirmation_email_issue_causes_500(
 def test_volunteer_application_data_is_bson_encodable() -> None:
     """Test that application data model can be encoded into BSON to store in MongoDB."""
     encoded = bson.encode(EXPECTED_APPLICATION_DATA.model_dump())
-    assert len(encoded) == 478
+    assert len(encoded) == 587
 
 
 def test_volunteer_past_deadline_causes_403() -> None:

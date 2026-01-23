@@ -1,5 +1,5 @@
 import TextInput from "@/lib/components/forms/TextInput";
-import DropdownSelect from "@/lib/components/forms/DropdownSelect";
+import MultipleSelect from "@/lib/components/forms/MultipleSelect";
 
 const pronouns = [
 	{ value: "he", text: "He/him/his" },
@@ -54,11 +54,12 @@ export default function BasicInformation() {
 			</div> */}
 
 			<div className="flex gap-5 w-full max-[1000px]:flex-col max-[1000px]:items-center">
-				<DropdownSelect
+				<MultipleSelect
 					name="pronouns"
 					labelText="Preferred Pronouns"
+					containerClass="flex flex-col w-1/2 max-[1000px]:w-full"
+					inputType="checkbox"
 					values={pronouns}
-					containerClass="flex flex-col w-[400px] max-[1000px]:w-full"
 				/>
 			</div>
 		</div>

@@ -35,6 +35,11 @@ import blankBody from "@/assets/images/characterCustomizer/blank_body.PNG";
 import blankHead from "@/assets/images/characterCustomizer/blank_head.PNG";
 import blankTail from "@/assets/images/characterCustomizer/blank_tail.PNG";
 
+// Line SVGs
+import lineHead from "@/assets/images/characterCustomizer/line_head.svg";
+import lineBody from "@/assets/images/characterCustomizer/line_body.svg";
+import lineFoot from "@/assets/images/characterCustomizer/line_foot.svg";
+
 const HEADS = [head1, head2, head3, head4, head5];
 const BODIES = [body1, body2, body3, body4];
 const FEET = [feet1, feet2, feet3, feet4, feet5, feet6];
@@ -74,7 +79,7 @@ export const CharacterCustomizer = () => {
 			{/* Main Content Area */}
 			<div className="relative z-10 w-full max-w-[800px] h-full flex items-center justify-center">
 				{/* HUD Frame Background */}
-				<div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+				<div className="invisible lg:visible absolute inset-0 flex items-center justify-center pointer-events-none z-20">
 					<Image
 						src={hudBackground}
 						alt="Interface Frame"
@@ -160,7 +165,7 @@ export const CharacterCustomizer = () => {
 					{/* We use pointer-events-auto on the interactive elements */}
 
 					{/* Left Controls (Arrows) */}
-					<div className="absolute left-[15%] top-1/2 -translate-y-1/2 flex flex-col gap-12 pointer-events-auto">
+					<div className="absolute left-[5%] xl:left-[15%] top-1/2 -translate-y-1/2 flex flex-col gap-12 pointer-events-auto">
 						{/* Top Arrow - Head */}
 						<button
 							type="button"
@@ -209,7 +214,7 @@ export const CharacterCustomizer = () => {
 					</div>
 
 					{/* Right Controls (Arrows) */}
-					<div className="absolute right-[15%] top-1/2 -translate-y-1/2 flex flex-col gap-12 pointer-events-auto">
+					<div className="absolute right-[5%] xl:right-[15%] top-1/2 -translate-y-1/2 flex flex-col gap-12 pointer-events-auto">
 						{/* Top Arrow - Head */}
 						<button
 							type="button"
@@ -247,31 +252,32 @@ export const CharacterCustomizer = () => {
                 or we can visually approximate based on the screenshot. 
                 The screenshot has lines pointing to parts. I'll just place the text nearby for now.
             */}
-					<div className="absolute left-[28%] md:left-[32%] top-[35%] pointer-events-auto">
-						<div className="flex items-center gap-2">
-							<span className="text-cyan-400 font-mono text-sm uppercase tracking-widest drop-shadow-[0_0_5px_rgba(34,211,238,0.8)]">
-								Glasses {headIndex + 1}
-							</span>
-							{/* Line visual could go here */}
-							<div className="w-12 h-[1px] bg-cyan-400/50 hidden md:block"></div>
+					<div className="invisible lg:visible">
+						<div className="absolute md:left-[27%] xl:left-[31%] 2xl:left-[32%] top-[29%] pointer-events-auto">
+							<div className="flex flex-col items-center gap-2">
+								<span className="text-cyan-400 font-mono text-sm uppercase tracking-widest drop-shadow-[0_0_5px_rgba(34,211,238,0.8)]">
+									Glasses {headIndex + 1}
+								</span>
+								<Image src={lineHead} alt="" className="hidden md:block" />
+							</div>
 						</div>
-					</div>
 
-					<div className="absolute right-[28%] md:right-[32%] top-[45%] pointer-events-auto text-right">
-						<div className="flex items-center gap-2 flex-row-reverse">
-							<span className="text-fuchsia-400 font-mono text-sm uppercase tracking-widest drop-shadow-[0_0_5px_rgba(232,121,249,0.8)]">
-								Jacket {bodyIndex + 1}
-							</span>
-							<div className="w-8 h-[1px] bg-fuchsia-400/50 hidden md:block"></div>
+						<div className="absolute md:right-[27%] xl:right-[31%] 2xl:right-[32%] top-[38%] pointer-events-auto text-right">
+							<div className="flex flex-col gap-2 flex-row-reverse">
+								<span className="text-fuchsia-400 font-mono text-sm uppercase tracking-widest drop-shadow-[0_0_5px_rgba(232,121,249,0.8)]">
+									Jacket {bodyIndex + 1}
+								</span>
+								<Image src={lineBody} alt="" className="hidden md:block" />
+							</div>
 						</div>
-					</div>
 
-					<div className="absolute left-[28%] md:left-[32%] top-[55%] pointer-events-auto">
-						<div className="flex items-center gap-2">
-							<span className="text-cyan-400 font-mono text-sm uppercase tracking-widest drop-shadow-[0_0_5px_rgba(34,211,238,0.8)]">
-								Pants {feetIndex + 1}
-							</span>
-							<div className="w-16 h-[1px] bg-cyan-400/50 hidden md:block"></div>
+						<div className="absolute md:left-[30%] xl:left-[33%] 2xl:left-[34%] top-[48%] pointer-events-auto">
+							<div className="flex flex-col">
+								<span className="text-cyan-400 font-mono text-sm uppercase tracking-widest drop-shadow-[0_0_5px_rgba(34,211,238,0.8)]">
+									Pants {feetIndex + 1}
+								</span>
+								<Image src={lineFoot} alt="" className="hidden md:block" />
+							</div>
 						</div>
 					</div>
 				</div>

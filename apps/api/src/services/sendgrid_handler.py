@@ -16,9 +16,9 @@ SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
 
 
 class Template(str, Enum):
-    CONFIRMATION_EMAIL = "d-3f5484a1aa4b4403a8b1f1f80c779dea"  # for zothacks
-
+    CONFIRMATION_EMAIL = "d-5041cae29f974fe18d18976a9381020c"  # for irvinehacks 2026
     GUEST_TOKEN = "d-19a126a867294a56b8db9d94a23f7b5d"  # for irvinehacks 2026
+
     HACKER_ACCEPTED_EMAIL = "d-07fa796cf6c34518a7124a68d4790d82"
     HACKER_WAITLISTED_EMAIL = "d-0e0cde2bfcc14dbfa069422801b6cf58"
     HACKER_REJECTED_EMAIL = "d-4edf53090e42417ea9c065645d8c55c2"

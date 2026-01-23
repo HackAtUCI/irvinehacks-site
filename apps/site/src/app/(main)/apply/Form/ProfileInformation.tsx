@@ -62,7 +62,7 @@ export default function ProfileInformation() {
 
 			<Textfield
 				name="frq_character"
-				labelText="“Build your cyberpunk character! Choose your augmentations, accessories, and companion, then explain how each choice reflects your character’s identity, role, or backstory.” [75 words]"
+				labelText="Build your cyberpunk character! Choose your augmentations, accessories, and companion, then explain how each choice reflects your character's identity, role, or backstory. [75 words]"
 				containerClass="flex flex-col w-full"
 				isRequired={true}
 				maxWordCount={75}

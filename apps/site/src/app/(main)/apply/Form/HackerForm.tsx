@@ -14,6 +14,7 @@ export default function HackerForm() {
 			<SchoolInformation />
 			<ExtraQuestions />
 			<ProfileInformation />
+
 			<ResumeInformation isRequired />
 			<AgeInformation />
 		</BaseForm>

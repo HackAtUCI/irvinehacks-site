@@ -19,7 +19,7 @@ import head4 from "@/assets/images/characterCustomizer/head_front_4.png";
 import body1 from "@/assets/images/characterCustomizer/body_front_1.png";
 import body3 from "@/assets/images/characterCustomizer/body_front_3.png";
 import body4 from "@/assets/images/characterCustomizer/body_arms.png";
-import head5 from "@/assets/images/characterCustomizer/head_front_5.png";
+import body5 from "@/assets/images/characterCustomizer/head_front_5.png";
 
 // Character Assets - Feet
 import feet1 from "@/assets/images/characterCustomizer/feet_front.png";
@@ -49,7 +49,7 @@ const BODIES: [any, string][] = [
 	[body1, "Number"],
 	[body3, "Coat"],
 	[body4, "Robotic Arms"],
-	[head5, "Necklace"],
+	[body5, "Necklace"],
 ];
 const FEET: [any, string][] = [
 	[feet1, "Hover Boots"],
@@ -86,7 +86,36 @@ export const CharacterCustomizer = () => {
 	};
 
 	return (
-		<div className="relative w-11/12 border-white border-4 rounded-xl bg-gradient-to-b from-[#02031D] via-[#090D83] via-54% to-[#090D83]">
+		<div className="relative w-full border-white border-4 rounded-xl bg-gradient-to-b from-[#02031D] via-[#090D83] via-54% to-[#090D83]">
+			<input
+				type="text"
+				name="character_head_index"
+				value={headIndex}
+				readOnly
+				hidden
+			/>
+			<input
+				type="text"
+				name="character_body_index"
+				value={bodyIndex}
+				readOnly
+				hidden
+			/>
+			<input
+				type="text"
+				name="character_feet_index"
+				value={feetIndex}
+				readOnly
+				hidden
+			/>
+			<input
+				type="text"
+				name="character_companion_index"
+				value={companionIndex}
+				readOnly
+				hidden
+			/>
+
 			<div className="h-[400px] w-full flex items-center justify-center">
 				{/* Perspective Grid Layer */}
 				<div className="absolute bottom-0 h-full w-full inset-0 z-0">

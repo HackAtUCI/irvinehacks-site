@@ -79,6 +79,11 @@ class BaseApplicationData(BaseModel):
     frq_ambition: str = Field(max_length=2048)
     frq_character: str = Field(max_length=2048)
 
+    character_head_index: int
+    character_body_index: int
+    character_feet_index: int
+    character_companion_index: int
+
     is_18_older: bool
 
 

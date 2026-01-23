@@ -64,7 +64,7 @@ export default function MultipleSelect({
 				{labelText} {isRequired && <RequiredAsterisk />}
 			</p>
 			<div
-				className={`w-10/12 flex ${
+				className={`w-full flex ${
 					horizontal ? "flex-wrap gap-10" : "flex-col gap-2"
 				}`}
 			>

@@ -58,7 +58,7 @@ export default function ExtraQuestions({ hidden }: { hidden?: boolean }) {
 			<MultipleSelect
 				name="dietary_restrictions"
 				labelText="Dietary restrictions?"
-				containerClass="w-11/12 flex flex-col gap-2"
+				containerClass="flex flex-col gap-2"
 				inputType="checkbox"
 				values={dietary_restrictions}
 			/>

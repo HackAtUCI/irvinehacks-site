@@ -1,11 +1,7 @@
 import MultipleSelect from "@/lib/components/forms/MultipleSelect";
+import CharacterCustomizer from "@/lib/components/forms/shared/CharacterCustomizer";
 import Textfield from "@/lib/components/forms/Textfield";
 import TextInput from "@/lib/components/forms/TextInput";
-
-// The length here is different from the length specified in API data models.
-// This was originally done because different browsers used to count newline characters slightly differently
-// Currently unsure if this is still the case
-const FRQ_MAX_LENGTH = 2000;
 
 const areasInterestedOptions = [
 	{ value: "software", text: "Software" },
@@ -53,7 +49,7 @@ export default function ProfileInformation() {
 				labelText="Describe a past or current project that you are proud of. [100 words]"
 				containerClass="flex flex-col w-full"
 				isRequired={true}
-				maxLength={FRQ_MAX_LENGTH}
+				maxWordCount={100}
 			/>
 
 			<Textfield
@@ -61,7 +57,7 @@ export default function ProfileInformation() {
 				labelText="What is something you feel like going above and beyond for? Why? [100 words]"
 				containerClass="flex flex-col w-full"
 				isRequired={true}
-				maxLength={FRQ_MAX_LENGTH}
+				maxWordCount={100}
 			/>
 
 			<Textfield
@@ -69,8 +65,10 @@ export default function ProfileInformation() {
 				labelText="“Build your cyberpunk character! Choose your augmentations, accessories, and companion, then explain how each choice reflects your character’s identity, role, or backstory.” [75 words]"
 				containerClass="flex flex-col w-full"
 				isRequired={true}
-				maxLength={FRQ_MAX_LENGTH}
+				maxWordCount={75}
 			/>
+
+			<CharacterCustomizer />
 		</div>
 	);
 }

@@ -4,5 +4,6 @@ export default function hasDeadlinePassed() {
 
 	const deadline = new Date(pstDeadline + utcOffset);
 	const now = new Date();
+	return false;
 	return now > deadline;
 }

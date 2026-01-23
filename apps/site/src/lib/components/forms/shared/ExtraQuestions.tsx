@@ -1,6 +1,6 @@
-import Textfield from "@/lib/components/forms/Textfield";
 import SimpleRadio from "@/lib/components/forms/SimpleRadio";
 import MultipleSelect from "@/lib/components/forms/MultipleSelect";
+import TextInput from "../TextInput";
 
 const sizes = [
 	{ labelText: "S", inputValue: "S" },
@@ -39,6 +39,16 @@ export default function ExtraQuestions({ hidden }: { hidden?: boolean }) {
 				values={sizes}
 				title="T-Shirt Size"
 				titleClass="text-xl mb-0.5"
+				subtitle={
+					<a
+						href="https://drive.google.com/file/d/1Pzz5KYmFGCSGXuVOg2E9znkYVfun0X4w/view?usp=sharing"
+						className="underline text-[#0084ff]"
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						Size guide
+					</a>
+				}
 				containerClassTotal="w-11/12 flex flex-col gap-5"
 				isRequired={true}
 				labelClass="text-xl"
@@ -48,16 +58,18 @@ export default function ExtraQuestions({ hidden }: { hidden?: boolean }) {
 			<MultipleSelect
 				name="dietary_restrictions"
 				labelText="Dietary restrictions?"
-				containerClass="w-11/12 flex flex-col gap-2"
+				containerClass="flex flex-col gap-2"
 				inputType="checkbox"
 				values={dietary_restrictions}
+				isRequired
 			/>
-			<Textfield
+			<TextInput
 				name="allergies"
 				labelText="Allergies? (Please specify.)"
 				containerClass="w-11/12 flex flex-col gap-5"
+				type="text"
+				placeholder="Peanuts, shellfish, etc."
 				isRequired={false}
-				maxLength={1500}
 			/>
 			<MultipleSelect
 				name="ih_reference"

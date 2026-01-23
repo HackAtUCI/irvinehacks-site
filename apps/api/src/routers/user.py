@@ -62,6 +62,7 @@ class CharacterIndexes(BaseModel):
     character_feet_index: int
     character_companion_index: int
 
+
 class ApplicationData(BaseModel):
     application_data: Union[CharacterIndexes, None] = None
 

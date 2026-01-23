@@ -21,9 +21,9 @@ export default function Home() {
 			<Landing />
 			<ChooseCharacter />
 			<FAQ />
-			<Sponsors />
-			<Partners />
-			<Organizers />
+			{/* <Sponsors /> */}
+			{/* <Partners /> */}
+			{/* <Organizers /> */}
 		</>
 	);
 }

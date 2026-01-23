@@ -1,12 +1,12 @@
 from datetime import datetime
 from typing import Any
-from unittest.mock import ANY, AsyncMock, call, patch
+from unittest.mock import ANY, AsyncMock, patch
 
 from fastapi import FastAPI
 
 from auth.user_identity import NativeUser, UserTestClient
 from models.ApplicationData import Decision
-from models.user_record import Role, Status
+from models.user_record import Role
 from routers import director
 from services.mongodb_handler import Collection
 from services.sendgrid_handler import Template

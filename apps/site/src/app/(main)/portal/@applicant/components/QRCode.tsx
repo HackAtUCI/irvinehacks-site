@@ -10,13 +10,11 @@ interface User {
 interface QRCodeComponentProps {
 	className?: string;
 	size?: number;
-	includeEventInfo?: boolean;
 }
 
 export default function QRCodeComponent({
 	className = "",
 	size = 200,
-	includeEventInfo = true,
 }: QRCodeComponentProps) {
 	const [user, setUser] = useState<User | null>(null);
 	const [loading, setLoading] = useState(true);
@@ -52,12 +50,7 @@ export default function QRCodeComponent({
 
 	const generateQRValue = () => {
 		if (!user) return "";
-
-		if (includeEventInfo) {
-			return `IrvineHacks2026|${user.uid}`;
-		} else {
-			return user.uid;
-		}
+		return user.uid;
 	};
 
 	if (loading) {

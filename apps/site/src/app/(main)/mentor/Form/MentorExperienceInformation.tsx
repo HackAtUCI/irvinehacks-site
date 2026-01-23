@@ -161,6 +161,7 @@ export default function ExperienceInformation({
 					name="mentor_prev_experience_saq1"
 					labelText="Have you participated or mentored at a hackathon before? If so, please list which ones. e.g. IrvineHacks 2024 (Hacker), ZotHacks 2024 (Mentor)"
 					containerClass="flex flex-col w-full"
+					textAreaClass="h-36"
 					isRequired={false}
 				/>
 			</div>

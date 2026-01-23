@@ -1,6 +1,7 @@
 import Textfield from "@/lib/components/forms/Textfield";
 import SimpleRadio from "@/lib/components/forms/SimpleRadio";
 import MultipleSelect from "@/lib/components/forms/MultipleSelect";
+import TextInput from "../TextInput";
 
 const sizes = [
 	{ labelText: "S", inputValue: "S" },
@@ -63,10 +64,12 @@ export default function ExtraQuestions({ hidden }: { hidden?: boolean }) {
 				values={dietary_restrictions}
 				isRequired
 			/>
-			<Textfield
+			<TextInput
 				name="allergies"
 				labelText="Allergies? (Please specify.)"
 				containerClass="w-11/12 flex flex-col gap-5"
+				type="text"
+				placeholder="Peanuts, shellfish, etc."
 				isRequired={false}
 			/>
 			<MultipleSelect

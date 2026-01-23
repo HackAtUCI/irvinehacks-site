@@ -10,13 +10,19 @@ import ExtraQuestions from "@/lib/components/forms/shared/ExtraQuestions";
 export default function HackerForm() {
 	return (
 		<BaseForm applicationType="Hacker" applyPath="/api/user/apply">
+			<div className="w-11/12">
+				<p className="text-lg">
+					[Note] If you have any questions about IrvineHacks, please email{" "}
+					<b>irvinehacks2026@gmail.com</b>.
+				</p>
+			</div>
+			<AgeInformation />
 			<BasicInformation />
 			<SchoolInformation />
 			<ExtraQuestions />
 			<ProfileInformation />
 
 			<ResumeInformation isRequired />
-			<AgeInformation />
 		</BaseForm>
 	);
 }

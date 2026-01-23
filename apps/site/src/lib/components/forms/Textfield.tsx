@@ -12,6 +12,7 @@ interface TextfieldProps {
 	isRequired: boolean;
 	maxWordCount?: number;
 	maxCharCount?: number;
+	textAreaClass?: string;
 }
 
 function truncateToWordCount(str: string, maxWords: number) {
@@ -27,6 +28,7 @@ export default function Textfield({
 	isRequired,
 	maxWordCount,
 	maxCharCount = 1500,
+	textAreaClass = "h-48",
 }: TextfieldProps) {
 	const [value, setValue] = useState("");
 
@@ -70,7 +72,7 @@ export default function Textfield({
 				<textarea
 					id={name}
 					name={name}
-					className="text-black bg-[#E1E1E1] p-3 h-48 resize-none rounded-xl"
+					className={`text-black bg-[#E1E1E1] p-3 resize-none rounded-xl ${textAreaClass}`}
 					required={isRequired}
 					maxLength={maxCharCount}
 					value={value}

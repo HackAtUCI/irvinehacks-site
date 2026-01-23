@@ -29,7 +29,7 @@ export default async function ConfirmationDetails({
 						the application below, and we hope you can join our event team!
 						<br />
 						<br />
-						What: Volunteering at UCI's Annual Hackathon
+						What: Volunteering at UCI&apos;s Annual Hackathon
 						<br />
 						When: February 27 2026 - March 1st 2026 (3-day weekend event - not
 						overnight)
@@ -38,8 +38,9 @@ export default async function ConfirmationDetails({
 					</p>
 					<p className="text-lg m-0 w-full">
 						<b>
-							As a volunteer, you’ll play a key role in ensuring the event runs
-							smoothly, and you’ll also get some great perks, including:
+							As a volunteer, you&apos;ll play a key role in ensuring the event
+							runs smoothly, and you&apos;ll also get some great perks,
+							including:
 						</b>
 						<br />
 						- Free food and swag

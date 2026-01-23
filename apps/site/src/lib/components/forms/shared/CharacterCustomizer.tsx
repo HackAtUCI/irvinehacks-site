@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 
 // Backgrounds & Icons
 import perspectiveGrid from "@/assets/backgrounds/perspective-grid.svg";
@@ -39,26 +39,26 @@ import blankBody from "@/assets/images/characterCustomizer/blank_body.png";
 import blankHead from "@/assets/images/characterCustomizer/blank_head.png";
 import blankTail from "@/assets/images/characterCustomizer/blank_tail.png";
 
-const HEADS: [any, string][] = [
+const HEADS: [StaticImageData, string][] = [
 	[head1, "Kitty Headphones"],
 	[head2, "Among Us"],
 	[head3, "LED Mask"],
 	[head4, "Hood"],
 ];
-const BODIES: [any, string][] = [
+const BODIES: [StaticImageData, string][] = [
 	[body1, "Number"],
 	[body3, "Coat"],
 	[body4, "Robotic Arms"],
 	[body5, "Necklace"],
 ];
-const FEET: [any, string][] = [
+const FEET: [StaticImageData, string][] = [
 	[feet1, "Hover Boots"],
 	[feet2, "Black Boots"],
 	[feet3, "Astro Boots"],
 	[feet4, "Neon Anklets"],
 	[feet6, "Cyber Anklets"],
 ];
-const COMPANIONS: [any, string][] = [
+const COMPANIONS: [StaticImageData, string][] = [
 	[companion1, "Drone"],
 	[companion2, "Robopetr"],
 	[companion3, "Holo"],

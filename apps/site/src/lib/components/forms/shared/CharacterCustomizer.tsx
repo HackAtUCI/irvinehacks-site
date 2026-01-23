@@ -30,6 +30,12 @@ import feet4 from "@/assets/images/characterCustomizer/feet_front_4.PNG";
 import feet5 from "@/assets/images/characterCustomizer/feet_front_5.PNG";
 import feet6 from "@/assets/images/characterCustomizer/feet_front_6.PNG";
 
+// Character Assets - Companions
+import companion1 from "@/assets/images/characterCustomizer/companion_1.PNG";
+import companion2 from "@/assets/images/characterCustomizer/companion_2.PNG";
+import companion3 from "@/assets/images/characterCustomizer/companion_3.PNG";
+import companion4 from "@/assets/images/characterCustomizer/companion_4.PNG";
+
 // Base/Blank Character Parts
 import blankBody from "@/assets/images/characterCustomizer/blank_body.PNG";
 import blankHead from "@/assets/images/characterCustomizer/blank_head.PNG";
@@ -43,14 +49,15 @@ import lineFoot from "@/assets/images/characterCustomizer/line_foot.svg";
 const HEADS = [head1, head2, head3, head4, head5];
 const BODIES = [body1, body2, body3, body4];
 const FEET = [feet1, feet2, feet3, feet4, feet5, feet6];
+const COMPANIONS = [companion1, companion2, companion3, companion4];
 
 const imageWidth = 600;
-const imageHeight = 300;
 
 export const CharacterCustomizer = () => {
 	const [headIndex, setHeadIndex] = useState(0);
 	const [bodyIndex, setBodyIndex] = useState(0);
 	const [feetIndex, setFeetIndex] = useState(0);
+	const [companionIndex, setCompanionIndex] = useState(0);
 
 	const cycleIndex = (
 		current: number,
@@ -158,6 +165,17 @@ export const CharacterCustomizer = () => {
 							priority
 						/>
 					</div>
+					{/* Companion (Customizable Layer - Top Layer) */}
+					<div className="absolute inset-0 flex items-center justify-center">
+						<Image
+							src={COMPANIONS[companionIndex]}
+							alt="Character Companion"
+							width={imageWidth}
+							height={imageWidth}
+							className="object-contain"
+							priority
+						/>
+					</div>
 				</div>
 
 				{/* Controls & Labels Layer */}
@@ -181,7 +199,7 @@ export const CharacterCustomizer = () => {
 								height={24}
 							/>
 						</button>
-						{/* Middle Arrow - Body */}
+						{/* Second Arrow - Body */}
 						<button
 							type="button"
 							onClick={() =>
@@ -196,7 +214,7 @@ export const CharacterCustomizer = () => {
 								height={24}
 							/>
 						</button>
-						{/* Bottom Arrow - Feet */}
+						{/* Third Arrow - Feet */}
 						<button
 							type="button"
 							onClick={() =>
@@ -207,6 +225,23 @@ export const CharacterCustomizer = () => {
 							<Image
 								src={leftArrow}
 								alt="Previous Feet"
+								width={24}
+								height={24}
+							/>
+						</button>
+						{/* Fourth Arrow - Companion */}
+						<button
+							type="button"
+							onClick={() =>
+								setCompanionIndex((i) =>
+									cycleIndex(i, COMPANIONS.length, "prev"),
+								)
+							}
+							className="hover:scale-110 transition-transform p-2"
+						>
+							<Image
+								src={leftArrow}
+								alt="Previous Companion"
 								width={24}
 								height={24}
 							/>
@@ -225,7 +260,7 @@ export const CharacterCustomizer = () => {
 						>
 							<Image src={rightArrow} alt="Next Head" width={24} height={24} />
 						</button>
-						{/* Middle Arrow - Body */}
+						{/* Second Arrow - Body */}
 						<button
 							type="button"
 							onClick={() =>
@@ -235,7 +270,7 @@ export const CharacterCustomizer = () => {
 						>
 							<Image src={rightArrow} alt="Next Body" width={24} height={24} />
 						</button>
-						{/* Bottom Arrow - Feet */}
+						{/* Third Arrow - Feet */}
 						<button
 							type="button"
 							onClick={() =>
@@ -244,6 +279,23 @@ export const CharacterCustomizer = () => {
 							className="hover:scale-110 transition-transform p-2"
 						>
 							<Image src={rightArrow} alt="Next Feet" width={24} height={24} />
+						</button>
+						{/* Fourth Arrow - Companion */}
+						<button
+							type="button"
+							onClick={() =>
+								setCompanionIndex((i) =>
+									cycleIndex(i, COMPANIONS.length, "next"),
+								)
+							}
+							className="hover:scale-110 transition-transform p-2"
+						>
+							<Image
+								src={rightArrow}
+								alt="Next Companion"
+								width={24}
+								height={24}
+							/>
 						</button>
 					</div>
 
@@ -278,6 +330,21 @@ export const CharacterCustomizer = () => {
 								</span>
 								<Image src={lineFoot} alt="" className="hidden md:block" />
 							</div>
+						</div>
+					</div>
+
+					<div>
+						<div>
+							<p>Head</p>
+						</div>
+						<div>
+							<p>Body</p>
+						</div>
+						<div>
+							<p>Feet</p>
+						</div>
+						<div>
+							<p>Companion</p>
 						</div>
 					</div>
 				</div>

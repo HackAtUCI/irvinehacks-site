@@ -10,46 +10,60 @@ import leftArrow from "@/assets/icons/left_arrow.svg";
 import rightArrow from "@/assets/icons/right_arrow.svg";
 
 // Character Assets - Heads
-import head1 from "@/assets/images/characterCustomizer/head_front_1.PNG";
-import head2 from "@/assets/images/characterCustomizer/head_front_2.PNG";
-import head3 from "@/assets/images/characterCustomizer/head_front_3.PNG";
-import head4 from "@/assets/images/characterCustomizer/head_front_4.PNG";
-import head5 from "@/assets/images/characterCustomizer/head_front_5.PNG";
+import head1 from "@/assets/images/characterCustomizer/head_front_1.png";
+import head2 from "@/assets/images/characterCustomizer/head_front_2.png";
+import head3 from "@/assets/images/characterCustomizer/head_front_3.png";
+import head4 from "@/assets/images/characterCustomizer/head_front_4.png";
 
 // Character Assets - Bodies
-import body1 from "@/assets/images/characterCustomizer/body_front_1.PNG";
-import body2 from "@/assets/images/characterCustomizer/body_front_2.PNG";
-import body3 from "@/assets/images/characterCustomizer/body_front_3.PNG";
-import body4 from "@/assets/images/characterCustomizer/body_front_4.PNG";
+import body1 from "@/assets/images/characterCustomizer/body_front_1.png";
+import body3 from "@/assets/images/characterCustomizer/body_front_3.png";
+import body4 from "@/assets/images/characterCustomizer/body_arms.png";
+import head5 from "@/assets/images/characterCustomizer/head_front_5.png";
 
 // Character Assets - Feet
-import feet1 from "@/assets/images/characterCustomizer/feet_front_1.PNG";
-import feet2 from "@/assets/images/characterCustomizer/feet_front_2.PNG";
-import feet3 from "@/assets/images/characterCustomizer/feet_front_3.PNG";
-import feet4 from "@/assets/images/characterCustomizer/feet_front_4.PNG";
-import feet5 from "@/assets/images/characterCustomizer/feet_front_5.PNG";
-import feet6 from "@/assets/images/characterCustomizer/feet_front_6.PNG";
+import feet1 from "@/assets/images/characterCustomizer/feet_front.png";
+import feet2 from "@/assets/images/characterCustomizer/feet_front_2.png";
+import feet3 from "@/assets/images/characterCustomizer/feet_front_3.png";
+import feet4 from "@/assets/images/characterCustomizer/feet_front_4.png";
+import feet6 from "@/assets/images/characterCustomizer/feet_front_6.png";
 
 // Character Assets - Companions
-import companion1 from "@/assets/images/characterCustomizer/companion_1.PNG";
-import companion2 from "@/assets/images/characterCustomizer/companion_2.PNG";
-import companion3 from "@/assets/images/characterCustomizer/companion_3.PNG";
-import companion4 from "@/assets/images/characterCustomizer/companion_4.PNG";
+import companion1 from "@/assets/images/characterCustomizer/companion_1.png";
+import companion2 from "@/assets/images/characterCustomizer/companion_2.png";
+import companion3 from "@/assets/images/characterCustomizer/companion_3.png";
+import companion4 from "@/assets/images/characterCustomizer/companion_4.png";
 
 // Base/Blank Character Parts
-import blankBody from "@/assets/images/characterCustomizer/blank_body.PNG";
-import blankHead from "@/assets/images/characterCustomizer/blank_head.PNG";
-import blankTail from "@/assets/images/characterCustomizer/blank_tail.PNG";
+import blankBody from "@/assets/images/characterCustomizer/blank_body.png";
+import blankHead from "@/assets/images/characterCustomizer/blank_head.png";
+import blankTail from "@/assets/images/characterCustomizer/blank_tail.png";
 
-// Line SVGs
-import lineHead from "@/assets/images/characterCustomizer/line_head.svg";
-import lineBody from "@/assets/images/characterCustomizer/line_body.svg";
-import lineFoot from "@/assets/images/characterCustomizer/line_foot.svg";
-
-const HEADS = [head1, head2, head3, head4, head5];
-const BODIES = [body1, body2, body3, body4];
-const FEET = [feet1, feet2, feet3, feet4, feet5, feet6];
-const COMPANIONS = [companion1, companion2, companion3, companion4];
+const HEADS: [any, string][] = [
+	[head1, "Kitty Headphones"],
+	[head2, "Among Us"],
+	[head3, "LED Mask"],
+	[head4, "Hood"],
+];
+const BODIES: [any, string][] = [
+	[body1, "Number"],
+	[body3, "Coat"],
+	[body4, "Robotic Arms"],
+	[head5, "Necklace"],
+];
+const FEET: [any, string][] = [
+	[feet1, "Hover Boots"],
+	[feet2, "Black Boots"],
+	[feet3, "Astro Boots"],
+	[feet4, "Neon Anklets"],
+	[feet6, "Cyber Anklets"],
+];
+const COMPANIONS: [any, string][] = [
+	[companion1, "Drone"],
+	[companion2, "Robopetr"],
+	[companion3, "Holo"],
+	[companion4, "Tether"],
+];
 
 const imageWidth = 600;
 
@@ -72,280 +86,270 @@ export const CharacterCustomizer = () => {
 	};
 
 	return (
-		<div className="relative w-11/12 h-[400px] border-white border-4 overflow-hidden rounded-xl bg-gradient-to-b from-[#02031D] via-[#090D83] via-54% to-[#090D83] flex items-center justify-center">
-			{/* Perspective Grid Layer */}
-			<div className="absolute bottom-0 h-full w-full inset-0 z-0">
-				<Image
-					src={perspectiveGrid}
-					alt="Perspective Grid"
-					className="absolute bottom-0"
-					priority
-				/>
-			</div>
-
-			{/* Main Content Area */}
-			<div className="relative z-10 w-full max-w-[800px] h-full flex items-center justify-center">
-				{/* HUD Frame Background */}
-				<div className="invisible lg:visible absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+		<div className="relative w-11/12 border-white border-4 rounded-xl bg-gradient-to-b from-[#02031D] via-[#090D83] via-54% to-[#090D83]">
+			<div className="h-[400px] w-full flex items-center justify-center">
+				{/* Perspective Grid Layer */}
+				<div className="absolute bottom-0 h-full w-full inset-0 z-0">
 					<Image
-						src={hudBackground}
-						alt="Interface Frame"
-						width={400}
-						height={300}
-						className="max-w-[600px] md:max-w-[700px] object-contain"
+						src={perspectiveGrid}
+						alt="Perspective Grid"
+						className="absolute bottom-0"
 						priority
 					/>
 				</div>
-
-				{/* Character Composite */}
-				<div className="relative z-30 w-[400px] h-[400px] flex items-center justify-center mt-10">
-					{/* Blank Tail (Base Layer) */}
-					<div className="absolute inset-0 flex items-center justify-center">
+				{/* Main Content Area */}
+				<div className="relative z-10 w-full max-w-[800px] h-full flex items-center justify-center">
+					{/* HUD Frame Background */}
+					<div className="invisible lg:visible absolute inset-0 flex items-center justify-center pointer-events-none z-20">
 						<Image
-							src={blankTail}
-							alt="Base Tail"
-							width={imageWidth}
-							height={imageWidth}
-							className="object-contain"
+							src={hudBackground}
+							alt="Interface Frame"
+							width={400}
+							height={300}
+							className="max-w-[600px] md:max-w-[700px] object-contain"
 							priority
 						/>
 					</div>
-					{/* Blank Body (Base Layer) */}
-					<div className="absolute inset-0 flex items-center justify-center">
-						<Image
-							src={blankBody}
-							alt="Base Body"
-							width={imageWidth}
-							height={imageWidth}
-							className="object-contain"
-							priority
-						/>
+					{/* Character Composite */}
+					<div className="relative z-30 w-[400px] h-[400px] flex items-center justify-center mt-10">
+						{/* Blank Tail (Base Layer) */}
+						<div className="absolute inset-0 flex items-center justify-center">
+							<Image
+								src={blankTail}
+								alt="Base Tail"
+								width={imageWidth}
+								height={imageWidth}
+								className="object-contain"
+								priority
+							/>
+						</div>
+						{/* Blank Body (Base Layer) */}
+						<div className="absolute inset-0 flex items-center justify-center">
+							<Image
+								src={blankBody}
+								alt="Base Body"
+								width={imageWidth}
+								height={imageWidth}
+								className="object-contain"
+								priority
+							/>
+						</div>
+						{/* Blank Head (Base Layer) */}
+						<div className="absolute inset-0 flex items-center justify-center">
+							<Image
+								src={blankHead}
+								alt="Base Head"
+								width={imageWidth}
+								height={imageWidth}
+								className="object-contain"
+								priority
+							/>
+						</div>
+						{/* Feet (Customizable Layer) */}
+						<div className="absolute inset-0 flex items-center justify-center">
+							<Image
+								src={FEET[feetIndex][0]}
+								alt="Character Feet"
+								width={imageWidth}
+								height={imageWidth}
+								className="object-contain"
+								priority
+							/>
+						</div>
+						{/* Body (Customizable Layer) */}
+						<div className="absolute inset-0 flex items-center justify-center">
+							<Image
+								src={BODIES[bodyIndex][0]}
+								alt="Character Body"
+								width={imageWidth}
+								height={imageWidth}
+								className="object-contain"
+								priority
+							/>
+						</div>
+						{/* Head (Customizable Layer) */}
+						<div className="absolute inset-0 flex items-center justify-center">
+							<Image
+								src={HEADS[headIndex][0]}
+								alt="Character Head"
+								width={imageWidth}
+								height={imageWidth}
+								className="object-contain"
+								priority
+							/>
+						</div>
+						{/* Companion (Customizable Layer - Top Layer) */}
+						<div className="absolute inset-0 flex items-center justify-center">
+							<Image
+								src={COMPANIONS[companionIndex][0]}
+								alt="Character Companion"
+								width={imageWidth}
+								height={imageWidth}
+								className="object-contain"
+								priority
+							/>
+						</div>
 					</div>
-					{/* Blank Head (Base Layer) */}
-					<div className="absolute inset-0 flex items-center justify-center">
-						<Image
-							src={blankHead}
-							alt="Base Head"
-							width={imageWidth}
-							height={imageWidth}
-							className="object-contain"
-							priority
-						/>
-					</div>
-					{/* Feet (Customizable Layer) */}
-					<div className="absolute inset-0 flex items-center justify-center">
-						<Image
-							src={FEET[feetIndex]}
-							alt="Character Feet"
-							width={imageWidth}
-							height={imageWidth}
-							className="object-contain"
-							priority
-						/>
-					</div>
-					{/* Body (Customizable Layer) */}
-					<div className="absolute inset-0 flex items-center justify-center">
-						<Image
-							src={BODIES[bodyIndex]}
-							alt="Character Body"
-							width={imageWidth}
-							height={imageWidth}
-							className="object-contain"
-							priority
-						/>
-					</div>
-					{/* Head (Customizable Layer) */}
-					<div className="absolute inset-0 flex items-center justify-center">
-						<Image
-							src={HEADS[headIndex]}
-							alt="Character Head"
-							width={imageWidth}
-							height={imageWidth}
-							className="object-contain"
-							priority
-						/>
-					</div>
-					{/* Companion (Customizable Layer - Top Layer) */}
-					<div className="absolute inset-0 flex items-center justify-center">
-						<Image
-							src={COMPANIONS[companionIndex]}
-							alt="Character Companion"
-							width={imageWidth}
-							height={imageWidth}
-							className="object-contain"
-							priority
-						/>
+					{/* Controls & Labels Layer */}
+					<div className="absolute inset-0 z-40 w-full h-full pointer-events-none">
+						{/* We use pointer-events-auto on the interactive elements */}
+						{/* Left Controls (Arrows) */}
+						<div className="absolute left-[5%] xl:left-[15%] top-1/2 -translate-y-1/2 flex flex-col gap-12 pointer-events-auto">
+							{/* Top Arrow - Head */}
+							<button
+								type="button"
+								onClick={() =>
+									setHeadIndex((i) => cycleIndex(i, HEADS.length, "prev"))
+								}
+								className="hover:scale-110 transition-transform p-2"
+							>
+								<Image
+									src={leftArrow}
+									alt="Previous Head"
+									width={24}
+									height={24}
+								/>
+							</button>
+							{/* Second Arrow - Body */}
+							<button
+								type="button"
+								onClick={() =>
+									setBodyIndex((i) => cycleIndex(i, BODIES.length, "prev"))
+								}
+								className="hover:scale-110 transition-transform p-2"
+							>
+								<Image
+									src={leftArrow}
+									alt="Previous Body"
+									width={24}
+									height={24}
+								/>
+							</button>
+							{/* Third Arrow - Feet */}
+							<button
+								type="button"
+								onClick={() =>
+									setFeetIndex((i) => cycleIndex(i, FEET.length, "prev"))
+								}
+								className="hover:scale-110 transition-transform p-2"
+							>
+								<Image
+									src={leftArrow}
+									alt="Previous Feet"
+									width={24}
+									height={24}
+								/>
+							</button>
+							{/* Fourth Arrow - Companion */}
+							<button
+								type="button"
+								onClick={() =>
+									setCompanionIndex((i) =>
+										cycleIndex(i, COMPANIONS.length, "prev"),
+									)
+								}
+								className="hover:scale-110 transition-transform p-2"
+							>
+								<Image
+									src={leftArrow}
+									alt="Previous Companion"
+									width={24}
+									height={24}
+								/>
+							</button>
+						</div>
+						{/* Right Controls (Arrows) */}
+						<div className="absolute right-[5%] xl:right-[15%] top-1/2 -translate-y-1/2 flex flex-col gap-12 pointer-events-auto">
+							{/* Top Arrow - Head */}
+							<button
+								type="button"
+								onClick={() =>
+									setHeadIndex((i) => cycleIndex(i, HEADS.length, "next"))
+								}
+								className="hover:scale-110 transition-transform p-2"
+							>
+								<Image
+									src={rightArrow}
+									alt="Next Head"
+									width={24}
+									height={24}
+								/>
+							</button>
+							{/* Second Arrow - Body */}
+							<button
+								type="button"
+								onClick={() =>
+									setBodyIndex((i) => cycleIndex(i, BODIES.length, "next"))
+								}
+								className="hover:scale-110 transition-transform p-2"
+							>
+								<Image
+									src={rightArrow}
+									alt="Next Body"
+									width={24}
+									height={24}
+								/>
+							</button>
+							{/* Third Arrow - Feet */}
+							<button
+								type="button"
+								onClick={() =>
+									setFeetIndex((i) => cycleIndex(i, FEET.length, "next"))
+								}
+								className="hover:scale-110 transition-transform p-2"
+							>
+								<Image
+									src={rightArrow}
+									alt="Next Feet"
+									width={24}
+									height={24}
+								/>
+							</button>
+							{/* Fourth Arrow - Companion */}
+							<button
+								type="button"
+								onClick={() =>
+									setCompanionIndex((i) =>
+										cycleIndex(i, COMPANIONS.length, "next"),
+									)
+								}
+								className="hover:scale-110 transition-transform p-2"
+							>
+								<Image
+									src={rightArrow}
+									alt="Next Companion"
+									width={24}
+									height={24}
+								/>
+							</button>
+						</div>
 					</div>
 				</div>
-
-				{/* Controls & Labels Layer */}
-				<div className="absolute inset-0 z-40 w-full h-full pointer-events-none">
-					{/* We use pointer-events-auto on the interactive elements */}
-
-					{/* Left Controls (Arrows) */}
-					<div className="absolute left-[5%] xl:left-[15%] top-1/2 -translate-y-1/2 flex flex-col gap-12 pointer-events-auto">
-						{/* Top Arrow - Head */}
-						<button
-							type="button"
-							onClick={() =>
-								setHeadIndex((i) => cycleIndex(i, HEADS.length, "prev"))
-							}
-							className="hover:scale-110 transition-transform p-2"
-						>
-							<Image
-								src={leftArrow}
-								alt="Previous Head"
-								width={24}
-								height={24}
-							/>
-						</button>
-						{/* Second Arrow - Body */}
-						<button
-							type="button"
-							onClick={() =>
-								setBodyIndex((i) => cycleIndex(i, BODIES.length, "prev"))
-							}
-							className="hover:scale-110 transition-transform p-2"
-						>
-							<Image
-								src={leftArrow}
-								alt="Previous Body"
-								width={24}
-								height={24}
-							/>
-						</button>
-						{/* Third Arrow - Feet */}
-						<button
-							type="button"
-							onClick={() =>
-								setFeetIndex((i) => cycleIndex(i, FEET.length, "prev"))
-							}
-							className="hover:scale-110 transition-transform p-2"
-						>
-							<Image
-								src={leftArrow}
-								alt="Previous Feet"
-								width={24}
-								height={24}
-							/>
-						</button>
-						{/* Fourth Arrow - Companion */}
-						<button
-							type="button"
-							onClick={() =>
-								setCompanionIndex((i) =>
-									cycleIndex(i, COMPANIONS.length, "prev"),
-								)
-							}
-							className="hover:scale-110 transition-transform p-2"
-						>
-							<Image
-								src={leftArrow}
-								alt="Previous Companion"
-								width={24}
-								height={24}
-							/>
-						</button>
-					</div>
-
-					{/* Right Controls (Arrows) */}
-					<div className="absolute right-[5%] xl:right-[15%] top-1/2 -translate-y-1/2 flex flex-col gap-12 pointer-events-auto">
-						{/* Top Arrow - Head */}
-						<button
-							type="button"
-							onClick={() =>
-								setHeadIndex((i) => cycleIndex(i, HEADS.length, "next"))
-							}
-							className="hover:scale-110 transition-transform p-2"
-						>
-							<Image src={rightArrow} alt="Next Head" width={24} height={24} />
-						</button>
-						{/* Second Arrow - Body */}
-						<button
-							type="button"
-							onClick={() =>
-								setBodyIndex((i) => cycleIndex(i, BODIES.length, "next"))
-							}
-							className="hover:scale-110 transition-transform p-2"
-						>
-							<Image src={rightArrow} alt="Next Body" width={24} height={24} />
-						</button>
-						{/* Third Arrow - Feet */}
-						<button
-							type="button"
-							onClick={() =>
-								setFeetIndex((i) => cycleIndex(i, FEET.length, "next"))
-							}
-							className="hover:scale-110 transition-transform p-2"
-						>
-							<Image src={rightArrow} alt="Next Feet" width={24} height={24} />
-						</button>
-						{/* Fourth Arrow - Companion */}
-						<button
-							type="button"
-							onClick={() =>
-								setCompanionIndex((i) =>
-									cycleIndex(i, COMPANIONS.length, "next"),
-								)
-							}
-							className="hover:scale-110 transition-transform p-2"
-						>
-							<Image
-								src={rightArrow}
-								alt="Next Companion"
-								width={24}
-								height={24}
-							/>
-						</button>
-					</div>
-
-					{/* Dynamic Labels */}
-					{/* Positioning these involves some magic numbers to match the HUD lines if they are baked in, 
-                or we can visually approximate based on the screenshot. 
-                The screenshot has lines pointing to parts. I'll just place the text nearby for now.
-            */}
-					<div className="invisible lg:visible">
-						<div className="absolute md:left-[27%] xl:left-[31%] 2xl:left-[32%] top-[29%] pointer-events-auto">
-							<div className="flex flex-col items-center gap-2">
-								<span className="text-cyan-400 font-mono text-sm uppercase tracking-widest drop-shadow-[0_0_5px_rgba(34,211,238,0.8)]">
-									Glasses {headIndex + 1}
-								</span>
-								<Image src={lineHead} alt="" className="hidden md:block" />
-							</div>
-						</div>
-
-						<div className="absolute md:right-[27%] xl:right-[31%] 2xl:right-[32%] top-[38%] pointer-events-auto text-right">
-							<div className="flex flex-col gap-2 flex-row-reverse">
-								<span className="text-fuchsia-400 font-mono text-sm uppercase tracking-widest drop-shadow-[0_0_5px_rgba(232,121,249,0.8)]">
-									Jacket {bodyIndex + 1}
-								</span>
-								<Image src={lineBody} alt="" className="hidden md:block" />
-							</div>
-						</div>
-
-						<div className="absolute md:left-[30%] xl:left-[33%] 2xl:left-[34%] top-[48%] pointer-events-auto">
-							<div className="flex flex-col">
-								<span className="text-cyan-400 font-mono text-sm uppercase tracking-widest drop-shadow-[0_0_5px_rgba(34,211,238,0.8)]">
-									Pants {feetIndex + 1}
-								</span>
-								<Image src={lineFoot} alt="" className="hidden md:block" />
-							</div>
-						</div>
-					</div>
-
+			</div>
+			<div className="flex flex-col items-center justify-center mb-8">
+				<div className="flex flex-col">
 					<div>
-						<div>
-							<p>Head</p>
-						</div>
-						<div>
-							<p>Body</p>
-						</div>
-						<div>
-							<p>Feet</p>
-						</div>
-						<div>
-							<p>Companion</p>
-						</div>
+						<p className="font-display">
+							<span className="text-turquoise">Head:</span>{" "}
+							{HEADS[headIndex][1]}
+						</p>
+					</div>
+					<div>
+						<p className="font-display">
+							<span className="text-turquoise">Body:</span>{" "}
+							{BODIES[bodyIndex][1]}
+						</p>
+					</div>
+					<div>
+						<p className="font-display">
+							<span className="text-turquoise">Feet:</span> {FEET[feetIndex][1]}
+						</p>
+					</div>
+					<div>
+						<p className="font-display">
+							<span className="text-turquoise">Companion:</span>{" "}
+							{COMPANIONS[companionIndex][1]}
+						</p>
 					</div>
 				</div>
 			</div>

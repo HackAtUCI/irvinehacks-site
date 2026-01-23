@@ -1,4 +1,3 @@
-import Textfield from "@/lib/components/forms/Textfield";
 import DayShift from "./DayShift";
 
 export default function ShiftAvailability({ hidden }: { hidden?: boolean }) {
@@ -25,12 +24,6 @@ export default function ShiftAvailability({ hidden }: { hidden?: boolean }) {
 					shiftLabel="sunday_availability"
 					startHour={7}
 					endHour={19}
-				/>
-				<Textfield
-					name="frq_volunteer_allergy"
-					labelText="If you are tasked to serve food, do you have any allergies we should be aware of? If so, please explain the severity of each allergy."
-					containerClass="w-full"
-					isRequired={false}
 				/>
 			</div>
 		</div>

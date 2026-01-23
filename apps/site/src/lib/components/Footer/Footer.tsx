@@ -13,8 +13,8 @@ import styles from "./Footer.module.scss";
 const socials = [
 	{
 		logo: mail,
-		alt: "Email that directs to contact@irvinehacks.com",
-		link: "mailto:contact@irvinehacks.com",
+		alt: "Email that directs to irvinehacks2026@gmail.com",
+		link: "mailto:irvinehacks2026@gmail.com",
 	},
 	{
 		logo: discord,

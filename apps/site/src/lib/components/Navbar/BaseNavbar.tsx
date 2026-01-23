@@ -8,7 +8,7 @@ import HackLogo from "@/lib/components/HackLogo/HackLogo";
 import NavLinkItem from "./NavbarHelpers";
 
 import hamburger from "@/assets/icons/navigation-icon.svg";
-// import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
+import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
 
 import styles from "./Navbar.module.scss";
 
@@ -37,7 +37,7 @@ export default function BaseNavbar({ children }: PropsWithChildren) {
 	// 	}
 	// };
 
-	// const deadlinePassed = hasDeadlinePassed();
+	const deadlinePassed = hasDeadlinePassed();
 
 	return (
 		<NavMenu.Root
@@ -72,15 +72,15 @@ export default function BaseNavbar({ children }: PropsWithChildren) {
 					}
 					onTransitionEnd={() => setHidden(!listShown)}
 				>
-					{/* <NavLinkItem href="/">Home</NavLinkItem> */}
-					{/* {!deadlinePassed && (
+					<NavLinkItem href="/">Home</NavLinkItem>
+					{!deadlinePassed && (
 						<NavLinkItem
 							href="/#apply"
 							// onClick={goToChooseChar}
 						>
 							Apply
 						</NavLinkItem>
-					)} */}
+					)}
 
 					{/* <NavLinkItem href="/resources">Resources</NavLinkItem> */}
 

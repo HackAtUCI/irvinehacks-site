@@ -1,6 +1,5 @@
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, Mock, patch
-from typing import Union, Iterable
 
 import bson
 from fastapi import FastAPI
@@ -11,7 +10,6 @@ from models.user_record import Applicant, Role, Status
 from routers import user
 from services.mongodb_handler import Collection
 
-FormValue = Union[str, Iterable[str]]
 
 # Tests will break again next year, tech should notice and fix :P
 TEST_DEADLINE = datetime(2026, 10, 1, 8, 0, 0, tzinfo=timezone.utc)
@@ -25,7 +23,7 @@ USER_PKFIRE = NativeUser(
     affiliations=["pkfire"],
 )
 
-SAMPLE_APPLICATION: dict[str, FormValue] = {
+SAMPLE_APPLICATION = {
     "first_name": "pk",
     "last_name": "fire",
     # "ethnicity": "E#",
@@ -39,10 +37,10 @@ SAMPLE_APPLICATION: dict[str, FormValue] = {
     "frq_memory": "",
     "other_questions": "",
     "application_type": "Volunteer",
-    "character_head_index": 0,
-    "character_body_index": 0,
-    "character_feet_index": 0,
-    "character_companion_index": 0,
+    "character_head_index": "0",
+    "character_body_index": "0",
+    "character_feet_index": "0",
+    "character_companion_index": "0",
     "friday_availability": ["12", "13"],
     "saturday_availability": ["14", "18"],
     "sunday_availability": ["9", "10"],

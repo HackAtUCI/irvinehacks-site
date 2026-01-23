@@ -2,7 +2,6 @@ import copy
 import json
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, Mock, patch
-from typing import Union, Iterable
 
 import bson
 from aiogoogle import HTTPError
@@ -23,7 +22,6 @@ from utils import resume_handler
 from utils.hackathon_context import HackathonName
 from middleware.hackathon_context_middleware import HackathonContextMiddleware
 
-FormValue = Union[str, Iterable[str]]
 
 # Tests will break again next year, tech should notice and fix :P
 TEST_DEADLINE = datetime(2026, 10, 1, 8, 0, 0, tzinfo=timezone.utc)
@@ -37,7 +35,7 @@ USER_PKFIRE = NativeUser(
     affiliations=["pkfire"],
 )
 
-SAMPLE_APPLICATION: dict[str, FormValue] = {
+SAMPLE_APPLICATION = {
     "first_name": "pk",
     "last_name": "fire",
     "pronouns": ["pk"],
@@ -56,10 +54,10 @@ SAMPLE_APPLICATION: dict[str, FormValue] = {
     "frq_change": "I am pkfire",
     "frq_ambition": "I am pkfire",
     "frq_character": "I am pkfire",
-    "character_head_index": 0,
-    "character_body_index": 0,
-    "character_feet_index": 0,
-    "character_companion_index": 0,
+    "character_head_index": "0",
+    "character_body_index": "0",
+    "character_feet_index": "0",
+    "character_companion_index": "0",
     "application_type": "Hacker",
     "email": "pkfire@uci.edu",
     "is_18_older": "true",

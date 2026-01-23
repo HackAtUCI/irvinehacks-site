@@ -85,7 +85,7 @@ class BaseApplicationData(BaseModel):
 class BaseMentorApplicationData(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, str_max_length=254)
 
-    mentor_type: list[str] = []
+    mentor_type: list[str]
 
     pronouns: list[str] = []
     # ethnicity: str
@@ -93,7 +93,7 @@ class BaseMentorApplicationData(BaseModel):
     major: str
     education_level: str
     t_shirt_size: Literal["S", "M", "L", "XL"]
-    dietary_restrictions: list[str] = []
+    dietary_restrictions: list[str]
     allergies: Union[str, None] = Field(None, max_length=2048)
     # Field for question: "How did you hear about IrvineHacks?"
     ih_reference: list[str] = []

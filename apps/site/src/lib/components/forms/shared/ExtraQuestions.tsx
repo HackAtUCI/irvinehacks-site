@@ -61,6 +61,7 @@ export default function ExtraQuestions({ hidden }: { hidden?: boolean }) {
 				containerClass="flex flex-col gap-2"
 				inputType="checkbox"
 				values={dietary_restrictions}
+				isRequired
 			/>
 			<Textfield
 				name="allergies"

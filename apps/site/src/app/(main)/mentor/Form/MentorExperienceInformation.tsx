@@ -136,6 +136,7 @@ function DesignMentorQuestions({
 						containerClass="w-full"
 						inputType="checkbox"
 						values={designToolOptions}
+						isRequired={isDesignMentor}
 					/>
 				</div>
 			</div>

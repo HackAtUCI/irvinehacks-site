@@ -39,6 +39,12 @@ const OtherInput = forwardRef<HTMLInputElement, OtherInputProps>(
 );
 OtherInput.displayName = "OtherInput";
 
+// A miniscule input that will appear if none of the checkboxes/radios
+// are checked. Used to enforce isRequired
+const RequiredBlocker = () => (
+	<input className="w-[1px] h-[1px] bg-black" required />
+);
+
 export default function MultipleSelect({
 	name,
 	labelText,
@@ -49,6 +55,7 @@ export default function MultipleSelect({
 	isRequired,
 	hidden,
 }: MultipleSelectProps) {
+	const [checkedValues, setCheckedValues] = useState<Set<string>>(new Set());
 	const [isOtherChecked, setIsOtherChecked] = useState(false);
 	const otherRef = useRef<HTMLInputElement>(null);
 
@@ -58,11 +65,27 @@ export default function MultipleSelect({
 		}
 	}, [isOtherChecked]);
 
+	const handleCheckChange = (value: string, checked: boolean) => {
+		setCheckedValues((prev) => {
+			const next = new Set(prev);
+			if (checked) {
+				next.add(value);
+			} else {
+				next.delete(value);
+			}
+			return next;
+		});
+	};
+
+	const anyChecked = checkedValues.size > 0 || isOtherChecked;
+
 	return (
 		<div className={clsx(hidden && "hidden", containerClass)}>
 			<p className="m-0 text-lg mb-4">
 				{labelText} {isRequired && <RequiredAsterisk />}
+				{isRequired && !anyChecked && <RequiredBlocker />}
 			</p>
+
 			<div
 				className={`w-full flex ${
 					horizontal ? "flex-wrap gap-10" : "flex-col gap-2"
@@ -79,7 +102,10 @@ export default function MultipleSelect({
 									key={`option-${i}`}
 									name={name}
 									value={item.value}
-									onChange={(e) => setIsOtherChecked(e.target.checked)}
+									onChange={(e) => {
+										setIsOtherChecked(e.target.checked);
+										handleCheckChange(item.value, e.target.checked);
+									}}
 								/>
 								<label className="text-lg" htmlFor={inputId}>
 									{item.text}
@@ -100,6 +126,9 @@ export default function MultipleSelect({
 								key={`option-${i}`}
 								name={name}
 								value={item.value}
+								onChange={(e) =>
+									handleCheckChange(item.value, e.target.checked)
+								}
 							/>
 							<label className="text-lg" htmlFor={inputId}>
 								{item.text}

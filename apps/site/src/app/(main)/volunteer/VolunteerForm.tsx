@@ -6,6 +6,7 @@ import BaseForm from "@/lib/components/forms/shared/BaseForm";
 import ShiftAvailability from "./components/ShiftAvailability";
 import VolunteerFRQ from "./components/VolunteerFRQ";
 import ExtraQuestions from "@/lib/components/forms/shared/ExtraQuestions";
+import Textfield from "@/lib/components/forms/Textfield";
 
 export default function VolunteerForm() {
 	return (
@@ -22,6 +23,12 @@ export default function VolunteerForm() {
 			<SchoolInformation />
 
 			<ShiftAvailability />
+			<Textfield
+				name="frq_volunteer_allergy"
+				labelText="If you are tasked to serve food, do you have any allergies we should be aware of? If so, please explain the severity of each allergy."
+				containerClass="w-11/12"
+				isRequired={false}
+			/>
 			<VolunteerFRQ />
 		</BaseForm>
 	);

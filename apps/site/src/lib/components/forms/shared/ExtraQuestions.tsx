@@ -68,7 +68,6 @@ export default function ExtraQuestions({ hidden }: { hidden?: boolean }) {
 				labelText="Allergies? (Please specify.)"
 				containerClass="w-11/12 flex flex-col gap-5"
 				isRequired={false}
-				maxLength={1500}
 			/>
 			<MultipleSelect
 				name="ih_reference"

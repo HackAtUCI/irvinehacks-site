@@ -53,7 +53,7 @@ export default function ProfileInformation() {
 				labelText="Describe a past or current project that you are proud of. [100 words]"
 				containerClass="flex flex-col w-full"
 				isRequired={true}
-				maxLength={FRQ_MAX_LENGTH}
+				maxCharCount={FRQ_MAX_LENGTH}
 			/>
 
 			<Textfield
@@ -61,7 +61,7 @@ export default function ProfileInformation() {
 				labelText="What is something you feel like going above and beyond for? Why? [100 words]"
 				containerClass="flex flex-col w-full"
 				isRequired={true}
-				maxLength={FRQ_MAX_LENGTH}
+				maxCharCount={FRQ_MAX_LENGTH}
 			/>
 
 			<Textfield
@@ -69,7 +69,7 @@ export default function ProfileInformation() {
 				labelText="“Build your cyberpunk character! Choose your augmentations, accessories, and companion, then explain how each choice reflects your character’s identity, role, or backstory.” [75 words]"
 				containerClass="flex flex-col w-full"
 				isRequired={true}
-				maxLength={FRQ_MAX_LENGTH}
+				maxCharCount={FRQ_MAX_LENGTH}
 			/>
 		</div>
 	);

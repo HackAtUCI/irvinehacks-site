@@ -29,7 +29,6 @@ export default function ShiftAvailability() {
 					labelText="If you are tasked to serve food, do you have any allergies we should be aware of? If so, please explain the severity of each allergy."
 					containerClass="w-full"
 					isRequired={false}
-					maxLength={1500}
 				/>
 			</div>
 		</div>

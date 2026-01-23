@@ -1,9 +1,11 @@
 import Textfield from "@/lib/components/forms/Textfield";
 import DayShift from "./DayShift";
 
-export default function ShiftAvailability() {
+export default function ShiftAvailability({ hidden }: { hidden?: boolean }) {
 	return (
-		<div className="flex flex-col gap-10 items-start w-11/12">
+		<div
+			className={hidden ? "hidden" : "flex flex-col gap-10 items-start w-11/12"}
+		>
 			<div className="text-4xl font-bold">Shift Availability</div>
 			<div className="w-full flex flex-col items-center gap-10">
 				<DayShift
@@ -22,7 +24,7 @@ export default function ShiftAvailability() {
 					shiftText="March 1 - Sunday Shift"
 					shiftLabel="sunday_availability"
 					startHour={7}
-					endHour={24}
+					endHour={19}
 				/>
 				<Textfield
 					name="frq_volunteer_allergy"

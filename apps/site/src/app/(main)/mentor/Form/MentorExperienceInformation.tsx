@@ -80,7 +80,7 @@ function TechMentorQuestions({ isTechMentor }: { isTechMentor: boolean }) {
 			<MultipleSelectSet
 				className="flex flex-col gap-10 w-full"
 				labelText="List of Technical Skills"
-				isRequired
+				isRequired={isTechMentor}
 			>
 				<div className="w-full flex flex-col gap-10 sm:gap-0 sm:flex-row">
 					<div className="w-full sm:w-1/2">

@@ -12,6 +12,7 @@ import ExperienceInformation from "./MentorExperienceInformation";
 import MultipleSelect from "@/lib/components/forms/MultipleSelect";
 import ControlledMultipleSelect from "@/lib/components/forms/ControlledMultipleSelect";
 import ExtraQuestions from "@/lib/components/forms/shared/ExtraQuestions";
+import ShiftAvailability from "../../volunteer/components/ShiftAvailability";
 
 export default function MentorForm() {
 	const [mentorSelection, setMentorSelection] = useState<
@@ -43,6 +44,7 @@ export default function MentorForm() {
 
 			<BasicInformation hidden={hidden} />
 			<SchoolInformation hidden={hidden} />
+			<ShiftAvailability hidden={hidden} />
 			<ExtraQuestions hidden={hidden} />
 
 			<ExperienceInformation

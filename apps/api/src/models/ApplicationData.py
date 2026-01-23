@@ -87,6 +87,9 @@ class BaseApplicationData(BaseModel):
     is_18_older: bool
 
 
+Hour = Annotated[int, Field(ge=7, lt=24)]
+
+
 class BaseMentorApplicationData(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, str_max_length=254)
 
@@ -125,12 +128,13 @@ class BaseMentorApplicationData(BaseModel):
     character_feet_index: int
     character_companion_index: int
 
+    friday_availability: list[Hour] = []
+    saturday_availability: list[Hour] = []
+    sunday_availability: list[Hour] = []
+
     resume_share_to_sponsors: bool = False
     # other_questions: Union[str, None] = Field(None, max_length=2048)
     is_18_older: bool
-
-
-Hour = Annotated[int, Field(ge=7, lt=24)]
 
 
 class BaseVolunteerApplicationData(BaseModel):

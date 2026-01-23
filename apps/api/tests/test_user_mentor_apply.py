@@ -57,6 +57,9 @@ SAMPLE_APPLICATION = {
     "character_body_index": 0,
     "character_feet_index": 0,
     "character_companion_index": 0,
+    "friday_availability": ["12", "13"],
+    "saturday_availability": ["14", "18"],
+    "sunday_availability": ["9", "10"],
     # "other_questions": "",
     "resume_share_to_sponsors": "true",
     "application_type": "Mentor",
@@ -270,7 +273,7 @@ def test_mentor_application_data_is_bson_encodable() -> None:
     data = EXPECTED_APPLICATION_DATA.model_copy()
     data.linkedin = HttpUrl("https://linkedin.com")
     encoded = bson.encode(EXPECTED_APPLICATION_DATA.model_dump())
-    assert len(encoded) == 901
+    assert len(encoded) == 1023
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)

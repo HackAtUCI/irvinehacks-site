@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import Box from "@cloudscape-design/components/box";
 import Button from "@cloudscape-design/components/button";
 import Modal from "@cloudscape-design/components/modal";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import TextContent from "@cloudscape-design/components/text-content";
+import Tiles from "@cloudscape-design/components/tiles";
 
 import { Participant } from "@/lib/admin/useParticipants";
 
@@ -16,6 +17,15 @@ export interface ActionModalProps {
 
 function CheckInModal({ onDismiss, onConfirm, participant }: ActionModalProps) {
 	const [showScanner, setShowScanner] = useState(true);
+	const [selectedType, setSelectedType] = useState("accepted");
+
+	useEffect(() => {
+		if (participant) setSelectedType("accepted");
+	}, [participant]);
+
+	if (participant === null) {
+		return null;
+	}
 
 	if (participant === null) {
 		if (showScanner) {
@@ -40,16 +50,41 @@ function CheckInModal({ onDismiss, onConfirm, participant }: ActionModalProps) {
 					</SpaceBetween>
 				</Box>
 			}
-			header={`Check In ${participant?.first_name} ${participant?.last_name}`}
+			header={`Participant Name: ${participant?.first_name} ${participant?.last_name}`}
 		>
-			<TextContent>
-				<ul>
-					{/* TODO: actual instructions for check-in associates */}
-					<li>Ask for a photo ID and verify name is under attendee list.</li>
-					<li>Have participant sign the SPFB sheet.</li>
-					<li>Fill in badge and give to participant.</li>
-				</ul>
-			</TextContent>
+			<SpaceBetween size="m">
+				<TextContent>
+					<ul>
+						<li>Ask for a photo ID and check participant is 18+</li>
+						<li>Have participant sign the SPFB sheet.</li>
+						<li>Fill in badge and give to participant.</li>
+					</ul>
+				</TextContent>
+
+				<TextContent>
+					<p>Confirm participant identity and select check-in type:</p>
+				</TextContent>
+
+				<Tiles
+					onChange={({ detail }) => setSelectedType(detail.value)}
+					value={selectedType}
+					columns={3}
+					items={[
+						{
+							label: "General Check-In",
+							value: "accepted",
+						},
+						{
+							label: "Waitlist Queue",
+							value: "waitlisted",
+						},
+						{
+							label: "Workshop",
+							value: "workshop",
+						},
+					]}
+				/>
+			</SpaceBetween>
 		</Modal>
 	);
 }

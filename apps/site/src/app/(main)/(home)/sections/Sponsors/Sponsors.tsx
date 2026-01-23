@@ -27,7 +27,7 @@ const Sponsors = async () => {
 				<div className="absolute w-full left-0 top-[1rem] flex gap-4 px-8 ">
 					<div className="h-[2px] bg-white flex-grow  ml-[2rem] mt-[0.5rem]" />
 					<p className="text-xs lg:text-sm text-center">
-						Interested in sponsoring IrvineHacks 2026? Email us at{" "}
+						Interested in sponsoring IrvineHacks 2025? Email us at{" "}
 						<a href="mailto:hack@uci.edu" className="underline">
 							hack@uci.edu
 						</a>

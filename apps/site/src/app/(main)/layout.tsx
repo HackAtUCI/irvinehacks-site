@@ -8,34 +8,10 @@ import BaseNavbar from "@/lib/components/Navbar/BaseNavbar";
 
 import "./globals.css";
 
-const title = "IrvineHacks 2026";
-const description =
-	"IrvineHacks is Hack at UCI's premier hackathon for collegiate students.";
-
 export const metadata: Metadata = {
-	title,
-	description,
-	metadataBase: new URL("https://irvinehacks.com"),
-
-	openGraph: {
-		title,
-		description,
-		siteName: "IrvineHacks",
-		images: [
-			{
-				url: "/social-preview.png",
-				alt: title,
-			},
-		],
-		type: "website",
-	},
-
-	twitter: {
-		card: "summary_large_image",
-		title,
-		description,
-		images: ["/social-preview.png"],
-	},
+	title: "IrvineHacks 2025",
+	description:
+		"IrvineHacks is Hack at UCI's premier hackathon for collegiate students.",
 };
 
 export default function Layout({ children }: PropsWithChildren) {

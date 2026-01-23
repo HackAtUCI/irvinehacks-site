@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, forwardRef } from "react";
 import clsx from "clsx";
 
 import RequiredAsterisk from "./RequiredAsterisk";
+import { useMultipleSelectSet } from "./MultipleSelectSet/MultipleSelectSetContext";
 
 interface MultipleSelectProps {
 	name: string;
@@ -59,11 +60,22 @@ export default function MultipleSelect({
 	const [isOtherChecked, setIsOtherChecked] = useState(false);
 	const otherRef = useRef<HTMLInputElement>(null);
 
+	const setContext = useMultipleSelectSet();
+	const idRef = useRef(crypto.randomUUID());
+
+	const anyChecked = checkedValues.size > 0 || isOtherChecked;
+
 	useEffect(() => {
 		if (isOtherChecked) {
 			otherRef.current?.focus();
 		}
 	}, [isOtherChecked]);
+
+	useEffect(() => {
+		if (setContext) {
+			setContext.reportChecked(idRef.current, anyChecked);
+		}
+	}, [anyChecked, setContext]);
 
 	const handleCheckChange = (value: string, checked: boolean) => {
 		setCheckedValues((prev) => {
@@ -76,8 +88,6 @@ export default function MultipleSelect({
 			return next;
 		});
 	};
-
-	const anyChecked = checkedValues.size > 0 || isOtherChecked;
 
 	return (
 		<div className={clsx(hidden && "hidden", containerClass)}>

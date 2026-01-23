@@ -9,7 +9,7 @@ import BaseNavbar from "@/lib/components/Navbar/BaseNavbar";
 import "./globals.css";
 
 export const metadata: Metadata = {
-	title: "IrvineHacks 2025",
+	title: "IrvineHacks 2026",
 	description:
 		"IrvineHacks is Hack at UCI's premier hackathon for collegiate students.",
 };

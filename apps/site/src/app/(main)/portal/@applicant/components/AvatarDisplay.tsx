@@ -66,7 +66,7 @@ const imageWidth = 600;
 
 export const AvatarDisplay = () => {
 	const data = useApplicationData();
-	console.log(data);
+
 	return (
 		<div className="relative w-full border-white border-4 rounded-xl bg-gradient-to-b from-[#02031D] via-[#090D83] via-54% to-[#090D83] mb-10">
 			<div className="h-[400px] w-full flex items-center justify-center">

@@ -1,3 +1,4 @@
+import CharacterCustomizer from "@/lib/components/forms/shared/CharacterCustomizer";
 import Textfield from "@/lib/components/forms/Textfield";
 
 export default function VolunteerFRQ() {
@@ -9,7 +10,7 @@ export default function VolunteerFRQ() {
 				labelText="Why are you interested in volunteering, and what do you expect to gain from this experience? (max word count 150)"
 				containerClass="w-full"
 				isRequired={true}
-				maxWordCount={150}
+				maxWordCount={100}
 			/>
 			<Textfield
 				name="frq_memory"
@@ -18,6 +19,12 @@ export default function VolunteerFRQ() {
 				isRequired={true}
 				maxWordCount={100}
 			/>
+			<p className="text-lg mb-2">
+				Our IrvineHacks 2026 theme is cyberpunk! Want to design a cyberpunk
+				avatar? Pick their augmentations, accessories, and companion, and just
+				have fun creating your character.
+			</p>
+			<CharacterCustomizer />
 		</div>
 	);
 }

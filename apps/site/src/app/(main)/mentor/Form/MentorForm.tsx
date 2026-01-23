@@ -71,7 +71,6 @@ export default function MentorForm() {
 				hidden={hidden}
 			/>
 
-			{/* optional cyberpunk avatar */}
 			{/* <Textfield
 				name="other_questions"
 				labelText="Questions/comments/concerns?"

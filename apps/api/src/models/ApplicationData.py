@@ -119,6 +119,12 @@ class BaseMentorApplicationData(BaseModel):
     mentor_tech_saq3: str = Field(max_length=2048)
     mentor_design_saq4: str = Field(max_length=2048)
     mentor_interest_saq5: str = Field(max_length=2048)
+
+    character_head_index: int
+    character_body_index: int
+    character_feet_index: int
+    character_companion_index: int
+
     resume_share_to_sponsors: bool = False
     # other_questions: Union[str, None] = Field(None, max_length=2048)
     is_18_older: bool
@@ -144,6 +150,11 @@ class BaseVolunteerApplicationData(BaseModel):
     dietary_restrictions: list[str] = []
     allergies: Union[str, None] = Field(None, max_length=2048)
     frq_volunteer_allergy: Optional[str] = ""
+
+    character_head_index: int
+    character_body_index: int
+    character_feet_index: int
+    character_companion_index: int
 
     friday_availability: list[Hour] = []
     saturday_availability: list[Hour] = []

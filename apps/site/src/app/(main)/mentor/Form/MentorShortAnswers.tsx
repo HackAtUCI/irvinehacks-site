@@ -1,3 +1,4 @@
+import CharacterCustomizer from "@/lib/components/forms/shared/CharacterCustomizer";
 import Textfield from "@/lib/components/forms/Textfield";
 
 interface ShortAnswersProps {
@@ -40,6 +41,12 @@ export default function ShortAnswers({
 				containerClass="flex flex-col w-full"
 				isRequired
 			/>
+			<p className="text-lg mb-2">
+				Our IrvineHacks 2026 theme is cyberpunk! Want to design a cyberpunk
+				avatar? Pick their augmentations, accessories, and companion, and just
+				have fun creating your character.
+			</p>
+			<CharacterCustomizer />
 		</div>
 	);
 }

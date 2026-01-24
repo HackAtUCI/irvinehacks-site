@@ -9,7 +9,7 @@ async function ApplicationsClosed() {
 	const identity = await getUserIdentity();
 
 	return (
-		<div className="rounded-2xl p-10 text-display bg-[var(--color-blue)] text-center w-8/12 max-[800px]:w-9/12 max-[400px]:w-11/12">
+		<div className="rounded-2xl p-10 text-white text-display bg-[var(--color-blue)] text-center w-8/12 max-[800px]:w-9/12 max-[400px]:w-11/12">
 			<h1 className="font-display text-pink text-2xl md:text-4xl lg:text-5xl p-10 max-[800px]:p-0">
 				Applications for IrvineHacks 2026 closed on February 11th.
 			</h1>
@@ -34,7 +34,10 @@ async function ApplicationsClosed() {
 			)}
 			<p className="text-lg">
 				If you have any other questions or concerns, feel free to contact us at{" "}
-				<a href="mailto:hack@uci.edu" className="text-pink underline font-semibold">
+				<a
+					href="mailto:hack@uci.edu"
+					className="text-pink underline font-semibold"
+				>
 					hack@uci.edu
 				</a>
 				.

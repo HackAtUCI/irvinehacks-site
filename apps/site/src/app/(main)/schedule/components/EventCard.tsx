@@ -51,9 +51,7 @@ export default function EventCard({
 							}`}</p>
 
 							{organization && (
-								<p className="text-2xl mt-0 mb-0">
-								By: {organization}
-								</p>
+								<p className="text-2xl mt-0 mb-0">By: {organization}</p>
 							)}
 						</div>
 					</div>

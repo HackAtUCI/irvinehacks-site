@@ -10,9 +10,7 @@ import Message from "./components/Message";
 import SignWaiver from "./components/SignWaiver";
 import ReturnHome from "./components/ReturnHome";
 import VerticalTimeline from "./components/timeline/VerticalTimeline";
-<<<<<<<<< Temporary merge branch 1
 import QRCodeComponent from "./components/QRCode";
-=========
 import AvatarDisplay from "./components/AvatarDisplay";
 
 const rolesArray = ["Mentor", "Hacker", "Volunteer"];

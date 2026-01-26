@@ -41,7 +41,7 @@ log = getLogger(__name__)
 
 router = APIRouter()
 
-DEADLINE = datetime(2025, 10, 28, 8, 1, tzinfo=timezone.utc)
+DEADLINE = datetime(2026, 2, 13, 8, 1, tzinfo=timezone.utc)
 
 HACKATHON_EXPERIENCE_SCORE_MAP = {
     "first_time": 5,
@@ -54,6 +54,17 @@ class IdentityResponse(BaseModel):
     uid: Union[str, None] = None
     status: Union[str, None] = None
     roles: list[Role] = []
+
+
+class CharacterIndexes(BaseModel):
+    character_head_index: int
+    character_body_index: int
+    character_feet_index: int
+    character_companion_index: int
+
+
+class ApplicationData(BaseModel):
+    application_data: Union[CharacterIndexes, None] = None
 
 
 def _is_past_deadline(now: datetime) -> bool:
@@ -102,6 +113,23 @@ async def me(
         return IdentityResponse(uid=user.uid)
 
     return IdentityResponse(uid=user.uid, **user_record)
+
+
+@router.get("/application")
+async def application(
+    user: Annotated[Union[User, None], Depends(use_user_identity)],
+) -> ApplicationData:
+    log.info(user)
+    if not user:
+        return ApplicationData()
+    user_record = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": user.uid}, ["application_data"]
+    )
+
+    if not user_record:
+        return ApplicationData()
+
+    return ApplicationData(**user_record)
 
 
 @router.post("/apply", status_code=status.HTTP_201_CREATED)

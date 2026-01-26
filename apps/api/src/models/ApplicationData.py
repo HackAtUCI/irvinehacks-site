@@ -79,19 +79,32 @@ class BaseApplicationData(BaseModel):
     frq_ambition: str = Field(max_length=2048)
     frq_character: str = Field(max_length=2048)
 
+    character_head_index: int
+    character_body_index: int
+    character_feet_index: int
+    character_companion_index: int
+
     is_18_older: bool
+
+
+Hour = Annotated[int, Field(ge=7, lt=24)]
 
 
 class BaseMentorApplicationData(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, str_max_length=254)
 
-    mentor_type: list[str] = []
+    mentor_type: list[str]
 
     pronouns: list[str] = []
     # ethnicity: str
     school: str
     major: str
     education_level: str
+    t_shirt_size: Literal["S", "M", "L", "XL"]
+    dietary_restrictions: list[str]
+    allergies: Union[str, None] = Field(None, max_length=2048)
+    # Field for question: "How did you hear about IrvineHacks?"
+    ih_reference: list[str] = []
 
     tech_experienced_technologies: list[str] = []
     hardware_experienced_technologies: list[str] = []
@@ -109,12 +122,19 @@ class BaseMentorApplicationData(BaseModel):
     mentor_tech_saq3: str = Field(max_length=2048)
     mentor_design_saq4: str = Field(max_length=2048)
     mentor_interest_saq5: str = Field(max_length=2048)
+
+    character_head_index: int
+    character_body_index: int
+    character_feet_index: int
+    character_companion_index: int
+
+    friday_availability: list[Hour] = []
+    saturday_availability: list[Hour] = []
+    sunday_availability: list[Hour] = []
+
     resume_share_to_sponsors: bool = False
     # other_questions: Union[str, None] = Field(None, max_length=2048)
     is_18_older: bool
-
-
-Hour = Annotated[int, Field(ge=7, lt=24)]
 
 
 class BaseVolunteerApplicationData(BaseModel):
@@ -134,6 +154,11 @@ class BaseVolunteerApplicationData(BaseModel):
     dietary_restrictions: list[str] = []
     allergies: Union[str, None] = Field(None, max_length=2048)
     frq_volunteer_allergy: Optional[str] = ""
+
+    character_head_index: int
+    character_body_index: int
+    character_feet_index: int
+    character_companion_index: int
 
     friday_availability: list[Hour] = []
     saturday_availability: list[Hour] = []

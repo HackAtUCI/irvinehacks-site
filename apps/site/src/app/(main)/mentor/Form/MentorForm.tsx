@@ -12,6 +12,7 @@ import ExperienceInformation from "./MentorExperienceInformation";
 import MultipleSelect from "@/lib/components/forms/MultipleSelect";
 import ControlledMultipleSelect from "@/lib/components/forms/ControlledMultipleSelect";
 import ExtraQuestions from "@/lib/components/forms/shared/ExtraQuestions";
+import ShiftAvailability from "../../volunteer/components/ShiftAvailability";
 
 export default function MentorForm() {
 	const [mentorSelection, setMentorSelection] = useState<
@@ -27,6 +28,13 @@ export default function MentorForm() {
 
 	return (
 		<BaseForm applicationType="Mentor" applyPath="/api/user/mentor">
+			<div className="w-11/12">
+				<p className="text-lg">
+					[Note] If you have any questions about IrvineHacks or being a mentor,
+					please email <b>irvinehacks2026@gmail.com</b>.
+				</p>
+			</div>
+
 			<ControlledMultipleSelect
 				name="mentor_type"
 				containerClass="w-11/12"
@@ -40,9 +48,31 @@ export default function MentorForm() {
 				inputType="checkbox"
 				isRequired
 			/>
+			<div className="w-11/12">
+				<p className="text-lg">
+					[<strong className="text-[#FBA80A]">Tech Mentor</strong>]: Tech
+					mentors help hackers with technical challenges during the hackathon.
+					This includes debugging code, troubleshooting hardware, advising on
+					tools and tech stacks, and helping teams scope their ideas into
+					something achievable within the event timeline. <br />
+					Tech mentors guide teams through problem-solving without building the
+					project for them.
+				</p>
+			</div>
+			<div className="w-11/12">
+				<p className="text-lg">
+					[<strong className="text-[#FBA80A]">Design Mentor</strong>]: Design
+					mentors help hackers with UX, UI, and visual design. This includes
+					giving feedback on user flows, wireframes, and prototypes, improving
+					usability and accessibility, and helping teams turn ideas into clear,
+					intuitive designs that can be completed during the hackathon.
+				</p>
+			</div>
+			<AgeInformation hidden={hidden} />
 
 			<BasicInformation hidden={hidden} />
 			<SchoolInformation hidden={hidden} />
+			<ShiftAvailability hidden={hidden} />
 			<ExtraQuestions hidden={hidden} />
 
 			<ExperienceInformation
@@ -71,14 +101,12 @@ export default function MentorForm() {
 				hidden={hidden}
 			/>
 
-			{/* optional cyberpunk avatar */}
 			{/* <Textfield
 				name="other_questions"
 				labelText="Questions/comments/concerns?"
 				containerClass={`${hidden && "hidden"} flex flex-col w-11/12`}
 				isRequired={false}
 			/> */}
-			<AgeInformation hidden={hidden} />
 		</BaseForm>
 	);
 }

@@ -10,6 +10,7 @@ import Message from "./components/Message";
 import SignWaiver from "./components/SignWaiver";
 import ReturnHome from "./components/ReturnHome";
 import VerticalTimeline from "./components/timeline/VerticalTimeline";
+import AvatarDisplay from "./components/AvatarDisplay";
 import QRCodeComponent from "./components/QRCode";
 
 const rolesArray = ["Mentor", "Hacker", "Volunteer"];
@@ -49,6 +50,7 @@ function Portal() {
 				<h2 className="font-bold font-display text-[var(--color-white)] mb-4 md:mb-[42px] text-[15px] sm:text-2xl md:text-[40px] md:leading-10">
 					{roleToDisplay} Application Status
 				</h2>
+				<AvatarDisplay />
 				<VerticalTimeline status={status as Status} />
 				<Message status={status as Status} />
 				{needsToSignWaiver && <SignWaiver />}

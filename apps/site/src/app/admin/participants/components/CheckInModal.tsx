@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 import Box from "@cloudscape-design/components/box";
 import Button from "@cloudscape-design/components/button";
@@ -16,22 +16,10 @@ export interface ActionModalProps {
 }
 
 function CheckInModal({ onDismiss, onConfirm, participant }: ActionModalProps) {
-	const [showScanner, setShowScanner] = useState(true);
 	const [selectedType, setSelectedType] = useState("accepted");
 
-	useEffect(() => {
-		if (participant) setSelectedType("accepted");
-	}, [participant]);
-
-	if (participant === null) {
+	if (!participant) {
 		return null;
-	}
-
-	if (participant === null) {
-		if (showScanner) {
-			setShowScanner(false);
-		}
-		return <Modal visible={false} />;
 	}
 
 	return (
@@ -55,7 +43,7 @@ function CheckInModal({ onDismiss, onConfirm, participant }: ActionModalProps) {
 			<SpaceBetween size="m">
 				<TextContent>
 					<ul>
-						<li>Ask for a photo ID and check participant is 18+</li>
+						<li>Ask for a photo ID and check participant is 18+.</li>
 						<li>Have participant sign the SPFB sheet.</li>
 						<li>Fill in badge and give to participant.</li>
 					</ul>

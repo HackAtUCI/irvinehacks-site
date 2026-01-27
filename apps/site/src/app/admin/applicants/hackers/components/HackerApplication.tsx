@@ -162,7 +162,7 @@ function IrvineHacksHackerApplication({
 				)}
 			</Container>
 			<ScoreSection
-				title="Resume"
+				title="Previous Experience"
 				leftColumn={
 					guidelines?.guidelines?.resume && (
 						<PortableText value={guidelines.guidelines.resume} />

@@ -173,11 +173,6 @@ function useApplicant(
 		scores: object,
 		notes: string | null = null,
 	) {
-		console.log({
-			applicant: uid,
-			scores: scores,
-			notes: notes?.trim() || null,
-		});
 		await axios.post("/api/admin/detailed-review", {
 			applicant: uid,
 			scores: scores,

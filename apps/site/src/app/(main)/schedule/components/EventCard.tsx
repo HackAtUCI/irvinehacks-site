@@ -39,9 +39,8 @@ export default function EventCard({
 									<span>Location: </span>
 									{virtual ? <a>Zoom</a> : location}
 								</p>
-								{organization && <p className="text-xl">By: {organization}</p>}
 							</div>
-							<p className="text-2xl mt-0">{`Time: ${
+							<p className="text-2xl mt-0 mb-0">{`Time: ${
 								startTime.getTime() === endTime.getTime()
 									? `${getTimeAndDates(endTime).compositeTimeHourMinute} ${
 											getTimeAndDates(endTime).amPm
@@ -50,6 +49,10 @@ export default function EventCard({
 											getTimeAndDates(endTime).compositeTimeHourMinute
 									  } ${getTimeAndDates(endTime).amPm}`
 							}`}</p>
+
+							{organization && (
+								<p className="text-2xl mt-0 mb-0">By: {organization}</p>
+							)}
 						</div>
 					</div>
 					<div>

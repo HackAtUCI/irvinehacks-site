@@ -13,6 +13,7 @@ import useApplicant, {
 
 import ApplicantOverview from "./ApplicantOverview";
 import { ParticipantRole } from "@/lib/userRecord";
+import { ScoredFields } from "@/lib/detailedScores";
 import ZotHacksHackerApplication from "../zothacks-hackers/components/ZotHacksHackerApplication";
 import HackerApplicantActions from "./HackerApplicantActions";
 import { ZothacksScoringGuidelinesType } from "../zothacks-hackers/components/getScoringGuidelines";
@@ -31,7 +32,7 @@ function DetailedScoreApplicant({
 	const { setNotifications } = useContext(NotificationContext);
 	const { applicant, loading, submitDetailedReview, deleteNotes } =
 		useApplicant(uid, applicationType);
-	const [scores, setScores] = useState({});
+	const [scores, setScores] = useState<ScoredFields>({});
 	const [notes, setNotes] = useState("");
 
 	if (loading || !applicant) {

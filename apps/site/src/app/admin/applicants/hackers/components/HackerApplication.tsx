@@ -19,6 +19,7 @@ import ReviewerNotes from "@/app/admin/applicants/components/ReviewerNotes";
 import UserContext from "@/lib/admin/UserContext";
 import { isDirector, isLead } from "@/lib/admin/authorization";
 import { Uid } from "@/lib/userRecord";
+import { IrvineHacksHackerScoredFields } from "@/lib/detailedScores";
 
 type IHKeys = IrvineHacksHackerApplicationQuestion;
 
@@ -40,6 +41,21 @@ const IH_HACKER_APPLICATION_SECTIONS: IrvineHacksHackerApplicationSections = {
 	Other: ["ih_reference", "areas_interested"],
 };
 
+interface IrvineHacksHackerApplicationProps {
+	application_data: IrvineHacksHackerApplicationData;
+	onResumeScore: (
+		resumeScore: number,
+		hackathonExperienceScore: number,
+	) => void;
+	onScoreChange: (scores: IrvineHacksHackerScoredFields) => void;
+	guidelines: any;
+	notes: string;
+	onNotesChange: (notes: string) => void;
+	applicant: Uid;
+	reviews: Review[];
+	onDeleteNotes: (uid: Uid, idx: number) => void;
+}
+
 function IrvineHacksHackerApplication({
 	application_data,
 	onResumeScore,
@@ -50,20 +66,7 @@ function IrvineHacksHackerApplication({
 	onNotesChange,
 	reviews,
 	onDeleteNotes,
-}: {
-	application_data: IrvineHacksHackerApplicationData;
-	onResumeScore: (
-		resumeScore: number,
-		hackathonExperienceScore: number,
-	) => void;
-	onScoreChange: (scores: object) => void;
-	guidelines: any;
-	notes: string;
-	onNotesChange: (notes: string) => void;
-	applicant: Uid;
-	reviews: Review[];
-	onDeleteNotes: (uid: Uid, idx: number) => void;
-}) {
+}: IrvineHacksHackerApplicationProps) {
 	const { uid: reviewer_uid, roles } = useContext(UserContext);
 	const formattedUid = reviewer_uid?.split(".").at(-1);
 
@@ -114,7 +117,7 @@ function IrvineHacksHackerApplication({
 	const hackathonExperienceScore = application_data.is_first_hackathon ? 5 : 0;
 
 	useEffect(() => {
-		const scoresObject: Record<string, number> = {
+		const scoresObject: IrvineHacksHackerScoredFields = {
 			has_socials: hasSocials,
 		};
 
@@ -139,6 +142,7 @@ function IrvineHacksHackerApplication({
 		frqChangeScore,
 		frqAmbitionScore,
 		frqCharacterScore,
+		application_data,
 		onScoreChange,
 	]);
 

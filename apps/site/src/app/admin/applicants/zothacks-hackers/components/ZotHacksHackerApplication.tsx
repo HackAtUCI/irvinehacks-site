@@ -19,6 +19,7 @@ import { isDirector, isLead } from "@/lib/admin/authorization";
 import { ZothacksScoringGuidelinesType } from "./getScoringGuidelines";
 import { Review } from "@/lib/admin/useApplicant";
 import { Uid } from "@/lib/userRecord";
+import { ZotHacksHackerScoredFields } from "@/lib/detailedScores";
 
 type ZHKeys = Exclude<keyof ZotHacksHackerApplicationData, "reviews">;
 
@@ -60,7 +61,7 @@ function ZotHacksHackerApplication({
 		resumeScore: number,
 		hackathonExperienceScore: number,
 	) => void;
-	onScoreChange: (scores: object) => void;
+	onScoreChange: (scores: ZotHacksHackerScoredFields) => void;
 	guidelines: ZothacksScoringGuidelinesType;
 	notes: string;
 	onNotesChange: (notes: string) => void;
@@ -106,25 +107,26 @@ function ZotHacksHackerApplication({
 	});
 	const [elevatorScore, setElevatorScore] = useState<number>(
 		formattedUid
-			? application_data?.review_breakdown?.[formattedUid]
-					?.elevator_pitch_saq ?? -1
+			? (application_data?.review_breakdown?.[formattedUid]
+					?.elevator_pitch_saq ?? -1)
 			: -1,
 	);
 	const [techExperienceScore, setTechExperienceScore] = useState<number>(
 		formattedUid
-			? application_data?.review_breakdown?.[formattedUid]
-					?.tech_experience_saq ?? -1
+			? (application_data?.review_breakdown?.[formattedUid]
+					?.tech_experience_saq ?? -1)
 			: -1,
 	);
 	const [learnAboutSelfScore, setLearnAboutSelfScore] = useState<number>(
 		formattedUid
-			? application_data?.review_breakdown?.[formattedUid]
-					?.learn_about_self_saq ?? -1
+			? (application_data?.review_breakdown?.[formattedUid]
+					?.learn_about_self_saq ?? -1)
 			: -1,
 	);
 	const [pixelArtScore, setPixelArtScore] = useState<number>(
 		formattedUid
-			? application_data?.review_breakdown?.[formattedUid]?.pixel_art_saq ?? -1
+			? (application_data?.review_breakdown?.[formattedUid]?.pixel_art_saq ??
+					-1)
 			: -1,
 	);
 
@@ -136,7 +138,7 @@ function ZotHacksHackerApplication({
 		] || 0;
 
 	useEffect(() => {
-		const scoresObject: Record<string, number> = {
+		const scoresObject: ZotHacksHackerScoredFields = {
 			hackathon_experience: hackathonExperienceScore,
 		};
 

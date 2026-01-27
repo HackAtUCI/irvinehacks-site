@@ -21,6 +21,7 @@ import ApplicantActions from "./ApplicantActions";
 import ApplicantOverview from "./ApplicantOverview";
 import HackerApplicantActions from "./HackerApplicantActions";
 import { ParticipantRole } from "@/lib/userRecord";
+import { ScoredFields } from "@/lib/detailedScores";
 
 interface ApplicantProps {
 	uid: string;
@@ -37,7 +38,7 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 		submitDetailedReview,
 		deleteNotes,
 	} = useApplicant(uid, applicationType);
-	const [scores, setScores] = useState({});
+	const [scores, setScores] = useState<ScoredFields>({});
 	const [notes, setNotes] = useState("");
 
 	if (loading || !applicant) {

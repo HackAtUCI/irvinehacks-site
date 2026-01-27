@@ -8,6 +8,11 @@ import { Review } from "@/lib/admin/useApplicant";
 import { Uid } from "@/lib/userRecord";
 import UserContext from "@/lib/admin/UserContext";
 import { isReviewer } from "@/lib/admin/authorization";
+import {
+	IrvineHacksHackerScoredFields,
+	HACKER_WEIGHTING_CONFIG,
+	ZotHacksHackerScoredFields,
+} from "@/lib/detailedScores";
 
 interface ColoredTextBoxProps {
 	text: string | undefined;
@@ -21,22 +26,14 @@ const ColoredTextBox = ({ text }: ColoredTextBoxProps) => {
 	);
 };
 
-const WEIGHTING_CONFIG: Record<string, [number, number]> = {
-	frq_change: [20, 0.2],
-	frq_ambition: [20, 0.25],
-	frq_character: [20, 0.2],
-	previous_experience: [1, 0.3],
-	has_socials: [1, 0.05],
-};
-
 interface ApplicantActionsProps {
 	applicant: Uid;
 	reviews: Review[];
-	scores: object;
+	scores: IrvineHacksHackerScoredFields | ZotHacksHackerScoredFields;
 	notes?: string;
 	onSubmitDetailedReview: (
 		uid: Uid,
-		scores: object,
+		scores: IrvineHacksHackerScoredFields | ZotHacksHackerScoredFields,
 		notes: string | null,
 	) => void;
 }
@@ -68,20 +65,18 @@ function HackerApplicantActions({
 		onSubmitDetailedReview(applicant, scores, notes ?? null);
 	};
 
-	const calculateTotalScore = (scores: Record<string, number>) => {
-		if (scores.resume === -1000) {
-			return -1000;
-		}
-
+	const calculateTotalScore = (
+		scores: IrvineHacksHackerScoredFields | ZotHacksHackerScoredFields,
+	) => {
 		// Detect if we are using IrvineHacks scoring by the presence of its specific fields
 		const isIrvineHacks = "has_socials" in scores || "frq_change" in scores;
 
 		if (isIrvineHacks) {
 			let weightedSum = 0;
 			for (const [field, [maxScore, weight]] of Object.entries(
-				WEIGHTING_CONFIG,
+				HACKER_WEIGHTING_CONFIG,
 			)) {
-				const score = scores[field] ?? 0;
+				const score = scores[field as keyof IrvineHacksHackerScoredFields] ?? 0;
 				// In case of any leftover -1 values (though typically filtered out)
 				const normalizedScore = score === -1 ? 0 : score;
 				weightedSum += (normalizedScore / maxScore) * weight;
@@ -89,6 +84,8 @@ function HackerApplicantActions({
 
 			let totalScore = weightedSum * 100;
 			return Math.max(totalScore, -3);
+		} else if ("resume" in scores && scores.resume === -1000) {
+			return -1000;
 		}
 
 		// Fallback to simple sum for ZotHacks
@@ -100,7 +97,7 @@ function HackerApplicantActions({
 		return Math.max(totalScore, -3);
 	};
 
-	const totalScore = calculateTotalScore(scores as Record<string, number>);
+	const totalScore = calculateTotalScore(scores);
 
 	return canReview ? (
 		<SpaceBetween direction="horizontal" size="xs">

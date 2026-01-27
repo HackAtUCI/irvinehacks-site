@@ -17,13 +17,7 @@ interface BaseApplicationData {
 }
 
 export type HackathonExperience = "first_time" | "some_experience" | "veteran";
-interface ReviewBreakdown {
-	resume: number;
-	elevator_pitch_saq: number;
-	tech_experience_saq: number;
-	learn_about_self_saq: number;
-	pixel_art_saq: number;
-}
+
 export interface ZotHacksHackerApplicationData extends BaseApplicationData {
 	school_year: string;
 	dietary_restrictions: string[];
@@ -38,19 +32,42 @@ export interface ZotHacksHackerApplicationData extends BaseApplicationData {
 	resume_url: string | null;
 	submission_time: string;
 	reviews: Review[];
-	review_breakdown: { [reviewer_uid: string]: ReviewBreakdown };
+	review_breakdown: {
+		[reviewer_uid: string]: {
+			resume: number;
+			elevator_pitch_saq: number;
+			tech_experience_saq: number;
+			learn_about_self_saq: number;
+			pixel_art_saq: number;
+		};
+	};
 	global_field_scores?: { resume?: number };
 }
 
-export interface HackerApplicationData extends BaseApplicationData {
+export interface IrvineHacksHackerApplicationData extends BaseApplicationData {
 	is_first_hackathon: boolean;
 	portfolio: string | null;
 	linkedin: string | null;
 	frq_change: string;
-	frq_video_game: string;
-	resume_url: string;
+	frq_ambition: string;
+	frq_character: string;
+	resume_url: string | null;
+	dietary_restrictions: string[];
+	allergies: string | null;
+	ih_reference: string[];
+	areas_interested: string[];
+	t_shirt_size: string;
 	submission_time: string;
 	reviews: Review[];
+	review_breakdown?: {
+		[reviewer_uid: string]: {
+			resume?: number;
+			frq_change?: number;
+			frq_ambition?: number;
+			frq_character?: number;
+		};
+	};
+	global_field_scores?: { resume?: number };
 }
 
 export interface MentorApplicationData extends BaseApplicationData {
@@ -82,8 +99,8 @@ export interface VolunteerApplicationData extends BaseApplicationData {
 	reviews: Review[];
 }
 
-export type HackerApplicationQuestion = Exclude<
-	keyof HackerApplicationData,
+export type IrvineHacksHackerApplicationQuestion = Exclude<
+	keyof IrvineHacksHackerApplicationData,
 	"reviews"
 >;
 
@@ -103,7 +120,7 @@ export type ZotHacksHackerApplicationQuestion = Exclude<
 >;
 
 type ApplicationData =
-	| HackerApplicationData
+	| IrvineHacksHackerApplicationData
 	| MentorApplicationData
 	| VolunteerApplicationData
 	| ZotHacksHackerApplicationData;

@@ -7,7 +7,7 @@ interface ApplicantProps {
 function HackerApplicant({ params }: ApplicantProps) {
 	const { uid } = params;
 
-	return <Applicant uid={uid} applicationType="hacker" />;
+	return <Applicant uid={uid} applicationType="hacker" guidelines={{}} />;
 }
 
 export default HackerApplicant;

@@ -1,12 +1,14 @@
 "use client";
-
+import { useState, useContext } from "react";
 import ContentLayout from "@cloudscape-design/components/content-layout";
 import Header from "@cloudscape-design/components/header";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import Spinner from "@cloudscape-design/components/spinner";
+import { FlashbarProps } from "@cloudscape-design/components/flashbar";
 
+import NotificationContext from "@/lib/admin/NotificationContext";
 import useApplicant, {
-	HackerApplicationData,
+	IrvineHacksHackerApplicationData,
 	MentorApplicationData,
 	VolunteerApplicationData,
 } from "@/lib/admin/useApplicant";
@@ -17,19 +19,26 @@ import VolunteerApplication from "@/app/admin/applicants/volunteers/components/V
 
 import ApplicantActions from "./ApplicantActions";
 import ApplicantOverview from "./ApplicantOverview";
-import HackerApplicantActions from "./HackerApplicantActions";
+import ZotHacksHackerApplicantActions from "./ZotHacksHackerApplicantActions";
 import { ParticipantRole } from "@/lib/userRecord";
 
 interface ApplicantProps {
 	uid: string;
 	applicationType: "hacker" | "mentor" | "volunteer";
+	guidelines: Record<string, number>;
 }
 
-function Applicant({ uid, applicationType }: ApplicantProps) {
-	const { applicant, loading, submitReview } = useApplicant(
-		uid,
-		applicationType,
-	);
+function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
+	const { setNotifications } = useContext(NotificationContext);
+	const {
+		applicant,
+		loading,
+		submitReview,
+		submitDetailedReview,
+		deleteNotes,
+	} = useApplicant(uid, applicationType);
+	const [scores, setScores] = useState({});
+	const [notes, setNotes] = useState("");
 
 	if (loading || !applicant) {
 		return (
@@ -41,6 +50,31 @@ function Applicant({ uid, applicationType }: ApplicantProps) {
 
 	const { first_name, last_name, application_data } = applicant;
 
+	const successMessage: FlashbarProps.MessageDefinition = {
+		type: "success",
+		content: "Successfully submitted review!",
+		id: `${Date.now()}`,
+		dismissible: true,
+		onDismiss: () => {
+			if (setNotifications)
+				setNotifications((prev) =>
+					prev.filter((msg) => msg.id !== successMessage.id),
+				);
+		},
+	};
+
+	const handleSubmitDetailedReview = (
+		Uid: string,
+		scores: object,
+		notes: string | null,
+	) => {
+		submitDetailedReview(Uid, scores, notes).then(() => {
+			if (setNotifications)
+				setNotifications((prev) => [successMessage, ...prev]);
+			setNotes("");
+		});
+	};
+
 	return (
 		<ContentLayout
 			header={
@@ -49,10 +83,12 @@ function Applicant({ uid, applicationType }: ApplicantProps) {
 					description="Applicant"
 					actions={
 						applicant.roles.includes(ParticipantRole.Hacker) ? (
-							<HackerApplicantActions
+							<ZotHacksHackerApplicantActions
 								applicant={applicant._id}
 								reviews={application_data.reviews}
-								submitReview={submitReview}
+								scores={scores}
+								notes={notes}
+								onSubmitDetailedReview={handleSubmitDetailedReview}
 							/>
 						) : (
 							<ApplicantActions
@@ -70,7 +106,28 @@ function Applicant({ uid, applicationType }: ApplicantProps) {
 				<ApplicantOverview applicant={applicant} />
 				{applicant.roles.includes(ParticipantRole.Hacker) ? (
 					<HackerApplication
-						application_data={application_data as HackerApplicationData}
+						application_data={
+							application_data as IrvineHacksHackerApplicationData
+						}
+						onResumeScore={(
+							resumeScore: number,
+							hackathonExperienceScore: number,
+						) =>
+							submitDetailedReview(applicant._id, {
+								resume: resumeScore,
+								hackathon_experience: hackathonExperienceScore,
+							}).then(() => {
+								if (setNotifications)
+									setNotifications((prev) => [successMessage, ...prev]);
+							})
+						}
+						onScoreChange={setScores}
+						guidelines={guidelines}
+						notes={notes}
+						onNotesChange={setNotes}
+						applicant={applicant._id}
+						reviews={application_data.reviews}
+						onDeleteNotes={(uid, idx) => deleteNotes(uid, idx)}
 					/>
 				) : applicant.roles.includes(ParticipantRole.Mentor) ? (
 					<MentorApplication
@@ -82,6 +139,24 @@ function Applicant({ uid, applicationType }: ApplicantProps) {
 					/>
 				)}
 			</SpaceBetween>
+			<div
+				style={{
+					display: "flex",
+					width: "100%",
+					justifyContent: "flex-end",
+					margin: "16px",
+				}}
+			>
+				{applicant.roles.includes(ParticipantRole.Hacker) && (
+					<ZotHacksHackerApplicantActions
+						applicant={applicant._id}
+						reviews={application_data.reviews}
+						scores={scores}
+						notes={notes}
+						onSubmitDetailedReview={handleSubmitDetailedReview}
+					/>
+				)}
+			</div>
 		</ContentLayout>
 	);
 }

@@ -99,6 +99,14 @@ class ZotHacksHackerDetailedScores(BaseModel):
     hackathon_experience: Optional[int] = None
 
 
+class IrvineHacksHackerDetailedScores(BaseModel):
+    frq_change: float
+    frq_ambition: float
+    frq_character: float
+    previous_experience: float
+    has_socials: float
+
+
 class GlobalScores(BaseModel):
     resume: int
     hackathon_experience: int
@@ -106,7 +114,9 @@ class GlobalScores(BaseModel):
 
 class DetailedReviewRequest(BaseModel):
     applicant: str
-    scores: Union[GlobalScores, ZotHacksHackerDetailedScores]
+    scores: Union[
+        GlobalScores, ZotHacksHackerDetailedScores, IrvineHacksHackerDetailedScores
+    ]
     notes: Optional[str] = None  # Notes from reviewer
 
 
@@ -359,6 +369,13 @@ async def submit_detailed_review(
             reviewer,
             applicant_review.notes,
         )
+    elif isinstance(applicant_review.scores, IrvineHacksHackerDetailedScores):
+        await _handle_irvinehacks_detailed_scores_review(
+            applicant_review.applicant,
+            applicant_review.scores,
+            reviewer,
+            applicant_review.notes,
+        )
     else:
         assert_never(applicant_review.scores)
 
@@ -553,6 +570,95 @@ async def _handle_global_only_review(
         {"application_data.global_field_scores": scores.model_dump()},
         upsert=True,
     )
+
+
+async def _handle_irvinehacks_detailed_scores_review(
+    applicant: str,
+    scores: IrvineHacksHackerDetailedScores,
+    reviewer: User,
+    notes: Optional[str] = None,
+) -> None:
+    """Handle detailed scores review submission for IrvineHacks."""
+    # Dictionary mapping field names to (total_points, weight_percentage)
+    # The sum of weight_percentages should be 1.0 (100%)
+    WEIGHTING_CONFIG = {
+        "frq_change": (20, 0.20),
+        "frq_ambition": (20, 0.25),
+        "frq_character": (20, 0.20),
+        "previous_experience": (1, 0.30),
+        "has_socials": (1, 0.05)
+    }
+
+    score_breakdown = scores.model_dump(exclude_none=True)
+
+    # Check for overqualified auto-reject
+    if score_breakdown.get("resume") == -1000:
+        total_score = -1000.0
+    else:
+        weighted_sum = 0.0
+        for field, (total_points, weight) in WEIGHTING_CONFIG.items():
+            score_val = score_breakdown.get(field, 0)
+            weighted_sum += (score_val / total_points) * weight
+
+        # Scale to 100 percent
+        total_score = weighted_sum * 100.0
+        total_score = max(total_score, -3.0)
+
+    if total_score < -1000.0 or total_score > 100.0:
+        log.error("Invalid calculated review score: %f", total_score)
+        raise HTTPException(status.HTTP_400_BAD_REQUEST)
+
+    review: Review = (utc_now(), reviewer.uid, total_score, notes)
+
+    applicant_record = await mongodb_handler.retrieve_one(
+        Collection.USERS,
+        {"_id": applicant},
+        ["_id", "application_data.reviews", "roles"],
+    )
+    if not applicant_record:
+        log.error("Could not retrieve applicant after submitting review")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    unique_reviewers = applicant_review_processor.get_unique_reviewers(applicant_record)
+
+    # Only add a review if there are either less than 2 reviewers
+    # or reviewer is one of the reviewers
+    if len(unique_reviewers) >= 2 and reviewer.uid not in unique_reviewers:
+        log.error(
+            "%s tried to submit a review, but %s already has two reviewers",
+            reviewer,
+            applicant,
+        )
+        raise HTTPException(status.HTTP_403_FORBIDDEN)
+
+    update_query: dict[str, object] = {"$push": {"application_data.reviews": review}}
+    # Because reviewing a hacker requires 2 reviewers, only set the
+    # applicant's status to REVIEWED if there are at least 2 reviewers
+    if len(unique_reviewers | {reviewer.uid}) >= 2:
+        update_query.update({"$set": {"status": "REVIEWED"}})
+
+    await _try_update_applicant_with_query(
+        applicant,
+        update_query=update_query,
+        err_msg=f"{reviewer} could not submit review for {applicant}",
+    )
+
+    uid_no_domain = reviewer.uid.split(".")[-1]
+    await _try_update_applicant_with_query(
+        applicant,
+        update_query={
+            "$set": {
+                f"application_data.review_breakdown.{uid_no_domain}": score_breakdown
+            }
+        },
+        err_msg=f"{reviewer} could not submit review for {applicant}",
+    )
+
+    # No update to GlobalScores. For IH, leads decided not to score resume/experience
+    # beforehand. GlobalScores was meant for leads to mark applicants as overqualified.
+    # This is not the case for IH.
+
+    log.info("%s reviewed hacker %s", reviewer, applicant)
 
 
 async def _handle_detailed_scores_review(

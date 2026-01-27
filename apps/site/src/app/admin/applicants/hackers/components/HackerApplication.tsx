@@ -69,37 +69,25 @@ function IrvineHacksHackerApplication({
 
 	const isResumeDisabled = !isDirector(roles) && !isLead(roles);
 
-	// Resume options used for dropdown-based ScoreSection
-	const resumeOptions = useMemo(
+	// Previous Experience options used for dropdown-based ScoreSection
+	const previousExperienceOptions = useMemo(
 		() => [
 			{ label: "Select a score", value: "-1" },
-			{ label: "Weak", value: "5" },
-			{ label: "Medium", value: "15" },
-			{ label: "Strong", value: "0" },
-			{ label: "Overqualified (auto-reject)", value: "-1000" },
+			{ label: "Weak", value: "0" },
+			{ label: "Medium", value: "0.5" },
+			{ label: "Strong", value: "1" },
 		],
 		[],
 	);
 
 	// Controlled scores for each section
-	const [resumeScore, setResumeScore] = useState<number>(() => {
-		// First check if there's a global field score for resume
-		const globalResumeScore = application_data?.global_field_scores?.resume;
-		if (globalResumeScore !== undefined) {
-			const allowedValues = new Set(resumeOptions.map((o) => Number(o.value)));
-			return allowedValues.has(Number(globalResumeScore))
-				? Number(globalResumeScore)
-				: -1;
-		}
-
-		// Fall back to reviewer-specific score
-		const raw = formattedUid
-			? application_data?.review_breakdown?.[formattedUid]?.resume
-			: undefined;
-		// If there's a stored score, ensure it's one of the allowed dropdown values; otherwise default to -1
-		const allowedValues = new Set(resumeOptions.map((o) => Number(o.value)));
-		return allowedValues.has(Number(raw)) ? Number(raw) : -1;
-	});
+	const [previousExperienceScore, setPreviousExperienceScore] =
+		useState<number>(
+			formattedUid
+				? (application_data?.review_breakdown?.[formattedUid]
+						?.previous_experience ?? -1)
+				: -1,
+		);
 
 	const [frqChangeScore, setFrqChangeScore] = useState<number>(
 		formattedUid
@@ -120,16 +108,19 @@ function IrvineHacksHackerApplication({
 
 	const [showResume, setShowResume] = useState<boolean>(false);
 
+	const hasSocials =
+		application_data.linkedin || application_data.portfolio ? 1 : 0;
+
 	const hackathonExperienceScore = application_data.is_first_hackathon ? 5 : 0;
 
 	useEffect(() => {
 		const scoresObject: Record<string, number> = {
-			hackathon_experience: hackathonExperienceScore,
+			has_socials: hasSocials,
 		};
 
 		// Only include fields that don't have -1 values
-		if (resumeScore !== -1) {
-			scoresObject.resume = resumeScore;
+		if (previousExperienceScore !== -1) {
+			scoresObject.previous_experience = previousExperienceScore;
 		}
 		if (frqChangeScore !== -1) {
 			scoresObject.frq_change = frqChangeScore;
@@ -144,7 +135,7 @@ function IrvineHacksHackerApplication({
 		onScoreChange(scoresObject);
 	}, [
 		hackathonExperienceScore,
-		resumeScore,
+		previousExperienceScore,
 		frqChangeScore,
 		frqAmbitionScore,
 		frqCharacterScore,
@@ -176,6 +167,16 @@ function IrvineHacksHackerApplication({
 				rightColumn={
 					<>
 						<Button onClick={() => setShowResume(true)}>View resume</Button>
+						<br />
+						<a
+							href={
+								application_data.resume_url ? application_data.resume_url : ""
+							}
+							rel="noopener noreferrer"
+							target="_blank"
+						>
+							{application_data.resume_url}
+						</a>
 						{showResume && (
 							<Modal
 								onDismiss={() => setShowResume(false)}
@@ -195,11 +196,11 @@ function IrvineHacksHackerApplication({
 						)}
 					</>
 				}
-				options={resumeOptions}
+				options={previousExperienceOptions}
 				useDropdown
-				value={resumeScore}
+				value={previousExperienceScore}
 				onChange={(value) => {
-					setResumeScore(value);
+					setPreviousExperienceScore(value);
 					onResumeScore(value, hackathonExperienceScore);
 				}}
 				disabled={isResumeDisabled}

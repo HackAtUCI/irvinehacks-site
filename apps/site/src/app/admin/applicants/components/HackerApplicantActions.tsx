@@ -1,11 +1,10 @@
-import { useContext, useState } from "react";
+import { useContext } from "react";
 
 import Box from "@cloudscape-design/components/box";
 import Button from "@cloudscape-design/components/button";
-import Input from "@cloudscape-design/components/input";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 
-import { Review, submitReview } from "@/lib/admin/useApplicant";
+import { Review } from "@/lib/admin/useApplicant";
 import { Uid } from "@/lib/userRecord";
 import UserContext from "@/lib/admin/UserContext";
 import { isReviewer } from "@/lib/admin/authorization";
@@ -20,6 +19,14 @@ const ColoredTextBox = ({ text }: ColoredTextBoxProps) => {
 			{text}
 		</Box>
 	);
+};
+
+const WEIGHTING_CONFIG: Record<string, [number, number]> = {
+	frq_change: [20, 0.2],
+	frq_ambition: [20, 0.25],
+	frq_character: [20, 0.2],
+	previous_experience: [1, 0.3],
+	has_socials: [1, 0.05],
 };
 
 interface ApplicantActionsProps {
@@ -61,15 +68,44 @@ function HackerApplicantActions({
 		onSubmitDetailedReview(applicant, scores, notes ?? null);
 	};
 
-	const totalScore = Object.values(scores).reduce(
-		(acc, currentValue) => acc + currentValue,
-		0,
-	);
+	const calculateTotalScore = (scores: Record<string, number>) => {
+		if (scores.resume === -1000) {
+			return -1000;
+		}
+
+		// Detect if we are using IrvineHacks scoring by the presence of its specific fields
+		const isIrvineHacks = "has_socials" in scores || "frq_change" in scores;
+
+		if (isIrvineHacks) {
+			let weightedSum = 0;
+			for (const [field, [maxScore, weight]] of Object.entries(
+				WEIGHTING_CONFIG,
+			)) {
+				const score = scores[field] ?? 0;
+				// In case of any leftover -1 values (though typically filtered out)
+				const normalizedScore = score === -1 ? 0 : score;
+				weightedSum += (normalizedScore / maxScore) * weight;
+			}
+
+			let totalScore = weightedSum * 100;
+			return Math.max(totalScore, -3);
+		}
+
+		// Fallback to simple sum for ZotHacks
+		// TOOD: Make this configurable by specifying weight config
+		const totalScore = Object.values(scores).reduce(
+			(acc, val) => acc + (val === -1 ? 0 : val),
+			0,
+		);
+		return Math.max(totalScore, -3);
+	};
+
+	const totalScore = calculateTotalScore(scores as Record<string, number>);
 
 	return canReview ? (
 		<SpaceBetween direction="horizontal" size="xs">
 			<SpaceBetween direction="horizontal" size="xs">
-				{totalScore < 0 && (
+				{totalScore <= -1000 && (
 					<>
 						<Box variant="h3" color="text-status-error">
 							OVERQUALIFIED
@@ -78,7 +114,7 @@ function HackerApplicantActions({
 					</>
 				)}
 				<Box variant="h3" color="text-status-warning">
-					Calculated score: {totalScore}
+					Calculated score: {totalScore.toFixed(2)}
 				</Box>
 			</SpaceBetween>
 

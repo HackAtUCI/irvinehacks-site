@@ -61,10 +61,12 @@ export interface IrvineHacksHackerApplicationData extends BaseApplicationData {
 	reviews: Review[];
 	review_breakdown?: {
 		[reviewer_uid: string]: {
-			resume?: number;
+			// Corresponds to general score combining resume, socials content, previous experience saq
+			previous_experience?: number;
 			frq_change?: number;
 			frq_ambition?: number;
 			frq_character?: number;
+			has_socials?: number;
 		};
 	};
 	global_field_scores?: { resume?: number };
@@ -171,6 +173,11 @@ function useApplicant(
 		scores: object,
 		notes: string | null = null,
 	) {
+		console.log({
+			applicant: uid,
+			scores: scores,
+			notes: notes?.trim() || null,
+		});
 		await axios.post("/api/admin/detailed-review", {
 			applicant: uid,
 			scores: scores,

@@ -75,8 +75,6 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 		});
 	};
 
-	console.log(applicant.roles);
-
 	return (
 		<ContentLayout
 			header={

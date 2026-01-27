@@ -16,7 +16,7 @@ import ScoreSection from "../../components/ScoreSection";
 import ReviewerNotes from "@/app/admin/applicants/components/ReviewerNotes";
 import UserContext from "@/lib/admin/UserContext";
 import { isDirector, isLead } from "@/lib/admin/authorization";
-import { ZothacksScoringGuidelinesType } from "./getScoringGuidelines";
+import { ZothacksHackerScoringGuidelinesType } from "./getScoringGuidelines";
 import { Review } from "@/lib/admin/useApplicant";
 import { Uid } from "@/lib/userRecord";
 import { ZotHacksHackerScoredFields } from "@/lib/detailedScores";
@@ -62,7 +62,7 @@ function ZotHacksHackerApplication({
 		hackathonExperienceScore: number,
 	) => void;
 	onScoreChange: (scores: ZotHacksHackerScoredFields) => void;
-	guidelines: ZothacksScoringGuidelinesType;
+	guidelines: ZothacksHackerScoringGuidelinesType;
 	notes: string;
 	onNotesChange: (notes: string) => void;
 	applicant: Uid;

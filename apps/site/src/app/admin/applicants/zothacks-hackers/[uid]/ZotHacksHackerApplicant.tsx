@@ -1,5 +1,5 @@
 import DetailedScoreApplicant from "@/app/admin/applicants/components/DetailedScoreApplicant";
-import { getZothacksScoringGuidelines } from "../components/getScoringGuidelines";
+import { getZothacksHackerScoringGuidelines } from "../components/getScoringGuidelines";
 
 interface ApplicantProps {
 	params: { uid: string };
@@ -7,7 +7,7 @@ interface ApplicantProps {
 
 async function ZotHacksHackerApplicant({ params }: ApplicantProps) {
 	const { uid } = params;
-	const guidelines = await getZothacksScoringGuidelines();
+	const guidelines = await getZothacksHackerScoringGuidelines();
 
 	return (
 		<DetailedScoreApplicant

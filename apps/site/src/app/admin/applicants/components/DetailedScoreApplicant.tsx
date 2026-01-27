@@ -16,12 +16,12 @@ import { ParticipantRole } from "@/lib/userRecord";
 import { ScoredFields } from "@/lib/detailedScores";
 import ZotHacksHackerApplication from "../zothacks-hackers/components/ZotHacksHackerApplication";
 import HackerApplicantActions from "./HackerApplicantActions";
-import { ZothacksScoringGuidelinesType } from "../zothacks-hackers/components/getScoringGuidelines";
+import { ZothacksHackerScoringGuidelinesType } from "../zothacks-hackers/components/getScoringGuidelines";
 
 interface ApplicantProps {
 	uid: string;
 	applicationType: "hacker" | "mentor" | "volunteer";
-	guidelines: ZothacksScoringGuidelinesType;
+	guidelines: ZothacksHackerScoringGuidelinesType;
 }
 
 function DetailedScoreApplicant({

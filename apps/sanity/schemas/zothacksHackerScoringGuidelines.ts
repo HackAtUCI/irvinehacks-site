@@ -2,8 +2,8 @@ import { defineType, defineField } from "sanity";
 import { Newspaper } from "lucide-react";
 
 export default defineType({
-	name: "zothacksScoringGuidelines",
-	title: "Zothacks Scoring Guidelines",
+	name: "zothacksHackerScoringGuidelines",
+	title: "Zothacks Hacker Scoring Guidelines",
 	icon: Newspaper,
 	type: "document",
 	fields: [

@@ -14,7 +14,7 @@ import useApplicant, {
 import ApplicantOverview from "./ApplicantOverview";
 import { ParticipantRole } from "@/lib/userRecord";
 import ZotHacksHackerApplication from "../zothacks-hackers/components/ZotHacksHackerApplication";
-import ZotHacksHackerApplicantActions from "./ZotHacksHackerApplicantActions";
+import HackerApplicantActions from "./HackerApplicantActions";
 import { ZothacksScoringGuidelinesType } from "../zothacks-hackers/components/getScoringGuidelines";
 
 interface ApplicantProps {
@@ -77,7 +77,7 @@ function DetailedScoreApplicant({
 					description="Applicant"
 					actions={
 						applicant.roles.includes(ParticipantRole.Hacker) ? (
-							<ZotHacksHackerApplicantActions
+							<HackerApplicantActions
 								applicant={applicant._id}
 								reviews={application_data.reviews}
 								scores={scores}
@@ -132,7 +132,7 @@ function DetailedScoreApplicant({
 					margin: "16px",
 				}}
 			>
-				<ZotHacksHackerApplicantActions
+				<HackerApplicantActions
 					applicant={applicant._id}
 					reviews={application_data.reviews}
 					scores={scores}

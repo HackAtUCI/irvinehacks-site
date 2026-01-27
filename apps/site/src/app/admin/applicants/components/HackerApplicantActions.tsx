@@ -25,16 +25,23 @@ const ColoredTextBox = ({ text }: ColoredTextBoxProps) => {
 interface ApplicantActionsProps {
 	applicant: Uid;
 	reviews: Review[];
-	submitReview: submitReview;
+	scores: object;
+	notes?: string;
+	onSubmitDetailedReview: (
+		uid: Uid,
+		scores: object,
+		notes: string | null,
+	) => void;
 }
 
 function HackerApplicantActions({
 	applicant,
 	reviews,
-	submitReview,
+	scores,
+	notes,
+	onSubmitDetailedReview,
 }: ApplicantActionsProps) {
 	const { uid, roles } = useContext(UserContext);
-	const [value, setValue] = useState("");
 
 	const uniqueReviewers = Array.from(
 		new Set(reviews.map((review) => review[1])),
@@ -51,27 +58,30 @@ function HackerApplicantActions({
 
 	const handleClick = () => {
 		// TODO: use flashbar or modal for submit status
-		const val = parseFloat(value);
-		if (val >= 0 && val <= 10) {
-			submitReview(applicant, parseFloat(value));
-			setValue("");
-		}
+		onSubmitDetailedReview(applicant, scores, notes ?? null);
 	};
+
+	const totalScore = Object.values(scores).reduce(
+		(acc, currentValue) => acc + currentValue,
+		0,
+	);
 
 	return canReview ? (
 		<SpaceBetween direction="horizontal" size="xs">
-			<Input
-				onChange={({ detail }) => setValue(detail.value)}
-				value={value}
-				type="number"
-				inputMode="decimal"
-				placeholder="Applicant score"
-				step={0.5}
-				disabled={!canReview}
-				invalid={
-					value !== "" && (parseFloat(value) < 0 || parseFloat(value) > 10)
-				}
-			/>
+			<SpaceBetween direction="horizontal" size="xs">
+				{totalScore < 0 && (
+					<>
+						<Box variant="h3" color="text-status-error">
+							OVERQUALIFIED
+						</Box>
+						<Box variant="h3">|</Box>
+					</>
+				)}
+				<Box variant="h3" color="text-status-warning">
+					Calculated score: {totalScore}
+				</Box>
+			</SpaceBetween>
+
 			<Button onClick={handleClick} disabled={!canReview}>
 				Submit
 			</Button>

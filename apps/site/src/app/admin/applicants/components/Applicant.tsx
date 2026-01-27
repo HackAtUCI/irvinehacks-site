@@ -19,7 +19,7 @@ import VolunteerApplication from "@/app/admin/applicants/volunteers/components/V
 
 import ApplicantActions from "./ApplicantActions";
 import ApplicantOverview from "./ApplicantOverview";
-import ZotHacksHackerApplicantActions from "./ZotHacksHackerApplicantActions";
+import HackerApplicantActions from "./HackerApplicantActions";
 import { ParticipantRole } from "@/lib/userRecord";
 
 interface ApplicantProps {
@@ -75,6 +75,8 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 		});
 	};
 
+	console.log(applicant.roles);
+
 	return (
 		<ContentLayout
 			header={
@@ -83,7 +85,7 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 					description="Applicant"
 					actions={
 						applicant.roles.includes(ParticipantRole.Hacker) ? (
-							<ZotHacksHackerApplicantActions
+							<HackerApplicantActions
 								applicant={applicant._id}
 								reviews={application_data.reviews}
 								scores={scores}
@@ -109,18 +111,8 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 						application_data={
 							application_data as IrvineHacksHackerApplicationData
 						}
-						onResumeScore={(
-							resumeScore: number,
-							hackathonExperienceScore: number,
-						) =>
-							submitDetailedReview(applicant._id, {
-								resume: resumeScore,
-								hackathon_experience: hackathonExperienceScore,
-							}).then(() => {
-								if (setNotifications)
-									setNotifications((prev) => [successMessage, ...prev]);
-							})
-						}
+						// TODO: Remove onResumeScore by making it optional
+						onResumeScore={() => {}}
 						onScoreChange={setScores}
 						guidelines={guidelines}
 						notes={notes}
@@ -148,7 +140,7 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 				}}
 			>
 				{applicant.roles.includes(ParticipantRole.Hacker) && (
-					<ZotHacksHackerApplicantActions
+					<HackerApplicantActions
 						applicant={applicant._id}
 						reviews={application_data.reviews}
 						scores={scores}

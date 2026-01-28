@@ -7,7 +7,7 @@ import Header from "@cloudscape-design/components/header";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import { PortableText } from "@portabletext/react";
 import PixelArtDisplay from "./PixelArtDisplay";
-import HackerApplicationSection from "@/app/admin/applicants/hackers/components/HackerApplicationSection";
+import ZotHacksHackerApplicationSection from "./ZotHacksHackerApplicationSection";
 import {
 	HackathonExperience,
 	ZotHacksHackerApplicationData,
@@ -175,7 +175,7 @@ function ZotHacksHackerApplication({
 			<Container>
 				{Object.entries(ZH_HACKER_APPLICATION_SECTIONS).map(
 					([section, propsToShow]) => (
-						<HackerApplicationSection
+						<ZotHacksHackerApplicationSection
 							key={section}
 							title={section}
 							data={application_data}

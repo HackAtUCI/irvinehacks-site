@@ -45,10 +45,7 @@ function BadgeScanner(props: BadgeScannerProps) {
 		}
 
 		// stops scanning after success
-		const wrappedOnSuccess: QrcodeSuccessCallback = (
-			decodedText,
-			result,
-		) => {
+		const wrappedOnSuccess: QrcodeSuccessCallback = (decodedText, result) => {
 			// prevent duplicate callbacks
 			if (hasProcessedScanRef.current) {
 				return;

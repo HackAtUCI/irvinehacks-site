@@ -74,7 +74,7 @@ function BadgeScanner(props: BadgeScannerProps) {
 			// check DOM if clear
 			const checkElement = document.getElementById(scannerRegionId);
 			if (checkElement && checkElement.children.length > 0) {
-				checkElement.innerHTML = '';
+				checkElement.innerHTML = "";
 			}
 
 			// only create scanner if component is still mounted

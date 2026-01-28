@@ -1,4 +1,4 @@
-	import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect } from "react";
 
 import Box from "@cloudscape-design/components/box";
 import Button from "@cloudscape-design/components/button";

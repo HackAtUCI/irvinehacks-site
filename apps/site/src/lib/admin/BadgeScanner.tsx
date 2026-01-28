@@ -58,7 +58,6 @@ function BadgeScanner(props: BadgeScannerProps) {
 					console.error("Failed to stop scanner: ", error);
 				});
 			}
-			
 			onSuccess(decodedText, result);
 		};
 

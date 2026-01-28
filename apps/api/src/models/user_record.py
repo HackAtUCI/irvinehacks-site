@@ -39,7 +39,8 @@ class Status(str, Enum):
     WAIVER_SIGNED = "WAIVER_SIGNED"
     CONFIRMED = "CONFIRMED"
     ATTENDING = "ATTENDING"
-    VOID = "VOID"
+    WAITLISTED = "WAITLISTED"
+    QUEUED = "QUEUED"
 
 
 class UserRecord(BaseRecord):

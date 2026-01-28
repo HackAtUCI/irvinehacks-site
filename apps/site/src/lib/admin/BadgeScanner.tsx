@@ -55,11 +55,9 @@ function BadgeScanner(props: BadgeScannerProps) {
 			
 			// stop scanning
 			if (scannerRef.current) {
-				scannerRef.current
-					.clear()
-					.catch((error) => {
-						console.error("Failed to stop scanner: ", error);
-					});
+				scannerRef.current.clear().catch((error) => {
+					console.error("Failed to stop scanner: ", error);
+				});
 			}
 			
 			onSuccess(decodedText, result);

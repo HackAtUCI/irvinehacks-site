@@ -35,7 +35,6 @@ function BadgeScanner(props: BadgeScannerProps) {
 			onSuccess,
 			onError,
 		} = props;
-		
 		const scannerRegionId = scannerRegionIdRef.current;
 		let isMounted = true;
 

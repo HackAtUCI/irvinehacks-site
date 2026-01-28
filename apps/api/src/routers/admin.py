@@ -586,7 +586,7 @@ async def _handle_irvinehacks_detailed_scores_review(
         "frq_ambition": (20, 0.25),
         "frq_character": (20, 0.20),
         "previous_experience": (1, 0.30),
-        "has_socials": (1, 0.05)
+        "has_socials": (1, 0.05), 
     }
 
     score_breakdown = scores.model_dump(exclude_none=True)

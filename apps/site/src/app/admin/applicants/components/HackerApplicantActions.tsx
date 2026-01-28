@@ -82,7 +82,7 @@ function HackerApplicantActions({
 				weightedSum += (normalizedScore / maxScore) * weight;
 			}
 
-			let totalScore = weightedSum * 100;
+			const totalScore = weightedSum * 100;
 			return Math.max(totalScore, -3);
 		} else if ("resume" in scores && scores.resume === -1000) {
 			return -1000;

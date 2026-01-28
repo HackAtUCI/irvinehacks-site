@@ -22,11 +22,12 @@ import ApplicantOverview from "./ApplicantOverview";
 import HackerApplicantActions from "./HackerApplicantActions";
 import { ParticipantRole } from "@/lib/userRecord";
 import { ScoredFields } from "@/lib/detailedScores";
+import { IrvineHacksHackerScoringGuidelinesType } from "@/app/admin/applicants/hackers/components/getScoringGuidelines";
 
 interface ApplicantProps {
 	uid: string;
 	applicationType: "hacker" | "mentor" | "volunteer";
-	guidelines: any;
+	guidelines: IrvineHacksHackerScoringGuidelinesType;
 }
 
 function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {

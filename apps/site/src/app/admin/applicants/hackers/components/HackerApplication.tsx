@@ -138,7 +138,7 @@ function IrvineHacksHackerApplication({
 
 		onScoreChange(scoresObject);
 	}, [
-		hackathonExperienceScore,
+		hasSocials,
 		previousExperienceScore,
 		frqChangeScore,
 		frqAmbitionScore,

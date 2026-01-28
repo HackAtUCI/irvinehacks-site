@@ -165,8 +165,8 @@ function IrvineHacksHackerApplication({
 			<ScoreSection
 				title="Previous Experience"
 				leftColumn={
-					guidelines?.guidelines?.resume && (
-						<PortableText value={guidelines.guidelines.resume} />
+					guidelines?.guidelines?.prev_experience && (
+						<PortableText value={guidelines.guidelines.prev_experience} />
 					)
 				}
 				rightColumn={

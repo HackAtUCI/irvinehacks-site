@@ -52,7 +52,6 @@ function BadgeScanner(props: BadgeScannerProps) {
 			}
 			hasProcessedScanRef.current = true;
 			isScanningRef.current = false;
-			
 			// stop scanning
 			if (scannerRef.current) {
 				scannerRef.current.clear().catch((error) => {

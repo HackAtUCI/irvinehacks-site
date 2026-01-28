@@ -3,9 +3,9 @@ import { cache } from "react";
 import { client } from "@/lib/sanity/client";
 import { groq } from "next-sanity";
 
-export const ZothacksScoringGuidelines = z.object({
+export const ZothacksHackerScoringGuidelines = z.object({
 	_id: z.string(),
-	_type: z.literal("zothacksScoringGuidelines"),
+	_type: z.literal("zothacksHackerScoringGuidelines"),
 	guidelines: z.object({
 		resume: z.array(z.any()),
 		elevator_pitch_saq: z.array(z.any()),
@@ -15,13 +15,13 @@ export const ZothacksScoringGuidelines = z.object({
 	}),
 });
 
-export type ZothacksScoringGuidelinesType = z.infer<
-	typeof ZothacksScoringGuidelines
+export type ZothacksHackerScoringGuidelinesType = z.infer<
+	typeof ZothacksHackerScoringGuidelines
 >;
 
-export const getZothacksScoringGuidelines = cache(async () => {
+export const getZothacksHackerScoringGuidelines = cache(async () => {
 	const data = await client.fetch(
-		groq`*[_type == "zothacksScoringGuidelines"][0]{
+		groq`*[_type == "zothacksHackerScoringGuidelines"][0]{
       _id,
       _type,
       guidelines {
@@ -34,5 +34,5 @@ export const getZothacksScoringGuidelines = cache(async () => {
     }`,
 	);
 
-	return ZothacksScoringGuidelines.parse(data);
+	return ZothacksHackerScoringGuidelines.parse(data);
 });

@@ -115,7 +115,7 @@ EXPECTED_APPLICATION_DATA_WITHOUT_RESUME = ProcessedHackerApplicationData(
     verdict_time=SAMPLE_VERDICT_TIME,
 )
 
-EXPECTED_GLOBAL_FIELD_SCORES = {"hackathon_experience": -1000}
+EXPECTED_GLOBAL_FIELD_SCORES = {"hackathon_experience": -1000.0}
 
 EXPECTED_ZOTHACKS_HACKER_APPLICATION_DATA = ProcessedZotHacksHackerApplicationData(
     **SAMPLE_ZOTHACKS_HACKER_APPLICATION,  # type: ignore[arg-type]
@@ -415,7 +415,7 @@ def test_application_data_is_bson_encodable() -> None:
     data = EXPECTED_APPLICATION_DATA.model_copy()
     data.linkedin = HttpUrl("https://linkedin.com")
     encoded = bson.encode(EXPECTED_APPLICATION_DATA.model_dump())
-    assert len(encoded) == 687
+    assert len(encoded) == 736
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)

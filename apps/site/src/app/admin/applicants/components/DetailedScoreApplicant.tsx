@@ -13,14 +13,15 @@ import useApplicant, {
 
 import ApplicantOverview from "./ApplicantOverview";
 import { ParticipantRole } from "@/lib/userRecord";
+import { ScoredFields } from "@/lib/detailedScores";
 import ZotHacksHackerApplication from "../zothacks-hackers/components/ZotHacksHackerApplication";
-import ZotHacksHackerApplicantActions from "./ZotHacksHackerApplicantActions";
-import { ZothacksScoringGuidelinesType } from "../zothacks-hackers/components/getScoringGuidelines";
+import HackerApplicantActions from "./HackerApplicantActions";
+import { ZothacksHackerScoringGuidelinesType } from "../zothacks-hackers/components/getScoringGuidelines";
 
 interface ApplicantProps {
 	uid: string;
 	applicationType: "hacker" | "mentor" | "volunteer";
-	guidelines: ZothacksScoringGuidelinesType;
+	guidelines: ZothacksHackerScoringGuidelinesType;
 }
 
 function DetailedScoreApplicant({
@@ -31,7 +32,7 @@ function DetailedScoreApplicant({
 	const { setNotifications } = useContext(NotificationContext);
 	const { applicant, loading, submitDetailedReview, deleteNotes } =
 		useApplicant(uid, applicationType);
-	const [scores, setScores] = useState({});
+	const [scores, setScores] = useState<ScoredFields>({});
 	const [notes, setNotes] = useState("");
 
 	if (loading || !applicant) {
@@ -77,7 +78,7 @@ function DetailedScoreApplicant({
 					description="Applicant"
 					actions={
 						applicant.roles.includes(ParticipantRole.Hacker) ? (
-							<ZotHacksHackerApplicantActions
+							<HackerApplicantActions
 								applicant={applicant._id}
 								reviews={application_data.reviews}
 								scores={scores}
@@ -132,7 +133,7 @@ function DetailedScoreApplicant({
 					margin: "16px",
 				}}
 			>
-				<ZotHacksHackerApplicantActions
+				<HackerApplicantActions
 					applicant={applicant._id}
 					reviews={application_data.reviews}
 					scores={scores}

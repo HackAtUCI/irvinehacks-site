@@ -2,7 +2,7 @@ import ColumnLayout from "@cloudscape-design/components/column-layout";
 import TextContent from "@cloudscape-design/components/text-content";
 
 import {
-	HackerApplicationData,
+	IrvineHacksHackerApplicationData,
 	ZotHacksHackerApplicationData,
 } from "@/lib/admin/useApplicant";
 
@@ -66,7 +66,7 @@ function ApplicationResponse({ value }: ApplicationResponseProps) {
 }
 
 type BaseData =
-	| Omit<HackerApplicationData, "reviews">
+	| Omit<IrvineHacksHackerApplicationData, "reviews">
 	| Omit<ZotHacksHackerApplicationData, "reviews">;
 
 function HackerApplicationSection<

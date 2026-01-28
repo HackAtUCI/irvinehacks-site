@@ -2,8 +2,8 @@ import { defineType, defineField } from "sanity";
 import { Newspaper } from "lucide-react";
 
 export default defineType({
-	name: "zothacksScoringGuidelines",
-	title: "Zothacks Scoring Guidelines",
+	name: "irvinehacksHackerScoringGuidelines",
+	title: "IrvineHacks Hacker Scoring Guidelines",
 	icon: Newspaper,
 	type: "document",
 	fields: [
@@ -13,32 +13,26 @@ export default defineType({
 			type: "object",
 			fields: [
 				defineField({
-					name: "resume",
-					title: "Resume",
+					name: "prev_experience",
+					title: "Previous Experience",
 					type: "array",
 					of: [{ type: "block" }],
 				}),
 				defineField({
-					name: "elevator_pitch_saq",
-					title: "Elevator Pitch SAQ",
+					name: "frq_change",
+					title: "FRQ Change",
 					type: "array",
 					of: [{ type: "block" }],
 				}),
 				defineField({
-					name: "tech_experience_saq",
-					title: "Tech Experience SAQ",
+					name: "frq_ambition",
+					title: "FRQ Ambition",
 					type: "array",
 					of: [{ type: "block" }],
 				}),
 				defineField({
-					name: "learn_about_self_saq",
-					title: "Learn About Self SAQ",
-					type: "array",
-					of: [{ type: "block" }],
-				}),
-				defineField({
-					name: "pixel_art_saq",
-					title: "Pixel Art SAQ",
+					name: "frq_character",
+					title: "FRQ Character",
 					type: "array",
 					of: [{ type: "block" }],
 				}),

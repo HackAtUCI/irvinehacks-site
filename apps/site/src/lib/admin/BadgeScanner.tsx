@@ -50,7 +50,6 @@ function BadgeScanner(props: BadgeScannerProps) {
 			if (hasProcessedScanRef.current) {
 				return;
 			}
-			
 			hasProcessedScanRef.current = true;
 			isScanningRef.current = false;
 			

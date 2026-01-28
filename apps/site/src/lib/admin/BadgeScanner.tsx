@@ -21,7 +21,9 @@ function BadgeScanner(props: BadgeScannerProps) {
 	const isScanningRef = useRef(false);
 	const hasProcessedScanRef = useRef(false);
 	const isInitializingRef = useRef(false);
-	const scannerRegionIdRef = useRef(`badge-scanner-${Math.random().toString(36).substr(2, 9)}`);
+	const scannerRegionIdRef = useRef(
+		`badge-scanner-${Math.random().toString(36).substr(2, 9)}`,
+	);
 
 	useEffect(() => {
 		const {

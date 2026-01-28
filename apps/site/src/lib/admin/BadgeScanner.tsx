@@ -122,7 +122,7 @@ function BadgeScanner(props: BadgeScannerProps) {
 						// clear DOM element content
 						const element = document.getElementById(scannerRegionId);
 						if (element) {
-							element.innerHTML = '';
+							element.innerHTML = "";
 						}
 					})
 					.catch((error) => {

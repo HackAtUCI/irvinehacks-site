@@ -107,26 +107,25 @@ function ZotHacksHackerApplication({
 	});
 	const [elevatorScore, setElevatorScore] = useState<number>(
 		formattedUid
-			? (application_data?.review_breakdown?.[formattedUid]
-					?.elevator_pitch_saq ?? -1)
+			? application_data?.review_breakdown?.[formattedUid]
+					?.elevator_pitch_saq ?? -1
 			: -1,
 	);
 	const [techExperienceScore, setTechExperienceScore] = useState<number>(
 		formattedUid
-			? (application_data?.review_breakdown?.[formattedUid]
-					?.tech_experience_saq ?? -1)
+			? application_data?.review_breakdown?.[formattedUid]
+					?.tech_experience_saq ?? -1
 			: -1,
 	);
 	const [learnAboutSelfScore, setLearnAboutSelfScore] = useState<number>(
 		formattedUid
-			? (application_data?.review_breakdown?.[formattedUid]
-					?.learn_about_self_saq ?? -1)
+			? application_data?.review_breakdown?.[formattedUid]
+					?.learn_about_self_saq ?? -1
 			: -1,
 	);
 	const [pixelArtScore, setPixelArtScore] = useState<number>(
 		formattedUid
-			? (application_data?.review_breakdown?.[formattedUid]?.pixel_art_saq ??
-					-1)
+			? application_data?.review_breakdown?.[formattedUid]?.pixel_art_saq ?? -1
 			: -1,
 	);
 

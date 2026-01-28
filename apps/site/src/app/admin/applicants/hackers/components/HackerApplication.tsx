@@ -88,25 +88,24 @@ function IrvineHacksHackerApplication({
 	const [previousExperienceScore, setPreviousExperienceScore] =
 		useState<number>(
 			formattedUid
-				? (application_data?.review_breakdown?.[formattedUid]
-						?.previous_experience ?? -1)
+				? application_data?.review_breakdown?.[formattedUid]
+						?.previous_experience ?? -1
 				: -1,
 		);
 
 	const [frqChangeScore, setFrqChangeScore] = useState<number>(
 		formattedUid
-			? (application_data?.review_breakdown?.[formattedUid]?.frq_change ?? -1)
+			? application_data?.review_breakdown?.[formattedUid]?.frq_change ?? -1
 			: -1,
 	);
 	const [frqAmbitionScore, setFrqAmbitionScore] = useState<number>(
 		formattedUid
-			? (application_data?.review_breakdown?.[formattedUid]?.frq_ambition ?? -1)
+			? application_data?.review_breakdown?.[formattedUid]?.frq_ambition ?? -1
 			: -1,
 	);
 	const [frqCharacterScore, setFrqCharacterScore] = useState<number>(
 		formattedUid
-			? (application_data?.review_breakdown?.[formattedUid]?.frq_character ??
-					-1)
+			? application_data?.review_breakdown?.[formattedUid]?.frq_character ?? -1
 			: -1,
 	);
 

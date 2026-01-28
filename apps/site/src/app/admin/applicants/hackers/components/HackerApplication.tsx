@@ -20,6 +20,7 @@ import UserContext from "@/lib/admin/UserContext";
 import { isDirector, isLead } from "@/lib/admin/authorization";
 import { Uid } from "@/lib/userRecord";
 import { IrvineHacksHackerScoredFields } from "@/lib/detailedScores";
+import { IrvineHacksHackerScoringGuidelinesType } from "./getScoringGuidelines";
 
 type IHKeys = IrvineHacksHackerApplicationQuestion;
 
@@ -48,7 +49,7 @@ interface IrvineHacksHackerApplicationProps {
 		hackathonExperienceScore: number,
 	) => void;
 	onScoreChange: (scores: IrvineHacksHackerScoredFields) => void;
-	guidelines: any;
+	guidelines: IrvineHacksHackerScoringGuidelinesType;
 	notes: string;
 	onNotesChange: (notes: string) => void;
 	applicant: Uid;

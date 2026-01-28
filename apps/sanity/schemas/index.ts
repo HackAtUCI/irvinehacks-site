@@ -7,6 +7,7 @@ import resourceCategoryOrder from "./resourceCategoryOrder";
 import sponsors from "./sponsors";
 import organizers from "./organizers";
 import zothacksHackerScoringGuidelines from "./zothacksHackerScoringGuidelines";
+import irvinehacksHackerScoringGuidelines from "./irvinehacksHackerScoringGuidelines";
 
 export const schemaTypes = [
 	faqs,
@@ -18,4 +19,5 @@ export const schemaTypes = [
 	sponsors,
 	organizers,
 	zothacksHackerScoringGuidelines,
+	irvinehacksHackerScoringGuidelines,
 ];

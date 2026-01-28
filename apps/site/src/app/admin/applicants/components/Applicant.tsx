@@ -26,7 +26,7 @@ import { ScoredFields } from "@/lib/detailedScores";
 interface ApplicantProps {
 	uid: string;
 	applicationType: "hacker" | "mentor" | "volunteer";
-	guidelines: Record<string, number>;
+	guidelines: any;
 }
 
 function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {

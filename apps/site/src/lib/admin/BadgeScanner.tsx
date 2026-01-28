@@ -138,7 +138,7 @@ function BadgeScanner(props: BadgeScannerProps) {
 				// clear DOM even if no scanner ref (race condition)
 				const element = document.getElementById(scannerRegionId);
 				if (element) {
-					element.innerHTML = '';
+					element.innerHTML = "";
 				}
 			}
 		};

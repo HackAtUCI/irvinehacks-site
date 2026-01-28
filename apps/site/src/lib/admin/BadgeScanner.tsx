@@ -131,7 +131,7 @@ function BadgeScanner(props: BadgeScannerProps) {
 						// clear DOM element content even on error
 						const element = document.getElementById(scannerRegionId);
 						if (element) {
-							element.innerHTML = '';
+							element.innerHTML = "";
 						}
 					});
 			} else {

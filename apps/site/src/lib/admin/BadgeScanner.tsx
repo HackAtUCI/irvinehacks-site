@@ -41,7 +41,7 @@ function BadgeScanner(props: BadgeScannerProps) {
 		// clears DOM element to prevent duplicate renders
 		const element = document.getElementById(scannerRegionId);
 		if (element) {
-			element.innerHTML = '';
+			element.innerHTML = "";
 		}
 
 		// stops scanning after success

@@ -185,3 +185,50 @@ def test_avg_score_not_fully_reviewed() -> None:
 
     applicant_review_processor._include_avg_score(record)
     assert record["avg_score"] == applicant_review_processor.NOT_FULLY_REVIEWED
+
+
+def test_avg_score_with_globals_and_breakdown_one_reviewer() -> None:
+    """Test that avg_score_with_globals_and_breakdown calculates correctly
+    with 1 reviewer.
+    """
+    record: dict[str, Any] = {
+        "_id": "edu.uci.eric",
+        "status": "REVIEWED",
+        "application_data": {
+            "review_breakdown": {
+                "vishok": {
+                    "resume": 0,
+                    "elevator_pitch_saq": 8,
+                    "tech_experience_saq": 7,
+                    "learn_about_self_saq": 7,
+                    "pixel_art_saq": 8,
+                    "hackathon_experience": 5,
+                },
+            },
+            "global_field_scores": {
+                "hackathon_experience": 5,
+            },
+        },
+    }
+
+    applicant_review_processor._include_avg_score_with_global_and_breakdown(record)
+    assert record["avg_score"] == 35.0
+
+
+def test_avg_score_with_globals_and_breakdown_no_reviewers() -> None:
+    """Test that avg_score_with_globals_and_breakdown returns NOT_FULLY_REVIEWED
+    with 0 reviewers.
+    """
+    record: dict[str, Any] = {
+        "_id": "edu.uci.eric",
+        "status": "REVIEWED",
+        "application_data": {
+            "review_breakdown": {},
+            "global_field_scores": {
+                "hackathon_experience": 5,
+            },
+        },
+    }
+
+    applicant_review_processor._include_avg_score_with_global_and_breakdown(record)
+    assert record["avg_score"] == applicant_review_processor.NOT_FULLY_REVIEWED

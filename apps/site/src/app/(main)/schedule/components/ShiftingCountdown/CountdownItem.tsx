@@ -1,7 +1,4 @@
 import { AnimatePresence, motion } from "framer-motion";
-import clsx from "clsx";
-
-import styles from "./ShiftingCountdown.module.scss";
 
 const timerAnimVariants = {
 	initial: {
@@ -26,18 +23,15 @@ const CountdownItem = ({
 		<motion.div
 			className={
 				isColon
-					? "font-display flex flex-col gap-1 md:gap-2 items-center justify-center pl-5 pr-5"
-					: "font-display flex flex-col gap-1 md:gap-2 items-center justify-center border-slate-200 whitespace-normal"
+					? "font-display flex flex-col gap-1 md:gap-2 items-center justify-center px-2 sm:px-3 md:px-4"
+					: "font-display flex flex-col gap-1 md:gap-2 items-center justify-center"
 			}
 		>
 			<div className="w-full p-1 text-center relative overflow-hidden">
 				<AnimatePresence mode="popLayout">
 					<motion.span
 						variants={timerAnimVariants}
-						className={clsx(
-							"flex text-2xl sm:text-4xl md:text-6xl xl:text-9xl text-white text-center flex-col justify-center items-center",
-							styles.text,
-						)}
+						className="flex text-4xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-9xl text-cyan-300 text-center flex-col justify-center items-center font-bold tracking-wider"
 					>
 						{`${isColon ? num : num.toString().padStart(2, "0")}`}
 					</motion.span>

@@ -3,12 +3,14 @@ import { Status } from "@/lib/userRecord";
 import { StatusImageProps } from "./StatusImage";
 
 export const WaiverComponent = ({ status }: { status: Status }) => {
-	let verdict = null;
+	let verdict: {
+		text: string;
+		statusIcon: StatusImageProps["statusIcon"];
+	} | null = null;
 
 	if (status === Status.Accepted) {
 		verdict = {
 			text: "Sign Waiver",
-			finished: false,
 			statusIcon: "Pending",
 		};
 	} else if (
@@ -18,15 +20,13 @@ export const WaiverComponent = ({ status }: { status: Status }) => {
 	) {
 		verdict = {
 			text: "Waiver Signed",
-			finished: true,
 			statusIcon: "Accepted",
 		};
 	}
-	return verdict ? (
-		<TimelineComponent
-			text={verdict.text}
-			finished={verdict.finished}
-			statusIcon={verdict.statusIcon as StatusImageProps["statusIcon"]}
-		/>
-	) : null;
+
+	if (!verdict) return null;
+
+	return (
+		<TimelineComponent text={verdict.text} statusIcon={verdict.statusIcon} />
+	);
 };

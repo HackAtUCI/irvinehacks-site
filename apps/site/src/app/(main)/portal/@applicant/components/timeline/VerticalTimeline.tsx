@@ -11,7 +11,7 @@ interface VerticalTimelineProps {
 
 function VerticalTimeline({ status }: VerticalTimelineProps) {
 	return (
-		<div>
+		<div className="flex flex-col gap-6 md:gap-10">
 			<SubmissionComponent />
 			<VerdictComponent status={status} />
 			<WaiverComponent status={status} />

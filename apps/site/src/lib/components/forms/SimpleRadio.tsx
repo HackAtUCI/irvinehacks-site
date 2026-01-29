@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import RequiredAsterisk from "./RequiredAsterisk";
 
 interface SimpleRadioProps {
@@ -8,6 +9,7 @@ interface SimpleRadioProps {
 	}>;
 	title: string;
 	titleClass: string;
+	subtitle?: ReactNode;
 	containerClassTotal: string;
 	containerClassInputLabels: string;
 	containerClassValues: string;
@@ -20,6 +22,7 @@ export default function SimpleRadio({
 	values,
 	title,
 	titleClass,
+	subtitle,
 	containerClassTotal,
 	containerClassInputLabels,
 	containerClassValues,
@@ -31,6 +34,12 @@ export default function SimpleRadio({
 			<p className={titleClass}>
 				{`${title} `}
 				{isRequired && <RequiredAsterisk />}
+				{subtitle && (
+					<>
+						<br />
+						{subtitle}
+					</>
+				)}
 			</p>
 			<div className={containerClassValues}>
 				{values.map((value, i) => {

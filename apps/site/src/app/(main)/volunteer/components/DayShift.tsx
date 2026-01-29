@@ -90,7 +90,7 @@ export default function DayShift({
 							<div
 								className={`h-[50px] w-full ${
 									i === num_hours ? "" : "border-black border-b-2"
-								} ${available ? "bg-blue-500" : "bg-gray-200"}`}
+								} ${available ? "bg-green-400" : "bg-gray-200"}`}
 								onMouseDown={(e) => onMouseDown(e, i)}
 								onMouseUp={onMouseUp}
 								onMouseOver={() => onMouseOver(i)}

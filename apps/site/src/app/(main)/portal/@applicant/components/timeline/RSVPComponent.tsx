@@ -8,19 +8,16 @@ export const RSVPComponent = ({ status }: { status: Status }) => {
 	if (status === Status.Accepted || status === Status.Signed) {
 		verdict = {
 			text: "Confirm Attendance",
-			finished: false,
 			statusIcon: "Pending",
 		};
 	} else if (status === Status.Confirmed || status === Status.Attending) {
 		verdict = {
 			text: "Attendance Confirmed",
-			finished: true,
 			statusIcon: "Accepted",
 		};
 	} else if (status === Status.Void) {
 		verdict = {
 			text: "No RSVP Indicated",
-			finished: false,
 			statusIcon: "Pending",
 		};
 	}
@@ -28,7 +25,6 @@ export const RSVPComponent = ({ status }: { status: Status }) => {
 	return verdict ? (
 		<TimelineComponent
 			text={verdict.text}
-			finished={verdict.finished}
 			statusIcon={verdict.statusIcon as StatusImageProps["statusIcon"]}
 		/>
 	) : null;

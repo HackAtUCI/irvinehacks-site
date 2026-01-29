@@ -23,13 +23,18 @@ const Sponsors = async () => {
 				Sponsors
 			</h2>
 
-			<p className="text-center text-xs sm:text-sm text-white/90 -mt-8 mb-10">
-				Interested in sponsoring IrvineHacks 2025? Email us at{" "}
-				<a href="mailto:hack@uci.edu" className="underline">
-					hack@uci.edu
-				</a>
-				.
-			</p>
+			<div className={styles.sponsorsContainer}>
+				<div className="absolute w-full left-0 top-[1rem] flex gap-4 px-8 ">
+					<div className="h-[2px] bg-white flex-grow  ml-[2rem] mt-[0.5rem]" />
+					<p className="text-xs lg:text-sm text-center">
+						Interested in sponsoring IrvineHacks 2026? Email us at{" "}
+						<a href="mailto:hack@uci.edu" className="underline">
+							hack@uci.edu
+						</a>
+						.
+					</p>
+					<div className="h-[2px] bg-white flex-grow mr-[2rem] mt-[0.5rem]" />
+				</div>
 
 			<div
 				className={styles.sponsorsContainer}

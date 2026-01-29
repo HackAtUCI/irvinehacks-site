@@ -2,9 +2,10 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import Image from "next/image";
 
 import getTimeAndDates from "@/lib/utils/getTimeAndDates";
+import arrowTriangle from "@/assets/icons/arrow-triangle.svg";
 
 export default function ScheduleScroll({
 	weekdays,
@@ -85,39 +86,45 @@ export default function ScheduleScroll({
 			<h1 className="text-5xl font-display">Schedule</h1>
 			<div className="flex gap-10 sm:hidden">
 				<div className="h-full flex items-center">
-					<ChevronLeft
-						height={40}
-						width={40}
+					<Image
+						src={arrowTriangle}
+						alt="Previous day"
+						width={60}
+						height={60}
 						onClick={() => scrollDir("left")}
-						className="cursor-pointer"
+						className="cursor-pointer scale-x-[-1]"
 					/>
 				</div>
 				<div className="h-full flex items-center">
-					<ChevronRight
-						height={40}
-						width={40}
+					<Image
+						src={arrowTriangle}
+						alt="Next day"
+						width={60}
+						height={60}
 						onClick={() => scrollDir("right")}
 						className="cursor-pointer"
 					/>
 				</div>
 			</div>
 			<div className="w-full flex items-center justify-between h-[120px] px-10 max-sm:hidden overflow-visible relative z-[100]">
-				<div className="flex items-center gap-6 translate-y-32 -translate-x-12 relative z-[100]">
-					<ChevronLeft
-						height={40}
-						width={40}
+				<div className="flex items-center gap-2 translate-y-32 -translate-x-12 relative z-[100]">
+					<Image
+						src={arrowTriangle}
+						alt="Previous day"
+						width={60}
+						height={60}
 						onClick={() => scrollDir("left")}
-						className="cursor-pointer relative z-[100]"
+						className="cursor-pointer relative z-[100] scale-x-[-1]"
 					/>
 					<span
-						className="font-display text-[#FF4DEF] text-[64px] leading-none whitespace-nowrap cursor-pointer"
+						className="font-display text-[#FF4DEF] text-[60px] leading-none whitespace-nowrap cursor-pointer"
 						style={{ textShadow: "0px 0px 25px #FF4DEF" }}
 						onClick={() => setSelectedEventDay(selectedWeekday)}
 					>
 						{selectedWeekdayStr}
 					</span>
 				</div>
-				<div className="flex items-center gap-6 translate-y-[104px] -translate-x-8 relative z-[100]">
+				<div className="flex items-center gap-20 translate-y-[104px] translate-x-12 relative z-[100]">
 					<div className="w-[160px] text-left">
 						<span
 							className="font-display text-[#FF4DEF] text-[32px] leading-none whitespace-nowrap cursor-pointer"
@@ -127,9 +134,11 @@ export default function ScheduleScroll({
 							{nextWeekdayStr}
 						</span>
 					</div>
-					<ChevronRight
-						height={40}
-						width={40}
+					<Image
+						src={arrowTriangle}
+						alt="Next day"
+						width={60}
+						height={60}
 						onClick={() => scrollDir("right")}
 						className="cursor-pointer relative z-[100]"
 					/>

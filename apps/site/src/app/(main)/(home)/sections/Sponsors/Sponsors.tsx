@@ -35,6 +35,7 @@ const Sponsors = async () => {
 					</p>
 					<div className="h-[2px] bg-white flex-grow mr-[2rem] mt-[0.5rem]" />
 				</div>
+			</div>
 
 			<div
 				className={styles.sponsorsContainer}

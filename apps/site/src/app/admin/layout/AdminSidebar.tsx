@@ -11,6 +11,8 @@ import {
 	isHackerReviewer,
 	isDirector,
 	isLead,
+	isMentorReviewer,
+	isVolunteerReviewer,
 } from "@/lib/admin/authorization";
 
 import UserContext from "@/lib/admin/UserContext";
@@ -33,29 +35,37 @@ function AdminSidebar() {
 
 	const applicationLinks: SideNavigationProps.Link[] = [];
 
+	// if (isHackerReviewer(roles)) {
+	// 	applicationLinks.push({
+	// 		type: "link",
+	// 		text: "ZotHacks Hacker Applications",
+	// 		href: "/admin/applicants/zothacks-hackers",
+	// 	});
+	// }
+
 	if (isHackerReviewer(roles)) {
 		applicationLinks.push({
 			type: "link",
-			text: "ZotHacks Hacker Applications",
-			href: "/admin/applicants/zothacks-hackers",
+			text: "IH Hacker Applications",
+			href: "/admin/applicants/hackers",
 		});
 	}
 
-	// if (isMentorReviewer(roles)) {
-	// 	applicationLinks.push({
-	// 		type: "link",
-	// 		text: "Mentor Applications",
-	// 		href: "/admin/applicants/mentors",
-	// 	});
-	// }
+	if (isMentorReviewer(roles)) {
+		applicationLinks.push({
+			type: "link",
+			text: "IH Mentor Applications",
+			href: "/admin/applicants/mentors",
+		});
+	}
 
-	// if (isVolunteerReviewer(roles)) {
-	// 	applicationLinks.push({
-	// 		type: "link",
-	// 		text: "Volunteer Applications",
-	// 		href: "/admin/applicants/volunteers",
-	// 	});
-	// }
+	if (isVolunteerReviewer(roles)) {
+		applicationLinks.push({
+			type: "link",
+			text: "IH Volunteer Applications",
+			href: "/admin/applicants/volunteers",
+		});
+	}
 
 	if (isLead(roles) || isDirector(roles)) {
 		navigationItems.splice(1, 0, {

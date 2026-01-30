@@ -7,7 +7,7 @@ import Header from "@cloudscape-design/components/header";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import { PortableText } from "@portabletext/react";
 import PixelArtDisplay from "./PixelArtDisplay";
-import HackerApplicationSection from "@/app/admin/applicants/hackers/components/HackerApplicationSection";
+import ZotHacksHackerApplicationSection from "./ZotHacksHackerApplicationSection";
 import {
 	HackathonExperience,
 	ZotHacksHackerApplicationData,
@@ -16,9 +16,10 @@ import ScoreSection from "../../components/ScoreSection";
 import ReviewerNotes from "@/app/admin/applicants/components/ReviewerNotes";
 import UserContext from "@/lib/admin/UserContext";
 import { isDirector, isLead } from "@/lib/admin/authorization";
-import { ZothacksScoringGuidelinesType } from "./getScoringGuidelines";
+import { ZothacksHackerScoringGuidelinesType } from "./getScoringGuidelines";
 import { Review } from "@/lib/admin/useApplicant";
 import { Uid } from "@/lib/userRecord";
+import { ZotHacksHackerScoredFields } from "@/lib/detailedScores";
 
 type ZHKeys = Exclude<keyof ZotHacksHackerApplicationData, "reviews">;
 
@@ -60,8 +61,8 @@ function ZotHacksHackerApplication({
 		resumeScore: number,
 		hackathonExperienceScore: number,
 	) => void;
-	onScoreChange: (scores: object) => void;
-	guidelines: ZothacksScoringGuidelinesType;
+	onScoreChange: (scores: ZotHacksHackerScoredFields) => void;
+	guidelines: ZothacksHackerScoringGuidelinesType;
 	notes: string;
 	onNotesChange: (notes: string) => void;
 	applicant: Uid;
@@ -136,7 +137,7 @@ function ZotHacksHackerApplication({
 		] || 0;
 
 	useEffect(() => {
-		const scoresObject: Record<string, number> = {
+		const scoresObject: ZotHacksHackerScoredFields = {
 			hackathon_experience: hackathonExperienceScore,
 		};
 
@@ -174,7 +175,7 @@ function ZotHacksHackerApplication({
 			<Container>
 				{Object.entries(ZH_HACKER_APPLICATION_SECTIONS).map(
 					([section, propsToShow]) => (
-						<HackerApplicationSection
+						<ZotHacksHackerApplicationSection
 							key={section}
 							title={section}
 							data={application_data}

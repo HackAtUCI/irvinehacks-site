@@ -17,7 +17,6 @@ import {
 import ScoreSection from "../../components/ScoreSection";
 import ReviewerNotes from "@/app/admin/applicants/components/ReviewerNotes";
 import UserContext from "@/lib/admin/UserContext";
-import { isDirector, isLead } from "@/lib/admin/authorization";
 import { Uid } from "@/lib/userRecord";
 import { IrvineHacksHackerScoredFields } from "@/lib/detailedScores";
 import { IrvineHacksHackerScoringGuidelinesType } from "./getScoringGuidelines";

@@ -128,7 +128,6 @@ function HackerApplicationSection<
 	T extends BaseData,
 	K extends keyof T & string,
 >({ title, data, propsToShow }: { title: string; data: T; propsToShow: K[] }) {
-	console.log(data);
 	return (
 		<TextContent>
 			<h3>{title}</h3>

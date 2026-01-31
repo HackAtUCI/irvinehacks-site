@@ -1,16 +1,17 @@
+import { PortableText } from "@portabletext/react";
 import Container from "@cloudscape-design/components/container";
 import Header from "@cloudscape-design/components/header";
 import SpaceBetween from "@cloudscape-design/components/space-between";
-
-import { IrvineHacksMentorApplicationQuestion } from "@/lib/admin/useApplicant";
-import MentorApplicationSection from "@/app/admin/applicants/mentors/components/MentorApplicationSection";
-
-import { IrvineHacksMentorApplicationData } from "@/lib/admin/useApplicant";
-import ResponseSection from "../../components/ResponseSection";
 import { Box, ColumnLayout } from "@cloudscape-design/components";
+
+import {
+	IrvineHacksMentorApplicationQuestion,
+	IrvineHacksMentorApplicationData,
+} from "@/lib/admin/useApplicant";
+import MentorApplicationSection from "@/app/admin/applicants/mentors/components/MentorApplicationSection";
+import ResponseSection from "../../components/ResponseSection";
 import DayShift from "../../components/DayShift";
 import { IrvineHacksMentorScoringGuidelinesType } from "./getScoringGuidelines";
-import { PortableText } from "@portabletext/react";
 
 interface MentorApplicationSections {
 	[key: string]: IrvineHacksMentorApplicationQuestion[];

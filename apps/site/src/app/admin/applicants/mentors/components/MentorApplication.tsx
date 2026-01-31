@@ -8,6 +8,7 @@ import MentorApplicationSection from "@/app/admin/applicants/mentors/components/
 import { IrvineHacksMentorApplicationData } from "@/lib/admin/useApplicant";
 import ResponseSection from "../../components/ResponseSection";
 import { Box, ColumnLayout } from "@cloudscape-design/components";
+import DayShift from "../../components/DayShift";
 
 interface MentorApplicationSections {
 	[key: string]: IrvineHacksMentorApplicationQuestion[];
@@ -149,6 +150,29 @@ function MentorApplication({
 				leftColumn={""}
 				rightColumn={application_data.mentor_interest_saq5}
 			/>
+
+			<Container header={<Header variant="h2">Shift Availability</Header>}>
+				<ColumnLayout columns={3}>
+					<DayShift
+						shiftText="Friday"
+						startHour={7}
+						endHour={24}
+						hoursArray={application_data.friday_availability}
+					/>
+					<DayShift
+						shiftText="Saturday"
+						startHour={7}
+						endHour={24}
+						hoursArray={application_data.saturday_availability}
+					/>
+					<DayShift
+						shiftText="Sunday"
+						startHour={7}
+						endHour={19}
+						hoursArray={application_data.sunday_availability}
+					/>
+				</ColumnLayout>
+			</Container>
 		</SpaceBetween>
 	);
 }

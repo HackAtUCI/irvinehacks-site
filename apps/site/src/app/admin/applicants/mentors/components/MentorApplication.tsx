@@ -32,7 +32,35 @@ function TechMentorSection({
 	return (
 		<SpaceBetween direction="vertical" size="m">
 			<Container header={<Header variant="h2">Tech Section</Header>}>
-				<ColumnLayout columns={2} variant="text-grid">
+				<ColumnLayout columns={4} variant="text-grid">
+					<div>
+						<h4>Github</h4>
+						{application_data.github ? (
+							<a
+								href={application_data.github}
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								{application_data.github}
+							</a>
+						) : (
+							"No Response"
+						)}
+					</div>
+					<div>
+						<h4>Portfolio</h4>
+						{application_data.portfolio ? (
+							<a
+								href={application_data.portfolio}
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								{application_data.portfolio}
+							</a>
+						) : (
+							"No Response"
+						)}
+					</div>
 					<div>
 						<h4>Git Experience</h4>
 						<p>{application_data.git_experience} / 5</p>
@@ -95,10 +123,40 @@ function DesignMentorSection({
 	return (
 		<SpaceBetween direction="vertical" size="m">
 			<Container header={<Header variant="h2">Design Section</Header>}>
-				<div>
-					<h4>Figma Experience</h4>
-					<p>{application_data.figma_experience} / 5</p>
-				</div>
+				<ColumnLayout columns={4} variant="text-grid">
+					<div>
+						<h4>Github</h4>
+						{application_data.github ? (
+							<a
+								href={application_data.github}
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								{application_data.github}
+							</a>
+						) : (
+							"No Response"
+						)}
+					</div>
+					<div>
+						<h4>Portfolio</h4>
+						{application_data.portfolio ? (
+							<a
+								href={application_data.portfolio}
+								target="_blank"
+								rel="noopener noreferrer"
+							>
+								{application_data.portfolio}
+							</a>
+						) : (
+							"No Response"
+						)}
+					</div>
+					<div>
+						<h4>Figma Experience</h4>
+						<p>{application_data.figma_experience} / 5</p>
+					</div>
+				</ColumnLayout>
 			</Container>
 			<Container header={<Header variant="h2">List of Design Tools</Header>}>
 				{guidelines?.guidelines?.mentor_prev_experience_saq1 && (

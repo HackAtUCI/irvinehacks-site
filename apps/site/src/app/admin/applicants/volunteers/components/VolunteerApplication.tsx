@@ -9,6 +9,7 @@ import {
 } from "@/lib/admin/useApplicant";
 import VolunteerApplicationSection from "@/app/admin/applicants/volunteers/components/VolunteerApplicationSection";
 import DayShift from "../../components/DayShift";
+import CharacterDisplay from "../../components/CharacterDisplay";
 
 interface VolunteerApplicationSections {
 	[key: string]: VolunteerApplicationQuestion[];
@@ -97,6 +98,13 @@ function VolunteerApplication({
 					/>
 				</ColumnLayout>
 			</Container>
+
+			<CharacterDisplay
+				headIndex={application_data.character_head_index}
+				bodyIndex={application_data.character_body_index}
+				feetIndex={application_data.character_feet_index}
+				companionIndex={application_data.character_companion_index}
+			/>
 		</SpaceBetween>
 	);
 }

@@ -16,6 +16,7 @@ import ResponseSection from "../../components/ResponseSection";
 interface ApplicationResponseProps {
 	value:
 		| string
+		| number
 		| boolean
 		| string[]
 		| readonly string[]

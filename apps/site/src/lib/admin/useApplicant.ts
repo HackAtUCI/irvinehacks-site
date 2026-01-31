@@ -70,6 +70,10 @@ export interface IrvineHacksHackerApplicationData extends BaseApplicationData {
 		};
 	};
 	global_field_scores?: { resume?: number };
+	character_head_index: number;
+	character_body_index: number;
+	character_feet_index: number;
+	character_companion_index: number;
 }
 
 export interface IrvineHacksMentorApplicationData extends BaseApplicationData {
@@ -87,6 +91,10 @@ export interface IrvineHacksMentorApplicationData extends BaseApplicationData {
 	friday_availability: ReadonlyArray<number>;
 	saturday_availability: ReadonlyArray<number>;
 	sunday_availability: ReadonlyArray<number>;
+	character_head_index: number;
+	character_body_index: number;
+	character_feet_index: number;
+	character_companion_index: number;
 	mentor_prev_experience_saq1: string | null;
 	// Tech mentor specific
 	github: string | null;
@@ -121,6 +129,10 @@ export interface VolunteerApplicationData extends BaseApplicationData {
 	sunday_availability: ReadonlyArray<number>;
 	submission_time: string;
 	reviews: Review[];
+	character_head_index: number;
+	character_body_index: number;
+	character_feet_index: number;
+	character_companion_index: number;
 }
 
 export type IrvineHacksHackerApplicationQuestion = Exclude<

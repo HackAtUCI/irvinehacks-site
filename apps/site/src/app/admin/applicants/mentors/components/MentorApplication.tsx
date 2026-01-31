@@ -15,6 +15,7 @@ import MentorApplicationSection, {
 import ResponseSection from "../../components/ResponseSection";
 import DayShift from "../../components/DayShift";
 import { IrvineHacksMentorScoringGuidelinesType } from "./getScoringGuidelines";
+import CharacterDisplay from "../../components/CharacterDisplay";
 
 interface MentorApplicationSections {
 	[key: string]: IrvineHacksMentorApplicationQuestion[];
@@ -128,6 +129,13 @@ function MentorApplication({
 					/>
 				</ColumnLayout>
 			</Container>
+
+			<CharacterDisplay
+				headIndex={application_data.character_head_index}
+				bodyIndex={application_data.character_body_index}
+				feetIndex={application_data.character_feet_index}
+				companionIndex={application_data.character_companion_index}
+			/>
 		</SpaceBetween>
 	);
 }

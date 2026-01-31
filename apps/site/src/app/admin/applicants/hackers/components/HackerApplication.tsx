@@ -20,6 +20,7 @@ import UserContext from "@/lib/admin/UserContext";
 import { Uid } from "@/lib/userRecord";
 import { IrvineHacksHackerScoredFields } from "@/lib/detailedScores";
 import { IrvineHacksHackerScoringGuidelinesType } from "./getScoringGuidelines";
+import CharacterDisplay from "../../components/CharacterDisplay";
 
 type IHKeys = IrvineHacksHackerApplicationQuestion;
 
@@ -246,6 +247,12 @@ function IrvineHacksHackerApplication({
 				value={frqCharacterScore}
 				onChange={setFrqCharacterScore}
 				wordLimit={75}
+			/>
+			<CharacterDisplay
+				headIndex={application_data.character_head_index}
+				bodyIndex={application_data.character_body_index}
+				feetIndex={application_data.character_feet_index}
+				companionIndex={application_data.character_companion_index}
 			/>
 			<ReviewerNotes
 				applicant={applicant}

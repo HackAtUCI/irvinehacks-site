@@ -5,7 +5,15 @@
 	margin-right: auto;
 	background-position: center;
 	background-repeat: no-repeat;
-	max-width: 80rem;
+	max-width: 36rem;
+
+	@media (min-width: 1024px) {
+		max-width: 56rem;
+	}
+
+	@media (min-width: 1280px) {
+		max-width: 64rem;
+	}
 }
 
 @media (min-width: 1024px) {

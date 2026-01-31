@@ -109,11 +109,17 @@ export interface IrvineHacksMentorApplicationData extends BaseApplicationData {
 }
 
 export interface VolunteerApplicationData extends BaseApplicationData {
+	t_shirt_size: string;
+	ih_reference: string[];
 	frq_volunteer: string;
-	frq_utensil: string;
+	frq_memory: string;
+	dietary_restrictions: string[];
 	allergies: string | null;
-	extra_questions: string | null;
-	other_questions: string | null;
+	frq_volunteer_allergy: string | null;
+	character_head_index: number;
+	character_body_index: number;
+	character_feet_index: number;
+	character_companion_index: number;
 	friday_availability: ReadonlyArray<number>;
 	saturday_availability: ReadonlyArray<number>;
 	sunday_availability: ReadonlyArray<number>;

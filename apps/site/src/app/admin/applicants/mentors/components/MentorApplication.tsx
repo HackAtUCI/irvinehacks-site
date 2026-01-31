@@ -178,16 +178,6 @@ function MentorApplication({
 			)}
 
 			<ResponseSection
-				title="Why are you interested in being a mentor for IrvineHacks 2026? (100+ words recommended)"
-				leftColumn={
-					guidelines?.guidelines?.mentor_interest_saq2 && (
-						<PortableText value={guidelines.guidelines.mentor_interest_saq2} />
-					)
-				}
-				rightColumn={application_data.mentor_interest_saq2}
-			/>
-
-			<ResponseSection
 				title="How would you help participants turn an ambitious idea into something achievable within the hackathon?"
 				leftColumn={
 					guidelines?.guidelines?.mentor_interest_saq5 && (
@@ -195,6 +185,16 @@ function MentorApplication({
 					)
 				}
 				rightColumn={application_data.mentor_interest_saq5}
+			/>
+
+			<ResponseSection
+				title="Why are you interested in being a mentor for IrvineHacks 2026? (100+ words recommended)"
+				leftColumn={
+					guidelines?.guidelines?.mentor_interest_saq2 && (
+						<PortableText value={guidelines.guidelines.mentor_interest_saq2} />
+					)
+				}
+				rightColumn={application_data.mentor_interest_saq2}
 			/>
 
 			<Container header={<Header variant="h2">Shift Availability</Header>}>

@@ -21,7 +21,15 @@ interface MentorApplicationSections {
 }
 
 const MENTOR_APPLICATION_SECTIONS: MentorApplicationSections = {
-	"Personal Information": ["mentor_type", "pronouns", "is_18_older"],
+	"Personal Information": [
+		"mentor_type",
+		"pronouns",
+		"is_18_older",
+		"t_shirt_size",
+		"dietary_restrictions",
+		"allergies",
+		"ih_reference",
+	],
 	Education: ["school", "education_level", "major"],
 	Experience: ["linkedin", "resume_url", "resume_share_to_sponsors"],
 };

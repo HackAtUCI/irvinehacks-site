@@ -68,10 +68,8 @@ function IrvineHacksHackerApplication({
 	reviews,
 	onDeleteNotes,
 }: IrvineHacksHackerApplicationProps) {
-	const { uid: reviewer_uid, roles } = useContext(UserContext);
+	const { uid: reviewer_uid } = useContext(UserContext);
 	const formattedUid = reviewer_uid?.split(".").at(-1);
-
-	const isResumeDisabled = !isDirector(roles) && !isLead(roles);
 
 	// Previous Experience options used for dropdown-based ScoreSection
 	const previousExperienceOptions = useMemo(
@@ -207,7 +205,6 @@ function IrvineHacksHackerApplication({
 					setPreviousExperienceScore(value);
 					onResumeScore(value, hackathonExperienceScore);
 				}}
-				disabled={isResumeDisabled}
 			/>
 			<ScoreSection
 				title="Describe a past or current project that you are proud of. [100 words]"

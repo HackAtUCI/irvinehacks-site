@@ -3,7 +3,6 @@
 	width: 100%;
 	margin-left: auto;
 	margin-right: auto;
-	margin-top: 2.5rem;
 	background-position: center;
 	background-repeat: no-repeat;
 	max-width: 80rem;
@@ -12,17 +11,17 @@
 @media (min-width: 1024px) {
 	.platinum,
 	.gold {
-		max-width: 400px;
-		max-height: 400px;
+		max-width: 200px;
+		max-height: 200px;
 	}
 	.silver {
-		max-width: 350px;
-		max-height: 350px;
+		max-width: 150px;
+		max-height: 150px;
 	}
 	.bronze,
 	.sponsored-prize,
 	.in-kind {
-		max-width: 300px;
-		max-height: 300px;
+		max-width: 100px;
+		max-height: 100px;
 	}
 }

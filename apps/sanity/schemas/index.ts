@@ -8,6 +8,7 @@ import sponsors from "./sponsors";
 import organizers from "./organizers";
 import zothacksHackerScoringGuidelines from "./zothacksHackerScoringGuidelines";
 import irvinehacksHackerScoringGuidelines from "./irvinehacksHackerScoringGuidelines";
+import irvinehacksMentorScoringGuidelines from "./irvinehacksMentorScoringGuidelines";
 
 export const schemaTypes = [
 	faqs,
@@ -20,4 +21,5 @@ export const schemaTypes = [
 	organizers,
 	zothacksHackerScoringGuidelines,
 	irvinehacksHackerScoringGuidelines,
+	irvinehacksMentorScoringGuidelines,
 ];

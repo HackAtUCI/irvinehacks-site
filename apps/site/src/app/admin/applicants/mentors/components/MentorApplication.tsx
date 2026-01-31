@@ -9,6 +9,8 @@ import { IrvineHacksMentorApplicationData } from "@/lib/admin/useApplicant";
 import ResponseSection from "../../components/ResponseSection";
 import { Box, ColumnLayout } from "@cloudscape-design/components";
 import DayShift from "../../components/DayShift";
+import { IrvineHacksMentorScoringGuidelinesType } from "./getScoringGuidelines";
+import { PortableText } from "@portabletext/react";
 
 interface MentorApplicationSections {
 	[key: string]: IrvineHacksMentorApplicationQuestion[];
@@ -22,8 +24,10 @@ const MENTOR_APPLICATION_SECTIONS: MentorApplicationSections = {
 
 function TechMentorSection({
 	application_data,
+	guidelines,
 }: {
 	application_data: IrvineHacksMentorApplicationData;
+	guidelines?: IrvineHacksMentorScoringGuidelinesType;
 }) {
 	return (
 		<SpaceBetween direction="vertical" size="m">
@@ -42,6 +46,11 @@ function TechMentorSection({
 			<Container
 				header={<Header variant="h2">List of Technical Skills</Header>}
 			>
+				{guidelines?.guidelines?.mentor_prev_experience_saq1 && (
+					<PortableText
+						value={guidelines.guidelines.mentor_prev_experience_saq1}
+					/>
+				)}
 				<ColumnLayout columns={2} borders="vertical">
 					<Box>
 						<Header variant="h3">Tech</Header>
@@ -65,7 +74,11 @@ function TechMentorSection({
 
 			<ResponseSection
 				title="How would you go about helping a team that is struggling with a bug?"
-				leftColumn={""}
+				leftColumn={
+					guidelines?.guidelines?.mentor_tech_saq3 && (
+						<PortableText value={guidelines.guidelines.mentor_tech_saq3} />
+					)
+				}
 				rightColumn={application_data.mentor_tech_saq3}
 			/>
 		</SpaceBetween>
@@ -74,8 +87,10 @@ function TechMentorSection({
 
 function DesignMentorSection({
 	application_data,
+	guidelines,
 }: {
 	application_data: IrvineHacksMentorApplicationData;
+	guidelines?: IrvineHacksMentorScoringGuidelinesType;
 }) {
 	return (
 		<SpaceBetween direction="vertical" size="m">
@@ -86,20 +101,36 @@ function DesignMentorSection({
 				</div>
 			</Container>
 			<Container header={<Header variant="h2">List of Design Tools</Header>}>
+				{guidelines?.guidelines?.mentor_prev_experience_saq1 && (
+					<PortableText
+						value={guidelines.guidelines.mentor_prev_experience_saq1}
+					/>
+				)}
 				<ul>
 					{application_data?.design_experienced_tools?.map((v) => (
 						<li key={v}>{v}</li>
 					))}
 				</ul>
 			</Container>
+			<ResponseSection
+				title="How would you go about helping a team that is struggling with a design problem?"
+				leftColumn={
+					guidelines?.guidelines?.mentor_design_saq4 && (
+						<PortableText value={guidelines.guidelines.mentor_design_saq4} />
+					)
+				}
+				rightColumn={application_data.mentor_design_saq4}
+			/>
 		</SpaceBetween>
 	);
 }
 
 function MentorApplication({
 	application_data,
+	guidelines,
 }: {
 	application_data: IrvineHacksMentorApplicationData;
+	guidelines?: IrvineHacksMentorScoringGuidelinesType;
 }) {
 	return (
 		<SpaceBetween direction="vertical" size="m">
@@ -133,22 +164,36 @@ function MentorApplication({
 			</Container>
 
 			{application_data.mentor_type.includes("is_tech_mentor") && (
-				<TechMentorSection application_data={application_data} />
+				<TechMentorSection
+					application_data={application_data}
+					guidelines={guidelines}
+				/>
 			)}
 
 			{application_data.mentor_type.includes("is_design_mentor") && (
-				<DesignMentorSection application_data={application_data} />
+				<DesignMentorSection
+					application_data={application_data}
+					guidelines={guidelines}
+				/>
 			)}
 
 			<ResponseSection
 				title="Why are you interested in being a mentor for IrvineHacks 2026? (100+ words recommended)"
-				leftColumn={""}
+				leftColumn={
+					guidelines?.guidelines?.mentor_interest_saq2 && (
+						<PortableText value={guidelines.guidelines.mentor_interest_saq2} />
+					)
+				}
 				rightColumn={application_data.mentor_interest_saq2}
 			/>
 
 			<ResponseSection
 				title="How would you help participants turn an ambitious idea into something achievable within the hackathon?"
-				leftColumn={""}
+				leftColumn={
+					guidelines?.guidelines?.mentor_interest_saq5 && (
+						<PortableText value={guidelines.guidelines.mentor_interest_saq5} />
+					)
+				}
 				rightColumn={application_data.mentor_interest_saq5}
 			/>
 

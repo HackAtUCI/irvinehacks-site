@@ -23,11 +23,18 @@ import HackerApplicantActions from "./HackerApplicantActions";
 import { ParticipantRole } from "@/lib/userRecord";
 import { ScoredFields } from "@/lib/detailedScores";
 import { IrvineHacksHackerScoringGuidelinesType } from "@/app/admin/applicants/hackers/components/getScoringGuidelines";
+import { IrvineHacksMentorScoringGuidelinesType } from "@/app/admin/applicants/mentors/components/getScoringGuidelines";
+import { ZothacksHackerScoringGuidelinesType } from "@/app/admin/applicants/zothacks-hackers/components/getScoringGuidelines";
+
+type ScoringGuidelinesType =
+	| IrvineHacksHackerScoringGuidelinesType
+	| IrvineHacksMentorScoringGuidelinesType
+	| ZothacksHackerScoringGuidelinesType;
 
 interface ApplicantProps {
 	uid: string;
 	applicationType: "hacker" | "mentor" | "volunteer";
-	guidelines: IrvineHacksHackerScoringGuidelinesType;
+	guidelines: ScoringGuidelinesType;
 }
 
 function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
@@ -114,7 +121,7 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 						// TODO: Remove onResumeScore by making it optional
 						onResumeScore={() => {}}
 						onScoreChange={setScores}
-						guidelines={guidelines}
+						guidelines={guidelines as IrvineHacksHackerScoringGuidelinesType}
 						notes={notes}
 						onNotesChange={setNotes}
 						applicant={applicant._id}
@@ -126,6 +133,7 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 						application_data={
 							application_data as IrvineHacksMentorApplicationData
 						}
+						guidelines={guidelines as IrvineHacksMentorScoringGuidelinesType}
 					/>
 				) : (
 					<VolunteerApplication

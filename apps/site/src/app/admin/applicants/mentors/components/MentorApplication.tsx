@@ -20,11 +20,6 @@ const MENTOR_APPLICATION_SECTIONS: MentorApplicationSections = {
 	Experience: ["linkedin", "resume_url", "resume_share_to_sponsors"],
 };
 
-// Component for SAQs
-
-// Component for availability from volunteer
-
-// Show different saq questions based on mentor type
 function TechMentorSection({
 	application_data,
 }: {
@@ -144,6 +139,12 @@ function MentorApplication({
 			{application_data.mentor_type.includes("is_design_mentor") && (
 				<DesignMentorSection application_data={application_data} />
 			)}
+
+			<ResponseSection
+				title="Why are you interested in being a mentor for IrvineHacks 2026? (100+ words recommended)"
+				leftColumn={""}
+				rightColumn={application_data.mentor_interest_saq2}
+			/>
 
 			<ResponseSection
 				title="How would you help participants turn an ambitious idea into something achievable within the hackathon?"

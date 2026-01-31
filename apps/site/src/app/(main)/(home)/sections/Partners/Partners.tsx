@@ -12,7 +12,7 @@ export default async function Partners() {
 
 	return (
 		<section className="container py-24 relative mx-auto w-full ">
-			<h2 className="text-center text-4xl sm:text-[3rem] font-display -mb-12 text-pink">
+			<h2 className="text-center text-2xl sm:text-4xl lg:text-[3rem] font-display -mb-12 text-pink">
 				Partners
 			</h2>
 

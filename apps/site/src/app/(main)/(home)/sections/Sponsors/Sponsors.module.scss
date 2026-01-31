@@ -16,6 +16,18 @@
 	}
 }
 
+// Mobile
+.platinum,
+.gold,
+.silver,
+.bronze,
+.sponsored-prize,
+.in-kind {
+	max-width: 100px;
+	max-height: 100px;
+}
+
+// Desktop
 @media (min-width: 1024px) {
 	.platinum,
 	.gold {

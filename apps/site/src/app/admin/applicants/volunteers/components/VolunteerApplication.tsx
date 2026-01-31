@@ -1,12 +1,13 @@
 import Container from "@cloudscape-design/components/container";
 import Header from "@cloudscape-design/components/header";
 import SpaceBetween from "@cloudscape-design/components/space-between";
-
-import { VolunteerApplicationQuestion } from "@/lib/admin/useApplicant";
-import VolunteerApplicationSection from "@/app/admin/applicants/volunteers/components/VolunteerApplicationSection";
-
-import { VolunteerApplicationData } from "@/lib/admin/useApplicant";
 import ColumnLayout from "@cloudscape-design/components/column-layout";
+
+import {
+	VolunteerApplicationQuestion,
+	VolunteerApplicationData,
+} from "@/lib/admin/useApplicant";
+import VolunteerApplicationSection from "@/app/admin/applicants/volunteers/components/VolunteerApplicationSection";
 import DayShift from "../../components/DayShift";
 
 interface VolunteerApplicationSections {

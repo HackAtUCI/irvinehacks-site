@@ -116,10 +116,6 @@ export interface VolunteerApplicationData extends BaseApplicationData {
 	dietary_restrictions: string[];
 	allergies: string | null;
 	frq_volunteer_allergy: string | null;
-	character_head_index: number;
-	character_body_index: number;
-	character_feet_index: number;
-	character_companion_index: number;
 	friday_availability: ReadonlyArray<number>;
 	saturday_availability: ReadonlyArray<number>;
 	sunday_availability: ReadonlyArray<number>;

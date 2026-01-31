@@ -2,12 +2,18 @@ import ColumnLayout from "@cloudscape-design/components/column-layout";
 import TextContent from "@cloudscape-design/components/text-content";
 
 import {
-	MentorApplicationData,
-	MentorApplicationQuestion,
+	IrvineHacksMentorApplicationData,
+	IrvineHacksMentorApplicationQuestion,
 } from "@/lib/admin/useApplicant";
 
 interface ApplicationResponseProps {
-	value: string | boolean | string[] | null;
+	value:
+		| string
+		| boolean
+		| string[]
+		| readonly string[]
+		| readonly number[]
+		| null;
 }
 
 const titleCase = (str: string) =>
@@ -49,8 +55,8 @@ function ApplicationResponse({ value }: ApplicationResponseProps) {
 
 interface ApplicationSectionProps {
 	title: string;
-	data: Omit<MentorApplicationData, "reviews">;
-	propsToShow: MentorApplicationQuestion[];
+	data: Omit<IrvineHacksMentorApplicationData, "reviews">;
+	propsToShow: IrvineHacksMentorApplicationQuestion[];
 }
 
 function MentorApplicationSection({

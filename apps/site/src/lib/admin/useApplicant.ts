@@ -72,20 +72,40 @@ export interface IrvineHacksHackerApplicationData extends BaseApplicationData {
 	global_field_scores?: { resume?: number };
 }
 
-export interface MentorApplicationData extends BaseApplicationData {
-	git_experience: string;
-	github: string | null;
-	portfolio: string | null;
+export interface IrvineHacksMentorApplicationData extends BaseApplicationData {
+	mentor_type: string[];
 	linkedin: string | null;
-	mentor_prev_experience_saq1: string | null;
-	mentor_interest_saq2: string;
-	mentor_team_help_saq3: string;
-	mentor_team_help_saq4: string;
-	resume_share_to_sponsors: boolean;
-	other_questions: string | null;
-	resume_url: string;
+	dietary_restrictions: string[];
+	allergies: string | null;
+	ih_reference: string[];
+	areas_interested: string[];
+	t_shirt_size: string;
 	submission_time: string;
 	reviews: Review[];
+	resume_url: string | null;
+	resume_share_to_sponsors: boolean;
+	friday_availability: ReadonlyArray<number>;
+	saturday_availability: ReadonlyArray<number>;
+	sunday_availability: ReadonlyArray<number>;
+	mentor_prev_experience_saq1: string | null;
+	// Tech mentor specific
+	github: string | null;
+	portfolio: string | null;
+
+	git_experience: string;
+	arduino_experience: string;
+
+	tech_experienced_technologies: ReadonlyArray<string>;
+	hardware_experienced_technologies: ReadonlyArray<string>;
+
+	mentor_interest_saq2: string;
+	mentor_tech_saq3: string;
+	mentor_interest_saq5: string;
+
+	// Design mentor specific
+	figma_experience: string;
+	design_experienced_tools: ReadonlyArray<string>;
+	mentor_design_saq4: string;
 }
 
 export interface VolunteerApplicationData extends BaseApplicationData {
@@ -106,8 +126,8 @@ export type IrvineHacksHackerApplicationQuestion = Exclude<
 	"reviews"
 >;
 
-export type MentorApplicationQuestion = Exclude<
-	keyof MentorApplicationData,
+export type IrvineHacksMentorApplicationQuestion = Exclude<
+	keyof IrvineHacksMentorApplicationData,
 	"reviews"
 >;
 
@@ -123,7 +143,7 @@ export type ZotHacksHackerApplicationQuestion = Exclude<
 
 type ApplicationData =
 	| IrvineHacksHackerApplicationData
-	| MentorApplicationData
+	| IrvineHacksMentorApplicationData
 	| VolunteerApplicationData
 	| ZotHacksHackerApplicationData;
 

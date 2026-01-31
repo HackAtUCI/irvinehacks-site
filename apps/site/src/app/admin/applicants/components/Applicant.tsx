@@ -9,7 +9,7 @@ import { FlashbarProps } from "@cloudscape-design/components/flashbar";
 import NotificationContext from "@/lib/admin/NotificationContext";
 import useApplicant, {
 	IrvineHacksHackerApplicationData,
-	MentorApplicationData,
+	IrvineHacksMentorApplicationData,
 	VolunteerApplicationData,
 } from "@/lib/admin/useApplicant";
 
@@ -123,7 +123,9 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 					/>
 				) : applicant.roles.includes(ParticipantRole.Mentor) ? (
 					<MentorApplication
-						application_data={application_data as MentorApplicationData}
+						application_data={
+							application_data as IrvineHacksMentorApplicationData
+						}
 					/>
 				) : (
 					<VolunteerApplication

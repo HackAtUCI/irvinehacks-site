@@ -15,11 +15,63 @@ const titleCase = (str: string) =>
 
 const formatQuestion = (q: string) => q.split("_").map(titleCase).join(" ");
 
-// Map of hackathon experience values to labels
 const HACKATHON_EXPERIENCE_LABELS: Record<string, string> = {
 	first_time: "First Time",
 	some_experience: "Some Experience",
 	veteran: "Veteran",
+};
+
+const EDUCATION_LEVEL_LABELS: Record<string, string> = {
+	"high school": "High School",
+	"first-year-undergrad": "First Year Undergraduate",
+	"second-year-undergrad": "Second Year Undergraduate",
+	"third-year-undergrad": "Third Year Undergraduate",
+	"fourth-year-undergrad": "Fourth Year Undergraduate",
+	"fifth-year-undergrad": "Fifth Year Undergraduate",
+	graduate: "Graduate",
+};
+
+const PRONOUNS_LABELS: Record<string, string> = {
+	he: "He/him/his",
+	she: "She/her/hers",
+	hey: "They/them/theirs",
+};
+
+const DIETARY_RESTRICTION_LABELS: Record<string, string> = {
+	anything: "I can eat anything, including the following: chicken, beef, pork",
+	no_beef: "No Beef",
+	no_pork: "No Pork",
+	vegetarian: "Vegetarian",
+	vegan: "Vegan",
+	gluten_free: "Gluten-Free",
+};
+
+const IH_REFERENCE_LABELS: Record<string, string> = {
+	aif: "AIF",
+	discord: "Discord",
+	instagram: "Instagram",
+	classes: "Classes",
+	word_of_mouth: "Word of Mouth",
+};
+
+const AREAS_INTERESTED_LABELS: Record<string, string> = {
+	software: "Software",
+	ai: "AI/ML",
+	hardware: "Hardware",
+	infrastructure: "Infrastructure",
+	industry: "Industry",
+};
+
+const LIST_LABELS: Record<string, string> = {
+	...PRONOUNS_LABELS,
+	...IH_REFERENCE_LABELS,
+	...AREAS_INTERESTED_LABELS,
+	...DIETARY_RESTRICTION_LABELS,
+};
+
+const SINGLE_ANSWER_LABELS: Record<string, string> = {
+	...HACKATHON_EXPERIENCE_LABELS,
+	...EDUCATION_LEVEL_LABELS,
 };
 
 function ApplicationResponse({ value }: ApplicationResponseProps) {
@@ -40,24 +92,27 @@ function ApplicationResponse({ value }: ApplicationResponseProps) {
 					</p>
 				);
 			}
-			if (value in HACKATHON_EXPERIENCE_LABELS) {
+			if (value in SINGLE_ANSWER_LABELS) {
 				return (
 					<p>
-						{
-							HACKATHON_EXPERIENCE_LABELS[
-								value as keyof typeof HACKATHON_EXPERIENCE_LABELS
-							]
-						}
+						{SINGLE_ANSWER_LABELS[value as keyof typeof SINGLE_ANSWER_LABELS]}
 					</p>
 				);
 			}
+
 			return <p>{value}</p>;
 		case "object":
 			return (
 				<ul>
-					{value.map((v) => (
-						<li key={v}>{v}</li>
-					))}
+					{value.map((v) => {
+						if (v in LIST_LABELS) {
+							return (
+								<li key={v}>{LIST_LABELS[v as keyof typeof LIST_LABELS]}</li>
+							);
+						}
+
+						return <li key={v}>{v}</li>;
+					})}
 				</ul>
 			);
 		default:

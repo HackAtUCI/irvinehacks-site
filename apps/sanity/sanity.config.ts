@@ -26,6 +26,7 @@ export default defineConfig({
 									"resource",
 									"zothacksHackerScoringGuidelines",
 									"irvinehacksHackerScoringGuidelines",
+									"irvinehacksMentorScoringGuidelines",
 								].includes(listItem.getId()!)
 						),
 						S.divider(),
@@ -61,11 +62,19 @@ export default defineConfig({
 							),
 						S.divider(),
 						S.listItem()
-							.title("IrvineHacks Scoring Guidelines")
+							.title("IrvineHacks Hacker Scoring Guidelines")
 							.icon(Newspaper)
 							.child(
 								S.documentTypeList("irvinehacksHackerScoringGuidelines").title(
 									"IrvineHacks Hacker Scoring Guidelines"
+								)
+							),
+						S.listItem()
+							.title("IrvineHacks Mentor Scoring Guidelines")
+							.icon(Newspaper)
+							.child(
+								S.documentTypeList("irvinehacksMentorScoringGuidelines").title(
+									"IrvineHacks Mentor Scoring Guidelines"
 								)
 							),
 					]),

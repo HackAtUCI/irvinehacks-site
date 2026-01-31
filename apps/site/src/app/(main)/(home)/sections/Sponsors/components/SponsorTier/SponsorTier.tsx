@@ -12,7 +12,7 @@ interface SponsorTierProps {
 
 export default function SponsorTier({ className, sponsors }: SponsorTierProps) {
 	return (
-		<div className="flex flex-row flex-wrap my-20 gap-16 items-center justify-center">
+		<div className="flex flex-row flex-wrap mt-8 mb-20 gap-16 items-center justify-center">
 			{sponsors?.map(({ _key, name, url, logo }) => (
 				<a key={_key} href={url} target="_blank" rel="noopener noreferrer">
 					{/* eslint-disable-next-line @next/next/no-img-element*/}

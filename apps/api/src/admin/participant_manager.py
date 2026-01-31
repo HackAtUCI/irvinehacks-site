@@ -66,6 +66,8 @@ async def get_participants() -> list[Participant]:
                     },
                     "status": {
                         "$in": [
+                            Status.WAITLISTED,
+                            Status.QUEUED,
                             Status.ATTENDING,
                             Status.WAIVER_SIGNED,
                             Status.CONFIRMED,

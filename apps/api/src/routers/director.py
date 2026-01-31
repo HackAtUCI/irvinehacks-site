@@ -284,40 +284,6 @@ async def rsvp_reminder() -> None:
     await _rsvp_reminder(Role.VOLUNTEER)
 
 
-@router.post("/confirm-attendance", dependencies=[Depends(require_director)])
-async def confirm_attendance() -> None:
-    """Update applicant status to void or attending based on their current status."""
-    # TODO: consider using Pydantic model, maybe BareApplicant
-    records = await mongodb_handler.retrieve(
-        Collection.USERS, {"roles": Role.APPLICANT}, ["_id", "status"]
-    )
-
-    statuses = {
-        Status.CONFIRMED: Status.ATTENDING,
-        Decision.ACCEPTED: Status.VOID,
-        Status.WAIVER_SIGNED: Status.VOID,
-    }
-
-    for status_from, status_to in statuses.items():
-        curr_records = [record for record in records if record["status"] == status_from]
-
-        for record in curr_records:
-            record["status"] = status_to
-
-        log.info(
-            f"Changing status of {len(curr_records)} from {status_from} to {status_to}"
-        )
-
-        await asyncio.gather(
-            *(
-                _process_status(batch, status_to)
-                for batch in batched(
-                    [str(record["_id"]) for record in curr_records], 100
-                )
-            )
-        )
-
-
 @router.post("/set-thresholds")
 async def set_hacker_score_thresholds(
     user: Annotated[User, Depends(require_director)],

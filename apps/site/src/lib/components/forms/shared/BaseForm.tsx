@@ -107,37 +107,44 @@ export default function BaseForm({
 	);
 
 	return (
-		<form
-			method="post"
-			className="bg-black border-[4px] border-white text-[var(--color-white)] w-8/12 flex flex-col items-center py-12 gap-14 z-1 max-[800px]:w-9/12 max-[400px]:w-11/12"
-			action={applyPath}
-			encType="multipart/form-data"
-			onSubmit={handleSubmit}
-		>
-			<Image
-				src={cityBackground}
-				alt="Background image"
-				quality={100}
-				fill
-				sizes="100vh"
-				style={{ objectFit: "cover", zIndex: -1 }} // cover ensures it covers the area and z-index places it behind content
-				priority
-			/>
-			<input
-				type="text"
-				name="application_type"
-				value={applicationType}
-				readOnly
-				hidden
-			/>
-			{children}
-			<Button
-				text="Submit"
-				className="text-2xl !px-11 !py-2"
-				isLightVersion={true}
-				disabled={submitting}
-			/>
-			{sessionExpired && sessionExpiredMessage}
-		</form>
+		<div className="min-h-[100dvh]">
+			<div className="fixed inset-0 -z-10 pointer-events-none">
+				<Image
+					src={cityBackground}
+					alt="Background image"
+					fill
+					priority
+					quality={100}
+					sizes="100vw"
+					className="object-cover"
+				/>
+			</div>
+
+			<div className="relative z-10 flex justify-center py-12">
+				<form
+					method="post"
+					action={applyPath}
+					encType="multipart/form-data"
+					onSubmit={handleSubmit}
+					className="bg-black border-[4px] border-white text-[var(--color-white)]w-[92vw] max-w-[820px] flex flex-col items-center py-12 gap-14"
+				>
+					<input
+						type="text"
+						name="application_type"
+						value={applicationType}
+						readOnly
+						hidden
+					/>
+					{children}
+					<Button
+						text="Submit"
+						className="text-2xl !px-11 !py-2"
+						isLightVersion={true}
+						disabled={submitting}
+					/>
+					{sessionExpired && sessionExpiredMessage}
+				</form>
+			</div>
+		</div>
 	);
 }

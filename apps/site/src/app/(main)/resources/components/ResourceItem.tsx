@@ -16,7 +16,7 @@ export default function ResourceItem({
 			key={key}
 			href={link}
 			target="_blank"
-			className="my-0.5 p-3 flex flex-col items-center justify-center bg-black text-xl sm:text-2xl text-white border border-2 border-white transition-all duration-300 hover:bg-white hover:text-black hover:border-black hover:shadow-[9px_9px_0px_0px_#ffffff]"
+			className="my-0.5 p-3 flex flex-col items-center justify-center text-xl sm:text-2xl text-white border border-2 border-yellow transition-all duration-300 hover:bg-white hover:text-black hover:border-white hover:scale-105"
 		>
 			{title}
 		</a>
@@ -25,7 +25,7 @@ export default function ResourceItem({
 			key={key}
 			href={link}
 			target="_blank"
-			className="my-2 flex flex-col items-center justify-center bg-black text-white border border-[3px] border-white transition-all duration-300 hover:bg-white hover:text-black hover:border-black hover:shadow-[9px_9px_0px_1px_#ffffff] w-full h-[200px] xl:h-[240px] flex-grow"
+			className="my-2 flex flex-col items-center justify-center text-white border border-[3px] border-yellow transition-all duration-300 hover:bg-white hover:text-black hover:scale-105 w-full h-[200px] xl:h-[240px] flex-grow"
 		>
 			<div className="h-full py-6 xl:p-6">
 				{/* eslint-disable-next-line @next/next/no-img-element*/}

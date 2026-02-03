@@ -1,9 +1,4 @@
-import React from "react";
 import Image, { StaticImageData } from "next/image";
-
-// Backgrounds & Icons
-import perspectiveGrid from "@/assets/backgrounds/perspective-grid.svg";
-import hudBackground from "@/assets/images/character-customizer-background.svg";
 
 // Character Assets - Heads
 import head1 from "@/assets/images/characterCustomizer/head_front_1.png";
@@ -75,136 +70,241 @@ const CharacterDisplay = ({
 	companionIndex: number;
 }) => {
 	return (
-		<div className="relative w-full border-white border-4 rounded-xl bg-gradient-to-b from-[#02031D] via-[#090D83] via-54% to-[#090D83]">
-			<div className="h-[400px] w-full flex items-center justify-center">
-				{/* Perspective Grid Layer */}
-				<div className="absolute bottom-0 h-full w-full inset-0 z-0">
-					<Image
-						src={perspectiveGrid}
-						alt="Perspective Grid"
-						className="absolute bottom-0 w-full"
-						priority
-					/>
-				</div>
+		<div
+			style={{
+				position: "relative",
+				width: "100%",
+				border: "4px solid white",
+				borderRadius: "0.75rem",
+				background:
+					"linear-gradient(to bottom, #02031D 0%, #090D83 54%, #090D83 100%)",
+				overflow: "hidden",
+			}}
+		>
+			<div
+				style={{
+					height: "400px",
+					width: "100%",
+					display: "flex",
+					alignItems: "center",
+					justifyContent: "center",
+				}}
+			>
 				{/* Main Content Area */}
-				<div className="relative z-10 w-full max-w-[800px] h-full flex items-center justify-center">
-					{/* HUD Frame Background */}
-					<div className="invisible lg:visible absolute inset-0 flex items-center justify-center pointer-events-none z-20">
-						<Image
-							src={hudBackground}
-							alt="Interface Frame"
-							width={400}
-							height={300}
-							className="max-w-[600px] md:max-w-[700px] object-contain"
-							priority
-						/>
-					</div>
+				<div
+					style={{
+						position: "relative",
+						zIndex: 10,
+						width: "100%",
+						maxWidth: "800px",
+						height: "100%",
+						display: "flex",
+						alignItems: "center",
+						justifyContent: "center",
+					}}
+				>
 					{/* Character Composite */}
-					<div className="relative z-30 w-[400px] h-[400px] flex items-center justify-center mt-10">
+					<div
+						style={{
+							position: "relative",
+							zIndex: 30,
+							width: "400px",
+							height: "400px",
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "center",
+							marginTop: "2.5rem",
+						}}
+					>
 						{/* Blank Tail (Base Layer) */}
-						<div className="absolute inset-0 flex items-center justify-center">
+						<div
+							style={{
+								position: "absolute",
+								top: 0,
+								right: 0,
+								bottom: 0,
+								left: "-20%",
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "center",
+							}}
+						>
 							<Image
 								src={blankTail}
 								alt="Base Tail"
 								width={imageWidth}
 								height={imageWidth}
-								className="object-contain"
+								style={{ objectFit: "contain" }}
 								priority
 							/>
 						</div>
 						{/* Blank Body (Base Layer) */}
-						<div className="absolute inset-0 flex items-center justify-center">
+						<div
+							style={{
+								position: "absolute",
+								top: 0,
+								right: 0,
+								bottom: 0,
+								left: "-20%",
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "center",
+							}}
+						>
 							<Image
 								src={blankBody}
 								alt="Base Body"
 								width={imageWidth}
 								height={imageWidth}
-								className="object-contain"
+								style={{ objectFit: "contain" }}
 								priority
 							/>
 						</div>
 						{/* Blank Head (Base Layer) */}
-						<div className="absolute inset-0 flex items-center justify-center">
+						<div
+							style={{
+								position: "absolute",
+								top: 0,
+								right: 0,
+								bottom: 0,
+								left: "-20%",
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "center",
+							}}
+						>
 							<Image
 								src={blankHead}
 								alt="Base Head"
 								width={imageWidth}
 								height={imageWidth}
-								className="object-contain"
+								style={{ objectFit: "contain" }}
 								priority
 							/>
 						</div>
 						{/* Feet (Customizable Layer) */}
-						<div className="absolute inset-0 flex items-center justify-center">
+						<div
+							style={{
+								position: "absolute",
+								top: 0,
+								right: 0,
+								bottom: 0,
+								left: "-20%",
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "center",
+							}}
+						>
 							<Image
 								src={FEET[feetIndex][0]}
 								alt="Character Feet"
 								width={imageWidth}
 								height={imageWidth}
-								className="object-contain"
+								style={{ objectFit: "contain" }}
 								priority
 							/>
 						</div>
 						{/* Body (Customizable Layer) */}
-						<div className="absolute inset-0 flex items-center justify-center">
+						<div
+							style={{
+								position: "absolute",
+								top: 0,
+								right: 0,
+								bottom: 0,
+								left: "-20%",
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "center",
+							}}
+						>
 							<Image
 								src={BODIES[bodyIndex][0]}
 								alt="Character Body"
 								width={imageWidth}
 								height={imageWidth}
-								className="object-contain"
+								style={{ objectFit: "contain" }}
 								priority
 							/>
 						</div>
 						{/* Head (Customizable Layer) */}
-						<div className="absolute inset-0 flex items-center justify-center">
+						<div
+							style={{
+								position: "absolute",
+								top: 0,
+								right: 0,
+								bottom: 0,
+								left: "-20%",
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "center",
+							}}
+						>
 							<Image
 								src={HEADS[headIndex][0]}
 								alt="Character Head"
 								width={imageWidth}
 								height={imageWidth}
-								className="object-contain"
+								style={{ objectFit: "contain" }}
 								priority
 							/>
 						</div>
 						{/* Companion (Customizable Layer - Top Layer) */}
-						<div className="absolute inset-0 flex items-center justify-center">
+						<div
+							style={{
+								position: "absolute",
+								top: 0,
+								right: 0,
+								bottom: 0,
+								left: "-20%",
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "center",
+							}}
+						>
 							<Image
 								src={COMPANIONS[companionIndex][0]}
 								alt="Character Companion"
 								width={imageWidth}
 								height={imageWidth}
-								className="object-contain"
+								style={{ objectFit: "contain" }}
 								priority
 							/>
 						</div>
 					</div>
 				</div>
 			</div>
-			<div className="flex flex-col items-center justify-center mb-8">
-				<div className="flex flex-col">
+			<div
+				style={{
+					display: "flex",
+					flexDirection: "column",
+					alignItems: "center",
+					justifyContent: "center",
+					marginBottom: "2rem",
+				}}
+			>
+				<div style={{ display: "flex", flexDirection: "column" }}>
 					<div>
-						<p className="font-display">
-							<span className="text-turquoise">Head:</span>{" "}
-							<span className="text-white">{HEADS[headIndex][1]}</span>
+						<p style={{ marginBottom: "1rem" }}>
+							<span style={{ color: "#00ffff" }}>Head:</span>{" "}
+							<span style={{ color: "white" }}>{HEADS[headIndex][1]}</span>
 						</p>
 					</div>
 					<div>
-						<p className="font-display">
-							<span className="text-turquoise">Body:</span>{" "}
-							<span className="text-white">{BODIES[bodyIndex][1]}</span>
+						<p style={{ marginBottom: "1rem" }}>
+							<span style={{ color: "#00ffff" }}>Body:</span>{" "}
+							<span style={{ color: "white" }}>{BODIES[bodyIndex][1]}</span>
 						</p>
 					</div>
 					<div>
-						<p className="font-display">
-							<span className="text-turquoise">Feet:</span>{" "}
-							<span className="text-white">{FEET[feetIndex][1]}</span>
+						<p style={{ marginBottom: "1rem" }}>
+							<span style={{ color: "#00ffff" }}>Feet:</span>{" "}
+							<span style={{ color: "white" }}>{FEET[feetIndex][1]}</span>
 						</p>
 					</div>
 					<div>
-						<p className="font-display">
-							<span className="text-turquoise">Companion:</span>{" "}
-							<span className="text-white">
+						<p style={{ marginBottom: "1rem" }}>
+							<span style={{ color: "#00ffff" }}>Companion:</span>{" "}
+							<span style={{ color: "white" }}>
 								{COMPANIONS[companionIndex][1]}
 							</span>
 						</p>

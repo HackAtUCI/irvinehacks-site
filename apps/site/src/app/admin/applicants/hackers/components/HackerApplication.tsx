@@ -206,6 +206,14 @@ function IrvineHacksHackerApplication({
 					onResumeScore(value, hackathonExperienceScore);
 				}}
 			/>
+			{guidelines?.guidelines?.frq_guideline && (
+				<Container>
+					<SpaceBetween direction="vertical" size="m">
+						<Header variant="h2">General FRQ Guidelines</Header>
+						<PortableText value={guidelines.guidelines.frq_guideline} />
+					</SpaceBetween>
+				</Container>
+			)}
 			<ScoreSection
 				title="Describe a past or current project that you are proud of. [100 words]"
 				min={0}

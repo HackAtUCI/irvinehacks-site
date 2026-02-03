@@ -81,7 +81,7 @@ export default function ReviewerNotes({
 					</TextContent>
 				)}
 				<Textarea
-					placeholder="Reviewer Notes"
+					placeholder="Leave any comments for other leads to read in case there's anything of note!"
 					value={notes}
 					onChange={({ detail }) => onNotesChange(detail.value)}
 					rows={5}

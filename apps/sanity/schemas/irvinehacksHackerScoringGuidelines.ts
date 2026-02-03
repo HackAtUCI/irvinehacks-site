@@ -13,6 +13,12 @@ export default defineType({
 			type: "object",
 			fields: [
 				defineField({
+					name: "frq_guideline",
+					title: "FRQ Guideline",
+					type: "array",
+					of: [{ type: "block" }],
+				}),
+				defineField({
 					name: "prev_experience",
 					title: "Previous Experience",
 					type: "array",

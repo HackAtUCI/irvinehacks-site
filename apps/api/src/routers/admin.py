@@ -200,9 +200,15 @@ async def hacker_applicants(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     for record in records:
-        # TODO: If we change back to old avg score for summary, change this function
-        # applicant_review_processor.include_hacker_app_fields
-        applicant_review_processor.include_hacker_app_fields_with_global_and_breakdown(
+        # TODO: Use different route for different avg score types.
+
+        # If we change back to old avg score for summary, like for IH, change this
+        # function back to applicant_review_processor.include_hacker_app_fields
+        # If we change to detailed avg score, like for zothacks, use this function:
+        # applicant_review_processor.include_hacker_app_fields_with_global_and_breakdown(
+        #     record, thresholds["accept"], thresholds["waitlist"]
+        # )
+        applicant_review_processor.include_hacker_app_fields(
             record, thresholds["accept"], thresholds["waitlist"]
         )
 

@@ -13,7 +13,7 @@ export default async function ResourceSection() {
 			{resources.order.map(
 				({ _id, iconUrl, title, description, resources }) => (
 					<>
-						<div className="hidden md:block">
+						{/* <div className="hidden md:block">
 							<div
 								key={_id}
 								className="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 justify-center items-center lg:pr-[3.25vw]"
@@ -51,8 +51,8 @@ export default async function ResourceSection() {
 									</div>
 								</div>
 							</div>
-						</div>
-						<div className="block md:hidden">
+						</div> */}
+						<div className="flex flex-col justify-center items-center">
 							<div className="w-full max-w-5xl bg-black p-5 sm:p-7 grow-[2] mb-12 border-[5px] border-white shadow-[9px_9px_0px_1px_#ffffff] select-none">
 								<div className="flex justify-stretch select-none pointer-events-none">
 									<ResourceCategory

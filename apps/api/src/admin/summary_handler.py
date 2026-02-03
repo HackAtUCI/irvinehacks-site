@@ -1,6 +1,6 @@
 from collections import Counter, defaultdict
 from datetime import date, datetime
-from typing import Iterable
+from typing import Iterable, Optional
 from zoneinfo import ZoneInfo
 
 from pydantic import BaseModel, TypeAdapter, ValidationError
@@ -16,11 +16,24 @@ class ApplicantSummaryRecord(BaseModel):
     status: ApplicantStatus
 
 
-async def applicant_summary() -> Counter[ApplicantStatus]:
-    """Get summary of applicants by status."""
+async def applicant_summary(
+    role: Optional[Role] = None,
+    status: Optional[ApplicantStatus] = None,
+) -> Counter[ApplicantStatus]:
+    """Get summary of applicants by status, optionally filtered by role/status."""
+    query: dict[str, object] = {"roles": Role.APPLICANT}
+
+    # Add role filter if specified (filter by participant role like Hacker, Mentor, etc.)
+    if role is not None:
+        query["roles"] = {"$all": [Role.APPLICANT, role]}
+
+    # Add status filter if specified
+    if status is not None:
+        query["status"] = status.value
+
     records = await mongodb_handler.retrieve(
         Collection.USERS,
-        {"roles": Role.APPLICANT},
+        query,
         ["status"],
     )
     applicants = TypeAdapter(list[ApplicantSummaryRecord]).validate_python(records)

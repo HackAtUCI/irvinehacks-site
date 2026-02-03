@@ -68,9 +68,10 @@ def _get_avg_score(
         return OVERQUALIFIED
 
     unique_reviewers = {t[1] for t in reviews}
+    num_reviewers = len(unique_reviewers)
 
     last_score = _get_last_score(unique_reviewers.pop(), reviews)
-    if len(unique_reviewers) < 2:
+    if num_reviewers < 2:
         return last_score
 
     last_score2 = _get_last_score(unique_reviewers.pop(), reviews)

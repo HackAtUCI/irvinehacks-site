@@ -23,11 +23,9 @@ async def applicant_summary(
     """Get summary of applicants by status, optionally filtered by role/status."""
     query: dict[str, object] = {"roles": Role.APPLICANT}
 
-    # Add role filter if specified (filter by participant role like Hacker, Mentor, etc.)
     if role is not None:
         query["roles"] = {"$all": [Role.APPLICANT, role]}
 
-    # Add status filter if specified
     if status is not None:
         query["status"] = status.value
 

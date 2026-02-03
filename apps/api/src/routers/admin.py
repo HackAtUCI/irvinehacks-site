@@ -251,7 +251,7 @@ async def applicant_summary(
     role: Optional[str] = None,
     status_filter: Optional[str] = None,
 ) -> dict[ApplicantStatus, int]:
-    """Provide summary of statuses of applicants, optionally filtered by role and status."""
+    """Provide summary of statuses of applicants"""
     # Convert string params to enums if provided
     role_enum: Optional[Role] = None
     status_enum: Optional[ApplicantStatus] = None

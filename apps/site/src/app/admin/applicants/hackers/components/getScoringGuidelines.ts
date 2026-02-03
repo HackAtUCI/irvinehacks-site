@@ -11,6 +11,7 @@ export const IrvineHacksHackerScoringGuidelines = z.object({
 		frq_change: z.array(z.any()),
 		frq_ambition: z.array(z.any()),
 		frq_character: z.array(z.any()),
+		frq_guideline: z.array(z.any()),
 	}),
 });
 
@@ -27,7 +28,8 @@ export const getIrvineHacksHackerScoringGuidelines = cache(async () => {
         prev_experience,
         frq_change,
         frq_ambition,
-        frq_character
+        frq_character,
+        frq_guideline
       }
     }`,
 	);

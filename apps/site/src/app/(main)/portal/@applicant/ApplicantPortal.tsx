@@ -45,6 +45,9 @@ function Portal() {
 			<div className="bg-transparent text-black max-w-6xl rounded-2xl p-6 flex flex-col mb-24 w-full">
 				<div className="mb-12">
 					<QRCodeComponent className="max-w-xs mx-auto" size={180} />
+					<p className="mt-4 text-white text-center">
+						If admitted, please show this QR code to our staff to check-in.
+					</p>
 				</div>
 
 				<h2 className="font-bold font-display text-[var(--color-white)] mb-4 md:mb-[42px] text-[15px] sm:text-2xl md:text-[40px] md:leading-10">

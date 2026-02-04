@@ -69,9 +69,11 @@ def _get_avg_score(
 
     unique_reviewers = {t[1] for t in reviews}
     num_reviewers = len(unique_reviewers)
+    if num_reviewers == 0:
+        return NOT_FULLY_REVIEWED
 
     last_score = _get_last_score(unique_reviewers.pop(), reviews)
-    if num_reviewers < 2:
+    if num_reviewers == 1:
         return last_score
 
     last_score2 = _get_last_score(unique_reviewers.pop(), reviews)

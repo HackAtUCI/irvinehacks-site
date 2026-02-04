@@ -171,6 +171,20 @@ def test_decision_based_on_threshold_with_overqualified() -> None:
     assert record["decision"] == "REJECTED"  # OVERQUALIFIED (-3) < waitlist (5.0)
 
 
+def test_avg_score_no_reviewer() -> None:
+    """Test that avg_score returns when there's only one reviewer."""
+    record: dict[str, Any] = {
+        "_id": "edu.uci.sydnee",
+        "status": "REVIEWED",
+        "application_data": {
+            "reviews": [],
+        },
+    }
+
+    applicant_review_processor._include_avg_score(record)
+    assert record["avg_score"] == applicant_review_processor.NOT_FULLY_REVIEWED
+
+
 def test_avg_score_only_one_reviewer() -> None:
     """Test that avg_score returns when there's only one reviewer."""
     record: dict[str, Any] = {

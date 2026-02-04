@@ -46,7 +46,8 @@ function Portal() {
 				<div className="mb-12">
 					<QRCodeComponent className="max-w-xs mx-auto" size={180} />
 					<p className="mt-4 text-white text-center">
-						If admitted, please show this QR code to our staff to check-in.
+						If selected to attend, please show this QR code to our staff to
+						check-in.
 					</p>
 				</div>
 

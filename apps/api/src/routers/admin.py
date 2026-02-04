@@ -15,7 +15,7 @@ from admin.score_normalizing_handler import (
 from auth.authorization import require_role
 from auth.user_identity import User, utc_now
 from models.ApplicationData import Decision, Review
-from models.user_record import Applicant, ApplicantStatus, Role
+from models.user_record import Applicant, ApplicantStatus, Role, Status as UserStatus
 from services import mongodb_handler
 from services.mongodb_handler import BaseRecord, Collection
 from utils import email_handler
@@ -263,9 +263,37 @@ async def volunteer_applicant(
 
 
 @router.get("/summary/applicants", dependencies=[Depends(require_manager)])
-async def applicant_summary() -> dict[ApplicantStatus, int]:
-    """Provide summary of statuses of applicants."""
-    return await summary_handler.applicant_summary()
+async def applicant_summary(
+    role: Optional[str] = None,
+    status_filter: Optional[str] = None,
+) -> dict[ApplicantStatus, int]:
+    """Provide summary of statuses of applicants"""
+    # Convert string params to enums if provided
+    role_enum: Optional[Role] = None
+    status_enum: Optional[ApplicantStatus] = None
+
+    if role:
+        try:
+            role_enum = Role(role)
+        except ValueError:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST, detail=f"Invalid role: {role}"
+            )
+
+    if status_filter:
+        # Try to parse as Decision first, then Status
+        try:
+            status_enum = Decision(status_filter)
+        except ValueError:
+            try:
+                status_enum = UserStatus(status_filter)
+            except ValueError:
+                raise HTTPException(
+                    status.HTTP_400_BAD_REQUEST,
+                    detail=f"Invalid status: {status_filter}",
+                )
+
+    return await summary_handler.applicant_summary(role=role_enum, status=status_enum)
 
 
 @router.get(

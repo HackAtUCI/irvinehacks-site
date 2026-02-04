@@ -29,9 +29,9 @@ export default function MentorForm() {
 	return (
 		<BaseForm applicationType="Mentor" applyPath="/api/user/mentor">
 			<div className="w-11/12">
-				<p className="text-lg">
+				<p className="text-lg break-words">
 					[Note] If you have any questions about IrvineHacks or being a mentor,
-					please email <b>irvinehacks2026@gmail.com</b>.
+					please email <b className="break-all">irvinehacks2026@gmail.com</b>.
 				</p>
 			</div>
 

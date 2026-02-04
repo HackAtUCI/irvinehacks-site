@@ -12,9 +12,14 @@ export default function VolunteerForm() {
 	return (
 		<BaseForm applicationType="Volunteer" applyPath="/api/user/volunteer">
 			<div className="w-11/12">
-				<p className="text-lg break-words">
+				<p className="text-lg">
 					[Note] If you have any questions about IrvineHacks or being a
-					volunteer, please email <b className="break-all">irvinehacks2026@gmail.com</b>.
+					volunteer, please email{" "}
+					<b>
+						<span>irvinehacks2026</span>
+						<span>@gmail.com</span>
+					</b>
+					.
 				</p>
 			</div>
 			<AgeInformation />

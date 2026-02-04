@@ -149,8 +149,8 @@ class BaseVolunteerApplicationData(BaseModel):
     major: str
     # Field for question: "How did you hear about IrvineHacks?"
     ih_reference: list[str] = []
-    frq_volunteer: str = Field(max_length=150)
-    frq_memory: str = Field(max_length=100)
+    frq_volunteer: str = Field(max_length=2048)
+    frq_memory: str = Field(max_length=2048)
     dietary_restrictions: list[str] = []
     allergies: Union[str, None] = Field(None, max_length=2048)
     frq_volunteer_allergy: Optional[str] = ""

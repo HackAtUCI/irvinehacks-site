@@ -10,7 +10,7 @@ export default function VolunteerFRQ() {
 				labelText="Why are you interested in volunteering, and what do you expect to gain from this experience? (max word count 150)"
 				containerClass="w-full"
 				isRequired={true}
-				maxWordCount={100}
+				maxWordCount={150}
 			/>
 			<Textfield
 				name="frq_memory"

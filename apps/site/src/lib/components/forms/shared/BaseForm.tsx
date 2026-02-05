@@ -126,7 +126,7 @@ export default function BaseForm({
 					action={applyPath}
 					encType="multipart/form-data"
 					onSubmit={handleSubmit}
-					className="bg-black border-[4px] border-white text-[var(--color-white)]w-[92vw] max-w-[820px] flex flex-col items-center py-12 gap-14"
+					className="bg-black border-[4px] border-white text-[var(--color-white)] w-[92vw] max-w-[820px] flex flex-col items-center py-12 gap-14"
 				>
 					<input
 						type="text"

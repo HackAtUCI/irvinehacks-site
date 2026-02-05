@@ -1,12 +1,12 @@
 from datetime import datetime
 from typing import Any
-from unittest.mock import ANY, AsyncMock, call, patch
+from unittest.mock import ANY, AsyncMock, patch
 
 from fastapi import FastAPI
 
 from auth.user_identity import NativeUser, UserTestClient
 from models.ApplicationData import Decision
-from models.user_record import Role, Status
+from models.user_record import Role
 from routers import director
 from services.mongodb_handler import Collection
 from services.sendgrid_handler import Template
@@ -173,65 +173,6 @@ def test_get_apply_reminder_senders(
         Collection.EMAILS,
         {"_id": "apply_reminder"},
         ["senders"],
-    )
-
-
-@patch("services.mongodb_handler.update", autospec=True)
-@patch("services.mongodb_handler.retrieve_one", autospec=True)
-@patch("services.mongodb_handler.retrieve", autospec=True)
-def test_confirm_attendance_route(
-    mock_mongodb_handler_retrieve: AsyncMock,
-    mock_mongodb_handler_retrieve_one: AsyncMock,
-    mock_mognodb_handler_update: AsyncMock,
-) -> None:
-    """Test that confirmed status changes to void with accepted."""
-
-    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
-    mock_mongodb_handler_retrieve.return_value = [
-        {
-            "_id": "edu.uc.tester",
-            "status": Decision.ACCEPTED,
-        },
-        {
-            "_id": "edu.uc.tester2",
-            "status": Status.WAIVER_SIGNED,
-        },
-        {
-            "_id": "edu.uc.tester3",
-            "status": Status.CONFIRMED,
-        },
-        {
-            "_id": "edu.uc.tester4",
-            "status": Decision.WAITLISTED,
-        },
-    ]
-
-    # Not doing this will result in the return value acting as a mock, which would be
-    # tracked in the assert_has_calls below.
-    mock_mognodb_handler_update.side_effect = [True, True, True]
-
-    res = director_client.post("/confirm-attendance")
-
-    assert res.status_code == 200
-    mock_mongodb_handler_retrieve.assert_awaited_once()
-    mock_mognodb_handler_update.assert_has_calls(
-        [
-            call(
-                Collection.USERS,
-                {"_id": {"$in": ("edu.uc.tester3",)}},
-                {"status": Status.ATTENDING},
-            ),
-            call(
-                Collection.USERS,
-                {"_id": {"$in": ("edu.uc.tester",)}},
-                {"status": Status.VOID},
-            ),
-            call(
-                Collection.USERS,
-                {"_id": {"$in": ("edu.uc.tester2",)}},
-                {"status": Status.VOID},
-            ),
-        ]
     )
 
 

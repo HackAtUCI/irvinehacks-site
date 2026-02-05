@@ -4,8 +4,8 @@ import Box from "@cloudscape-design/components/box";
 import useApplicationsSummary from "./useApplicationsSummary";
 
 const TIME_SPEC = "T00:00:00-08:00";
-const START_DAY = new Date("2024-12-11" + TIME_SPEC);
-const END_DAY = new Date("2025-01-11" + TIME_SPEC);
+const START_DAY = new Date("2026-01-23" + TIME_SPEC);
+const END_DAY = new Date("2026-02-15" + TIME_SPEC);
 
 // In reverse of desired order
 const KNOWN_SCHOOLS = [

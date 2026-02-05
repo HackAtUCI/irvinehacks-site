@@ -149,8 +149,8 @@ class BaseVolunteerApplicationData(BaseModel):
     major: str
     # Field for question: "How did you hear about IrvineHacks?"
     ih_reference: list[str] = []
-    frq_volunteer: str = Field(max_length=150)
-    frq_memory: str = Field(max_length=100)
+    frq_volunteer: str = Field(max_length=2048)
+    frq_memory: str = Field(max_length=2048)
     dietary_restrictions: list[str] = []
     allergies: Union[str, None] = Field(None, max_length=2048)
     frq_volunteer_allergy: Optional[str] = ""
@@ -259,6 +259,12 @@ class ProcessedHackerApplicationData(BaseApplicationData):
     resume_url: Union[HttpUrl, None] = None
     submission_time: datetime
     reviews: list[Review] = []
+    review_breakdown: dict[str, dict[str, float]] = {}
+    # TODO: Create aliases for review_breakdown
+    # dict[reviewer_uid, dict[field_name, score]]
+    global_field_scores: dict[str, float] = {}
+    # TODO: Create aliases for these global_field_scores
+    # dict[field that can have detailed reviews, score]
 
     @field_serializer("linkedin", "portfolio", "resume_url")
     def url2str(self, val: Union[HttpUrl, None]) -> Union[str, None]:
@@ -292,10 +298,10 @@ class ProcessedZotHacksHackerApplicationData(BaseZotHacksHackerApplicationData):
     resume_url: Union[HttpUrl, None] = None
     submission_time: datetime
     reviews: list[Review] = []
-    review_breakdown: dict[str, dict[str, int]] = {}
+    review_breakdown: dict[str, dict[str, float]] = {}
     # TODO: Create aliases for review_breakdown
     # dict[reviewer_uid, dict[field_name, score]]
-    global_field_scores: dict[str, int] = {}
+    global_field_scores: dict[str, float] = {}
     # TODO: Create aliases for these global_field_scores
     # dict[field that can have detailed reviews, score]
 

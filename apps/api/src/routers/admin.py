@@ -15,7 +15,7 @@ from admin.score_normalizing_handler import (
 from auth.authorization import require_role
 from auth.user_identity import User, utc_now
 from models.ApplicationData import Decision, Review
-from models.user_record import Applicant, ApplicantStatus, Role
+from models.user_record import Applicant, ApplicantStatus, Role, Status as UserStatus
 from services import mongodb_handler
 from services.mongodb_handler import BaseRecord, Collection
 from utils import email_handler
@@ -99,6 +99,14 @@ class ZotHacksHackerDetailedScores(BaseModel):
     hackathon_experience: Optional[int] = None
 
 
+class IrvineHacksHackerDetailedScores(BaseModel):
+    frq_change: float
+    frq_ambition: float
+    frq_character: float
+    previous_experience: float
+    has_socials: float
+
+
 class GlobalScores(BaseModel):
     resume: int
     hackathon_experience: int
@@ -106,7 +114,9 @@ class GlobalScores(BaseModel):
 
 class DetailedReviewRequest(BaseModel):
     applicant: str
-    scores: Union[GlobalScores, ZotHacksHackerDetailedScores]
+    scores: Union[
+        GlobalScores, ZotHacksHackerDetailedScores, IrvineHacksHackerDetailedScores
+    ]
     notes: Optional[str] = None  # Notes from reviewer
 
 
@@ -190,9 +200,15 @@ async def hacker_applicants(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     for record in records:
-        # TODO: If we change back to old avg score for summary, change this function
-        # applicant_review_processor.include_hacker_app_fields
-        applicant_review_processor.include_hacker_app_fields_with_global_and_breakdown(
+        # TODO: Use different route for different avg score types.
+
+        # If we change back to old avg score for summary, like for IH, change this
+        # function back to applicant_review_processor.include_hacker_app_fields
+        # If we change to detailed avg score, like for zothacks, use this function:
+        # applicant_review_processor.include_hacker_app_fields_with_global_and_breakdown(
+        #     record, thresholds["accept"], thresholds["waitlist"]
+        # )
+        applicant_review_processor.include_hacker_app_fields(
             record, thresholds["accept"], thresholds["waitlist"]
         )
 
@@ -247,9 +263,37 @@ async def volunteer_applicant(
 
 
 @router.get("/summary/applicants", dependencies=[Depends(require_manager)])
-async def applicant_summary() -> dict[ApplicantStatus, int]:
-    """Provide summary of statuses of applicants."""
-    return await summary_handler.applicant_summary()
+async def applicant_summary(
+    role: Optional[str] = None,
+    status_filter: Optional[str] = None,
+) -> dict[ApplicantStatus, int]:
+    """Provide summary of statuses of applicants"""
+    # Convert string params to enums if provided
+    role_enum: Optional[Role] = None
+    status_enum: Optional[ApplicantStatus] = None
+
+    if role:
+        try:
+            role_enum = Role(role)
+        except ValueError:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST, detail=f"Invalid role: {role}"
+            )
+
+    if status_filter:
+        # Try to parse as Decision first, then Status
+        try:
+            status_enum = Decision(status_filter)
+        except ValueError:
+            try:
+                status_enum = UserStatus(status_filter)
+            except ValueError:
+                raise HTTPException(
+                    status.HTTP_400_BAD_REQUEST,
+                    detail=f"Invalid status: {status_filter}",
+                )
+
+    return await summary_handler.applicant_summary(role=role_enum, status=status_enum)
 
 
 @router.get(
@@ -354,6 +398,13 @@ async def submit_detailed_review(
         )
     elif isinstance(applicant_review.scores, ZotHacksHackerDetailedScores):
         await _handle_detailed_scores_review(
+            applicant_review.applicant,
+            applicant_review.scores,
+            reviewer,
+            applicant_review.notes,
+        )
+    elif isinstance(applicant_review.scores, IrvineHacksHackerDetailedScores):
+        await _handle_irvinehacks_detailed_scores_review(
             applicant_review.applicant,
             applicant_review.scores,
             reviewer,
@@ -553,6 +604,95 @@ async def _handle_global_only_review(
         {"application_data.global_field_scores": scores.model_dump()},
         upsert=True,
     )
+
+
+async def _handle_irvinehacks_detailed_scores_review(
+    applicant: str,
+    scores: IrvineHacksHackerDetailedScores,
+    reviewer: User,
+    notes: Optional[str] = None,
+) -> None:
+    """Handle detailed scores review submission for IrvineHacks."""
+    # Dictionary mapping field names to (total_points, weight_percentage)
+    # The sum of weight_percentages should be 1.0 (100%)
+    WEIGHTING_CONFIG = {
+        "frq_change": (20, 0.20),
+        "frq_ambition": (20, 0.25),
+        "frq_character": (20, 0.20),
+        "previous_experience": (1, 0.30),
+        "has_socials": (1, 0.05),
+    }
+
+    score_breakdown = scores.model_dump(exclude_none=True)
+
+    # Check for overqualified auto-reject
+    if score_breakdown.get("resume") == -1000:
+        total_score = -1000.0
+    else:
+        weighted_sum = 0.0
+        for field, (total_points, weight) in WEIGHTING_CONFIG.items():
+            score_val = score_breakdown.get(field, 0)
+            weighted_sum += (score_val / total_points) * weight
+
+        # Scale to 100 percent
+        total_score = weighted_sum * 100.0
+        total_score = max(total_score, -3.0)
+
+    if total_score < -1000.0 or total_score > 100.0:
+        log.error("Invalid calculated review score: %f", total_score)
+        raise HTTPException(status.HTTP_400_BAD_REQUEST)
+
+    review: Review = (utc_now(), reviewer.uid, total_score, notes)
+
+    applicant_record = await mongodb_handler.retrieve_one(
+        Collection.USERS,
+        {"_id": applicant},
+        ["_id", "application_data.reviews", "roles"],
+    )
+    if not applicant_record:
+        log.error("Could not retrieve applicant after submitting review")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    unique_reviewers = applicant_review_processor.get_unique_reviewers(applicant_record)
+
+    # Only add a review if there are either less than 2 reviewers
+    # or reviewer is one of the reviewers
+    if len(unique_reviewers) >= 2 and reviewer.uid not in unique_reviewers:
+        log.error(
+            "%s tried to submit a review, but %s already has two reviewers",
+            reviewer,
+            applicant,
+        )
+        raise HTTPException(status.HTTP_403_FORBIDDEN)
+
+    update_query: dict[str, object] = {"$push": {"application_data.reviews": review}}
+    # Because reviewing a hacker requires 2 reviewers, only set the
+    # applicant's status to REVIEWED if there are at least 2 reviewers
+    if len(unique_reviewers | {reviewer.uid}) >= 2:
+        update_query.update({"$set": {"status": "REVIEWED"}})
+
+    await _try_update_applicant_with_query(
+        applicant,
+        update_query=update_query,
+        err_msg=f"{reviewer} could not submit review for {applicant}",
+    )
+
+    uid_no_domain = reviewer.uid.split(".")[-1]
+    await _try_update_applicant_with_query(
+        applicant,
+        update_query={
+            "$set": {
+                f"application_data.review_breakdown.{uid_no_domain}": score_breakdown
+            }
+        },
+        err_msg=f"{reviewer} could not submit review for {applicant}",
+    )
+
+    # No update to GlobalScores. For IH, leads decided not to score resume/experience
+    # beforehand. GlobalScores was meant for leads to mark applicants as overqualified.
+    # This is not the case for IH.
+
+    log.info("%s reviewed hacker %s", reviewer, applicant)
 
 
 async def _handle_detailed_scores_review(

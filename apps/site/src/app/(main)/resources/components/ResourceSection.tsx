@@ -4,6 +4,7 @@ import extraBorder from "@/assets/icons/ExtraBorder.svg";
 
 import ResourceItem from "./ResourceItem";
 import ResourceHeader from "./ResourceHeader";
+import ResourcePageFooter from "./ResourcePageFooter";
 import { getResources } from "../getResources";
 import styles from "./ResourceSection.module.scss";
 import Image from "next/image";
@@ -84,6 +85,7 @@ export default async function ResourceSection() {
 					</>
 				),
 			)}
+			<ResourcePageFooter />
 		</>
 	);
 }

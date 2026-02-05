@@ -3,7 +3,7 @@ interface ResourceHeaderProps {
 	description: string;
 }
 
-export default async function ResourceHeader({
+export default function ResourceHeader({
 	title,
 	description,
 }: ResourceHeaderProps) {

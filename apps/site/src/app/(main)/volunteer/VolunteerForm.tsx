@@ -14,7 +14,12 @@ export default function VolunteerForm() {
 			<div className="w-11/12">
 				<p className="text-lg">
 					[Note] If you have any questions about IrvineHacks or being a
-					volunteer, please email <b>irvinehacks2026@gmail.com</b>.
+					volunteer, please email{" "}
+					<b>
+						<span>irvinehacks2026</span>
+						<span>@gmail.com</span>
+					</b>
+					.
 				</p>
 			</div>
 			<AgeInformation />

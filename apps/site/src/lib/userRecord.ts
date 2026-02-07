@@ -54,7 +54,9 @@ export enum PostAcceptedStatus {
 	Signed = "WAIVER_SIGNED",
 	Confirmed = "CONFIRMED",
 	Attending = "ATTENDING",
-	Void = "VOID",
+	Waitlisted = "WAITLISTED",
+	Accepted = "ACCEPTED",
+	Queued = "QUEUED",
 }
 
 /** All of the different possible status values. */

@@ -11,7 +11,7 @@ import { Participant } from "@/lib/admin/useParticipants";
 
 export interface ActionModalProps {
 	onDismiss: () => void;
-	onConfirm: (participant: Participant) => void;
+	onConfirm: (participant: Participant, type: string) => void;
 	participant: Participant | null;
 }
 
@@ -32,7 +32,10 @@ function CheckInModal({ onDismiss, onConfirm, participant }: ActionModalProps) {
 						<Button variant="link" onClick={onDismiss}>
 							Cancel
 						</Button>
-						<Button variant="primary" onClick={() => onConfirm(participant)}>
+						<Button
+							variant="primary"
+							onClick={() => onConfirm(participant, selectedType)}
+						>
 							Check In
 						</Button>
 					</SpaceBetween>

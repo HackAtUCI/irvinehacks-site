@@ -13,7 +13,7 @@ export const StatusLabels = {
 	[Status.Signed]: "waiver signed",
 	[Status.Confirmed]: "confirmed",
 	[Status.Attending]: "attending",
-	[Status.Void]: "void",
+	[Status.Queued]: "queued",
 };
 
 const StatusTypes: Record<Status, StatusIndicatorProps.Type> = {
@@ -25,7 +25,7 @@ const StatusTypes: Record<Status, StatusIndicatorProps.Type> = {
 	[Status.Signed]: "in-progress",
 	[Status.Confirmed]: "info",
 	[Status.Attending]: "success",
-	[Status.Void]: "stopped",
+	[Status.Queued]: "pending",
 };
 
 interface ApplicantStatusProps {

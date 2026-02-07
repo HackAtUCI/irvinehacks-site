@@ -27,12 +27,32 @@ function useParticipants() {
 	);
 
 	const checkInParticipant = async (participant: Participant) => {
-		console.log("Checking in", participant);
-		// TODO: implement mutation for showing checked in on each day
-		// Note: Will cause 422 if badge number is null, but in practice,
-		// this should never happen
-		await axios.post(`/api/admin/checkin/${participant._id}`);
-		mutate();
+		try {
+			console.log("Checking in", participant);
+			// TODO: implement mutation for showing checked in on each day
+			// Note: Will cause 422 if badge number is null, but in practice,
+			// this should never happen
+			await axios.post(`/api/admin/checkin/${participant._id}`);
+			mutate();
+		} catch (error) {
+			if (axios.isAxiosError(error) && error.response?.data?.detail) {
+				throw new Error(error.response.data.detail);
+			}
+			throw error;
+		}
+	};
+
+	const queueParticipant = async (participant: Participant) => {
+		try {
+			console.log("Queueing in", participant);
+			await axios.post(`/api/admin/queue/${participant._id}`);
+			mutate();
+		} catch (error) {
+			if (axios.isAxiosError(error) && error.response?.data?.detail) {
+				throw new Error(error.response.data.detail);
+			}
+			throw error;
+		}
 	};
 
 	const releaseParticipantFromWaitlist = async (participant: Participant) => {
@@ -53,6 +73,7 @@ function useParticipants() {
 		loading: isLoading,
 		error,
 		checkInParticipant,
+		queueParticipant,
 		releaseParticipantFromWaitlist,
 		confirmOutsideParticipants,
 	};

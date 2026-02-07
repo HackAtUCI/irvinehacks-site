@@ -89,12 +89,11 @@ async def check_in_participant(uid: str, associate: User) -> None:
     record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
         Collection.USERS, {"_id": uid, "roles": {"$exists": True}}, ["status"]
     )
-
     if not record or record.get("status", "") not in (
         Status.ATTENDING,
         Status.CONFIRMED,
     ):
-        raise ValueError
+        raise ValueError(f'User status is {record.get("status", "")} and is not eligible to be checked in.')
 
     new_checkin_entry: Checkin = (utc_now(), associate.uid)
 
@@ -103,6 +102,7 @@ async def check_in_participant(uid: str, associate: User) -> None:
         {"_id": uid},
         {
             "$push": {"checkins": new_checkin_entry},
+            "$set": {"status": Status.ATTENDING}
         },
     )
     if not update_status:
@@ -110,6 +110,45 @@ async def check_in_participant(uid: str, associate: User) -> None:
 
     log.info(f"Applicant {uid} checked in by {associate.uid}")
 
+async def add_participant_to_queue(uid: str, associate: User) -> None:
+    """Add waitlisted participant to queue at IrvineHacks"""
+    record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": uid, "roles": {"$exists": True}}, ["status", "decision", "roles"]
+    )
+
+    if not record:
+        raise ValueError("No application record found.")
+    
+    if Role.HACKER not in record.get("roles", []):
+        raise ValueError(f'Applicant is a {record.get("roles", "")}, not a hacker.')
+    
+    if record.get("decision") == Decision.ACCEPTED:
+        raise ValueError(f'Applicant decision is accepted and should be checked in. Not eligible to be added to the queue.')
+    elif record.get("decision") == Decision.REJECTED:
+        raise ValueError(f'Applicant decision is rejected. Not eligible to be at the hackathon.')
+    
+    if record.get("status", "") == Status.ATTENDING:
+        raise ValueError(f'Participant has checked in. Not eligible to be added to the queue.')
+    elif record.get("status", "") != Status.WAIVER_SIGNED:
+        raise ValueError(f'Applicant status is {record.get("status")}. Not eligible to be added to the queue.')
+
+    update_status = await mongodb_handler.raw_update_one(
+        Collection.USERS,
+        {"_id": uid},
+        {"$set": {"status": Status.QUEUED}}
+    )
+
+    if not update_status:
+        log.info(f"{uid} has been queued before.")
+
+    await mongodb_handler.raw_update_one(
+        Collection.SETTINGS,
+        {"_id": "queue"},
+        {"$push": {"users_queue": uid}},
+        upsert=True,
+    )
+
+    log.info(f"Applicant {uid} added to queue by {associate.uid}")
 
 async def confirm_attendance_outside_participants(uid: str, director: User) -> None:
     """Update status from WAIVER_SIGNED to ATTENDING for outside participants."""

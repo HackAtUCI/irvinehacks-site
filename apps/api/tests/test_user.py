@@ -45,7 +45,12 @@ def test_no_identity_when_unauthenticated() -> None:
     """Test that identity is empty when not authenticated."""
     res = client.get("/me")
     data = res.json()
-    assert data == {"uid": None, "status": None, "roles": [], "decision": None,}
+    assert data == {
+        "uid": None,
+        "status": None,
+        "roles": [],
+        "decision": None,
+    }
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)

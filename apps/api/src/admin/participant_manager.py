@@ -89,7 +89,9 @@ async def check_in_participant(uid: str, associate: User) -> None:
     record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
         Collection.USERS, {"_id": uid, "roles": {"$exists": True}}, ["status"]
     )
-    if not record or record.get("status", "") not in (
+    if not record:
+        raise ValueError("No application record found.")
+    elif record.get("status", "") not in (
         Status.ATTENDING,
         Status.CONFIRMED,
     ):
@@ -120,7 +122,10 @@ async def add_participant_to_queue(uid: str, associate: User) -> None:
         ["status", "decision", "roles"],
     )
 
-    if not record:
+    roles = record.get("roles")
+    if not isinstance(roles, list):
+        roles = []
+    if Role.HACKER not in roles:
         raise ValueError("No application record found.")
     if Role.HACKER not in record.get("roles", []):
         raise ValueError(f'Applicant is a {record.get("roles", "")}, not a hacker.')
@@ -129,9 +134,7 @@ async def add_participant_to_queue(uid: str, associate: User) -> None:
     elif record.get("decision") == Decision.REJECTED:
         raise ValueError("Applicant decision is rejected. Not eligible for hackathon.")
     if record.get("status", "") == Status.ATTENDING:
-        raise ValueError(
-            "Participant has checked in. Not eligible for queue."
-        )
+        raise ValueError("Participant has checked in. Not eligible for queue.")
     elif record.get("status", "") != Status.WAIVER_SIGNED:
         raise ValueError("Participant has checked in. Not eligible for queue.")
 

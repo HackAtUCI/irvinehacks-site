@@ -122,12 +122,11 @@ async def add_participant_to_queue(uid: str, associate: User) -> None:
         ["status", "decision", "roles"],
     )
 
-    roles = record.get("roles")
-    if not isinstance(roles, list):
-        roles = []
-    if Role.HACKER not in roles:
+    if record is None:
         raise ValueError("No application record found.")
-    if Role.HACKER not in record.get("roles", []):
+    roles = record.get("roles")
+
+    if Role.HACKER not in roles:
         raise ValueError(f'Applicant is a {record.get("roles", "")}, not a hacker.')
     if record.get("decision") == Decision.ACCEPTED:
         raise ValueError("Applicant decision is accepted and should be checked in.")

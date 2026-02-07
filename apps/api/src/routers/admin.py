@@ -536,7 +536,7 @@ async def check_in_participant(
     except RuntimeError as err:
         log.exception("During participant check-in: %s", err)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+
 
 @router.post("/queue/{uid}")
 async def add_participant_to_queue(
@@ -550,7 +550,7 @@ async def add_participant_to_queue(
         log.error(err)
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail=str(err))
     except RuntimeError as err:
-        log.exception("During participant check-in: %s", err)
+        log.exception("During participant queue: %s", err)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

@@ -58,10 +58,10 @@ def test_plain_identity_when_no_user_record(
     res = client.get("/me")
 
     mock_mongodb_handler_retrieve_one.assert_awaited_once_with(
-        Collection.USERS, {"_id": "edu.stanford.tree"}, ["roles", "status"]
+        Collection.USERS, {"_id": "edu.stanford.tree"}, ["roles", "status", "decision"]
     )
     data = res.json()
-    assert data == {"uid": "edu.stanford.tree", "status": None, "roles": []}
+    assert data == {"uid": "edu.stanford.tree", "status": None, "decision": None, "roles": []}
 
 
 @patch("services.mongodb_handler.update_one", autospec=True)

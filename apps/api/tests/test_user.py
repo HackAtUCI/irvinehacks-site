@@ -45,7 +45,7 @@ def test_no_identity_when_unauthenticated() -> None:
     """Test that identity is empty when not authenticated."""
     res = client.get("/me")
     data = res.json()
-    assert data == {"uid": None, "status": None, "roles": []}
+    assert data == {"uid": None, "status": None, "roles": [], "decision": None,}
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
@@ -132,6 +132,7 @@ def test_user_me_route_returns_correct_type(
     mock_mongodb_handler_retrieve_one.return_value = {
         "status": Status.WAIVER_SIGNED,
         "roles": [Role.VOLUNTEER],
+        "decision": None,
     }
 
     client = UserTestClient(GuestUser(email="tree@stanford.edu"), app)
@@ -142,4 +143,5 @@ def test_user_me_route_returns_correct_type(
         "uid": "edu.stanford.tree",
         "status": Status.WAIVER_SIGNED,
         "roles": [Role.VOLUNTEER],
+        "decision": None,
     }

@@ -125,21 +125,15 @@ async def add_participant_to_queue(uid: str, associate: User) -> None:
     if Role.HACKER not in record.get("roles", []):
         raise ValueError(f'Applicant is a {record.get("roles", "")}, not a hacker.')
     if record.get("decision") == Decision.ACCEPTED:
-        raise ValueError(
-            "Applicant decision is accepted and should be checked in."
-        )
+        raise ValueError("Applicant decision is accepted and should be checked in.")
     elif record.get("decision") == Decision.REJECTED:
-        raise ValueError(
-            "Applicant decision is rejected. Not eligible for hackathon."
-        )
+        raise ValueError("Applicant decision is rejected. Not eligible for hackathon.")
     if record.get("status", "") == Status.ATTENDING:
         raise ValueError(
             "Participant has checked in. Not eligible for queue."
         )
     elif record.get("status", "") != Status.WAIVER_SIGNED:
-        raise ValueError(
-            f'Applicant status is {record.get("status")}. Not eligible for queue.'
-        )
+        raise ValueError("Participant has checked in. Not eligible for queue.")
 
     update_status = await mongodb_handler.raw_update_one(
         Collection.USERS, {"_id": uid}, {"$set": {"status": Status.QUEUED}}

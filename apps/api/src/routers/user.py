@@ -53,6 +53,7 @@ HACKATHON_EXPERIENCE_SCORE_MAP = {
 class IdentityResponse(BaseModel):
     uid: Union[str, None] = None
     status: Union[str, None] = None
+    decision: str | None = None
     roles: list[Role] = []
 
 
@@ -379,7 +380,7 @@ async def rsvp(
     elif user_record["status"] == Status.CONFIRMED:
         new_status = Status.WAIVER_SIGNED
     elif user_record["status"] == Status.ATTENDING:
-        OInew_status = Status.WAITLISTED
+        new_status = Status.WAITLISTED
     else:
         log.warning(f"User {user.uid} has not signed waiver. Status has not changed.")
         raise HTTPException(

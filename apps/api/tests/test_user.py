@@ -61,7 +61,12 @@ def test_plain_identity_when_no_user_record(
         Collection.USERS, {"_id": "edu.stanford.tree"}, ["roles", "status", "decision"]
     )
     data = res.json()
-    assert data == {"uid": "edu.stanford.tree", "status": None, "decision": None, "roles": []}
+    assert data == {
+        "uid": "edu.stanford.tree",
+        "status": None,
+        "decision": None,
+        "roles": [],
+    }
 
 
 @patch("services.mongodb_handler.update_one", autospec=True)

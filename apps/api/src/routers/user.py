@@ -53,7 +53,7 @@ HACKATHON_EXPERIENCE_SCORE_MAP = {
 class IdentityResponse(BaseModel):
     uid: Union[str, None] = None
     status: Union[str, None] = None
-    decision: str | None = None
+    decision: Union[str, None] = None
     roles: list[Role] = []
 
 

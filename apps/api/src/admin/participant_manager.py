@@ -117,7 +117,7 @@ async def add_participant_to_queue(uid: str, associate: User) -> None:
     record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
         Collection.USERS,
         {"_id": uid, "roles": {"$exists": True}},
-        ["status", "decision", "roles"]
+        ["status", "decision", "roles"],
     )
 
     if not record:
@@ -126,20 +126,19 @@ async def add_participant_to_queue(uid: str, associate: User) -> None:
         raise ValueError(f'Applicant is a {record.get("roles", "")}, not a hacker.')
     if record.get("decision") == Decision.ACCEPTED:
         raise ValueError(
-            f"Applicant decision is accepted and should be checked in. Not eligible to be added to the queue."
+            "Applicant decision is accepted and should be checked in."
         )
     elif record.get("decision") == Decision.REJECTED:
         raise ValueError(
-            f"Applicant decision is rejected. Not eligible to be at the hackathon."
+            "Applicant decision is rejected. Not eligible for hackathon."
         )
-    
     if record.get("status", "") == Status.ATTENDING:
         raise ValueError(
-            "Participant has checked in. Not eligible to be added to the queue."
+            "Participant has checked in. Not eligible for queue."
         )
     elif record.get("status", "") != Status.WAIVER_SIGNED:
         raise ValueError(
-            f'Applicant status is {record.get("status")}. Not eligible to be added to the queue.'
+            f'Applicant status is {record.get("status")}. Not eligible for queue.'
         )
 
     update_status = await mongodb_handler.raw_update_one(

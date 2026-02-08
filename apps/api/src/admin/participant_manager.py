@@ -1,6 +1,6 @@
 from datetime import datetime
 from logging import getLogger
-from typing import Any, Optional, Union
+from typing import Any, cast, Optional, Union
 
 from typing_extensions import TypeAlias
 
@@ -125,13 +125,12 @@ async def add_participant_to_queue(uid: str, associate: User) -> None:
 
     if record is None:
         raise ValueError("No application record found.")
-    
     status = record.get("status")
     decision = record.get("decision")
-    roles = record.get("roles")
+    roles = cast(list[Role], record.get("roles"))
 
     if Role.HACKER not in roles:
-        raise ValueError(f'Applicant is a {roles}, not a hacker.')
+        raise ValueError(f"Applicant is a {roles}, not a hacker.")
     if decision == Decision.ACCEPTED:
         raise ValueError("Applicant decision is accepted and should be checked in.")
     elif decision == Decision.REJECTED:

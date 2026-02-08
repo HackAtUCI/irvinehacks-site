@@ -1,7 +1,7 @@
 import axios from "axios";
 import useSWR from "swr";
 
-import { ParticipantRole, Status, Uid } from "@/lib/userRecord";
+import { Decision, ParticipantRole, Status, Uid } from "@/lib/userRecord";
 
 export type Checkin = [string, Uid];
 
@@ -12,6 +12,7 @@ export interface Participant {
 	roles: ReadonlyArray<ParticipantRole>;
 	checkins: Checkin[];
 	status: Status;
+	decision?: Decision;
 	badge_number: string | null;
 }
 

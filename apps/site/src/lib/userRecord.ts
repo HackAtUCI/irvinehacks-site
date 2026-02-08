@@ -54,11 +54,11 @@ export enum PostAcceptedStatus {
 	Signed = "WAIVER_SIGNED",
 	Confirmed = "CONFIRMED",
 	Attending = "ATTENDING",
-	Waitlisted = "WAITLISTED",
-	Accepted = "ACCEPTED",
 	Queued = "QUEUED",
 }
 
 /** All of the different possible status values. */
 export const Status = { ...ReviewStatus, ...Decision, ...PostAcceptedStatus };
 export type Status = ReviewStatus | Decision | PostAcceptedStatus;
+
+export const ReviewDecision = { ...Decision };

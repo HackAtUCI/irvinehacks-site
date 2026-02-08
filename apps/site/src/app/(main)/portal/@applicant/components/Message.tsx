@@ -1,4 +1,4 @@
-import { Status } from "@/lib/userRecord";
+import { PostAcceptedStatus, Status } from "@/lib/userRecord";
 
 interface MessageProps {
 	status: Status;
@@ -47,19 +47,9 @@ function Message({ status }: MessageProps) {
 		case Status.Accepted:
 		case Status.Signed:
 		case Status.Confirmed:
-		case Status.Attending: {
+		case Status.Attending:
+		case PostAcceptedStatus.Queued: {
 			message = <></>;
-			break;
-		}
-
-		case Status.Void: {
-			message = (
-				<p className="mt-4">
-					Unfortunately, you are not able to RSVP for IrvineHacks at this time
-					and will not be able to come to the event. However, we would love to
-					see you apply again next year!
-				</p>
-			);
 			break;
 		}
 

@@ -5,14 +5,22 @@
 	margin-right: auto;
 	background-position: center;
 	background-repeat: no-repeat;
-	max-width: 36rem;
+	max-width: 40rem;
+
+	// Mobile: turquoise border, no background frame
+	border: 2px solid var(--color-turquoise);
+	border-radius: 1rem;
 
 	@media (min-width: 1024px) {
-		max-width: 56rem;
+		max-width: 80rem;
+		border: none;
+		border-radius: 0;
+		background-image: var(--bg-image);
+		background-size: 100% 100%;
 	}
 
 	@media (min-width: 1280px) {
-		max-width: 64rem;
+		max-width: 90rem;
 	}
 }
 
@@ -23,25 +31,28 @@
 .bronze,
 .sponsored-prize,
 .in-kind {
-	max-width: 100px;
-	max-height: 100px;
+	max-width: 250px;
+	max-height: 250px;
 }
 
 // Desktop
 @media (min-width: 1024px) {
-	.platinum,
+	.platinum {
+		max-width: 400px;
+		max-height: 400px;
+	}
 	.gold {
-		max-width: 200px;
-		max-height: 200px;
+		max-width: 300px;
+		max-height: 300px;
 	}
 	.silver {
-		max-width: 150px;
-		max-height: 150px;
+		max-width: 250px;
+		max-height: 250px;
 	}
 	.bronze,
 	.sponsored-prize,
 	.in-kind {
-		max-width: 100px;
-		max-height: 100px;
+		max-width: 200px;
+		max-height: 200px;
 	}
 }

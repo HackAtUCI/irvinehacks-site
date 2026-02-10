@@ -1,8 +1,9 @@
 import { getSponsors } from "./getSponsors";
 import SponsorTier from "./components/SponsorTier/SponsorTier";
-import styles from "./Sponsors.module.scss";
 
 import NeonSectionFrame from "@/assets/images/neon-section-frame.svg";
+
+import styles from "./Sponsors.module.scss";
 
 // Only GlenAir in silver for IH 2026, but they don't want logo shown
 const TIERS = [
@@ -19,16 +20,17 @@ const Sponsors = async () => {
 
 	return (
 		<section className="container py-24 relative mx-auto w-full">
-			<h2 className="text-center text-2xl sm:text-4xl lg:text-[3rem] font-display text-pink -mb-4">
+			<h2 className="text-center text-2xl sm:text-4xl lg:text-[3rem] font-display text-pink mb-4 md:-mb-4">
 				Sponsors
 			</h2>
 
 			<div
 				className={styles.sponsorsContainer}
-				style={{
-					backgroundImage: `url(${NeonSectionFrame.src})`,
-					backgroundSize: "100% 100%",
-				}}
+				style={
+					{
+						"--bg-image": `url(${NeonSectionFrame.src})`,
+					} as React.CSSProperties
+				}
 			>
 				<div
 					style={{

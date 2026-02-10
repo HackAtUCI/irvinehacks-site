@@ -20,7 +20,7 @@ const Sponsors = async () => {
 
 	return (
 		<section className="container py-24 relative mx-auto w-full">
-			<h2 className="text-center text-2xl sm:text-4xl lg:text-[3rem] font-display text-pink mb-4 md:-mb-4">
+			<h2 className="text-center text-2xl sm:text-4xl lg:text-[3rem] font-display text-pink mb-4 lg:-mb-4">
 				Sponsors
 			</h2>
 
@@ -42,7 +42,7 @@ const Sponsors = async () => {
 				>
 					<div className="flex gap-4 items-center justify-center mt-8 mb-8 px-10 sm:px-4">
 						<div className="h-[2px] bg-white flex-grow max-w-[2rem] self-center" />
-						<p className="text-[0.5rem] sm:text-xs lg:text-sm text-center shrink-0 my-0 max-w-full">
+						<p className="text-center shrink-0 my-0 max-w-full lg:mt-16">
 							Interested in sponsoring IrvineHacks 2026? Email us at{" "}
 							<a href="mailto:hack@uci.edu" className="underline">
 								hack@uci.edu

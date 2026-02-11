@@ -36,13 +36,13 @@ const Sponsors = async () => {
 					style={{
 						paddingLeft: "clamp(2.25rem, 8vw, 4rem)",
 						paddingRight: "clamp(2.25rem, 8vw, 4rem)",
-						paddingTop: "clamp(4.25rem, 14vw, 5.5rem)",
-						paddingBottom: "clamp(3.75rem, 10vw, 5rem)",
+						paddingTop: "clamp(1.25rem, 2rem, 5.5rem)",
 					}}
+					className="pb-16 lg:pb-64"
 				>
 					<div className="flex gap-4 items-center justify-center mt-8 mb-8 px-10 sm:px-4">
 						<div className="h-[2px] bg-white flex-grow max-w-[2rem] self-center" />
-						<p className="text-center shrink-0 my-0 max-w-full lg:mt-16">
+						<p className="text-center shrink-0 my-0 max-w-full lg:mt-32">
 							Interested in sponsoring IrvineHacks 2026? Email us at{" "}
 							<a href="mailto:hack@uci.edu" className="underline">
 								hack@uci.edu

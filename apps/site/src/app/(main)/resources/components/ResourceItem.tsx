@@ -30,7 +30,7 @@ export default function ResourceItem({
 			<div className="h-full py-6 xl:p-6">
 				{/* eslint-disable-next-line @next/next/no-img-element*/}
 				<img
-					className="pointer-events-none w-[90px] h-[90px] xl:w-[130px] xl:h-[130px]"
+					className="pointer-events-none w-[90px] h-[90px] xl:w-[130px] xl:h-[130px] object-contain"
 					src={resourceIconUrl}
 					alt={title}
 				/>

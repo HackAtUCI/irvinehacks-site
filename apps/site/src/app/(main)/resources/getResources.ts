@@ -43,7 +43,7 @@ export const getResources = cache(async () => {
 						_updatedAt,
 						_rev,
 						'_type': _type,
-						link,
+						'link': coalesce(pdfFile.asset->url, link) + coalesce(linkFragment, ""),
 						title,
 						'resourceIconUrl': coalesce(icon.asset->url, ""),
 						resourceType

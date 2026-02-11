@@ -2,7 +2,7 @@ import {
 	Landing,
 	ChooseCharacter,
 	FAQ,
-	// Sponsors,
+	Sponsors,
 	// Partners,
 	// Organizers,
 } from "./sections";
@@ -21,7 +21,7 @@ export default function Home() {
 			<Landing />
 			<ChooseCharacter />
 			<FAQ />
-			{/* <Sponsors /> */}
+			<Sponsors />
 			{/* <Partners /> */}
 			{/* <Organizers /> */}
 		</>

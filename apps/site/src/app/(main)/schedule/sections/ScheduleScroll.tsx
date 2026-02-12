@@ -59,9 +59,7 @@ export default function ScheduleScroll({
 					ref={scheduleContainerRef}
 				>
 					<div
-						className={clsx(
-							"top-0 h-full min-w-full w-fit flex gap-16 px-28",
-						)}
+						className={clsx("top-0 h-full min-w-full w-fit flex gap-16 px-28")}
 						ref={scheduleBarRef}
 					>
 						{weekdays.map((weekday, i) => {

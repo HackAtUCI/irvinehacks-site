@@ -92,7 +92,7 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 		const index = allEvents.findIndex(
 			(event) =>
 				event.title === selectedEvent.title &&
-				event.startTime.getTime() === selectedEvent.startTime.getTime()
+				event.startTime.getTime() === selectedEvent.startTime.getTime(),
 		);
 
 		return index >= 0 ? index : 0;
@@ -187,10 +187,7 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 
 		return allEvents.filter(
 			event =>
-				getEventDate(
-					event.startTime
-				).getTime() ===
-				selectedEventDay.getTime()
+				getEventDate(event.startTime).getTime() === selectedEventDay.getTime()
 		);
 	}, [allEvents, selectedEventDay]);
 
@@ -203,7 +200,7 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 				selectedEventDay={selectedEventDay}
 				setSelectedEventDay={(day: Date) => {
 					const index = allEvents.findIndex(
-						event =>
+						(event) =>
 							getEventDate(event.startTime).getTime() === day.getTime(),
 					);
 
@@ -233,30 +230,21 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 
 				{/* Mobile Carousel */}
 				<div className="mobile-carousel-wrapper lg:hidden">
-					<div
-						ref={carouselRef}
-						className="mobile-carousel"
-					>
-						{allEvents.map(
-							(event, index) => (
-								<div
-									key={`${event.title}-${event.startTime.toISOString()}`}
-									className={`mobile-carousel-item ${index === activeIndex
-										? "active"
-										: ""
-										}`}
-								>
-									<EventCard
-										now={now}
-										isHappening={
-											event.startTime <= now &&
-											event.endTime >= now
-										}
-										{...event}
-									/>
-								</div>
-							)
-						)}
+					<div ref={carouselRef} className="mobile-carousel">
+						{allEvents.map((event, index) => (
+							<div
+								key={`${event.title}-${event.startTime.toISOString()}`}
+								className={`mobile-carousel-item ${
+									index === activeIndex ? "active" : ""
+								}`}
+							>
+								<EventCard
+									now={now}
+									isHappening={event.startTime <= now && event.endTime >= now}
+									{...event}
+								/>
+							</div>
+						))}
 					</div>
 				</div>
 

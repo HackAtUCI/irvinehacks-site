@@ -72,7 +72,7 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 
 	const currentEvent = useMemo(() => {
 		return allEvents.find(
-			event =>
+			(event) =>
 				event.startTime.getTime() <= now.getTime() &&
 				event.endTime.getTime() >= now.getTime(),
 		);
@@ -90,10 +90,9 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 		if (!selectedEvent) return 0;
 
 		const index = allEvents.findIndex(
-			event =>
+			(event) =>
 				event.title === selectedEvent.title &&
-				event.startTime.getTime() ===
-				selectedEvent.startTime.getTime()
+				event.startTime.getTime() === selectedEvent.startTime.getTime()
 		);
 
 		return index >= 0 ? index : 0;
@@ -205,7 +204,7 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 				setSelectedEventDay={(day: Date) => {
 					const index = allEvents.findIndex(
 						event =>
-							getEventDate(event.startTime).getTime() === day.getTime()
+							getEventDate(event.startTime).getTime() === day.getTime(),
 					);
 
 					if (index !== -1) {

@@ -140,7 +140,7 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 				const carouselCenter = carouselRect.left + carouselRect.width / 2;
 
 				const items = Array.from(
-					carousel.querySelectorAll(".mobile-carousel-item")
+					carousel.querySelectorAll(".mobile-carousel-item"),
 				);
 
 				let closestIndex = 0;

@@ -505,7 +505,7 @@ async def _process_batch(
     uids: list[str] = [record["_id"] for record in batch]
     log.info(f"Setting {application_type}s {','.join(uids)} as {decision}")
     ok = await mongodb_handler.update(
-        Collection.USERS, {"_id": {"$in": uids}}, {"status": decision}
+        Collection.USERS, {"_id": {"$in": uids}}, {"decision": decision}
     )
     if not ok:
         raise RuntimeError("gg wp")

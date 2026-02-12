@@ -379,8 +379,6 @@ async def rsvp(
         new_status = Status.CONFIRMED
     elif user_record["status"] == Status.CONFIRMED:
         new_status = Status.WAIVER_SIGNED
-    elif user_record["status"] == Status.ATTENDING:
-        new_status = Status.WAITLISTED
     else:
         log.warning(f"User {user.uid} has not signed waiver. Status has not changed.")
         raise HTTPException(

@@ -91,6 +91,7 @@ async def check_in_participant(uid: str, associate: User) -> None:
         Collection.USERS, {"_id": uid, "roles": {"$exists": True}}, ["status"]
     )
     if not record:
+        # Error message ties to exception raised in routers/admin.py
         raise ValueError("No application record found.")
     elif record.get("status", "") not in (
         Status.ATTENDING,

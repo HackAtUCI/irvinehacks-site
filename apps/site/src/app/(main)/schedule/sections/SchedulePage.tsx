@@ -48,7 +48,7 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 	const allDays = useMemo(() => {
 		const uniqueDays = new Map<number, Date>();
 
-		allEvents.forEach(event => {
+		allEvents.forEach((event) => {
 			const day = getEventDate(event.startTime);
 			uniqueDays.set(day.getTime(), day);
 		});

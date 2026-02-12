@@ -74,7 +74,7 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 		return allEvents.find(
 			event =>
 				event.startTime.getTime() <= now.getTime() &&
-				event.endTime.getTime() >= now.getTime()
+				event.endTime.getTime() >= now.getTime(),
 		);
 	}, [allEvents, now]);
 
@@ -205,15 +205,11 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 				setSelectedEventDay={(day: Date) => {
 					const index = allEvents.findIndex(
 						event =>
-							getEventDate(
-								event.startTime
-							).getTime() ===
-							day.getTime()
+							getEventDate(event.startTime).getTime() === day.getTime()
 					);
 
 					if (index !== -1) {
-						const event =
-							allEvents[index];
+						const event = allEvents[index];
 						setSelectedEvent(event);
 						scrollToIndex(index);
 					}
@@ -232,9 +228,7 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 								  }${selectedEvent.startTime.toISOString()}`
 								: ""
 						}
-						setSelectedEvent={
-							setSelectedEvent
-						}
+						setSelectedEvent={setSelectedEvent}
 					/>
 				</div>
 

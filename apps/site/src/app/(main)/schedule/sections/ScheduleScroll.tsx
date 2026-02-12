@@ -47,7 +47,6 @@ export default function ScheduleScroll({
 		}
 	}, [weekdays]);
 
-
 	return (
 		<div className="w-full flex flex-col items-center select-none gap-20 max-md:gap-5">
 			<div className="w-full flex gap-40 justify-center h-[100px] max-lg:gap-2">

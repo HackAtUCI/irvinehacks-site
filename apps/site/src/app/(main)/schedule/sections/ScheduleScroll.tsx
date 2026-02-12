@@ -3,7 +3,6 @@
 
 import clsx from "clsx";
 import { useEffect, useRef } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import getTimeAndDates from "@/lib/utils/getTimeAndDates";
 
@@ -30,19 +29,6 @@ export default function ScheduleScroll({
 				: 0,
 			behavior: "smooth",
 		});
-	}
-
-	function getCurrentDateIndex() {
-		let ind = 0;
-		for (let i = 0; i < weekdays.length; i++) {
-			if (
-				selectedEventDay &&
-				weekdays[i].getTime() === selectedEventDay.getTime()
-			)
-				ind = i;
-		}
-
-		return ind;
 	}
 
 	useEffect(() => {

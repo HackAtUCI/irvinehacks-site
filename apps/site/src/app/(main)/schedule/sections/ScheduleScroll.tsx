@@ -26,7 +26,7 @@ export default function ScheduleScroll({
 		scheduleContainerRef.current?.scrollTo({
 			left: scheduleBarRef.current
 				? scheduleBarRef.current.getBoundingClientRect().width *
-				  fixedPos[newPos]
+				fixedPos[newPos]
 				: 0,
 			behavior: "smooth",
 		});
@@ -60,7 +60,7 @@ export default function ScheduleScroll({
 			scrollTo(ind);
 		}
 	}, [weekdays]);
-	
+
 
 	return (
 		<div className="w-full flex flex-col items-center select-none gap-20 max-md:gap-5">

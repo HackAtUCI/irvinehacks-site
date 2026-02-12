@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import Arrow from "@/assets/icons/resource-arrow.svg";
-import extraBorder from "@/assets/icons/ExtraBorder.svg";
+import extraBorder from "@/assets/icons/extraBorder.svg";
 
 import ResourceItem from "./ResourceItem";
 import ResourceHeader from "./ResourceHeader";

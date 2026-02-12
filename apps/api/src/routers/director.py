@@ -2,7 +2,7 @@ import asyncio
 
 from datetime import datetime
 from logging import getLogger
-from typing import Annotated, Any, Literal, Optional, Sequence, Union
+from typing import Annotated, Any, Literal, Optional, Sequence
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, TypeAdapter, ValidationError
@@ -439,16 +439,14 @@ async def waitlist_transfer() -> None:
     records: list[dict[str, Any]] = await mongodb_handler.retrieve(
         Collection.USERS,
         {
-        "roles": Role.HACKER,
-        "status": { "$nin": [Status.CONFIRMED, Status.ATTENDING] },
-        "decision": Decision.ACCEPTED,
-    },
-    ["_id", "first_name"],
+            "roles": Role.HACKER,
+            "status": { "$nin": [Status.CONFIRMED, Status.ATTENDING] },
+            "decision": Decision.ACCEPTED,
+        },
+        ["_id", "first_name"],
     )
 
-    log.info(
-        f"Changing status of {len(records)} to {Decision.WAITLISTED}"
-    )
+    log.info(f"Changing status of {len(records)} to {Decision.WAITLISTED}")
 
     await asyncio.gather(
         *(

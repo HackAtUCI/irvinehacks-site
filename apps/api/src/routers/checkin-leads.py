@@ -38,19 +38,20 @@ RSVP_REMINDER_EMAIL_TEMPLATES: dict[
 }
 
 
-@router.post("/queue-removal", dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))])
+@router.post(
+    "/queue-removal",
+    dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
+)
 async def queue_removal() -> None:
     """Remove CONFIRMED participants that did not show up to in person check in"""
     records: list[dict[str, Any]] = await mongodb_handler.retrieve(
         Collection.USERS,
-    {
-        "roles": Role.HACKER,
-        "status": Status.CONFIRMED,
-    }
+        {
+            "roles": Role.HACKER,
+            "status": Status.CONFIRMED,
+        }
     )
-    log.info(
-        f"Changing status of {len(records)} to {Status.WAIVER_SIGNED}"
-    )
+    log.info(f"Changing status of {len(records)} to {Status.WAIVER_SIGNED}")
 
     await asyncio.gather(
         *(
@@ -60,24 +61,25 @@ async def queue_removal() -> None:
     )
 
 
-@router.post("/queue-participants", dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))])
+@router.post(
+    "/queue-participants",
+    dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
+)
 async def queue_participants() -> None:
     """Remove QUEUED participants from queue and send them email notification."""
     records = []
     num_queued = HACKER_COUNT - len(participant_manager.get_participants())
-    settings = await mongodb_handler.retrieve_one(Collection.SETTINGS, {}, ["users_queue"])
+    settings = await mongodb_handler.retrieve_one(
+        Collection.SETTINGS, {}, ["users_queue"]
+    )
     uids_to_promote = settings["users_queue"][:num_queued]
 
     await mongodb_handler.update_one(
-        Collection.SETTINGS,
-        {},
-        {"$pull": {"users_queue": {"$in": uids_to_promote}}}
+        Collection.SETTINGS, {}, {"$pull": {"users_queue": {"$in": uids_to_promote}}}
     )
 
     records = await mongodb_handler.retrieve(
-        Collection.USERS,
-        {"_id": {"$in": uids_to_promote}},
-        ["_id", "first_name"]
+        Collection.USERS, {"_id": {"$in": uids_to_promote}}, ["_id", "first_name"]
     )
 
     await asyncio.gather(
@@ -108,16 +110,19 @@ async def queue_participants() -> None:
         )
 
 
-@router.get("/close-walkins", dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))])
+@router.get(
+    "/close-walkins",
+    dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
+)
 async def close_walkins() -> None:
     """Notify queued participants that we have reached maximum capacity."""
     records: list[dict[str, Any]] = await mongodb_handler.retrieve(
         Collection.USERS,
-    {
-        "roles": Role.HACKER,
-        "status": { "$in": [Status.QUEUED, Status.WAIVER_SIGNED, Status.CONFIRMED] },
-    },
-    ["_id", "first_name"],
+        {
+            "roles": Role.HACKER,
+            "status": { "$in": [Status.QUEUED, Status.WAIVER_SIGNED, Status.CONFIRMED] },
+        },
+        ["_id", "first_name"],
     )
 
     personalizations = []
@@ -133,7 +138,7 @@ async def close_walkins() -> None:
 
     if len(records) > 0:
         await sendgrid_handler.send_email(
-            #TODO: Fix email type.
+            # TODO: Fix email type.
             Template.WAITLIST_TRANSFER_EMAIL,
             IH_SENDER,
             personalizations,

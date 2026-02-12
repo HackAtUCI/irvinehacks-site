@@ -3,8 +3,8 @@ import {
 	ChooseCharacter,
 	FAQ,
 	Sponsors,
-	Partners,
-	Organizers,
+	// Partners,
+	// Organizers,
 } from "./sections";
 
 export const revalidate = 60;
@@ -22,8 +22,8 @@ export default function Home() {
 			<ChooseCharacter />
 			<FAQ />
 			<Sponsors />
-			<Partners />
-			<Organizers />
+			{/* <Partners /> */}
+			{/* <Organizers /> */}
 		</>
 	);
 }

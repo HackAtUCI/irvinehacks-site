@@ -281,9 +281,11 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 						/>
 					</div>
 				) : (
-					<div className="w-[50%] min-h-[700px] relative flex max-lg:hidden justify-center items-center">
-						<div className="text-4xl text-center font-display">
-							No Event Selected...
+					<div className="w-[50%] min-h-[700px] relative flex max-lg:justify-center max-lg:hidden">
+						<div className="w-[90%] min-h-[700px] h-full bg-[#170f51]/50 border-[9px] border-yellow relative p-16 font-display">
+							<div className="text-4xl min-h-[600px] w-full h-full flex justify-center items-center text-center text-yellow">
+								No Event Selected...
+							</div>
 						</div>
 					</div>
 				)}

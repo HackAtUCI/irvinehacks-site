@@ -1,12 +1,13 @@
 import axios from "axios";
 
-import { Role, Uid } from "@/lib/userRecord";
+import { Role, Uid, Decision } from "@/lib/userRecord";
 import useSWR from "swr";
 
 export interface Identity {
 	uid: Uid | null;
 	roles: ReadonlyArray<Role>;
 	status: string | null;
+	decision?: Decision;
 }
 
 const fetcher = async (url: string) => {

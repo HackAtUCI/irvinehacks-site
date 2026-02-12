@@ -6,17 +6,20 @@ import Container from "@cloudscape-design/components/container";
 import Header from "@cloudscape-design/components/header";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import { PortableText } from "@portabletext/react";
-
 import PixelArtDisplay from "./PixelArtDisplay";
-import HackerApplicationSection from "@/app/admin/applicants/hackers/components/HackerApplicationSection";
+import ZotHacksHackerApplicationSection from "./ZotHacksHackerApplicationSection";
 import {
 	HackathonExperience,
 	ZotHacksHackerApplicationData,
 } from "@/lib/admin/useApplicant";
 import ScoreSection from "../../components/ScoreSection";
+import ReviewerNotes from "@/app/admin/applicants/components/ReviewerNotes";
 import UserContext from "@/lib/admin/UserContext";
 import { isDirector, isLead } from "@/lib/admin/authorization";
-import { ZothacksScoringGuidelinesType } from "./getScoringGuidelines";
+import { ZothacksHackerScoringGuidelinesType } from "./getScoringGuidelines";
+import { Review } from "@/lib/admin/useApplicant";
+import { Uid } from "@/lib/userRecord";
+import { ZotHacksHackerScoredFields } from "@/lib/detailedScores";
 
 type ZHKeys = Exclude<keyof ZotHacksHackerApplicationData, "reviews">;
 
@@ -47,14 +50,24 @@ function ZotHacksHackerApplication({
 	onResumeScore,
 	onScoreChange,
 	guidelines,
+	notes,
+	applicant,
+	onNotesChange,
+	reviews,
+	onDeleteNotes,
 }: {
 	application_data: ZotHacksHackerApplicationData;
 	onResumeScore: (
 		resumeScore: number,
 		hackathonExperienceScore: number,
 	) => void;
-	onScoreChange: (scores: object) => void;
-	guidelines: ZothacksScoringGuidelinesType;
+	onScoreChange: (scores: ZotHacksHackerScoredFields) => void;
+	guidelines: ZothacksHackerScoringGuidelinesType;
+	notes: string;
+	onNotesChange: (notes: string) => void;
+	applicant: Uid;
+	reviews: Review[];
+	onDeleteNotes: (uid: Uid, idx: number) => void;
 }) {
 	const { uid: reviewer_uid, roles } = useContext(UserContext);
 	const formattedUid = reviewer_uid?.split(".").at(-1);
@@ -124,7 +137,7 @@ function ZotHacksHackerApplication({
 		] || 0;
 
 	useEffect(() => {
-		const scoresObject: Record<string, number> = {
+		const scoresObject: ZotHacksHackerScoredFields = {
 			hackathon_experience: hackathonExperienceScore,
 		};
 
@@ -162,7 +175,7 @@ function ZotHacksHackerApplication({
 			<Container>
 				{Object.entries(ZH_HACKER_APPLICATION_SECTIONS).map(
 					([section, propsToShow]) => (
-						<HackerApplicationSection
+						<ZotHacksHackerApplicationSection
 							key={section}
 							title={section}
 							data={application_data}
@@ -261,6 +274,14 @@ function ZotHacksHackerApplication({
 				value={pixelArtScore}
 				onChange={setPixelArtScore}
 				wordLimit={100}
+			/>
+			<ReviewerNotes
+				applicant={applicant}
+				notes={notes}
+				onNotesChange={onNotesChange}
+				reviews={reviews}
+				onDeleteNotes={onDeleteNotes}
+				reviewerId={reviewer_uid}
 			/>
 		</SpaceBetween>
 	);

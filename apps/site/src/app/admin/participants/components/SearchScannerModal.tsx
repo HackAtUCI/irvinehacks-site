@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useState, useEffect } from "react";
 
 import Box from "@cloudscape-design/components/box";
 import Button from "@cloudscape-design/components/button";
@@ -17,27 +17,48 @@ function SearchScannerModal({
 	onConfirm,
 	show,
 }: SearchScannerProps) {
+	// use a key to force remount of scanner when modal reopens
+	const [scannerKey, setScannerKey] = useState(0);
+
+	// reset scanner key when modal opens to ensure fresh scanner instance
+	useEffect(() => {
+		if (show) {
+			setScannerKey((prev) => prev + 1);
+		}
+	}, [show]);
+
 	const onScanSuccess = useCallback(
 		(decodedText: string) => {
 			onConfirm(decodedText);
+			// onConfirm in parent component (ParticipantsTable) will close the modal
 		},
 		[onConfirm],
 	);
 
+	const handleDismiss = useCallback(() => {
+		onDismiss();
+	}, [onDismiss]);
+
 	return (
 		<Modal
-			onDismiss={onDismiss}
+			onDismiss={handleDismiss}
 			visible={show}
 			footer={
 				<Box float="right">
-					<Button variant="link" onClick={onDismiss}>
+					<Button variant="link" onClick={handleDismiss}>
 						Cancel
 					</Button>
 				</Box>
 			}
 			header="Scan badge"
 		>
-			{show && <BadgeScanner onSuccess={onScanSuccess} onError={() => null} />}
+			{show && (
+				<BadgeScanner
+					key={scannerKey}
+					onSuccess={onScanSuccess}
+					onError={() => null}
+				/>
+			)}
 		</Modal>
 	);
 }

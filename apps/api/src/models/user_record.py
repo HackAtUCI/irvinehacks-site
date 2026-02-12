@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Annotated, Union
+from typing import Annotated, Optional, Union
 
 from pydantic import AfterValidator, Field
 from typing_extensions import TypeAlias
@@ -39,7 +39,8 @@ class Status(str, Enum):
     WAIVER_SIGNED = "WAIVER_SIGNED"
     CONFIRMED = "CONFIRMED"
     ATTENDING = "ATTENDING"
-    VOID = "VOID"
+    WAITLISTED = "WAITLISTED"
+    QUEUED = "QUEUED"
 
 
 class UserRecord(BaseRecord):
@@ -71,6 +72,7 @@ class BareApplicant(UserRecord):
 
     roles: RoleWithApplicant
     status: ApplicantStatus
+    decision: Optional[Decision] = None
 
 
 class Applicant(BareApplicant):

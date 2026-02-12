@@ -3,7 +3,7 @@ import useSWR from "swr";
 
 import { ParticipantRole, Status, Uid, Score } from "@/lib/userRecord";
 
-export type Review = [string, Uid, Score];
+export type Review = [string, Uid, Score, string | null];
 
 // The application responses submitted by an applicant
 interface BaseApplicationData {
@@ -17,13 +17,7 @@ interface BaseApplicationData {
 }
 
 export type HackathonExperience = "first_time" | "some_experience" | "veteran";
-interface ReviewBreakdown {
-	resume: number;
-	elevator_pitch_saq: number;
-	tech_experience_saq: number;
-	learn_about_self_saq: number;
-	pixel_art_saq: number;
-}
+
 export interface ZotHacksHackerApplicationData extends BaseApplicationData {
 	school_year: string;
 	dietary_restrictions: string[];
@@ -38,57 +32,116 @@ export interface ZotHacksHackerApplicationData extends BaseApplicationData {
 	resume_url: string | null;
 	submission_time: string;
 	reviews: Review[];
-	review_breakdown: { [reviewer_uid: string]: ReviewBreakdown };
+	review_breakdown: {
+		[reviewer_uid: string]: {
+			resume: number;
+			elevator_pitch_saq: number;
+			tech_experience_saq: number;
+			learn_about_self_saq: number;
+			pixel_art_saq: number;
+		};
+	};
 	global_field_scores?: { resume?: number };
 }
 
-export interface HackerApplicationData extends BaseApplicationData {
+export interface IrvineHacksHackerApplicationData extends BaseApplicationData {
 	is_first_hackathon: boolean;
 	portfolio: string | null;
 	linkedin: string | null;
 	frq_change: string;
-	frq_video_game: string;
-	resume_url: string;
+	frq_ambition: string;
+	frq_character: string;
+	resume_url: string | null;
+	dietary_restrictions: string[];
+	allergies: string | null;
+	ih_reference: string[];
+	areas_interested: string[];
+	t_shirt_size: string;
 	submission_time: string;
 	reviews: Review[];
+	review_breakdown?: {
+		[reviewer_uid: string]: {
+			// Corresponds to general score combining resume, socials content, previous experience saq
+			previous_experience?: number;
+			frq_change?: number;
+			frq_ambition?: number;
+			frq_character?: number;
+			has_socials?: number;
+		};
+	};
+	global_field_scores?: { resume?: number };
+	character_head_index: number;
+	character_body_index: number;
+	character_feet_index: number;
+	character_companion_index: number;
 }
 
-export interface MentorApplicationData extends BaseApplicationData {
-	git_experience: string;
-	github: string | null;
-	portfolio: string | null;
+export interface IrvineHacksMentorApplicationData extends BaseApplicationData {
+	mentor_type: string[];
 	linkedin: string | null;
-	mentor_prev_experience_saq1: string | null;
-	mentor_interest_saq2: string;
-	mentor_team_help_saq3: string;
-	mentor_team_help_saq4: string;
-	resume_share_to_sponsors: boolean;
-	other_questions: string | null;
-	resume_url: string;
+	dietary_restrictions: string[];
+	allergies: string | null;
+	ih_reference: string[];
+	areas_interested: string[];
+	t_shirt_size: string;
 	submission_time: string;
 	reviews: Review[];
+	resume_url: string | null;
+	resume_share_to_sponsors: boolean;
+	friday_availability: ReadonlyArray<number>;
+	saturday_availability: ReadonlyArray<number>;
+	sunday_availability: ReadonlyArray<number>;
+	character_head_index: number;
+	character_body_index: number;
+	character_feet_index: number;
+	character_companion_index: number;
+	mentor_prev_experience_saq1: string | null;
+	// Tech mentor specific
+	github: string | null;
+	portfolio: string | null;
+
+	git_experience: string;
+	arduino_experience: string;
+
+	tech_experienced_technologies: ReadonlyArray<string>;
+	hardware_experienced_technologies: ReadonlyArray<string>;
+
+	mentor_interest_saq2: string;
+	mentor_tech_saq3: string;
+	mentor_interest_saq5: string;
+
+	// Design mentor specific
+	figma_experience: string;
+	design_experienced_tools: ReadonlyArray<string>;
+	mentor_design_saq4: string;
 }
 
 export interface VolunteerApplicationData extends BaseApplicationData {
+	t_shirt_size: string;
+	ih_reference: string[];
 	frq_volunteer: string;
-	frq_utensil: string;
+	frq_memory: string;
+	dietary_restrictions: string[];
 	allergies: string | null;
-	extra_questions: string | null;
-	other_questions: string | null;
+	frq_volunteer_allergy: string | null;
 	friday_availability: ReadonlyArray<number>;
 	saturday_availability: ReadonlyArray<number>;
 	sunday_availability: ReadonlyArray<number>;
 	submission_time: string;
 	reviews: Review[];
+	character_head_index: number;
+	character_body_index: number;
+	character_feet_index: number;
+	character_companion_index: number;
 }
 
-export type HackerApplicationQuestion = Exclude<
-	keyof HackerApplicationData,
+export type IrvineHacksHackerApplicationQuestion = Exclude<
+	keyof IrvineHacksHackerApplicationData,
 	"reviews"
 >;
 
-export type MentorApplicationQuestion = Exclude<
-	keyof MentorApplicationData,
+export type IrvineHacksMentorApplicationQuestion = Exclude<
+	keyof IrvineHacksMentorApplicationData,
 	"reviews"
 >;
 
@@ -103,8 +156,8 @@ export type ZotHacksHackerApplicationQuestion = Exclude<
 >;
 
 type ApplicationData =
-	| HackerApplicationData
-	| MentorApplicationData
+	| IrvineHacksHackerApplicationData
+	| IrvineHacksMentorApplicationData
 	| VolunteerApplicationData
 	| ZotHacksHackerApplicationData;
 
@@ -135,16 +188,29 @@ function useApplicant(
 		[string, string, Uid]
 	>(["/api/admin/applicant/", applicationType, uid], fetcher);
 
-	async function submitReview(uid: Uid, score: number) {
-		await axios.post("/api/admin/review", { applicant: uid, score: score });
+	async function submitReview(
+		uid: Uid,
+		score: number,
+		notes: string | null = null,
+	) {
+		await axios.post("/api/admin/review", {
+			applicant: uid,
+			score: score,
+			notes: notes,
+		});
 		// TODO: provide success status to display in alert
 		mutate();
 	}
 
-	async function submitDetailedReview(uid: Uid, scores: object) {
+	async function submitDetailedReview(
+		uid: Uid,
+		scores: object,
+		notes: string | null = null,
+	) {
 		await axios.post("/api/admin/detailed-review", {
 			applicant: uid,
 			scores: scores,
+			notes: notes?.trim() || null,
 		});
 		// TODO: provide success status to display in alert
 		mutate();
@@ -156,10 +222,31 @@ function useApplicant(
 		error,
 		submitReview,
 		submitDetailedReview,
+		deleteNotes,
 	};
+
+	async function deleteNotes(uid: Uid, reviewIndex: number) {
+		await axios.delete("/api/admin/delete-notes", {
+			data: {
+				applicant: uid,
+				review_index: reviewIndex,
+			},
+		});
+		// Re-fetch the applicant to get the updated reviews
+		mutate();
+	}
 }
 
-export type submitReview = (uid: Uid, score: number) => Promise<void>;
-export type submitDetailedReview = (uid: Uid, scores: object) => Promise<void>;
+export type submitReview = (
+	uid: Uid,
+	score: number,
+	notes?: string | null,
+) => Promise<void>;
+export type submitDetailedReview = (
+	uid: Uid,
+	scores: object,
+	notes?: string | null,
+) => Promise<void>;
+export type deleteNotes = (uid: Uid, reviewIndex: number) => Promise<void>;
 
 export default useApplicant;

@@ -9,12 +9,12 @@
 	$underline-size: 2px;
 
 	font-size: 24px;
-	text-shadow: 0px 0px 20px #fffce2;
+	text-shadow: none;
 
 	// needed for underline effect to work
 	padding-bottom: 0.5rem;
 
-	background-image: linear-gradient(white, white);
+	background-image: linear-gradient(#e5f200, #e5f200);
 	background-repeat: no-repeat;
 	background-position-y: 34px;
 	background-size: 0% $underline-size;
@@ -26,9 +26,8 @@
 	&:focus,
 	&:active {
 		text-shadow:
-			0px 0px 20px #fffce2,
-			0px 0px 20px #ffc67c,
-			0px 0px 20px #fffce2;
+			0px 0px 20px #e5f200,
+			0px 0px 20px #e5f200;
 		background-size: 100% $underline-size;
 	}
 }

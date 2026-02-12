@@ -45,7 +45,12 @@ def test_no_identity_when_unauthenticated() -> None:
     """Test that identity is empty when not authenticated."""
     res = client.get("/me")
     data = res.json()
-    assert data == {"uid": None, "status": None, "roles": []}
+    assert data == {
+        "uid": None,
+        "status": None,
+        "roles": [],
+        "decision": None,
+    }
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
@@ -58,10 +63,15 @@ def test_plain_identity_when_no_user_record(
     res = client.get("/me")
 
     mock_mongodb_handler_retrieve_one.assert_awaited_once_with(
-        Collection.USERS, {"_id": "edu.stanford.tree"}, ["roles", "status"]
+        Collection.USERS, {"_id": "edu.stanford.tree"}, ["roles", "status", "decision"]
     )
     data = res.json()
-    assert data == {"uid": "edu.stanford.tree", "status": None, "roles": []}
+    assert data == {
+        "uid": "edu.stanford.tree",
+        "status": None,
+        "decision": None,
+        "roles": [],
+    }
 
 
 @patch("services.mongodb_handler.update_one", autospec=True)
@@ -104,25 +114,6 @@ def test_user_with_status_confirmed_un_rsvp_changes_status_to_waiver_signed(
 
 @patch("services.mongodb_handler.update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
-def test_user_with_status_attending_un_rsvp_changes_status_to_void(
-    mock_mongodb_handler_retrieve_one: AsyncMock,
-    mock_mongodb_handler_update_one: AsyncMock,
-) -> None:
-    """Test user with ATTENDING status has new status of VOID after RSVP."""
-    mock_mongodb_handler_retrieve_one.return_value = {"status": Status.ATTENDING}
-
-    client = UserTestClient(GuestUser(email="tree@stanford.edu"), app)
-    res = client.post("/rsvp", follow_redirects=False)
-
-    mock_mongodb_handler_update_one.assert_awaited_once_with(
-        Collection.USERS, {"_id": "edu.stanford.tree"}, {"status": Status.VOID}
-    )
-
-    assert res.status_code == 303
-
-
-@patch("services.mongodb_handler.update_one", autospec=True)
-@patch("services.mongodb_handler.retrieve_one", autospec=True)
 def test_user_with_status_accepted_un_rsvp_returns_403(
     mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_mongodb_handler_update_one: AsyncMock,
@@ -146,6 +137,7 @@ def test_user_me_route_returns_correct_type(
     mock_mongodb_handler_retrieve_one.return_value = {
         "status": Status.WAIVER_SIGNED,
         "roles": [Role.VOLUNTEER],
+        "decision": None,
     }
 
     client = UserTestClient(GuestUser(email="tree@stanford.edu"), app)
@@ -156,4 +148,5 @@ def test_user_me_route_returns_correct_type(
         "uid": "edu.stanford.tree",
         "status": Status.WAIVER_SIGNED,
         "roles": [Role.VOLUNTEER],
+        "decision": None,
     }

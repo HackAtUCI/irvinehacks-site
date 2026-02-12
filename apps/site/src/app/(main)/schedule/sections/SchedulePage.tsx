@@ -40,11 +40,7 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 	const allEvents = useMemo(() => {
 		return schedule
 			.flat()
-			.sort(
-				(a, b) =>
-					a.startTime.getTime() -
-					b.startTime.getTime()
-			);
+			.sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
 	}, [schedule]);
 
 	/* ---------------- All Unique Days ---------------- */

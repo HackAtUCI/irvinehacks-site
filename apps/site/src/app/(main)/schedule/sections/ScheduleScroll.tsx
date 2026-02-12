@@ -15,7 +15,7 @@ export default function ScheduleScroll({
 }: {
 	weekdays: Date[];
 	selectedEventDay: Date | undefined;
-	setSelectedEventDay: React.Dispatch<React.SetStateAction<Date | undefined>>;
+	setSelectedEventDay: (day: Date) => void;
 }) {
 	const scheduleBarRef = useRef<HTMLDivElement>(null);
 	const scheduleContainerRef = useRef<HTMLDivElement>(null);

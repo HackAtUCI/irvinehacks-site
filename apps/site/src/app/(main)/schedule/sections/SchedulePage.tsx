@@ -186,8 +186,8 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 		if (!selectedEventDay) return [];
 
 		return allEvents.filter(
-			event =>
-				getEventDate(event.startTime).getTime() === selectedEventDay.getTime()
+			(event) =>
+				getEventDate(event.startTime).getTime() === selectedEventDay.getTime(),
 		);
 	}, [allEvents, selectedEventDay]);
 

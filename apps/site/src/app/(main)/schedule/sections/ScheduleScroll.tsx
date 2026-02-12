@@ -25,7 +25,7 @@ export default function ScheduleScroll({
 		scheduleContainerRef.current?.scrollTo({
 			left: scheduleBarRef.current
 				? scheduleBarRef.current.getBoundingClientRect().width *
-				fixedPos[newPos]
+				  fixedPos[newPos]
 				: 0,
 			behavior: "smooth",
 		});

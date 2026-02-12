@@ -64,9 +64,7 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 		useState<EventProps | undefined>(undefined);
 
 	const selectedEventDay = useMemo(() => {
-		return selectedEvent
-			? getEventDate(selectedEvent.startTime)
-			: allDays[0];
+		return selectedEvent ? getEventDate(selectedEvent.startTime) : allDays[0];
 	}, [selectedEvent, allDays]);
 
 	/* ---------------- Current Live Event ---------------- */

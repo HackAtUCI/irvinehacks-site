@@ -77,7 +77,13 @@ export default function ScheduleScroll({
 										scrollTo(i);
 									}}
 								>
-									<p className={`text-2xl flex justify-center items-center text-[var(--color-pink)] [text-shadow:0_0_16px_var(--color-pink)] ${weekday.getDate() === selectedEventDay?.getDate() ? "uppercase" : "opacity-60"}`}>
+									<p
+										className={`text-2xl flex justify-center items-center text-[var(--color-pink)] [text-shadow:0_0_16px_var(--color-pink)] ${
+											weekday.getDate() === selectedEventDay?.getDate()
+												? "uppercase"
+												: "opacity-60"
+										}`}
+									>
 										{weekdayStr}
 									</p>
 								</div>

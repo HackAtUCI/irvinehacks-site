@@ -533,9 +533,9 @@ async def check_in_participant(
         await participant_manager.check_in_participant(uid, associate)
     except ValueError as err:
         log.error(err)
-        if "record found" in err:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, detail=err)
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, detail=err)
+        if "record found" in str(err):
+            raise HTTPException(status.HTTP_404_NOT_FOUND, detail=str(err))
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
     except RuntimeError as err:
         log.exception("During participant check-in: %s", err)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)

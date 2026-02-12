@@ -60,8 +60,9 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 
 	/* ---------------- Selected Event ---------------- */
 
-	const [selectedEvent, setSelectedEvent] =
-		useState<EventProps | undefined>(undefined);
+	const [selectedEvent, setSelectedEvent] = useState<EventProps | undefined>(
+		undefined,
+	);
 
 	const selectedEventDay = useMemo(() => {
 		return selectedEvent ? getEventDate(selectedEvent.startTime) : allDays[0];

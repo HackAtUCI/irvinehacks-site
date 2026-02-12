@@ -7,7 +7,6 @@ from fastapi import APIRouter, Depends
 
 from admin import participant_manager
 from auth.authorization import require_role
-from models.ApplicationData import Decision
 from models.user_record import Role, Status
 from services import mongodb_handler, sendgrid_handler
 from services.mongodb_handler import Collection
@@ -72,6 +71,9 @@ async def queue_participants() -> None:
     settings = await mongodb_handler.retrieve_one(
         Collection.SETTINGS, {}, ["users_queue"]
     )
+    if not settings or "users_queue" not in settings:
+        log.error("Queue settings or users_queue field is missing.")
+        return
     uids_to_promote = settings["users_queue"][:num_queued]
 
     await mongodb_handler.update_one(
@@ -93,8 +95,8 @@ async def queue_participants() -> None:
     for record in records:
         personalizations.append(
             ApplicationUpdatePersonalization(
-                email=recover_email_from_uid(record["_id"]),
-                first_name=record["first_name"],
+                email=recover_email_from_uid(str(record["_id"])),
+                first_name=str(record["first_name"]),
             )
         )
 
@@ -120,7 +122,7 @@ async def close_walkins() -> None:
         Collection.USERS,
         {
             "roles": Role.HACKER,
-            "status": {"$in": [Status.QUEUED, Status.WAIVER_SIGNED, Status.CONFIRMED] },
+            "status": {"$in": [Status.QUEUED, Status.WAIVER_SIGNED, Status.CONFIRMED]},
         },
         ["_id", "first_name"],
     )

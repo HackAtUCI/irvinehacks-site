@@ -228,7 +228,9 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 						events={sidebarEvents}
 						currentTitle={
 							selectedEvent
-								? `${selectedEvent.title}${selectedEvent.startTime.toISOString()}`
+								? `${
+										selectedEvent.title
+								  }${selectedEvent.startTime.toISOString()}`
 								: ""
 						}
 						setSelectedEvent={

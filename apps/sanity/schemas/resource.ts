@@ -43,7 +43,23 @@ export default defineType({
 			name: "link",
 			title: "Link",
 			type: "url",
-			validation: (Rule) => Rule.required(),
+			validation: (Rule) => Rule.optional(),
+		}),
+		defineField({
+			name: "pdfFile",
+			title: "PDF File",
+			type: "file",
+			options: {
+				accept: ".pdf",
+			},
+			validation: (Rule) => Rule.optional(),
+		}),
+		defineField({
+			name: "linkFragment",
+			title: "URL Fragment (e.g. #page=9)",
+			type: "string",
+			description: "Optional. Add #page=9 to open PDF at a specific page.",
+			validation: (Rule) => Rule.optional(),
 		}),
 	],
 	preview: {

@@ -13,6 +13,7 @@ import {
 	isLead,
 	isMentorReviewer,
 	isVolunteerReviewer,
+	isCheckInLead,
 } from "@/lib/admin/authorization";
 
 import UserContext from "@/lib/admin/UserContext";
@@ -101,6 +102,14 @@ function AdminSidebar() {
 					href: "/admin/directors/email-sender",
 				},
 			],
+		});
+	}
+
+	if (isCheckInLead(roles)) {
+		navigationItems.splice(1, 0, {
+			type: "link",
+			text: "Check-In Leads",
+			href: "/admin/checkin-leads",
 		});
 	}
 

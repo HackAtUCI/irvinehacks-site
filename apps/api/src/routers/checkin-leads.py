@@ -1,0 +1,149 @@
+import asyncio
+
+from logging import getLogger
+from typing import Any, Literal, Sequence
+
+from fastapi import APIRouter, Depends
+
+from admin import participant_manager
+from auth.authorization import require_role
+from models.ApplicationData import Decision
+from models.user_record import Role, Status
+from services import mongodb_handler, sendgrid_handler
+from services.mongodb_handler import Collection
+from services.sendgrid_handler import (
+    ApplicationUpdatePersonalization,
+    Template,
+)
+from utils.email_handler import IH_SENDER, recover_email_from_uid
+from utils.batched import batched
+
+log = getLogger(__name__)
+
+router = APIRouter()
+
+HACKER_COUNT = 400
+
+RSVP_REMINDER_EMAIL_TEMPLATES: dict[
+    Role,
+    Literal[
+        Template.HACKER_RSVP_REMINDER,
+        Template.MENTOR_RSVP_REMINDER,
+        Template.VOLUNTEER_RSVP_REMINDER,
+    ],
+] = {
+    Role.HACKER: Template.HACKER_RSVP_REMINDER,
+    Role.MENTOR: Template.MENTOR_RSVP_REMINDER,
+    Role.VOLUNTEER: Template.VOLUNTEER_RSVP_REMINDER,
+}
+
+
+@router.post("/queue-removal", dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))])
+async def queue_removal() -> None:
+    """Remove CONFIRMED participants that did not show up to in person check in"""
+    records: list[dict[str, Any]] = await mongodb_handler.retrieve(
+        Collection.USERS,
+    {
+        "roles": Role.HACKER,
+        "status": Status.CONFIRMED,
+    }
+    )
+    log.info(
+        f"Changing status of {len(records)} to {Status.WAIVER_SIGNED}"
+    )
+
+    await asyncio.gather(
+        *(
+            _process_decision(batch, Status.WAIVER_SIGNED)
+            for batch in batched([str(record["_id"]) for record in records], 100)
+        )
+    )
+
+
+@router.post("/queue-participants", dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))])
+async def queue_participants() -> None:
+    """Remove QUEUED participants from queue and send them email notification."""
+    records = []
+    num_queued = HACKER_COUNT - len(participant_manager.get_participants())
+    settings = await mongodb_handler.retrieve_one(Collection.SETTINGS, {}, ["users_queue"])
+    uids_to_promote = settings["users_queue"][:num_queued]
+
+    await mongodb_handler.update_one(
+        Collection.SETTINGS,
+        {},
+        {"$pull": {"users_queue": {"$in": uids_to_promote}}}
+    )
+
+    records = await mongodb_handler.retrieve(
+        Collection.USERS,
+        {"_id": {"$in": uids_to_promote}},
+        ["_id", "first_name"]
+    )
+
+    await asyncio.gather(
+        *(
+            _process_decision(batch, Status.WAIVER_SIGNED)
+            for batch in batched([str(record["_id"]) for record in records], 100)
+        )
+    )
+
+    personalizations = []
+    for record in records:
+        personalizations.append(
+            ApplicationUpdatePersonalization(
+                email=recover_email_from_uid(record["_id"]),
+                first_name=record["first_name"],
+            )
+        )
+
+    log.info(f"Sending queued emails to {len(records)} hackers")
+
+    if len(records) > 0:
+        await sendgrid_handler.send_email(
+            # TODO: Update email to sendgrid
+            Template.WAITLIST_TRANSFER_EMAIL,
+            IH_SENDER,
+            personalizations,
+            True,
+        )
+
+
+@router.get("/close-walkins", dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))])
+async def close_walkins() -> None:
+    """Notify queued participants that we have reached maximum capacity."""
+    records: list[dict[str, Any]] = await mongodb_handler.retrieve(
+        Collection.USERS,
+    {
+        "roles": Role.HACKER,
+        "status": { "$in": [Status.QUEUED, Status.WAIVER_SIGNED, Status.CONFIRMED] },
+    },
+    ["_id", "first_name"],
+    )
+
+    personalizations = []
+    for record in records:
+        personalizations.append(
+            ApplicationUpdatePersonalization(
+                email=recover_email_from_uid(record["_id"]),
+                first_name=record["first_name"],
+            )
+        )
+
+    log.info(f"Sending emails to {len(records)} hackers that we are at max capacity.")
+
+    if len(records) > 0:
+        await sendgrid_handler.send_email(
+            #TODO: Fix email type.
+            Template.WAITLIST_TRANSFER_EMAIL,
+            IH_SENDER,
+            personalizations,
+            True,
+        )
+
+
+async def _process_decision(uids: Sequence[str], decision: Decision) -> None:
+    ok = await mongodb_handler.update(
+        Collection.USERS, {"_id": {"$in": uids}}, {"decision": decision}
+    )
+    if not ok:
+        raise RuntimeError("gg wp")

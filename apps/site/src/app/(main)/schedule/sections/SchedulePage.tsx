@@ -270,7 +270,9 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 				{selectedEvent ? (
 					<div className="w-[50%] relative flex max-lg:hidden lg:min-h-[700px]">
 						<EventCard
-							key={`${selectedEvent.title}-${selectedEvent.startTime.toISOString()}`}
+							key={`${
+								selectedEvent.title
+							}-${selectedEvent.startTime.toISOString()}`}
 							now={now}
 							isHappening={false}
 							{...selectedEvent}

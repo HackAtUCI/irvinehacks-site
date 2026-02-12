@@ -49,13 +49,13 @@ async def queue_removal() -> None:
         {
             "roles": Role.HACKER,
             "status": Status.CONFIRMED,
-        }
+        },
     )
     log.info(f"Changing status of {len(records)} to {Status.WAIVER_SIGNED}")
 
     await asyncio.gather(
         *(
-            _process_decision(batch, Status.WAIVER_SIGNED)
+            _process_status(batch, Status.WAIVER_SIGNED)
             for batch in batched([str(record["_id"]) for record in records], 100)
         )
     )
@@ -68,7 +68,7 @@ async def queue_removal() -> None:
 async def queue_participants() -> None:
     """Remove QUEUED participants from queue and send them email notification."""
     records = []
-    num_queued = HACKER_COUNT - len(participant_manager.get_participants())
+    num_queued = HACKER_COUNT - len(await participant_manager.get_participants())
     settings = await mongodb_handler.retrieve_one(
         Collection.SETTINGS, {}, ["users_queue"]
     )
@@ -84,7 +84,7 @@ async def queue_participants() -> None:
 
     await asyncio.gather(
         *(
-            _process_decision(batch, Status.WAIVER_SIGNED)
+            _process_status(batch, Status.WAIVER_SIGNED)
             for batch in batched([str(record["_id"]) for record in records], 100)
         )
     )
@@ -120,7 +120,7 @@ async def close_walkins() -> None:
         Collection.USERS,
         {
             "roles": Role.HACKER,
-            "status": { "$in": [Status.QUEUED, Status.WAIVER_SIGNED, Status.CONFIRMED] },
+            "status": {"$in": [Status.QUEUED, Status.WAIVER_SIGNED, Status.CONFIRMED] },
         },
         ["_id", "first_name"],
     )
@@ -146,9 +146,9 @@ async def close_walkins() -> None:
         )
 
 
-async def _process_decision(uids: Sequence[str], decision: Decision) -> None:
+async def _process_status(uids: Sequence[str], status: Status) -> None:
     ok = await mongodb_handler.update(
-        Collection.USERS, {"_id": {"$in": uids}}, {"decision": decision}
+        Collection.USERS, {"_id": {"$in": uids}}, {"status": status}
     )
     if not ok:
         raise RuntimeError("gg wp")

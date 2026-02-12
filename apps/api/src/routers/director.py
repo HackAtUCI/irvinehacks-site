@@ -440,7 +440,7 @@ async def waitlist_transfer() -> None:
         Collection.USERS,
         {
             "roles": Role.HACKER,
-            "status": { "$nin": [Status.CONFIRMED, Status.ATTENDING] },
+            "status": {"$nin": [Status.CONFIRMED, Status.ATTENDING] },
             "decision": Decision.ACCEPTED,
         },
         ["_id", "first_name"],

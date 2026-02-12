@@ -98,7 +98,7 @@ export default async function ConfirmationDetails({
 				""
 			)}
 			<strong className="text-lg text-[#FF2222]">
-				Applications are due on February 11th, 2026 at 11:59PM PST.
+				Applications are due on February 13th, 2026 at 11:59PM PST.
 			</strong>
 			<Button
 				className="text-2xl"

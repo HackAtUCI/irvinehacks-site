@@ -54,7 +54,7 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 		});
 
 		return Array.from(uniqueDays.values()).sort(
-			(a, b) => a.getTime() - b.getTime()
+			(a, b) => a.getTime() - b.getTime(),
 		);
 	}, [allEvents]);
 

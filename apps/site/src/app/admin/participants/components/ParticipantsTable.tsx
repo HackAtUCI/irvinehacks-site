@@ -34,7 +34,6 @@ interface ParticipantsTableProps {
 	participants: Participant[];
 	loading: boolean;
 	initiateCheckIn: (participant: Participant) => void;
-	initiatePromotion: (participant: Participant) => void;
 	initiateConfirm: (participant: Participant) => void;
 }
 
@@ -79,7 +78,6 @@ function ParticipantsTable({
 	participants,
 	loading,
 	initiateCheckIn,
-	initiatePromotion,
 	initiateConfirm,
 }: ParticipantsTableProps) {
 	const [preferences, setPreferences] = useState({
@@ -166,11 +164,10 @@ function ParticipantsTable({
 			<ParticipantAction
 				participant={participant}
 				initiateCheckIn={initiateCheckIn}
-				initiatePromotion={initiatePromotion}
 				initiateConfirm={initiateConfirm}
 			/>
 		),
-		[initiateCheckIn, initiatePromotion, initiateConfirm],
+		[initiateCheckIn, initiateConfirm],
 	);
 
 	const columnDefinitions: StrictColumnDefinition[] = [

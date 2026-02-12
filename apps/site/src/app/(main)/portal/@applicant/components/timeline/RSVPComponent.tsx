@@ -15,11 +15,6 @@ export const RSVPComponent = ({ status }: { status: Status }) => {
 			text: "Attendance Confirmed",
 			statusIcon: "Accepted",
 		};
-	} else if (status === Status.Void) {
-		verdict = {
-			text: "No RSVP Indicated",
-			statusIcon: "Pending",
-		};
 	}
 
 	return verdict ? (

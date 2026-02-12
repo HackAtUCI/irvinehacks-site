@@ -33,7 +33,7 @@ const statusOptions: SelectProps.Options = [
 	{ label: "Waiver Signed", value: Status.Signed },
 	{ label: "Confirmed", value: Status.Confirmed },
 	{ label: "Attending", value: Status.Attending },
-	{ label: "Void", value: Status.Void },
+	{ label: "Queued", value: Status.Queued },
 ];
 
 function ApplicantSummary() {
@@ -58,10 +58,10 @@ function ApplicantSummary() {
 		Status.Signed,
 		Status.Confirmed,
 		Status.Attending,
-		Status.Void,
+		Status.Queued,
 	].map((status) => ({
 		title: status,
-		value: summary[status] ?? 0,
+		value: (summary as Record<string, number>)[status] ?? 0,
 	}));
 
 	return (

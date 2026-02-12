@@ -1,6 +1,6 @@
 from datetime import datetime
 from logging import getLogger
-from typing import Any, Optional, Union
+from typing import Any, cast, Optional, Union
 
 from typing_extensions import TypeAlias
 
@@ -35,6 +35,7 @@ PARTICIPANT_FIELDS = [
     "last_name",
     "roles",
     "status",
+    "decision",
     "checkins",
     "badge_number",
 ]
@@ -89,12 +90,16 @@ async def check_in_participant(uid: str, associate: User) -> None:
     record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
         Collection.USERS, {"_id": uid, "roles": {"$exists": True}}, ["status"]
     )
-
-    if not record or record.get("status", "") not in (
+    if not record:
+        # Error message ties to exception raised in routers/admin.py
+        raise ValueError("No application record found.")
+    elif record.get("status", "") not in (
         Status.ATTENDING,
         Status.CONFIRMED,
     ):
-        raise ValueError
+        raise ValueError(
+            f'User is {record.get("status", "")} and can not be checked in.'
+        )
 
     new_checkin_entry: Checkin = (utc_now(), associate.uid)
 
@@ -103,12 +108,53 @@ async def check_in_participant(uid: str, associate: User) -> None:
         {"_id": uid},
         {
             "$push": {"checkins": new_checkin_entry},
+            "$set": {"status": Status.ATTENDING},
         },
     )
     if not update_status:
         raise RuntimeError(f"Could not update check-in record for {uid}.")
-
     log.info(f"Applicant {uid} checked in by {associate.uid}")
+
+
+async def add_participant_to_queue(uid: str, associate: User) -> None:
+    """Add waitlisted participant to queue at IrvineHacks"""
+    record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
+        Collection.USERS,
+        {"_id": uid, "roles": {"$exists": True}},
+        ["status", "decision", "roles"],
+    )
+
+    if record is None:
+        raise ValueError("No application record found.")
+    status = record.get("status")
+    decision = record.get("decision")
+    roles = cast(list[Role], record.get("roles"))
+
+    if Role.HACKER not in roles:
+        raise ValueError(f"Applicant is a {roles}, not a hacker.")
+    if decision == Decision.ACCEPTED:
+        raise ValueError("Applicant decision is accepted and should be checked in.")
+    elif decision == Decision.REJECTED:
+        raise ValueError("Applicant decision is rejected. Not eligible for hackathon.")
+    if status == Status.ATTENDING:
+        raise ValueError("Participant has checked in. Not eligible for queue.")
+    elif status != Status.WAIVER_SIGNED:
+        raise ValueError("Participant has not signed waiver. Not eligible for queue.")
+
+    update_status = await mongodb_handler.raw_update_one(
+        Collection.USERS, {"_id": uid}, {"$set": {"status": Status.QUEUED}}
+    )
+
+    if not update_status:
+        log.info(f"{uid} has been queued before.")
+
+    await mongodb_handler.raw_update_one(
+        Collection.SETTINGS,
+        {"_id": "queue"},
+        {"$push": {"users_queue": uid}},
+        upsert=True,
+    )
+    log.info(f"Applicant {uid} added to queue by {associate.uid}")
 
 
 async def confirm_attendance_outside_participants(uid: str, director: User) -> None:

@@ -531,10 +531,29 @@ async def check_in_participant(
     """Check in participant at IrvineHacks."""
     try:
         await participant_manager.check_in_participant(uid, associate)
-    except ValueError:
-        raise HTTPException(status.HTTP_404_NOT_FOUND)
+    except ValueError as err:
+        log.error(err)
+        if "record found" in str(err):
+            raise HTTPException(status.HTTP_404_NOT_FOUND, detail=str(err))
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(err))
     except RuntimeError as err:
         log.exception("During participant check-in: %s", err)
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@router.post("/queue/{uid}")
+async def add_participant_to_queue(
+    uid: str,
+    associate: Annotated[User, Depends(require_organizer)],
+) -> None:
+    """Add waitlisted participant to queue at IrvineHacks."""
+    try:
+        await participant_manager.add_participant_to_queue(uid, associate)
+    except ValueError as err:
+        log.error(err)
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=str(err))
+    except RuntimeError as err:
+        log.exception("During participant queue: %s", err)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

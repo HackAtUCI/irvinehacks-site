@@ -53,6 +53,7 @@ HACKATHON_EXPERIENCE_SCORE_MAP = {
 class IdentityResponse(BaseModel):
     uid: Union[str, None] = None
     status: Union[str, None] = None
+    decision: Union[str, None] = None
     roles: list[Role] = []
 
 
@@ -106,7 +107,7 @@ async def me(
     if not user:
         return IdentityResponse()
     user_record = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": user.uid}, ["roles", "status"]
+        Collection.USERS, {"_id": user.uid}, ["roles", "status", "decision"]
     )
 
     if not user_record:
@@ -378,8 +379,6 @@ async def rsvp(
         new_status = Status.CONFIRMED
     elif user_record["status"] == Status.CONFIRMED:
         new_status = Status.WAIVER_SIGNED
-    elif user_record["status"] == Status.ATTENDING:
-        new_status = Status.VOID
     else:
         log.warning(f"User {user.uid} has not signed waiver. Status has not changed.")
         raise HTTPException(

@@ -1,5 +1,5 @@
 import { TimelineComponent } from "./TimelineComponent";
-import { Status } from "@/lib/userRecord";
+import { PostAcceptedStatus, Status } from "@/lib/userRecord";
 import { StatusImageProps } from "./StatusImage";
 
 export const VerdictComponent = ({ status }: { status: Status }) => {
@@ -10,7 +10,6 @@ export const VerdictComponent = ({ status }: { status: Status }) => {
 
 	switch (status) {
 		case Status.Accepted:
-		case Status.Void:
 		case Status.Signed:
 		case Status.Confirmed:
 		case Status.Attending: {
@@ -28,7 +27,8 @@ export const VerdictComponent = ({ status }: { status: Status }) => {
 			break;
 		}
 
-		case Status.Waitlisted: {
+		case Status.Waitlisted:
+		case PostAcceptedStatus.Queued: {
 			verdict = {
 				text: "Application Waitlisted",
 				statusIcon: "Pending",

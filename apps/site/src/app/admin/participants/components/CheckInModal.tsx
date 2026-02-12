@@ -11,7 +11,7 @@ import { Participant } from "@/lib/admin/useParticipants";
 
 export interface ActionModalProps {
 	onDismiss: () => void;
-	onConfirm: (participant: Participant) => void;
+	onConfirm: (participant: Participant, type: string) => void;
 	participant: Participant | null;
 }
 
@@ -32,7 +32,10 @@ function CheckInModal({ onDismiss, onConfirm, participant }: ActionModalProps) {
 						<Button variant="link" onClick={onDismiss}>
 							Cancel
 						</Button>
-						<Button variant="primary" onClick={() => onConfirm(participant)}>
+						<Button
+							variant="primary"
+							onClick={() => onConfirm(participant, selectedType)}
+						>
 							Check In
 						</Button>
 					</SpaceBetween>
@@ -43,9 +46,11 @@ function CheckInModal({ onDismiss, onConfirm, participant }: ActionModalProps) {
 			<SpaceBetween size="m">
 				<TextContent>
 					<ul>
-						<li>Ask for a photo ID and check participant is 18+.</li>
-						<li>Have participant sign the SPFB sheet.</li>
-						<li>Fill in badge and give to participant.</li>
+						<li>
+							1. Ask for a photo ID and check participant is 18+ years old.
+						</li>
+						<li>2. Have participant sign the SPFB sheet.</li>
+						<li>3. Fill in badge and give to participant.</li>
 					</ul>
 				</TextContent>
 
@@ -56,7 +61,7 @@ function CheckInModal({ onDismiss, onConfirm, participant }: ActionModalProps) {
 				<Tiles
 					onChange={({ detail }) => setSelectedType(detail.value)}
 					value={selectedType}
-					columns={3}
+					columns={2}
 					items={[
 						{
 							label: "General Check-In",
@@ -65,10 +70,6 @@ function CheckInModal({ onDismiss, onConfirm, participant }: ActionModalProps) {
 						{
 							label: "Waitlist Queue",
 							value: "waitlisted",
-						},
-						{
-							label: "Workshop",
-							value: "workshop",
 						},
 					]}
 				/>

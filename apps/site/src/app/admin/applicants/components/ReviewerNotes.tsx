@@ -72,7 +72,14 @@ export default function ReviewerNotes({
 													</Button>
 												)}
 											</div>
-											<Box>{note}</Box>
+											<Box>
+												{note?.split("\n").map((line, i, arr) => (
+													<span key={i}>
+														{line}
+														{i !== arr.length - 1 && <br />}
+													</span>
+												))}
+											</Box>
 										</li>
 									);
 								},

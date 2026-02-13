@@ -41,7 +41,7 @@ log = getLogger(__name__)
 
 router = APIRouter()
 
-DEADLINE = datetime(2026, 2, 1, 8, 1, tzinfo=timezone.utc)
+DEADLINE = datetime(2026, 2, 14, 8, 1, tzinfo=timezone.utc)
 
 HACKATHON_EXPERIENCE_SCORE_MAP = {
     "first_time": 5,

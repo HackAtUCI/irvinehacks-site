@@ -1,13 +1,11 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 "use client";
 
-import clsx from "clsx";
 import { useEffect, useRef } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import Image from "next/image";
 
 import getTimeAndDates from "@/lib/utils/getTimeAndDates";
-
-import styles from "./ScheduleScroll.module.scss";
+import arrowTriangle from "@/assets/icons/arrow-triangle.svg";
 
 export default function ScheduleScroll({
 	weekdays,
@@ -73,80 +71,76 @@ export default function ScheduleScroll({
 		setSelectedEventDay(weekdays[nextIndex]);
 	}
 
+	if (!weekdays.length) {
+		return null;
+	}
+
+	const selectedIndex = getCurrentDateIndex();
+	const selectedWeekday = weekdays[selectedIndex];
+	const nextWeekday = weekdays[(selectedIndex + 1) % weekdays.length];
+	const selectedWeekdayStr = getTimeAndDates(selectedWeekday).day;
+	const nextWeekdayStr = getTimeAndDates(nextWeekday).day;
+
 	return (
 		<div className="w-full flex flex-col items-center select-none gap-20 max-md:gap-5">
 			<h1 className="text-5xl font-display">Schedule</h1>
 			<div className="flex gap-10 sm:hidden">
 				<div className="h-full flex items-center">
-					<ChevronLeft
-						height={40}
-						width={40}
+					<Image
+						src={arrowTriangle}
+						alt="Previous day"
+						width={60}
+						height={60}
 						onClick={() => scrollDir("left")}
-						className="cursor-pointer"
+						className="cursor-pointer scale-x-[-1]"
 					/>
 				</div>
 				<div className="h-full flex items-center">
-					<ChevronRight
-						height={40}
-						width={40}
+					<Image
+						src={arrowTriangle}
+						alt="Next day"
+						width={60}
+						height={60}
 						onClick={() => scrollDir("right")}
 						className="cursor-pointer"
 					/>
 				</div>
 			</div>
-			<div className="w-full flex gap-40 justify-center h-[100px] max-lg:gap-2">
-				<div className="h-full flex items-center max-sm:hidden">
-					<ChevronLeft
-						height={40}
-						width={40}
+			<div className="w-full flex items-center justify-between h-[120px] px-10 max-sm:hidden overflow-visible relative z-[100]">
+				<div className="flex items-center gap-2 translate-y-32 -translate-x-12 relative z-[100]">
+					<Image
+						src={arrowTriangle}
+						alt="Previous day"
+						width={60}
+						height={60}
 						onClick={() => scrollDir("left")}
-						className="cursor-pointer"
+						className="cursor-pointer relative z-[100] scale-x-[-1]"
 					/>
-				</div>
-				<div
-					className={clsx(
-						"w-[600px] h-full gap-20 font-display text-6xl overflow-auto relative max-lg:min-w-[400px] max-lg:w-[400px] max-md:text-4xl",
-						styles.background,
-						styles.hideScroll,
-					)}
-					ref={scheduleContainerRef}
-				>
-					<div
-						className={clsx(
-							"top-0 absolute h-full min-w-full w-fit flex gap-20 max-lg:left-[-2%]",
-						)}
-						ref={scheduleBarRef}
+					<span
+						className="font-display text-[#FF4DEF] text-[60px] leading-none whitespace-nowrap cursor-pointer"
+						style={{ textShadow: "0px 0px 25px #FF4DEF" }}
+						onClick={() => setSelectedEventDay(selectedWeekday)}
 					>
-						<div className="h-full w-[150px] max-lg:w-[50px]" />
-						{weekdays.map((weekday, i) => {
-							const weekdayStr = getTimeAndDates(weekday).day;
-							return (
-								<div
-									className="whitespace-nowrap cursor-pointer relative flex justify-center items-center"
-									key={weekdayStr}
-									onClick={() => {
-										setSelectedEventDay(weekday);
-										scrollTo(i);
-									}}
-								>
-									<span className="invisible font-display text-6xl">
-										{weekdayStr}
-									</span>
-									<div className="absolute w-full h-full top-0 left-0 flex justify-center items-center">
-										<span className="absolute">{weekdayStr}</span>
-									</div>
-								</div>
-							);
-						})}
-						<div className="h-full w-[100px] max-lg:w-[190px]" />
-					</div>
+						{selectedWeekdayStr}
+					</span>
 				</div>
-				<div className="h-full flex items-center max-sm:hidden">
-					<ChevronRight
-						height={40}
-						width={40}
+				<div className="flex items-center gap-20 translate-y-[104px] translate-x-12 relative z-[100]">
+					<div className="w-[160px] text-left">
+						<span
+							className="font-display text-[#FF4DEF] text-[32px] leading-none whitespace-nowrap cursor-pointer"
+							style={{ textShadow: "0px 0px 25px #FF4DEF" }}
+							onClick={() => scrollDir("right")}
+						>
+							{nextWeekdayStr}
+						</span>
+					</div>
+					<Image
+						src={arrowTriangle}
+						alt="Next day"
+						width={60}
+						height={60}
 						onClick={() => scrollDir("right")}
-						className="cursor-pointer"
+						className="cursor-pointer relative z-[100]"
 					/>
 				</div>
 			</div>

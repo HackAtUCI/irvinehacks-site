@@ -8,6 +8,7 @@ from pydantic import (
     BaseModel,
     BeforeValidator,
     ConfigDict,
+    constr,
     Discriminator,
     EmailStr,
     Field,
@@ -25,7 +26,7 @@ class Decision(str, Enum):
 
 
 Review = tuple[
-    datetime, str, float, Optional[str]
+    datetime, str, float, Optional[constr(max_length=2048)]
 ]  # (timestamp, reviewer_uid, score, notes)
 
 

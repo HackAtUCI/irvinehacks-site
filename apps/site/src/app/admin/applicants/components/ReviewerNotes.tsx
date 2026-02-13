@@ -90,7 +90,9 @@ export default function ReviewerNotes({
 				<Textarea
 					placeholder="Leave any comments for other leads to read in case there's anything of note!"
 					value={notes}
-					onChange={({ detail }) => onNotesChange(detail.value)}
+					onChange={({ detail }) => {
+						if (detail.value.length < 2048) onNotesChange(detail.value);
+					}}
 					rows={5}
 				/>
 			</SpaceBetween>

@@ -22,7 +22,7 @@ function CheckInLeads() {
 
 	const [selectedAction, setSelectedAction] =
 		useState<SelectProps.Option | null>(null);
-	const { handleUpdate, loading, message, setMessage } = useCheckInAction();
+	const { handleUpdate, isLoading, message, setMessage } = useCheckInAction();
 
 	if (!isCheckInLead(roles)) {
 		router.push("/admin/dashboard");
@@ -45,7 +45,7 @@ function CheckInLeads() {
 							selectedAction={selectedAction}
 							onActionChange={setSelectedAction}
 							onUpdate={onUpdate}
-							loading={loading}
+							isLoading={isLoading}
 							message={message}
 							onDismissMessage={() => setMessage(null)}
 						/>

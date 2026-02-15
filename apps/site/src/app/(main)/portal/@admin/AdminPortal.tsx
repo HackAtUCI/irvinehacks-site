@@ -7,7 +7,7 @@ function AdminPortal() {
 				Welcome to the Admin portal. Please visit the{" "}
 				<Link
 					href="/admin/dashboard"
-					className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+					className="font-bold text-lg text-pink hover:underline"
 				>
 					Admin Dashboard
 				</Link>

@@ -1,7 +1,7 @@
 import asyncio
 
 from logging import getLogger
-from typing import Any, Sequence
+from typing import Any, Literal, Sequence
 
 from fastapi import APIRouter, Depends
 
@@ -23,6 +23,19 @@ log = getLogger(__name__)
 router = APIRouter()
 
 HACKER_WAITLIST_MAX = 400
+
+RSVP_REMINDER_EMAIL_TEMPLATES: dict[
+    Role,
+    Literal[
+        Template.HACKER_RSVP_REMINDER,
+        Template.MENTOR_RSVP_REMINDER,
+        Template.VOLUNTEER_RSVP_REMINDER,
+    ],
+] = {
+    Role.HACKER: Template.HACKER_RSVP_REMINDER,
+    Role.MENTOR: Template.MENTOR_RSVP_REMINDER,
+    Role.VOLUNTEER: Template.VOLUNTEER_RSVP_REMINDER,
+}
 
 
 @router.post(
@@ -73,8 +86,8 @@ async def queue_participants() -> None:
     uids_to_promote = settings["users_queue"][:num_queued]
 
     await mongodb_handler.raw_update_one(
-        Collection.SETTINGS, 
-        {"_id": "queue"}, 
+        Collection.SETTINGS,
+        {"_id": "queue"},
         {"$pull": {"users_queue": {"$in": uids_to_promote}}}
     )
     records = await mongodb_handler.retrieve(

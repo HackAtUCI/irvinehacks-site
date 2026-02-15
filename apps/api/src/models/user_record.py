@@ -61,7 +61,6 @@ class UserPromotionRecord(BaseRecord):
     """
     Model for promotion logic.
     """
-    
     first_name: str = ""
 
 

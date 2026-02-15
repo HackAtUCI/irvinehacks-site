@@ -2,48 +2,49 @@ import { useState } from "react";
 import axios from "axios";
 import { SelectProps } from "@cloudscape-design/components/select";
 
+const optionEndpoints: Record<string, string> = {
+	"end-accepted-checkin": "/api/admin/checkin-leads/queue-removal",
+	"get-next-batch": "/api/admin/checkin-leads/queue-participants",
+	"notify-venue-full": "/api/admin/checkin-leads/close-walkins",
+};
+
 export function useCheckInAction() {
-	const [loading, setLoading] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
 	const [message, setMessage] = useState<{
 		type: "success" | "error";
 		text: string;
 	} | null>(null);
 
 	const handleUpdate = async (selectedAction: SelectProps.Option | null) => {
-		if (!selectedAction) return;
+		const actionValue = selectedAction?.value;
+		if (!actionValue) return;
 
-		setLoading(true);
+		const endpoint = optionEndpoints[actionValue as string];
+
+		setIsLoading(true);
 		setMessage(null);
 
 		try {
-			let endpoint = "";
-			const actionValue = selectedAction.value as string;
+			const method = endpoint.includes("close-walkins") ? "get" : "post";
 
-			if (actionValue === "end-accepted-checkin") {
-				endpoint = "/api/admin/checkin-leads/queue-removal";
-			} else if (actionValue === "get-next-batch") {
-				endpoint = "/api/admin/checkin-leads/queue-participants";
-			} else if (actionValue === "notify-venue-full") {
-				endpoint = "/api/admin/checkin-leads/close-walkins";
-			}
+			await axios[method](endpoint);
 
-			if (endpoint) {
-				const method = endpoint.includes("close-walkins") ? "get" : "post";
-				await axios[method](endpoint);
-				setMessage({
-					type: "success",
-					text: `Successfully executed: ${selectedAction.label}`,
-				});
-			}
+			setMessage({
+				type: "success",
+				text: `Successfully executed: ${selectedAction.label}`,
+			});
 		} catch (error) {
 			setMessage({
 				type: "error",
-				text: error instanceof Error ? error.message : "An error occurred",
+				text:
+					error instanceof Error
+						? error.message
+						: "Unable to update, an error occurred.",
 			});
 		} finally {
-			setLoading(false);
+			setIsLoading(false);
 		}
 	};
 
-	return { handleUpdate, loading, message, setMessage };
+	return { handleUpdate, isLoading, message, setMessage };
 }

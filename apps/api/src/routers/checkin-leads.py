@@ -1,13 +1,14 @@
 import asyncio
 
 from logging import getLogger
-from typing import Any, Literal, Sequence
+from typing import Any, Sequence
 
 from fastapi import APIRouter, Depends
 
 from admin import participant_manager
 from auth.authorization import require_role
-from models.user_record import Role, Status
+from models.user_record import Role, Status, UserPromotionRecord
+from pydantic import TypeAdapter
 from services import mongodb_handler, sendgrid_handler
 from services.mongodb_handler import Collection
 from services.sendgrid_handler import (
@@ -21,21 +22,7 @@ log = getLogger(__name__)
 
 router = APIRouter()
 
-HACKER_COUNT = 400
-
-RSVP_REMINDER_EMAIL_TEMPLATES: dict[
-    Role,
-    Literal[
-        Template.HACKER_RSVP_REMINDER,
-        Template.MENTOR_RSVP_REMINDER,
-        Template.VOLUNTEER_RSVP_REMINDER,
-    ],
-] = {
-    Role.HACKER: Template.HACKER_RSVP_REMINDER,
-    Role.MENTOR: Template.MENTOR_RSVP_REMINDER,
-    Role.VOLUNTEER: Template.VOLUNTEER_RSVP_REMINDER,
-}
-
+HACKER_WAITLIST_MAX = 400
 
 @router.post(
     "/queue-removal",
@@ -50,6 +37,11 @@ async def queue_removal() -> None:
             "status": Status.CONFIRMED,
         },
     )
+
+    if not records:
+        log.info(f"All CONFIRMED participants showed up.")
+        return
+
     log.info(f"Changing status of {len(records)} to {Status.WAIVER_SIGNED}")
 
     await asyncio.gather(
@@ -67,9 +59,9 @@ async def queue_removal() -> None:
 async def queue_participants() -> None:
     """Remove QUEUED participants from queue and send them email notification."""
     records = []
-    num_queued = HACKER_COUNT - len(await participant_manager.get_participants())
+    num_queued = HACKER_WAITLIST_MAX - len(await participant_manager.get_participants())
     settings = await mongodb_handler.retrieve_one(
-        Collection.SETTINGS, {}, ["users_queue"]
+        Collection.SETTINGS, {"_id": "queue"}, ["users_queue"]
     )
     if not settings or "users_queue" not in settings:
         log.error("Queue settings or users_queue field is missing.")
@@ -77,26 +69,28 @@ async def queue_participants() -> None:
     uids_to_promote = settings["users_queue"][:num_queued]
 
     await mongodb_handler.update_one(
-        Collection.SETTINGS, {}, {"$pull": {"users_queue": {"$in": uids_to_promote}}}
+        Collection.SETTINGS, {"_id": "queue"}, {"$pull": {"users_queue": {"$in": uids_to_promote}}}
     )
 
     records = await mongodb_handler.retrieve(
         Collection.USERS, {"_id": {"$in": uids_to_promote}}, ["_id", "first_name"]
     )
 
+    validated_records = TypeAdapter(list[UserPromotionRecord]).validate_python(records)
+
     await asyncio.gather(
         *(
             _process_status(batch, Status.WAIVER_SIGNED)
-            for batch in batched([str(record["_id"]) for record in records], 100)
+            for batch in batched([record.uid for record in validated_records], 100)
         )
     )
 
     personalizations = []
-    for record in records:
+    for record in validated_records:
         personalizations.append(
             ApplicationUpdatePersonalization(
-                email=recover_email_from_uid(str(record["_id"])),
-                first_name=str(record["first_name"]),
+                email=recover_email_from_uid(record.uid),
+                first_name=record.first_name,
             )
         )
 
@@ -104,8 +98,7 @@ async def queue_participants() -> None:
 
     if len(records) > 0:
         await sendgrid_handler.send_email(
-            # TODO: Update email to sendgrid
-            Template.WAITLIST_TRANSFER_EMAIL,
+            Template.WAITLIST_QUEUED_EMAIL,
             IH_SENDER,
             personalizations,
             True,
@@ -140,8 +133,7 @@ async def close_walkins() -> None:
 
     if len(records) > 0:
         await sendgrid_handler.send_email(
-            # TODO: Fix email type.
-            Template.WAITLIST_TRANSFER_EMAIL,
+            Template.WAITLIST_CLOSED_EMAIL,
             IH_SENDER,
             personalizations,
             True,

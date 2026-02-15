@@ -10,7 +10,7 @@ interface StatusUpdateContainerProps {
 	selectedAction: SelectProps.Option | null;
 	onActionChange: (option: SelectProps.Option | null) => void;
 	onUpdate: () => void;
-	loading: boolean;
+	isLoading: boolean;
 	message: {
 		type: "success" | "error";
 		text: string;
@@ -22,7 +22,7 @@ export default function StatusUpdateContainer({
 	selectedAction,
 	onActionChange,
 	onUpdate,
-	loading,
+	isLoading,
 	message,
 	onDismissMessage,
 }: StatusUpdateContainerProps) {
@@ -33,7 +33,7 @@ export default function StatusUpdateContainer({
 					selectedAction={selectedAction}
 					onActionChange={onActionChange}
 					onUpdate={onUpdate}
-					loading={loading}
+					loading={isLoading}
 				/>
 				{message && (
 					<Alert type={message.type} dismissible onDismiss={onDismissMessage}>

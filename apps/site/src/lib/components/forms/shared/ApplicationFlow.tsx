@@ -12,20 +12,18 @@ import getUserIdentity from "@/lib/utils/getUserIdentity";
 export const revalidate = 60;
 
 interface ApplicationFlowProps {
-	searchParams: {
-		prefaceAccepted?: string;
-	};
+	prefaceAccepted?: string;
 	applicationType: "Hacker" | "Mentor" | "Volunteer";
 	applicationURL: "/apply" | "/mentor" | "/volunteer";
 }
 
 export default async function ApplicationFlow({
-	searchParams,
+	prefaceAccepted,
 	applicationType,
 	applicationURL,
 	children,
 }: ApplicationFlowProps & PropsWithChildren) {
-	const hasAcceptedQueryParam = searchParams.prefaceAccepted === "true";
+	const hasAcceptedQueryParam = prefaceAccepted === "true";
 	const identity = await getUserIdentity();
 
 	if (identity.status !== null) {

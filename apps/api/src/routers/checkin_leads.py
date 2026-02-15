@@ -98,7 +98,7 @@ async def queue_participants() -> None:
     await asyncio.gather(
         *(
             _process_status(batch, Status.CONFIRMED)
-            for batch in batched([record.id for record in validated_records], 100)
+            for batch in batched([record.uid for record in validated_records], 100)
         )
     )
 
@@ -106,7 +106,7 @@ async def queue_participants() -> None:
     for record in validated_records:
         personalizations.append(
             ApplicationUpdatePersonalization(
-                email=recover_email_from_uid(record.id),
+                email=recover_email_from_uid(record.uid),
                 first_name=record.first_name,
             )
         )
@@ -143,7 +143,7 @@ async def close_walkins() -> None:
     for record in validated_records:
         personalizations.append(
             ApplicationUpdatePersonalization(
-                email=recover_email_from_uid(record.id),
+                email=recover_email_from_uid(record.uid),
                 first_name=record.first_name,
             )
         )

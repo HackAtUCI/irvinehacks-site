@@ -24,6 +24,7 @@ router = APIRouter()
 
 HACKER_WAITLIST_MAX = 400
 
+
 @router.post(
     "/queue-removal",
     dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
@@ -39,7 +40,7 @@ async def queue_removal() -> None:
     )
 
     if not records:
-        log.info(f"All CONFIRMED participants showed up.")
+        log.info("All CONFIRMED participants showed up.")
         return
 
     log.info(f"Changing status of {len(records)} to {Status.WAIVER_SIGNED}")
@@ -65,14 +66,17 @@ async def queue_participants() -> None:
     if not settings or "users_queue" not in settings:
         log.error("Queue settings or users_queue field is missing.")
         return
-    num_queued = min(len(settings["users_queue"]), HACKER_WAITLIST_MAX - len(await participant_manager.get_participants()))
+    num_queued = min(
+        len(settings["users_queue"]),
+        HACKER_WAITLIST_MAX - len(await participant_manager.get_participants()),
+    )
     uids_to_promote = settings["users_queue"][:num_queued]
 
     await mongodb_handler.raw_update_one(
-    Collection.SETTINGS, 
-    {"_id": "queue"}, 
-    {"$pull": {"users_queue": {"$in": uids_to_promote}}} 
-)
+        Collection.SETTINGS, 
+        {"_id": "queue"}, 
+        {"$pull": {"users_queue": {"$in": uids_to_promote}}}
+    )
     records = await mongodb_handler.retrieve(
         Collection.USERS, {"_id": {"$in": uids_to_promote}}, ["_id", "first_name"]
     )

@@ -33,14 +33,33 @@ export function useCheckInAction() {
 				type: "success",
 				text: `Successfully executed: ${selectedAction.label}`,
 			});
-		} catch (error) {
-			setMessage({
-				type: "error",
-				text:
-					error instanceof Error
-						? error.message
-						: "Unable to update, an error occurred.",
-			});
+		} catch (err) {
+			if (axios.isAxiosError(err)) {
+				const errorDetail = err.response?.data?.detail;
+
+				if (errorDetail === "QUEUE_EMPTY") {
+					setMessage({
+						type: "error",
+						text: "There are no participants waiting in the queue.",
+					});
+				} else if (errorDetail === "VENUE_FULL") {
+					setMessage({
+						type: "error",
+						text: "Cannot queue more participants: Venue is at maximum capacity.",
+					});
+				} else {
+					setMessage({
+						type: "error",
+						text: errorDetail || err.message || "An unexpected error occurred.",
+					});
+				}
+			} else {
+				setMessage({
+					type: "error",
+					text:
+						err instanceof Error ? err.message : "An unknown error occurred.",
+				});
+			}
 		} finally {
 			setIsLoading(false);
 		}

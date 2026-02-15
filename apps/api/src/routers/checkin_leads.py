@@ -3,7 +3,7 @@ import asyncio
 from logging import getLogger
 from typing import Any, Literal, Sequence
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 from admin import participant_manager
 from auth.authorization import require_role
@@ -78,10 +78,15 @@ async def queue_participants() -> None:
     if not settings or "users_queue" not in settings:
         log.error("Queue settings or users_queue field is missing.")
         return
-    num_queued = min(
-        len(settings["users_queue"]),
-        HACKER_WAITLIST_MAX - len(await participant_manager.get_participants()),
-    )
+
+    num_spots = HACKER_WAITLIST_MAX - len(await participant_manager.get_participants())
+    if len(settings["users_queue"]) == 0:
+        raise HTTPException(status_code=400, detail="QUEUE EMPTY")
+    
+    if num_spots <= 0:
+        raise HTTPException(status_code=400, detail="VENUE FULL")
+    
+    num_queued = min(len(settings["users_queue"]), num_spots)
     uids_to_promote = settings["users_queue"][:num_queued]
 
     await mongodb_handler.raw_update_one(

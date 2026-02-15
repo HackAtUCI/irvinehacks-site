@@ -2,6 +2,7 @@ from unittest.mock import AsyncMock, patch
 
 from admin import score_normalizing_handler
 
+
 def test_get_reviewer_stats() -> None:
     applications = [
         {
@@ -34,18 +35,18 @@ def test_get_normalized_scores_for_hacker_applicants() -> None:
             "_id": "app1",
             "application_data": {
                 "review_breakdown": {
-                    "bob": {"a": 10, "resume": 99}, # exclude resume
+                    "bob": {"a": 10, "resume": 99},  # exclude resume
                 }
             },
         }
     ]
 
-    stats = {"bob": {"mean": 5, "std": 5}} 
+    stats = {"bob": {"mean": 5, "std": 5}}
     normalized = score_normalizing_handler.get_normalized_scores_for_hacker_applicants(
         all_apps, stats
     )
 
-    assert normalized["app1"]["bob"] == 1.0 # z = (10-5)/5 = 1
+    assert normalized["app1"]["bob"] == 1.0  # z = (10-5)/5 = 1
 
 
 @patch("services.mongodb_handler.retrieve", autospec=True)
@@ -54,7 +55,7 @@ async def test_get_all_hacker_apps(mock_retrieve: AsyncMock) -> None:
 
     await score_normalizing_handler.get_all_hacker_apps()
 
-    mock_retrieve.assert_awaited_once() # hit DB
+    mock_retrieve.assert_awaited_once()  # hit DB
 
 
 @patch("services.mongodb_handler.bulk_update", autospec=True)

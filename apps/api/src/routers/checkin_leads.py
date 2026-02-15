@@ -59,19 +59,20 @@ async def queue_removal() -> None:
 async def queue_participants() -> None:
     """Remove QUEUED participants from queue and send them email notification."""
     records = []
-    num_queued = HACKER_WAITLIST_MAX - len(await participant_manager.get_participants())
     settings = await mongodb_handler.retrieve_one(
         Collection.SETTINGS, {"_id": "queue"}, ["users_queue"]
     )
     if not settings or "users_queue" not in settings:
         log.error("Queue settings or users_queue field is missing.")
         return
+    num_queued = min(len(settings["users_queue"]), HACKER_WAITLIST_MAX - len(await participant_manager.get_participants()))
     uids_to_promote = settings["users_queue"][:num_queued]
 
-    await mongodb_handler.update_one(
-        Collection.SETTINGS, {"_id": "queue"}, {"$pull": {"users_queue": {"$in": uids_to_promote}}}
-    )
-
+    await mongodb_handler.raw_update_one(
+    Collection.SETTINGS, 
+    {"_id": "queue"}, 
+    {"$pull": {"users_queue": {"$in": uids_to_promote}}} 
+)
     records = await mongodb_handler.retrieve(
         Collection.USERS, {"_id": {"$in": uids_to_promote}}, ["_id", "first_name"]
     )
@@ -80,7 +81,7 @@ async def queue_participants() -> None:
 
     await asyncio.gather(
         *(
-            _process_status(batch, Status.WAIVER_SIGNED)
+            _process_status(batch, Status.CONFIRMED)
             for batch in batched([record.uid for record in validated_records], 100)
         )
     )

@@ -3,9 +3,9 @@ import axios from "axios";
 import { SelectProps } from "@cloudscape-design/components/select";
 
 const optionEndpoints: Record<string, string> = {
-	"end-accepted-checkin": "/api/admin/checkin-leads/queue-removal",
-	"get-next-batch": "/api/admin/checkin-leads/queue-participants",
-	"notify-venue-full": "/api/admin/checkin-leads/close-walkins",
+	"end-accepted-checkin": "/api/checkin-leads/queue-removal",
+	"get-next-batch": "/api/checkin-leads/queue-participants",
+	"notify-venue-full": "/api/checkin-leads/close-walkins",
 };
 
 export function useCheckInAction() {

@@ -88,13 +88,15 @@ async def queue_participants() -> None:
     await mongodb_handler.raw_update_one(
         Collection.SETTINGS,
         {"_id": "queue"},
-        {"$pull": {"users_queue": {"$in": uids_to_promote}}}
+        {"$pull": {"users_queue": {"$in": uids_to_promote}}},
     )
     records = await mongodb_handler.retrieve(
         Collection.USERS, {"_id": {"$in": uids_to_promote}}, ["_id", "first_name"]
     )
 
-    validated_records = TypeAdapter(list[UserPromotionRecord]).validate_python(records)
+    validated_records = UserPromotionRecord.model_validate(records)
+
+    records = set(validated_records)
 
     await asyncio.gather(
         *(
@@ -137,6 +139,10 @@ async def close_walkins() -> None:
         },
         ["_id", "first_name"],
     )
+
+    validated_records = UserPromotionRecord.model_validate(records)
+
+    records = set(validated_records)
 
     personalizations = []
     for record in records:

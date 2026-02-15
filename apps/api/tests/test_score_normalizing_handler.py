@@ -41,7 +41,7 @@ def test_get_normalized_scores_for_hacker_applicants() -> None:
         }
     ]
 
-    stats = {"bob": {"mean": 5, "std": 5}}
+    stats = {"bob": {"mean": 5.0, "std": 5.0}}
     normalized = score_normalizing_handler.get_normalized_scores_for_hacker_applicants(
         all_apps, stats
     )

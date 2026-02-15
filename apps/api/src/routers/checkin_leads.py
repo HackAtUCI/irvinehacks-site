@@ -82,10 +82,8 @@ async def queue_participants() -> None:
     num_spots = HACKER_WAITLIST_MAX - len(await participant_manager.get_participants())
     if len(settings["users_queue"]) == 0:
         raise HTTPException(status_code=400, detail="QUEUE EMPTY")
-    
     if num_spots <= 0:
         raise HTTPException(status_code=400, detail="VENUE FULL")
-    
     num_queued = min(len(settings["users_queue"]), num_spots)
     uids_to_promote = settings["users_queue"][:num_queued]
 

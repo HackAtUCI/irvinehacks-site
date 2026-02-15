@@ -21,6 +21,8 @@ export const InfiniteMovingCards = ({
 	const scrollerRef = React.useRef<HTMLUListElement>(null);
 	const [, setStart] = useState(false);
 
+	console.log(start);
+
 	useEffect(() => {
 		if (!containerRef.current || !scrollerRef.current) return;
 

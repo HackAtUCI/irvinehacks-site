@@ -8,7 +8,6 @@ from fastapi import APIRouter, Depends
 from admin import participant_manager
 from auth.authorization import require_role
 from models.user_record import Role, Status, UserPromotionRecord
-from pydantic import TypeAdapter
 from services import mongodb_handler, sendgrid_handler
 from services.mongodb_handler import Collection
 from services.sendgrid_handler import (
@@ -94,14 +93,12 @@ async def queue_participants() -> None:
         Collection.USERS, {"_id": {"$in": uids_to_promote}}, ["_id", "first_name"]
     )
 
-    validated_records = UserPromotionRecord.model_validate(records)
-
-    records = set(validated_records)
+    validated_records = [UserPromotionRecord.model_validate(r) for r in records]
 
     await asyncio.gather(
         *(
             _process_status(batch, Status.CONFIRMED)
-            for batch in batched([record.uid for record in validated_records], 100)
+            for batch in batched([record.id for record in validated_records], 100)
         )
     )
 
@@ -109,7 +106,7 @@ async def queue_participants() -> None:
     for record in validated_records:
         personalizations.append(
             ApplicationUpdatePersonalization(
-                email=recover_email_from_uid(record.uid),
+                email=recover_email_from_uid(record.id),
                 first_name=record.first_name,
             )
         )
@@ -140,22 +137,20 @@ async def close_walkins() -> None:
         ["_id", "first_name"],
     )
 
-    validated_records = UserPromotionRecord.model_validate(records)
-
-    records = set(validated_records)
+    validated_records = [UserPromotionRecord.model_validate(r) for r in records]
 
     personalizations = []
-    for record in records:
+    for record in validated_records:
         personalizations.append(
             ApplicationUpdatePersonalization(
-                email=recover_email_from_uid(record["_id"]),
-                first_name=record["first_name"],
+                email=recover_email_from_uid(record.id),
+                first_name=record.first_name,
             )
         )
 
-    log.info(f"Sending emails to {len(records)} hackers that we are at max capacity.")
+    log.info(f"Sending emails to {len(validated_records)} hackers that we are at max capacity.")
 
-    if len(records) > 0:
+    if len(validated_records) > 0:
         await sendgrid_handler.send_email(
             Template.WAITLIST_CLOSED_EMAIL,
             IH_SENDER,

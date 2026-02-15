@@ -148,9 +148,7 @@ async def close_walkins() -> None:
             )
         )
 
-    log.info(
-        f"Sending emails to {len(validated_records)} hackers that we are full."
-    )
+    log.info(f"Sending emails to {len(validated_records)} hackers that we are full.")
 
     if len(validated_records) > 0:
         await sendgrid_handler.send_email(

@@ -211,22 +211,18 @@ def test_avg_score_with_globals_and_breakdown_one_reviewer() -> None:
         "application_data": {
             "review_breakdown": {
                 "vishok": {
-                    "resume": 0,
-                    "elevator_pitch_saq": 8,
-                    "tech_experience_saq": 7,
-                    "learn_about_self_saq": 7,
-                    "pixel_art_saq": 8,
-                    "hackathon_experience": 5,
+                    "frq_change": 15,
+                    "frq_ambition": 16,
+                    "frq_character": 15,
+                    "previous_experience": 1,
+                    "has_socials": 1,
                 },
-            },
-            "global_field_scores": {
-                "hackathon_experience": 5,
             },
         },
     }
 
     applicant_review_processor._include_avg_score_with_global_and_breakdown(record)
-    assert record["avg_score"] == 35.0
+    assert record["avg_score"] == 85.0
 
 
 def test_avg_score_with_globals_and_breakdown_no_reviewers() -> None:

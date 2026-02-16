@@ -10,6 +10,7 @@ from pymongo import DESCENDING
 from admin import applicant_review_processor, participant_manager, summary_handler
 from admin.participant_manager import Participant
 from admin.score_normalizing_handler import (
+    IH_WEIGHTING_CONFIG,
     add_normalized_scores_to_all_hacker_applicants,
 )
 from auth.authorization import require_role
@@ -126,15 +127,6 @@ class DeleteNotesRequest(BaseModel):
     # application_data.reviews array for quick lookup
     review_index: int
 
-# Dictionary mapping field names to (total_points, weight_percentage)
-# The sum of weight_percentages should be 1.0 (100%)
-IH_WEIGHTING_CONFIG = {
-    "frq_change": (20, 0.20),
-    "frq_ambition": (20, 0.25),
-    "frq_character": (20, 0.20),
-    "previous_experience": (1, 0.30),
-    "has_socials": (1, 0.05),
-}
 
 async def mentor_volunteer_applicants(
     application_type: Literal["Mentor", "Volunteer"],

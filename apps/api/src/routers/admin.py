@@ -202,10 +202,17 @@ async def hacker_applicants(
     for record in records:
         # TODO: Use different route for different avg score types.
 
-        # If we change back to old avg score for summary, like for IH, change this
-        # function back to applicant_review_processor.include_hacker_app_fields
-        # If we change to detailed avg score, like for zothacks, use this function:
-        # applicant_review_processor.include_hacker_app_fields_with_global_and_breakdown(
+        # Difference between them:
+        # include_hacker_app_fields_with_global_and_breakdown uses review_breakdown and
+        # global_field_scores as the source of truth for "most recent scores"
+
+        # include_hacker_app_fields uses reviews array as source of truth
+        # for "most recent scores"
+
+        applicant_review_processor.include_hacker_app_fields_with_global_and_breakdown(
+            record, thresholds["accept"], thresholds["waitlist"]
+        )
+        # applicant_review_processor.include_hacker_app_fields(
         #     record, thresholds["accept"], thresholds["waitlist"]
         # )
         applicant_review_processor.include_hacker_app_fields(

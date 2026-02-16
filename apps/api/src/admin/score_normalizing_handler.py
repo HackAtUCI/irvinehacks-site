@@ -10,6 +10,16 @@ from services.mongodb_handler import Collection
 
 GLOBAL_FIELDS = {"resume", "hackathon_experience"}
 
+# Dictionary mapping field names to (total_points, weight_percentage)
+# The sum of weight_percentages should be 1.0 (100%)
+IH_WEIGHTING_CONFIG = {
+    "frq_change": (20, 0.20),
+    "frq_ambition": (20, 0.25),
+    "frq_character": (20, 0.20),
+    "previous_experience": (1, 0.30),
+    "has_socials": (1, 0.05),
+}
+
 
 async def add_normalized_scores_to_all_hacker_applicants() -> None:
     """Calculates normalized scores and adds them to all hacker apps"""

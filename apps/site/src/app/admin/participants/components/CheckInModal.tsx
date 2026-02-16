@@ -43,20 +43,56 @@ function CheckInModal({ onDismiss, onConfirm, participant }: ActionModalProps) {
 			}
 			header={`Participant Name: ${participant?.first_name} ${participant?.last_name}`}
 		>
-			<SpaceBetween size="m">
-				<TextContent>
-					<ul>
-						<li>
-							1. Ask for a photo ID and check participant is 18+ years old.
-						</li>
-						<li>2. Have participant sign the SPFB sheet.</li>
-						<li>3. Fill in badge and give to participant.</li>
-					</ul>
-				</TextContent>
+			<SpaceBetween size="s">
+				<div>
+					<p>
+						<strong>General Check-in Instructions</strong>
+					</p>
+					<TextContent>
+						<ul>
+							<ol>
+								<li>
+									Ask for a photo ID and check participant is 18+ years old.
+								</li>
+								<li>Have participant sign the SPFB sheet.</li>
+								<li>Ask participant to fill in badge.</li>
+							</ol>
+						</ul>
+					</TextContent>
+				</div>
 
-				<TextContent>
-					<p>Confirm participant identity and select check-in type:</p>
-				</TextContent>
+				<div>
+					<p>
+						<strong>Queue Instructions</strong>
+					</p>
+					<TextContent>
+						<ol>
+							<li>
+								Ask for a photo ID and check participant is 18+ years old.
+							</li>
+							<li>
+								Inform participant regarding the following:
+								<ol>
+									<li>Turn on email notifications.</li>
+									<li>
+										Participants have 15 minutes to check in starting from email
+										notification sent or they will have to come in person to
+										rejoin the queue.
+									</li>
+									<li>Waitlist check in starts at 6pm.</li>
+								</ol>
+							</li>
+						</ol>
+						<hr
+							style={{
+								border: "0",
+								borderTop: "1px solid #ddd",
+								margin: "20px 0",
+							}}
+						/>
+						<p>Select check-in type:</p>
+					</TextContent>
+				</div>
 
 				<Tiles
 					onChange={({ detail }) => setSelectedType(detail.value)}

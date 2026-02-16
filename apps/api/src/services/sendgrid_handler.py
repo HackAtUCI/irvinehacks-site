@@ -73,6 +73,8 @@ ApplicationUpdateTemplates: TypeAlias = Literal[
     Template.VOLUNTEER_RSVP_REMINDER,
     Template.WAITLIST_RELEASE_EMAIL,
     Template.WAITLIST_TRANSFER_EMAIL,
+    Template.WAITLIST_QUEUED_EMAIL,
+    Template.WAITLIST_CLOSED_EMAIL,
 ]
 
 LogisticsTemplates: TypeAlias = Literal[

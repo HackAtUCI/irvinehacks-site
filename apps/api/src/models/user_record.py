@@ -57,6 +57,14 @@ class UserRecord(BaseRecord):
     roles: Annotated[tuple[Role, ...], Field(min_length=1)]
 
 
+class UserPromotionRecord(BaseRecord):
+    """
+    Model for promotion logic.
+    """
+
+    first_name: str = ""
+
+
 def has_applicant_role(val: tuple[Role, ...]) -> tuple[Role, ...]:
     if Role.APPLICANT not in val:
         raise ValueError

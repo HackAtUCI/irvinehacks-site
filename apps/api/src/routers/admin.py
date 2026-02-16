@@ -126,6 +126,15 @@ class DeleteNotesRequest(BaseModel):
     # application_data.reviews array for quick lookup
     review_index: int
 
+# Dictionary mapping field names to (total_points, weight_percentage)
+# The sum of weight_percentages should be 1.0 (100%)
+IH_WEIGHTING_CONFIG = {
+    "frq_change": (20, 0.20),
+    "frq_ambition": (20, 0.25),
+    "frq_character": (20, 0.20),
+    "previous_experience": (1, 0.30),
+    "has_socials": (1, 0.05),
+}
 
 async def mentor_volunteer_applicants(
     application_type: Literal["Mentor", "Volunteer"],
@@ -215,9 +224,6 @@ async def hacker_applicants(
         # applicant_review_processor.include_hacker_app_fields(
         #     record, thresholds["accept"], thresholds["waitlist"]
         # )
-        applicant_review_processor.include_hacker_app_fields(
-            record, thresholds["accept"], thresholds["waitlist"]
-        )
 
     try:
         return TypeAdapter(list[HackerApplicantSummary]).validate_python(records)
@@ -639,16 +645,6 @@ async def _handle_irvinehacks_detailed_scores_review(
     notes: Optional[str] = None,
 ) -> None:
     """Handle detailed scores review submission for IrvineHacks."""
-    # Dictionary mapping field names to (total_points, weight_percentage)
-    # The sum of weight_percentages should be 1.0 (100%)
-    WEIGHTING_CONFIG = {
-        "frq_change": (20, 0.20),
-        "frq_ambition": (20, 0.25),
-        "frq_character": (20, 0.20),
-        "previous_experience": (1, 0.30),
-        "has_socials": (1, 0.05),
-    }
-
     score_breakdown = scores.model_dump(exclude_none=True)
 
     # Check for overqualified auto-reject
@@ -656,7 +652,7 @@ async def _handle_irvinehacks_detailed_scores_review(
         total_score = -1000.0
     else:
         weighted_sum = 0.0
-        for field, (total_points, weight) in WEIGHTING_CONFIG.items():
+        for field, (total_points, weight) in IH_WEIGHTING_CONFIG.items():
             score_val = score_breakdown.get(field, 0)
             weighted_sum += (score_val / total_points) * weight
 

@@ -1,6 +1,9 @@
 from unittest.mock import AsyncMock, patch
 
+from pymongo import UpdateOne
+
 from admin import score_normalizing_handler
+from services.mongodb_handler import Collection
 
 
 def test_get_reviewer_stats() -> None:
@@ -64,11 +67,18 @@ async def test_update_hacker_applicants_in_collection(
 ) -> None:
     normalized_scores = {"app1": {"bob": 1.2}}
 
+    expected_operations = [
+        UpdateOne(
+            {"_id": app_id}, {"$set": {"application_data.normalized_scores": scores}}
+        )
+        for app_id, scores in normalized_scores.items()
+    ]
+
     await score_normalizing_handler.update_hacker_applicants_in_collection(
         normalized_scores
     )
 
-    mock_bulk_update.assert_awaited_once()
+    mock_bulk_update.assert_awaited_once_with(Collection.USERS, expected_operations)
 
 
 @patch.object(
@@ -89,4 +99,6 @@ async def test_add_normalized_scores_to_all_hacker_applicants(
     await score_normalizing_handler.add_normalized_scores_to_all_hacker_applicants()
 
     mock_get_all.assert_awaited_once()
-    mock_update.assert_awaited_once()
+
+    expected_normalized_scores = {"app1": {"bob": 0.0}}
+    mock_update.assert_awaited_once_with(expected_normalized_scores)

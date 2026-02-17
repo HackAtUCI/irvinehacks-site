@@ -8,7 +8,8 @@ from test_docusign_handler import SAMPLE_WEBHOOK_PAYLOAD
 
 from auth.authorization import require_accepted_applicant
 from auth.user_identity import User
-from models.ApplicationData import Decision
+
+# from models.ApplicationData import Decision
 from models.user_record import BareApplicant, Role, Status
 from routers import user
 from services import docusign_handler
@@ -18,30 +19,30 @@ app.include_router(user.router)
 
 client = TestClient(app)
 
+# TODO: Revisit when payment/api for docusign/hellosign is figured out
+# def test_accepted_user_can_request_waiver() -> None:
+#     """Test accepted applicant can request signing waiver."""
+#     uid = "edu.uci.hack"
+#     app.dependency_overrides[require_accepted_applicant] = lambda: (
+#         User(uid=uid, email="hack@uci.edu"),
+#         BareApplicant(
+#             uid=uid,
+#             first_name="Riley",
+#             last_name="Wong",
+#             roles=(Role.APPLICANT,),
+#             status=Decision.ACCEPTED,
+#         ),
+#     )
 
-def test_accepted_user_can_request_waiver() -> None:
-    """Test accepted applicant can request signing waiver."""
-    uid = "edu.uci.hack"
-    app.dependency_overrides[require_accepted_applicant] = lambda: (
-        User(uid=uid, email="hack@uci.edu"),
-        BareApplicant(
-            uid=uid,
-            first_name="Riley",
-            last_name="Wong",
-            roles=(Role.APPLICANT,),
-            status=Decision.ACCEPTED,
-        ),
-    )
+#     res = client.get("/waiver", follow_redirects=False)
 
-    res = client.get("/waiver", follow_redirects=False)
+#     assert res.status_code == 303
+#     location = res.headers["location"]
+#     assert "docusign.net" in location
+#     assert "Participant_Email=hack%40uci.edu" in location
+#     assert "Participant_UserName=Riley+Wong" in location
 
-    assert res.status_code == 303
-    location = res.headers["location"]
-    assert "docusign.net" in location
-    assert "Participant_Email=hack%40uci.edu" in location
-    assert "Participant_UserName=Riley+Wong" in location
-
-    app.dependency_overrides = {}
+#     app.dependency_overrides = {}
 
 
 def test_cannot_request_waiver_if_already_signed() -> None:

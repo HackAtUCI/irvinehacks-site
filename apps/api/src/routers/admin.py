@@ -60,6 +60,9 @@ class ApplicationDataSummary(BaseModel):
     extra_points: Optional[float] = None
     email: str
     resume_url: str
+    major: Optional[str] = None
+    linkedin: Optional[str] = None
+    reviews: list[Review] = []
 
 
 class ZotHacksApplicationDataSummary(BaseModel):
@@ -69,6 +72,9 @@ class ZotHacksApplicationDataSummary(BaseModel):
     extra_points: Optional[float] = None
     email: str
     resume_url: str
+    major: Optional[str] = None
+    linkedin: Optional[str] = None
+    reviews: list[Review] = []
 
 
 class ApplicantSummary(BaseRecord):

@@ -77,6 +77,19 @@ class ZotHacksApplicationDataSummary(BaseModel):
     reviews: list[Review] = []
 
 
+class SimplifiedApplicationDataSummary(BaseModel):
+    school: str
+    submission_time: datetime
+    reviews: list[Review] = []
+
+
+class SimplifiedApplicantSummary(BaseRecord):
+    first_name: str
+    last_name: str
+    status: str
+    application_data: SimplifiedApplicationDataSummary
+
+
 class ApplicantSummary(BaseRecord):
     first_name: str
     last_name: str
@@ -141,7 +154,7 @@ class DeleteNotesRequest(BaseModel):
 
 async def mentor_volunteer_applicants(
     application_type: Literal["Mentor", "Volunteer"],
-) -> list[ApplicantSummary]:
+) -> list[SimplifiedApplicantSummary]:
     """Get records of all mentor and volunteer applicants."""
     records: list[dict[str, object]] = await mongodb_handler.retrieve(
         Collection.USERS,
@@ -161,7 +174,7 @@ async def mentor_volunteer_applicants(
         applicant_review_processor.include_review_decision(record)
 
     try:
-        return TypeAdapter(list[ApplicantSummary]).validate_python(records)
+        return TypeAdapter(list[SimplifiedApplicantSummary]).validate_python(records)
     except ValidationError:
         raise RuntimeError("Could not parse applicant data.")
 
@@ -169,7 +182,7 @@ async def mentor_volunteer_applicants(
 @router.get("/applicants/mentors")
 async def mentor_applicants(
     user: Annotated[User, Depends(require_mentor_reviewer)],
-) -> list[ApplicantSummary]:
+) -> list[SimplifiedApplicantSummary]:
     """Get records of all mentor applicants."""
     log.info("%s requested mentor applicants", user)
 
@@ -179,7 +192,7 @@ async def mentor_applicants(
 @router.get("/applicants/volunteers")
 async def volunteer_applicants(
     user: Annotated[User, Depends(require_volunteer_reviewer)],
-) -> list[ApplicantSummary]:
+) -> list[SimplifiedApplicantSummary]:
     """Get records of all volunteer applicants."""
     log.info("%s requested volunteer applicants", user)
 

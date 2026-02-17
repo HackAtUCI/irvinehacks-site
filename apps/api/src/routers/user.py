@@ -32,6 +32,7 @@ from models.ApplicationData import (
     get_raw_mentor_discriminator_value,
 )
 from models.user_record import Applicant, BareApplicant, Role, Status
+from models.ApplicationData import Decision
 from services import docusign_handler, mongodb_handler
 from services.docusign_handler import WebhookPayload
 from services.mongodb_handler import Collection
@@ -368,7 +369,7 @@ async def rsvp(
 ) -> RedirectResponse:
     """Change user status for RSVP"""
     user_record = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": user.uid}, ["status"]
+        Collection.USERS, {"_id": user.uid}, ["status", "decision"]
     )
 
     if not user_record or "status" not in user_record:
@@ -379,6 +380,8 @@ async def rsvp(
         new_status = Status.CONFIRMED
     elif user_record["status"] == Status.CONFIRMED:
         new_status = Status.WAIVER_SIGNED
+    elif user_record["decision"] == Decision.ACCEPTED:
+        new_status = Status.CONFIRMED
     else:
         log.warning(f"User {user.uid} has not signed waiver. Status has not changed.")
         raise HTTPException(

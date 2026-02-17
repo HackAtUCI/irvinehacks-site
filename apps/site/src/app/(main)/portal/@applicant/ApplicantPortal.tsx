@@ -27,13 +27,6 @@ function Portal() {
 		if (identity && signed === "82ebb8bc-c302-4dc0-ad62-4b8b516395ce") {
 			router.push("/api/user/waiver");
 		}
-		if (identity) {
-			const status = identity.status;
-
-			if (status === null) {
-				redirect("/#apply");
-			}
-		}
 	}, [identity, signed, router]);
 
 	if (!identity) {
@@ -41,6 +34,10 @@ function Portal() {
 	}
 
 	const status = identity.status;
+
+	if (status === null) {
+		redirect("/#apply");
+	}
 
 	const roleToDisplay = identity.roles.find((role) =>
 		rolesArray.includes(role),

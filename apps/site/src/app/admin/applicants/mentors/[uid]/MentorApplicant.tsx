@@ -1,13 +1,17 @@
 import Applicant from "@/app/admin/applicants/components/Applicant";
+import { getIrvineHacksMentorScoringGuidelines } from "../components/getScoringGuidelines";
 
 interface ApplicantProps {
 	params: { uid: string };
 }
 
-function MentorApplicant({ params }: ApplicantProps) {
+async function MentorApplicant({ params }: ApplicantProps) {
 	const { uid } = params;
+	const guidelines = await getIrvineHacksMentorScoringGuidelines();
 
-	return <Applicant uid={uid} applicationType="mentor" />;
+	return (
+		<Applicant uid={uid} applicationType="mentor" guidelines={guidelines} />
+	);
 }
 
 export default MentorApplicant;

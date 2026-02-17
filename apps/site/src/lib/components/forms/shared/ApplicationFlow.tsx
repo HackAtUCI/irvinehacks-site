@@ -39,9 +39,9 @@ export default async function ApplicationFlow({
 	const deadlinePassed = hasDeadlinePassed();
 	const applicationsOpened = haveApplicationsOpened();
 	const applyBody = hasAcceptedQueryParam ? (
-		<div className="my-32">
+		<div className="w-full max-w-4xl px-4 sm:px-6 md:px-8 my-32 mx-auto">
 			<Title applicationType={applicationType} />
-			<div className="flex justify-center">{children}</div>
+			<div className="flex justify-center w-full">{children}</div>
 		</div>
 	) : (
 		<ApplyConfirm applicationURL={applicationURL} role={applicationType} />

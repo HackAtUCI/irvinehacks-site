@@ -1,35 +1,38 @@
 import React from "react";
 import Image from "next/image";
-import Checkmark from "@/assets/icons/checkmark.svg";
-import Xmark from "@/assets/icons/xmark.svg";
-import PendingDots from "@/assets/icons/pending-dots.svg";
+import PortalCheck from "@/assets/icons/portal-check.svg";
+import PortalWarning from "@/assets/icons/portal-warning.png";
+import PortalPending from "@/assets/icons/portal-pending.png";
 
 export interface StatusImageProps {
 	statusIcon: "Accepted" | "Rejected" | "Pending";
-	finished?: boolean;
 }
 
 const statusIcons = {
-	Accepted: { src: Checkmark, alt: "Confirmed checkmark" },
-	Rejected: { src: Xmark, alt: "Rejected X mark" },
-	Pending: { src: PendingDots, alt: "Pending dots" },
+	Accepted: {
+		src: PortalCheck,
+		alt: "Accepted icon",
+	},
+	Rejected: {
+		src: PortalWarning,
+		alt: "Rejected icon",
+	},
+	Pending: {
+		src: PortalPending,
+		alt: "Pending icon",
+	},
 };
 
-export const StatusImage: React.FC<StatusImageProps> = ({
-	statusIcon,
-	finished,
-}) => {
+export const StatusImage: React.FC<StatusImageProps> = ({ statusIcon }) => {
 	const { src, alt } = statusIcons[statusIcon];
 
 	return (
 		<Image
 			src={src}
 			alt={alt}
-			height={52}
-			width={52}
-			className={`mx-0 sm:mx-5 md:mx-16 p-4 sm:p-3 md:p-0 ${
-				statusIcon === "Pending" && finished ? "invert" : ""
-			}`}
+			width={120}
+			height={120}
+			className="w-16 sm:w-24 md:w-[120px] flex-shrink-0"
 		/>
 	);
 };

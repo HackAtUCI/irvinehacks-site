@@ -10,7 +10,8 @@ import Message from "./components/Message";
 import SignWaiver from "./components/SignWaiver";
 import ReturnHome from "./components/ReturnHome";
 import VerticalTimeline from "./components/timeline/VerticalTimeline";
-import BackgroundStars from "./components/BackgroundStars";
+import QRCodeComponent from "./components/QRCode";
+import AvatarDisplay from "./components/AvatarDisplay";
 
 const rolesArray = ["Mentor", "Hacker", "Volunteer"];
 
@@ -31,28 +32,42 @@ function Portal() {
 		rolesArray.includes(role),
 	);
 
-	const submittedWaiver =
-		status === Status.Signed ||
-		status === Status.Confirmed ||
-		status === Status.Attending;
+	// const submittedWaiver =
+	// 	status === Status.Signed ||
+	// 	status === Status.Confirmed ||
+	// 	status === Status.Attending;
 
-	const needsToSignWaiver = status === Status.Accepted;
+	const needsToSignWaiver =
+		status === Status.Accepted ||
+		status === Status.Confirmed ||
+		identity?.decision === Status.Accepted;
 	const rejected = status === Status.Rejected;
 
 	return (
 		<div className="relative">
-			<BackgroundStars className="left-[-15%] top-[21%]" />
 			<div className="bg-transparent text-black max-w-6xl rounded-2xl p-6 flex flex-col mb-24 w-full">
+				<div className="mb-12">
+					<QRCodeComponent className="max-w-xs mx-auto" size={180} />
+					<p className="mt-4 text-white text-center">
+						If selected to attend, please show this QR code to our staff to
+						check-in.
+					</p>
+				</div>
+
 				<h2 className="font-bold font-display text-[var(--color-white)] mb-4 md:mb-[42px] text-[15px] sm:text-2xl md:text-[40px] md:leading-10">
 					{roleToDisplay} Application Status
 				</h2>
-				<VerticalTimeline status={status as Status} />
-				<Message status={status as Status} />
+				<AvatarDisplay />
+				<VerticalTimeline
+					status={identity?.decision ? identity?.decision : (status as Status)}
+				/>
+				<Message
+					status={identity?.decision ? identity?.decision : (status as Status)}
+				/>
 				{needsToSignWaiver && <SignWaiver />}
-				{submittedWaiver && <ConfirmAttendance status={status as Status} />}
+				{needsToSignWaiver && <ConfirmAttendance status={status as Status} />}
 				{rejected && <ReturnHome />}
 			</div>
-			<BackgroundStars className="right-[-15%] bottom-[21%]" />
 		</div>
 	);
 }

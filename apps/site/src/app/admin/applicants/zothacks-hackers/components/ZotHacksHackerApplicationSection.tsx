@@ -2,12 +2,12 @@ import ColumnLayout from "@cloudscape-design/components/column-layout";
 import TextContent from "@cloudscape-design/components/text-content";
 
 import {
-	HackerApplicationData,
-	HackerApplicationQuestion,
+	ZotHacksHackerApplicationData,
+	ZotHacksHackerApplicationQuestion,
 } from "@/lib/admin/useApplicant";
 
 interface ApplicationResponseProps {
-	value: string | boolean | string[] | null;
+	value: string | boolean | string[] | number[] | null | undefined;
 }
 
 const titleCase = (str: string) =>
@@ -15,8 +15,15 @@ const titleCase = (str: string) =>
 
 const formatQuestion = (q: string) => q.split("_").map(titleCase).join(" ");
 
+// Map of hackathon experience values to labels
+const HACKATHON_EXPERIENCE_LABELS: Record<string, string> = {
+	first_time: "First Time",
+	some_experience: "Some Experience",
+	veteran: "Veteran",
+};
+
 function ApplicationResponse({ value }: ApplicationResponseProps) {
-	if (value === null) {
+	if (value === null || value === undefined) {
 		return <p>Not provided</p>;
 	}
 
@@ -33,31 +40,37 @@ function ApplicationResponse({ value }: ApplicationResponseProps) {
 					</p>
 				);
 			}
+			if (value in HACKATHON_EXPERIENCE_LABELS) {
+				return <p>{HACKATHON_EXPERIENCE_LABELS[value]}</p>;
+			}
 			return <p>{value}</p>;
 		case "object":
-			return (
-				<ul>
-					{value.map((v) => (
-						<li key={v}>{v}</li>
-					))}
-				</ul>
-			);
+			if (Array.isArray(value)) {
+				return (
+					<ul>
+						{value.map((v) => (
+							<li key={v.toString()}>{v}</li>
+						))}
+					</ul>
+				);
+			}
+			return <p>{JSON.stringify(value)}</p>;
 		default:
 			return <p />;
 	}
 }
 
-interface ApplicationSectionProps {
+interface ZotHacksHackerApplicationSectionProps {
 	title: string;
-	data: Omit<HackerApplicationData, "reviews">;
-	propsToShow: HackerApplicationQuestion[];
+	data: Omit<ZotHacksHackerApplicationData, "reviews">;
+	propsToShow: ZotHacksHackerApplicationQuestion[];
 }
 
-function HackerApplicationSection({
+function ZotHacksHackerApplicationSection({
 	title,
 	data,
 	propsToShow,
-}: ApplicationSectionProps) {
+}: ZotHacksHackerApplicationSectionProps) {
 	return (
 		<TextContent>
 			<h3>{title}</h3>
@@ -68,7 +81,9 @@ function HackerApplicationSection({
 				{propsToShow.map((prop) => (
 					<div key={prop}>
 						<h4>{formatQuestion(prop)}</h4>
-						<ApplicationResponse value={data[prop]} />
+						<ApplicationResponse
+							value={data[prop] as ApplicationResponseProps["value"]}
+						/>
 					</div>
 				))}
 			</ColumnLayout>
@@ -76,4 +91,4 @@ function HackerApplicationSection({
 	);
 }
 
-export default HackerApplicationSection;
+export default ZotHacksHackerApplicationSection;

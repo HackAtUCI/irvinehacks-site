@@ -1,6 +1,7 @@
 from typing import Any, Optional
 
 from models.ApplicationData import Decision
+from .score_normalizing_handler import IH_WEIGHTING_CONFIG
 
 OVERQUALIFIED = -3
 NOT_FULLY_REVIEWED = -1
@@ -68,10 +69,14 @@ def _get_avg_score(
         return OVERQUALIFIED
 
     unique_reviewers = {t[1] for t in reviews}
-    if len(unique_reviewers) < 2:
+    num_reviewers = len(unique_reviewers)
+    if num_reviewers == 0:
         return NOT_FULLY_REVIEWED
 
     last_score = _get_last_score(unique_reviewers.pop(), reviews)
+    if num_reviewers == 1:
+        return last_score
+
     last_score2 = _get_last_score(unique_reviewers.pop(), reviews)
     if any([last_score == OVERQUALIFIED, last_score2 == OVERQUALIFIED]):
         return OVERQUALIFIED
@@ -79,18 +84,22 @@ def _get_avg_score(
 
 
 def _get_avg_score_with_globals_and_breakdown(
-    review_breakdowns: dict[str, dict[str, int]], global_field_scores: dict[str, int]
+    review_breakdowns: dict[str, dict[str, int]],
+    global_field_scores: dict[str, int],
+    weight_config: dict[str, tuple[int, float]],
 ) -> float:
     # Check global_field_scores first - if any value is less than 0,
     # return OVERQUALIFIED
     if global_field_scores and any(score < 0 for score in global_field_scores.values()):
         return OVERQUALIFIED
 
-    if len(review_breakdowns) < 2:
+    if len(review_breakdowns) < 1:
         return NOT_FULLY_REVIEWED
 
+    num_reviewers = len(review_breakdowns)
+
     # Review breakdowns should be the most recent scores
-    total_score = 2 * sum(global_field_scores.values())
+    total_score: float = num_reviewers * sum(global_field_scores.values())
     for breakdown in review_breakdowns.values():
         for field, score in breakdown.items():
             # TODO: Fields from global_field_scores should not be in breakdowns
@@ -98,9 +107,10 @@ def _get_avg_score_with_globals_and_breakdown(
             if field in global_field_scores:
                 continue
 
-            total_score += score
+            total, weight = weight_config[field]
+            total_score += (score / total) * weight
 
-    return total_score / 2
+    return round((total_score / num_reviewers) * 100.0, 3)
 
 
 def _include_decision_based_on_threshold(
@@ -124,6 +134,7 @@ def _include_decision_based_on_threshold_and_score_breakdown(
     avg_score = _get_avg_score_with_globals_and_breakdown(
         applicant_record["application_data"].get("review_breakdown", {}),
         applicant_record["application_data"].get("global_field_scores", {}),
+        IH_WEIGHTING_CONFIG,
     )
     if avg_score >= accept:
         applicant_record["decision"] = Decision.ACCEPTED
@@ -146,11 +157,12 @@ def _include_avg_score(applicant_record: dict[str, Any]) -> None:
 
 
 def _include_avg_score_with_global_and_breakdown(
-    applicant_record: dict[str, Any]
+    applicant_record: dict[str, Any],
 ) -> None:
     applicant_record["avg_score"] = _get_avg_score_with_globals_and_breakdown(
         applicant_record["application_data"].get("review_breakdown", {}),
         applicant_record["application_data"].get("global_field_scores", {}),
+        IH_WEIGHTING_CONFIG,
     )
 
 

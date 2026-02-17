@@ -1,14 +1,18 @@
-import { useContext, useState } from "react";
+import { useContext } from "react";
 
 import Box from "@cloudscape-design/components/box";
 import Button from "@cloudscape-design/components/button";
-import Input from "@cloudscape-design/components/input";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 
-import { Review, submitReview } from "@/lib/admin/useApplicant";
+import { Review } from "@/lib/admin/useApplicant";
 import { Uid } from "@/lib/userRecord";
 import UserContext from "@/lib/admin/UserContext";
 import { isReviewer } from "@/lib/admin/authorization";
+import {
+	IrvineHacksHackerScoredFields,
+	HACKER_WEIGHTING_CONFIG,
+	ZotHacksHackerScoredFields,
+} from "@/lib/detailedScores";
 
 interface ColoredTextBoxProps {
 	text: string | undefined;
@@ -25,16 +29,23 @@ const ColoredTextBox = ({ text }: ColoredTextBoxProps) => {
 interface ApplicantActionsProps {
 	applicant: Uid;
 	reviews: Review[];
-	submitReview: submitReview;
+	scores: IrvineHacksHackerScoredFields | ZotHacksHackerScoredFields;
+	notes?: string;
+	onSubmitDetailedReview: (
+		uid: Uid,
+		scores: IrvineHacksHackerScoredFields | ZotHacksHackerScoredFields,
+		notes: string | null,
+	) => void;
 }
 
 function HackerApplicantActions({
 	applicant,
 	reviews,
-	submitReview,
+	scores,
+	notes,
+	onSubmitDetailedReview,
 }: ApplicantActionsProps) {
 	const { uid, roles } = useContext(UserContext);
-	const [value, setValue] = useState("");
 
 	const uniqueReviewers = Array.from(
 		new Set(reviews.map((review) => review[1])),
@@ -51,27 +62,59 @@ function HackerApplicantActions({
 
 	const handleClick = () => {
 		// TODO: use flashbar or modal for submit status
-		const val = parseFloat(value);
-		if (val >= 0 && val <= 10) {
-			submitReview(applicant, parseFloat(value));
-			setValue("");
-		}
+		onSubmitDetailedReview(applicant, scores, notes ?? null);
 	};
+
+	const calculateTotalScore = (
+		scores: IrvineHacksHackerScoredFields | ZotHacksHackerScoredFields,
+	) => {
+		// Detect if we are using IrvineHacks scoring by the presence of its specific fields
+		const isIrvineHacks = "has_socials" in scores || "frq_change" in scores;
+
+		if (isIrvineHacks) {
+			let weightedSum = 0;
+			for (const [field, [maxScore, weight]] of Object.entries(
+				HACKER_WEIGHTING_CONFIG,
+			)) {
+				const score = scores[field as keyof IrvineHacksHackerScoredFields] ?? 0;
+				// In case of any leftover -1 values (though typically filtered out)
+				const normalizedScore = score === -1 ? 0 : score;
+				weightedSum += (normalizedScore / maxScore) * weight;
+			}
+
+			const totalScore = weightedSum * 100;
+			return Math.max(totalScore, -3);
+		} else if ("resume" in scores && scores.resume === -1000) {
+			return -1000;
+		}
+
+		// Fallback to simple sum for ZotHacks
+		// TOOD: Make this configurable by specifying weight config
+		const totalScore = Object.values(scores).reduce(
+			(acc, val) => acc + (val === -1 ? 0 : val),
+			0,
+		);
+		return Math.max(totalScore, -3);
+	};
+
+	const totalScore = calculateTotalScore(scores);
 
 	return canReview ? (
 		<SpaceBetween direction="horizontal" size="xs">
-			<Input
-				onChange={({ detail }) => setValue(detail.value)}
-				value={value}
-				type="number"
-				inputMode="decimal"
-				placeholder="Applicant score"
-				step={0.5}
-				disabled={!canReview}
-				invalid={
-					value !== "" && (parseFloat(value) < 0 || parseFloat(value) > 10)
-				}
-			/>
+			<SpaceBetween direction="horizontal" size="xs">
+				{totalScore <= -1000 && (
+					<>
+						<Box variant="h3" color="text-status-error">
+							OVERQUALIFIED
+						</Box>
+						<Box variant="h3">|</Box>
+					</>
+				)}
+				<Box variant="h3" color="text-status-warning">
+					Calculated score: {totalScore.toFixed(2)}
+				</Box>
+			</SpaceBetween>
+
 			<Button onClick={handleClick} disabled={!canReview}>
 				Submit
 			</Button>

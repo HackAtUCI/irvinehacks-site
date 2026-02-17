@@ -13,14 +13,15 @@ import useApplicant, {
 
 import ApplicantOverview from "./ApplicantOverview";
 import { ParticipantRole } from "@/lib/userRecord";
+import { ScoredFields } from "@/lib/detailedScores";
 import ZotHacksHackerApplication from "../zothacks-hackers/components/ZotHacksHackerApplication";
-import ZotHacksHackerApplicantActions from "./ZotHacksHackerApplicantActions";
-import { ZothacksScoringGuidelinesType } from "../zothacks-hackers/components/getScoringGuidelines";
+import HackerApplicantActions from "./HackerApplicantActions";
+import { ZothacksHackerScoringGuidelinesType } from "../zothacks-hackers/components/getScoringGuidelines";
 
 interface ApplicantProps {
 	uid: string;
 	applicationType: "hacker" | "mentor" | "volunteer";
-	guidelines: ZothacksScoringGuidelinesType;
+	guidelines: ZothacksHackerScoringGuidelinesType;
 }
 
 function DetailedScoreApplicant({
@@ -29,11 +30,10 @@ function DetailedScoreApplicant({
 	guidelines,
 }: ApplicantProps) {
 	const { setNotifications } = useContext(NotificationContext);
-	const { applicant, loading, submitDetailedReview } = useApplicant(
-		uid,
-		applicationType,
-	);
-	const [scores, setScores] = useState({});
+	const { applicant, loading, submitDetailedReview, deleteNotes } =
+		useApplicant(uid, applicationType);
+	const [scores, setScores] = useState<ScoredFields>({});
+	const [notes, setNotes] = useState("");
 
 	if (loading || !applicant) {
 		return (
@@ -58,6 +58,18 @@ function DetailedScoreApplicant({
 		},
 	};
 
+	const handleSubmitDetailedReview = (
+		Uid: string,
+		scores: object,
+		notes: string | null,
+	) => {
+		submitDetailedReview(Uid, scores, notes).then(() => {
+			if (setNotifications)
+				setNotifications((prev) => [successMessage, ...prev]);
+			setNotes("");
+		});
+	};
+
 	return (
 		<ContentLayout
 			header={
@@ -66,16 +78,12 @@ function DetailedScoreApplicant({
 					description="Applicant"
 					actions={
 						applicant.roles.includes(ParticipantRole.Hacker) ? (
-							<ZotHacksHackerApplicantActions
+							<HackerApplicantActions
 								applicant={applicant._id}
 								reviews={application_data.reviews}
 								scores={scores}
-								submitDetailedReview={(Uid, scores) =>
-									submitDetailedReview(Uid, scores).then(() => {
-										if (setNotifications)
-											setNotifications((prev) => [successMessage, ...prev]);
-									})
-								}
+								notes={notes}
+								onSubmitDetailedReview={handleSubmitDetailedReview}
 							/>
 						) : (
 							<></>
@@ -90,6 +98,7 @@ function DetailedScoreApplicant({
 				<ApplicantOverview applicant={applicant} />
 				{applicant.roles.includes(ParticipantRole.Hacker) ? (
 					<ZotHacksHackerApplication
+						applicant={applicant._id}
 						application_data={application_data as ZotHacksHackerApplicationData}
 						onScoreChange={setScores}
 						onResumeScore={(
@@ -104,7 +113,11 @@ function DetailedScoreApplicant({
 									setNotifications((prev) => [successMessage, ...prev]);
 							})
 						}
+						onDeleteNotes={(uid, idx) => deleteNotes(uid, idx)}
 						guidelines={guidelines}
+						notes={notes}
+						onNotesChange={setNotes}
+						reviews={application_data.reviews}
 					/>
 				) : applicant.roles.includes(ParticipantRole.Mentor) ? (
 					<></>
@@ -120,16 +133,12 @@ function DetailedScoreApplicant({
 					margin: "16px",
 				}}
 			>
-				<ZotHacksHackerApplicantActions
+				<HackerApplicantActions
 					applicant={applicant._id}
 					reviews={application_data.reviews}
 					scores={scores}
-					submitDetailedReview={(Uid, scores) =>
-						submitDetailedReview(Uid, scores).then(() => {
-							if (setNotifications)
-								setNotifications((prev) => [successMessage, ...prev]);
-						})
-					}
+					notes={notes}
+					onSubmitDetailedReview={handleSubmitDetailedReview}
 				/>
 			</div>
 		</ContentLayout>

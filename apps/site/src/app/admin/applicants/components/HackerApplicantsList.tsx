@@ -160,6 +160,12 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 	const extraColumn =
 		hackathonName === "zothacks" ? zothacksExtraColumn : irvinehacksExtraColumn;
 
+	const resumeReviewedColumn = {
+		id: "resume_reviewed",
+		header: "Resume Reviewed Status",
+		content: ResumeReviewedStatus,
+	};
+
 	const renderHeader = useCallback(
 		({ _id, first_name, last_name, avg_score }: HackerApplicantSummary) => (
 			<CardHeader
@@ -196,11 +202,7 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 						header: "Status",
 						content: ApplicantStatus,
 					},
-					{
-						id: "resume_reviewed",
-						header: "Resume Reviewed Status",
-						content: ResumeReviewedStatus,
-					},
+					...(hackathonName === "zothacks" ? [resumeReviewedColumn] : []),
 					{
 						id: "reviewers",
 						header: "",

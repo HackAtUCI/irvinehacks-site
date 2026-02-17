@@ -8,8 +8,8 @@ interface ConfirmAttendanceProps {
 function ConfirmAttendance({ status }: ConfirmAttendanceProps) {
 	const buttonText =
 		status === Status.Confirmed || status === Status.Attending
-			? "I am no longer able to attend IrvineHacks 2025"
-			: "I will be attending IrvineHacks 2025";
+			? "I am no longer able to attend IrvineHacks 2026"
+			: "I will be attending IrvineHacks 2026";
 
 	return (
 		<div className="mt-2 md:mt-8 text-[var(--color-white)]">
@@ -19,10 +19,13 @@ function ConfirmAttendance({ status }: ConfirmAttendanceProps) {
 			{status === Status.Confirmed || status === Status.Attending ? (
 				<>
 					<p className="text-xs sm:text-base md:text-2xl">
+						Thank you for confirming your attendance!
+					</p>
+					{/* <p className="text-xs sm:text-base md:text-2xl">
 						Thank you for confirming your attendance! We look forward to seeing
 						you at IrvineHacks! If you are no longer able to attend, please let
 						us know using the button below.
-					</p>
+					</p> */}
 					{status === Status.Attending && (
 						<strong className="text-red-600 text-xs sm:text-base md:text-xl mb-3 w-full text-center inline-block">
 							WARNING: After clicking the button below, you will{" "}
@@ -32,16 +35,15 @@ function ConfirmAttendance({ status }: ConfirmAttendanceProps) {
 				</>
 			) : (
 				<p className="text-xs sm:text-base md:text-2xl">
-					If you plan on attending IrvineHacks 2025, please confirm your
+					If you plan on attending IrvineHacks 2026, please confirm your
 					attendance using the button below!
 				</p>
 			)}
-			<div className="mt-2 md:mt-8">
-				<RsvpForm
-					buttonText={buttonText}
-					showWarning={status === Status.Attending}
-				/>
-			</div>
+			{status !== Status.Confirmed && status !== Status.Attending && (
+				<div className="mt-2 md:mt-8">
+					<RsvpForm buttonText={buttonText} showWarning={false} />
+				</div>
+			)}
 		</div>
 	);
 }

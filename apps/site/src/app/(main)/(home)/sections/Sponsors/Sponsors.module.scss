@@ -1,122 +1,73 @@
 .sponsorsContainer {
-	border: 5px solid white;
-	padding: 2.5rem;
-	padding-bottom: 5rem;
 	position: relative;
 	width: 100%;
-	background: #0c071b;
+	margin-left: auto;
+	margin-right: auto;
+	background-position: center;
+	background-repeat: no-repeat;
+	max-width: 40rem;
 
-	// What a crazy way to do the inner border lines
-	&::before,
-	&::after,
-	.horizontalLine {
-		content: "";
-		position: absolute;
-		background: white;
+	// Mobile: turquoise border, no background frame
+	border: 2px solid var(--color-turquoise);
+	border-radius: 1rem;
+
+	@media (min-width: 1024px) {
+		max-width: 80rem;
+		border: none;
+		border-radius: 0;
+		background-image: var(--bg-image);
+		background-size: 100% 100%;
 	}
 
-	// Vertical lines
-	&::before {
-		width: 2px;
-		top: 4rem;
-		bottom: 4rem;
-		left: 1.5rem;
-	}
-
-	&::after {
-		width: 2px;
-		top: 4rem;
-		bottom: 4rem;
-		right: 1.5rem;
-	}
-
-	// Horizontal lines
-	.horizontalLine {
-		&.bottom {
-			height: 2px;
-			bottom: 1.5rem;
-			left: 4rem;
-			right: 4rem;
-		}
+	@media (min-width: 1280px) {
+		max-width: 90rem;
 	}
 }
 
-.cornerSquares {
-	div {
-		position: absolute;
-		width: 20px;
-		height: 20px;
-		background: white;
-	}
-
-	.topLeft {
-		top: calc(1.5rem);
-		left: calc(1.5rem);
-	}
-
-	.topRight {
-		top: calc(1.5rem);
-		right: calc(1.5rem);
-	}
-
-	.bottomLeft {
-		bottom: calc(1.5rem);
-		left: calc(1.5rem);
-	}
-
-	.bottomRight {
-		bottom: calc(1.5rem);
-		right: calc(1.5rem);
-	}
+// Mobile
+.platinum,
+.gold,
+.silver,
+.bronze,
+.sponsored-prize,
+.in-kind {
+	width: 100%;
+	aspect-ratio: 2 / 1;
 }
 
-.sponsorsGrid {
-	display: flex;
-	flex-direction: column;
-	gap: 1rem;
-	margin-top: 4rem;
+.platinum {
+	max-width: 320px;
+}
+.gold {
+	max-width: 280px;
+}
+.silver {
+	max-width: 240px;
+}
+.bronze,
+.sponsored-prize,
+.in-kind {
+	max-width: 200px;
 }
 
-.sponsorBox {
-	background: #d9d9d9;
-	aspect-ratio: 16/9;
-}
-
-@media (min-width: 640px) {
-	.sponsorsGrid {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 1rem;
-		margin-top: 2rem;
-	}
-	.sponsorsContainer {
-		padding: 3rem;
-		padding-bottom: 8rem;
-	}
-}
-
+// Desktop
 @media (min-width: 1024px) {
-	.platinum,
+	.platinum {
+		max-width: 500px;
+		max-height: 250px;
+	}
 	.gold {
 		max-width: 400px;
-		max-height: 400px;
+		max-height: 200px;
 	}
 	.silver {
 		max-width: 350px;
-		max-height: 350px;
+		max-height: 175px;
 	}
 	.bronze,
 	.sponsored-prize,
 	.in-kind {
-		max-width: 300px;
-		max-height: 300px;
-	}
-	.sponsorsContainer {
-		padding: 6rem;
-		padding-bottom: 16rem;
-	}
-	.sponsorsGrid {
-		gap: 1.5rem;
-		margin-top: 2rem;
+		max-width: 350px;
+		max-height: 175px;
 	}
 }

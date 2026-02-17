@@ -14,7 +14,7 @@ import SchedulePage from "./sections/SchedulePage";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-	title: "Schedule | IrvineHacks 2025",
+	title: "Schedule | IrvineHacks 2026",
 };
 
 export default async function Schedule() {
@@ -41,7 +41,7 @@ export default async function Schedule() {
 						className="absolute top-0 left-0 w-full"
 					/>
 				</div>
-				<div className="p-36 relative">
+				<div className="p-2 relative lg:p-36">
 					<ShiftingCountdown />
 				</div>
 				<div className="flex justify-center">

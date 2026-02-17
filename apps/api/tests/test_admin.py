@@ -436,9 +436,11 @@ def test_hacker_applicants_returns_correct_applicants(
                 "submission_time": datetime(2023, 1, 12, 9, 0, 0),
                 "email": "sydnee@uci.edu",
                 "resume_url": "https://example.com/sydnee.pdf",
+                "major": "Computer Science",
+                "linkedin": None,
                 "reviews": [
-                    [datetime(2023, 1, 19), "edu.uci.alicia", 56],
-                    [datetime(2023, 1, 19), "edu.uci.alicia2", 60],
+                    [datetime(2023, 1, 19), "edu.uci.alicia", 56, "comment"],
+                    [datetime(2023, 1, 19), "edu.uci.alicia2", 60, "comment2"],
                 ],
                 "review_breakdown": {
                     "alicia": {
@@ -477,6 +479,22 @@ def test_hacker_applicants_returns_correct_applicants(
                 "resume_url": "https://example.com/sydnee.pdf",
                 "extra_points": None,
                 "normalized_scores": None,
+                "major": "Computer Science",
+                "linkedin": None,
+                "reviews": [
+                    [
+                        datetime(2023, 1, 19).isoformat(),
+                        "edu.uci.alicia",
+                        56.0,
+                        "comment",
+                    ],
+                    [
+                        datetime(2023, 1, 19).isoformat(),
+                        "edu.uci.alicia2",
+                        60.0,
+                        "comment2",
+                    ],
+                ],
             },
         },
     ]

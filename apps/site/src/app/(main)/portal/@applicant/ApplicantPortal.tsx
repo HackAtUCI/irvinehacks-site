@@ -32,12 +32,15 @@ function Portal() {
 		rolesArray.includes(role),
 	);
 
-	const submittedWaiver =
-		status === Status.Signed ||
-		status === Status.Confirmed ||
-		status === Status.Attending;
+	// const submittedWaiver =
+	// 	status === Status.Signed ||
+	// 	status === Status.Confirmed ||
+	// 	status === Status.Attending;
 
-	const needsToSignWaiver = status === Status.Accepted;
+	const needsToSignWaiver =
+		status === Status.Accepted ||
+		status === Status.Confirmed ||
+		identity?.decision === Status.Accepted;
 	const rejected = status === Status.Rejected;
 
 	return (
@@ -55,10 +58,14 @@ function Portal() {
 					{roleToDisplay} Application Status
 				</h2>
 				<AvatarDisplay />
-				<VerticalTimeline status={status as Status} />
-				<Message status={status as Status} />
+				<VerticalTimeline
+					status={identity?.decision ? identity?.decision : (status as Status)}
+				/>
+				<Message
+					status={identity?.decision ? identity?.decision : (status as Status)}
+				/>
 				{needsToSignWaiver && <SignWaiver />}
-				{submittedWaiver && <ConfirmAttendance status={status as Status} />}
+				{needsToSignWaiver && <ConfirmAttendance status={status as Status} />}
 				{rejected && <ReturnHome />}
 			</div>
 		</div>

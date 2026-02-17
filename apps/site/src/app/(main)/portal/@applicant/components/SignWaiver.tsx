@@ -24,7 +24,7 @@ function SignWaiver() {
 			</div>
 			<p className="text-xl w-full text-center mt-2 text-yellow-500">
 				It may take up to a minute for this site to update after waiver is
-				signed
+				signed. Try reloading the page or coming back later.
 			</p>
 		</div>
 	);

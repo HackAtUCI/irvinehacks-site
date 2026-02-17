@@ -56,6 +56,10 @@ require_organizer = require_role({Role.ORGANIZER})
 class ApplicationDataSummary(BaseModel):
     school: str
     submission_time: datetime
+    normalized_scores: Optional[dict[str, float]] = None
+    extra_points: Optional[float] = None
+    email: str
+    resume_url: str
 
 
 class ZotHacksApplicationDataSummary(BaseModel):

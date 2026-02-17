@@ -434,6 +434,8 @@ def test_hacker_applicants_returns_correct_applicants(
             "application_data": {
                 "school": "Hamburger University",
                 "submission_time": datetime(2023, 1, 12, 9, 0, 0),
+                "email": "sydnee@uci.edu",
+                "resume_url": "https://example.com/sydnee.pdf",
                 "reviews": [
                     [datetime(2023, 1, 19), "edu.uci.alicia", 56],
                     [datetime(2023, 1, 19), "edu.uci.alicia2", 60],
@@ -471,6 +473,10 @@ def test_hacker_applicants_returns_correct_applicants(
             "application_data": {
                 "school": "Hamburger University",
                 "submission_time": "2023-01-12T09:00:00",
+                "email": "sydnee@uci.edu",
+                "resume_url": "https://example.com/sydnee.pdf",
+                "extra_points": None,
+                "normalized_scores": None,
             },
         },
     ]

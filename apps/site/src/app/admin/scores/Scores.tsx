@@ -42,13 +42,32 @@ const downloadCSV = (
 		extraPoints?: number;
 	})[],
 ) => {
-	const headers = ["Name", "Email", "Resume URL", "Average Normalized Score"];
-	const rows = data.map((a) => [
-		`${a.first_name} ${a.last_name}`,
-		a.application_data.email,
-		a.application_data.resume_url,
-		a.avgNormalizedScore.toFixed(2),
-	]);
+	const headers = [
+		"Name",
+		"Email",
+		"Major",
+		"LinkedIn",
+		"Resume URL",
+		"Average Normalized Score",
+		"Comments",
+	];
+	const rows = data.map((a) => {
+		const comments = (a.application_data.reviews || [])
+			.map((r) => (r[3] ? `${r[1]}: ${r[3]}` : ""))
+			.filter(Boolean)
+			.map((c) => c!.replace(/,/g, ".").replace(/[\r\n]+/g, " | "))
+			.join("; ");
+
+		return [
+			`${a.first_name} ${a.last_name}`,
+			a.application_data.email,
+			a.application_data.major || "",
+			a.application_data.linkedin || "",
+			a.application_data.resume_url,
+			a.avgNormalizedScore.toFixed(2),
+			comments,
+		];
+	});
 
 	const csvContent =
 		"data:text/csv;charset=utf-8," +
@@ -107,6 +126,68 @@ const ResumeModalButton = (
 	);
 };
 
+interface ScoredHackerApplicant extends HackerApplicantSummary {
+	avgNormalizedScore: number;
+	rowIndex: number;
+}
+
+const NameCell = (item: ScoredHackerApplicant) =>
+	`${item.first_name} ${item.last_name}`;
+
+const LinkedInCell = (item: ScoredHackerApplicant) =>
+	item.application_data.linkedin ? (
+		<Button
+			variant="link"
+			href={item.application_data.linkedin}
+			target="_blank"
+		>
+			LinkedIn
+		</Button>
+	) : (
+		"-"
+	);
+
+const COLUMNS = [
+	{
+		id: "index",
+		header: "#",
+		cell: (item: ScoredHackerApplicant) => item.rowIndex,
+		width: 40,
+	},
+	{
+		id: "name",
+		header: "Name",
+		cell: NameCell,
+	},
+	{
+		id: "email",
+		header: "Email",
+		cell: (item: ScoredHackerApplicant) => item.application_data.email,
+	},
+	{
+		id: "major",
+		header: "Major",
+		cell: (item: ScoredHackerApplicant) => item.application_data.major || "-",
+	},
+	{
+		id: "linkedin",
+		header: "LinkedIn",
+		cell: LinkedInCell,
+		minWidth: 150,
+	},
+	{
+		id: "resume",
+		header: "Resume",
+		cell: ResumeModalButton,
+		minWidth: 350,
+	},
+	{
+		id: "avgScore",
+		header: "Average Normalized Score",
+		cell: (item: ScoredHackerApplicant) => item.avgNormalizedScore.toFixed(2),
+	},
+];
+
 function Scores() {
 	const { setNotifications } = useContext(NotificationContext);
 	const { applicantList, loading, refetch } = useHackerApplicants();
@@ -162,35 +243,7 @@ function Scores() {
 			<Header variant="h1">Scores</Header>
 			<Table
 				loading={loading}
-				columnDefinitions={[
-					{
-						id: "index",
-						header: "#",
-						cell: (item) => item.rowIndex,
-						width: 40,
-					},
-					{
-						id: "name",
-						header: "Name",
-						cell: (item) => `${item.first_name} ${item.last_name}`,
-					},
-					{
-						id: "email",
-						header: "Email",
-						cell: (item) => item.application_data.email,
-					},
-					{
-						id: "resume",
-						header: "Resume",
-						cell: ResumeModalButton,
-						minWidth: 350,
-					},
-					{
-						id: "avgScore",
-						header: "Average Normalized Score",
-						cell: (item) => item.avgNormalizedScore.toFixed(2),
-					},
-				]}
+				columnDefinitions={COLUMNS}
 				items={sorted}
 				header={
 					<div

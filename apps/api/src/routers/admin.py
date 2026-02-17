@@ -60,6 +60,9 @@ class ApplicationDataSummary(BaseModel):
     extra_points: Optional[float] = None
     email: str
     resume_url: str
+    major: Optional[str] = None
+    linkedin: Optional[str] = None
+    reviews: list[Review] = []
 
 
 class ZotHacksApplicationDataSummary(BaseModel):
@@ -69,6 +72,9 @@ class ZotHacksApplicationDataSummary(BaseModel):
     extra_points: Optional[float] = None
     email: str
     resume_url: str
+    major: Optional[str] = None
+    linkedin: Optional[str] = None
+    reviews: list[Review] = []
 
 
 class ApplicantSummary(BaseRecord):
@@ -222,10 +228,10 @@ async def hacker_applicants(
         #     record, thresholds["accept"], thresholds["waitlist"]
         # )
 
-    try:
-        return TypeAdapter(list[HackerApplicantSummary]).validate_python(records)
-    except ValidationError:
-        raise RuntimeError("Could not parse applicant data.")
+    # try:
+    return TypeAdapter(list[HackerApplicantSummary]).validate_python(records)
+    # except ValidationError:
+    #     raise RuntimeError("Could not parse applicant data.")
 
 
 async def applicant(

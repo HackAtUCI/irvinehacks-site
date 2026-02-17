@@ -51,11 +51,21 @@ const downloadCSV = (
 		"Average Normalized Score",
 		"Comments",
 	];
+
+	// Helper to escape CSV fields (wrap in quotes, escape existing quotes)
+	const escapeCSV = (val: string | number) => {
+		const str = String(val);
+		if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+			return `"${str.replace(/"/g, '""')}"`;
+		}
+		return str;
+	};
+
 	const rows = data.map((a) => {
 		const comments = (a.application_data.reviews || [])
 			.map((r) => (r[3] ? `${r[1]}: ${r[3]}` : ""))
 			.filter(Boolean)
-			.map((c) => c!.replace(/,/g, ".").replace(/[\r\n]+/g, " | "))
+			.map((c) => c!.replace(/[\r\n]+/g, " | "))
 			.join("; ");
 
 		return [
@@ -66,20 +76,22 @@ const downloadCSV = (
 			a.application_data.resume_url,
 			a.avgNormalizedScore.toFixed(2),
 			comments,
-		];
+		]
+			.map(escapeCSV)
+			.join(",");
 	});
 
-	const csvContent =
-		"data:text/csv;charset=utf-8," +
-		[headers, ...rows].map((e) => e.join(",")).join("\n");
+	const csvContent = [headers.join(","), ...rows].join("\n");
+	const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+	const url = URL.createObjectURL(blob);
 
-	const encodedUri = encodeURI(csvContent);
 	const link = document.createElement("a");
-	link.setAttribute("href", encodedUri);
+	link.setAttribute("href", url);
 	link.setAttribute("download", "applicants.csv");
 	document.body.appendChild(link);
 	link.click();
 	document.body.removeChild(link);
+	URL.revokeObjectURL(url);
 };
 
 const ResumeModalButton = (

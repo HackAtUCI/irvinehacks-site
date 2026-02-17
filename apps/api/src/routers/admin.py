@@ -228,10 +228,10 @@ async def hacker_applicants(
         #     record, thresholds["accept"], thresholds["waitlist"]
         # )
 
-    # try:
-    return TypeAdapter(list[HackerApplicantSummary]).validate_python(records)
-    # except ValidationError:
-    #     raise RuntimeError("Could not parse applicant data.")
+    try:
+        return TypeAdapter(list[HackerApplicantSummary]).validate_python(records)
+    except ValidationError:
+        raise RuntimeError("Could not parse applicant data.")
 
 
 async def applicant(

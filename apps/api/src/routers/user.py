@@ -35,7 +35,7 @@ from models.user_record import Applicant, BareApplicant, Role, Status
 from services import docusign_handler, mongodb_handler
 from services.docusign_handler import WebhookPayload
 from services.mongodb_handler import Collection
-from utils import email_handler, resume_handler, waiver_handler
+from utils import email_handler, resume_handler
 
 log = getLogger(__name__)
 
@@ -328,16 +328,11 @@ async def request_waiver(
     if applicant.status in (Status.WAIVER_SIGNED, Status.CONFIRMED, Status.ATTENDING):
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Already submitted a waiver.")
 
-    await waiver_handler.process_waiver_completion(user_data.uid, user_data.email)
+    user_name = f"{applicant.first_name} {applicant.last_name}"
 
-    return RedirectResponse("/portal", status.HTTP_303_SEE_OTHER)
-
-    # TODO: Revisit docusign when we decide what to do with payment/api
-    # user_name = f"{applicant.first_name} {applicant.last_name}"
-
-    # # TODO: email may not match UCInetID format from `docusign_handler._acquire_uid`
-    # form_url = docusign_handler.waiver_form_url(user_data.email, user_name)
-    # return RedirectResponse(form_url, status.HTTP_303_SEE_OTHER)
+    # TODO: email may not match UCInetID format from `docusign_handler._acquire_uid`
+    form_url = docusign_handler.waiver_form_url(user_data.email, user_name)
+    return RedirectResponse(form_url, status.HTTP_303_SEE_OTHER)
 
 
 @router.post("/waiver")

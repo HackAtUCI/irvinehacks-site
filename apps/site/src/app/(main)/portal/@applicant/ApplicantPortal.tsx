@@ -1,6 +1,7 @@
 "use client";
 
-import { redirect } from "next/navigation";
+import { redirect, useSearchParams, useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 import useUserIdentity from "@/lib/utils/useUserIdentity";
 import { Status } from "@/lib/userRecord";
@@ -17,6 +18,16 @@ const rolesArray = ["Mentor", "Hacker", "Volunteer"];
 
 function Portal() {
 	const identity = useUserIdentity();
+	const searchParams = useSearchParams();
+	const router = useRouter();
+
+	const signed = searchParams.get("signed");
+
+	useEffect(() => {
+		if (identity && signed === "82ebb8bc-c302-4dc0-ad62-4b8b516395ce") {
+			router.push("/api/user/waiver");
+		}
+	}, [identity, signed, router]);
 
 	if (!identity) {
 		return <div className="font-display text-4xl mt-5">Loading...</div>;

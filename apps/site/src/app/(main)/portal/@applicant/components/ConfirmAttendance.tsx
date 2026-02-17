@@ -19,10 +19,13 @@ function ConfirmAttendance({ status }: ConfirmAttendanceProps) {
 			{status === Status.Confirmed || status === Status.Attending ? (
 				<>
 					<p className="text-xs sm:text-base md:text-2xl">
+						Thank you for confirming your attendance!
+					</p>
+					{/* <p className="text-xs sm:text-base md:text-2xl">
 						Thank you for confirming your attendance! We look forward to seeing
 						you at IrvineHacks! If you are no longer able to attend, please let
 						us know using the button below.
-					</p>
+					</p> */}
 					{status === Status.Attending && (
 						<strong className="text-red-600 text-xs sm:text-base md:text-xl mb-3 w-full text-center inline-block">
 							WARNING: After clicking the button below, you will{" "}
@@ -36,12 +39,11 @@ function ConfirmAttendance({ status }: ConfirmAttendanceProps) {
 					attendance using the button below!
 				</p>
 			)}
-			<div className="mt-2 md:mt-8">
-				<RsvpForm
-					buttonText={buttonText}
-					showWarning={status === Status.Attending}
-				/>
-			</div>
+			{status !== Status.Confirmed && status !== Status.Attending && (
+				<div className="mt-2 md:mt-8">
+					<RsvpForm buttonText={buttonText} showWarning={false} />
+				</div>
+			)}
 		</div>
 	);
 }

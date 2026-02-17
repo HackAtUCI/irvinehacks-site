@@ -2,12 +2,6 @@
 
 import { useState, useMemo, useContext } from "react";
 import axios from "axios";
-
-import NotificationContext from "@/lib/admin/NotificationContext";
-import useHackerApplicants, {
-	HackerApplicantSummary,
-} from "@/lib/admin/useHackerApplicants";
-import { OVERQUALIFIED_SCORE } from "@/lib/decisionScores";
 import {
 	Box,
 	Button,
@@ -17,6 +11,13 @@ import {
 	SpaceBetween,
 	Table,
 } from "@cloudscape-design/components";
+
+import NotificationContext from "@/lib/admin/NotificationContext";
+import useHackerApplicants, {
+	HackerApplicantSummary,
+} from "@/lib/admin/useHackerApplicants";
+import { OVERQUALIFIED_SCORE } from "@/lib/decisionScores";
+import ExcludeUIDsModal from "./ExcludeUIDsModal";
 
 function sortApplicantsByNormalizedScore(applicants: HackerApplicantSummary[]) {
 	return applicants
@@ -110,6 +111,8 @@ function Scores() {
 	const { setNotifications } = useContext(NotificationContext);
 	const { applicantList, loading, refetch } = useHackerApplicants();
 
+	const [isExcludeModalVisible, setIsExcludeModalVisible] = useState(false);
+
 	const filteredApplicants = useMemo(
 		() => applicantList.filter((a) => a.avg_score !== OVERQUALIFIED_SCORE),
 		[applicantList],
@@ -122,42 +125,35 @@ function Scores() {
 		}),
 	);
 
+	const showNotification = (
+		type: FlashbarProps.Type,
+		content: string,
+		id: string = `${Date.now()}`,
+	) => {
+		const message: FlashbarProps.MessageDefinition = {
+			type,
+			content,
+			id,
+			dismissible: true,
+			onDismiss: () => {
+				if (setNotifications)
+					setNotifications((prev) =>
+						prev.filter((msg) => msg.id !== message.id),
+					);
+			},
+		};
+		if (setNotifications) setNotifications((prev) => [message, ...prev]);
+	};
+
 	const handleClick = () => {
 		axios
 			.get("/api/admin/normalize-detailed-scores")
 			.then(() => {
-				const successMessage: FlashbarProps.MessageDefinition = {
-					type: "success",
-					content: "Successfully normalized scores!",
-					id: `${Date.now()}`,
-					dismissible: true,
-					onDismiss: () => {
-						if (setNotifications)
-							setNotifications((prev) =>
-								prev.filter((msg) => msg.id !== successMessage.id),
-							);
-					},
-				};
-				if (setNotifications)
-					setNotifications((prev) => [successMessage, ...prev]);
-
+				showNotification("success", "Successfully normalized scores!");
 				refetch();
 			})
 			.catch((error) => {
-				const errorMessage: FlashbarProps.MessageDefinition = {
-					type: "error",
-					content: `Request failed: ${error.message}`,
-					id: `${Date.now()}`,
-					dismissible: true,
-					onDismiss: () => {
-						if (setNotifications)
-							setNotifications((prev) =>
-								prev.filter((msg) => msg.id !== errorMessage.id),
-							);
-					},
-				};
-				if (setNotifications)
-					setNotifications((prev) => [errorMessage, ...prev]);
+				showNotification("error", `Request failed: ${error.message}`);
 			});
 	};
 
@@ -206,6 +202,9 @@ function Scores() {
 					>
 						<h2>Applicants</h2>
 						<div style={{ display: "flex", gap: "0.5rem" }}>
+							<Button onClick={() => setIsExcludeModalVisible(true)}>
+								Exclude UIDs (auto-reject/auto-accept)
+							</Button>
 							<Button onClick={() => downloadCSV(sorted)}>Download CSV</Button>
 							<Button variant="primary" onClick={handleClick}>
 								Normalize scores
@@ -213,6 +212,15 @@ function Scores() {
 						</div>
 					</div>
 				}
+			/>
+			<ExcludeUIDsModal
+				visible={isExcludeModalVisible}
+				onDismiss={() => setIsExcludeModalVisible(false)}
+				onSuccess={() => {
+					showNotification("success", "Successfully updated excluded UIDs!");
+					refetch();
+				}}
+				onError={(err) => showNotification("error", err)}
 			/>
 		</SpaceBetween>
 	);

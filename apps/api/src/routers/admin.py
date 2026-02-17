@@ -12,6 +12,7 @@ from admin.participant_manager import Participant
 from admin.score_normalizing_handler import (
     IH_WEIGHTING_CONFIG,
     add_normalized_scores_to_all_hacker_applicants,
+    add_uids_to_exclude_from_hacker_normalization,
 )
 from auth.authorization import require_role
 from auth.user_identity import User, utc_now
@@ -594,6 +595,18 @@ async def subevent_checkin(
     organizer: Annotated[User, Depends(require_organizer)],
 ) -> None:
     await participant_manager.subevent_checkin(event, uid, organizer)
+
+
+@router.post(
+    "/add-uids-to-exclude-from-normalization",
+    dependencies=[Depends(require_role({Role.DIRECTOR, Role.LEAD}))],
+)
+async def add_uids_to_exclude(uids: list[str]) -> None:
+    try:
+        await add_uids_to_exclude_from_hacker_normalization(uids)
+    except RuntimeError:
+        log.error("Could not update/add normalized scores to hacker applicants")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @router.get(

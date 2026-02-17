@@ -21,6 +21,19 @@ IH_WEIGHTING_CONFIG = {
 }
 
 
+async def add_uids_to_exclude_from_hacker_normalization(uids: list[str]) -> None:
+    """Adds UIDS to exclude from hacker normalization to SETTINGS collection"""
+    if not uids:
+        return
+
+    await mongodb_handler.update_one(
+        Collection.SETTINGS,
+        {"_id": "excluded_uids_from_normalization"},
+        {"excluded_uids": uids},
+        upsert=True,
+    )
+
+
 async def add_normalized_scores_to_all_hacker_applicants() -> None:
     """Calculates normalized scores and adds them to all hacker apps"""
     all_apps = await get_all_hacker_apps()

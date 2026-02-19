@@ -449,8 +449,8 @@ async def rsvp_late_arrival(
             "You must RSVP before setting an arrival time.",
         )
 
-    # Default check-in time is 6:00pm (18:00)
-    arrival_value: str = "18:00"
+    # Default check-in time is 5:00pm (17:00)
+    arrival_value: str = "17:00"
     if arrival_time and arrival_time.strip():
         if arrival_time.strip() not in ARRIVAL_TIMES:
             raise HTTPException(

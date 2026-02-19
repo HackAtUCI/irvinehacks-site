@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from logging import getLogger
-from typing import Annotated, Any, Union
+from typing import Annotated, Any, Optional, Union
 from urllib.parse import urlencode
 
 from fastapi import (
@@ -363,9 +363,13 @@ async def waiver_webhook(
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid payload content.")
 
 
+ARRIVAL_TIMES = ("17:00", "18:00", "18:30", "19:00", "19:30")
+
+
 @router.post("/rsvp")
 async def rsvp(
     user: Annotated[User, Depends(require_user_identity)],
+    arrival_time: Annotated[Optional[str], Form()] = None,
 ) -> RedirectResponse:
     """Change user status for RSVP"""
     user_record = await mongodb_handler.retrieve_one(
@@ -389,12 +393,77 @@ async def rsvp(
             "Waiver must be signed before being able to RSVP.",
         )
 
+    # Default check-in time is 5:00pm (17:00)
+    arrival_value: str = "17:00"
+    if arrival_time and arrival_time.strip():
+        if arrival_time.strip() not in ARRIVAL_TIMES:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                "Invalid arrival time.",
+            )
+        arrival_value = arrival_time.strip()
+
+    updated_fields: dict[str, Any] = {
+        "status": new_status,
+        "arrival_time": arrival_value,
+    }
     await mongodb_handler.update_one(
-        Collection.USERS, {"_id": user.uid}, {"status": new_status}
+        Collection.USERS, {"_id": user.uid}, updated_fields
     )
 
     old_status = user_record["status"]
     log.info(f"User {user.uid} changed status from {old_status} to {new_status}.")
+
+    return RedirectResponse("/portal", status.HTTP_303_SEE_OTHER)
+
+
+@router.get("/rsvp/late-arrival")
+async def get_arrival_time(
+    user: Annotated[User, Depends(require_user_identity)],
+) -> dict[str, Any]:
+    """Get the current arrival time for the user."""
+    user_record = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": user.uid}, ["arrival_time"]
+    )
+    if not user_record:
+        return {"arrival_time": None}
+    return {"arrival_time": user_record.get("arrival_time")}
+
+
+@router.post("/rsvp/late-arrival")
+async def rsvp_late_arrival(
+    user: Annotated[User, Depends(require_user_identity)],
+    arrival_time: Annotated[Optional[str], Form()] = None,
+) -> RedirectResponse:
+    """Submit or update expected arrival time (default 6pm; Friday 6pm–7:30pm)."""
+    user_record = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": user.uid}, ["status", "decision"]
+    )
+
+    if not user_record or "status" not in user_record:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "User must have a status.")
+
+    if user_record["status"] != Status.CONFIRMED:
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN,
+            "You must RSVP before setting an arrival time.",
+        )
+
+    # Default check-in time is 5:00pm (17:00)
+    arrival_value: str = "17:00"
+    if arrival_time and arrival_time.strip():
+        if arrival_time.strip() not in ARRIVAL_TIMES:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                "Invalid arrival time.",
+            )
+        arrival_value = arrival_time.strip()
+
+    await mongodb_handler.update_one(
+        Collection.USERS, {"_id": user.uid}, {"arrival_time": arrival_value}
+    )
+
+    log.info(f"User {user.uid} set arrival_time to {arrival_value}.")
 
     return RedirectResponse("/portal", status.HTTP_303_SEE_OTHER)
 

@@ -88,7 +88,9 @@ def test_user_with_status_waiver_signed_rsvp_changes_status_to_confirmed(
     res = client.post("/rsvp", follow_redirects=False)
 
     mock_mongodb_handler_update_one.assert_awaited_once_with(
-        Collection.USERS, {"_id": "edu.stanford.tree"}, {"status": Status.CONFIRMED}
+        Collection.USERS,
+        {"_id": "edu.stanford.tree"},
+        {"status": Status.CONFIRMED, "arrival_time": "17:00"},
     )
 
     assert res.status_code == 303
@@ -107,7 +109,9 @@ def test_user_with_status_confirmed_un_rsvp_changes_status_to_waiver_signed(
     res = client.post("/rsvp", follow_redirects=False)
 
     mock_mongodb_handler_update_one.assert_awaited_once_with(
-        Collection.USERS, {"_id": "edu.stanford.tree"}, {"status": Status.WAIVER_SIGNED}
+        Collection.USERS,
+        {"_id": "edu.stanford.tree"},
+        {"status": Status.WAIVER_SIGNED, "arrival_time": "17:00"},
     )
 
     assert res.status_code == 303

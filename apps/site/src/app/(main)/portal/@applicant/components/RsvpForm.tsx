@@ -11,6 +11,7 @@ interface RsvpFormProps {
 
 // Only late options, 6:00 PM is default from first dropdown
 const LATE_ARRIVAL_TIME_OPTIONS = [
+	{ value: "18:00", label: "6:00 PM" },
 	{ value: "18:30", label: "6:30 PM" },
 	{ value: "19:00", label: "7:00 PM" },
 	{ value: "19:30", label: "7:30 PM" },
@@ -20,7 +21,7 @@ export default function RsvpForm({ buttonText, showWarning }: RsvpFormProps) {
 	const [comingLateChoice, setComingLateChoice] = useState<"" | "no" | "yes">(
 		"",
 	);
-	const [arrivalTime, setArrivalTime] = useState<string>("18:30");
+	const [arrivalTime, setArrivalTime] = useState<string>("18:00");
 
 	const comingLate = comingLateChoice === "yes";
 	const confirmationMessage =

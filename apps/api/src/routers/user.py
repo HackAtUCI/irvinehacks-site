@@ -393,7 +393,8 @@ async def rsvp(
             "Waiver must be signed before being able to RSVP.",
         )
 
-    # Store expected late arrival time (Friday 6pm-8pm): None when on time, time string when late.
+    # Store expected late arrival time (Friday 6pm-8pm)
+    # None when on time, time string when late.
     late_arrival_value: Optional[str] = None
     if late_arrival_time and late_arrival_time.strip():
         if late_arrival_time.strip() not in LATE_ARRIVAL_TIMES:
@@ -403,7 +404,10 @@ async def rsvp(
             )
         late_arrival_value = late_arrival_time.strip()
 
-    updated_fields: dict[str, Any] = {"status": new_status, "late_arrival_time": late_arrival_value}
+    updated_fields: dict[str, Any] = {
+        "status": new_status,
+        "late_arrival_time": late_arrival_value,
+    }
     await mongodb_handler.update_one(
         Collection.USERS, {"_id": user.uid}, updated_fields
     )

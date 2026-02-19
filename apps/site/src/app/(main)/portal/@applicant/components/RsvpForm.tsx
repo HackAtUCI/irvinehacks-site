@@ -18,7 +18,9 @@ const LATE_ARRIVAL_TIMES = [
 ] as const;
 
 export default function RsvpForm({ buttonText, showWarning }: RsvpFormProps) {
-	const [comingLateChoice, setComingLateChoice] = useState<"" | "no" | "yes">("");
+	const [comingLateChoice, setComingLateChoice] = useState<"" | "no" | "yes">(
+		"",
+	);
 	const [lateArrivalTime, setLateArrivalTime] = useState<string>("18:00");
 	const comingLate = comingLateChoice === "yes";
 	const confirmationMessage =
@@ -69,9 +71,7 @@ export default function RsvpForm({ buttonText, showWarning }: RsvpFormProps) {
 				</div>
 			)}
 
-			{!comingLate && (
-				<input type="hidden" name="late_arrival_time" value="" />
-			)}
+			{!comingLate && <input type="hidden" name="late_arrival_time" value="" />}
 
 			<div className="mt-2 md:mt-8">
 				<Button

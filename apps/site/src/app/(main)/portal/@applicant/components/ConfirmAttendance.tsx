@@ -41,9 +41,9 @@ function ConfirmAttendance({ status }: ConfirmAttendanceProps) {
 					</p>
 					<p className="text-xs sm:text-base md:text-2xl mt-4">
 						If you plan on coming after your allotted check-in time on Friday,
-						please fill in your expected time of arrival below. All
-						members of your team must check in in person on Friday, and at least one
-						person from your team must check in in person for all 3 days.
+						please fill in your expected time of arrival below. All members of
+						your team must check in in person on Friday, and at least one person
+						from your team must check in in person for all 3 days.
 					</p>
 				</>
 			)}

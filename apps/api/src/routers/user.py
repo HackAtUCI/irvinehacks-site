@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from logging import getLogger
-from typing import Annotated, Any, Union
+from typing import Annotated, Any, Optional, Union
 from urllib.parse import urlencode
 
 from fastapi import (
@@ -363,9 +363,13 @@ async def waiver_webhook(
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid payload content.")
 
 
+LATE_ARRIVAL_TIMES = ("18:00", "18:30", "19:00", "19:30", "20:00")
+
+
 @router.post("/rsvp")
 async def rsvp(
     user: Annotated[User, Depends(require_user_identity)],
+    late_arrival_time: Annotated[Optional[str], Form()] = None,
 ) -> RedirectResponse:
     """Change user status for RSVP"""
     user_record = await mongodb_handler.retrieve_one(
@@ -389,8 +393,19 @@ async def rsvp(
             "Waiver must be signed before being able to RSVP.",
         )
 
+    # Store expected late arrival time (Friday 6pm-8pm): None when on time, time string when late.
+    late_arrival_value: Optional[str] = None
+    if late_arrival_time and late_arrival_time.strip():
+        if late_arrival_time.strip() not in LATE_ARRIVAL_TIMES:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                "Invalid late arrival time.",
+            )
+        late_arrival_value = late_arrival_time.strip()
+
+    updated_fields: dict[str, Any] = {"status": new_status, "late_arrival_time": late_arrival_value}
     await mongodb_handler.update_one(
-        Collection.USERS, {"_id": user.uid}, {"status": new_status}
+        Collection.USERS, {"_id": user.uid}, updated_fields
     )
 
     old_status = user_record["status"]

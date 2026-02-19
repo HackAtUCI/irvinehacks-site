@@ -365,6 +365,7 @@ async def waiver_webhook(
 
 ARRIVAL_TIMES = ("18:00", "18:30", "19:00", "19:30")
 
+
 @router.post("/rsvp")
 async def rsvp(
     user: Annotated[User, Depends(require_user_identity)],
@@ -414,6 +415,7 @@ async def rsvp(
     log.info(f"User {user.uid} changed status from {old_status} to {new_status}.")
 
     return RedirectResponse("/portal", status.HTTP_303_SEE_OTHER)
+
 
 @router.post("/rsvp/late-arrival")
 async def rsvp_late_arrival(

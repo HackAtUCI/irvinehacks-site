@@ -3,7 +3,7 @@ import {
 	ChooseCharacter,
 	FAQ,
 	Sponsors,
-	// Partners,
+	Partners,
 	// Organizers,
 } from "./sections";
 
@@ -22,7 +22,7 @@ export default function Home() {
 			<ChooseCharacter />
 			<FAQ />
 			<Sponsors />
-			{/* <Partners /> */}
+			<Partners />
 			{/* <Organizers /> */}
 		</>
 	);

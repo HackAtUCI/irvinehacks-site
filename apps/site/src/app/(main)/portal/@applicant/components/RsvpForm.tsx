@@ -9,8 +9,8 @@ interface RsvpFormProps {
 	showWarning: boolean;
 }
 
-const ARRIVAL_TIMES = [
-	{ value: "18:00", label: "6:00 PM" },
+// Only late options, 6:00 PM is default from first dropdown
+const LATE_ARRIVAL_TIME_OPTIONS = [
 	{ value: "18:30", label: "6:30 PM" },
 	{ value: "19:00", label: "7:00 PM" },
 	{ value: "19:30", label: "7:30 PM" },
@@ -20,7 +20,7 @@ export default function RsvpForm({ buttonText, showWarning }: RsvpFormProps) {
 	const [comingLateChoice, setComingLateChoice] = useState<"" | "no" | "yes">(
 		"",
 	);
-	const [arrivalTime, setArrivalTime] = useState<string>("18:00");
+	const [arrivalTime, setArrivalTime] = useState<string>("18:30");
 	const comingLate = comingLateChoice === "yes";
 	const confirmationMessage =
 		"WARNING: You will not be able to RSVP again. Are you sure you want to continue?";
@@ -61,7 +61,7 @@ export default function RsvpForm({ buttonText, showWarning }: RsvpFormProps) {
 						onChange={(e) => setArrivalTime(e.target.value)}
 						className="bg-[#e1e1e1] text-[var(--color-black)] text-lg h-10 p-1.5 rounded-md"
 					>
-						{ARRIVAL_TIMES.map(({ value, label }) => (
+						{LATE_ARRIVAL_TIME_OPTIONS.map(({ value, label }) => (
 							<option key={value} value={value}>
 								{label}
 							</option>
@@ -69,8 +69,6 @@ export default function RsvpForm({ buttonText, showWarning }: RsvpFormProps) {
 					</select>
 				</div>
 			)}
-
-			{!comingLate && <input type="hidden" name="arrival_time" value="18:00" />}
 
 			<div className="mt-2 md:mt-8">
 				<Button

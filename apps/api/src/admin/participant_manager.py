@@ -26,6 +26,7 @@ class Participant(UserRecord):
 
     checkins: list[Checkin] = []
     status: Union[Status, Decision] = Status.REVIEWED
+    decision: Decision
     badge_number: Union[str, None] = None
 
 
@@ -72,6 +73,21 @@ async def get_participants() -> list[Participant]:
                             Status.ATTENDING,
                             Status.WAIVER_SIGNED,
                             Status.CONFIRMED,
+                            Decision.ACCEPTED,
+                            Decision.WAITLISTED,
+                        ]
+                    },
+                },
+                {
+                    "roles": {
+                        "$in": [
+                            Role.HACKER,
+                            Role.MENTOR,
+                            Role.VOLUNTEER,
+                        ]
+                    },
+                    "decision": {
+                        "$in": [
                             Decision.ACCEPTED,
                             Decision.WAITLISTED,
                         ]

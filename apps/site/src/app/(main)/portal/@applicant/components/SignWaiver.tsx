@@ -1,12 +1,13 @@
 import Button from "@/lib/components/Button/Button";
-import { Decision } from "@/lib/userRecord";
+import { Decision, Status } from "@/lib/userRecord";
 
 interface SignWaiverProps {
+	status: Status;
 	decision: Decision;
 	waitlistOpen: boolean;
 }
 
-function SignWaiver({ decision, waitlistOpen }: SignWaiverProps) {
+function SignWaiver({ status, decision, waitlistOpen }: SignWaiverProps) {
 	return (
 		<div className="mt-4 md:mt-10 text-[var(--color-white)]">
 			<h3 className="font-bold font-display mb-[9px] md:mb-[20px] text-[0.9375rem] sm:text-2xl md:text-[2.5rem] md:leading-10">
@@ -16,8 +17,8 @@ function SignWaiver({ decision, waitlistOpen }: SignWaiverProps) {
 				In order to attend IrvineHacks 2026, all participants must complete the
 				Participation Waiver and review the Code of Conduct. The button below
 				will take you to a DropboxSign form to sign the waiver.{" "}
-				{(decision !== Decision.Waitlisted ||
-					(decision === Decision.Waitlisted && waitlistOpen)) && (
+				{((decision === Decision.Waitlisted && waitlistOpen) ||
+					status !== Status.Confirmed) && (
 					<span>
 						After signing the waiver, please return to this Portal to confirm
 						your attendance.

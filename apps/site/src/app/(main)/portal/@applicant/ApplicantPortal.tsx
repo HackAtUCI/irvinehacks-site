@@ -43,9 +43,7 @@ function Portal() {
 	const waitlistOpen = waitlistStatus?.is_open ?? false;
 
 	const needsToSignWaiver = isAccepted || (isWaitlisted && waitlistStarted);
-	const needsToRSVP =
-		!(isAccepted && isWaitlisted) &&
-		(isAccepted || (isWaitlisted && waitlistOpen));
+	const needsToRSVP = isAccepted || (isWaitlisted && waitlistOpen);
 
 	const rejected = status === Status.Rejected;
 
@@ -73,6 +71,7 @@ function Portal() {
 				/>
 				{needsToSignWaiver && (
 					<SignWaiver
+						status={status as Status}
 						decision={identity?.decision as Decision}
 						waitlistOpen={waitlistOpen}
 					/>

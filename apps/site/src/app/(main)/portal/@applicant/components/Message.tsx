@@ -35,19 +35,6 @@ function Message({ status, decision }: MessageProps) {
 				.
 			</p>
 		);
-	} else if (decision === Decision.Accepted && status === Status.Waitlisted) {
-		message = (
-			<p className="mb-0">
-				We did not receive your RSVP by the 2/19 deadline. However, you can show
-				up in-person to the Waitlist Queue on{" "}
-				<strong className="underline">Friday, 2/27 before 4:00 p.m. PST</strong>
-				.<br />
-				<br />
-				Note that check-in will start on{" "}
-				<strong className="underline">Friday, 2/27 at 5:00 p.m. PST</strong> and
-				will be on first-come first-served basis depending on venue capacity.
-			</p>
-		);
 	} else if (decision === Decision.Accepted) {
 		message = <></>;
 	} else if (decision === Decision.Waitlisted || status === Status.Waitlisted) {
@@ -120,7 +107,6 @@ function Message({ status, decision }: MessageProps) {
 	}
 
 	const showMessage =
-		(decision === Decision.Accepted && status === Status.Waitlisted) ||
 		(decision !== Decision.Accepted &&
 			(
 				[

@@ -143,17 +143,16 @@ async def add_participant_to_queue(uid: str, associate: User) -> None:
     if record is None:
         raise ValueError("No application record found.")
     status = record.get("status")
-    decision = record.get("decision")
     roles = cast(list[Role], record.get("roles"))
 
     if Role.HACKER not in roles:
         raise ValueError(f"Applicant is a {roles}, not a hacker.")
-    if decision == Decision.ACCEPTED:
-        raise ValueError("Applicant decision is accepted and should be checked in.")
-    elif decision == Decision.REJECTED:
-        raise ValueError("Applicant decision is rejected. Not eligible for hackathon.")
     if status == Status.ATTENDING:
         raise ValueError("Participant has checked in. Not eligible for queue.")
+    elif status == Status.QUEUED:
+        raise ValueError("Participant is on already on the queue.")
+    elif status == Status.CONFIRMED:
+        raise ValueError("Participant should be checked in instead.")
     elif status != Status.WAIVER_SIGNED:
         raise ValueError("Participant has not signed waiver. Not eligible for queue.")
 

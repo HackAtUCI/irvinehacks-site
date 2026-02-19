@@ -71,6 +71,9 @@ async def queue_removal() -> None:
 )
 async def queue_participants() -> None:
     """Remove QUEUED participants from queue and send them email notification."""
+
+    await queue_removal()
+
     records = []
     settings = await mongodb_handler.retrieve_one(
         Collection.SETTINGS, {"_id": "queue"}, ["users_queue"]

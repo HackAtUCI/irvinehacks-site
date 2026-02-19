@@ -12,7 +12,7 @@ import Table, { TableProps } from "@cloudscape-design/components/table";
 
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
 import { Participant } from "@/lib/admin/useParticipants";
-import { ParticipantRole } from "@/lib/userRecord";
+import { Decision, ParticipantRole } from "@/lib/userRecord";
 
 import CheckinDayIcon from "./CheckinDayIcon";
 import ParticipantAction from "./ParticipantAction";
@@ -20,9 +20,9 @@ import ParticipantsFilters from "./ParticipantsFilters";
 import RoleBadge from "./RoleBadge";
 import SearchScannerModal from "./SearchScannerModal";
 
-const FRIDAY = new Date("2025-01-24T12:00:00");
-const SATURDAY = new Date("2025-01-25T12:00:00");
-const SUNDAY = new Date("2025-01-26T12:00:00");
+const FRIDAY = new Date("2026-02-27T12:00:00");
+const SATURDAY = new Date("2026-02-28T12:00:00");
+const SUNDAY = new Date("2026-03-01T12:00:00");
 
 interface EmptyStateProps {
 	title: string;
@@ -44,6 +44,7 @@ const SEARCHABLE_COLUMNS: (keyof Participant)[] = [
 	"last_name",
 	"roles",
 	"status",
+	"decision",
 ];
 
 type StrictColumnDefinition = TableProps.ColumnDefinition<Participant> & {
@@ -88,6 +89,7 @@ function ParticipantsTable({
 			"lastName",
 			"roles",
 			"status",
+			"decision",
 			"friday",
 			"saturday",
 			"sunday",
@@ -96,6 +98,7 @@ function ParticipantsTable({
 	});
 	const [filterRole, setFilterRole] = useState<Options>([]);
 	const [filterStatus, setFilterStatus] = useState<Options>([]);
+	const [filterDecision, setFilterDecision] = useState<Options>([]);
 	const matchesRole = (p: Participant) =>
 		filterRole.length === 0 ||
 		filterRole
@@ -104,6 +107,9 @@ function ParticipantsTable({
 	const matchesStatus = (p: Participant) =>
 		filterStatus.length === 0 ||
 		filterStatus.map((s) => s.value).includes(p.status);
+	const matchesDecision = (p: Participant) =>
+		filterDecision.length === 0 ||
+		(p.decision && filterDecision.map((d) => d.value).includes(p.decision));
 
 	const {
 		items,
@@ -132,6 +138,9 @@ function ParticipantsTable({
 				if (!matchesStatus(item)) {
 					return false;
 				}
+				if (!matchesDecision(item)) {
+					return false;
+				}
 				const filteringTextLC = filteringText.toLowerCase();
 
 				return (
@@ -157,6 +166,13 @@ function ParticipantsTable({
 	const statusOptions = Array.from(allStatuses).map((s) => ({
 		value: s,
 		label: s,
+	}));
+	const allDecisions = new Set(
+		participants.map((p) => p.decision).filter((d): d is Decision => !!d),
+	);
+	const decisionOptions = Array.from(allDecisions).map((d) => ({
+		value: d,
+		label: d,
 	}));
 
 	const ActionCell = useCallback(
@@ -206,6 +222,13 @@ function ParticipantsTable({
 			cell: ApplicantStatus,
 			ariaLabel: createLabelFunction("status"),
 			sortingField: "status",
+		},
+		{
+			id: "decision",
+			header: "Decision",
+			cell: DecisionCell,
+			ariaLabel: createLabelFunction("decision"),
+			sortingField: "decision",
 		},
 		{
 			id: "friday",
@@ -292,6 +315,9 @@ function ParticipantsTable({
 						statuses={statusOptions}
 						selectedStatuses={filterStatus}
 						setSelectedStatuses={setFilterStatus}
+						decisions={decisionOptions}
+						selectedDecisions={filterDecision}
+						setSelectedDecisions={setFilterDecision}
 					/>
 				}
 				pagination={
@@ -353,5 +379,8 @@ const SaturdayCheckin = ({ checkins }: Participant) => (
 const SundayCheckin = ({ checkins }: Participant) => (
 	<CheckinDayIcon checkins={checkins} date={SUNDAY} />
 );
+
+const DecisionCell = (item: Participant) =>
+	item.decision ? <ApplicantStatus status={item.decision} /> : "-";
 
 export default ParticipantsTable;

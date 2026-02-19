@@ -30,6 +30,9 @@ interface ParticipantsFiltersProps {
 	statuses: Options;
 	selectedStatuses: Options;
 	setSelectedStatuses: Dispatch<SetStateAction<Options>>;
+	decisions: Options;
+	selectedDecisions: Options;
+	setSelectedDecisions: Dispatch<SetStateAction<Options>>;
 }
 
 const StatusIcons: Record<Status, IconProps.Name> = {
@@ -49,7 +52,7 @@ const statusOption = (status: MultiselectProps.Option) => {
 		throw Error();
 	}
 	return {
-		label: StatusLabels[status.value as Status],
+		label: StatusLabels[status.value as Status] ?? status.value,
 		value: status.value,
 		iconName: StatusIcons[status.value as Status],
 	};
@@ -64,6 +67,9 @@ function ParticipantsFilters({
 	statuses,
 	selectedStatuses,
 	setSelectedStatuses,
+	decisions,
+	selectedDecisions,
+	setSelectedDecisions,
 }: ParticipantsFiltersProps) {
 	return (
 		<SpaceBetween size="l" direction="horizontal">
@@ -99,6 +105,19 @@ function ParticipantsFilters({
 					selectedOptions={selectedStatuses}
 					onChange={(event) =>
 						setSelectedStatuses(event.detail.selectedOptions)
+					}
+					expandToViewport={true}
+				/>
+			</FormField>
+			<FormField label="Decision">
+				<Multiselect
+					data-testid="decision-filter"
+					placeholder="Filter by decision"
+					options={decisions.map(statusOption)}
+					selectedAriaLabel="Selected"
+					selectedOptions={selectedDecisions}
+					onChange={(event) =>
+						setSelectedDecisions(event.detail.selectedOptions)
 					}
 					expandToViewport={true}
 				/>

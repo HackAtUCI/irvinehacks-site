@@ -45,6 +45,10 @@ function ConfirmAttendance({ status }: ConfirmAttendanceProps) {
 						your team must check in in person on Friday, and at least one person
 						from your team must check in in person for all 3 days.
 					</p>
+					<p className="text-xs sm:text-base md:text-2xl mt-4 text-[#FF4DEF]">
+						If you do not check in by your allotted time or by the late arrival
+						time you specify, your spot may be given to another attendee.
+					</p>
 				</>
 			)}
 			{status !== Status.Confirmed && status !== Status.Attending && (

@@ -51,11 +51,14 @@ async def require_accepted_applicant(
 
         if applicant_record.status not in (
             Decision.ACCEPTED,
+            Decision.WAITLISTED,
             Status.WAIVER_SIGNED,
             Status.CONFIRMED,
             Status.ATTENDING,
         ):
-            raise HTTPException(status.HTTP_403_FORBIDDEN, "User was not accepted.")
+            raise HTTPException(
+                status.HTTP_403_FORBIDDEN, "User was not accepted or waitlisted."
+            )
 
         return user, applicant_record
     except ValidationError:

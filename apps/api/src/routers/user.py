@@ -43,6 +43,8 @@ log = getLogger(__name__)
 router = APIRouter()
 
 DEADLINE = datetime(2026, 2, 14, 8, 1, tzinfo=timezone.utc)
+WAITLIST_OPEN_TIME = datetime(2026, 2, 20, 20, 0, tzinfo=timezone.utc)
+WAITLIST_CLOSE_TIME = datetime(2026, 2, 23, 8, 1, tzinfo=timezone.utc)
 
 HACKATHON_EXPERIENCE_SCORE_MAP = {
     "first_time": 5,
@@ -65,12 +67,36 @@ class CharacterIndexes(BaseModel):
     character_companion_index: int
 
 
+class WaitlistStatus(BaseModel):
+    is_started: bool
+    is_open: bool
+
+
 class ApplicationData(BaseModel):
     application_data: Union[CharacterIndexes, None] = None
 
 
 def _is_past_deadline(now: datetime) -> bool:
     return now > DEADLINE
+
+
+async def _get_waitlist_status() -> WaitlistStatus:
+    now = datetime.now(timezone.utc)
+    is_started = now >= WAITLIST_OPEN_TIME
+
+    is_open = False
+    if is_started and now < WAITLIST_CLOSE_TIME:
+        confirmed_count = await mongodb_handler.count(
+            Collection.USERS, {"status": Status.CONFIRMED, "roles": Role.HACKER}
+        )
+        is_open = confirmed_count < 400
+
+    return WaitlistStatus(is_started=is_started, is_open=is_open)
+
+
+@router.get("/waitlist-open")
+async def waitlist_open() -> WaitlistStatus:
+    return await _get_waitlist_status()
 
 
 @router.post("/login")
@@ -381,6 +407,11 @@ async def rsvp(
     elif user_record["status"] == Status.CONFIRMED:
         new_status = Status.WAIVER_SIGNED
     elif user_record["decision"] == Decision.ACCEPTED:
+        new_status = Status.CONFIRMED
+    elif (
+        user_record["decision"] == Decision.WAITLISTED
+        and (await _get_waitlist_status()).is_open
+    ):
         new_status = Status.CONFIRMED
     else:
         log.warning(f"User {user.uid} has not signed waiver. Status has not changed.")

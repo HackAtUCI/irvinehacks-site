@@ -5,68 +5,43 @@ import Button from "@/lib/components/Button/Button";
 import ControlledDropdownSelect from "@/lib/components/forms/ControlledDropdownSelect";
 
 const ARRIVAL_TIMES = [
-	{ value: "18:00", label: "6:00 PM" },
-	{ value: "18:30", label: "6:30 PM" },
-	{ value: "19:00", label: "7:00 PM" },
-	{ value: "19:30", label: "7:30 PM" },
-] as const;
+	{ value: "18:00", text: "6:00 PM" },
+	{ value: "18:30", text: "6:30 PM" },
+	{ value: "19:00", text: "7:00 PM" },
+	{ value: "19:30", text: "7:30 PM" },
+];
 
 export default function LateArrivalForm() {
-	const [comingLateChoice, setComingLateChoice] = useState<"" | "no" | "yes">(
-		"",
-	);
 	const [arrivalTime, setArrivalTime] = useState<string>("18:00");
-	const comingLate = comingLateChoice === "yes";
 
 	return (
-		<form
-			method="post"
-			action="/api/user/rsvp/late-arrival"
-			className="space-y-4 mt-2 md:mt-8"
-		>
-			<ControlledDropdownSelect
-				name="coming-late"
-				labelText="Check-in defaults to 6:00 PM on Friday. Will you be arriving later than 6:00 PM? Failure to arrive at your specified check-in time may result in your spot being given to another attendee."
-				values={[
-					{ value: "", text: "Select an option" },
-					{ value: "no", text: "No, I'll be there by 6:00 PM" },
-					{ value: "yes", text: "Yes" },
-				]}
-				containerClass="flex flex-col w-full max-w-md text-[var(--color-white)]"
-				value={comingLateChoice}
-				onChange={(v) => setComingLateChoice(v as "" | "no" | "yes")}
-			/>
-
-			{comingLate && (
-				<div className="flex flex-col w-full max-w-md text-[var(--color-white)]">
-					<label className="text-lg mb-2" htmlFor="arrival_time">
-						Expected time of arrival (Friday)
-					</label>
-					<select
-						id="arrival_time"
-						name="arrival_time"
-						value={arrivalTime}
-						onChange={(e) => setArrivalTime(e.target.value)}
-						className="bg-[#e1e1e1] text-[var(--color-black)] text-lg h-10 p-1.5 rounded-md"
-					>
-						{ARRIVAL_TIMES.map(({ value, label }) => (
-							<option key={value} value={value}>
-								{label}
-							</option>
-						))}
-					</select>
-				</div>
-			)}
-
-			{!comingLate && <input type="hidden" name="arrival_time" value="18:00" />}
-
-			<div className="mt-2 md:mt-8">
-				<Button
-					text="Save arrival time"
-					isLightVersion={true}
-					className="text-xs sm:text-base md:text-4xl !bg-pink"
+		<div className="mt-2 md:mt-8">
+			<h3 className="font-bold font-display mb-[9px] md:mb-[20px] text-[0.9375rem] sm:text-2xl md:text-[2.5rem] md:leading-10 text-[var(--color-white)]">
+				Update Your Arrival Time
+			</h3>
+			<form
+				method="post"
+				action="/api/user/rsvp/late-arrival"
+				className="space-y-4"
+			>
+				<ControlledDropdownSelect
+					name="arrival_time"
+					labelText="Expected time of arrival (Friday). Failure to arrive at your specified check-in time may result in your spot being given to another attendee."
+					values={ARRIVAL_TIMES}
+					containerClass="flex flex-col w-full max-w-md text-[var(--color-white)]"
+					value={arrivalTime}
+					onChange={setArrivalTime}
+					required={true}
 				/>
-			</div>
-		</form>
+
+				<div className="mt-2 md:mt-8">
+					<Button
+						text="Save arrival time"
+						isLightVersion={true}
+						className="text-xs sm:text-base md:text-4xl !bg-pink"
+					/>
+				</div>
+			</form>
+		</div>
 	);
 }

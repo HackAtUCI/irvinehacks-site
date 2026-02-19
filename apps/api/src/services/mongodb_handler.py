@@ -113,6 +113,13 @@ async def retrieve(
     return output
 
 
+async def count(collection: Collection, query: Mapping[str, object]) -> int:
+    """Return the number of documents that satisfy the provided query."""
+    DB = get_database()
+    COLLECTION = DB[collection.value]
+    return await COLLECTION.count_documents(query)
+
+
 async def update_one(
     collection: Collection,
     query: Mapping[str, object],

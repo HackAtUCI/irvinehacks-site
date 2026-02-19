@@ -3,7 +3,8 @@
 import { redirect } from "next/navigation";
 
 import useUserIdentity from "@/lib/utils/useUserIdentity";
-import { Status } from "@/lib/userRecord";
+import { Decision, Status } from "@/lib/userRecord";
+import useWaitlistOpen from "@/lib/utils/useWaitlistOpen";
 
 import ConfirmAttendance from "./components/ConfirmAttendance";
 import Message from "./components/Message";
@@ -17,8 +18,9 @@ const rolesArray = ["Mentor", "Hacker", "Volunteer"];
 
 function Portal() {
 	const identity = useUserIdentity();
+	const { waitlistStatus, isLoading: isWaitlistLoading } = useWaitlistOpen();
 
-	if (!identity) {
+	if (!identity || isWaitlistLoading) {
 		return <div className="font-display text-4xl mt-5">Loading...</div>;
 	}
 
@@ -32,15 +34,17 @@ function Portal() {
 		rolesArray.includes(role),
 	);
 
-	// const submittedWaiver =
-	// 	status === Status.Signed ||
-	// 	status === Status.Confirmed ||
-	// 	status === Status.Attending;
+	const isWaitlisted =
+		status === Status.Waitlisted || identity?.decision === Status.Waitlisted;
+	const isAccepted =
+		status === Status.Accepted || identity?.decision === Status.Accepted;
 
-	const needsToSignWaiver =
-		status === Status.Accepted ||
-		status === Status.Confirmed ||
-		identity?.decision === Status.Accepted;
+	const waitlistStarted = waitlistStatus?.is_started ?? false;
+	const waitlistOpen = waitlistStatus?.is_open ?? false;
+
+	const needsToSignWaiver = isAccepted || (isWaitlisted && waitlistStarted);
+	const needsToRSVP = isAccepted || (isWaitlisted && waitlistOpen);
+
 	const rejected = status === Status.Rejected;
 
 	return (
@@ -62,10 +66,17 @@ function Portal() {
 					status={identity?.decision ? identity?.decision : (status as Status)}
 				/>
 				<Message
-					status={identity?.decision ? identity?.decision : (status as Status)}
+					status={status as Status}
+					decision={identity?.decision as Decision}
 				/>
-				{needsToSignWaiver && <SignWaiver />}
-				{needsToSignWaiver && <ConfirmAttendance status={status as Status} />}
+				{needsToSignWaiver && (
+					<SignWaiver
+						status={status as Status}
+						decision={identity?.decision as Decision}
+						waitlistOpen={waitlistOpen}
+					/>
+				)}
+				{needsToRSVP && <ConfirmAttendance status={status as Status} />}
 				{rejected && <ReturnHome />}
 			</div>
 		</div>

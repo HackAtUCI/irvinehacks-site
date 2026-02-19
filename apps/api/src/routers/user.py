@@ -363,7 +363,7 @@ async def waiver_webhook(
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid payload content.")
 
 
-ARRIVAL_TIMES = ("18:00", "18:30", "19:00", "19:30")
+ARRIVAL_TIMES = ("17:00", "18:00", "18:30", "19:00", "19:30")
 
 
 @router.post("/rsvp")
@@ -393,8 +393,8 @@ async def rsvp(
             "Waiver must be signed before being able to RSVP.",
         )
 
-    # Default check-in time is 6:00pm (18:00)
-    arrival_value: str = "18:00"
+    # Default check-in time is 5:00pm (17:00)
+    arrival_value: str = "17:00"
     if arrival_time and arrival_time.strip():
         if arrival_time.strip() not in ARRIVAL_TIMES:
             raise HTTPException(
@@ -415,6 +415,19 @@ async def rsvp(
     log.info(f"User {user.uid} changed status from {old_status} to {new_status}.")
 
     return RedirectResponse("/portal", status.HTTP_303_SEE_OTHER)
+
+
+@router.get("/rsvp/late-arrival")
+async def get_arrival_time(
+    user: Annotated[User, Depends(require_user_identity)],
+) -> dict[str, Any]:
+    """Get the current arrival time for the user."""
+    user_record = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": user.uid}, ["arrival_time"]
+    )
+    if not user_record:
+        return {"arrival_time": None}
+    return {"arrival_time": user_record.get("arrival_time")}
 
 
 @router.post("/rsvp/late-arrival")

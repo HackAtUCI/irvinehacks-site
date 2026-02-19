@@ -42,10 +42,10 @@ function ConfirmAttendance({ status }: ConfirmAttendanceProps) {
 						attendance using the button below!
 					</p>
 					<p className="text-xs sm:text-base md:text-2xl mt-4">
-						Check-in defaults to 6:00 PM on Friday 2/27 for everyone. If you
-						will be arriving later than 6:00 PM, please change your expected
-						arrival time below. All members of your team must check in in-person
-						on Friday, and at least one person from your team must check in
+						Check-in starts at 5:00 PM on Friday 2/27 for everyone. If you will
+						be arriving later than 5:00 PM, please change your expected arrival
+						time below. All members of your team must check in in-person on
+						Friday, and at least one person from your team must check in
 						in-person for all 3 days.
 					</p>
 					<p className="text-xs sm:text-base md:text-2xl mt-4 text-[#FF4DEF]">

@@ -365,7 +365,6 @@ async def waiver_webhook(
 
 ARRIVAL_TIMES = ("18:00", "18:30", "19:00", "19:30")
 
-
 @router.post("/rsvp")
 async def rsvp(
     user: Annotated[User, Depends(require_user_identity)],
@@ -415,6 +414,44 @@ async def rsvp(
     log.info(f"User {user.uid} changed status from {old_status} to {new_status}.")
 
     return RedirectResponse("/portal", status.HTTP_303_SEE_OTHER)
+
+@router.post("/rsvp/late-arrival")
+async def rsvp_late_arrival(
+    user: Annotated[User, Depends(require_user_identity)],
+    arrival_time: Annotated[Optional[str], Form()] = None,
+) -> RedirectResponse:
+    """Submit or update expected arrival time (default 6pm; Friday 6pm–7:30pm)."""
+    user_record = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": user.uid}, ["status", "decision"]
+    )
+
+    if not user_record or "status" not in user_record:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "User must have a status.")
+
+    if user_record["status"] != Status.CONFIRMED:
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN,
+            "You must RSVP before setting an arrival time.",
+        )
+
+    # Default check-in time is 6:00pm (18:00)
+    arrival_value: str = "18:00"
+    if arrival_time and arrival_time.strip():
+        if arrival_time.strip() not in ARRIVAL_TIMES:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                "Invalid arrival time.",
+            )
+        arrival_value = arrival_time.strip()
+
+    await mongodb_handler.update_one(
+        Collection.USERS, {"_id": user.uid}, {"arrival_time": arrival_value}
+    )
+
+    log.info(f"User {user.uid} set arrival_time to {arrival_value}.")
+
+    return RedirectResponse("/portal", status.HTTP_303_SEE_OTHER)
+
 
 def _parsed_form(form: FormData) -> dict[str, Any]:
     """Manually parse form data.

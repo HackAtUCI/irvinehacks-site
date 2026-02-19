@@ -1,4 +1,5 @@
 import { Status } from "@/lib/userRecord";
+import LateArrivalForm from "./LateArrivalForm";
 import RsvpForm from "./RsvpForm";
 
 interface ConfirmAttendanceProps {
@@ -32,6 +33,7 @@ function ConfirmAttendance({ status }: ConfirmAttendanceProps) {
 							<span className="underline">NOT</span> be able to RSVP again.
 						</strong>
 					)}
+					{status === Status.Confirmed && <LateArrivalForm />}
 				</>
 			) : (
 				<>

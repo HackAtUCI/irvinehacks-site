@@ -9,19 +9,18 @@ interface RsvpFormProps {
 	showWarning: boolean;
 }
 
-const LATE_ARRIVAL_TIMES = [
+const ARRIVAL_TIMES = [
 	{ value: "18:00", label: "6:00 PM" },
 	{ value: "18:30", label: "6:30 PM" },
 	{ value: "19:00", label: "7:00 PM" },
 	{ value: "19:30", label: "7:30 PM" },
-	{ value: "20:00", label: "8:00 PM" },
 ] as const;
 
 export default function RsvpForm({ buttonText, showWarning }: RsvpFormProps) {
 	const [comingLateChoice, setComingLateChoice] = useState<"" | "no" | "yes">(
 		"",
 	);
-	const [lateArrivalTime, setLateArrivalTime] = useState<string>("18:00");
+	const [arrivalTime, setArrivalTime] = useState<string>("18:00");
 	const comingLate = comingLateChoice === "yes";
 	const confirmationMessage =
 		"WARNING: You will not be able to RSVP again. Are you sure you want to continue?";
@@ -39,10 +38,10 @@ export default function RsvpForm({ buttonText, showWarning }: RsvpFormProps) {
 		>
 			<ControlledDropdownSelect
 				name="coming-late"
-				labelText="Will you be arriving after your allotted check-in time on Friday?"
+				labelText="Check-in defaults to 6:00 PM on Friday. Will you be arriving later than 6:00 PM?"
 				values={[
 					{ value: "", text: "Select an option" },
-					{ value: "no", text: "No, I'll be on time" },
+					{ value: "no", text: "No, I'll be there by 6:00 PM" },
 					{ value: "yes", text: "Yes" },
 				]}
 				containerClass="flex flex-col w-full max-w-md text-[var(--color-white)]"
@@ -52,17 +51,17 @@ export default function RsvpForm({ buttonText, showWarning }: RsvpFormProps) {
 
 			{comingLate && (
 				<div className="flex flex-col w-full max-w-md text-[var(--color-white)]">
-					<label className="text-lg mb-2" htmlFor="late_arrival_time">
+					<label className="text-lg mb-2" htmlFor="arrival_time">
 						Expected time of arrival (Friday)
 					</label>
 					<select
-						id="late_arrival_time"
-						name="late_arrival_time"
-						value={lateArrivalTime}
-						onChange={(e) => setLateArrivalTime(e.target.value)}
+						id="arrival_time"
+						name="arrival_time"
+						value={arrivalTime}
+						onChange={(e) => setArrivalTime(e.target.value)}
 						className="bg-[#e1e1e1] text-[var(--color-black)] text-lg h-10 p-1.5 rounded-md"
 					>
-						{LATE_ARRIVAL_TIMES.map(({ value, label }) => (
+						{ARRIVAL_TIMES.map(({ value, label }) => (
 							<option key={value} value={value}>
 								{label}
 							</option>
@@ -71,7 +70,7 @@ export default function RsvpForm({ buttonText, showWarning }: RsvpFormProps) {
 				</div>
 			)}
 
-			{!comingLate && <input type="hidden" name="late_arrival_time" value="" />}
+			{!comingLate && <input type="hidden" name="arrival_time" value="18:00" />}
 
 			<div className="mt-2 md:mt-8">
 				<Button

@@ -363,13 +363,13 @@ async def waiver_webhook(
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid payload content.")
 
 
-LATE_ARRIVAL_TIMES = ("18:00", "18:30", "19:00", "19:30", "20:00")
+ARRIVAL_TIMES = ("18:00", "18:30", "19:00", "19:30")
 
 
 @router.post("/rsvp")
 async def rsvp(
     user: Annotated[User, Depends(require_user_identity)],
-    late_arrival_time: Annotated[Optional[str], Form()] = None,
+    arrival_time: Annotated[Optional[str], Form()] = None,
 ) -> RedirectResponse:
     """Change user status for RSVP"""
     user_record = await mongodb_handler.retrieve_one(
@@ -393,20 +393,19 @@ async def rsvp(
             "Waiver must be signed before being able to RSVP.",
         )
 
-    # Store expected late arrival time (Friday 6pm-8pm)
-    # None when on time, time string when late.
-    late_arrival_value: Optional[str] = None
-    if late_arrival_time and late_arrival_time.strip():
-        if late_arrival_time.strip() not in LATE_ARRIVAL_TIMES:
+    # Default check-in time is 6:00pm (18:00)
+    arrival_value: str = "18:00"
+    if arrival_time and arrival_time.strip():
+        if arrival_time.strip() not in ARRIVAL_TIMES:
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST,
-                "Invalid late arrival time.",
+                "Invalid arrival time.",
             )
-        late_arrival_value = late_arrival_time.strip()
+        arrival_value = arrival_time.strip()
 
     updated_fields: dict[str, Any] = {
         "status": new_status,
-        "late_arrival_time": late_arrival_value,
+        "arrival_time": arrival_value,
     }
     await mongodb_handler.update_one(
         Collection.USERS, {"_id": user.uid}, updated_fields
@@ -416,7 +415,6 @@ async def rsvp(
     log.info(f"User {user.uid} changed status from {old_status} to {new_status}.")
 
     return RedirectResponse("/portal", status.HTTP_303_SEE_OTHER)
-
 
 def _parsed_form(form: FormData) -> dict[str, Any]:
     """Manually parse form data.

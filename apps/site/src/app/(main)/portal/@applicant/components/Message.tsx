@@ -43,14 +43,12 @@ function Message({ status, decision }: MessageProps) {
 				<p className="mb-0">
 					At this moment, the waitlist has closed. However, you can show up
 					in-person to the Waitlist Queue on{" "}
-					<strong className="underline">
-						Friday, 2/27 before 4:00 p.m. PST
-					</strong>
+					<strong className="underline">Friday, 2/27 at 5:30 p.m. PST</strong>
 					.<br />
 					<br />
 					Note that check-in will start on{" "}
 					<strong className="underline">
-						Friday, 2/27 at 5:00 p.m. PST
+						Friday, 2/27 at 6:00 p.m. PST
 					</strong>{" "}
 					and will be on first-come first-served basis depending on venue
 					capacity.

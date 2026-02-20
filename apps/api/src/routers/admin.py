@@ -297,6 +297,44 @@ async def applicant_summary(
 
 
 @router.get(
+    "/summary/applicants/table",
+    response_model=dict[str, int],
+    dependencies=[Depends(require_manager)],
+)
+async def applicant_table(
+    group_by: Literal["school", "major", "year"],
+    role: Optional[str] = None,
+    status_filter: Optional[str] = None,
+) -> dict[str, int]:
+    role_enum: Optional[Role] = None
+    status_enum: Optional[ApplicantStatus] = None
+
+    if role:
+        try:
+            role_enum = Role(role)
+        except ValueError:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST, detail=f"Invalid role: {role}"
+            )
+
+    if status_filter:
+        try:
+            status_enum = Decision(status_filter)
+        except ValueError:
+            try:
+                status_enum = UserStatus(status_filter)
+            except ValueError:
+                raise HTTPException(
+                    status.HTTP_400_BAD_REQUEST,
+                    detail=f"Invalid status: {status_filter}",
+                )
+
+    return await summary_handler.applicant_table(
+        role=role_enum, status=status_enum, group_by=group_by
+    )
+
+
+@router.get(
     "/summary/applications",
     response_model=dict[str, object],
     dependencies=[Depends(require_manager)],

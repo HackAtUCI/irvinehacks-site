@@ -150,7 +150,7 @@ async def add_participant_to_queue(uid: str, associate: User) -> None:
     if status == Status.ATTENDING:
         raise ValueError("Participant has checked in. Not eligible for queue.")
     elif status == Status.QUEUED:
-        raise ValueError("Participant is on already on the queue.")
+        raise ValueError("Participant is already on the queue.")
     elif status == Status.CONFIRMED:
         raise ValueError("Participant should be checked in instead.")
     elif status != Status.WAIVER_SIGNED:

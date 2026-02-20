@@ -8,7 +8,8 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from admin import participant_manager
 from auth.authorization import require_role
-from models.user_record import Decision, Role, Status, UserPromotionRecord, Decision
+from models.ApplicationData import Decision
+from models.user_record import Role, Status, UserPromotionRecord
 from services import mongodb_handler, sendgrid_handler
 from services.mongodb_handler import Collection
 from services.sendgrid_handler import (
@@ -56,9 +57,8 @@ async def queue_removal() -> None:
         log.info("All CONFIRMED participants showed up.")
         return
 
-    log.info(
-        f"Changing status, decision of {len(records)} to {Status.WAIVER_SIGNED}, {Decision.WAITLISTED}."
-    )
+    log.info(f"Changing {len(records)} status to {Status.WAIVER_SIGNED}.")
+    log.info(f"Changing {len(records)} decision to {Decision.WAITLISTED}.")
 
     await asyncio.gather(
         *(

@@ -1,13 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import clsx from "clsx";
 
 import EventPlaque from "./EventPlaque";
 import EventProps from "../EventProps";
 import EventCard from "./EventCard";
-
-import styles from "./EventSidebar.module.scss";
 
 export default function EventSidebar({
 	events,
@@ -77,17 +74,13 @@ export default function EventSidebar({
 	return (
 		<div className="flex flex-col items-center select-none relative w-[50%] max-lg:w-[100%]">
 			<div
-				className={clsx(
-					styles.background,
-					"h-[800px] w-[80%] overflow-auto max-lg:w-full",
-				)}
+				className="h-[800px] w-[80%] max-lg:w-full"
 				ref={scheduleScrollerRef}
 			>
 				<div
-					className="w-full h-fit flex flex-col gap-4 p-6 max-lg:gap-10"
+					className="w-full h-fit flex flex-row overflow-x-scroll gap-4 p-6 max-lg:gap-10"
 					ref={scheduleContainerRef}
 				>
-					<div className="h-[100px] w-full relative flex justify-center items-center max-md:h-0" />
 					{events.map((event) => {
 						return (
 							<div

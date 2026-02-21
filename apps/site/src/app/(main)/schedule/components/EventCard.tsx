@@ -21,7 +21,7 @@ export default function EventCard({
 }: EventCardProps) {
 	return (
 		<div
-			className={`w-[90%] min-w-[200px] h-full bg-[#170f51]/50 border-[9px] border-yellow relative p-12 font-display max-lg:w-full ${"max-lg:bg-blue-100 max-lg:border-blue-900 max-lg:text-blue-950 max-lg:top-[-8px] max-lg:left-[-8px]"}`}
+			className={`w-[78%] min-w-[200px] h-[520px] overflow-auto bg-[#170f51]/50 border-[9px] border-yellow relative p-7 font-display max-lg:w-full ${"max-lg:bg-blue-100 max-lg:border-blue-900 max-lg:text-blue-950 max-lg:top-[-8px] max-lg:left-[-8px]"}`}
 		>
 			{title ? (
 				<>

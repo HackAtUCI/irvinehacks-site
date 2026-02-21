@@ -2,8 +2,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 
 import convertToPST from "@/lib/utils/convertToPST";
+import scheduleFrame from "@/assets/images/schedule_frame.svg";
 
 import EventCard from "../components/EventCard";
 import EventProps from "../EventProps";
@@ -87,34 +89,44 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 				setSelectedEventDay={setSelectedEventDay}
 				selectedEventDay={selectedEventDay}
 			/>
-			<div className="w-full relative flex max-lg:flex-col-reverse max-lg:gap-20">
-				<EventSidebar
-					events={
-						selectedScheduleEvents
-							? selectedScheduleEvents
-							: currentScheduleEvents
-					}
-					currentTitle={`${currentEvent?.title}${currentEvent?.startTime.toISOString()}`}
-					setSelectedEvent={setSelectedEvent}
-				/>
-				{selectedEvent ? (
-					<div className="w-[50%] relative flex max-lg:hidden lg:min-h-[700px]">
-						<EventCard
-							key={selectedEvent.title}
-							now={now}
-							isHappening={false}
-							{...selectedEvent}
-						/>
-					</div>
-				) : (
-					<div className="w-[50%] min-h-[700px] relative flex max-lg:justify-center max-lg:hidden">
-						<div className="w-[90%] min-h-[700px] h-full bg-[#170f51]/50 border-[9px] border-yellow relative p-16 font-display">
-							<div className="text-4xl min-h-[600px] w-full h-full flex justify-center items-center text-center text-yellow">
-								No Event Selected...
+			<div className="relative w-full">
+				<div className="absolute inset-0 w-full h-full z-0">
+					<Image
+						src={scheduleFrame}
+						alt=""
+						className="w-full h-full object-contain"
+						style={{ pointerEvents: "none" }}
+					/>
+				</div>
+				<div className="w-full relative flex max-lg:flex-col-reverse max-lg:gap-20 p-5 z-10">
+					<EventSidebar
+						events={
+							selectedScheduleEvents
+								? selectedScheduleEvents
+								: currentScheduleEvents
+						}
+						currentTitle={`${currentEvent?.title}${currentEvent?.startTime.toISOString()}`}
+						setSelectedEvent={setSelectedEvent}
+					/>
+					{selectedEvent ? (
+						<div className="flex-1 relative flex items-center justify-start max-lg:hidden lg:min-h-[400px]">
+							<EventCard
+								key={selectedEvent.title}
+								now={now}
+								isHappening={false}
+								{...selectedEvent}
+							/>
+						</div>
+					) : (
+						<div className="flex-1 min-h-[400px] relative flex items-center justify-start max-lg:hidden">
+							<div className="w-[78%] h-[520px] overflow-auto bg-[#170f51]/50 border-[9px] border-yellow relative p-7 font-display">
+								<div className="text-4xl w-full h-full flex justify-center items-center text-center text-yellow">
+									No Event Selected...
+								</div>
 							</div>
 						</div>
-					</div>
-				)}
+					)}
+				</div>
 			</div>
 		</div>
 	);

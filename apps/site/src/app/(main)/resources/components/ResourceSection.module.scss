@@ -1,11 +1,50 @@
-.background {
-	mask-image: linear-gradient(
-		rgba(0, 0, 0, 0),
-		rgba(0, 0, 0, 1) 7%,
-		rgba(0, 0, 0, 1) 93%,
-		rgba(0, 0, 0, 0)
-	);
+.scrollbar {
 	scrollbar-color: white var(--color-black);
 	scrollbar-width: auto;
 	scrollbar-gutter: stable;
+}
+
+.leftBorder {
+	@media (max-width: 1150px) {
+		display: none;
+	}
+	transform: translateY(25px);
+	rotate: 180deg;
+	margin-right: 5px;
+}
+
+.rightBorder {
+	@media (max-width: 1150px) {
+		display: none;
+	}
+	transform: translateY(-25px);
+	margin-left: 5px;
+}
+
+.footer {
+	display: flex;
+	justify-content: end;
+	align-items: center;
+	margin-right: 20px;
+	margin-top: 100px;
+
+	@media (max-width: 768px) {
+		justify-content: center;
+		margin-right: 0px;
+	}
+}
+
+.resourcePageFigure {
+	width: 250px;
+	height: 250px;
+
+	@media (max-width: 768px) {
+		width: 150px;
+		height: 150px;
+	}
+
+	@media (max-width: 1150px) {
+		width: 200px;
+		height: 200px;
+	}
 }

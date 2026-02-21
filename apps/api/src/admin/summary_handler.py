@@ -1,6 +1,6 @@
 from collections import Counter, defaultdict
 from datetime import date, datetime
-from typing import Iterable, Literal, Optional
+from typing import Any, Iterable, Literal, Optional, cast
 from zoneinfo import ZoneInfo
 
 from pydantic import BaseModel, TypeAdapter, ValidationError
@@ -121,7 +121,7 @@ def _count_applications_by_day(
     return dict(daily_applications)
 
 
-def _get_table_value(app_data: Optional[dict], group_by: str) -> str:
+def _get_table_value(app_data: Optional[dict[str, Any]], group_by: str) -> str:
     if not app_data:
         return "Unknown"
     if group_by == "school":
@@ -165,10 +165,9 @@ async def applicant_table(
     )
     counts: dict[str, int] = defaultdict(int)
     for rec in records:
-        app_data = (
-            rec.get("application_data")
-            if isinstance(rec.get("application_data"), dict)
-            else None
+        raw = rec.get("application_data")
+        app_data: Optional[dict[str, Any]] = (
+            cast(dict[str, Any], raw) if isinstance(raw, dict) else None
         )
         key = _get_table_value(app_data, group_by)
         counts[key] += 1

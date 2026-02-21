@@ -16,23 +16,39 @@ import HackerCount from "../dashboard/components/HackerCount";
 import StatusUpdateContainer from "./components/StatusUpdateContainer";
 import { useCheckInAction } from "./components/useCheckInAction";
 
+import { useQueuePullTimer } from "./components/useQueuePullTimer";
+import QueuePullStopwatch from "./components/QueuePullStopwatch";
+import { useCheckinEventLog } from "./components/useCheckinEventLog";
+import CheckinActivityLog from "./components/CheckinActivityLog";
+import RefreshSummaryButton from "./components/RefreshSummaryButton";
+
 function CheckInLeads() {
 	const router = useRouter();
 	const { roles } = useContext(UserContext);
 
 	const [selectedAction, setSelectedAction] =
 		useState<SelectProps.Option | null>(null);
+
 	const { handleUpdate, isLoading, message, setMessage } = useCheckInAction();
+	const [summaryRefreshKey, setSummaryRefreshKey] = useState(0);
+
+	const { markPulled } = useQueuePullTimer();
+	const { log } = useCheckinEventLog();
+
+	const onUpdate = async () => {
+		if (!selectedAction) return;
+		const action = selectedAction;
+		await handleUpdate(selectedAction);
+		log(action.label ?? "Unknown action");
+		if (action.value === "get-next-batch") {
+			markPulled();
+		}
+		setSelectedAction(null);
+	};
 
 	if (!isCheckInLead(roles)) {
 		router.push("/admin/dashboard");
 	}
-
-	const onUpdate = async () => {
-		if (!selectedAction) return;
-		await handleUpdate(selectedAction);
-		setSelectedAction(null);
-	};
 
 	return (
 		<ContentLayout>
@@ -40,15 +56,24 @@ function CheckInLeads() {
 				<HackerCount />
 				{isCheckInLead(roles) && (
 					<Grid gridDefinition={[{ colspan: 7 }, { colspan: 5 }]}>
-						<ApplicantSummary />
-						<StatusUpdateContainer
-							selectedAction={selectedAction}
-							onActionChange={setSelectedAction}
-							onUpdate={onUpdate}
-							isLoading={isLoading}
-							message={message}
-							onDismissMessage={() => setMessage(null)}
-						/>
+						<SpaceBetween size="s">
+							<RefreshSummaryButton
+								onRefresh={() => setSummaryRefreshKey((k) => k + 1)}
+							/>
+							<ApplicantSummary key={summaryRefreshKey} />
+						</SpaceBetween>
+						<SpaceBetween size="l">
+							<StatusUpdateContainer
+								selectedAction={selectedAction}
+								onActionChange={setSelectedAction}
+								onUpdate={onUpdate}
+								isLoading={isLoading}
+								message={message}
+								onDismissMessage={() => setMessage(null)}
+							/>
+							<QueuePullStopwatch />
+							<CheckinActivityLog />
+						</SpaceBetween>
 					</Grid>
 				)}
 			</SpaceBetween>

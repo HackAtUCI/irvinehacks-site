@@ -46,11 +46,9 @@ function CheckInLeads() {
 		setSelectedAction(null);
 	};
 
-	useEffect(() => {
-		if (!isCheckInLead(roles)) {
-			router.push("/admin/dashboard");
-		}
-	}, [roles]);
+	if (!isCheckInLead(roles)) {
+		router.push("/admin/dashboard");
+	}
 
 	return (
 		<ContentLayout>

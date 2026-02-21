@@ -15,7 +15,7 @@ function formatElapsed(ms: number) {
 }
 
 export default function QueuePullStopwatch() {
-	const { elapsedMs, markPulled, lastPull } = useQueuePullTimer();
+	const { elapsedMs, markPulled } = useQueuePullTimer();
 
 	let status: "success" | "warning" | "error" = "success";
 	let label = "Good";

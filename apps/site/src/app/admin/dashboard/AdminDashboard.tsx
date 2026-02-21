@@ -9,6 +9,7 @@ import { isApplicationManager } from "@/lib/admin/authorization";
 import UserContext from "@/lib/admin/UserContext";
 
 import ApplicantSummary from "./components/ApplicantSummary";
+import ApplicantTable from "./components/ApplicantTable";
 import HackerCount from "./components/HackerCount";
 
 function AdminDashboard() {
@@ -19,6 +20,7 @@ function AdminDashboard() {
 			<SpaceBetween size="l">
 				<HackerCount />
 				{isApplicationManager(roles) && <ApplicantSummary />}
+				{isApplicationManager(roles) && <ApplicantTable />}
 			</SpaceBetween>
 		</ContentLayout>
 	);

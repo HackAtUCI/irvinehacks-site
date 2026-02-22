@@ -14,23 +14,21 @@ interface SubeventCheckinProps {
 }
 
 function SubeventCheckin({ participants, onConfirm }: SubeventCheckinProps) {
-	const [badgeNumber, setBadgeNumber] = useState("");
+	const [scannedUid, setScannedUid] = useState("");
 	const [showScanner, setShowScanner] = useState(true);
 	const [error, setError] = useState("");
 
 	const onScanSuccess = useCallback((decodedText: string) => {
-		console.log("Scanner found");
-		setBadgeNumber(decodedText);
+		setScannedUid(decodedText.trim());
 		setShowScanner(false);
 	}, []);
 
-	const participant = participants.filter(
-		(participant) => participant.badge_number === badgeNumber,
-	)[0];
+	// QR code from portal encodes UID; match participant by _id
+	const participant = participants.find((p) => p._id === scannedUid);
 	const notFoundMessage = (
 		<p>
-			Participant could not be found, please note down the name of the
-			participant manually
+			Participant could not be found. Scan the participant&apos;s portal QR
+			code or enter their UID manually.
 		</p>
 	);
 
@@ -40,13 +38,13 @@ function SubeventCheckin({ participants, onConfirm }: SubeventCheckinProps) {
 	);
 
 	const handleConfirm = async () => {
+		if (!participant) return;
+		setError("");
 		const okay = await onConfirm(participant);
 		if (okay) {
-			console.log("clearing badge number");
-			setBadgeNumber("");
-			setError("");
+			setScannedUid("");
 		} else {
-			setError("checkin failed");
+			setError("Check-in failed");
 		}
 	};
 
@@ -54,8 +52,9 @@ function SubeventCheckin({ participants, onConfirm }: SubeventCheckinProps) {
 		<Container>
 			<SpaceBetween direction="horizontal" size="xs">
 				<Input
-					onChange={({ detail }) => setBadgeNumber(detail.value)}
-					value={badgeNumber}
+					onChange={({ detail }) => setScannedUid(detail.value)}
+					value={scannedUid}
+					placeholder="Scan QR or enter UID"
 				/>
 				<Button
 					iconName="video-on"
@@ -65,14 +64,16 @@ function SubeventCheckin({ participants, onConfirm }: SubeventCheckinProps) {
 				/>
 			</SpaceBetween>
 			{showScanner && badgeScanner}
-			{badgeNumber !== "" && !participant && notFoundMessage}
+			{scannedUid !== "" && !participant && notFoundMessage}
 			{participant && (
 				<p>
 					Participant: {`${participant.first_name} ${participant.last_name}`}
 				</p>
 			)}
-			{error}
-			<Button onClick={handleConfirm}>Confirm</Button>
+			{error && <p style={{ color: "var(--color-text-error)" }}>{error}</p>}
+			<Button onClick={handleConfirm} disabled={!participant}>
+				Confirm check-in
+			</Button>
 		</Container>
 	);
 }

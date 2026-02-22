@@ -21,8 +21,11 @@ function useEvents() {
 		event: string,
 		uid: string,
 	): Promise<boolean> => {
-		const res = await axios.post(`/api/admin/event-checkin/${event}`, uid);
-		console.log(`Checked in ${uid} for ${event}`);
+		const res = await axios.post(
+			`/api/admin/event-checkin/${event}`,
+			JSON.stringify(uid),
+			{ headers: { "Content-Type": "application/json" } },
+		);
 		return res.status === 200;
 	};
 

@@ -55,6 +55,10 @@ function CheckInModal({ onDismiss, onConfirm, participant }: ActionModalProps) {
 									Ask for a photo ID and check participant is 18+ years old.
 								</li>
 								<li>Have participant sign the SPFB sheet.</li>
+								<li>
+									Ask participant if they have joined Slack. Add them if
+									necessary.
+								</li>
 								<li>Ask participant to fill in badge.</li>
 								<li>
 									Inform participant regarding the following:

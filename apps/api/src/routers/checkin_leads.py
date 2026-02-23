@@ -151,7 +151,7 @@ async def close_walkins() -> None:
         Collection.USERS,
         {
             "roles": Role.HACKER,
-            "status": {"$in": [Status.QUEUED, Status.WAIVER_SIGNED, Status.CONFIRMED]},
+            "decision": {"$in": [Decision.WAITLISTED]},
         },
         ["_id", "first_name"],
     )

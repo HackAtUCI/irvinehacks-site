@@ -178,7 +178,9 @@ async def close_walkins() -> None:
         )
 
 
-async def _process_status(uids: Sequence[str], status: Status, *, no_modifications_ok: bool = False) -> None:
+async def _process_status(
+    uids: Sequence[str], status: Status, *, no_modifications_ok: bool = False
+) -> None:
     any_modified = await mongodb_handler.update(
         Collection.USERS, {"_id": {"$in": uids}}, {"status": status}
     )

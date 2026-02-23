@@ -4,6 +4,7 @@ import useSWR from "swr";
 export interface Event {
 	name: string;
 	_id: string;
+	checkins?: Record<string, string> | [string, string][];
 }
 
 const fetcher = async (url: string) => {

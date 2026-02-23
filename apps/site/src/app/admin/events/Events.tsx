@@ -14,8 +14,11 @@ import SubeventCheckin from "./components/SubeventCheckin";
 function Events() {
 	const [event, setEvent] = useState<SelectProps.Option | null>(null);
 
-	const { events, loading: loadingEvents, checkInParticipantSubevent } =
-		useEvents();
+	const {
+		events,
+		loading: loadingEvents,
+		checkInParticipantSubevent,
+	} = useEvents();
 	const { participants } = useParticipants();
 
 	const options = events.map(({ name, _id }) => ({ label: name, value: _id }));

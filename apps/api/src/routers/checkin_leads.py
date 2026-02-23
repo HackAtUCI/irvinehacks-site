@@ -1,3 +1,4 @@
+from routers.user import DEFAULT_CHECKIN_TIME
 from routers.director import _process_decision
 import asyncio
 
@@ -50,12 +51,14 @@ async def queue_removal() -> None:
         {
             "roles": Role.HACKER,
             "status": Status.CONFIRMED,
-            "arrival_time": "17:00",
+            "arrival_time": DEFAULT_CHECKIN_TIME,
         },
     )
 
     if not records:
-        log.info("All CONFIRMED participants showed up.")
+        log.info(
+            "All CONFIRMED participants who didn't specify a late arrival showed up."
+        )
         return
 
     log.info(f"Changing {len(records)} status to {Status.WAIVER_SIGNED}.")
@@ -89,13 +92,13 @@ async def queue_participants() -> None:
     settings = await mongodb_handler.retrieve_one(
         Collection.SETTINGS, {"_id": "queue"}, ["users_queue"]
     )
+    num_spots = HACKER_WAITLIST_MAX - len(
+        await participant_manager.get_attending_and_late_hackers()
+    )
+    print(num_spots)
     if not settings or "users_queue" not in settings:
         log.error("Queue settings or users_queue field is missing.")
         return
-
-    num_spots = HACKER_WAITLIST_MAX - len(
-        await participant_manager.get_attending_hackers()
-    )
 
     if len(settings["users_queue"]) == 0:
         raise HTTPException(status_code=400, detail="QUEUE EMPTY")

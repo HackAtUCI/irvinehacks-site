@@ -1,3 +1,4 @@
+from routers.user import DEFAULT_CHECKIN_TIME
 import pytest
 from unittest.mock import AsyncMock, patch, MagicMock
 
@@ -30,7 +31,11 @@ async def test_queue_removal_success(
 
     mock_retrieve.assert_awaited_once_with(
         Collection.USERS,
-        {"roles": Role.HACKER, "status": Status.CONFIRMED},
+        {
+            "roles": Role.HACKER,
+            "status": Status.CONFIRMED,
+            "arrival_time": DEFAULT_CHECKIN_TIME,
+        },
     )
     mock_process_decision.assert_awaited_once_with(
         ("user1", "user2"), Decision.WAITLISTED, no_modifications_ok=True
@@ -53,7 +58,7 @@ async def test_queue_removal_no_records(mock_retrieve: AsyncMock) -> None:
 @pytest.mark.asyncio
 @patch("routers.checkin_leads.queue_removal", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
-@patch("admin.participant_manager.get_attending_hackers", autospec=True)
+@patch("admin.participant_manager.get_attending_and_late_hackers", autospec=True)
 @patch("services.mongodb_handler.raw_update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve", autospec=True)
 @patch("routers.checkin_leads._process_status", autospec=True)
@@ -65,12 +70,12 @@ async def test_queue_participants_success(
     mock_process_status: AsyncMock,
     mock_retrieve_users: AsyncMock,
     mock_update_settings: AsyncMock,
-    mock_get_attending: AsyncMock,
+    mock_get_attending_and_late_hackers: AsyncMock,
     mock_retrieve_settings: AsyncMock,
     mock_queue_removal: AsyncMock,
 ) -> None:
     mock_retrieve_settings.return_value = {"users_queue": ["user1", "user2", "user3"]}
-    mock_get_attending.return_value = [object()] * 390  # 390 attending
+    mock_get_attending_and_late_hackers.return_value = [object()] * 390  # 390 attending
     # HACKER_WAITLIST_MAX is 400, so 10 spots
 
     mock_retrieve_users.return_value = [
@@ -94,7 +99,7 @@ async def test_queue_participants_success(
 @pytest.mark.asyncio
 @patch("routers.checkin_leads.queue_removal", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
-@patch("admin.participant_manager.get_attending_hackers", autospec=True)
+@patch("admin.participant_manager.get_attending_and_late_hackers", autospec=True)
 @patch("routers.checkin_leads.HACKER_WAITLIST_MAX", 5)
 @patch("services.mongodb_handler.raw_update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve", autospec=True)
@@ -105,13 +110,15 @@ async def test_queue_participants_with_small_max(
     mock_process_status: AsyncMock,
     mock_retrieve_users: AsyncMock,
     mock_update_settings: AsyncMock,
-    mock_get_attending: AsyncMock,
+    mock_get_attending_and_late_hackers: AsyncMock,
     mock_retrieve_settings: AsyncMock,
     mock_queue_removal: AsyncMock,
 ) -> None:
     # Test with HACKER_WAITLIST_MAX = 5
     mock_retrieve_settings.return_value = {"users_queue": ["user1", "user2", "user3"]}
-    mock_get_attending.return_value = [object()] * 3  # 3 attending, so 2 spots
+    mock_get_attending_and_late_hackers.return_value = [
+        object()
+    ] * 3  # 3 attending, so 2 spots
 
     mock_retrieve_users.return_value = [
         {"_id": "user1", "first_name": "F1"},

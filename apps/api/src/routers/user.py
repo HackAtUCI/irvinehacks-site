@@ -389,7 +389,8 @@ async def waiver_webhook(
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid payload content.")
 
 
-ARRIVAL_TIMES = ("17:00", "18:00", "18:30", "19:00", "19:30")
+DEFAULT_CHECKIN_TIME = "17:00"
+ARRIVAL_TIMES = (DEFAULT_CHECKIN_TIME, "18:00", "18:30", "19:00", "19:30")
 
 
 @router.post("/rsvp")
@@ -425,7 +426,7 @@ async def rsvp(
         )
 
     # Default check-in time is 5:00pm (17:00)
-    arrival_value: str = "17:00"
+    arrival_value: str = DEFAULT_CHECKIN_TIME
     if arrival_time and arrival_time.strip():
         if arrival_time.strip() not in ARRIVAL_TIMES:
             raise HTTPException(
@@ -481,7 +482,7 @@ async def rsvp_late_arrival(
         )
 
     # Default check-in time is 5:00pm (17:00)
-    arrival_value: str = "17:00"
+    arrival_value: str = DEFAULT_CHECKIN_TIME
     if arrival_time and arrival_time.strip():
         if arrival_time.strip() not in ARRIVAL_TIMES:
             raise HTTPException(

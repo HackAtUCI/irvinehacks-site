@@ -1,3 +1,4 @@
+from routers.user import DEFAULT_CHECKIN_TIME
 from unittest.mock import ANY, AsyncMock, patch
 
 import pytest
@@ -6,7 +7,7 @@ from admin.participant_manager import (
     add_participant_to_queue,
     check_in_participant,
     confirm_attendance_outside_participants,
-    get_attending_hackers,
+    get_attending_and_late_hackers,
     get_participants,
     PARTICIPANT_FIELDS,
     subevent_checkin,
@@ -191,7 +192,7 @@ async def test_subevent_checkin_success(mock_raw_update_one: AsyncMock) -> None:
 
 
 @patch("services.mongodb_handler.retrieve", autospec=True)
-async def test_get_attending_hackers(mock_retrieve: AsyncMock) -> None:
+async def test_get_attending_and_late_hackers(mock_retrieve: AsyncMock) -> None:
     mock_retrieve.return_value = [
         {
             "_id": "hacker1",
@@ -203,12 +204,16 @@ async def test_get_attending_hackers(mock_retrieve: AsyncMock) -> None:
         }
     ]
 
-    hackers = await get_attending_hackers()
+    hackers = await get_attending_and_late_hackers()
 
     assert len(hackers) == 1
     assert hackers[0].uid == "hacker1"
     mock_retrieve.assert_awaited_once_with(
         Collection.USERS,
-        {"roles": Role.HACKER, "status": Status.ATTENDING},
+        {
+            "roles": Role.HACKER,
+            "status": Status.ATTENDING,
+            "arrival_time": {"$ne": DEFAULT_CHECKIN_TIME},
+        },
         PARTICIPANT_FIELDS,
     )

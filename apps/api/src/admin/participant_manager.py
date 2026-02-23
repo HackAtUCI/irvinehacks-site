@@ -209,3 +209,17 @@ async def subevent_checkin(event_id: str, uid: str, organizer: User) -> None:
     if not res:
         raise RuntimeError(f"Could not update events table for {event_id} with {uid}")
     log.info(f"{organizer.uid} checked in {uid} to {event_id}")
+
+
+async def get_attending_hackers() -> list[Participant]:
+    """Fetch all hackers with status ATTENDING."""
+    records: list[dict[str, Any]] = await mongodb_handler.retrieve(
+        Collection.USERS,
+        {
+            "roles": Role.HACKER,
+            "status": Status.ATTENDING,
+        },
+        PARTICIPANT_FIELDS,
+    )
+
+    return [Participant(**user) for user in records]

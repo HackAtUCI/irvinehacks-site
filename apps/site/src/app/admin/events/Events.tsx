@@ -160,7 +160,8 @@ function Events() {
 		{
 			id: "json",
 			text: "Export as JSON (integer → name, uid, workshop, timestamp)",
-			description: '{"1": {"name": "test hacker", "uid": "edu.uci.tstats", "workshop": "Intro to React", "timestamp": "2026-02-23T12:00:00Z"}}',
+			description:
+				'{"1": {"name": "test hacker", "uid": "edu.uci.tstats", "workshop": "Intro to React", "timestamp": "2026-02-23T12:00:00Z"}}',
 		},
 		{
 			id: "names",

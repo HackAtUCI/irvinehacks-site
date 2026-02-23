@@ -26,7 +26,7 @@ class Participant(UserRecord):
 
     checkins: list[Checkin] = []
     status: Union[Status, Decision] = Status.REVIEWED
-    decision: Decision
+    decision: Optional[Decision]
     badge_number: Union[str, None] = None
 
 
@@ -43,8 +43,13 @@ PARTICIPANT_FIELDS = [
 
 
 async def get_participants() -> list[Participant]:
-    """Fetch all Sponsors, Judges, and Workshop Leads. Also applicants who have a
-    status of ATTENDING, WAIVER_SIGNED, CONFIRMED, or WAITLISTED."""
+    """
+    Fetch all Sponsors, Judges, and Workshop Leads,
+    all applicants who have a status of:
+    - WAITLISTED, QUEUED, ATTENDING, WAIVER_SIGNED, CONFIRMED, ACCEPTED, or WAITLISTED,
+    and all applicants who have a decisoin of:
+    - ACCEPTED or WAITLISTED
+    """
     records: list[dict[str, Any]] = await mongodb_handler.retrieve(
         Collection.USERS,
         {
@@ -66,6 +71,9 @@ async def get_participants() -> list[Participant]:
                             Role.VOLUNTEER,
                         ]
                     },
+                    # TODO: Should deprecate the use of decisions in the status
+                    # i.e. Status.WAITLISTED, Status.ACCEPTED, Status.REJECTED
+                    # should be removed.
                     "status": {
                         "$in": [
                             Status.WAITLISTED,
@@ -143,17 +151,16 @@ async def add_participant_to_queue(uid: str, associate: User) -> None:
     if record is None:
         raise ValueError("No application record found.")
     status = record.get("status")
-    decision = record.get("decision")
     roles = cast(list[Role], record.get("roles"))
 
     if Role.HACKER not in roles:
         raise ValueError(f"Applicant is a {roles}, not a hacker.")
-    if decision == Decision.ACCEPTED:
-        raise ValueError("Applicant decision is accepted and should be checked in.")
-    elif decision == Decision.REJECTED:
-        raise ValueError("Applicant decision is rejected. Not eligible for hackathon.")
     if status == Status.ATTENDING:
         raise ValueError("Participant has checked in. Not eligible for queue.")
+    elif status == Status.QUEUED:
+        raise ValueError("Participant is already on the queue.")
+    elif status == Status.CONFIRMED:
+        raise ValueError("Participant should be checked in instead.")
     elif status != Status.WAIVER_SIGNED:
         raise ValueError("Participant has not signed waiver. Not eligible for queue.")
 
@@ -210,3 +217,17 @@ async def subevent_checkin(event_id: str, uid: str, organizer: User) -> None:
     if not res:
         raise RuntimeError(f"Could not update events table for {event_id} with {uid}")
     log.info(f"{organizer.uid} checked in {uid} to {event_id}")
+
+
+async def get_attending_hackers() -> list[Participant]:
+    """Fetch all hackers with status ATTENDING."""
+    records: list[dict[str, Any]] = await mongodb_handler.retrieve(
+        Collection.USERS,
+        {
+            "roles": Role.HACKER,
+            "status": Status.ATTENDING,
+        },
+        PARTICIPANT_FIELDS,
+    )
+
+    return [Participant(**user) for user in records]

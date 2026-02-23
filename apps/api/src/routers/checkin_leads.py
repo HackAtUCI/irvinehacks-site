@@ -1,3 +1,4 @@
+from routers.director import _process_decision
 import asyncio
 
 from logging import getLogger
@@ -7,6 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from admin import participant_manager
 from auth.authorization import require_role
+from models.ApplicationData import Decision
 from models.user_record import Role, Status, UserPromotionRecord
 from services import mongodb_handler, sendgrid_handler
 from services.mongodb_handler import Collection
@@ -56,7 +58,15 @@ async def queue_removal() -> None:
         log.info("All CONFIRMED participants showed up.")
         return
 
-    log.info(f"Changing status of {len(records)} to {Status.WAIVER_SIGNED}")
+    log.info(f"Changing {len(records)} status to {Status.WAIVER_SIGNED}.")
+    log.info(f"Changing {len(records)} decision to {Decision.WAITLISTED}.")
+
+    await asyncio.gather(
+        *(
+            _process_decision(batch, Decision.WAITLISTED, no_modifications_ok=True)
+            for batch in batched([str(record["_id"]) for record in records], 100)
+        )
+    )
 
     await asyncio.gather(
         *(
@@ -72,6 +82,9 @@ async def queue_removal() -> None:
 )
 async def queue_participants() -> None:
     """Remove QUEUED participants from queue and send them email notification."""
+
+    await queue_removal()
+
     records = []
     settings = await mongodb_handler.retrieve_one(
         Collection.SETTINGS, {"_id": "queue"}, ["users_queue"]
@@ -80,7 +93,10 @@ async def queue_participants() -> None:
         log.error("Queue settings or users_queue field is missing.")
         return
 
-    num_spots = HACKER_WAITLIST_MAX - len(await participant_manager.get_participants())
+    num_spots = HACKER_WAITLIST_MAX - len(
+        await participant_manager.get_attending_hackers()
+    )
+
     if len(settings["users_queue"]) == 0:
         raise HTTPException(status_code=400, detail="QUEUE EMPTY")
     if num_spots <= 0:
@@ -163,12 +179,16 @@ async def close_walkins() -> None:
         )
 
 
-async def _process_status(uids: Sequence[str], status: Status) -> None:
-    ok = await mongodb_handler.update(
+async def _process_status(
+    uids: Sequence[str], status: Status, *, no_modifications_ok: bool = False
+) -> None:
+    any_modified = await mongodb_handler.update(
         Collection.USERS, {"_id": {"$in": uids}}, {"status": status}
     )
-    if not ok:
-        raise RuntimeError("gg wp")
+    if not any_modified and not no_modifications_ok:
+        raise RuntimeError(
+            "Expected to modify at least one document, but none were modified."
+        )
     
 
 @router.get(

@@ -23,7 +23,7 @@ log = getLogger(__name__)
 
 router = APIRouter()
 
-HACKER_WAITLIST_MAX = 400
+HACKER_WAITLIST_MAX = 5
 
 RSVP_REMINDER_EMAIL_TEMPLATES: dict[
     Role,
@@ -62,7 +62,7 @@ async def queue_removal() -> None:
 
     await asyncio.gather(
         *(
-            _process_decision(batch, Decision.WAITLISTED)
+            _process_decision(batch, Decision.WAITLISTED, no_modifications_ok=True)
             for batch in batched([str(record["_id"]) for record in records], 100)
         )
     )
@@ -93,6 +93,7 @@ async def queue_participants() -> None:
         return
 
     num_spots = HACKER_WAITLIST_MAX - len(await participant_manager.get_attending_hackers())
+    print("calculated num_spots: ", num_spots)
     if len(settings["users_queue"]) == 0:
         raise HTTPException(status_code=400, detail="QUEUE EMPTY")
     if num_spots <= 0:
@@ -175,9 +176,9 @@ async def close_walkins() -> None:
         )
 
 
-async def _process_status(uids: Sequence[str], status: Status) -> None:
-    ok = await mongodb_handler.update(
+async def _process_status(uids: Sequence[str], status: Status, *, no_modifications_ok: bool = False) -> None:
+    any_modified = await mongodb_handler.update(
         Collection.USERS, {"_id": {"$in": uids}}, {"status": status}
     )
-    if not ok:
-        raise RuntimeError("gg wp")
+    if not any_modified and not no_modifications_ok:
+        raise RuntimeError("Expected to modify at least one document, but none were modified.")

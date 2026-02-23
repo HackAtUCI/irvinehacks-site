@@ -475,12 +475,12 @@ async def waitlist_transfer() -> None:
         )
 
 
-async def _process_decision(uids: Sequence[str], decision: Decision) -> None:
-    ok = await mongodb_handler.update(
+async def _process_decision(uids: Sequence[str], decision: Decision, *, no_modifications_ok = False) -> None:
+    any_modified = await mongodb_handler.update(
         Collection.USERS, {"_id": {"$in": uids}}, {"decision": decision}
     )
-    if not ok:
-        raise RuntimeError("gg wp")
+    if not any_modified and not no_modifications_ok:
+        raise RuntimeError("Expected to modify at least one document, but none were modified.")
 
 
 async def _process_records_in_batches(

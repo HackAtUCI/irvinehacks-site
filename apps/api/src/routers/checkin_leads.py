@@ -48,6 +48,7 @@ async def queue_removal() -> None:
         {
             "roles": Role.HACKER,
             "status": Status.CONFIRMED,
+            "arrival_time": "17:00",
         },
     )
 

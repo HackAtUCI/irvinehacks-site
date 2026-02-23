@@ -70,7 +70,10 @@ function buildExportText(
 function buildExportJson(
 	events: Event[],
 	participants: Participant[],
-): Record<string, { name: string; uid: string; workshop: string; timestamp: string }> {
+): Record<
+	string,
+	{ name: string; uid: string; workshop: string; timestamp: string }
+> {
 	const uidToName = new Map(
 		participants.map((p) => [p._id, `${p.first_name} ${p.last_name}`]),
 	);

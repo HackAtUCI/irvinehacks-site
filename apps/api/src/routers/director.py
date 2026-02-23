@@ -475,7 +475,9 @@ async def waitlist_transfer() -> None:
         )
 
 
-async def _process_decision(uids: Sequence[str], decision: Decision, *, no_modifications_ok: bool = False) -> None:
+async def _process_decision(
+    uids: Sequence[str], decision: Decision, *, no_modifications_ok: bool = False
+) -> None:
     any_modified = await mongodb_handler.update(
         Collection.USERS, {"_id": {"$in": uids}}, {"decision": decision}
     )

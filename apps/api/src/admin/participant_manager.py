@@ -26,7 +26,7 @@ class Participant(UserRecord):
 
     checkins: list[Checkin] = []
     status: Union[Status, Decision] = Status.REVIEWED
-    decision: Decision
+    decision: Optional[Decision]
     badge_number: Union[str, None] = None
 
 
@@ -43,8 +43,13 @@ PARTICIPANT_FIELDS = [
 
 
 async def get_participants() -> list[Participant]:
-    """Fetch all Sponsors, Judges, and Workshop Leads. Also applicants who have a
-    status of ATTENDING, WAIVER_SIGNED, CONFIRMED, or WAITLISTED."""
+    """
+    Fetch all Sponsors, Judges, and Workshop Leads,
+    all applicants who have a status of:
+    - WAITLISTED, QUEUED, ATTENDING, WAIVER_SIGNED, CONFIRMED, ACCEPTED, or WAITLISTED,
+    and all applicants who have a decisoin of:
+    - ACCEPTED or WAITLISTED
+    """
     records: list[dict[str, Any]] = await mongodb_handler.retrieve(
         Collection.USERS,
         {
@@ -66,6 +71,9 @@ async def get_participants() -> list[Participant]:
                             Role.VOLUNTEER,
                         ]
                     },
+                    # TODO: Should deprecate the use of decisions in the status
+                    # i.e. Status.WAITLISTED, Status.ACCEPTED, Status.REJECTED
+                    # should be removed.
                     "status": {
                         "$in": [
                             Status.WAITLISTED,

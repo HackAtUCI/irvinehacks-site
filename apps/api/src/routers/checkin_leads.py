@@ -92,7 +92,9 @@ async def queue_participants() -> None:
         log.error("Queue settings or users_queue field is missing.")
         return
 
-    num_spots = HACKER_WAITLIST_MAX - len(await participant_manager.get_attending_hackers())
+    num_spots = HACKER_WAITLIST_MAX - len(
+        await participant_manager.get_attending_hackers()
+    )
     print("calculated num_spots: ", num_spots)
     if len(settings["users_queue"]) == 0:
         raise HTTPException(status_code=400, detail="QUEUE EMPTY")

@@ -211,9 +211,17 @@ async def test_get_attending_and_late_hackers(mock_retrieve: AsyncMock) -> None:
     mock_retrieve.assert_awaited_once_with(
         Collection.USERS,
         {
-            "roles": Role.HACKER,
-            "status": Status.ATTENDING,
-            "arrival_time": {"$ne": DEFAULT_CHECKIN_TIME},
+            "$or": [
+                {
+                    "roles": Role.HACKER,
+                    "status": Status.ATTENDING,
+                },
+                {
+                    "roles": Role.HACKER,
+                    "status": Status.CONFIRMED,
+                    "arrival_time": {"$exists": 1, "$ne": DEFAULT_CHECKIN_TIME},
+                },
+            ]
         },
         PARTICIPANT_FIELDS,
     )

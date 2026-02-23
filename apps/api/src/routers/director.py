@@ -482,7 +482,9 @@ async def _process_decision(
         Collection.USERS, {"_id": {"$in": uids}}, {"decision": decision}
     )
     if not any_modified and not no_modifications_ok:
-        raise RuntimeError("Expected to modify at least one document, but none were modified.")
+        raise RuntimeError(
+            "Expected to modify at least one document, but none were modified."
+        )
 
 
 async def _process_records_in_batches(

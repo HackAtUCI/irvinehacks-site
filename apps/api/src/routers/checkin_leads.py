@@ -23,7 +23,7 @@ log = getLogger(__name__)
 
 router = APIRouter()
 
-HACKER_WAITLIST_MAX = 5
+HACKER_WAITLIST_MAX = 400
 
 RSVP_REMINDER_EMAIL_TEMPLATES: dict[
     Role,
@@ -95,7 +95,7 @@ async def queue_participants() -> None:
     num_spots = HACKER_WAITLIST_MAX - len(
         await participant_manager.get_attending_hackers()
     )
-    print("calculated num_spots: ", num_spots)
+
     if len(settings["users_queue"]) == 0:
         raise HTTPException(status_code=400, detail="QUEUE EMPTY")
     if num_spots <= 0:

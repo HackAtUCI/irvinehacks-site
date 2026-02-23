@@ -13,6 +13,7 @@ import UserContext from "@/lib/admin/UserContext";
 
 import ApplicantSummary from "../dashboard/components/ApplicantSummary";
 import HackerCount from "../dashboard/components/HackerCount";
+import LateArrivalsTable from "./components/LateArrivalsTable";
 import StatusUpdateContainer from "./components/StatusUpdateContainer";
 import { useCheckInAction } from "./components/useCheckInAction";
 
@@ -39,7 +40,9 @@ function CheckInLeads() {
 			<SpaceBetween size="l">
 				<HackerCount />
 				{isCheckInLead(roles) && (
-					<Grid gridDefinition={[{ colspan: 7 }, { colspan: 5 }]}>
+					<Grid
+						gridDefinition={[{ colspan: 7 }, { colspan: 5 }, { colspan: 12 }]}
+					>
 						<ApplicantSummary />
 						<StatusUpdateContainer
 							selectedAction={selectedAction}
@@ -49,6 +52,7 @@ function CheckInLeads() {
 							message={message}
 							onDismissMessage={() => setMessage(null)}
 						/>
+						<LateArrivalsTable />
 					</Grid>
 				)}
 			</SpaceBetween>

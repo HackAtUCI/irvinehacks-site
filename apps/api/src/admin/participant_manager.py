@@ -223,3 +223,4 @@ async def get_attending_hackers() -> list[Participant]:
     )
 
     return [Participant(**user) for user in records]
+    

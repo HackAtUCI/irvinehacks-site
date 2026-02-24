@@ -7,7 +7,7 @@ import Image from "next/image";
 import getTimeAndDates from "@/lib/utils/getTimeAndDates";
 import arrowTriangle from "@/assets/icons/arrow-triangle.svg";
 
-export default function ScheduleScroll({
+export default function DesktopScheduleScroll({
 	weekdays,
 	selectedEventDay,
 	setSelectedEventDay,
@@ -24,7 +24,7 @@ export default function ScheduleScroll({
 		scheduleContainerRef.current?.scrollTo({
 			left: scheduleBarRef.current
 				? scheduleBarRef.current.getBoundingClientRect().width *
-				  fixedPos[newPos]
+					fixedPos[newPos]
 				: 0,
 			behavior: "smooth",
 		});

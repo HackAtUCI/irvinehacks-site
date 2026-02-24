@@ -86,48 +86,52 @@ export default function DesktopSchedulePage({
 
 	return (
 		<div className="relative w-full h-fit flex gap-10 flex-col max-md:gap-2">
-			<DesktopScheduleScroll
-				weekdays={allDays}
-				setSelectedEventDay={setSelectedEventDay}
-				selectedEventDay={selectedEventDay}
-			/>
-			<div className="relative w-full">
-				<div className="absolute inset-0 w-full h-full z-0">
-					<Image
-						src={scheduleFrame}
-						alt=""
-						className="w-full h-full object-contain"
-						style={{ pointerEvents: "none" }}
+			<div className="w-full flex justify-center">
+				<div className="relative w-full lg:w-[1025px] xl:w-[1280px]">
+					<DesktopScheduleScroll
+						weekdays={allDays}
+						setSelectedEventDay={setSelectedEventDay}
+						selectedEventDay={selectedEventDay}
 					/>
-				</div>
-				<div className="w-full relative flex max-lg:flex-col-reverse max-lg:gap-20 p-5 z-10">
-					<EventSidebar
-						events={
-							selectedScheduleEvents
-								? selectedScheduleEvents
-								: currentScheduleEvents
-						}
-						currentTitle={`${currentEvent?.title}${currentEvent?.startTime.toISOString()}`}
-						setSelectedEvent={setSelectedEvent}
-					/>
-					{selectedEvent ? (
-						<div className="flex-1 relative flex items-center justify-start max-lg:hidden lg:min-h-[400px]">
-							<DesktopEventCard
-								key={selectedEvent.title}
-								now={now}
-								isHappening={false}
-								{...selectedEvent}
+					<div className="relative w-full">
+						<div className="absolute inset-0 w-full h-full z-0">
+							<Image
+								src={scheduleFrame}
+								alt=""
+								className="w-full h-full object-contain"
+								style={{ pointerEvents: "none" }}
 							/>
 						</div>
-					) : (
-						<div className="flex-1 min-h-[400px] relative flex items-center justify-start max-lg:hidden">
-							<div className="w-[78%] h-[520px] overflow-auto bg-[#170f51]/50 border-[9px] border-yellow relative p-7 font-display">
-								<div className="text-4xl w-full h-full flex justify-center items-center text-center text-yellow">
-									No Event Selected...
+						<div className="w-full relative flex max-lg:flex-col-reverse max-lg:gap-20 p-5 z-10">
+							<EventSidebar
+								events={
+									selectedScheduleEvents
+										? selectedScheduleEvents
+										: currentScheduleEvents
+								}
+								currentTitle={`${currentEvent?.title}${currentEvent?.startTime.toISOString()}`}
+								setSelectedEvent={setSelectedEvent}
+							/>
+							{selectedEvent ? (
+								<div className="flex-1 relative flex items-center justify-start max-lg:hidden lg:min-h-[400px]">
+									<DesktopEventCard
+										key={selectedEvent.title}
+										now={now}
+										isHappening={false}
+										{...selectedEvent}
+									/>
 								</div>
-							</div>
+							) : (
+								<div className="flex-1 min-h-[400px] relative flex items-center justify-start max-lg:hidden">
+									<div className="w-[78%] h-[520px] overflow-auto bg-[#170f51]/50 border-[9px] border-yellow relative p-7 font-display">
+										<div className="text-4xl w-full h-full flex justify-center items-center text-center text-yellow">
+											No Event Selected...
+										</div>
+									</div>
+								</div>
+							)}
 						</div>
-					)}
+					</div>
 				</div>
 			</div>
 		</div>

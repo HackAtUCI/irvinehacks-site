@@ -5,11 +5,10 @@ import hmac
 import json
 from typing import Any
 from logging import getLogger
-
 from fastapi import HTTPException, Request, status
 
-SIGNING_SECRET = os.getenv("SLACK_SIGNING_SECRET")
 
+SIGNING_SECRET = os.getenv("SLACK_SIGNING_SECRET")
 
 log = getLogger(__name__)
 
@@ -51,16 +50,3 @@ def _is_int(timestamp: str) -> bool:
     except (ValueError, TypeError):
         return False
     return True
-
-
-async def handle_event(body: dict[Any, Any]) -> None:
-    inner_event = body.get("event")
-    if not inner_event:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY)
-
-    if inner_event.get("type") == "team_join":
-        await _handle_team_join(body)
-
-
-async def _handle_team_join(body: dict[Any, Any]) -> None:
-    log.info(body)

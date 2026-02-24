@@ -86,10 +86,48 @@ async def test_require_slack_expired_timestamp(mock_time: MagicMock) -> None:
     assert excinfo.value.status_code == status.HTTP_403_FORBIDDEN
 
 
+@patch("services.slack_handler.SIGNING_SECRET", TEST_SECRET)
+async def test_require_slack_missing_headers() -> None:
+    """Test slack request with missing headers raises 403"""
+    request = AsyncMock()
+    request.headers = {}
+
+    with pytest.raises(HTTPException) as excinfo:
+        await require_slack(request)
+    assert excinfo.value.status_code == status.HTTP_403_FORBIDDEN
+
+    # Missing signature
+    request.headers = {"X-Slack-Request-Timestamp": "12345"}
+    with pytest.raises(HTTPException) as excinfo:
+        await require_slack(request)
+    assert excinfo.value.status_code == status.HTTP_403_FORBIDDEN
+
+    # Missing timestamp
+    request.headers = {"x-slack-signature": "v0=abc"}
+    with pytest.raises(HTTPException) as excinfo:
+        await require_slack(request)
+    assert excinfo.value.status_code == status.HTTP_403_FORBIDDEN
+
+
+@patch("services.slack_handler.SIGNING_SECRET", TEST_SECRET)
+async def test_require_slack_malformed_timestamp() -> None:
+    """Test slack request with malformed timestamp raises 403"""
+    request = AsyncMock()
+    request.body = AsyncMock(return_value=b"{}")
+    request.headers = {
+        "X-Slack-Request-Timestamp": "not-a-number",
+        "x-slack-signature": "v0=abc",
+    }
+
+    with pytest.raises(HTTPException) as excinfo:
+        await require_slack(request)
+    assert excinfo.value.status_code == status.HTTP_403_FORBIDDEN
+
+
 @patch("services.slack_handler.SIGNING_SECRET", None)
 async def test_require_slack_missing_secret() -> None:
     """Test that missing SIGNING_SECRET raises 500"""
-    request = MagicMock()
+    request = AsyncMock()
 
     with pytest.raises(HTTPException) as excinfo:
         await require_slack(request)

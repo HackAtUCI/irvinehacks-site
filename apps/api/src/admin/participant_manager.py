@@ -28,6 +28,7 @@ class Participant(UserRecord):
     status: Union[Status, Decision] = Status.REVIEWED
     decision: Optional[Decision]
     is_added_to_slack: bool = False
+    is_waiver_signed: bool = False
     badge_number: Union[str, None] = None
 
 
@@ -41,6 +42,7 @@ PARTICIPANT_FIELDS = [
     "checkins",
     "badge_number",
     "is_added_to_slack",
+    "is_waiver_signed",
 ]
 
 
@@ -233,3 +235,12 @@ async def get_attending_hackers() -> list[Participant]:
     )
 
     return [Participant(**user) for user in records]
+
+
+async def update_waiver_status(uid: str, is_signed: bool) -> bool:
+    """Update is_waiver_signed field for a participant."""
+    return await mongodb_handler.update_one(
+        Collection.USERS,
+        {"_id": uid},
+        {"is_waiver_signed": is_signed},
+    )

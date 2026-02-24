@@ -15,6 +15,7 @@ export interface Participant {
 	decision?: Decision;
 	badge_number: string | null;
 	is_added_to_slack?: boolean;
+	is_waiver_signed?: boolean;
 }
 
 const fetcher = async (url: string) => {
@@ -82,6 +83,20 @@ function useParticipants() {
 		mutate();
 	};
 
+	const updateWaiverStatus = async (uid: string, isSigned: boolean) => {
+		try {
+			await axios.post(`/api/admin/participant/waiver/${uid}`, {
+				is_signed: isSigned,
+			});
+			mutate();
+		} catch (error) {
+			if (axios.isAxiosError(error) && error.response?.data?.detail) {
+				throw new Error(error.response.data.detail);
+			}
+			throw error;
+		}
+	};
+
 	return {
 		participants: data ?? [],
 		loading: isLoading,
@@ -90,6 +105,7 @@ function useParticipants() {
 		queueParticipant,
 		releaseParticipantFromWaitlist,
 		confirmOutsideParticipants,
+		updateWaiverStatus,
 	};
 }
 

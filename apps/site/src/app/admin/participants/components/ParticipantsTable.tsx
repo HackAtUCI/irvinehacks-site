@@ -1,5 +1,6 @@
 import { ReactElement, useCallback, useState } from "react";
 
+import Checkbox from "@cloudscape-design/components/checkbox";
 import { useCollection } from "@cloudscape-design/collection-hooks";
 import Box from "@cloudscape-design/components/box";
 import Button from "@cloudscape-design/components/button";
@@ -36,6 +37,7 @@ interface ParticipantsTableProps {
 	loading: boolean;
 	initiateCheckIn: (participant: Participant) => void;
 	initiateConfirm: (participant: Participant) => void;
+	updateWaiverStatus: (participant: Participant, isSigned: boolean) => void;
 }
 
 export type Options = ReadonlyArray<MultiselectProps.Option>;
@@ -81,6 +83,7 @@ function ParticipantsTable({
 	loading,
 	initiateCheckIn,
 	initiateConfirm,
+	updateWaiverStatus,
 }: ParticipantsTableProps) {
 	const [preferences, setPreferences] = useState({
 		pageSize: 20,
@@ -91,6 +94,7 @@ function ParticipantsTable({
 			"roles",
 			"status",
 			"decision",
+			"waiver",
 			"friday",
 			"saturday",
 			"sunday",
@@ -188,6 +192,16 @@ function ParticipantsTable({
 		[initiateCheckIn, initiateConfirm],
 	);
 
+	const WaiverCell = useCallback(
+		(item: Participant) => (
+			<Checkbox
+				checked={!!item.is_waiver_signed}
+				onChange={({ detail }) => updateWaiverStatus(item, detail.checked)}
+			/>
+		),
+		[updateWaiverStatus],
+	);
+
 	const columnDefinitions: StrictColumnDefinition[] = [
 		{
 			id: "uid",
@@ -231,6 +245,12 @@ function ParticipantsTable({
 			cell: DecisionCell,
 			ariaLabel: createLabelFunction("decision"),
 			sortingField: "decision",
+		},
+		{
+			id: "waiver",
+			header: "Waiver",
+			cell: WaiverCell,
+			sortingField: "is_waiver_signed",
 		},
 		{
 			id: "slack",

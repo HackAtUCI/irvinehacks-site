@@ -9,7 +9,7 @@ import scheduleFrame from "@/assets/images/schedule_frame.svg";
 
 import EventCard from "../components/EventCard";
 import EventProps from "../EventProps";
-import ScheduleScroll from "./ScheduleScroll";
+import ScheduleScroll from "../components/DesktopScheduleScroll";
 import EventSidebar from "../components/EventSidebar";
 
 import "./SchedulePage.scss";

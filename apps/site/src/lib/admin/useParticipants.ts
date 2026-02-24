@@ -22,11 +22,23 @@ const fetcher = async (url: string) => {
 	return res.data;
 };
 
+const syncFetcher = async (url: string) => {
+	const res = await axios.post(url);
+	return res.data;
+};
+
 function useParticipants() {
 	const { data, error, isLoading, mutate } = useSWR<Participant[]>(
 		"/api/admin/participants",
 		fetcher,
 	);
+
+	useSWR("/api/slack/sync", syncFetcher, {
+		refreshInterval: 30000, // Sync every 30 seconds
+		onSuccess: () => {
+			mutate(); // Refresh participant data after sync
+		},
+	});
 
 	const checkInParticipant = async (participant: Participant) => {
 		try {

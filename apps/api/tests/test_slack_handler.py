@@ -6,6 +6,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from fastapi import HTTPException, status
 
+from routers.slack import handle_event, _handle_team_join
+from services.mongodb_handler import Collection
 from services.slack_handler import require_slack
 
 TEST_SECRET = "test_secret"
@@ -132,3 +134,62 @@ async def test_require_slack_missing_secret() -> None:
     with pytest.raises(HTTPException) as excinfo:
         await require_slack(request)
     assert excinfo.value.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
+
+
+@patch("routers.slack._handle_team_join", new_callable=AsyncMock)
+async def test_handle_event_team_join(mock_handle: AsyncMock) -> None:
+    """Test handle_event calls _handle_team_join for team_join type"""
+    body = {
+        "event": {
+            "type": "team_join",
+            "user": {"profile": {"email": "test@example.com"}},
+        }
+    }
+    await handle_event(body)
+    mock_handle.assert_awaited_once_with(body["event"])
+
+
+async def test_handle_event_missing_event() -> None:
+    """Test handle_event raises 422 if event is missing"""
+    with pytest.raises(HTTPException) as excinfo:
+        await handle_event({})
+    assert excinfo.value.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+
+
+@patch("routers.slack.mongodb_handler.retrieve_one")
+@patch("routers.slack.mongodb_handler.update_one")
+async def test_handle_team_join_success(
+    mock_update: AsyncMock, mock_retrieve: AsyncMock
+) -> None:
+    """Test _handle_team_join updates mongo correctly"""
+    email = "sholmes@example.com"
+    event_data = {"type": "team_join", "user": {"profile": {"email": email}}}
+
+    mock_retrieve.return_value = {"_id": "user123"}
+    mock_update.return_value = True
+
+    await _handle_team_join(event_data)
+
+    mock_retrieve.assert_awaited_once_with(
+        Collection.USERS, {"application_data.email": email}, ["_id"]
+    )
+    mock_update.assert_awaited_once_with(
+        Collection.USERS, {"_id": "user123"}, {"is_added_to_slack": True}
+    )
+
+
+@patch("routers.slack.mongodb_handler.retrieve_one")
+@patch("routers.slack.mongodb_handler.update_one")
+async def test_handle_team_join_user_not_found(
+    mock_update: AsyncMock, mock_retrieve: AsyncMock
+) -> None:
+    """Test _handle_team_join handles user not found in mongo"""
+    email = "unknown@example.com"
+    event_data = {"type": "team_join", "user": {"profile": {"email": email}}}
+
+    mock_retrieve.return_value = None
+
+    await _handle_team_join(event_data)
+
+    mock_retrieve.assert_awaited_once()
+    mock_update.assert_not_called()

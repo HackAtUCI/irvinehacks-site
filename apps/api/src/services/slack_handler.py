@@ -5,11 +5,10 @@ import hmac
 import json
 from typing import Any
 from logging import getLogger
-
 from fastapi import HTTPException, Request, status
 
-SIGNING_SECRET = os.getenv("SLACK_SIGNING_SECRET")
 
+SIGNING_SECRET = os.getenv("SLACK_SIGNING_SECRET")
 
 log = getLogger(__name__)
 

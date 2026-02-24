@@ -4,15 +4,19 @@ import hashlib
 import hmac
 import json
 from typing import Any
+from logging import getLogger
 
 from fastapi import HTTPException, Request, status
 
 SIGNING_SECRET = os.getenv("SLACK_SIGNING_SECRET")
 
 
+log = getLogger(__name__)
+
+
 async def require_slack(request: Request) -> dict[Any, Any]:
     if not SIGNING_SECRET:
-        print("bruz")
+        log.info("bruz")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
         # left off here I think where there's no signing secret
 

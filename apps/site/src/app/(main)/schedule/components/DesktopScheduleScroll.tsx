@@ -108,7 +108,8 @@ export default function DesktopScheduleScroll({
 			</div>
 			<div className="w-full h-[120px] px-10 max-sm:hidden overflow-visible relative z-[100]">
 				<div className="w-full flex items-center justify-between h-full xl:hidden">
-					<div className="flex items-center gap-2 translate-y-[180px] translate-x-10 relative z-[100]">
+					<div className="flex items-center gap-2 translate-y-[155px] -translate-x-[30px] relative z-[100]">
+						{" "}
 						<Image
 							src={arrowTriangle}
 							alt="Previous day"
@@ -125,7 +126,8 @@ export default function DesktopScheduleScroll({
 							{selectedWeekdayStr}
 						</span>
 					</div>
-					<div className="flex items-center gap-2 translate-y-[155px] -translate-x-16 relative z-[100]">
+					<div className="flex items-center gap-2 translate-y-[120px] translate-x-[50px] relative z-[100]">
+						{" "}
 						<div className="w-[160px] text-left">
 							<span
 								className="font-display text-[#FF4DEF] text-[24px] leading-none whitespace-nowrap cursor-pointer"

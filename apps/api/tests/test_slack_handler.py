@@ -6,8 +6,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from fastapi import HTTPException, status
 
-from services.slack_handler import require_slack, handle_event, _handle_team_join
+from routers.slack import handle_event, _handle_team_join
 from services.mongodb_handler import Collection
+from services.slack_handler import require_slack
 
 TEST_SECRET = "test_secret"
 
@@ -135,7 +136,7 @@ async def test_require_slack_missing_secret() -> None:
     assert excinfo.value.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
 
 
-@patch("services.slack_handler._handle_team_join", new_callable=AsyncMock)
+@patch("routers.slack._handle_team_join", new_callable=AsyncMock)
 async def test_handle_event_team_join(mock_handle: AsyncMock) -> None:
     """Test handle_event calls _handle_team_join for team_join type"""
     body = {
@@ -155,8 +156,8 @@ async def test_handle_event_missing_event() -> None:
     assert excinfo.value.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
 
-@patch("services.slack_handler.mongodb_handler.retrieve_one")
-@patch("services.slack_handler.mongodb_handler.update_one")
+@patch("routers.slack.mongodb_handler.retrieve_one")
+@patch("routers.slack.mongodb_handler.update_one")
 async def test_handle_team_join_success(
     mock_update: AsyncMock, mock_retrieve: AsyncMock
 ) -> None:
@@ -177,8 +178,8 @@ async def test_handle_team_join_success(
     )
 
 
-@patch("services.slack_handler.mongodb_handler.retrieve_one")
-@patch("services.slack_handler.mongodb_handler.update_one")
+@patch("routers.slack.mongodb_handler.retrieve_one")
+@patch("routers.slack.mongodb_handler.update_one")
 async def test_handle_team_join_user_not_found(
     mock_update: AsyncMock, mock_retrieve: AsyncMock
 ) -> None:

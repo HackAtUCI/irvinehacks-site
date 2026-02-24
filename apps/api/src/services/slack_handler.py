@@ -12,7 +12,9 @@ SIGNING_SECRET = os.getenv("SLACK_SIGNING_SECRET")
 
 async def require_slack(request: Request) -> dict[Any, Any]:
     if not SIGNING_SECRET:
+        print("bruz")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # left off here I think where there's no signing secret
 
     raw_body_bytes = await request.body()
 

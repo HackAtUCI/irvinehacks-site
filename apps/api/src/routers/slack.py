@@ -11,8 +11,7 @@ router = APIRouter()
 
 
 @router.post("/challenge")
-def respond_to_challenge(body: dict[Any, Any] = Depends(require_slack)) -> str:
-    log.info("in body")
+async def respond_to_challenge(body: dict[Any, Any] = Depends(require_slack)) -> str:
     if body.get("type") == "url_verification":
         return str(body["challenge"])
     return "invalid challenge"

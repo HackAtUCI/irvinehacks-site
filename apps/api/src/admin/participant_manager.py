@@ -27,6 +27,7 @@ class Participant(UserRecord):
     checkins: list[Checkin] = []
     status: Union[Status, Decision] = Status.REVIEWED
     decision: Optional[Decision]
+    is_added_to_slack: bool = False
     badge_number: Union[str, None] = None
 
 
@@ -39,6 +40,7 @@ PARTICIPANT_FIELDS = [
     "decision",
     "checkins",
     "badge_number",
+    "is_added_to_slack",
 ]
 
 

@@ -19,6 +19,7 @@ import ParticipantAction from "./ParticipantAction";
 import ParticipantsFilters from "./ParticipantsFilters";
 import RoleBadge from "./RoleBadge";
 import SearchScannerModal from "./SearchScannerModal";
+import StatusIndicator from "@cloudscape-design/components/status-indicator";
 
 const FRIDAY = new Date("2026-02-27T12:00:00");
 const SATURDAY = new Date("2026-02-28T12:00:00");
@@ -93,6 +94,7 @@ function ParticipantsTable({
 			"friday",
 			"saturday",
 			"sunday",
+			"slack",
 			"action",
 		],
 	});
@@ -229,6 +231,12 @@ function ParticipantsTable({
 			cell: DecisionCell,
 			ariaLabel: createLabelFunction("decision"),
 			sortingField: "decision",
+		},
+		{
+			id: "slack",
+			header: "Slack",
+			cell: SlackCell,
+			sortingField: "is_added_to_slack",
 		},
 		{
 			id: "friday",
@@ -382,5 +390,9 @@ const SundayCheckin = ({ checkins }: Participant) => (
 
 const DecisionCell = (item: Participant) =>
 	item.decision ? <ApplicantStatus status={item.decision} /> : "-";
+
+const SlackCell = (item: Participant) => (
+	<StatusIndicator type={item.is_added_to_slack ? "success" : "error"} />
+);
 
 export default ParticipantsTable;

@@ -14,6 +14,7 @@ export interface Participant {
 	status: Status;
 	decision?: Decision;
 	badge_number: string | null;
+	is_added_to_slack?: boolean;
 }
 
 const fetcher = async (url: string) => {

@@ -36,5 +36,9 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 		return null; // or a loading spinner
 	}
 
-	return isDesktop ? <DesktopSchedulePage schedule={schedule} /> : <MobileSchedulePage schedule={schedule} />;
+	return isDesktop ? (
+		<DesktopSchedulePage schedule={schedule} />
+	) : (
+		<MobileSchedulePage schedule={schedule} />
+	);
 }

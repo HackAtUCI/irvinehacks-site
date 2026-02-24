@@ -7,7 +7,7 @@ import Image from "next/image";
 import convertToPST from "@/lib/utils/convertToPST";
 import scheduleFrame from "@/assets/images/schedule_frame.svg";
 
-import EventCard from "../components/EventCard";
+import DesktopEventCard from "../components/DesktopEventCard";
 import EventProps from "../EventProps";
 import DesktopScheduleScroll from "../components/DesktopScheduleScroll";
 import EventSidebar from "../components/EventSidebar";
@@ -112,7 +112,7 @@ export default function DesktopSchedulePage({
 					/>
 					{selectedEvent ? (
 						<div className="flex-1 relative flex items-center justify-start max-lg:hidden lg:min-h-[400px]">
-							<EventCard
+							<DesktopEventCard
 								key={selectedEvent.title}
 								now={now}
 								isHappening={false}

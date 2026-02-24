@@ -14,7 +14,6 @@
 		scroll-snap-type: x mandatory;
 		scroll-behavior: smooth;
 		-webkit-overflow-scrolling: touch;
-		gap: 2rem;
 		padding: 2rem 1rem;
 		width: 100%;
 
@@ -33,12 +32,13 @@
 
 	/* Individual carousel items */
 	.mobile-carousel-item {
-		flex: 0 0 80%;
+		flex: 0 0 90%;
 		scroll-snap-align: center;
 		scroll-snap-stop: always;
 		display: flex;
 		justify-content: center;
-		align-items: center;
+		height: min-content;
+		align-items: start;
 		transition:
 			transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
 			opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);

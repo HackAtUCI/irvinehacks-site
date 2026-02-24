@@ -6,6 +6,8 @@ import EventPlaque from "./EventPlaque";
 import EventProps from "../EventProps";
 import EventCard from "./EventCard";
 
+import styles from "./EventSidebar.module.scss";
+
 export default function EventSidebar({
 	events,
 	currentTitle,

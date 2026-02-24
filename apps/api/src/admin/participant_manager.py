@@ -241,8 +241,7 @@ def _checkins_to_dict(raw: Any) -> dict[str, datetime]:
 
 async def subevent_checkin(event_id: str, uid: str, organizer: User) -> None:
     """checkins as {uid: ISODate}"""
-    event_doc = await mongodb_handler.retrieve_one
-    (
+    event_doc = await mongodb_handler.retrieve_one(
         Collection.EVENTS, {"_id": event_id}, ["checkins"]
     )
     if not event_doc:

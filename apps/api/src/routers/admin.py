@@ -661,7 +661,11 @@ async def get_avg_score_setting() -> dict[str, bool]:
         {"_id": "avg_score_setting"},
         ["show_with_one_reviewer"],
     )
-    return {"show_with_one_reviewer": bool(record and record.get("show_with_one_reviewer", False))}
+    return {
+        "show_with_one_reviewer": bool(
+            record and record.get("show_with_one_reviewer", False)
+        )
+    }
 
 
 async def _handle_global_only_review(

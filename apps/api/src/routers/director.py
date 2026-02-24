@@ -98,7 +98,7 @@ async def _get_apply_reminder_email_recipients() -> Optional[dict[str, Any]]:
 
 @router.get("/organizers")
 async def organizers(
-    user: Annotated[User, Depends(require_director)]
+    user: Annotated[User, Depends(require_director)],
 ) -> list[OrganizerSummary]:
     """Get records of all organizers"""
     log.info("%s requested organizer", user)
@@ -236,7 +236,7 @@ async def apply_reminder(user: Annotated[User, Depends(require_director)]) -> No
 
 
 async def _rsvp_reminder(
-    application_type: Literal[Role.HACKER, Role.MENTOR, Role.VOLUNTEER]
+    application_type: Literal[Role.HACKER, Role.MENTOR, Role.VOLUNTEER],
 ) -> None:
     """Send email to applicants based on application_type who have a status of ACCEPTED
     or WAIVER_SIGNED reminding them to RSVP."""

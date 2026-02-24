@@ -238,9 +238,21 @@ async def get_attending_hackers() -> list[Participant]:
 
 
 async def update_waiver_status(uid: str, is_signed: bool) -> bool:
-    """Update is_waiver_signed field for a participant."""
+    """Update is_waiver_signed field and conditionally update status."""
+    record = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": uid}, ["status"]
+    )
+    if not record:
+        return False
+
+    current_status = record.get("status")
+    update_data: dict[str, Union[bool, Status]] = {"is_waiver_signed": is_signed}
+
+    if current_status in (Status.WAIVER_SIGNED, Status.REVIEWED):
+        update_data["status"] = Status.WAIVER_SIGNED if is_signed else Status.REVIEWED
+
     return await mongodb_handler.update_one(
         Collection.USERS,
         {"_id": uid},
-        {"is_waiver_signed": is_signed},
+        update_data,
     )

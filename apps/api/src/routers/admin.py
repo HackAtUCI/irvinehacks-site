@@ -650,6 +650,20 @@ async def retrieve_thresholds() -> Optional[dict[str, Any]]:
     )
 
 
+@router.get(
+    "/avg-score-setting",
+    dependencies=[Depends(require_hacker_reviewer)],
+)
+async def get_avg_score_setting() -> dict[str, bool]:
+    """Get setting for whether to show avg score with only 1 reviewer."""
+    record = await mongodb_handler.retrieve_one(
+        Collection.SETTINGS,
+        {"_id": "avg_score_setting"},
+        ["show_with_one_reviewer"],
+    )
+    return {"show_with_one_reviewer": bool(record and record.get("show_with_one_reviewer", False))}
+
+
 async def _handle_global_only_review(
     applicant: str, scores: GlobalScores, reviewer: User
 ) -> None:

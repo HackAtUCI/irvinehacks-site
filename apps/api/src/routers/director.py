@@ -340,6 +340,26 @@ async def set_hacker_score_thresholds(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+@router.post("/avg-score-setting", dependencies=[Depends(require_director)])
+async def toggle_avg_score_setting() -> dict[str, bool]:
+    """Toggle whether to show avg score with only 1 reviewer."""
+    record = await mongodb_handler.retrieve_one(
+        Collection.SETTINGS,
+        {"_id": "avg_score_setting"},
+        ["show_with_one_reviewer"],
+    )
+    current = bool(record and record.get("show_with_one_reviewer", False))
+    new_value = not current
+
+    await mongodb_handler.raw_update_one(
+        Collection.SETTINGS,
+        {"_id": "avg_score_setting"},
+        {"$set": {"show_with_one_reviewer": new_value}},
+        upsert=True,
+    )
+    return {"show_with_one_reviewer": new_value}
+
+
 @router.post("/release/mentor-volunteer", dependencies=[Depends(require_director)])
 async def release_mentor_volunteer_decisions() -> None:
     """Update applicant status based on decision and send decision emails."""

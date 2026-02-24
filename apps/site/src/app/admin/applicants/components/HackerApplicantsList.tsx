@@ -20,6 +20,7 @@ import ApplicantReviewerIndicator from "../components/ApplicantReviewerIndicator
 import HackerThresholdInputs from "../components/HackerThresholdInputs";
 
 import useHackerThresholds from "@/lib/admin/useHackerThresholds";
+import useAvgScoreSetting from "@/lib/admin/useAvgScoreSetting";
 import useHackerApplicants, {
 	HackerApplicantSummary,
 } from "@/lib/admin/useHackerApplicants";
@@ -65,6 +66,8 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 	const { thresholds } = useHackerThresholds();
 	const acceptThreshold = thresholds?.accept;
 	const waitlistThreshold = thresholds?.waitlist;
+
+	const { showWithOneReviewer } = useAvgScoreSetting();
 
 	const [top400, setTop400] = useState(false);
 
@@ -179,11 +182,12 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		[hackathonName],
 	);
 
-	const avgScore = ({ avg_score }: { avg_score: number }) => {
-		if (avg_score === -1) return "-";
+	const avgScore = ({ avg_score, reviewers }: HackerApplicantSummary) => {
 		if (avg_score === OVERQUALIFIED_SCORE)
 			return <Box color="text-status-error">OVERQUALIFIED</Box>;
-		return avg_score;
+		if (avg_score === -1) return "-";
+		if (reviewers.length < 2 && !showWithOneReviewer) return "-";
+		return avg_score.toFixed(3);
 	};
 
 	return (

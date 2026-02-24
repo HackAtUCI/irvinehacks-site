@@ -10,6 +10,7 @@ import { MultiselectProps } from "@cloudscape-design/components/multiselect";
 import Pagination from "@cloudscape-design/components/pagination";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import Table, { TableProps } from "@cloudscape-design/components/table";
+import Spinner from "@cloudscape-design/components/spinner";
 
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
 import { Participant } from "@/lib/admin/useParticipants";
@@ -192,14 +193,39 @@ function ParticipantsTable({
 		[initiateCheckIn, initiateConfirm],
 	);
 
-	const WaiverCell = useCallback(
-		(item: Participant) => (
-			<Checkbox
-				checked={!!item.is_waiver_signed}
-				onChange={({ detail }) => updateWaiverStatus(item, detail.checked)}
-			/>
-		),
+	const [loadingWaivers, setLoadingWaivers] = useState<Set<string>>(new Set());
+
+	const onWaiverChange = useCallback(
+		async (item: Participant, checked: boolean) => {
+			setLoadingWaivers((prev) => new Set(prev).add(item._id));
+			try {
+				await updateWaiverStatus(item, checked);
+			} finally {
+				setLoadingWaivers((prev) => {
+					const next = new Set(prev);
+					next.delete(item._id);
+					return next;
+				});
+			}
+		},
 		[updateWaiverStatus],
+	);
+
+	const WaiverCell = useCallback(
+		(item: Participant) => {
+			const isLoading = loadingWaivers.has(item._id);
+			return (
+				<SpaceBetween direction="horizontal" size="xs">
+					<Checkbox
+						checked={!!item.is_waiver_signed}
+						onChange={({ detail }) => onWaiverChange(item, detail.checked)}
+						disabled={isLoading}
+					/>
+					{isLoading && <Spinner />}
+				</SpaceBetween>
+			);
+		},
+		[onWaiverChange, loadingWaivers],
 	);
 
 	const columnDefinitions: StrictColumnDefinition[] = [

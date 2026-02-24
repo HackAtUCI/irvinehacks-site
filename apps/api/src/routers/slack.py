@@ -49,6 +49,7 @@ async def handle_event(body: dict[Any, Any]) -> None:
 
 
 async def _handle_team_join(event_data: dict[Any, Any]) -> None:
+    log.info(event_data)
     try:
         event = SlackTeamJoinEvent.model_validate(event_data)
     except Exception as e:

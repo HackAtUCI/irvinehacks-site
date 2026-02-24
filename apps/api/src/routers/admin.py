@@ -868,7 +868,7 @@ async def _try_update_applicant_with_query(
 
 @router.post(
     "/participant/waiver/{uid}",
-    dependencies=[Depends(require_checkin_lead)],
+    dependencies=[Depends(require_organizer)],
 )
 async def update_participant_waiver_status(
     uid: str,

@@ -1,5 +1,6 @@
 import { ReactElement, useCallback, useState } from "react";
 
+import Checkbox from "@cloudscape-design/components/checkbox";
 import { useCollection } from "@cloudscape-design/collection-hooks";
 import Box from "@cloudscape-design/components/box";
 import Button from "@cloudscape-design/components/button";
@@ -19,6 +20,7 @@ import ParticipantAction from "./ParticipantAction";
 import ParticipantsFilters from "./ParticipantsFilters";
 import RoleBadge from "./RoleBadge";
 import SearchScannerModal from "./SearchScannerModal";
+import StatusIndicator from "@cloudscape-design/components/status-indicator";
 
 const FRIDAY = new Date("2026-02-27T12:00:00");
 const SATURDAY = new Date("2026-02-28T12:00:00");
@@ -35,6 +37,7 @@ interface ParticipantsTableProps {
 	loading: boolean;
 	initiateCheckIn: (participant: Participant) => void;
 	initiateConfirm: (participant: Participant) => void;
+	updateWaiverStatus: (participant: Participant, isSigned: boolean) => void;
 }
 
 export type Options = ReadonlyArray<MultiselectProps.Option>;
@@ -80,6 +83,7 @@ function ParticipantsTable({
 	loading,
 	initiateCheckIn,
 	initiateConfirm,
+	updateWaiverStatus,
 }: ParticipantsTableProps) {
 	const [preferences, setPreferences] = useState({
 		pageSize: 20,
@@ -90,9 +94,11 @@ function ParticipantsTable({
 			"roles",
 			"status",
 			"decision",
+			"waiver",
 			"friday",
 			"saturday",
 			"sunday",
+			"slack",
 			"action",
 		],
 	});
@@ -186,6 +192,16 @@ function ParticipantsTable({
 		[initiateCheckIn, initiateConfirm],
 	);
 
+	const WaiverCell = useCallback(
+		(item: Participant) => (
+			<Checkbox
+				checked={!!item.is_waiver_signed}
+				onChange={({ detail }) => updateWaiverStatus(item, detail.checked)}
+			/>
+		),
+		[updateWaiverStatus],
+	);
+
 	const columnDefinitions: StrictColumnDefinition[] = [
 		{
 			id: "uid",
@@ -229,6 +245,18 @@ function ParticipantsTable({
 			cell: DecisionCell,
 			ariaLabel: createLabelFunction("decision"),
 			sortingField: "decision",
+		},
+		{
+			id: "waiver",
+			header: "Waiver",
+			cell: WaiverCell,
+			sortingField: "is_waiver_signed",
+		},
+		{
+			id: "slack",
+			header: "Slack",
+			cell: SlackCell,
+			sortingField: "is_added_to_slack",
 		},
 		{
 			id: "friday",
@@ -382,5 +410,9 @@ const SundayCheckin = ({ checkins }: Participant) => (
 
 const DecisionCell = (item: Participant) =>
 	item.decision ? <ApplicantStatus status={item.decision} /> : "-";
+
+const SlackCell = (item: Participant) => (
+	<StatusIndicator type={item.is_added_to_slack ? "success" : "error"} />
+);
 
 export default ParticipantsTable;

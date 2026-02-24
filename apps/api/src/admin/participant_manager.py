@@ -234,7 +234,6 @@ def _checkins_to_dict(raw: Any) -> dict[str, datetime]:
     return out
 
 
-# checkins as {uid: ISODate, one entry per UID
 async def subevent_checkin(event_id: str, uid: str, organizer: User) -> None:
             if (
                 isinstance(e, (list, tuple))

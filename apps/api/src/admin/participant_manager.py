@@ -202,10 +202,55 @@ async def confirm_attendance_outside_participants(uid: str, director: User) -> N
     log.info(f"Non-hacker {uid} status updated to attending by {director.uid}")
 
 
+class AlreadyCheckedInError(Exception):
+    pass
+
+
+def _uid_already_in_checkins(raw: Any, uid: str) -> bool:
+    if not raw:
+        return False
+    if isinstance(raw, dict):
+        return str(uid) in raw or uid in raw
+    if isinstance(raw, list):
+        for e in raw:
+            if isinstance(e, (list, tuple)) and len(e) >= 1:
+                if e[0] == uid or str(e[0]) == str(uid):
+                    return True
+    return False
+
+
+def _checkins_to_dict(raw: Any) -> dict[str, datetime]:
+    out: dict[str, datetime] = {}
+    if not raw:
+        return out
+    if isinstance(raw, dict):
+        for k, v in raw.items():
+            if isinstance(k, str) and isinstance(v, datetime):
+                out[k] = v
+    elif isinstance(raw, list):
+        for e in raw:
+            if isinstance(e, (list, tuple)) and len(e) >= 2 and isinstance(e[0], str) and isinstance(e[1], datetime):
+                out[e[0]] = e[1]
+    return out
+
+
+# checkins as {uid: ISODate, one entry per UID
 async def subevent_checkin(event_id: str, uid: str, organizer: User) -> None:
-    checkin = (uid, utc_now())
+    event_doc = await mongodb_handler.retrieve_one(
+        Collection.EVENTS, {"_id": event_id}, ["checkins"]
+    )
+    if not event_doc:
+        raise RuntimeError(f"Event {event_id} not found")
+
+    raw = event_doc.get("checkins")
+    if _uid_already_in_checkins(raw, uid):
+        raise AlreadyCheckedInError(f"{uid} is already checked in to this event")
+
+    checkins = _checkins_to_dict(raw)
+    checkins[uid] = utc_now()
+
     res = await mongodb_handler.raw_update_one(
-        Collection.EVENTS, {"_id": event_id}, {"$push": {"checkins": checkin}}
+        Collection.EVENTS, {"_id": event_id}, {"$set": {"checkins": checkins}}
     )
     if not res:
         raise RuntimeError(f"Could not update events table for {event_id} with {uid}")

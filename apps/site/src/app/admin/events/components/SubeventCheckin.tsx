@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState } from "react";
 
+import Box from "@cloudscape-design/components/box";
 import Button from "@cloudscape-design/components/button";
 import Container from "@cloudscape-design/components/container";
 import Input from "@cloudscape-design/components/input";
@@ -32,6 +33,7 @@ function SubeventCheckin({ participants, onConfirm }: SubeventCheckinProps) {
 	const [participantSearch, setParticipantSearch] = useState("");
 	const [showScanner, setShowScanner] = useState(true);
 	const [error, setError] = useState("");
+	const [success, setSuccess] = useState("");
 
 	const onScanSuccess = useCallback((decodedText: string) => {
 		setScannedUid(decodedText.trim());
@@ -57,8 +59,8 @@ function SubeventCheckin({ participants, onConfirm }: SubeventCheckinProps) {
 
 	const notFoundMessage = (
 		<p>
-			Participant could not be found. Scan the participant&apos;s portal QR
-			code or enter their UID manually.
+			Participant could not be found. Scan the participant&apos;s portal QR code
+			or enter their UID manually.
 		</p>
 	);
 
@@ -70,11 +72,20 @@ function SubeventCheckin({ participants, onConfirm }: SubeventCheckinProps) {
 	const handleConfirm = async () => {
 		if (!participant) return;
 		setError("");
-		const okay = await onConfirm(participant);
-		if (okay) {
-			setScannedUid("");
-		} else {
-			setError("Check-in failed");
+		setSuccess("");
+		try {
+			const okay = await onConfirm(participant);
+			if (okay) {
+				setSuccess(
+					`Successfully checked in ${participant.first_name} ${participant.last_name}.`,
+				);
+				setScannedUid("");
+				window.setTimeout(() => setSuccess(""), 5000);
+			} else {
+				setError("Check-in failed");
+			}
+		} catch (err) {
+			setError(err instanceof Error ? err.message : "Check-in failed");
 		}
 	};
 
@@ -124,7 +135,8 @@ function SubeventCheckin({ participants, onConfirm }: SubeventCheckinProps) {
 					Participant: {`${participant.first_name} ${participant.last_name}`}
 				</p>
 			)}
-			{error && <p style={{ color: "var(--color-text-error)" }}>{error}</p>}
+			{success && <Box color="text-status-success">{success}</Box>}
+			{error && <Box color="text-status-error">{error}</Box>}
 			<Button onClick={handleConfirm} disabled={!participant}>
 				Confirm check-in
 			</Button>

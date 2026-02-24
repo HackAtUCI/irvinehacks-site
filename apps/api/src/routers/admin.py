@@ -8,7 +8,7 @@ from typing_extensions import assert_never
 from pymongo import DESCENDING
 
 from admin import applicant_review_processor, participant_manager, summary_handler
-from admin.participant_manager import Participant
+from admin.participant_manager import AlreadyCheckedInError, Participant
 from admin.score_normalizing_handler import (
     IH_WEIGHTING_CONFIG,
     add_normalized_scores_to_all_hacker_applicants,
@@ -617,7 +617,10 @@ async def subevent_checkin(
     uid: Annotated[str, Body()],
     organizer: Annotated[User, Depends(require_organizer)],
 ) -> None:
-    await participant_manager.subevent_checkin(event, uid, organizer)
+    try:
+        await participant_manager.subevent_checkin(event, uid, organizer)
+    except AlreadyCheckedInError as e:
+        raise HTTPException(status.HTTP_409_CONFLICT, detail=str(e))
 
 
 @router.post(

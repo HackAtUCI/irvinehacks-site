@@ -1,3 +1,5 @@
+import os
+import httpx
 from typing import Any
 from logging import getLogger
 from pydantic import BaseModel, ConfigDict
@@ -10,6 +12,8 @@ from services import mongodb_handler
 from services.mongodb_handler import Collection
 
 log = getLogger(__name__)
+
+SLACK_BOT_TOKEN = os.getenv("SLACK_BOT_TOKEN")
 
 router = APIRouter()
 
@@ -73,3 +77,66 @@ async def _handle_team_join(event_data: dict[Any, Any]) -> None:
         Collection.USERS, {"_id": user_record["_id"]}, {"is_added_to_slack": True}
     )
     log.info("Marked user %s as added to Slack", user_record["_id"])
+
+
+@router.post("/sync")
+async def sync_slack_users() -> dict[str, Any]:
+    """Fetches Slack users and marks them as added to Slack in MongoDB."""
+    if not SLACK_BOT_TOKEN:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="SLACK_BOT_TOKEN not configured",
+        )
+
+    all_emails: list[str] = []
+    cursor = None
+
+    async with httpx.AsyncClient() as client:
+        while True:
+            params: dict[Any, Any] = {}
+            if cursor:
+                params["cursor"] = cursor
+
+            response = await client.get(
+                "https://slack.com/api/users.list",
+                headers={"Authorization": f"Bearer {SLACK_BOT_TOKEN}"},
+                params=params,
+            )
+            data = response.json()
+
+            if not data.get("ok"):
+                log.error("Slack API error: %s", data.get("error"))
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=f"Slack API error: {data.get('error')}",
+                )
+
+            for member in data.get("members", []):
+                profile = member.get("profile", {})
+                email = profile.get("email")
+                if email:
+                    all_emails.append(email)
+
+            cursor = data.get("response_metadata", {}).get("next_cursor")
+            if not cursor:
+                break
+
+    if not all_emails:
+        return {
+            "status": "success",
+            "updated_count": 0,
+            "message": "No emails found in Slack",
+        }
+
+    # Update all users whose application_data.email is in the list
+    updated = await mongodb_handler.update(
+        Collection.USERS,
+        {"application_data.email": {"$in": all_emails}},
+        {"is_added_to_slack": True},
+    )
+
+    return {
+        "status": "success",
+        "updated": updated,
+        "slack_user_count": len(all_emails),
+    }

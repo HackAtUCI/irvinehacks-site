@@ -7,7 +7,6 @@ import convertToPST from "@/lib/utils/convertToPST";
 import EventCard from "../components/MobileEventCard";
 import EventProps from "../EventProps";
 import ScheduleScroll from "./MobileScheduleScroll";
-import EventSidebar from "../components/MobileEventSidebar";
 
 import "./MobileSchedulePage.scss";
 
@@ -213,21 +212,6 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 			/>
 
 			<div className="w-full relative flex max-lg:flex-col-reverse max-lg:gap-20">
-				{/* Desktop Sidebar */}
-				<div className="max-lg:hidden w-full">
-					<EventSidebar
-						events={sidebarEvents}
-						currentTitle={
-							selectedEvent
-								? `${
-										selectedEvent.title
-								  }${selectedEvent.startTime.toISOString()}`
-								: ""
-						}
-						setSelectedEvent={setSelectedEvent}
-					/>
-				</div>
-
 				{/* Mobile Carousel */}
 				<div className="mobile-carousel-wrapper lg:hidden">
 					<div ref={carouselRef} className="mobile-carousel">
@@ -247,26 +231,6 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 						))}
 					</div>
 				</div>
-
-				{/* Desktop Event Card */}
-				{selectedEvent ? (
-					<div className="w-[50%] relative flex max-lg:hidden lg:min-h-[700px]">
-						<EventCard
-							key={selectedEvent.title}
-							now={now}
-							isHappening={false}
-							{...selectedEvent}
-						/>
-					</div>
-				) : (
-					<div className="w-[50%] min-h-[700px] relative flex max-lg:justify-center max-lg:hidden">
-						<div className="w-[90%] min-h-[700px] h-full bg-[#170f51]/50 border-[9px] border-yellow relative p-16 font-display">
-							<div className="text-4xl min-h-[600px] w-full h-full flex justify-center items-center text-center text-yellow">
-								No Event Selected...
-							</div>
-						</div>
-					</div>
-				)}
 			</div>
 		</div>
 	);

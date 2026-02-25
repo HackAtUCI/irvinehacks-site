@@ -2,7 +2,7 @@ import asyncio
 
 from datetime import datetime
 from logging import getLogger
-from typing import Annotated, Any, Literal, Optional, Sequence, Union
+from typing import Annotated, Any, Literal, Optional, Sequence
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
 from pydantic import BaseModel, EmailStr, TypeAdapter, ValidationError
@@ -438,17 +438,19 @@ async def waitlist_transfer() -> None:
     """Transfer all accepted hackers that didn't RSVP in time to the waitlist"""
     records: list[dict[str, Any]] = await mongodb_handler.retrieve(
         Collection.USERS,
-        {"roles": Role.HACKER, "status": Status.VOID},
+        {
+            "roles": Role.HACKER,
+            "status": {"$nin": [Status.CONFIRMED, Status.ATTENDING]},
+            "decision": Decision.ACCEPTED,
+        },
         ["_id", "first_name"],
     )
 
-    log.info(
-        f"Changing status of {len(records)} from {Status.VOID} to {Decision.WAITLISTED}"
-    )
+    log.info(f"Changing status of {len(records)} to {Decision.WAITLISTED}")
 
     await asyncio.gather(
         *(
-            _process_status(batch, Decision.WAITLISTED)
+            _process_decision(batch, Decision.WAITLISTED)
             for batch in batched([str(record["_id"]) for record in records], 100)
         )
     )
@@ -473,12 +475,16 @@ async def waitlist_transfer() -> None:
         )
 
 
-async def _process_status(uids: Sequence[str], status: Union[Status, Decision]) -> None:
-    ok = await mongodb_handler.update(
-        Collection.USERS, {"_id": {"$in": uids}}, {"status": status}
+async def _process_decision(
+    uids: Sequence[str], decision: Decision, *, no_modifications_ok: bool = False
+) -> None:
+    any_modified = await mongodb_handler.update(
+        Collection.USERS, {"_id": {"$in": uids}}, {"decision": decision}
     )
-    if not ok:
-        raise RuntimeError("gg wp")
+    if not any_modified and not no_modifications_ok:
+        raise RuntimeError(
+            "Expected to modify at least one document, but none were modified."
+        )
 
 
 async def _process_records_in_batches(

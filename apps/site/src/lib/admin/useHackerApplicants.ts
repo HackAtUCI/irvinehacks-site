@@ -20,6 +20,9 @@ export interface HackerApplicantSummary {
 		extra_points?: number;
 		email: string;
 		resume_url: string;
+		major?: string;
+		linkedin?: string;
+		reviews?: ReadonlyArray<[string, string, number, string?]>;
 	};
 }
 

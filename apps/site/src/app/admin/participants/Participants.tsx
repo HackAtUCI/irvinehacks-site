@@ -15,6 +15,7 @@ function Participants() {
 		checkInParticipant,
 		queueParticipant,
 		confirmOutsideParticipants,
+		updateWaiverStatus,
 	} = useParticipants();
 	const [checkinParticipant, setCheckinParticipant] =
 		useState<Participant | null>(null);
@@ -23,6 +24,35 @@ function Participants() {
 
 	const initiateCheckIn = (participant: Participant): void => {
 		setCheckinParticipant(participant);
+	};
+
+	const onUpdateWaiver = async (
+		participant: Participant,
+		isSigned: boolean,
+	) => {
+		try {
+			await updateWaiverStatus(participant._id, isSigned);
+		} catch (error) {
+			if (setNotifications) {
+				const notificationId = `waiver-${participant._id}`;
+				const dismissError = () =>
+					setNotifications((notifications) =>
+						notifications.filter((n) => n.id !== notificationId),
+					);
+
+				setNotifications((old) => [
+					{
+						type: "error",
+						content: `Failed to update waiver for ${participant.first_name}: ${error}`,
+						dismissible: true,
+						id: notificationId,
+						onDismiss: dismissError,
+					},
+					...old,
+				]);
+				window.setTimeout(dismissError, 5000);
+			}
+		}
 	};
 
 	const sendCheckIn = async (
@@ -102,6 +132,7 @@ function Participants() {
 				loading={loading}
 				initiateCheckIn={initiateCheckIn}
 				initiateConfirm={confirmOutsideParticipants}
+				updateWaiverStatus={onUpdateWaiver}
 			/>
 			<CheckInModal
 				onDismiss={() => setCheckinParticipant(null)}

@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import DesktopSchedulePage from "./ScheduleDesktop";
+import DesktopSchedulePage from "./DesktopSchedulePage";
 import MobileSchedulePage from "./ScheduleMobile";
 import EventProps from "../EventProps";
 

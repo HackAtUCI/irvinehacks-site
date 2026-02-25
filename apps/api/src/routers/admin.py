@@ -10,7 +10,9 @@ from pymongo import DESCENDING
 from admin import applicant_review_processor, participant_manager, summary_handler
 from admin.participant_manager import Participant
 from admin.score_normalizing_handler import (
+    IH_WEIGHTING_CONFIG,
     add_normalized_scores_to_all_hacker_applicants,
+    add_uids_to_exclude_from_hacker_normalization,
 )
 from auth.authorization import require_role
 from auth.user_identity import User, utc_now
@@ -54,6 +56,13 @@ require_organizer = require_role({Role.ORGANIZER})
 class ApplicationDataSummary(BaseModel):
     school: str
     submission_time: datetime
+    normalized_scores: Optional[dict[str, float]] = None
+    extra_points: Optional[float] = None
+    email: str
+    resume_url: str
+    major: Optional[str] = None
+    linkedin: Optional[str] = None
+    reviews: list[Review] = []
 
 
 class ZotHacksApplicationDataSummary(BaseModel):
@@ -63,6 +72,22 @@ class ZotHacksApplicationDataSummary(BaseModel):
     extra_points: Optional[float] = None
     email: str
     resume_url: str
+    major: Optional[str] = None
+    linkedin: Optional[str] = None
+    reviews: list[Review] = []
+
+
+class SimplifiedApplicationDataSummary(BaseModel):
+    school: str
+    submission_time: datetime
+    reviews: list[Review] = []
+
+
+class SimplifiedApplicantSummary(BaseRecord):
+    first_name: str
+    last_name: str
+    status: str
+    application_data: SimplifiedApplicationDataSummary
 
 
 class ApplicantSummary(BaseRecord):
@@ -127,9 +152,13 @@ class DeleteNotesRequest(BaseModel):
     review_index: int
 
 
+class WaiverStatusRequest(BaseModel):
+    is_signed: bool
+
+
 async def mentor_volunteer_applicants(
     application_type: Literal["Mentor", "Volunteer"],
-) -> list[ApplicantSummary]:
+) -> list[SimplifiedApplicantSummary]:
     """Get records of all mentor and volunteer applicants."""
     records: list[dict[str, object]] = await mongodb_handler.retrieve(
         Collection.USERS,
@@ -149,7 +178,7 @@ async def mentor_volunteer_applicants(
         applicant_review_processor.include_review_decision(record)
 
     try:
-        return TypeAdapter(list[ApplicantSummary]).validate_python(records)
+        return TypeAdapter(list[SimplifiedApplicantSummary]).validate_python(records)
     except ValidationError:
         raise RuntimeError("Could not parse applicant data.")
 
@@ -157,7 +186,7 @@ async def mentor_volunteer_applicants(
 @router.get("/applicants/mentors")
 async def mentor_applicants(
     user: Annotated[User, Depends(require_mentor_reviewer)],
-) -> list[ApplicantSummary]:
+) -> list[SimplifiedApplicantSummary]:
     """Get records of all mentor applicants."""
     log.info("%s requested mentor applicants", user)
 
@@ -167,7 +196,7 @@ async def mentor_applicants(
 @router.get("/applicants/volunteers")
 async def volunteer_applicants(
     user: Annotated[User, Depends(require_volunteer_reviewer)],
-) -> list[ApplicantSummary]:
+) -> list[SimplifiedApplicantSummary]:
     """Get records of all volunteer applicants."""
     log.info("%s requested volunteer applicants", user)
 
@@ -202,15 +231,19 @@ async def hacker_applicants(
     for record in records:
         # TODO: Use different route for different avg score types.
 
-        # If we change back to old avg score for summary, like for IH, change this
-        # function back to applicant_review_processor.include_hacker_app_fields
-        # If we change to detailed avg score, like for zothacks, use this function:
-        # applicant_review_processor.include_hacker_app_fields_with_global_and_breakdown(
-        #     record, thresholds["accept"], thresholds["waitlist"]
-        # )
-        applicant_review_processor.include_hacker_app_fields(
+        # Difference between them:
+        # include_hacker_app_fields_with_global_and_breakdown uses review_breakdown and
+        # global_field_scores as the source of truth for "most recent scores"
+
+        # include_hacker_app_fields uses reviews array as source of truth
+        # for "most recent scores"
+
+        applicant_review_processor.include_hacker_app_fields_with_global_and_breakdown(
             record, thresholds["accept"], thresholds["waitlist"]
         )
+        # applicant_review_processor.include_hacker_app_fields(
+        #     record, thresholds["accept"], thresholds["waitlist"]
+        # )
 
     try:
         return TypeAdapter(list[HackerApplicantSummary]).validate_python(records)
@@ -591,6 +624,18 @@ async def subevent_checkin(
     await participant_manager.subevent_checkin(event, uid, organizer)
 
 
+@router.post(
+    "/add-uids-to-exclude-from-normalization",
+    dependencies=[Depends(require_role({Role.DIRECTOR, Role.LEAD}))],
+)
+async def add_uids_to_exclude(uids: list[str]) -> None:
+    try:
+        await add_uids_to_exclude_from_hacker_normalization(uids)
+    except RuntimeError:
+        log.error("Could not update/add normalized scores to hacker applicants")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 @router.get(
     "/normalize-detailed-scores",
     dependencies=[Depends(require_role({Role.DIRECTOR, Role.LEAD}))],
@@ -632,16 +677,6 @@ async def _handle_irvinehacks_detailed_scores_review(
     notes: Optional[str] = None,
 ) -> None:
     """Handle detailed scores review submission for IrvineHacks."""
-    # Dictionary mapping field names to (total_points, weight_percentage)
-    # The sum of weight_percentages should be 1.0 (100%)
-    WEIGHTING_CONFIG = {
-        "frq_change": (20, 0.20),
-        "frq_ambition": (20, 0.25),
-        "frq_character": (20, 0.20),
-        "previous_experience": (1, 0.30),
-        "has_socials": (1, 0.05),
-    }
-
     score_breakdown = scores.model_dump(exclude_none=True)
 
     # Check for overqualified auto-reject
@@ -649,7 +684,7 @@ async def _handle_irvinehacks_detailed_scores_review(
         total_score = -1000.0
     else:
         weighted_sum = 0.0
-        for field, (total_points, weight) in WEIGHTING_CONFIG.items():
+        for field, (total_points, weight) in IH_WEIGHTING_CONFIG.items():
             score_val = score_breakdown.get(field, 0)
             weighted_sum += (score_val / total_points) * weight
 
@@ -829,3 +864,21 @@ async def _try_update_applicant_with_query(
     except RuntimeError:
         log.error(err_msg)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@router.post(
+    "/participant/waiver/{uid}",
+    dependencies=[Depends(require_organizer)],
+)
+async def update_participant_waiver_status(
+    uid: str,
+    request: WaiverStatusRequest,
+) -> dict[str, bool]:
+    """Update is_waiver_signed field for a participant."""
+    success = await participant_manager.update_waiver_status(uid, request.is_signed)
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Could not update waiver status for {uid}",
+        )
+    return {"success": True}

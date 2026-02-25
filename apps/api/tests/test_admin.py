@@ -341,6 +341,82 @@ def test_non_waitlisted_applicant_cannot_be_released(
 #     data = res.json()
 #     assert data == expected_records
 
+# TODO: Use this once new route created for ZH applicants
+# @patch("services.mongodb_handler.retrieve_one", autospec=True)
+# @patch("services.mongodb_handler.retrieve", autospec=True)
+# def test_hacker_applicants_returns_correct_applicants(
+#     mock_mongodb_handler_retrieve: AsyncMock,
+#     mock_mongodb_handler_retrieve_one: AsyncMock,
+# ) -> None:
+#     """Test that the /applicants/hackers route returns correctly"""
+#     returned_records: list[dict[str, object]] = [
+#         {
+#             "_id": "edu.uci.sydnee",
+#             "first_name": "sydnee",
+#             "last_name": "unknown",
+#             "status": "REVIEWED",
+#             "application_data": {
+#                 "school": "Hamburger University",
+#                 "submission_time": datetime(2023, 1, 12, 9, 0, 0),
+#                 "reviews": [
+#                     [datetime(2023, 1, 19), "edu.uci.alicia", 56],
+#                     [datetime(2023, 1, 19), "edu.uci.alicia2", 60],
+#                 ],
+#                 "review_breakdown": {
+#                     "alicia": {
+#                         "resume": 15,
+#                         "elevator_pitch_saq": 6,
+#                         "tech_experience_saq": 6,
+#                         "learn_about_self_saq": 8,
+#                         "pixel_art_saq": 16,
+#                         "hackathon_experience": -1000,
+#                     },
+#                     "alicia2": {
+#                         "resume": 15,
+#                         "elevator_pitch_saq": 10,
+#                         "tech_experience_saq": 10,
+#                         "learn_about_self_saq": 10,
+#                         "pixel_art_saq": 10,
+#                         "hackathon_experience": 5,
+#                     },
+#                 },
+#                 "global_field_scores": {"resume": 15, "hackathon_experience": 5},
+#             },
+#         }
+#     ]
+
+#     expected_records = [
+#         {
+#             "_id": "edu.uci.sydnee",
+#             "first_name": "sydnee",
+#             "last_name": "unknown",
+#             "resume_reviewed": True,
+#             "status": "REVIEWED",
+#             "decision": "ACCEPTED",
+#             "avg_score": 58.0,
+#             "reviewers": ["edu.uci.alicia", "edu.uci.alicia2"],
+#             "application_data": {
+#                 "school": "Hamburger University",
+#                 "submission_time": "2023-01-12T09:00:00",
+#             },
+#         },
+#     ]
+
+#     returned_thresholds: dict[str, object] = {"accept": 12, "waitlist": 5}
+
+#     mock_mongodb_handler_retrieve.return_value = returned_records
+#     mock_mongodb_handler_retrieve_one.side_effect = [
+#         HACKER_REVIEWER_IDENTITY,
+#         returned_thresholds,
+#     ]
+
+#     res = reviewer_client.get("/applicants/hackers")
+
+#     assert res.status_code == 200
+#     mock_mongodb_handler_retrieve.assert_awaited_once()
+#     data = res.json()
+#     assert data == expected_records
+
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 @patch("services.mongodb_handler.retrieve", autospec=True)
@@ -358,29 +434,30 @@ def test_hacker_applicants_returns_correct_applicants(
             "application_data": {
                 "school": "Hamburger University",
                 "submission_time": datetime(2023, 1, 12, 9, 0, 0),
+                "email": "sydnee@uci.edu",
+                "resume_url": "https://example.com/sydnee.pdf",
+                "major": "Computer Science",
+                "linkedin": None,
                 "reviews": [
-                    [datetime(2023, 1, 19), "edu.uci.alicia", 56],
-                    [datetime(2023, 1, 19), "edu.uci.alicia2", 60],
+                    [datetime(2023, 1, 19), "edu.uci.alicia", 56, "comment"],
+                    [datetime(2023, 1, 19), "edu.uci.alicia2", 60, "comment2"],
                 ],
                 "review_breakdown": {
                     "alicia": {
-                        "resume": 15,
-                        "elevator_pitch_saq": 6,
-                        "tech_experience_saq": 6,
-                        "learn_about_self_saq": 8,
-                        "pixel_art_saq": 16,
-                        "hackathon_experience": -1000,
+                        "frq_change": 16,
+                        "frq_ambition": 14,
+                        "frq_character": 12,
+                        "previous_experience": 1,
+                        "has_socials": 1,
                     },
                     "alicia2": {
-                        "resume": 15,
-                        "elevator_pitch_saq": 10,
-                        "tech_experience_saq": 10,
-                        "learn_about_self_saq": 10,
-                        "pixel_art_saq": 10,
-                        "hackathon_experience": 5,
+                        "frq_change": 15,
+                        "frq_ambition": 16,
+                        "frq_character": 15,
+                        "previous_experience": 1,
+                        "has_socials": 1,
                     },
                 },
-                "global_field_scores": {"resume": 15, "hackathon_experience": 5},
             },
         }
     ]
@@ -390,14 +467,34 @@ def test_hacker_applicants_returns_correct_applicants(
             "_id": "edu.uci.sydnee",
             "first_name": "sydnee",
             "last_name": "unknown",
-            "resume_reviewed": True,
+            "resume_reviewed": False,
             "status": "REVIEWED",
             "decision": "ACCEPTED",
-            "avg_score": 58.0,
+            "avg_score": 82.75,
             "reviewers": ["edu.uci.alicia", "edu.uci.alicia2"],
             "application_data": {
                 "school": "Hamburger University",
                 "submission_time": "2023-01-12T09:00:00",
+                "email": "sydnee@uci.edu",
+                "resume_url": "https://example.com/sydnee.pdf",
+                "extra_points": None,
+                "normalized_scores": None,
+                "major": "Computer Science",
+                "linkedin": None,
+                "reviews": [
+                    [
+                        datetime(2023, 1, 19).isoformat(),
+                        "edu.uci.alicia",
+                        56.0,
+                        "comment",
+                    ],
+                    [
+                        datetime(2023, 1, 19).isoformat(),
+                        "edu.uci.alicia2",
+                        60.0,
+                        "comment2",
+                    ],
+                ],
             },
         },
     ]

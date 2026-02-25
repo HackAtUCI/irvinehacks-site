@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from logging import getLogger
-from typing import Annotated, Any, Union
+from typing import Annotated, Any, Optional, Union
 from urllib.parse import urlencode
 
 from fastapi import (
@@ -32,6 +32,7 @@ from models.ApplicationData import (
     get_raw_mentor_discriminator_value,
 )
 from models.user_record import Applicant, BareApplicant, Role, Status
+from models.ApplicationData import Decision
 from services import docusign_handler, mongodb_handler
 from services.docusign_handler import WebhookPayload
 from services.mongodb_handler import Collection
@@ -41,7 +42,9 @@ log = getLogger(__name__)
 
 router = APIRouter()
 
-DEADLINE = datetime(2026, 2, 13, 8, 1, tzinfo=timezone.utc)
+DEADLINE = datetime(2026, 2, 14, 8, 1, tzinfo=timezone.utc)
+WAITLIST_OPEN_TIME = datetime(2026, 2, 20, 20, 0, tzinfo=timezone.utc)
+WAITLIST_CLOSE_TIME = datetime(2026, 2, 23, 8, 1, tzinfo=timezone.utc)
 
 HACKATHON_EXPERIENCE_SCORE_MAP = {
     "first_time": 5,
@@ -64,12 +67,36 @@ class CharacterIndexes(BaseModel):
     character_companion_index: int
 
 
+class WaitlistStatus(BaseModel):
+    is_started: bool
+    is_open: bool
+
+
 class ApplicationData(BaseModel):
     application_data: Union[CharacterIndexes, None] = None
 
 
 def _is_past_deadline(now: datetime) -> bool:
     return now > DEADLINE
+
+
+async def _get_waitlist_status() -> WaitlistStatus:
+    now = datetime.now(timezone.utc)
+    is_started = now >= WAITLIST_OPEN_TIME
+
+    is_open = False
+    if is_started and now < WAITLIST_CLOSE_TIME:
+        confirmed_count = await mongodb_handler.count(
+            Collection.USERS, {"status": Status.CONFIRMED, "roles": Role.HACKER}
+        )
+        is_open = confirmed_count < 400
+
+    return WaitlistStatus(is_started=is_started, is_open=is_open)
+
+
+@router.get("/waitlist-open")
+async def waitlist_open() -> WaitlistStatus:
+    return await _get_waitlist_status()
 
 
 @router.post("/login")
@@ -362,13 +389,17 @@ async def waiver_webhook(
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid payload content.")
 
 
+ARRIVAL_TIMES = ("17:00", "18:00", "18:30", "19:00", "19:30")
+
+
 @router.post("/rsvp")
 async def rsvp(
     user: Annotated[User, Depends(require_user_identity)],
+    arrival_time: Annotated[Optional[str], Form()] = None,
 ) -> RedirectResponse:
     """Change user status for RSVP"""
     user_record = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": user.uid}, ["status"]
+        Collection.USERS, {"_id": user.uid}, ["status", "decision"]
     )
 
     if not user_record or "status" not in user_record:
@@ -379,6 +410,13 @@ async def rsvp(
         new_status = Status.CONFIRMED
     elif user_record["status"] == Status.CONFIRMED:
         new_status = Status.WAIVER_SIGNED
+    elif user_record["decision"] == Decision.ACCEPTED:
+        new_status = Status.CONFIRMED
+    elif (
+        user_record["decision"] == Decision.WAITLISTED
+        and (await _get_waitlist_status()).is_open
+    ):
+        new_status = Status.CONFIRMED
     else:
         log.warning(f"User {user.uid} has not signed waiver. Status has not changed.")
         raise HTTPException(
@@ -386,12 +424,77 @@ async def rsvp(
             "Waiver must be signed before being able to RSVP.",
         )
 
+    # Default check-in time is 5:00pm (17:00)
+    arrival_value: str = "17:00"
+    if arrival_time and arrival_time.strip():
+        if arrival_time.strip() not in ARRIVAL_TIMES:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                "Invalid arrival time.",
+            )
+        arrival_value = arrival_time.strip()
+
+    updated_fields: dict[str, Any] = {
+        "status": new_status,
+        "arrival_time": arrival_value,
+    }
     await mongodb_handler.update_one(
-        Collection.USERS, {"_id": user.uid}, {"status": new_status}
+        Collection.USERS, {"_id": user.uid}, updated_fields
     )
 
     old_status = user_record["status"]
     log.info(f"User {user.uid} changed status from {old_status} to {new_status}.")
+
+    return RedirectResponse("/portal", status.HTTP_303_SEE_OTHER)
+
+
+@router.get("/rsvp/late-arrival")
+async def get_arrival_time(
+    user: Annotated[User, Depends(require_user_identity)],
+) -> dict[str, Any]:
+    """Get the current arrival time for the user."""
+    user_record = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": user.uid}, ["arrival_time"]
+    )
+    if not user_record:
+        return {"arrival_time": None}
+    return {"arrival_time": user_record.get("arrival_time")}
+
+
+@router.post("/rsvp/late-arrival")
+async def rsvp_late_arrival(
+    user: Annotated[User, Depends(require_user_identity)],
+    arrival_time: Annotated[Optional[str], Form()] = None,
+) -> RedirectResponse:
+    """Submit or update expected arrival time (default 6pm; Friday 6pm–7:30pm)."""
+    user_record = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": user.uid}, ["status", "decision"]
+    )
+
+    if not user_record or "status" not in user_record:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "User must have a status.")
+
+    if user_record["status"] != Status.CONFIRMED:
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN,
+            "You must RSVP before setting an arrival time.",
+        )
+
+    # Default check-in time is 5:00pm (17:00)
+    arrival_value: str = "17:00"
+    if arrival_time and arrival_time.strip():
+        if arrival_time.strip() not in ARRIVAL_TIMES:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                "Invalid arrival time.",
+            )
+        arrival_value = arrival_time.strip()
+
+    await mongodb_handler.update_one(
+        Collection.USERS, {"_id": user.uid}, {"arrival_time": arrival_value}
+    )
+
+    log.info(f"User {user.uid} set arrival_time to {arrival_value}.")
 
     return RedirectResponse("/portal", status.HTTP_303_SEE_OTHER)
 

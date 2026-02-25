@@ -1,6 +1,13 @@
 import Button from "@/lib/components/Button/Button";
+import { Decision, Status } from "@/lib/userRecord";
 
-function SignWaiver() {
+interface SignWaiverProps {
+	status: Status;
+	decision: Decision;
+	waitlistOpen: boolean;
+}
+
+function SignWaiver({ status, decision, waitlistOpen }: SignWaiverProps) {
 	return (
 		<div className="mt-4 md:mt-10 text-[var(--color-white)]">
 			<h3 className="font-bold font-display mb-[9px] md:mb-[20px] text-[0.9375rem] sm:text-2xl md:text-[2.5rem] md:leading-10">
@@ -9,13 +16,19 @@ function SignWaiver() {
 			<p className="font-sans font-normal md:text-2xl">
 				In order to attend IrvineHacks 2026, all participants must complete the
 				Participation Waiver and review the Code of Conduct. The button below
-				will take you to a DocuSign form to sign the waiver. After signing the
-				waiver, please return to this Portal to confirm your attendance.
+				will take you to a DropboxSign form to sign the waiver.{" "}
+				{((decision === Decision.Waitlisted && waitlistOpen) ||
+					status !== Status.Confirmed) && (
+					<span>
+						After signing the waiver, please return to this Portal to confirm
+						your attendance.
+					</span>
+				)}
 			</p>
 			<div className="mt-6 md:mt-12">
 				<Button
 					text="Sign Waiver to attend IrvineHacks 2026"
-					href="/api/user/waiver"
+					href="https://app.hellosign.com/s/1C2DkqYe"
 					newWindow={true}
 					usePrefetch={false}
 					isLightVersion={true}
@@ -23,8 +36,8 @@ function SignWaiver() {
 				/>
 			</div>
 			<p className="text-xl w-full text-center mt-2 text-yellow-500">
-				It may take up to a minute for this site to update after waiver is
-				signed
+				If you have signed the waiver and received a confirmation, you do not
+				have to sign the waiver again.
 			</p>
 		</div>
 	);

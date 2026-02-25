@@ -1,5 +1,6 @@
 import { ReactElement, useCallback, useState } from "react";
 
+import Checkbox from "@cloudscape-design/components/checkbox";
 import { useCollection } from "@cloudscape-design/collection-hooks";
 import Box from "@cloudscape-design/components/box";
 import Button from "@cloudscape-design/components/button";
@@ -9,20 +10,22 @@ import { MultiselectProps } from "@cloudscape-design/components/multiselect";
 import Pagination from "@cloudscape-design/components/pagination";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import Table, { TableProps } from "@cloudscape-design/components/table";
+import Spinner from "@cloudscape-design/components/spinner";
 
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
 import { Participant } from "@/lib/admin/useParticipants";
-import { ParticipantRole } from "@/lib/userRecord";
+import { Decision, ParticipantRole } from "@/lib/userRecord";
 
 import CheckinDayIcon from "./CheckinDayIcon";
 import ParticipantAction from "./ParticipantAction";
 import ParticipantsFilters from "./ParticipantsFilters";
 import RoleBadge from "./RoleBadge";
 import SearchScannerModal from "./SearchScannerModal";
+import StatusIndicator from "@cloudscape-design/components/status-indicator";
 
-const FRIDAY = new Date("2025-01-24T12:00:00");
-const SATURDAY = new Date("2025-01-25T12:00:00");
-const SUNDAY = new Date("2025-01-26T12:00:00");
+const FRIDAY = new Date("2026-02-27T12:00:00");
+const SATURDAY = new Date("2026-02-28T12:00:00");
+const SUNDAY = new Date("2026-03-01T12:00:00");
 
 interface EmptyStateProps {
 	title: string;
@@ -35,6 +38,7 @@ interface ParticipantsTableProps {
 	loading: boolean;
 	initiateCheckIn: (participant: Participant) => void;
 	initiateConfirm: (participant: Participant) => void;
+	updateWaiverStatus: (participant: Participant, isSigned: boolean) => void;
 }
 
 export type Options = ReadonlyArray<MultiselectProps.Option>;
@@ -44,6 +48,7 @@ const SEARCHABLE_COLUMNS: (keyof Participant)[] = [
 	"last_name",
 	"roles",
 	"status",
+	"decision",
 ];
 
 type StrictColumnDefinition = TableProps.ColumnDefinition<Participant> & {
@@ -79,6 +84,7 @@ function ParticipantsTable({
 	loading,
 	initiateCheckIn,
 	initiateConfirm,
+	updateWaiverStatus,
 }: ParticipantsTableProps) {
 	const [preferences, setPreferences] = useState({
 		pageSize: 20,
@@ -88,14 +94,18 @@ function ParticipantsTable({
 			"lastName",
 			"roles",
 			"status",
+			"decision",
+			"waiver",
 			"friday",
 			"saturday",
 			"sunday",
+			"slack",
 			"action",
 		],
 	});
 	const [filterRole, setFilterRole] = useState<Options>([]);
 	const [filterStatus, setFilterStatus] = useState<Options>([]);
+	const [filterDecision, setFilterDecision] = useState<Options>([]);
 	const matchesRole = (p: Participant) =>
 		filterRole.length === 0 ||
 		filterRole
@@ -104,6 +114,9 @@ function ParticipantsTable({
 	const matchesStatus = (p: Participant) =>
 		filterStatus.length === 0 ||
 		filterStatus.map((s) => s.value).includes(p.status);
+	const matchesDecision = (p: Participant) =>
+		filterDecision.length === 0 ||
+		(p.decision && filterDecision.map((d) => d.value).includes(p.decision));
 
 	const {
 		items,
@@ -132,6 +145,9 @@ function ParticipantsTable({
 				if (!matchesStatus(item)) {
 					return false;
 				}
+				if (!matchesDecision(item)) {
+					return false;
+				}
 				const filteringTextLC = filteringText.toLowerCase();
 
 				return (
@@ -158,6 +174,13 @@ function ParticipantsTable({
 		value: s,
 		label: s,
 	}));
+	const allDecisions = new Set(
+		participants.map((p) => p.decision).filter((d): d is Decision => !!d),
+	);
+	const decisionOptions = Array.from(allDecisions).map((d) => ({
+		value: d,
+		label: d,
+	}));
 
 	const ActionCell = useCallback(
 		(participant: Participant) => (
@@ -168,6 +191,41 @@ function ParticipantsTable({
 			/>
 		),
 		[initiateCheckIn, initiateConfirm],
+	);
+
+	const [loadingWaivers, setLoadingWaivers] = useState<Set<string>>(new Set());
+
+	const onWaiverChange = useCallback(
+		async (item: Participant, checked: boolean) => {
+			setLoadingWaivers((prev) => new Set(prev).add(item._id));
+			try {
+				await updateWaiverStatus(item, checked);
+			} finally {
+				setLoadingWaivers((prev) => {
+					const next = new Set(prev);
+					next.delete(item._id);
+					return next;
+				});
+			}
+		},
+		[updateWaiverStatus],
+	);
+
+	const WaiverCell = useCallback(
+		(item: Participant) => {
+			const isLoading = loadingWaivers.has(item._id);
+			return (
+				<SpaceBetween direction="horizontal" size="xs">
+					<Checkbox
+						checked={!!item.is_waiver_signed}
+						onChange={({ detail }) => onWaiverChange(item, detail.checked)}
+						disabled={isLoading}
+					/>
+					{isLoading && <Spinner />}
+				</SpaceBetween>
+			);
+		},
+		[onWaiverChange, loadingWaivers],
 	);
 
 	const columnDefinitions: StrictColumnDefinition[] = [
@@ -206,6 +264,25 @@ function ParticipantsTable({
 			cell: ApplicantStatus,
 			ariaLabel: createLabelFunction("status"),
 			sortingField: "status",
+		},
+		{
+			id: "decision",
+			header: "Decision",
+			cell: DecisionCell,
+			ariaLabel: createLabelFunction("decision"),
+			sortingField: "decision",
+		},
+		{
+			id: "waiver",
+			header: "Waiver",
+			cell: WaiverCell,
+			sortingField: "is_waiver_signed",
+		},
+		{
+			id: "slack",
+			header: "Slack",
+			cell: SlackCell,
+			sortingField: "is_added_to_slack",
 		},
 		{
 			id: "friday",
@@ -292,6 +369,9 @@ function ParticipantsTable({
 						statuses={statusOptions}
 						selectedStatuses={filterStatus}
 						setSelectedStatuses={setFilterStatus}
+						decisions={decisionOptions}
+						selectedDecisions={filterDecision}
+						setSelectedDecisions={setFilterDecision}
 					/>
 				}
 				pagination={
@@ -352,6 +432,13 @@ const SaturdayCheckin = ({ checkins }: Participant) => (
 
 const SundayCheckin = ({ checkins }: Participant) => (
 	<CheckinDayIcon checkins={checkins} date={SUNDAY} />
+);
+
+const DecisionCell = (item: Participant) =>
+	item.decision ? <ApplicantStatus status={item.decision} /> : "-";
+
+const SlackCell = (item: Participant) => (
+	<StatusIndicator type={item.is_added_to_slack ? "success" : "error"} />
 );
 
 export default ParticipantsTable;

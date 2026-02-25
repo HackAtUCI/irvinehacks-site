@@ -25,7 +25,7 @@ class Decision(str, Enum):
 
 
 Review = tuple[
-    datetime, str, float, Optional[str]
+    datetime, str, float, Optional[Annotated[str, Field(max_length=2048)]]
 ]  # (timestamp, reviewer_uid, score, notes)
 
 

@@ -43,20 +43,69 @@ function CheckInModal({ onDismiss, onConfirm, participant }: ActionModalProps) {
 			}
 			header={`Participant Name: ${participant?.first_name} ${participant?.last_name}`}
 		>
-			<SpaceBetween size="m">
-				<TextContent>
-					<ul>
-						<li>
-							1. Ask for a photo ID and check participant is 18+ years old.
-						</li>
-						<li>2. Have participant sign the SPFB sheet.</li>
-						<li>3. Fill in badge and give to participant.</li>
-					</ul>
-				</TextContent>
+			<SpaceBetween size="s">
+				{selectedType === "accepted" && (
+					<div>
+						<p>
+							<strong>General Check-in Instructions</strong>
+						</p>
+						<TextContent>
+							<ol>
+								<li>
+									Ask for a photo ID and check participant is 18+ years old.
+								</li>
+								<li>Have participant sign the SPFB sheet.</li>
+								<li>
+									Ask participant if they have joined Slack. Add them if
+									necessary.
+								</li>
+								<li>Ask participant to fill in badge.</li>
+								<li>
+									Inform participant regarding the following:
+									<ol>
+										<li>Can head inside ballroom to talk to sponsors.</li>
+										<li>Team formation starts at 7pm at Moss Cove B.</li>
+										<li>Opening ceremony starts at 8pm.</li>
+										<li>
+											Schedule is available on website at
+											<b> irvinehacks.com/schedule.</b>
+										</li>
+									</ol>
+								</li>
+							</ol>
+						</TextContent>
+					</div>
+				)}
 
-				<TextContent>
-					<p>Confirm participant identity and select check-in type:</p>
-				</TextContent>
+				{selectedType === "waitlisted" && (
+					<div>
+						<p>
+							<strong>Queue Instructions</strong>
+						</p>
+						<TextContent>
+							<ol>
+								<li>
+									Ask for a photo ID and check participant is 18+ years old.
+								</li>
+								<li>
+									Inform participant regarding the following:
+									<ol>
+										<li>Turn on email notifications.</li>
+										<li>
+											Participants have 15 minutes to check in starting from
+											email notification sent or they will have to come in
+											person to rejoin the queue.
+										</li>
+										<li>
+											We will start calling people off waitlist to check in at
+											6pm.
+										</li>
+									</ol>
+								</li>
+							</ol>
+						</TextContent>
+					</div>
+				)}
 
 				<Tiles
 					onChange={({ detail }) => setSelectedType(detail.value)}

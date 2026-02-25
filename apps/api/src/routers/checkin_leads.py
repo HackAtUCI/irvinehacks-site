@@ -40,6 +40,7 @@ RSVP_REMINDER_EMAIL_TEMPLATES: dict[
     Role.VOLUNTEER: Template.VOLUNTEER_RSVP_REMINDER,
 }
 
+
 @router.post(
     "/queue-removal",
     dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
@@ -188,12 +189,13 @@ async def _process_status(
     if not any_modified and not no_modifications_ok:
         raise RuntimeError(
             "Expected to modify at least one document, but none were modified."
-        )    
+        )
+
 
 @router.get(
     "/checkin-log",
     dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
-    )
+)
 async def get_checkin_log():
     doc = await mongodb_handler.retrieve_one(
         Collection.SETTINGS,
@@ -205,6 +207,7 @@ async def get_checkin_log():
         return []
 
     return doc["events"]
+
 
 @router.post(
     "/checkin-log",
@@ -223,20 +226,15 @@ async def add_checkin_log(payload: dict):
     await mongodb_handler.raw_update_one(
         Collection.SETTINGS,
         {"_id": "checkin_event_log"},
-        {
-            "$push": {
-                "events": {
-                    "$each": [event],
-                    "$position": 0
-                }
-            }
-        },
+        {"$push": {"events": {"$each": [event], "$position": 0}}},
         upsert=True,
     )
 
     return {"ok": True}
 
-@router.get("/queue-timer",
+
+@router.get(
+    "/queue-timer",
     dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
 )
 async def get_queue_timer():
@@ -251,7 +249,9 @@ async def get_queue_timer():
 
     return {"last_pull": doc.get("last_pull")}
 
-@router.post("/queue-timer",
+
+@router.post(
+    "/queue-timer",
     dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
 )
 async def set_queue_timer():

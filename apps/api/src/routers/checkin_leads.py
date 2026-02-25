@@ -96,7 +96,7 @@ async def queue_participants() -> None:
     num_spots = HACKER_WAITLIST_MAX - len(
         await participant_manager.get_attending_and_late_hackers()
     )
-    print(num_spots)
+
     if not settings or "users_queue" not in settings:
         log.error("Queue settings or users_queue field is missing.")
         return

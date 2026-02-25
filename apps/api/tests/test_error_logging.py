@@ -16,6 +16,7 @@ register_exception_handlers(app)
 class Item(BaseModel):
     name: str
 
+
 # Mock routes to trigger each of the 3 errors
 @app.get("/trigger-http-error")
 async def trigger_http_error():

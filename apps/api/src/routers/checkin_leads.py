@@ -263,6 +263,4 @@ async def set_queue_timer():
         {"$set": {"last_pull": now}},
         upsert=True,
     )
-
     return {"last_pull": now}
-        )

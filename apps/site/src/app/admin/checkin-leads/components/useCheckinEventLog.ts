@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
 
-const KEY = "checkin_event_log";
-const EVENT = "checkin_log_updated";
-
 export interface CheckinEvent {
 	time: number;
 	text: string;

@@ -188,8 +188,7 @@ async def _process_status(
     if not any_modified and not no_modifications_ok:
         raise RuntimeError(
             "Expected to modify at least one document, but none were modified."
-        )
-    
+        )    
 
 @router.get(
     "/checkin-log",
@@ -251,9 +250,6 @@ async def get_queue_timer():
         return {"last_pull": None}
 
     return {"last_pull": doc.get("last_pull")}
-
-
-from time import time
 
 @router.post("/queue-timer",
     dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],

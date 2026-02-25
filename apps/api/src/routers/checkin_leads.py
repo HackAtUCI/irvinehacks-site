@@ -1,10 +1,10 @@
-from routers.director import _process_decision
 import asyncio
 
 from logging import getLogger
 from typing import Any, Literal, Sequence, cast, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 
 from admin import participant_manager
 from auth.authorization import require_role
@@ -18,6 +18,8 @@ from services.sendgrid_handler import (
 )
 from utils.email_handler import IH_SENDER, recover_email_from_uid
 from utils.batched import batched
+from routers.user import DEFAULT_CHECKIN_TIME
+from routers.director import _process_decision
 
 from time import time
 
@@ -52,11 +54,14 @@ async def queue_removal() -> None:
         {
             "roles": Role.HACKER,
             "status": Status.CONFIRMED,
+            "arrival_time": DEFAULT_CHECKIN_TIME,
         },
     )
 
     if not records:
-        log.info("All CONFIRMED participants showed up.")
+        log.info(
+            "All CONFIRMED participants who didn't specify a late arrival showed up."
+        )
         return
 
     log.info(f"Changing {len(records)} status to {Status.WAIVER_SIGNED}.")
@@ -90,13 +95,13 @@ async def queue_participants() -> None:
     settings = await mongodb_handler.retrieve_one(
         Collection.SETTINGS, {"_id": "queue"}, ["users_queue"]
     )
+    num_spots = HACKER_WAITLIST_MAX - len(
+        await participant_manager.get_attending_and_late_hackers()
+    )
+
     if not settings or "users_queue" not in settings:
         log.error("Queue settings or users_queue field is missing.")
         return
-
-    num_spots = HACKER_WAITLIST_MAX - len(
-        await participant_manager.get_attending_hackers()
-    )
 
     if len(settings["users_queue"]) == 0:
         raise HTTPException(status_code=400, detail="QUEUE EMPTY")
@@ -141,6 +146,63 @@ async def queue_participants() -> None:
             personalizations,
             True,
         )
+
+
+class LateArrivalRecord(BaseModel):
+    id: str
+    first_name: str
+    last_name: str
+    arrival_time: str
+    status: str
+    decision: Optional[str] = None
+
+
+@router.get(
+    "/late-arrivals",
+    dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
+)
+async def late_arrivals() -> list[LateArrivalRecord]:
+    """Return all CONFIRMED hackers who specified a non-default arrival time."""
+    records: list[dict[str, Any]] = await mongodb_handler.retrieve(
+        Collection.USERS,
+        {
+            "roles": Role.HACKER,
+            "status": Status.CONFIRMED,
+            "arrival_time": {"$exists": True, "$ne": DEFAULT_CHECKIN_TIME},
+        },
+        ["_id", "first_name", "last_name", "arrival_time", "status", "decision"],
+    )
+
+    return [
+        LateArrivalRecord(
+            id=str(r["_id"]),
+            first_name=r["first_name"],
+            last_name=r["last_name"],
+            arrival_time=r["arrival_time"],
+            status=r["status"],
+            decision=r.get("decision"),
+        )
+        for r in records
+    ]
+
+
+@router.post(
+    "/move-to-waitlist/{uid}",
+    dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
+)
+async def move_to_waitlist(uid: str) -> None:
+    """Set the given user's status to WAIVER_SIGNED and decision to WAITLISTED."""
+    record = await mongodb_handler.retrieve_one(Collection.USERS, {"_id": uid}, ["_id"])
+    if not record:
+        raise HTTPException(status_code=404, detail="User not found.")
+
+    log.info(
+        f"Changing {uid} status to {Status.WAIVER_SIGNED}"
+        + f" and decision to {Decision.WAITLISTED}."
+    )
+
+    await _process_decision([uid], Decision.WAITLISTED, no_modifications_ok=True)
+    await _process_status([uid], Status.WAIVER_SIGNED, no_modifications_ok=True)
 
 
 @router.get(

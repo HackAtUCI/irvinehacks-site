@@ -209,9 +209,7 @@ async def test_add_participant_to_queue_not_hacker(
         "status": Status.WAIVER_SIGNED,
         "roles": [Role.SPONSOR],
     }
-    with pytest.raises(
-        ValueError, match=r"Applicant is a \[.*\], not a hacker."
-    ):
+    with pytest.raises(ValueError, match=r"Applicant is a \[.*\], not a hacker."):
         await add_participant_to_queue(uid, USER_ASSOCIATE)
 
 

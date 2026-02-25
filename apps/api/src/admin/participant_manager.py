@@ -9,6 +9,7 @@ from models.ApplicationData import Decision
 from models.user_record import Role, Status, UserRecord
 from services import mongodb_handler
 from services.mongodb_handler import Collection
+from routers.user import DEFAULT_CHECKIN_TIME
 
 log = getLogger(__name__)
 
@@ -273,13 +274,24 @@ async def subevent_checkin(event_id: str, uid: str, organizer: User) -> None:
     log.info(f"{organizer.uid} checked in {uid} to {event_id}")
 
 
-async def get_attending_hackers() -> list[Participant]:
-    """Fetch all hackers with status ATTENDING."""
+async def get_attending_and_late_hackers() -> list[Participant]:
+    """Fetch all hackers with status ATTENDING and
+    hackers with status CONFIRMED who specified an arrival_time that's not the default.
+    """
     records: list[dict[str, Any]] = await mongodb_handler.retrieve(
         Collection.USERS,
         {
-            "roles": Role.HACKER,
-            "status": Status.ATTENDING,
+            "$or": [
+                {
+                    "roles": Role.HACKER,
+                    "status": Status.ATTENDING,
+                },
+                {
+                    "roles": Role.HACKER,
+                    "status": Status.CONFIRMED,
+                    "arrival_time": {"$exists": 1, "$ne": DEFAULT_CHECKIN_TIME},
+                },
+            ]
         },
         PARTICIPANT_FIELDS,
     )

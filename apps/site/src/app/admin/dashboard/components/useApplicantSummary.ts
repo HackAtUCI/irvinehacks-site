@@ -28,12 +28,16 @@ function useApplicantSummary(options: UseApplicantSummaryOptions = {}) {
 		queryString ? `?${queryString}` : ""
 	}`;
 
-	const { data, error, isLoading } = useSWR<ApplicantSummary>(url, fetcher);
+	const { data, error, isLoading, mutate } = useSWR<ApplicantSummary>(
+		url,
+		fetcher,
+	);
 
 	return {
 		summary: data ?? ({} as ApplicantSummary),
 		loading: isLoading,
 		error,
+		mutate,
 	};
 }
 

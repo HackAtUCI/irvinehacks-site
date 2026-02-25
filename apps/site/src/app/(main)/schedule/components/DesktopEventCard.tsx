@@ -43,10 +43,10 @@ export default function DesktopEventCard({
 								startTime.getTime() === endTime.getTime()
 									? `${getTimeAndDates(endTime).compositeTimeHourMinute} ${
 											getTimeAndDates(endTime).amPm
-										}`
+									  }`
 									: `${getTimeAndDates(startTime).compositeTimeHourMinute} - ${
 											getTimeAndDates(endTime).compositeTimeHourMinute
-										} ${getTimeAndDates(endTime).amPm}`
+									  } ${getTimeAndDates(endTime).amPm}`
 							}`}</p>
 						</div>
 					</div>

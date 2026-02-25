@@ -77,7 +77,7 @@ export default function DesktopSchedulePage({
 				(event) =>
 					event.startTime.getTime() <= now.getTime() &&
 					event.endTime.getTime() >= now.getTime(),
-			)?.[0]
+		  )?.[0]
 		: undefined;
 
 	useEffect(() => {

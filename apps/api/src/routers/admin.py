@@ -152,6 +152,10 @@ class DeleteNotesRequest(BaseModel):
     review_index: int
 
 
+class WaiverStatusRequest(BaseModel):
+    is_signed: bool
+
+
 async def mentor_volunteer_applicants(
     application_type: Literal["Mentor", "Volunteer"],
 ) -> list[SimplifiedApplicantSummary]:
@@ -863,3 +867,21 @@ async def _try_update_applicant_with_query(
     except RuntimeError:
         log.error(err_msg)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@router.post(
+    "/participant/waiver/{uid}",
+    dependencies=[Depends(require_organizer)],
+)
+async def update_participant_waiver_status(
+    uid: str,
+    request: WaiverStatusRequest,
+) -> dict[str, bool]:
+    """Update is_waiver_signed field for a participant."""
+    success = await participant_manager.update_waiver_status(uid, request.is_signed)
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Could not update waiver status for {uid}",
+        )
+    return {"success": True}

@@ -29,6 +29,7 @@ services:
       MONGODB_URI: mongodb://root:example@mongo:27017
       DEPLOYMENT: LOCAL
       UCI_SSO_ENABLED: "true"
+      SLACK_SIGNING_SECRET: "secret"
 
 volumes:
   mongodb_data_volume: {}

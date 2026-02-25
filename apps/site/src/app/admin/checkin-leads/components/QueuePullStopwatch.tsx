@@ -33,7 +33,16 @@ export default function QueuePullStopwatch() {
 	}
 
 	return (
-		<Container header={<Box variant="h3">Queue Timing</Box>}>
+		<Container
+			header={
+				<>
+					<Box variant="h3">Queue Timer</Box>
+					<Box variant="small">
+						Pulling next batch or clicking button below resets timer
+					</Box>
+				</>
+			}
+		>
 			<SpaceBetween size="m">
 				{/* Timer display */}
 				<Box fontSize="heading-s">
@@ -48,7 +57,7 @@ export default function QueuePullStopwatch() {
 				</StatusIndicator>
 
 				{/* Manual correction button */}
-				<Button onClick={markPulled}>Mark batch pulled now</Button>
+				<Button onClick={markPulled}>Reset timer</Button>
 			</SpaceBetween>
 		</Container>
 	);

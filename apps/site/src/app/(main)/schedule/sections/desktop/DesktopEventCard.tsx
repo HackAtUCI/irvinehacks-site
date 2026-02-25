@@ -1,7 +1,7 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import EventProps from "../EventProps";
+import EventProps from "../../components/EventProps";
 import getTimeAndDates from "@/lib/utils/getTimeAndDates";
 
 interface DesktopEventCardProps extends EventProps {

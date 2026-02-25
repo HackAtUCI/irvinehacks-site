@@ -2,9 +2,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import DesktopSchedulePage from "./DesktopSchedulePage";
-import MobileSchedulePage from "./ScheduleMobile";
-import EventProps from "../EventProps";
+import DesktopSchedulePage from "./sections/desktop/DesktopSchedulePage";
+import MobileSchedulePage from "./sections/mobile/ScheduleMobile";
+import EventProps from "./components/EventProps";
 
 interface ScheduleProps {
 	schedule: EventProps[][];

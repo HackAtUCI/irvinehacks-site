@@ -8,7 +8,7 @@ import Image from "next/image";
 import illus_bg from "@/assets/backgrounds/alt_illus_moonless-blur.png";
 
 import ShiftingCountdown from "./components/ShiftingCountdown/ShiftingCountdown";
-import SchedulePage from "./sections/SchedulePage";
+import SchedulePage from "./SchedulePage";
 
 export const revalidate = 60;
 

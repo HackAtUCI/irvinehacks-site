@@ -4,8 +4,8 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import convertToPST from "@/lib/utils/convertToPST";
 
-import EventCard from "../components/MobileEventCard";
-import EventProps from "../EventProps";
+import EventCard from "./MobileEventCard";
+import EventProps from "../../components/EventProps";
 import ScheduleScroll from "./MobileScheduleScroll";
 
 import "./MobileSchedulePage.scss";

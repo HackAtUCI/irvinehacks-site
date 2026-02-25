@@ -38,7 +38,7 @@ const Sponsors = async () => {
 						paddingRight: "clamp(2.25rem, 8vw, 4rem)",
 						paddingTop: "clamp(1.25rem, 2rem, 5.5rem)",
 					}}
-					className="pb-16 lg:pb-64"
+					className="pb-16 lg:pb-[24rem] xl:pb-64"
 				>
 					<div className="flex gap-4 items-center justify-center mt-8 lg:mt-64 mb-16 px-10 sm:px-4">
 						<div className="h-[2px] bg-white flex-grow max-w-[2rem] self-center" />

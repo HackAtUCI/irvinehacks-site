@@ -5,12 +5,12 @@ import { useState, useEffect } from "react";
 
 import convertToPST from "@/lib/utils/convertToPST";
 
-import EventCard from "../components/EventCard";
+import EventCard from "../components/MobileEventCard";
 import EventProps from "../EventProps";
-import ScheduleScroll from "./ScheduleScroll";
-import EventSidebar from "../components/EventSidebar";
+import ScheduleScroll from "./MobileScheduleScroll";
+import EventSidebar from "../components/MobileEventSidebar";
 
-import "./SchedulePage.scss";
+import "./MobileSchedulePage.scss";
 
 const T_REFRESH = 15000;
 

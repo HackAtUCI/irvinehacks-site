@@ -10,6 +10,7 @@ import SpaceBetween from "@cloudscape-design/components/space-between";
 import { Status, ParticipantRole } from "@/lib/userRecord";
 
 import useApplicantSummary from "./useApplicantSummary";
+import RefreshSummaryButton from "../../checkin-leads/components/RefreshSummaryButton";
 
 // Role options for the dropdown
 const roleOptions: SelectProps.Options = [
@@ -43,7 +44,7 @@ function ApplicantSummary() {
 	const [selectedStatus, setSelectedStatus] =
 		useState<SelectProps.Option | null>(null);
 
-	const { summary, loading, error } = useApplicantSummary({
+	const { summary, loading, error, mutate } = useApplicantSummary({
 		role: (selectedRole?.value as ParticipantRole) || null,
 		status: (selectedStatus?.value as Status) || null,
 	});
@@ -80,6 +81,7 @@ function ApplicantSummary() {
 						options={statusOptions}
 						placeholder="Filter by status"
 					/>
+					<RefreshSummaryButton onRefresh={mutate} />
 				</SpaceBetween>
 				<PieChart
 					data={orderedData}

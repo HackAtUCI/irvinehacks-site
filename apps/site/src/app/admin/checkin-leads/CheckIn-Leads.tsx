@@ -21,7 +21,6 @@ import { useQueuePullTimer } from "./components/useQueuePullTimer";
 import QueuePullStopwatch from "./components/QueuePullStopwatch";
 import { useCheckinEventLog } from "./components/useCheckinEventLog";
 import CheckinActivityLog from "./components/CheckinActivityLog";
-import RefreshSummaryButton from "./components/RefreshSummaryButton";
 
 function CheckInLeads() {
 	const router = useRouter();
@@ -31,7 +30,6 @@ function CheckInLeads() {
 		useState<SelectProps.Option | null>(null);
 
 	const { handleUpdate, isLoading, message, setMessage } = useCheckInAction();
-	const [summaryRefreshKey, setSummaryRefreshKey] = useState(0);
 
 	const { markPulled } = useQueuePullTimer();
 	const { log } = useCheckinEventLog();
@@ -56,28 +54,28 @@ function CheckInLeads() {
 			<SpaceBetween size="l">
 				<HackerCount />
 				{isCheckInLead(roles) && (
-					<Grid
-						gridDefinition={[{ colspan: 7 }, { colspan: 5 }, { colspan: 12 }]}
-					>
-						<SpaceBetween size="s">
-							<RefreshSummaryButton
-								onRefresh={() => setSummaryRefreshKey((k) => k + 1)}
-							/>
-							<ApplicantSummary key={summaryRefreshKey} />
-						</SpaceBetween>
-						<SpaceBetween size="l">
-							<StatusUpdateContainer
-								selectedAction={selectedAction}
-								onActionChange={setSelectedAction}
-								onUpdate={onUpdate}
-								isLoading={isLoading}
-								message={message}
-								onDismissMessage={() => setMessage(null)}
-							/>
-							<QueuePullStopwatch />
-							<CheckinActivityLog />
-						</SpaceBetween>
-						<LateArrivalsTable />
+					<Grid gridDefinition={[{ colspan: 9 }, { colspan: 3 }]}>
+						<Grid
+							gridDefinition={[{ colspan: 8 }, { colspan: 4 }, { colspan: 12 }]}
+						>
+							<SpaceBetween size="s">
+								<ApplicantSummary />
+							</SpaceBetween>
+							<SpaceBetween size="l">
+								<StatusUpdateContainer
+									selectedAction={selectedAction}
+									onActionChange={setSelectedAction}
+									onUpdate={onUpdate}
+									isLoading={isLoading}
+									message={message}
+									onDismissMessage={() => setMessage(null)}
+								/>
+								<QueuePullStopwatch />
+							</SpaceBetween>
+
+							<LateArrivalsTable />
+						</Grid>
+						<CheckinActivityLog />
 					</Grid>
 				)}
 			</SpaceBetween>

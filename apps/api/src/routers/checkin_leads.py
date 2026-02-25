@@ -2,7 +2,7 @@ from routers.director import _process_decision
 import asyncio
 
 from logging import getLogger
-from typing import Any, Literal, Sequence
+from typing import Any, Literal, Sequence, cast, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -18,6 +18,8 @@ from services.sendgrid_handler import (
 )
 from utils.email_handler import IH_SENDER, recover_email_from_uid
 from utils.batched import batched
+
+from time import time
 
 log = getLogger(__name__)
 
@@ -188,3 +190,78 @@ async def _process_status(
         raise RuntimeError(
             "Expected to modify at least one document, but none were modified."
         )
+
+
+@router.get(
+    "/checkin-log",
+    dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
+)
+async def get_checkin_log() -> list[dict[str, Any]]:
+    doc = await mongodb_handler.retrieve_one(
+        Collection.SETTINGS,
+        {"_id": "checkin_event_log"},
+        ["events"],
+    )
+
+    if not doc or "events" not in doc:
+        return []
+
+    return cast(list[dict[str, Any]], doc["events"])
+
+
+@router.post(
+    "/checkin-log",
+    dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
+)
+async def add_checkin_log(payload: dict[str, Any]) -> dict[str, bool]:
+    text = payload.get("text")
+    if not text:
+        raise HTTPException(status_code=400, detail="Missing text")
+
+    event = {
+        "time": int(time() * 1000),
+        "text": text,
+    }
+
+    await mongodb_handler.raw_update_one(
+        Collection.SETTINGS,
+        {"_id": "checkin_event_log"},
+        {"$push": {"events": {"$each": [event], "$position": 0}}},
+        upsert=True,
+    )
+
+    return {"ok": True}
+
+
+@router.get(
+    "/queue-timer",
+    dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
+)
+async def get_queue_timer() -> dict[str, Optional[int]]:
+    doc = await mongodb_handler.retrieve_one(
+        Collection.SETTINGS,
+        {"_id": "checkin_queue_timer"},
+        ["last_pull"],
+    )
+
+    if not doc:
+        return {"last_pull": None}
+
+    value = doc.get("last_pull")
+    return {"last_pull": value if isinstance(value, int) else None}
+
+
+@router.post(
+    "/queue-timer",
+    dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
+)
+async def set_queue_timer() -> dict[str, int]:
+    now = int(time() * 1000)
+
+    await mongodb_handler.raw_update_one(
+        Collection.SETTINGS,
+        {"_id": "checkin_queue_timer"},
+        {"$set": {"last_pull": now}},
+        upsert=True,
+    )
+    return {"last_pull": now}

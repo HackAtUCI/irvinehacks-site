@@ -1,17 +1,16 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import clsx from "clsx";
 import Arrow from "@/assets/icons/resource-arrow.svg";
 import extraBorder from "@/assets/icons/extraBorder.svg";
 
 import ResourceItem from "./ResourceItem";
 import ResourceHeader from "./ResourceHeader";
 import ResourcePageFooter from "./ResourcePageFooter";
-import { getResources } from "../getResources";
 import styles from "./ResourceSection.module.scss";
 import Image from "next/image";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 const ITEMS_PER_PAGE = 3;
 
@@ -19,8 +18,8 @@ export default function ResourceSection({ data }: { data: any }) {
 	const [pages, setPages] = useState<Record<number, number>>({});
 
 	const setPageFor = (index: number, value: number) => {
-		setPages(prev => ({ ...prev, [index]: value }));
-	  };
+		setPages((prev) => ({ ...prev, [index]: value }));
+	};
 
 	return (
 		<>
@@ -76,7 +75,7 @@ export default function ResourceSection({ data }: { data: any }) {
 											height={80}
 											className="rotate-180 cursor-pointer"
 											onClick={() => setPageFor(index, Math.max(page - 1, 0))}
-											/>
+										/>
 
 										<div className="pb-[9px] pr-4 mx-5">
 											<div className="p-5 w-full grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
@@ -102,10 +101,12 @@ export default function ResourceSection({ data }: { data: any }) {
 											className="cursor-pointer"
 											onClick={() =>
 												setPageFor(
-												  index,
-												  (page + 1) * ITEMS_PER_PAGE >= resources.length ? page : page + 1
+													index,
+													(page + 1) * ITEMS_PER_PAGE >= resources.length
+														? page
+														: page + 1,
 												)
-											  }
+											}
 										/>
 									</div>
 								</div>

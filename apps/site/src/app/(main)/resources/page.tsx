@@ -29,7 +29,7 @@ export default async function Resources() {
 						</h1>
 					</div>
 					<div className="mx-4 mb-40">
-						<ResourceSection data={data}/>
+						<ResourceSection data={data} />
 					</div>
 				</div>
 				<div className="min-h-screen absolute top-0 left-0 w-full h-full overflow-hidden">

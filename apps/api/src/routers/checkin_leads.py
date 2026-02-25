@@ -196,7 +196,7 @@ async def _process_status(
     "/checkin-log",
     dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
 )
-async def get_checkin_log() -> list[dict[str, Any]]:
+async def get_checkin_log() -> list[dict[str]]:
     doc = await mongodb_handler.retrieve_one(
         Collection.SETTINGS,
         {"_id": "checkin_event_log"},
@@ -213,7 +213,7 @@ async def get_checkin_log() -> list[dict[str, Any]]:
     "/checkin-log",
     dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
 )
-async def add_checkin_log(payload: dict[str, Any]) -> dict[str, Any]:
+async def add_checkin_log(payload: dict[str, Any]) -> dict[str, Any]:    
     text = payload.get("text")
     if not text:
         raise HTTPException(status_code=400, detail="Missing text")
@@ -237,7 +237,7 @@ async def add_checkin_log(payload: dict[str, Any]) -> dict[str, Any]:
     "/queue-timer",
     dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
 )
-async def get_queue_timer() -> dict[str, int | None]:
+async def get_queue_timer() -> dict[str, int]:
     doc = await mongodb_handler.retrieve_one(
         Collection.SETTINGS,
         {"_id": "checkin_queue_timer"},

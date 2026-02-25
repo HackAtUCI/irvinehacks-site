@@ -33,7 +33,7 @@ def register_exception_handlers(app: FastAPI) -> None:
     ) -> JSONResponse:
         """
         Raised explicitly by route code or for unmatched routes and logs
-        error
+        error.
         """
         log.warning(
             "HTTP error: method=%s path=%s status=%d detail=%s",

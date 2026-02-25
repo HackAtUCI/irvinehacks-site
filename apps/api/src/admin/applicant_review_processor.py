@@ -104,7 +104,7 @@ def _get_avg_score_with_globals_and_breakdown(
         for field, score in breakdown.items():
             # TODO: Fields from global_field_scores should not be in breakdowns
             # This check should be removed once breakdown models remove global fields
-            if field in global_field_scores:
+            if field not in weight_config:
                 continue
 
             total, weight = weight_config[field]

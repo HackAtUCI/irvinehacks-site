@@ -106,9 +106,9 @@ export default function DesktopScheduleScroll({
 					/>
 				</div>
 			</div>
-			<div className="w-full h-[120px] px-10 max-sm:hidden overflow-visible relative z-[100]">
+			<div className="w-full h-[120px] px-10 max-sm:hidden overflow-visible relative z-[60]">
 				<div className="w-full flex items-center justify-between h-full xl:hidden">
-					<div className="flex items-center gap-2 translate-y-[155px] -translate-x-[30px] relative z-[100]">
+					<div className="flex items-center gap-2 translate-y-[155px] -translate-x-[30px] relative z-[60]">
 						{" "}
 						<Image
 							src={arrowTriangle}
@@ -116,7 +116,7 @@ export default function DesktopScheduleScroll({
 							width={60}
 							height={60}
 							onClick={() => scrollDir("left")}
-							className="cursor-pointer relative z-[100] scale-x-[-1]"
+							className="cursor-pointer relative z-[60] scale-x-[-1]"
 						/>
 						<span
 							className="font-display text-[#FF4DEF] text-[40px] leading-none whitespace-nowrap cursor-pointer"
@@ -126,7 +126,7 @@ export default function DesktopScheduleScroll({
 							{selectedWeekdayStr}
 						</span>
 					</div>
-					<div className="flex items-center gap-2 translate-y-[120px] translate-x-[50px] relative z-[100]">
+					<div className="flex items-center gap-2 translate-y-[120px] translate-x-[50px] relative z-[60]">
 						{" "}
 						<div className="w-[160px] text-left">
 							<span
@@ -143,13 +143,13 @@ export default function DesktopScheduleScroll({
 							width={60}
 							height={60}
 							onClick={() => scrollDir("right")}
-							className="cursor-pointer relative z-[100]"
+							className="cursor-pointer relative z-[60]"
 						/>
 					</div>
 				</div>
 
 				<div className="hidden xl:block w-full h-full relative">
-					<div className="absolute left-[-50px] top-[125px] flex items-center gap-2 z-[100]">
+					<div className="absolute left-[-50px] top-[125px] flex items-center gap-2 z-[60]">
 						<Image
 							src={arrowTriangle}
 							alt="Previous day"
@@ -161,7 +161,7 @@ export default function DesktopScheduleScroll({
 						<span
 							className="font-display text-[#FF4DEF] text-[60px] leading-none whitespace-nowrap cursor-pointer"
 							style={{ textShadow: "0px 0px 25px #FF4DEF" }}
-							onClick={() => setSelectedEventDay(selectedWeekday)}
+							onClick={() => scrollDir("left")}
 						>
 							{selectedWeekdayStr}
 						</span>
@@ -173,9 +173,9 @@ export default function DesktopScheduleScroll({
 						width={60}
 						height={60}
 						onClick={() => scrollDir("right")}
-						className="cursor-pointer absolute right-[-45px] top-[95px] z-[100]"
+						className="cursor-pointer absolute right-[-45px] top-[95px] z-[60]"
 					/>
-					<div className="absolute right-[80px] top-[100px] w-[160px] z-[100]">
+					<div className="absolute right-[80px] top-[100px] w-[160px] z-[60]">
 						<span
 							className="block w-full text-left font-display text-[#FF4DEF] text-[32px] leading-none whitespace-nowrap cursor-pointer"
 							style={{ textShadow: "0px 0px 25px #FF4DEF" }}

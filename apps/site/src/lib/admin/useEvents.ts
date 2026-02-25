@@ -4,6 +4,7 @@ import useSWR from "swr";
 export interface Event {
 	name: string;
 	_id: string;
+	checkins?: Record<string, string> | [string, string][];
 }
 
 const fetcher = async (url: string) => {
@@ -21,9 +22,20 @@ function useEvents() {
 		event: string,
 		uid: string,
 	): Promise<boolean> => {
-		const res = await axios.post(`/api/admin/event-checkin/${event}`, uid);
-		console.log(`Checked in ${uid} for ${event}`);
-		return res.status === 200;
+		try {
+			const res = await axios.post(
+				`/api/admin/event-checkin/${event}`,
+				JSON.stringify(uid),
+				{ headers: { "Content-Type": "application/json" } },
+			);
+			return res.status === 200;
+		} catch (err) {
+			const msg =
+				axios.isAxiosError(err) && err.response?.data?.detail !== undefined
+					? String(err.response.data.detail)
+					: "Check-in failed";
+			throw new Error(msg);
+		}
 	};
 
 	return {

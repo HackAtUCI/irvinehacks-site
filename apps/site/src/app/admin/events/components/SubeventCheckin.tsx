@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState } from "react";
 
+import Box from "@cloudscape-design/components/box";
 import Button from "@cloudscape-design/components/button";
 import Container from "@cloudscape-design/components/container";
 import Input from "@cloudscape-design/components/input";
@@ -8,29 +9,58 @@ import SpaceBetween from "@cloudscape-design/components/space-between";
 import BadgeScanner from "@/lib/admin/BadgeScanner";
 import { Participant } from "@/lib/admin/useParticipants";
 
+const MAX_SEARCH_MATCHES = 10;
+
 interface SubeventCheckinProps {
 	participants: Participant[];
 	onConfirm: (participant: Participant) => Promise<boolean>;
 }
 
+function matchParticipant(p: Participant, query: string): boolean {
+	const q = query.trim().toLowerCase();
+	if (!q) return false;
+	const fullName = `${p.first_name} ${p.last_name}`.toLowerCase();
+	return (
+		p._id.toLowerCase().includes(q) ||
+		p.first_name.toLowerCase().includes(q) ||
+		p.last_name.toLowerCase().includes(q) ||
+		fullName.includes(q)
+	);
+}
+
 function SubeventCheckin({ participants, onConfirm }: SubeventCheckinProps) {
-	const [badgeNumber, setBadgeNumber] = useState("");
+	const [scannedUid, setScannedUid] = useState("");
+	const [participantSearch, setParticipantSearch] = useState("");
 	const [showScanner, setShowScanner] = useState(true);
 	const [error, setError] = useState("");
+	const [success, setSuccess] = useState("");
 
 	const onScanSuccess = useCallback((decodedText: string) => {
-		console.log("Scanner found");
-		setBadgeNumber(decodedText);
+		setScannedUid(decodedText.trim());
+		setShowScanner(false);
+		setParticipantSearch("");
+	}, []);
+
+	// QR code from portal encodes UID; match participant by _id
+	const participant = participants.find((p) => p._id === scannedUid);
+
+	const searchMatches = useMemo(() => {
+		if (!participantSearch.trim()) return [];
+		return participants
+			.filter((p) => matchParticipant(p, participantSearch))
+			.slice(0, MAX_SEARCH_MATCHES);
+	}, [participants, participantSearch]);
+
+	const selectParticipant = useCallback((p: Participant) => {
+		setScannedUid(p._id);
+		setParticipantSearch("");
 		setShowScanner(false);
 	}, []);
 
-	const participant = participants.filter(
-		(participant) => participant.badge_number === badgeNumber,
-	)[0];
 	const notFoundMessage = (
 		<p>
-			Participant could not be found, please note down the name of the
-			participant manually
+			Participant could not be found. Scan the participant&apos;s portal QR code
+			or enter their UID manually.
 		</p>
 	);
 
@@ -40,39 +70,76 @@ function SubeventCheckin({ participants, onConfirm }: SubeventCheckinProps) {
 	);
 
 	const handleConfirm = async () => {
-		const okay = await onConfirm(participant);
-		if (okay) {
-			console.log("clearing badge number");
-			setBadgeNumber("");
-			setError("");
-		} else {
-			setError("checkin failed");
+		if (!participant) return;
+		setError("");
+		setSuccess("");
+		try {
+			const okay = await onConfirm(participant);
+			if (okay) {
+				setSuccess(
+					`Successfully checked in ${participant.first_name} ${participant.last_name}.`,
+				);
+				setScannedUid("");
+				window.setTimeout(() => setSuccess(""), 5000);
+			} else {
+				setError("Check-in failed");
+			}
+		} catch (err) {
+			setError(err instanceof Error ? err.message : "Check-in failed");
 		}
 	};
 
 	return (
 		<Container>
-			<SpaceBetween direction="horizontal" size="xs">
+			<SpaceBetween size="m">
 				<Input
-					onChange={({ detail }) => setBadgeNumber(detail.value)}
-					value={badgeNumber}
+					value={participantSearch}
+					onChange={({ detail }) => setParticipantSearch(detail.value)}
+					placeholder="Search participants by name or UID"
+					type="search"
+					clearAriaLabel="Clear search"
 				/>
-				<Button
-					iconName="video-on"
-					variant="icon"
-					onClick={() => setShowScanner(true)}
-					iconAlt="Scan with camera"
-				/>
+				{searchMatches.length > 0 && (
+					<ul style={{ margin: 0, paddingLeft: "1.25rem" }}>
+						{searchMatches.map((p) => (
+							<li key={p._id} style={{ marginBottom: "0.25rem" }}>
+								<Button
+									variant="link"
+									onClick={() => selectParticipant(p)}
+									ariaLabel={`Select ${p.first_name} ${p.last_name}`}
+								>
+									{p.first_name} {p.last_name} ({p._id})
+								</Button>
+							</li>
+						))}
+					</ul>
+				)}
+				<SpaceBetween direction="horizontal" size="xs">
+					<Input
+						onChange={({ detail }) => setScannedUid(detail.value)}
+						value={scannedUid}
+						placeholder="Scan QR or enter UID"
+					/>
+					<Button
+						iconName="video-on"
+						variant="icon"
+						onClick={() => setShowScanner(true)}
+						iconAlt="Scan with camera"
+					/>
+				</SpaceBetween>
 			</SpaceBetween>
 			{showScanner && badgeScanner}
-			{badgeNumber !== "" && !participant && notFoundMessage}
+			{scannedUid !== "" && !participant && notFoundMessage}
 			{participant && (
 				<p>
 					Participant: {`${participant.first_name} ${participant.last_name}`}
 				</p>
 			)}
-			{error}
-			<Button onClick={handleConfirm}>Confirm</Button>
+			{success && <Box color="text-status-success">{success}</Box>}
+			{error && <Box color="text-status-error">{error}</Box>}
+			<Button onClick={handleConfirm} disabled={!participant}>
+				Confirm check-in
+			</Button>
 		</Container>
 	);
 }

@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import DesktopSchedulePage from "./ScheduleDesktop";
 import MobileSchedulePage from "./ScheduleMobile";
+import EventProps from "../EventProps";
 
 interface ScheduleProps {
 	schedule: EventProps[][];

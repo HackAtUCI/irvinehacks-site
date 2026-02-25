@@ -127,32 +127,74 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 		const carousel = carouselRef.current;
 		if (!carousel) return;
 
+		let isDown = false;
+		let startX: number;
+		let scrollLeft: number;
+
+		const getClosestIndex = () => {
+			const carouselRect = carousel.getBoundingClientRect();
+			const carouselCenter = carouselRect.left + carouselRect.width / 2;
+			const items = Array.from(
+				carousel.querySelectorAll(".mobile-carousel-item"),
+			);
+
+			let closestIndex = 0;
+			let smallestDistance = Infinity;
+
+			items.forEach((item, index) => {
+				const rect = item.getBoundingClientRect();
+				const itemCenter = rect.left + rect.width / 2;
+				const distance = Math.abs(carouselCenter - itemCenter);
+
+				if (distance < smallestDistance) {
+					smallestDistance = distance;
+					closestIndex = index;
+				}
+			});
+			return closestIndex;
+		};
+
+		const handleMouseDown = (e: MouseEvent) => {
+			isDown = true;
+			carousel.classList.add("active-drag");
+			startX = e.pageX - carousel.offsetLeft;
+			scrollLeft = carousel.scrollLeft;
+		};
+
+		const handleMouseLeave = () => {
+			if (!isDown) return;
+			isDown = false;
+			carousel.classList.remove("active-drag");
+			scrollToIndex(getClosestIndex());
+		};
+
+		const handleMouseUp = () => {
+			if (!isDown) return;
+			isDown = false;
+			carousel.classList.remove("active-drag");
+			scrollToIndex(getClosestIndex());
+		};
+
+		const handleMouseMove = (e: MouseEvent) => {
+			if (!isDown) return;
+			e.preventDefault();
+			const x = e.pageX - carousel.offsetLeft;
+			const walk = (x - startX) * 2; // Scroll speed
+			carousel.scrollLeft = scrollLeft - walk;
+		};
+
+		carousel.addEventListener("mousedown", handleMouseDown);
+		carousel.addEventListener("mouseleave", handleMouseLeave);
+		carousel.addEventListener("mouseup", handleMouseUp);
+		carousel.addEventListener("mousemove", handleMouseMove);
+
 		let timeout: ReturnType<typeof setTimeout>;
 
 		const handleScroll = () => {
 			clearTimeout(timeout);
 
 			timeout = setTimeout(() => {
-				const carouselRect = carousel.getBoundingClientRect();
-				const carouselCenter = carouselRect.left + carouselRect.width / 2;
-
-				const items = Array.from(
-					carousel.querySelectorAll(".mobile-carousel-item"),
-				);
-
-				let closestIndex = 0;
-				let smallestDistance = Infinity;
-
-				items.forEach((item, index) => {
-					const rect = item.getBoundingClientRect();
-					const itemCenter = rect.left + rect.width / 2;
-					const distance = Math.abs(carouselCenter - itemCenter);
-
-					if (distance < smallestDistance) {
-						smallestDistance = distance;
-						closestIndex = index;
-					}
-				});
+				const closestIndex = getClosestIndex();
 
 				// If we're in a manual scroll to a target, ignore intermediate updates
 				if (
@@ -174,6 +216,10 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 
 		carousel.addEventListener("scroll", handleScroll);
 		return () => {
+			carousel.removeEventListener("mousedown", handleMouseDown);
+			carousel.removeEventListener("mouseleave", handleMouseLeave);
+			carousel.removeEventListener("mouseup", handleMouseUp);
+			carousel.removeEventListener("mousemove", handleMouseMove);
 			carousel.removeEventListener("scroll", handleScroll);
 			clearTimeout(timeout);
 		};
@@ -193,7 +239,7 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 	/* ---------------- Render ---------------- */
 
 	return (
-		<div className="relative w-full h-fit flex gap-10 flex-col max-md:gap-2">
+		<div className="relative w-full h-fit flex gap-10 flex-col max-md:gap-2 select-none">
 			<ScheduleScroll
 				weekdays={allDays}
 				selectedEventDay={selectedEventDay}

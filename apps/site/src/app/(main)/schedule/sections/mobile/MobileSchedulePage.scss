@@ -16,6 +16,7 @@
 		-webkit-overflow-scrolling: touch;
 		padding: 2rem 1rem;
 		width: 100%;
+		cursor: grab;
 
 		/* Add padding to allow scrolling past edges */
 		padding-left: 10%;
@@ -24,6 +25,12 @@
 		/* Hide scrollbar */
 		scrollbar-width: none;
 		-ms-overflow-style: none;
+
+		&.active-drag {
+			cursor: grabbing;
+			scroll-snap-type: none;
+			scroll-behavior: auto;
+		}
 	}
 
 	.mobile-carousel::-webkit-scrollbar {

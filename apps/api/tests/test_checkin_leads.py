@@ -1,4 +1,3 @@
-from routers.user import DEFAULT_CHECKIN_TIME
 import pytest
 from unittest.mock import AsyncMock, patch, MagicMock
 
@@ -8,6 +7,7 @@ from routers.checkin_leads import (
     close_walkins,
     _process_status,
 )
+from routers.user import DEFAULT_CHECKIN_TIME
 from models.user_record import Role, Status
 from models.ApplicationData import Decision
 from services.mongodb_handler import Collection

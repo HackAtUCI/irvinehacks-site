@@ -1,4 +1,3 @@
-from routers.user import DEFAULT_CHECKIN_TIME
 from datetime import datetime
 from logging import getLogger
 from typing import Any, cast, Optional, Union
@@ -10,6 +9,7 @@ from models.ApplicationData import Decision
 from models.user_record import Role, Status, UserRecord
 from services import mongodb_handler
 from services.mongodb_handler import Collection
+from routers.user import DEFAULT_CHECKIN_TIME
 
 log = getLogger(__name__)
 

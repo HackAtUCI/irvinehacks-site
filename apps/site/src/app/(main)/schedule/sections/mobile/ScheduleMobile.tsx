@@ -225,17 +225,6 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 		};
 	}, [allEvents]);
 
-	/* ---------------- Sidebar Events (Current Day Only) ---------------- */
-
-	const sidebarEvents = useMemo(() => {
-		if (!selectedEventDay) return [];
-
-		return allEvents.filter(
-			(event) =>
-				getEventDate(event.startTime).getTime() === selectedEventDay.getTime(),
-		);
-	}, [allEvents, selectedEventDay]);
-
 	/* ---------------- Render ---------------- */
 
 	return (

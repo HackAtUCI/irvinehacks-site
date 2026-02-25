@@ -53,7 +53,7 @@ const ShiftingCountdown = () => {
 	const hasEnded = new Date() > new Date(HACKING_ENDS);
 
 	return (
-		<div className="flex items-center justify-center p-4 sm:p-8">
+		<div className="flex items-center justify-center py-32 p-4 lg:p-8">
 			<div className="w-full max-w-6xl">
 				<div className="bg-gradient-to-br from-[#2B3FD9]/90 via-[#1E2B8F]/90 to-[#0F1654]/90 rounded-[32px] sm:rounded-[48px] p-6 sm:p-12 md:p-16 backdrop-blur-sm border border-cyan-400/20 shadow-2xl">
 					<div className="flex flex-col items-center justify-center gap-4 sm:gap-6 md:gap-8">

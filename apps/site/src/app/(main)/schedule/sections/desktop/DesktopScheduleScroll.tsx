@@ -82,7 +82,7 @@ export default function DesktopScheduleScroll({
 	const nextWeekdayStr = getTimeAndDates(nextWeekday).day;
 
 	return (
-		<div className="w-full flex flex-col items-center select-none gap-20 max-md:gap-5">
+		<div className="w-full flex flex-col items-center select-none max-md:gap-5">
 			<h1 className="text-5xl font-display">Schedule</h1>
 			<div className="flex gap-10 sm:hidden">
 				<div className="h-full flex items-center">

@@ -6,7 +6,7 @@ import { useEffect, useRef } from "react";
 
 import getTimeAndDates from "@/lib/utils/getTimeAndDates";
 
-import styles from "./ScheduleScroll.module.scss";
+import styles from "../components/DesktopScheduleScroll.module.scss";
 
 export default function ScheduleScroll({
 	weekdays,

@@ -32,9 +32,8 @@ export default function SchedulePage({ schedule }: ScheduleProps) {
 		};
 	}, []);
 
-	// Prevent hydration mismatch
 	if (isDesktop === null) {
-		return null; // or a loading spinner
+		return null;
 	}
 
 	return isDesktop ? (

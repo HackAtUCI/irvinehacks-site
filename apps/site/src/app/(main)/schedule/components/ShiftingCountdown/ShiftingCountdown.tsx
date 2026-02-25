@@ -13,34 +13,42 @@ const MINUTE = SECOND * 60;
 const HOUR = MINUTE * 60;
 const DAY = HOUR * 24;
 
+const calculateCountdown = () => {
+	const now = new Date();
+	let end = new Date(HACKING_STARTS);
+	let label = "Hacking starts";
+
+	if (now >= end) {
+		label = "Hacking ends";
+		end = new Date(HACKING_ENDS);
+	}
+
+	const distance = Math.max(+end - +now, 0);
+	const days = Math.floor(distance / DAY);
+	const hours = Math.floor((distance % DAY) / HOUR);
+	const minutes = Math.floor((distance % HOUR) / MINUTE);
+	const seconds = Math.floor((distance % MINUTE) / SECOND);
+
+	return { days, hours, minutes, seconds, label };
+};
+
 const ShiftingCountdown = () => {
-	const calculateCountdown = () => {
-		const now = new Date();
-		let end = new Date(HACKING_STARTS);
-		let label = "Hacking starts";
+	const [countdown, setCountdown] = useState({
+		days: 0,
+		hours: 0,
+		minutes: 0,
+		seconds: 0,
+		label: "Loading...",
+	});
 
-		if (now >= end) {
-			label = "Hacking ends";
-			end = new Date(HACKING_ENDS);
-		}
-
-		const distance = Math.max(+end - +now, 0);
-		const days = Math.floor(distance / DAY);
-		const hours = Math.floor((distance % DAY) / HOUR);
-		const minutes = Math.floor((distance % HOUR) / MINUTE);
-		const seconds = Math.floor((distance % MINUTE) / SECOND);
-
-		return { days, hours, minutes, seconds, label };
-	};
-
-	const [countdown, setCountdown] = useState(calculateCountdown);
-
+	// Check mount to fix hydration issue
+	const [isMounted, setIsMounted] = useState(false);
 	useEffect(() => {
-		const intervalRef = setInterval(() => {
-			setCountdown(calculateCountdown());
-		}, 1000);
-		return () => clearInterval(intervalRef || undefined);
+		setIsMounted(true);
+		setCountdown(calculateCountdown());
 	}, []);
+
+	if (!isMounted) return null;
 
 	const hasEnded = new Date() > new Date(HACKING_ENDS);
 

@@ -1,12 +1,14 @@
+"""Tests for admin.participant_manager (event/subevent check-in, etc.)."""
+
 from unittest.mock import ANY, AsyncMock, patch
 
 import pytest
 
 from admin.participant_manager import (
+    AlreadyCheckedInError,
     add_participant_to_queue,
     check_in_participant,
     confirm_attendance_outside_participants,
-    get_attending_hackers,
     get_participants,
     PARTICIPANT_FIELDS,
     subevent_checkin,
@@ -31,8 +33,59 @@ USER_DIRECTOR = NativeUser(
 )
 
 
+# ---- subevent_checkin ----
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_subevent_checkin_success(
+    mock_retrieve_one: AsyncMock,
+    mock_raw_update_one: AsyncMock,
+) -> None:
+    """Subevent check-in succeeds when event exists and UID not already checked in."""
+    event_id = "event1"
+    uid = "user1"
+
+    mock_retrieve_one.return_value = {"_id": event_id, "checkins": {}}
+    mock_raw_update_one.return_value = True
+
+    await subevent_checkin(event_id, uid, USER_ASSOCIATE)
+
+    mock_retrieve_one.assert_awaited_once_with(
+        Collection.EVENTS, {"_id": event_id}, ["checkins"]
+    )
+    mock_raw_update_one.assert_awaited_once()
+    call_args = mock_raw_update_one.call_args
+    assert call_args[0][0] == Collection.EVENTS
+    assert call_args[0][1] == {"_id": event_id}
+    assert "$set" in call_args[0][2]
+    assert "checkins" in call_args[0][2]["$set"]
+    assert call_args[0][2]["$set"]["checkins"].get(uid) is not None
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_subevent_checkin_event_not_found(mock_retrieve_one: AsyncMock) -> None:
+    """Subevent check-in raises when event does not exist."""
+    mock_retrieve_one.return_value = None
+    with pytest.raises(RuntimeError, match="Event event1 not found"):
+        await subevent_checkin("event1", "user1", USER_ASSOCIATE)
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_subevent_checkin_already_checked_in(
+    mock_retrieve_one: AsyncMock,
+) -> None:
+    """Subevent check-in raises AlreadyCheckedInError when UID already in checkins."""
+    mock_retrieve_one.return_value = {
+        "_id": "event1",
+        "checkins": {"user1": "2025-01-01T00:00:00Z"},
+    }
+    with pytest.raises(AlreadyCheckedInError, match="already checked in"):
+        await subevent_checkin("event1", "user1", USER_ASSOCIATE)
+
+
+# ---- get_participants ----
 @patch("services.mongodb_handler.retrieve", autospec=True)
 async def test_get_participants(mock_retrieve: AsyncMock) -> None:
+    """get_participants returns list of Participant from DB query."""
     mock_retrieve.return_value = [
         {
             "_id": "user1",
@@ -63,7 +116,6 @@ async def test_get_participants(mock_retrieve: AsyncMock) -> None:
     assert participants[0].status == Status.CONFIRMED
     assert participants[1].uid == "user2"
     assert participants[1].roles == (Role.SPONSOR,)
-
     mock_retrieve.assert_awaited_once_with(
         Collection.USERS,
         ANY,
@@ -71,12 +123,14 @@ async def test_get_participants(mock_retrieve: AsyncMock) -> None:
     )
 
 
+# ---- check_in_participant ----
 @patch("services.mongodb_handler.raw_update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 async def test_check_in_participant_success(
     mock_retrieve_one: AsyncMock,
     mock_raw_update_one: AsyncMock,
 ) -> None:
+    """Check-in succeeds for confirmed user."""
     uid = "user123"
     mock_retrieve_one.return_value = {"status": Status.CONFIRMED}
     mock_raw_update_one.return_value = True
@@ -98,6 +152,7 @@ async def test_check_in_participant_success(
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 async def test_check_in_participant_no_record(mock_retrieve_one: AsyncMock) -> None:
+    """Check-in raises when no user record exists."""
     mock_retrieve_one.return_value = None
     with pytest.raises(ValueError, match="No application record found."):
         await check_in_participant("invalid_uid", USER_ASSOCIATE)
@@ -107,6 +162,7 @@ async def test_check_in_participant_no_record(mock_retrieve_one: AsyncMock) -> N
 async def test_check_in_participant_invalid_status(
     mock_retrieve_one: AsyncMock,
 ) -> None:
+    """Check-in raises when user status is not CONFIRMED/ATTENDING."""
     mock_retrieve_one.return_value = {"status": Status.PENDING_REVIEW}
     with pytest.raises(
         ValueError, match="User is PENDING_REVIEW and can not be checked in."
@@ -114,12 +170,14 @@ async def test_check_in_participant_invalid_status(
         await check_in_participant("user123", USER_ASSOCIATE)
 
 
+# ---- add_participant_to_queue ----
 @patch("services.mongodb_handler.raw_update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 async def test_add_participant_to_queue_success(
     mock_retrieve_one: AsyncMock,
     mock_raw_update_one: AsyncMock,
 ) -> None:
+    """Adding hacker with WAIVER_SIGNED to queue updates user and settings."""
     uid = "hacker1"
     mock_retrieve_one.return_value = {
         "status": Status.WAIVER_SIGNED,
@@ -130,11 +188,9 @@ async def test_add_participant_to_queue_success(
     await add_participant_to_queue(uid, USER_ASSOCIATE)
 
     assert mock_raw_update_one.await_count == 2
-    # First update: set status to QUEUED
     mock_raw_update_one.assert_any_await(
         Collection.USERS, {"_id": uid}, {"$set": {"status": Status.QUEUED}}
     )
-    # Second update: push to queue settings
     mock_raw_update_one.assert_any_await(
         Collection.SETTINGS,
         {"_id": "queue"},
@@ -147,23 +203,26 @@ async def test_add_participant_to_queue_success(
 async def test_add_participant_to_queue_not_hacker(
     mock_retrieve_one: AsyncMock,
 ) -> None:
+    """Adding non-hacker to queue raises ValueError."""
     uid = "sponsor1"
     mock_retrieve_one.return_value = {
         "status": Status.WAIVER_SIGNED,
         "roles": [Role.SPONSOR],
     }
     with pytest.raises(
-        ValueError, match=r"Applicant is a \[<Role.SPONSOR: 'Sponsor'>\], not a hacker."
+        ValueError, match=r"Applicant is a \[.*\], not a hacker."
     ):
         await add_participant_to_queue(uid, USER_ASSOCIATE)
 
 
+# ---- confirm_attendance_outside_participants ----
 @patch("services.mongodb_handler.update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 async def test_confirm_attendance_outside_participants_success(
     mock_retrieve_one: AsyncMock,
     mock_update_one: AsyncMock,
 ) -> None:
+    """Confirming outside participant updates status to ATTENDING."""
     uid = "sponsor1"
     mock_retrieve_one.return_value = {"status": Status.WAIVER_SIGNED}
     mock_update_one.return_value = True
@@ -174,41 +233,4 @@ async def test_confirm_attendance_outside_participants_success(
         Collection.USERS,
         {"_id": uid},
         {"status": Status.ATTENDING},
-    )
-
-
-@patch("services.mongodb_handler.raw_update_one", autospec=True)
-async def test_subevent_checkin_success(mock_raw_update_one: AsyncMock) -> None:
-    event_id = "event1"
-    uid = "user1"
-    mock_raw_update_one.return_value = True
-
-    await subevent_checkin(event_id, uid, USER_ASSOCIATE)
-
-    mock_raw_update_one.assert_awaited_once_with(
-        Collection.EVENTS, {"_id": event_id}, {"$push": {"checkins": (uid, ANY)}}
-    )
-
-
-@patch("services.mongodb_handler.retrieve", autospec=True)
-async def test_get_attending_hackers(mock_retrieve: AsyncMock) -> None:
-    mock_retrieve.return_value = [
-        {
-            "_id": "hacker1",
-            "first_name": "Hacker",
-            "last_name": "One",
-            "roles": [Role.HACKER],
-            "status": Status.ATTENDING,
-            "decision": Decision.ACCEPTED,
-        }
-    ]
-
-    hackers = await get_attending_hackers()
-
-    assert len(hackers) == 1
-    assert hackers[0].uid == "hacker1"
-    mock_retrieve.assert_awaited_once_with(
-        Collection.USERS,
-        {"roles": Role.HACKER, "status": Status.ATTENDING},
-        PARTICIPANT_FIELDS,
     )

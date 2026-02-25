@@ -1,5 +1,3 @@
-from routers.user import DEFAULT_CHECKIN_TIME
-from routers.director import _process_decision
 import asyncio
 
 from logging import getLogger
@@ -20,6 +18,8 @@ from services.sendgrid_handler import (
 )
 from utils.email_handler import IH_SENDER, recover_email_from_uid
 from utils.batched import batched
+from routers.user import DEFAULT_CHECKIN_TIME
+from routers.director import _process_decision
 
 log = getLogger(__name__)
 
@@ -213,7 +213,7 @@ async def close_walkins() -> None:
         Collection.USERS,
         {
             "roles": Role.HACKER,
-            "status": {"$in": [Status.QUEUED, Status.WAIVER_SIGNED, Status.CONFIRMED]},
+            "decision": {"$in": [Decision.WAITLISTED]},
         },
         ["_id", "first_name"],
     )

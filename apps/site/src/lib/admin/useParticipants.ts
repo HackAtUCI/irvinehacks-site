@@ -14,10 +14,17 @@ export interface Participant {
 	status: Status;
 	decision?: Decision;
 	badge_number: string | null;
+	is_added_to_slack?: boolean;
+	is_waiver_signed?: boolean;
 }
 
 const fetcher = async (url: string) => {
 	const res = await axios.get<Participant[]>(url);
+	return res.data;
+};
+
+const syncFetcher = async (url: string) => {
+	const res = await axios.post(url);
 	return res.data;
 };
 
@@ -26,6 +33,13 @@ function useParticipants() {
 		"/api/admin/participants",
 		fetcher,
 	);
+
+	useSWR("/api/slack/sync", syncFetcher, {
+		refreshInterval: 30000, // Sync every 30 seconds
+		onSuccess: () => {
+			mutate(); // Refresh participant data after sync
+		},
+	});
 
 	const checkInParticipant = async (participant: Participant) => {
 		try {
@@ -69,6 +83,20 @@ function useParticipants() {
 		mutate();
 	};
 
+	const updateWaiverStatus = async (uid: string, isSigned: boolean) => {
+		try {
+			await axios.post(`/api/admin/participant/waiver/${uid}`, {
+				is_signed: isSigned,
+			});
+			mutate();
+		} catch (error) {
+			if (axios.isAxiosError(error) && error.response?.data?.detail) {
+				throw new Error(error.response.data.detail);
+			}
+			throw error;
+		}
+	};
+
 	return {
 		participants: data ?? [],
 		loading: isLoading,
@@ -77,6 +105,7 @@ function useParticipants() {
 		queueParticipant,
 		releaseParticipantFromWaitlist,
 		confirmOutsideParticipants,
+		updateWaiverStatus,
 	};
 }
 

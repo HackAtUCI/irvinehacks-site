@@ -1,4 +1,3 @@
-from routers.user import DEFAULT_CHECKIN_TIME
 from unittest.mock import ANY, AsyncMock, patch
 
 import pytest
@@ -16,6 +15,7 @@ from auth.user_identity import NativeUser
 from models.ApplicationData import Decision
 from models.user_record import Role, Status
 from services.mongodb_handler import Collection
+from routers.user import DEFAULT_CHECKIN_TIME
 
 USER_ASSOCIATE = NativeUser(
     ucinetid="associate",

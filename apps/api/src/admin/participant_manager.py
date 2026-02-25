@@ -28,6 +28,8 @@ class Participant(UserRecord):
     checkins: list[Checkin] = []
     status: Union[Status, Decision] = Status.REVIEWED
     decision: Optional[Decision]
+    is_added_to_slack: bool = False
+    is_waiver_signed: bool = False
     badge_number: Union[str, None] = None
 
 
@@ -40,6 +42,8 @@ PARTICIPANT_FIELDS = [
     "decision",
     "checkins",
     "badge_number",
+    "is_added_to_slack",
+    "is_waiver_signed",
 ]
 
 
@@ -243,3 +247,24 @@ async def get_attending_and_late_hackers() -> list[Participant]:
     )
 
     return [Participant(**user) for user in records]
+
+
+async def update_waiver_status(uid: str, is_signed: bool) -> bool:
+    """Update is_waiver_signed field and conditionally update status."""
+    record = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": uid}, ["status"]
+    )
+    if not record:
+        return False
+
+    current_status = record.get("status")
+    update_data: dict[str, Union[bool, Status]] = {"is_waiver_signed": is_signed}
+
+    if current_status in (Status.WAIVER_SIGNED, Status.REVIEWED):
+        update_data["status"] = Status.WAIVER_SIGNED if is_signed else Status.REVIEWED
+
+    return await mongodb_handler.update_one(
+        Collection.USERS,
+        {"_id": uid},
+        update_data,
+    )

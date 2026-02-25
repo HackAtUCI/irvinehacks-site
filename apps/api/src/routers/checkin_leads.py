@@ -2,7 +2,7 @@ from routers.director import _process_decision
 import asyncio
 
 from logging import getLogger
-from typing import Any, Literal, Sequence, cast
+from typing import Any, Literal, Sequence, cast, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -237,7 +237,7 @@ async def add_checkin_log(payload: dict[str, Any]) -> dict[str, bool]:
     "/queue-timer",
     dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
 )
-async def get_queue_timer() -> dict[str, int | None]:
+async def get_queue_timer() -> dict[str, Optional[int]]:
     doc = await mongodb_handler.retrieve_one(
         Collection.SETTINGS,
         {"_id": "checkin_queue_timer"},

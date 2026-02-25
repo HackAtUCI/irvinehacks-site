@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 
 import EventPlaque from "./EventPlaque";
-import EventProps from "../EventProps";
+import EventProps from "../../components/EventProps";
 import EventCard from "./EventCard";
 
 import styles from "./EventSidebar.module.scss";
@@ -79,7 +79,7 @@ export default function EventSidebar({
 			<div
 				className={clsx(
 					styles.background,
-					"h-[800px] w-[80%] overflow-auto max-lg:w-full",
+					"h-[800px] w-full xl:w-[80%] overflow-auto mr-8 xl:mr-0",
 				)}
 				ref={scheduleScrollerRef}
 			>

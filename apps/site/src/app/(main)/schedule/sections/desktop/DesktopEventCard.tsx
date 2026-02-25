@@ -1,14 +1,14 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import EventProps from "../EventProps";
+import EventProps from "../../components/EventProps";
 import getTimeAndDates from "@/lib/utils/getTimeAndDates";
 
-interface EventCardProps extends EventProps {
+interface DesktopEventCardProps extends EventProps {
 	isHappening: boolean;
 }
 
-export default function EventCard({
+export default function DesktopEventCard({
 	title,
 	location,
 	virtual,
@@ -18,29 +18,28 @@ export default function EventCard({
 	hosts,
 	description,
 	isHappening,
-}: EventCardProps) {
+}: DesktopEventCardProps) {
 	return (
-		<div
-			className={`w-[78%] min-w-[200px] h-[520px] overflow-auto bg-[#170f51]/50 border-[9px] border-yellow relative p-7 font-display max-lg:w-full ${"max-lg:bg-blue-100 max-lg:border-blue-900 max-lg:text-blue-950 max-lg:top-[-8px] max-lg:left-[-8px]"}`}
-		>
+		<div className="w-[78%] min-w-[200px] h-[520px] overflow-auto bg-[#170f51]/50 border-[9px] border-yellow relative p-7 font-display">
 			{title ? (
 				<>
 					<div>
-						<div className="flex justify-between gap-5 max-lg:flex-col">
+						<div className="flex justify-between gap-5">
 							<div className="h-fit w-full flex justify-between items-center">
-								<h1 className="text-4xl [text-shadow:0_0_25px] max-w-[80%] max-sm:text-3xl">
+								<h1 className="text-4xl [text-shadow:0_0_25px] max-w-[80%]">
 									{title}
 								</h1>
 							</div>
 						</div>
 						<div className="pt-6 text-yellow">
-							<div className="w-full flex justify-between gap-5 max-lg:flex-col ">
+							<div className="w-full flex justify-between gap-5">
 								<p className="text-2xl mb-0">
 									<span>Location: </span>
 									{virtual ? <a>Zoom</a> : location}
 								</p>
+								{organization && <p className="text-xl">By: {organization}</p>}
 							</div>
-							<p className="text-2xl mt-0 mb-0">{`Time: ${
+							<p className="text-2xl mt-0">{`Time: ${
 								startTime.getTime() === endTime.getTime()
 									? `${getTimeAndDates(endTime).compositeTimeHourMinute} ${
 											getTimeAndDates(endTime).amPm
@@ -49,10 +48,6 @@ export default function EventCard({
 											getTimeAndDates(endTime).compositeTimeHourMinute
 									  } ${getTimeAndDates(endTime).amPm}`
 							}`}</p>
-
-							{organization && (
-								<p className="text-2xl mt-0 mb-0">By: {organization}</p>
-							)}
 						</div>
 					</div>
 					<div>

@@ -7,10 +7,10 @@ import Image from "next/image";
 import convertToPST from "@/lib/utils/convertToPST";
 import scheduleFrame from "@/assets/images/schedule_frame.svg";
 
-import DesktopEventCard from "../components/DesktopEventCard";
-import EventProps from "../EventProps";
-import DesktopScheduleScroll from "../components/DesktopScheduleScroll";
-import EventSidebar from "../components/EventSidebar";
+import DesktopEventCard from "./DesktopEventCard";
+import EventProps from "../../components/EventProps";
+import DesktopScheduleScroll from "./DesktopScheduleScroll";
+import EventSidebar from "./EventSidebar";
 
 import "./SchedulePage.scss";
 

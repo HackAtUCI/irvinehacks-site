@@ -1,0 +1,72 @@
+/* Mobile Carousel Styles - Only applies to mobile/tablet views */
+
+/* Mobile carousel container */
+@media (max-width: 1023px) {
+	.mobile-carousel-wrapper {
+		width: 100%;
+		overflow: hidden;
+		position: relative;
+	}
+
+	.mobile-carousel {
+		display: flex;
+		overflow-x: auto;
+		scroll-snap-type: x mandatory;
+		scroll-behavior: smooth;
+		-webkit-overflow-scrolling: touch;
+		padding: 2rem 1rem;
+		width: 100%;
+
+		/* Add padding to allow scrolling past edges */
+		padding-left: 10%;
+		padding-right: 10%;
+
+		/* Hide scrollbar */
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+	}
+
+	.mobile-carousel::-webkit-scrollbar {
+		display: none;
+	}
+
+	/* Individual carousel items */
+	.mobile-carousel-item {
+		flex: 0 0 90%;
+		scroll-snap-align: center;
+		scroll-snap-stop: always;
+		display: flex;
+		justify-content: center;
+		height: min-content;
+		align-items: start;
+		transition:
+			transform 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+			opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+		transform: scale(0.75);
+		opacity: 0.5;
+		transform-origin: center;
+	}
+
+	/* Active (centered) item */
+	.mobile-carousel-item.active {
+		transform: scale(1);
+		opacity: 1;
+	}
+
+	/* Ensure EventCard takes full width within the carousel item */
+	.mobile-carousel-item > * {
+		width: 100%;
+		max-width: 500px;
+	}
+}
+
+/* Ensure desktop styles remain unchanged */
+@media (min-width: 1024px) {
+	.mobile-carousel {
+		display: none;
+	}
+
+	.mobile-carousel-wrapper {
+		display: none;
+	}
+}

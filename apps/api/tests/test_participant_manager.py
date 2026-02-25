@@ -74,7 +74,10 @@ async def test_subevent_checkin_already_checked_in(
     mock_retrieve_one: AsyncMock,
 ) -> None:
     """Subevent check-in raises AlreadyCheckedInError when UID already in checkins."""
-    mock_retrieve_one.return_value = {"_id": "event1", "checkins": {"user1": "2025-01-01T00:00:00Z"}}
+    mock_retrieve_one.return_value = {
+        "_id": "event1",
+        "checkins": {"user1": "2025-01-01T00:00:00Z"},
+    }
     with pytest.raises(AlreadyCheckedInError, match="already checked in"):
         await subevent_checkin("event1", "user1", USER_ASSOCIATE)
 

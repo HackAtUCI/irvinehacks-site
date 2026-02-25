@@ -84,7 +84,7 @@ export default function EventSidebar({
 				ref={scheduleScrollerRef}
 			>
 				<div
-					className="w-full h-fit flex flex-col gap-4 p-6 max-lg:gap-10"
+					className="w-full h-fit flex flex-col gap-4 pl-28 pr-6 py-6 max-lg:gap-10"
 					ref={scheduleContainerRef}
 				>
 					<div className="h-[100px] w-full relative flex justify-center items-center max-md:h-0" />

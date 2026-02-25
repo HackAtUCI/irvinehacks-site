@@ -195,7 +195,7 @@ async def _process_status(
 @router.get(
     "/checkin-log",
     dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
-    )
+)
 async def get_checkin_log() -> list[dict[str, Any]]:
     doc = await mongodb_handler.retrieve_one(
         Collection.SETTINGS,
@@ -213,7 +213,7 @@ async def get_checkin_log() -> list[dict[str, Any]]:
     "/checkin-log",
     dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
 )
-async def add_checkin_log(payload: dict[str, Any]) -> dict[str, Any]:    
+async def add_checkin_log(payload: dict[str, Any]) -> dict[str, Any]:
     text = payload.get("text")
     if not text:
         raise HTTPException(status_code=400, detail="Missing text")

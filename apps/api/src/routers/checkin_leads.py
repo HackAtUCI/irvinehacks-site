@@ -17,6 +17,8 @@ from services.sendgrid_handler import (
 from utils.email_handler import IH_SENDER, recover_email_from_uid
 from utils.batched import batched
 
+from time import time
+
 log = getLogger(__name__)
 
 router = APIRouter()
@@ -35,7 +37,6 @@ RSVP_REMINDER_EMAIL_TEMPLATES: dict[
     Role.MENTOR: Template.MENTOR_RSVP_REMINDER,
     Role.VOLUNTEER: Template.VOLUNTEER_RSVP_REMINDER,
 }
-
 
 @router.post(
     "/queue-removal",
@@ -168,3 +169,83 @@ async def _process_status(uids: Sequence[str], status: Status) -> None:
     )
     if not ok:
         raise RuntimeError("gg wp")
+    
+
+@router.get(
+    "/checkin-log",
+    dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
+    )
+async def get_checkin_log():
+    doc = await mongodb_handler.retrieve_one(
+        Collection.SETTINGS,
+        {"_id": "checkin_event_log"},
+        ["events"],
+    )
+
+    if not doc or "events" not in doc:
+        return []
+
+    return doc["events"]
+
+@router.post(
+    "/checkin-log",
+    dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
+)
+async def add_checkin_log(payload: dict):
+    text = payload.get("text")
+    if not text:
+        raise HTTPException(status_code=400, detail="Missing text")
+
+    event = {
+        "time": int(time() * 1000),
+        "text": text,
+    }
+
+    await mongodb_handler.raw_update_one(
+        Collection.SETTINGS,
+        {"_id": "checkin_event_log"},
+        {
+            "$push": {
+                "events": {
+                    "$each": [event],
+                    "$position": 0
+                }
+            }
+        },
+        upsert=True,
+    )
+
+    return {"ok": True}
+
+@router.get("/queue-timer",
+    dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
+)
+async def get_queue_timer():
+    doc = await mongodb_handler.retrieve_one(
+        Collection.SETTINGS,
+        {"_id": "checkin_queue_timer"},
+        ["last_pull"],
+    )
+
+    if not doc:
+        return {"last_pull": None}
+
+    return {"last_pull": doc.get("last_pull")}
+
+
+from time import time
+
+@router.post("/queue-timer",
+    dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
+)
+async def set_queue_timer():
+    now = int(time() * 1000)
+
+    await mongodb_handler.raw_update_one(
+        Collection.SETTINGS,
+        {"_id": "checkin_queue_timer"},
+        {"$set": {"last_pull": now}},
+        upsert=True,
+    )
+
+    return {"last_pull": now}

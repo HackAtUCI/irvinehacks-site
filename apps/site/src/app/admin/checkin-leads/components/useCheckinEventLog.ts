@@ -11,38 +11,29 @@ export interface CheckinEvent {
 export function useCheckinEventLog() {
 	const [events, setEvents] = useState<CheckinEvent[]>([]);
 
-	const load = () => {
-		const stored = localStorage.getItem(KEY);
-		setEvents(stored ? JSON.parse(stored) : []);
+	const load = async () => {
+		const res = await fetch("/api/checkin-leads/checkin-log");
+		const data = await res.json();
+		setEvents(Array.isArray(data) ? data : []);
 	};
 
 	useEffect(() => {
 		load();
+		const interval = setInterval(load, 4000);
+		return () => clearInterval(interval);
 	}, []);
 
-	useEffect(() => {
-		const handler = () => load();
-		window.addEventListener(EVENT, handler);
-		window.addEventListener("storage", handler);
-		return () => {
-			window.removeEventListener(EVENT, handler);
-			window.removeEventListener("storage", handler);
-		};
-	}, []);
+	const log = async (text: string) => {
+		await fetch("/api/checkin-leads/checkin-log", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"X-Hackathon-Name": process.env.NEXT_PUBLIC_HACKATHON_NAME!,
+			},
+			body: JSON.stringify({ text }),
+		});
 
-	const log = (text: string) => {
-		const newEvent = { time: Date.now(), text };
-
-		const stored = localStorage.getItem(KEY);
-		const existing: CheckinEvent[] = stored ? JSON.parse(stored) : [];
-
-		const updated = [newEvent, ...existing].slice(0, 50);
-		localStorage.setItem(KEY, JSON.stringify(updated));
-
-		setEvents(updated);
-
-		// notify listeners
-		window.dispatchEvent(new Event(EVENT));
+		await load();
 	};
 
 	return { events, log };

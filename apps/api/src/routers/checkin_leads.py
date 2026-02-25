@@ -208,6 +208,7 @@ async def get_checkin_log() -> list[dict[str, Any]]:
 
     return cast(list[dict[str, Any]], doc["events"])
 
+
 @router.post(
     "/checkin-log",
     dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],

@@ -2,7 +2,7 @@ from routers.director import _process_decision
 import asyncio
 
 from logging import getLogger
-from typing import Any, Literal, Sequence
+from typing import Any, Literal, Sequence, cast
 
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -196,7 +196,7 @@ async def _process_status(
     "/checkin-log",
     dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
 )
-async def get_checkin_log() -> list[dict[str]]:
+async def get_checkin_log() -> list[dict[str, Any]]:
     doc = await mongodb_handler.retrieve_one(
         Collection.SETTINGS,
         {"_id": "checkin_event_log"},
@@ -206,14 +206,13 @@ async def get_checkin_log() -> list[dict[str]]:
     if not doc or "events" not in doc:
         return []
 
-    return doc["events"]
-
+    return cast(list[dict[str, Any]], doc["events"])
 
 @router.post(
     "/checkin-log",
     dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
 )
-async def add_checkin_log(payload: dict[str, Any]) -> dict[str, Any]:
+async def add_checkin_log(payload: dict[str, Any]) -> dict[str, bool]:
     text = payload.get("text")
     if not text:
         raise HTTPException(status_code=400, detail="Missing text")
@@ -237,7 +236,7 @@ async def add_checkin_log(payload: dict[str, Any]) -> dict[str, Any]:
     "/queue-timer",
     dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
 )
-async def get_queue_timer() -> dict[str, int]:
+async def get_queue_timer() -> dict[str, int | None]:
     doc = await mongodb_handler.retrieve_one(
         Collection.SETTINGS,
         {"_id": "checkin_queue_timer"},
@@ -247,7 +246,8 @@ async def get_queue_timer() -> dict[str, int]:
     if not doc:
         return {"last_pull": None}
 
-    return {"last_pull": doc.get("last_pull")}
+    value = doc.get("last_pull")
+    return {"last_pull": value if isinstance(value, int) else None}
 
 
 @router.post(

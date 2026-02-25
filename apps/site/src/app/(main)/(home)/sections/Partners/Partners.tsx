@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
+import clsx from "clsx";
 import { getPartners } from "./getPartners";
 import { client } from "@/lib/sanity/client";
 import imageUrlBuilder from "@sanity/image-url";
@@ -34,7 +35,7 @@ export default async function Partners() {
 					}}
 					className="pb-16 lg:pb-64"
 				>
-					<div className="flex flex-wrap mt-8 xl:mb-20 gap-8 xl:gap-16 items-center justify-center">
+					<div className="flex flex-wrap lg:mt-36 gap-8 xl:gap-16 items-center justify-center">
 						{partners.map(({ _key, name, url, logo }) => (
 							<a
 								key={_key}
@@ -43,7 +44,12 @@ export default async function Partners() {
 								rel="noopener noreferrer"
 								className={`${styles.partnerItem} transition-transform hover:scale-105`}
 							>
-								<div className={styles.partnerLogos}>
+								<div
+									className={clsx(
+										"flex items-center justify-center py-2 px-4 bg-[#c6c6ce] rounded-2xl",
+										styles.partnerLogos,
+									)}
+								>
 									<img
 										src={builder.image(logo).format("webp").url()}
 										alt={`${name} logo`}

@@ -25,33 +25,20 @@
 }
 
 .partnerItem {
-	flex: 0 0 100%;
-	min-width: 0;
-
-	@media (min-width: 640px) {
-		flex: 0 0 calc(50% - 1rem);
-	}
+	width: 100%;
+	max-width: 350px;
+	max-height: 175px;
 }
 
 // Same styling as Platinum sponsors
 .partnerLogos {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	padding-top: 0.5rem;
-	padding-bottom: 0.5rem;
-	padding-left: 1rem;
-	padding-right: 1rem;
-	background-color: #c6c6ce;
-	border-radius: 1rem;
 	width: 100%;
 	aspect-ratio: 2 / 1;
-	max-width: 320px;
 }
 
 @media (min-width: 1024px) {
 	.partnerLogos {
-		max-width: 500px;
-		max-height: 250px;
+		max-width: 350px;
+		max-height: 175px;
 	}
 }

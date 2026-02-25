@@ -4,6 +4,7 @@ import Image from "next/image";
 
 import ResourcePageBackground from "@/assets/backgrounds/resources-page-bg.png";
 import ResourceSection from "./components/ResourceSection";
+import { getResources } from "./getResources";
 
 export const revalidate = 60;
 
@@ -16,6 +17,8 @@ export default async function Resources() {
 		redirect("/");
 	}
 
+	const data = await getResources();
+
 	return (
 		<>
 			<section className="bg-[#00001c]">
@@ -26,7 +29,7 @@ export default async function Resources() {
 						</h1>
 					</div>
 					<div className="mx-4 mb-40">
-						<ResourceSection />
+						<ResourceSection data={data}/>
 					</div>
 				</div>
 				<div className="min-h-screen absolute top-0 left-0 w-full h-full overflow-hidden">

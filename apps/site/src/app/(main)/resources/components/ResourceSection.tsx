@@ -55,14 +55,17 @@ export default function ResourceSection({ data }: { data: any }) {
 									{/* MOBILE */}
 									<div className="block md:hidden">
 										<div className="mt-2 flex flex-col gap-4 items-center justify-center">
-											{resources.map(({ _id, title, link }) => (
-												<ResourceItem
-													key={_id}
-													title={title}
-													link={link}
-													isMobile={true}
-												/>
-											))}
+											{resources.map((resource: any) => {
+												const { _id, title, link } = resource;
+												return (
+													<ResourceItem
+														key={_id}
+														title={title}
+														link={link}
+														isMobile={true}
+													/>
+												);
+											})}
 										</div>
 									</div>
 
@@ -79,8 +82,10 @@ export default function ResourceSection({ data }: { data: any }) {
 
 										<div className="pb-[9px] pr-4 mx-5">
 											<div className="p-5 w-full grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-												{visibleResources.map(
-													({ _id, resourceIconUrl, title, link }) => (
+												{visibleResources.map((resource: any) => {
+													const { _id, resourceIconUrl, title, link } =
+														resource;
+													return (
 														<ResourceItem
 															key={_id}
 															resourceIconUrl={resourceIconUrl}
@@ -88,8 +93,8 @@ export default function ResourceSection({ data }: { data: any }) {
 															link={link}
 															isMobile={false}
 														/>
-													),
-												)}
+													);
+												})}
 											</div>
 										</div>
 

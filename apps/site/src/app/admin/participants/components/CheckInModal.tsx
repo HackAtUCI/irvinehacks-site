@@ -56,7 +56,8 @@ function CheckInModal({ onDismiss, onConfirm, participant }: ActionModalProps) {
 								</li>
 								<li>Have participant sign the SPFB sheet.</li>
 								<li>
-									Check if the participant has joined Slack (there is a column to indicate it). If not, ask a check-in lead to add them.
+									Check if the participant has joined Slack (there is a column
+									to indicate it). If not, ask a check-in lead to add them.
 								</li>
 								<li>Ask participant to fill in badge.</li>
 								<li>

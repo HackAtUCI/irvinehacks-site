@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import CountdownItem from "./CountdownItem";
 
 // NOTE: Change this date to whatever date you want to countdown to :)
-const HACKING_STARTS = Date.UTC(2026, 1, 27, 5, 0, 0); // 2/26 at 9pm PST
+const HACKING_STARTS = Date.UTC(2026, 1, 28, 5, 0, 0); // 2/26 at 9pm PST
 const HACKING_ENDS = Date.UTC(2026, 2, 1, 17, 0, 0); // 3/1 at 9am PST (36 hours later)
 
 const SECOND = 1000;

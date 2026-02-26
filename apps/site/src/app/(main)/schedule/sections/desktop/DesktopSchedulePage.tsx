@@ -21,6 +21,7 @@ interface DesktopSchedulePageProps {
 }
 
 // test date : "2024-01-26T23:30:00.000Z"
+const firstDay = new Date(2026, 1, 27); // hackathon start day
 
 export default function DesktopSchedulePage({
 	schedule,
@@ -48,8 +49,6 @@ export default function DesktopSchedulePage({
 	function getEventDate(date: Date) {
 		return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 	}
-
-	const firstDay = new Date(2025, 0, 24); // hackathon start day
 
 	const allDays = schedule
 		.map((event) => (event ? event[0].startTime : new Date(0)))

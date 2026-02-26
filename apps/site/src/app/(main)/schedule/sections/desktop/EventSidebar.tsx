@@ -2,10 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
+import Image from "next/image";
 
 import EventPlaque from "./EventPlaque";
 import EventProps from "../../components/EventProps";
 import EventCard from "./EventCard";
+import hackerAnteater from "@/assets/images/hacker-sprite.svg";
 
 import styles from "./EventSidebar.module.scss";
 
@@ -131,6 +133,14 @@ export default function EventSidebar({
 							</div>
 						);
 					})}
+					<div className="h-[300px] w-full flex justify-center items-center">
+						<Image
+							src={hackerAnteater}
+							width={200}
+							height={200}
+							alt="hacker anteater"
+						/>
+					</div>
 				</div>
 			</div>
 		</div>

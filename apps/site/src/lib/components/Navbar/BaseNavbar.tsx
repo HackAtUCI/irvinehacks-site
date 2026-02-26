@@ -82,9 +82,9 @@ export default function BaseNavbar({ children }: PropsWithChildren) {
 						</NavLinkItem>
 					)}
 
-					{/* <NavLinkItem href="/resources">Resources</NavLinkItem> */}
+					<NavLinkItem href="/resources">Resources</NavLinkItem>
 
-					{/* <NavLinkItem href="/schedule">Schedule</NavLinkItem> */}
+					<NavLinkItem href="/schedule">Schedule</NavLinkItem>
 
 					{/* <NavLinkItem
 						href="/incident"

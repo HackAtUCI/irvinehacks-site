@@ -13,7 +13,7 @@ export default function PrizeCard({
 	return (
 		<div className="relative flex items-center justify-center w-fit transition-transform duration-300 hover:scale-105">
 			<Image src={BackgroundImage} alt="Background" height={350} priority />
-			<div className="absolute inset-0 flex flex-col items-center justify-center text-center pt-4">
+			<div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 pt-4">
 				<h3 className="font-display text-xl md:text-3xl [text-shadow:0_0_10px_#00ffff]">
 					{title}
 				</h3>

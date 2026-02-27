@@ -8,6 +8,8 @@ import Walle from "@/assets/images/walle.png";
 import Roots from "@/assets/images/roots.png";
 import QualcommLogo from "@/assets/images/qualcomm_logo_white.png";
 import DroneImage from "@/assets/images/Drone.png";
+import OpennoteLogo from "@/assets/images/Opennote_full_light 1.png";
+import IpadImage from "@/assets/images/ipad.png";
 
 function PrizeTracks() {
 	return (
@@ -133,6 +135,70 @@ function SponsoredPrizeTracks() {
 							</p>
 						</div>
 					</PrizeCard>
+				</div>
+
+				<div className="flex flex-col items-center w-full mt-20">
+					<div className="relative h-32 mx-auto md:h-48">
+						<Image
+							src={OpennoteLogo}
+							alt="Opennote"
+							style={{ objectFit: "contain" }}
+						/>
+					</div>
+					<div className="flex flex-wrap items-center justify-center gap-10">
+						<PrizeCard title="Best UI/UX Hack (1st Place)">
+							<div className="flex items-center justify-center gap-4 md:gap-8 mt-2">
+								<div className="flex flex-col items-center">
+									<div className="relative w-24 h-32">
+										<Image
+											src={IpadImage}
+											alt="iPad"
+											fill
+											style={{ objectFit: "contain" }}
+										/>
+									</div>
+									<p className="font-display text-turquoise text-lg uppercase [text-shadow:0_0_8px_#00ffff]">
+										IPAD
+									</p>
+								</div>
+								<span className="font-display text-white text-4xl [text-shadow:0_0_10px_#ffffff]">
+									+
+								</span>
+								<div className="flex flex-col items-center gap-2">
+									<span className="font-display text-white text-5xl [text-shadow:0_0_15px_rgba(255,255,255,0.8)]">
+										$100
+									</span>
+									<p className="font-sans text-turquoise text-xs md:text-sm uppercase m-0 [text-shadow:0_0_8px_#00ffff]">
+										Worth of <br /> Opennote Merch
+									</p>
+								</div>
+							</div>
+						</PrizeCard>
+
+						<PrizeCard title="Best UI/UX Hack (2nd Place)">
+							<div className="flex items-center justify-center gap-6 my-8">
+								<div className="flex flex-col items-center gap-2">
+									<span className="font-display text-white text-5xl [text-shadow:0_0_15px_rgba(255,255,255,0.8)]">
+										$150
+									</span>
+									<p className="font-sans text-turquoise text-xs md:text-sm uppercase m-0 [text-shadow:0_0_8px_#00ffff]">
+										For Each <br /> Team Member
+									</p>
+								</div>
+								<span className="font-display text-white text-4xl [text-shadow:0_0_10px_#ffffff]">
+									+
+								</span>
+								<div className="flex flex-col items-center gap-2">
+									<span className="font-display text-white text-5xl [text-shadow:0_0_15px_rgba(255,255,255,0.8)]">
+										$50
+									</span>
+									<p className="font-sans text-turquoise text-xs md:text-sm uppercase m-0 [text-shadow:0_0_8px_#00ffff]">
+										Worth of <br /> Opennote Merch
+									</p>
+								</div>
+							</div>
+						</PrizeCard>
+					</div>
 				</div>
 			</div>
 		</div>

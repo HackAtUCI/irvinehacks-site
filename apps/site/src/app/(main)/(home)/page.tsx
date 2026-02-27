@@ -1,5 +1,6 @@
 import {
 	Landing,
+	Prizes,
 	ChooseCharacter,
 	FAQ,
 	Sponsors,
@@ -19,6 +20,7 @@ export default function Home() {
 	) : (
 		<>
 			<Landing />
+			<Prizes />
 			<ChooseCharacter />
 			<FAQ />
 			<Sponsors />

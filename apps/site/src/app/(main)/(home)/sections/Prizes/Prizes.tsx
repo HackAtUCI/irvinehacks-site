@@ -10,6 +10,7 @@ import QualcommLogo from "@/assets/images/qualcomm_logo_white.png";
 import DroneImage from "@/assets/images/Drone.png";
 import OpennoteLogo from "@/assets/images/Opennote_full_light 1.png";
 import IpadImage from "@/assets/images/ipad.png";
+import FirstAmericanLogo from "@/assets/images/FirstAmerican Logo White 1.png";
 
 function PrizeTracks() {
 	return (
@@ -104,7 +105,7 @@ function SponsoredPrizeTracks() {
 							style={{ objectFit: "contain" }}
 						/>
 					</div>
-					<PrizeCard title="Most Innovative Use of Arduino Uno Q Board">
+					<PrizeCard title="Most Innovative Use of Arduino UNO Q Board">
 						<div className="flex flex-col items-center">
 							<span className="font-display text-white text-6xl mt-6 [text-shadow:0_0_15px_rgba(255,255,255,0.8)]">
 								$250
@@ -138,7 +139,7 @@ function SponsoredPrizeTracks() {
 				</div>
 
 				<div className="flex flex-col items-center w-full mt-20">
-					<div className="relative h-32 mx-auto md:h-48">
+					<div className="relative mx-auto w-[350px] lg:w-[500px] mb-12">
 						<Image
 							src={OpennoteLogo}
 							alt="Opennote"
@@ -196,6 +197,62 @@ function SponsoredPrizeTracks() {
 										Worth of <br /> Opennote Merch
 									</p>
 								</div>
+							</div>
+						</PrizeCard>
+					</div>
+				</div>
+
+				<div className="flex flex-wrap items-center justify-center gap-10">
+					<div className="flex flex-col items-center">
+						<div className="relative w-80 h-32 my-4">
+							<Image
+								src={FirstAmericanLogo}
+								alt="First American"
+								fill
+								style={{ objectFit: "contain" }}
+							/>
+						</div>
+						<PrizeCard title="Best Use of AI in Real Estate">
+							<div className="flex flex-col items-center gap-2 px-2">
+								<div className="flex items-center justify-center gap-4 mt-2">
+									<span className="font-display text-white text-5xl [text-shadow:0_0_15px_rgba(255,255,255,0.8)]">
+										$150
+									</span>
+									<p className="font-sans text-turquoise text-xs uppercase m-0 text-left [text-shadow:0_0_8px_#00ffff]">
+										Worth of First <br /> American Merch
+									</p>
+								</div>
+								<span className="font-display text-white text-4xl [text-shadow:0_0_10px_#ffffff]">
+									+
+								</span>
+								<p className="font-sans text-white text-xs uppercase m-0 max-w-[280px] [text-shadow:0_0_10px_#ffffff]">
+									Guaranteed First Round Interviews for Summer &apos;26
+									Internships for Each Member
+								</p>
+							</div>
+						</PrizeCard>
+					</div>
+
+					<div className="flex flex-col items-center">
+						<span className="font-display text-white text-2xl uppercase tracking-widest my-16 [text-shadow:0_0_8px_#ffffff]">
+							AI Safety at UCI
+						</span>
+						<PrizeCard title="Best AI Safety Hack">
+							<div className="flex flex-col items-center gap-2 px-2">
+								<div className="flex items-center justify-center gap-4 mt-2">
+									<span className="font-display text-white text-5xl [text-shadow:0_0_15px_rgba(255,255,255,0.8)]">
+										$50
+									</span>
+									<p className="font-sans text-turquoise text-xs uppercase m-0 text-left [text-shadow:0_0_8px_#00ffff]">
+										Visa Gift Card <br /> for Each Member
+									</p>
+								</div>
+								<span className="font-display text-white text-4xl [text-shadow:0_0_10px_#ffffff]">
+									+
+								</span>
+								<p className="font-sans text-white text-xs uppercase m-0 [text-shadow:0_0_10px_#ffffff]">
+									Instant Admission to <br /> Tech Fellowship
+								</p>
 							</div>
 						</PrizeCard>
 					</div>

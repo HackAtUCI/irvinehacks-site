@@ -32,6 +32,26 @@ const statusOptions: SelectProps.Options = [
 	{ label: "Queued", value: Status.Queued },
 ];
 
+const pronounsOptions: SelectProps.Options = [
+	{ label: "All Pronouns", value: "" },
+	{ label: "He/him/his", value: "he" },
+	{ label: "She/her/hers", value: "she" },
+	{ label: "They/them/theirs", value: "they" },
+	{ label: "Other", value: "other" },
+];
+
+const ethnicityOptions: SelectProps.Options = [
+	{ label: "All Ethnicities", value: "" },
+	{ label: "American Indian or Alaskan", value: "American" },
+	{ label: "Asian or Pacific Islander", value: "Asian" },
+	{ label: "Black or African American", value: "Black" },
+	{ label: "Hispanic", value: "Hispanic" },
+	{ label: "White or Caucasian", value: "White" },
+	{ label: "Two or more races", value: "Two-or-more" },
+	{ label: "Prefer not to answer", value: "Prefer not to answer" },
+	{ label: "Other", value: "other" },
+];
+
 const categoryOptions: SelectProps.Options = [
 	{ label: "School", value: "school" },
 	{ label: "Major", value: "major" },
@@ -64,12 +84,18 @@ function ApplicantTable() {
 	);
 	const [selectedStatus, setSelectedStatus] =
 		useState<SelectProps.Option | null>(null);
+	const [selectedPronouns, setSelectedPronouns] =
+		useState<SelectProps.Option | null>(null);
+	const [selectedEthnicity, setSelectedEthnicity] =
+		useState<SelectProps.Option | null>(null);
 	const [selectedCategory, setSelectedCategory] =
 		useState<SelectProps.Option | null>(categoryOptions[0]);
 
 	const { table, loading } = useApplicantTable({
 		role: (selectedRole?.value as ParticipantRole) || null,
 		status: (selectedStatus?.value as Status) || null,
+		pronouns: selectedPronouns?.value || null,
+		ethnicity: selectedEthnicity?.value || null,
 		category: (selectedCategory?.value as GroupBy) || "school",
 	});
 
@@ -112,6 +138,22 @@ function ApplicantTable() {
 						}
 						options={categoryOptions}
 						placeholder="Group by"
+					/>
+					<Select
+						selectedOption={selectedPronouns}
+						onChange={({ detail }) =>
+							setSelectedPronouns(detail.selectedOption)
+						}
+						options={pronounsOptions}
+						placeholder="Filter by pronoun"
+					/>
+					<Select
+						selectedOption={selectedEthnicity}
+						onChange={({ detail }) =>
+							setSelectedEthnicity(detail.selectedOption)
+						}
+						options={ethnicityOptions}
+						placeholder="Filter by ethnicity"
 					/>
 				</SpaceBetween>
 				<Table

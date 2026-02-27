@@ -150,6 +150,8 @@ async def applicant_table(
     role: Optional[Role] = None,
     status: Optional[ApplicantStatus] = None,
     group_by: Literal["school", "major", "year"] = "school",
+    pronouns: Optional[str] = None,
+    ethnicity: Optional[str] = None,
 ) -> dict[str, int]:
     query: dict[str, object] = {"roles": Role.APPLICANT}
 
@@ -157,6 +159,10 @@ async def applicant_table(
         query["roles"] = {"$all": [Role.APPLICANT, role]}
     if status is not None:
         query["status"] = status.value
+    if pronouns is not None:
+        query["application_data.pronouns"] = pronouns
+    if ethnicity is not None:
+        query["application_data.ethnicity"] = ethnicity
 
     records = await mongodb_handler.retrieve(
         Collection.USERS,

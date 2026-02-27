@@ -305,6 +305,8 @@ async def applicant_table(
     group_by: Literal["school", "major", "year"],
     role: Optional[str] = None,
     status_filter: Optional[str] = None,
+    pronouns: Optional[str] = None,
+    ethnicity: Optional[str] = None,
 ) -> dict[str, int]:
     role_enum: Optional[Role] = None
     status_enum: Optional[ApplicantStatus] = None
@@ -330,7 +332,11 @@ async def applicant_table(
                 )
 
     return await summary_handler.applicant_table(
-        role=role_enum, status=status_enum, group_by=group_by
+        role=role_enum,
+        status=status_enum,
+        group_by=group_by,
+        pronouns=pronouns,
+        ethnicity=ethnicity,
     )
 
 

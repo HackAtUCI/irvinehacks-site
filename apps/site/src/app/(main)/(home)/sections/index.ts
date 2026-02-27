@@ -1,4 +1,5 @@
 export { default as Landing } from "./Landing/Landing";
+export { default as Prizes } from "./Prizes/Prizes";
 export { default as ChooseCharacter } from "./ChooseCharacter/ChooseCharacter";
 export { default as FAQ } from "./FAQ/FAQ";
 export { default as Sponsors } from "./Sponsors/Sponsors";

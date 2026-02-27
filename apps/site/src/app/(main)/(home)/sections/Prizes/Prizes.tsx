@@ -42,7 +42,7 @@ function PrizeTracks() {
 						/>
 					</div>
 					<p className="font-sans text-lg md:text-xl m-0 [text-shadow:0_0_8px_#00ffff]">
-						HIBOY S2 Pro Electric Scooter
+						HIBOY Electric Scooter
 					</p>
 				</PrizeCard>
 				<PrizeCard title="Hacker's Choice">
@@ -55,7 +55,7 @@ function PrizeTracks() {
 						/>
 					</div>
 					<p className="font-sans text-lg md:text-xl m-0 [text-shadow:0_0_8px_#00ffff]">
-						Bose QuietComfort SC Headphones
+						Bose QCSCNC Headphones
 					</p>
 				</PrizeCard>
 				<PrizeCard title="Best Beginner Hack">
@@ -225,7 +225,7 @@ function SponsoredPrizeTracks() {
 								<span className="font-display text-white text-4xl [text-shadow:0_0_10px_#ffffff]">
 									+
 								</span>
-								<p className="font-sans text-white text-xs uppercase m-0 max-w-[280px] [text-shadow:0_0_10px_#ffffff]">
+								<p className="font-sans text-white text-sm uppercase m-0 max-w-[280px] [text-shadow:0_0_10px_#ffffff]">
 									Guaranteed First Round Interviews for Summer &apos;26
 									Internships for Each Member
 								</p>
@@ -234,7 +234,7 @@ function SponsoredPrizeTracks() {
 					</div>
 
 					<div className="flex flex-col items-center">
-						<span className="font-display text-white text-2xl uppercase tracking-widest my-16 [text-shadow:0_0_8px_#ffffff]">
+						<span className="font-display text-white text-2xl uppercase tracking-widest my-8 lg:my-16 [text-shadow:0_0_8px_#ffffff]">
 							AI Safety at UCI
 						</span>
 						<PrizeCard title="Best AI Safety Hack">
@@ -250,7 +250,7 @@ function SponsoredPrizeTracks() {
 								<span className="font-display text-white text-4xl [text-shadow:0_0_10px_#ffffff]">
 									+
 								</span>
-								<p className="font-sans text-white text-xs uppercase m-0 [text-shadow:0_0_10px_#ffffff]">
+								<p className="font-sans text-white text-sm uppercase m-0 [text-shadow:0_0_10px_#ffffff]">
 									Instant Admission to <br /> Tech Fellowship
 								</p>
 							</div>

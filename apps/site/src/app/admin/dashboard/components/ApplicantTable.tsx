@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Box from "@cloudscape-design/components/box";
+import Button from "@cloudscape-design/components/button";
 import Container from "@cloudscape-design/components/container";
 import Select, { SelectProps } from "@cloudscape-design/components/select";
 import SpaceBetween from "@cloudscape-design/components/space-between";
@@ -91,6 +92,14 @@ function ApplicantTable() {
 	const [selectedCategory, setSelectedCategory] =
 		useState<SelectProps.Option | null>(categoryOptions[0]);
 
+	const clearFilters = () => {
+		setSelectedRole(null);
+		setSelectedStatus(null);
+		setSelectedPronouns(null);
+		setSelectedEthnicity(null);
+		setSelectedCategory(categoryOptions[0]);
+	};
+
 	const { table, loading } = useApplicantTable({
 		role: (selectedRole?.value as ParticipantRole) || null,
 		status: (selectedStatus?.value as Status) || null,
@@ -132,14 +141,6 @@ function ApplicantTable() {
 						placeholder="Filter by status"
 					/>
 					<Select
-						selectedOption={selectedCategory}
-						onChange={({ detail }) =>
-							setSelectedCategory(detail.selectedOption)
-						}
-						options={categoryOptions}
-						placeholder="Group by"
-					/>
-					<Select
 						selectedOption={selectedPronouns}
 						onChange={({ detail }) =>
 							setSelectedPronouns(detail.selectedOption)
@@ -155,6 +156,17 @@ function ApplicantTable() {
 						options={ethnicityOptions}
 						placeholder="Filter by ethnicity"
 					/>
+					<Select
+						selectedOption={selectedCategory}
+						onChange={({ detail }) =>
+							setSelectedCategory(detail.selectedOption)
+						}
+						options={categoryOptions}
+						placeholder="Group by"
+					/>
+					<div style={{ marginLeft: "auto" }}>
+						<Button onClick={clearFilters}>Clear filters</Button>
+					</div>
 				</SpaceBetween>
 				<Table
 					{...collectionProps}

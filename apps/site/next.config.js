@@ -37,7 +37,7 @@ const nextConfig = {
 			{
 				source: "/incident",
 				destination:
-					"https://docs.google.com/forms/d/e/1FAIpQLSf-Frl5wHNoBMs9_pBlaUFyw525N5HqtJaDdmooEssUSREggQ/viewform?usp=sharing",
+					"https://docs.google.com/forms/d/e/1FAIpQLSdBh0dpA15R1xe_GJA3j7swmqul5bxwnW63p5fwIQYETJ4eMg/viewform?usp=header",
 				permanent: true,
 			},
 			{

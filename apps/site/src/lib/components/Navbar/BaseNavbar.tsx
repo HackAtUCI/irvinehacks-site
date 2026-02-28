@@ -86,7 +86,7 @@ export default function BaseNavbar({ children }: PropsWithChildren) {
 
 					<NavLinkItem href="/schedule">Schedule</NavLinkItem>
 
-					{/* <NavLinkItem
+					<NavLinkItem
 						href="/incident"
 						target="_blank"
 						rel="noopener noreferrer"
@@ -94,15 +94,15 @@ export default function BaseNavbar({ children }: PropsWithChildren) {
 						Report Incident
 					</NavLinkItem>
 
-					<NavLinkItem
+					{/* <NavLinkItem
 						href="/devpost"
 						target="_blank"
 						rel="noopener noreferrer"
 					>
 						Devpost
-					</NavLinkItem>
+					</NavLinkItem> */}
 
-					<NavLinkItem
+					{/* <NavLinkItem
 						href="/feedback"
 						target="_blank"
 						rel="noopener noreferrer"

@@ -40,16 +40,22 @@ async def test_subevent_checkin_success(
     mock_retrieve_one: AsyncMock,
     mock_raw_update_one: AsyncMock,
 ) -> None:
-    """Subevent check-in succeeds when event exists and UID not already checked in."""
+    """Subevent check-in succeeds for a hacker when event exists and UID not already checked in."""
     event_id = "event1"
     uid = "user1"
+    user_doc = {"_id": uid, "roles": [Role.HACKER]}
+    event_doc = {"_id": event_id, "checkins": {}}
 
-    mock_retrieve_one.return_value = {"_id": event_id, "checkins": {}}
+    mock_retrieve_one.side_effect = [user_doc, event_doc]
     mock_raw_update_one.return_value = True
 
     await subevent_checkin(event_id, uid, USER_ASSOCIATE)
 
-    mock_retrieve_one.assert_awaited_once_with(
+    assert mock_retrieve_one.await_count == 2
+    mock_retrieve_one.assert_any_await(
+        Collection.USERS, {"_id": uid, "roles": {"$exists": True}}, ["roles"]
+    )
+    mock_retrieve_one.assert_any_await(
         Collection.EVENTS, {"_id": event_id}, ["checkins"]
     )
     mock_raw_update_one.assert_awaited_once()
@@ -62,9 +68,32 @@ async def test_subevent_checkin_success(
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_subevent_checkin_only_hackers(mock_retrieve_one: AsyncMock) -> None:
+    """Subevent check-in rejects non-hackers (e.g. mentor, volunteer)."""
+    mock_retrieve_one.return_value = {"_id": "mentor1", "roles": [Role.MENTOR]}
+    with pytest.raises(ValueError, match="only for hackers"):
+        await subevent_checkin("event1", "mentor1", USER_ASSOCIATE)
+
+    mock_retrieve_one.return_value = {"_id": "vol1", "roles": [Role.VOLUNTEER]}
+    with pytest.raises(ValueError, match="only for hackers"):
+        await subevent_checkin("event1", "vol1", USER_ASSOCIATE)
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_subevent_checkin_user_not_found(mock_retrieve_one: AsyncMock) -> None:
+    """Subevent check-in raises when user has no application record."""
+    mock_retrieve_one.return_value = None
+    with pytest.raises(ValueError, match="No application record found"):
+        await subevent_checkin("event1", "unknown", USER_ASSOCIATE)
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
 async def test_subevent_checkin_event_not_found(mock_retrieve_one: AsyncMock) -> None:
     """Subevent check-in raises when event does not exist."""
-    mock_retrieve_one.return_value = None
+    mock_retrieve_one.side_effect = [
+        {"_id": "user1", "roles": [Role.HACKER]},
+        None,
+    ]
     with pytest.raises(RuntimeError, match="Event event1 not found"):
         await subevent_checkin("event1", "user1", USER_ASSOCIATE)
 
@@ -74,10 +103,10 @@ async def test_subevent_checkin_already_checked_in(
     mock_retrieve_one: AsyncMock,
 ) -> None:
     """Subevent check-in raises AlreadyCheckedInError when UID already in checkins."""
-    mock_retrieve_one.return_value = {
-        "_id": "event1",
-        "checkins": {"user1": "2025-01-01T00:00:00Z"},
-    }
+    mock_retrieve_one.side_effect = [
+        {"_id": "user1", "roles": [Role.HACKER]},
+        {"_id": "event1", "checkins": {"user1": "2025-01-01T00:00:00Z"}},
+    ]
     with pytest.raises(AlreadyCheckedInError, match="already checked in"):
         await subevent_checkin("event1", "user1", USER_ASSOCIATE)
 

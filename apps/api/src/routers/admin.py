@@ -625,6 +625,8 @@ async def subevent_checkin(
         await participant_manager.subevent_checkin(event, uid, organizer)
     except AlreadyCheckedInError as e:
         raise HTTPException(status.HTTP_409_CONFLICT, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @router.post(

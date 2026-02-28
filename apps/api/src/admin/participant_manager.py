@@ -252,7 +252,18 @@ def _checkins_to_dict(raw: Any) -> dict[str, datetime]:
 
 
 async def subevent_checkin(event_id: str, uid: str, organizer: User) -> None:
-    """checkins as {uid: ISODate}"""
+    """Check in a hacker to a subevent. checkins as {uid: ISODate} & Hacker role only."""
+    user_doc: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": uid, "roles": {"$exists": True}}, ["roles"]
+    )
+    if not user_doc:
+        raise ValueError(f"No application record found for {uid}.")
+    roles = user_doc.get("roles")
+    if not isinstance(roles, list) or Role.HACKER not in roles:
+        raise ValueError(
+            f"Subevent check-in is only for hackers. {uid} does not have Hacker role."
+        )
+
     event_doc = await mongodb_handler.retrieve_one(
         Collection.EVENTS, {"_id": event_id}, ["checkins"]
     )

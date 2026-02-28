@@ -12,9 +12,11 @@ const fetcher = async (url: string) => {
 	return res.data;
 };
 
+const EVENTS_KEY = "/api/admin/events";
+
 function useEvents() {
-	const { data, error, isLoading } = useSWR<Event[]>(
-		"/api/admin/events",
+	const { data, error, isLoading, mutate } = useSWR<Event[]>(
+		EVENTS_KEY,
 		fetcher,
 	);
 
@@ -28,6 +30,9 @@ function useEvents() {
 				JSON.stringify(uid),
 				{ headers: { "Content-Type": "application/json" } },
 			);
+			if (res.status === 200) {
+				await mutate();
+			}
 			return res.status === 200;
 		} catch (err) {
 			const msg =

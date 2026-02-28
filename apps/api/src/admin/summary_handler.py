@@ -1,6 +1,6 @@
 from collections import Counter, defaultdict
 from datetime import date, datetime
-from typing import Iterable, Optional
+from typing import Any, Iterable, Literal, Optional, cast
 from zoneinfo import ZoneInfo
 
 from pydantic import BaseModel, TypeAdapter, ValidationError
@@ -118,4 +118,63 @@ def _count_applications_by_day(
         day = data.submission_time.astimezone(LOCAL_TIMEZONE).date()
         daily_applications[day] += 1
 
-    return daily_applications
+    return dict(daily_applications)
+
+
+def _get_table_value(app_data: Optional[dict[str, Any]], group_by: str) -> str:
+    if not app_data:
+        return "Unknown"
+    if group_by == "school":
+        return (app_data.get("school") or "Unknown").strip() or "Unknown"
+    if group_by == "major":
+        return (app_data.get("major") or "Unknown").strip() or "Unknown"
+    if group_by == "year":
+        val = (
+            app_data.get("education_level")
+            or app_data.get("school_year")
+            or (
+                str(app_data["graduation_year"])
+                if app_data.get("graduation_year") is not None
+                else None
+            )
+        )
+        return (
+            (val or "Unknown").strip()
+            if isinstance(val, str)
+            else (str(val) if val is not None else "Unknown")
+        )
+    return "Unknown"
+
+
+async def applicant_table(
+    role: Optional[Role] = None,
+    status: Optional[ApplicantStatus] = None,
+    group_by: Literal["school", "major", "year"] = "school",
+    pronouns: Optional[str] = None,
+    ethnicity: Optional[str] = None,
+) -> dict[str, int]:
+    query: dict[str, object] = {"roles": Role.APPLICANT}
+
+    if role is not None:
+        query["roles"] = {"$all": [Role.APPLICANT, role]}
+    if status is not None:
+        query["status"] = status.value
+    if pronouns is not None:
+        query["application_data.pronouns"] = pronouns
+    if ethnicity is not None:
+        query["application_data.ethnicity"] = ethnicity
+
+    records = await mongodb_handler.retrieve(
+        Collection.USERS,
+        query,
+        ["application_data"],
+    )
+    counts: dict[str, int] = defaultdict(int)
+    for rec in records:
+        raw = rec.get("application_data")
+        app_data: Optional[dict[str, Any]] = (
+            cast(dict[str, Any], raw) if isinstance(raw, dict) else None
+        )
+        key = _get_table_value(app_data, group_by)
+        counts[key] += 1
+    return dict(counts)

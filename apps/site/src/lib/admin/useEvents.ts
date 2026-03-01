@@ -12,11 +12,11 @@ const fetcher = async (url: string) => {
 	return res.data;
 };
 
-const EVENTS_KEY = "/api/admin/events";
+const EVENTS_ROUTE = "/api/admin/events";
 
 function useEvents() {
 	const { data, error, isLoading, mutate } = useSWR<Event[]>(
-		EVENTS_KEY,
+		EVENTS_ROUTE,
 		fetcher,
 	);
 

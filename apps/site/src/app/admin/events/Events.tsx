@@ -136,7 +136,7 @@ function Events() {
 				name: uidToName.get(uid) ?? uid,
 				uid,
 				date,
-		  }))
+			}))
 		: [];
 
 	const handleConfirmCheckin = async (participant: { _id: string }) => {

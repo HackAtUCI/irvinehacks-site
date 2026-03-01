@@ -15,6 +15,7 @@
 		"react/button-has-type": "error",
 		"react/no-danger": "warn",
 		"react/no-unstable-nested-components": "error",
-		"react/self-closing-comp": "warn"
+		"react/self-closing-comp": "warn",
+		"no-mixed-spaces-and-tabs": "off"
 	}
 }

@@ -2,12 +2,14 @@
 
 import { useCallback, useState } from "react";
 
+import Box from "@cloudscape-design/components/box";
 import ButtonDropdown, {
 	ButtonDropdownProps,
 } from "@cloudscape-design/components/button-dropdown";
 import ContentLayout from "@cloudscape-design/components/content-layout";
 import Select, { SelectProps } from "@cloudscape-design/components/select";
 import SpaceBetween from "@cloudscape-design/components/space-between";
+import Table from "@cloudscape-design/components/table";
 
 import useEvents, { type Event } from "@/lib/admin/useEvents";
 import useParticipants from "@/lib/admin/useParticipants";
@@ -124,6 +126,18 @@ function Events() {
 
 	const options = events.map(({ name, _id }) => ({ label: name, value: _id }));
 	const eventId = event?.value ?? null;
+	const selectedEvent = events.find((e) => e._id === eventId);
+
+	const uidToName = new Map(
+		(participants ?? []).map((p) => [p._id, `${p.first_name} ${p.last_name}`]),
+	);
+	const checkedInAttendees = selectedEvent
+		? getCheckinsSorted(selectedEvent.checkins).map(({ uid, date }) => ({
+				name: uidToName.get(uid) ?? uid,
+				uid,
+				date,
+		  }))
+		: [];
 
 	const handleConfirmCheckin = async (participant: { _id: string }) => {
 		if (!eventId) return false;
@@ -193,6 +207,36 @@ function Events() {
 						participants={participants ?? []}
 						onConfirm={handleConfirmCheckin}
 					/>
+				)}
+				{eventId && (
+					<SpaceBetween size="xs">
+						<Box variant="h3">Checked-in hackers</Box>
+						{checkedInAttendees.length === 0 ? (
+							<Box color="text-body-secondary">
+								No one checked in yet for this event.
+							</Box>
+						) : (
+							<Table
+								columnDefinitions={[
+									{
+										id: "name",
+										header: <span style={{ paddingLeft: "8px" }}>Name</span>,
+										// eslint-disable-next-line react/no-unstable-nested-components
+										cell: (item) => (
+											<span style={{ paddingLeft: "8px" }}>{item.name}</span>
+										),
+									},
+									{ id: "uid", header: "UID", cell: (item) => item.uid },
+								]}
+								items={checkedInAttendees}
+								empty={
+									<Box color="text-body-secondary">
+										No one checked in yet for this event.
+									</Box>
+								}
+							/>
+						)}
+					</SpaceBetween>
 				)}
 			</SpaceBetween>
 		</ContentLayout>

@@ -18,6 +18,7 @@ import MentorApplication from "@/app/admin/applicants/mentors/components/MentorA
 import VolunteerApplication from "@/app/admin/applicants/volunteers/components/VolunteerApplication";
 
 import ApplicantActions from "./ApplicantActions";
+import ApplicantNavigationButtons from "./ApplicantNavigationButtons";
 import ApplicantOverview from "./ApplicantOverview";
 import HackerApplicantActions from "./HackerApplicantActions";
 import { ParticipantRole } from "@/lib/userRecord";
@@ -92,13 +93,19 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 					description="Applicant"
 					actions={
 						applicant.roles.includes(ParticipantRole.Hacker) ? (
-							<HackerApplicantActions
-								applicant={applicant._id}
-								reviews={application_data.reviews}
-								scores={scores}
-								notes={notes}
-								onSubmitDetailedReview={handleSubmitDetailedReview}
-							/>
+							<SpaceBetween direction="horizontal" size="xs">
+								<ApplicantNavigationButtons
+									uid={uid}
+									basePath="/admin/applicants/hackers" // hardcoded for Irvinehacks (Applicant.tsx)
+								/>
+								<HackerApplicantActions
+									applicant={applicant._id}
+									reviews={application_data.reviews}
+									scores={scores}
+									notes={notes}
+									onSubmitDetailedReview={handleSubmitDetailedReview}
+								/>
+							</SpaceBetween>
 						) : (
 							<ApplicantActions
 								applicant={applicant._id}
@@ -150,13 +157,19 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 				}}
 			>
 				{applicant.roles.includes(ParticipantRole.Hacker) && (
-					<HackerApplicantActions
-						applicant={applicant._id}
-						reviews={application_data.reviews}
-						scores={scores}
-						notes={notes}
-						onSubmitDetailedReview={handleSubmitDetailedReview}
-					/>
+					<SpaceBetween direction="horizontal" size="xs">
+						<ApplicantNavigationButtons
+							uid={uid}
+							basePath="/admin/applicants/hackers" // hardcoded for Irvinehacks (Applicant.tsx)
+						/>
+						<HackerApplicantActions
+							applicant={applicant._id}
+							reviews={application_data.reviews}
+							scores={scores}
+							notes={notes}
+							onSubmitDetailedReview={handleSubmitDetailedReview}
+						/>
+					</SpaceBetween>
 				)}
 			</div>
 		</ContentLayout>

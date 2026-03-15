@@ -12,7 +12,7 @@ export default async function Hacker({
 }) {
 	return (
 		<ApplicationFlow
-			searchParams={searchParams}
+			prefaceAccepted={searchParams.prefaceAccepted}
 			applicationType="Hacker"
 			applicationURL="/apply"
 		>

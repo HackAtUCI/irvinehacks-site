@@ -24,7 +24,7 @@ async def trigger_http_error() -> None:
 
 
 @app.post("/trigger-validation-error")
-async def trigger_validation_error(item: Item) -> None:
+async def trigger_validation_error(item: Item):
     return item
 
 

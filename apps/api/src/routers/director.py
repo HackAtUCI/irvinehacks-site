@@ -98,7 +98,7 @@ async def _get_apply_reminder_email_recipients() -> Optional[dict[str, Any]]:
 
 @router.get("/organizers")
 async def organizers(
-    user: Annotated[User, Depends(require_director)]
+    user: Annotated[User, Depends(require_director)],
 ) -> list[OrganizerSummary]:
     """Get records of all organizers"""
     log.info("%s requested organizer", user)
@@ -236,7 +236,7 @@ async def apply_reminder(user: Annotated[User, Depends(require_director)]) -> No
 
 
 async def _rsvp_reminder(
-    application_type: Literal[Role.HACKER, Role.MENTOR, Role.VOLUNTEER]
+    application_type: Literal[Role.HACKER, Role.MENTOR, Role.VOLUNTEER],
 ) -> None:
     """Send email to applicants based on application_type who have a status of ACCEPTED
     or WAIVER_SIGNED reminding them to RSVP."""
@@ -338,6 +338,26 @@ async def set_hacker_score_thresholds(
             waitlist,
         )
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@router.post("/avg-score-setting", dependencies=[Depends(require_director)])
+async def toggle_avg_score_setting() -> dict[str, bool]:
+    """Toggle whether to show avg score with only 1 reviewer."""
+    record = await mongodb_handler.retrieve_one(
+        Collection.SETTINGS,
+        {"_id": "avg_score_setting"},
+        ["show_with_one_reviewer"],
+    )
+    current = bool(record and record.get("show_with_one_reviewer", False))
+    new_value = not current
+
+    await mongodb_handler.raw_update_one(
+        Collection.SETTINGS,
+        {"_id": "avg_score_setting"},
+        {"$set": {"show_with_one_reviewer": new_value}},
+        upsert=True,
+    )
+    return {"show_with_one_reviewer": new_value}
 
 
 @router.post("/release/mentor-volunteer", dependencies=[Depends(require_director)])

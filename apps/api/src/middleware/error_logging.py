@@ -1,5 +1,6 @@
 import logging
 
+from typing import cast
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -11,7 +12,8 @@ log = logging.getLogger(__name__)
 def register_exception_handlers(app: FastAPI) -> None:
     async def _validation_exception_handler(
         request: Request, exc: RequestValidationError
-    ) -> JSONResponse:
+    ) -> JSONResponse: 
+        exc = cast(RequestValidationError, exc)
         """
         Catches Pydantic validation errors and logs sanitized error to avoid
         leaking sensitive data like email addresses.
@@ -31,6 +33,7 @@ def register_exception_handlers(app: FastAPI) -> None:
     async def _http_exception_handler(
         request: Request, exc: HTTPException
     ) -> JSONResponse:
+        exc = cast(HTTPException, exc)
         """
         Raised explicitly by route code or for unmatched routes and logs
         error.

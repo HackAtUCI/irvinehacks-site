@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import Button from "@cloudscape-design/components/button";
 import SpaceBetween from "@cloudscape-design/components/space-between";
+import Popover from "@cloudscape-design/components/popover";
 
 import useHackerApplicants from "@/lib/admin/useHackerApplicants";
 
@@ -20,25 +21,30 @@ function ApplicantNavigationButtons({
 
 	if (loading || applicantList.length === 0) return null;
 
-	const currentApplicant = applicantList.find((a) => a._id === uid);
-	const isReviewed = (currentApplicant?.reviewers.length ?? 0) >= 2;
+	const currentIndex = applicantList.findIndex((a) => a._id === uid);
 
-	const pool = applicantList.filter((a) =>
-		isReviewed ? a.reviewers.length >= 2 : a.reviewers.length < 2,
-	);
+	const prevApplicant =
+		currentIndex > 0 ? applicantList[currentIndex - 1] : null;
 
-	const currentIndex = pool.findIndex((a) => a._id === uid);
-	const prevApplicant = currentIndex > 0 ? pool[currentIndex - 1] : null;
 	const nextApplicant =
-		currentIndex < pool.length - 1 ? pool[currentIndex + 1] : null;
+		currentIndex < applicantList.length - 1
+			? applicantList[currentIndex + 1]
+			: null;
 
-	const otherPool = applicantList.filter((a) =>
-		isReviewed ? a.reviewers.length < 2 : a.reviewers.length >= 2,
+	const unreviewedApplicants = applicantList.filter(
+		(a) => (a.reviewers?.length ?? 0) < 2,
 	);
-	const switchTarget = otherPool.length > 0 ? otherPool[0] : null;
-	const switchLabel = isReviewed
-		? "Switch to Needs Review"
-		: "Switch to Reviewed";
+
+	const nextUnreviewed =
+		applicantList
+			.slice(currentIndex + 1)
+			.find((a) => (a.reviewers?.length ?? 0) < 2) ?? unreviewedApplicants[0];
+
+	const allReviewed = unreviewedApplicants.length === 0;
+
+	const lastUnreviewed =
+		!allReviewed &&
+		unreviewedApplicants[unreviewedApplicants.length - 1]._id === uid;
 
 	return (
 		<SpaceBetween direction="horizontal" size="xs">
@@ -59,12 +65,12 @@ function ApplicantNavigationButtons({
 				Next
 			</Button>
 			<Button
-				disabled={!switchTarget}
+				disabled={allReviewed || lastUnreviewed}
 				onClick={() =>
-					switchTarget && router.push(`${basePath}/${switchTarget._id}`)
+					nextUnreviewed && router.push(`${basePath}/${nextUnreviewed._id}`)
 				}
 			>
-				{switchLabel}
+				Next Unreviewed
 			</Button>
 		</SpaceBetween>
 	);

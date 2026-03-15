@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import Button from "@cloudscape-design/components/button";
 import SpaceBetween from "@cloudscape-design/components/space-between";
-import Popover from "@cloudscape-design/components/popover";
 
 import useHackerApplicants from "@/lib/admin/useHackerApplicants";
 

@@ -1,6 +1,5 @@
 import logging
 
-from typing import cast
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -12,8 +11,7 @@ log = logging.getLogger(__name__)
 def register_exception_handlers(app: FastAPI) -> None:
     async def _validation_exception_handler(
         request: Request, exc: RequestValidationError
-    ) -> JSONResponse: 
-        exc = cast(RequestValidationError, exc)
+    ) -> JSONResponse:
         """
         Catches Pydantic validation errors and logs sanitized error to avoid
         leaking sensitive data like email addresses.
@@ -33,7 +31,6 @@ def register_exception_handlers(app: FastAPI) -> None:
     async def _http_exception_handler(
         request: Request, exc: HTTPException
     ) -> JSONResponse:
-        exc = cast(HTTPException, exc)
         """
         Raised explicitly by route code or for unmatched routes and logs
         error.
@@ -68,6 +65,6 @@ def register_exception_handlers(app: FastAPI) -> None:
             status_code=500, content={"detail": "Internal server error"}
         )
 
-    app.add_exception_handler(RequestValidationError, _validation_exception_handler)
-    app.add_exception_handler(HTTPException, _http_exception_handler)
+    app.add_exception_handler(RequestValidationError, _validation_exception_handler)  # type: ignore[arg-type]
+    app.add_exception_handler(HTTPException, _http_exception_handler)  # type: ignore[arg-type]
     app.add_exception_handler(Exception, _unhandled_exception_handler)

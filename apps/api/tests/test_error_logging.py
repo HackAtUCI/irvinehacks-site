@@ -16,19 +16,20 @@ register_exception_handlers(app)
 class Item(BaseModel):
     name: str
 
+
 # Mock routes to trigger each of the 3 errors
 @app.get("/trigger-http-error")
-async def trigger_http_error():
+async def trigger_http_error() -> None:
     raise HTTPException(status_code=403, detail="Forbidden")
 
 
 @app.post("/trigger-validation-error")
-async def trigger_validation_error(item: Item):
+async def trigger_validation_error(item: Item) -> None:
     return item
 
 
 @app.get("/trigger-unhandled-error")
-async def trigger_unhandled_error():
+async def trigger_unhandled_error() -> None:
     raise RuntimeError("Something broke")
 
 

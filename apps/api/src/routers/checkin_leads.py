@@ -88,7 +88,7 @@ async def queue_removal() -> None:
 )
 async def queue_participants() -> None:
     """Remove QUEUED participants from queue and send new QUEUED
-      participants an email notification."""
+    participants an email notification."""
 
     await queue_removal()
 

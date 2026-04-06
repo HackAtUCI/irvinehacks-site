@@ -87,7 +87,8 @@ async def queue_removal() -> None:
     dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
 )
 async def queue_participants() -> None:
-    """Remove QUEUED participants from queue and send them email notification."""
+    """Remove QUEUED participants from queue and send new QUEUED
+    participants an email notification."""
 
     await queue_removal()
 
@@ -216,6 +217,7 @@ async def close_walkins() -> None:
         {
             "roles": Role.HACKER,
             "decision": {"$in": [Decision.WAITLISTED]},
+            "status": {"$ne": Status.ATTENDING},
         },
         ["_id", "first_name"],
     )

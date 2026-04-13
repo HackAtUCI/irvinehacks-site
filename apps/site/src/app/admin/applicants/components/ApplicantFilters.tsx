@@ -80,16 +80,20 @@ function ApplicantFilters({
 
 	let reviewerOptions: Options = [];
 	if (!loading && applicantList.length > 0) {
-		const reviewerIdsSet = new Set(
-			applicantList.flatMap((applicant) => applicant.reviewers || []),
+		const reviewerCountMap = new Map<string, number>();
+		
+		for (const applicant of applicantList) {
+			for (const id of applicant.reviewers || []) {
+				reviewerCountMap.set(id, (reviewerCountMap.get(id) ?? 0) + 1);
+			}
+		}
+
+		reviewerOptions = Array.from(reviewerCountMap.entries()).map(
+			([id, count]) => ({
+				label: `${id.split(".")[2]} - ${count} application${count === 1 ? "" : "s"} reviewed`,
+				value: id,
+			}),
 		);
-
-		const reviewerIds = Array.from(reviewerIdsSet);
-
-		reviewerOptions = reviewerIds.map((id) => ({
-			label: id.split(".")[2],
-			value: id,
-		}));
 	}
 
 	return (

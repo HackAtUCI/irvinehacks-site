@@ -81,7 +81,7 @@ function ApplicantFilters({
 	let reviewerOptions: Options = [];
 	if (!loading && applicantList.length > 0) {
 		const reviewerCountMap = new Map<string, number>();
-		
+
 		for (const applicant of applicantList) {
 			for (const id of applicant.reviewers || []) {
 				reviewerCountMap.set(id, (reviewerCountMap.get(id) ?? 0) + 1);
@@ -90,7 +90,9 @@ function ApplicantFilters({
 
 		reviewerOptions = Array.from(reviewerCountMap.entries()).map(
 			([id, count]) => ({
-				label: `${id.split(".")[2]} - ${count} application${count === 1 ? "" : "s"} reviewed`,
+				label: `${id.split(".")[2]} - ${count} application${
+					count === 1 ? "" : "s"
+				} reviewed`,
 				value: id,
 			}),
 		);

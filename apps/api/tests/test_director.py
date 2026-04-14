@@ -6,7 +6,7 @@ from fastapi import FastAPI
 
 from auth.user_identity import NativeUser, UserTestClient
 from models.ApplicationData import Decision
-from models.user_record import Role
+from models.user_record import Role, Status
 from routers import director
 from services.mongodb_handler import Collection
 from services.sendgrid_handler import Template
@@ -269,3 +269,51 @@ def test_release_hacker_decisions_works(
 
     assert res.status_code == 200
     assert returned_records[0]["decision"] == Decision.ACCEPTED
+
+
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_void_applicant_success(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_update_one: AsyncMock,
+) -> None:
+    """Test that a director can void an applicant."""
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        {"status": "REVIEWED"},
+    ]
+    mock_mongodb_handler_update_one.return_value = True
+
+    res = director_client.post("/void", json={"uid": "edu.uci.petr"})
+
+    assert res.status_code == 200
+    mock_mongodb_handler_update_one.assert_awaited_once_with(
+        Collection.USERS, {"_id": "edu.uci.petr"}, {"status": Status.VOID}
+    )
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_void_applicant_not_found(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test that voiding a nonexistent applicant returns 404."""
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        None,
+    ]
+
+    res = director_client.post("/void", json={"uid": "edu.uci.nobody"})
+
+    assert res.status_code == 404
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_void_applicant_forbidden_for_non_director(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test that a non-director cannot void an applicant."""
+    mock_mongodb_handler_retrieve_one.return_value = HACKER_REVIEWER_IDENTITY
+
+    res = reviewer_client.post("/void", json={"uid": "edu.uci.petr"})
+
+    assert res.status_code == 403

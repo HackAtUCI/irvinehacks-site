@@ -313,6 +313,7 @@ async def _apply_flow(
         roles=(Role.APPLICANT, Role(application_type)),
         application_data=processed_application_data,
         status=Status.PENDING_REVIEW,
+        is_voided=False,
     )
 
     # add applicant to database

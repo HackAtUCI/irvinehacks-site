@@ -280,7 +280,7 @@ def test_void_applicant_success(
     """Test that a director can void an applicant."""
     mock_mongodb_handler_retrieve_one.side_effect = [
         DIRECTOR_IDENTITY,
-        {"status": "REVIEWED"},
+        {"is_voided": False},
     ]
     mock_mongodb_handler_update_one.return_value = True
 
@@ -288,7 +288,7 @@ def test_void_applicant_success(
 
     assert res.status_code == 200
     mock_mongodb_handler_update_one.assert_awaited_once_with(
-        Collection.USERS, {"_id": "edu.uci.petr"}, {"status": Status.VOID}
+        Collection.USERS, {"_id": "edu.uci.petr"}, {"is_voided": True}
     )
 
 
@@ -315,5 +315,68 @@ def test_void_applicant_forbidden_for_non_director(
     mock_mongodb_handler_retrieve_one.return_value = HACKER_REVIEWER_IDENTITY
 
     res = reviewer_client.post("/void", json={"uid": "edu.uci.petr"})
+
+    assert res.status_code == 403
+
+
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_unvoid_applicant_success(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_update_one: AsyncMock,
+) -> None:
+    """Test that a director can unvoid an applicant."""
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        {"is_voided": True},
+    ]
+    mock_mongodb_handler_update_one.return_value = True
+
+    res = director_client.post("/unvoid", json={"uid": "edu.uci.petr"})
+
+    assert res.status_code == 200
+    mock_mongodb_handler_update_one.assert_awaited_once_with(
+        Collection.USERS, {"_id": "edu.uci.petr"}, {"is_voided": False}
+    )
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_unvoid_applicant_not_found(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test that unvoiding a nonexistent applicant returns 404."""
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        None,
+    ]
+
+    res = director_client.post("/unvoid", json={"uid": "edu.uci.nobody"})
+
+    assert res.status_code == 404
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_unvoid_applicant_not_voided(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test that unvoiding a non-voided applicant returns 400."""
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        {"is_voided": False},
+    ]
+
+    res = director_client.post("/unvoid", json={"uid": "edu.uci.petr"})
+
+    assert res.status_code == 400
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_unvoid_applicant_forbidden_for_non_director(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test that a non-director cannot unvoid an applicant."""
+    mock_mongodb_handler_retrieve_one.return_value = HACKER_REVIEWER_IDENTITY
+
+    res = reviewer_client.post("/unvoid", json={"uid": "edu.uci.petr"})
 
     assert res.status_code == 403

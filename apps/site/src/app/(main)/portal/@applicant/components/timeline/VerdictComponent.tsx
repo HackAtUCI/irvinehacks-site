@@ -19,8 +19,7 @@ export const VerdictComponent = ({ status }: { status: Status }) => {
 			};
 			break;
 		}
-		case Status.Rejected:
-		case Status.Void: {
+		case Status.Rejected: {
 			verdict = {
 				text: "Application Rejected",
 				statusIcon: "Rejected",

@@ -51,6 +51,7 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 		submitDetailedReview,
 		deleteNotes,
 		voidApplicant,
+		unvoidApplicant,
 	} = useApplicant(uid, applicationType);
 	const [scores, setScores] = useState<ScoredFields>({});
 	const [notes, setNotes] = useState("");
@@ -110,20 +111,30 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 									notes={notes}
 									onSubmitDetailedReview={handleSubmitDetailedReview}
 								/>
-								{isDirector(roles) && (
-									<Button
-										onClick={() => voidApplicant(applicant._id)}
-										iconName="status-stopped"
-									>
-										Void
-									</Button>
-								)}
+								{isDirector(roles) &&
+									(applicant.is_voided ? (
+										<Button
+											onClick={() => unvoidApplicant(applicant._id)}
+											iconName="status-pending"
+										>
+											Unvoid
+										</Button>
+									) : (
+										<Button
+											onClick={() => voidApplicant(applicant._id)}
+											iconName="status-stopped"
+										>
+											Void
+										</Button>
+									))}
 							</SpaceBetween>
 						) : (
 							<ApplicantActions
 								applicant={applicant._id}
 								submitReview={submitReview}
 								voidApplicant={voidApplicant}
+								unvoidApplicant={unvoidApplicant}
+								isVoided={applicant.is_voided}
 							/>
 						)
 					}
@@ -183,14 +194,22 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 							notes={notes}
 							onSubmitDetailedReview={handleSubmitDetailedReview}
 						/>
-						{isDirector(roles) && (
-							<Button
-								onClick={() => voidApplicant(applicant._id)}
-								iconName="status-stopped"
-							>
-								Void
-							</Button>
-						)}
+						{isDirector(roles) &&
+							(applicant.is_voided ? (
+								<Button
+									onClick={() => unvoidApplicant(applicant._id)}
+									iconName="status-pending"
+								>
+									Unvoid
+								</Button>
+							) : (
+								<Button
+									onClick={() => voidApplicant(applicant._id)}
+									iconName="status-stopped"
+								>
+									Void
+								</Button>
+							))}
 					</SpaceBetween>
 				)}
 			</div>

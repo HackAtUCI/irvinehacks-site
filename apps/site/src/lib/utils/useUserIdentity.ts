@@ -7,6 +7,7 @@ export interface Identity {
 	uid: Uid | null;
 	roles: ReadonlyArray<Role>;
 	status: string | null;
+	is_voided?: boolean;
 	decision?: Decision;
 }
 

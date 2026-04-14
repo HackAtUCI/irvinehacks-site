@@ -31,7 +31,6 @@ const statusOptions: SelectProps.Options = [
 	{ label: "Confirmed", value: Status.Confirmed },
 	{ label: "Attending", value: Status.Attending },
 	{ label: "Queued", value: Status.Queued },
-	{ label: "Void", value: Status.Void },
 ];
 
 const pronounsOptions: SelectProps.Options = [

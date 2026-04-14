@@ -5,7 +5,7 @@ import ButtonDropdown, {
 } from "@cloudscape-design/components/button-dropdown";
 
 import { isDirector, isReviewer } from "@/lib/admin/authorization";
-import { submitReview, voidApplicant } from "@/lib/admin/useApplicant";
+import { submitReview, voidApplicant, unvoidApplicant } from "@/lib/admin/useApplicant";
 import UserContext from "@/lib/admin/UserContext";
 import { Decision, Uid } from "@/lib/userRecord";
 import { decisionsToScores } from "@/lib/decisionScores";
@@ -14,10 +14,12 @@ interface ApplicantActionsProps {
 	applicant: Uid;
 	submitReview: submitReview;
 	voidApplicant: voidApplicant;
+	unvoidApplicant: unvoidApplicant;
+	isVoided?: boolean;
 }
 
 interface ReviewButtonItem extends ButtonDropdownProps.Item {
-	id: Decision | "VOID";
+	id: Decision | "VOID" | "UNVOID";
 }
 
 type ReviewButtonItems = ReviewButtonItem[];
@@ -26,6 +28,8 @@ function ApplicantActions({
 	applicant,
 	submitReview,
 	voidApplicant,
+	unvoidApplicant,
+	isVoided,
 }: ApplicantActionsProps) {
 	const { roles } = useContext(UserContext);
 
@@ -38,6 +42,10 @@ function ApplicantActions({
 	) => {
 		if (event.detail.id === "VOID") {
 			voidApplicant(applicant);
+			return;
+		}
+		if (event.detail.id === "UNVOID") {
+			unvoidApplicant(applicant);
 			return;
 		}
 		const review = event.detail.id as Decision;
@@ -66,12 +74,21 @@ function ApplicantActions({
 	];
 
 	if (isDirector(roles)) {
-		dropdownItems.push({
-			text: "Void",
-			id: "VOID",
-			iconName: "status-stopped",
-			description: "Void the applicant — no longer under consideration",
-		});
+		if (isVoided) {
+			dropdownItems.push({
+				text: "Unvoid",
+				id: "UNVOID",
+				iconName: "status-pending",
+				description: "Unvoid the applicant — return to review queue",
+			});
+		} else {
+			dropdownItems.push({
+				text: "Void",
+				id: "VOID",
+				iconName: "status-stopped",
+				description: "Void the applicant — no longer under consideration",
+			});
+		}
 	}
 
 	return (

@@ -167,6 +167,7 @@ export interface Applicant {
 	last_name: string;
 	roles: ReadonlyArray<ParticipantRole>;
 	status: Status;
+	is_voided?: boolean;
 	application_data: ApplicationData;
 }
 
@@ -221,6 +222,11 @@ function useApplicant(
 		mutate();
 	}
 
+	async function unvoidApplicant(uid: Uid) {
+		await axios.post("/api/director/unvoid", { uid });
+		mutate();
+	}
+
 	return {
 		applicant: data,
 		loading: isLoading,
@@ -229,6 +235,7 @@ function useApplicant(
 		submitDetailedReview,
 		deleteNotes,
 		voidApplicant,
+		unvoidApplicant,
 	};
 
 	async function deleteNotes(uid: Uid, reviewIndex: number) {
@@ -255,5 +262,6 @@ export type submitDetailedReview = (
 ) => Promise<void>;
 export type deleteNotes = (uid: Uid, reviewIndex: number) => Promise<void>;
 export type voidApplicant = (uid: Uid) => Promise<void>;
+export type unvoidApplicant = (uid: Uid) => Promise<void>;
 
 export default useApplicant;

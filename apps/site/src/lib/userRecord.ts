@@ -55,7 +55,6 @@ export enum PostAcceptedStatus {
 	Confirmed = "CONFIRMED",
 	Attending = "ATTENDING",
 	Queued = "QUEUED",
-	Void = "VOID",
 }
 
 /** All of the different possible status values. */

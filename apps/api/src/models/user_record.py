@@ -41,7 +41,6 @@ class Status(str, Enum):
     ATTENDING = "ATTENDING"
     WAITLISTED = "WAITLISTED"
     QUEUED = "QUEUED"
-    VOID = "VOID"
 
 
 class UserRecord(BaseRecord):
@@ -81,6 +80,7 @@ class BareApplicant(UserRecord):
 
     roles: RoleWithApplicant
     status: ApplicantStatus
+    is_voided: bool = False
     decision: Optional[Decision] = None
 
 

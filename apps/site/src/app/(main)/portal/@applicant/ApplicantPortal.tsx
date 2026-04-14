@@ -45,7 +45,7 @@ function Portal() {
 	const needsToSignWaiver = isAccepted || (isWaitlisted && waitlistStarted);
 	const needsToRSVP = isAccepted || (isWaitlisted && waitlistOpen);
 
-	const rejected = status === Status.Rejected || status === Status.Void;
+	const rejected = status === Status.Rejected || identity?.is_voided;
 
 	return (
 		<div className="relative">

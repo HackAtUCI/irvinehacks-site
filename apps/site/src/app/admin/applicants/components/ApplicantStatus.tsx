@@ -14,6 +14,7 @@ export const StatusLabels = {
 	[Status.Confirmed]: "confirmed",
 	[Status.Attending]: "attending",
 	[Status.Queued]: "queued",
+	[Status.Void]: "void",
 };
 
 const StatusTypes: Record<Status, StatusIndicatorProps.Type> = {
@@ -26,6 +27,7 @@ const StatusTypes: Record<Status, StatusIndicatorProps.Type> = {
 	[Status.Confirmed]: "info",
 	[Status.Attending]: "success",
 	[Status.Queued]: "pending",
+	[Status.Void]: "stopped",
 };
 
 interface ApplicantStatusProps {

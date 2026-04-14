@@ -216,6 +216,11 @@ function useApplicant(
 		mutate();
 	}
 
+	async function voidApplicant(uid: Uid) {
+		await axios.post("/api/director/void", { uid });
+		mutate();
+	}
+
 	return {
 		applicant: data,
 		loading: isLoading,
@@ -223,6 +228,7 @@ function useApplicant(
 		submitReview,
 		submitDetailedReview,
 		deleteNotes,
+		voidApplicant,
 	};
 
 	async function deleteNotes(uid: Uid, reviewIndex: number) {
@@ -248,5 +254,6 @@ export type submitDetailedReview = (
 	notes?: string | null,
 ) => Promise<void>;
 export type deleteNotes = (uid: Uid, reviewIndex: number) => Promise<void>;
+export type voidApplicant = (uid: Uid) => Promise<void>;
 
 export default useApplicant;

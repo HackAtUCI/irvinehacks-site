@@ -78,6 +78,7 @@ function Message({ status, decision }: MessageProps) {
 	} else {
 		switch (status) {
 			case Status.Rejected:
+			case Status.Void:
 			case Status.Accepted:
 			case Status.Signed:
 			case Status.Attending:

@@ -13,8 +13,10 @@ from routers.admin import (
     _handle_detailed_scores_review,
     _handle_global_only_review,
     delete_notes,
+    submit_detailed_review,
     GlobalScores,
     DeleteNotesRequest,
+    DetailedReviewRequest,
     ZotHacksHackerDetailedScores,
 )
 from services.mongodb_handler import Collection
@@ -818,3 +820,57 @@ async def test_delete_reviewer_notes_success(
             "$set": {f"application_data.reviews.0.{notes_field_index}": None},
         },
     )
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_submit_review_voided_applicant_fails(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+    """Test that a reviewer cannot submit a review for a voided applicant."""
+    post_data = {"applicant": "edu.uci.sydnee", "score": 0}
+
+    returned_record: dict[str, Any] = {
+        "_id": "edu.uci.sydnee",
+        "roles": ["Applicant", "Mentor"],
+        "application_data": {
+            "reviews": [],
+        },
+        "is_voided": True,
+    }
+
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        HACKER_REVIEWER_IDENTITY,
+        returned_record,
+    ]
+
+    res = reviewer_client.post("/review", json=post_data)
+
+    assert res.status_code == 400
+    mock_mongodb_handler_raw_update_one.assert_not_awaited()
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+@pytest.mark.asyncio
+async def test_submit_detailed_review_voided_applicant_fails(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test that a reviewer cannot submit a detailed review for a voided applicant."""
+    applicant_record: dict[str, Any] = {
+        "_id": "edu.uci.test",
+        "is_voided": True,
+    }
+
+    mock_mongodb_handler_retrieve_one.return_value = applicant_record
+
+    review_request = DetailedReviewRequest(
+        applicant="edu.uci.test",
+        scores=GlobalScores(resume=8, hackathon_experience=10),
+    )
+
+    with pytest.raises(HTTPException) as exc_info:
+        await submit_detailed_review(review_request, USER_REVIEWER)
+
+    assert exc_info.value.status_code == 400
+    assert exc_info.value.detail == "Application is voided"

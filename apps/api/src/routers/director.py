@@ -360,6 +360,27 @@ async def toggle_avg_score_setting() -> dict[str, bool]:
     return {"show_with_one_reviewer": new_value}
 
 
+@router.post("/void")
+async def void_applicant(
+    user: Annotated[User, Depends(require_director)],
+    uid: str = Body(embed=True),
+) -> None:
+    """Set an applicant's status to VOID."""
+    record = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": uid, "roles": {"$exists": True}}, ["status"]
+    )
+    if not record:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Applicant not found.")
+
+    ok = await mongodb_handler.update_one(
+        Collection.USERS, {"_id": uid}, {"status": Status.VOID}
+    )
+    if not ok:
+        raise RuntimeError(f"Could not update status to VOID for {uid}.")
+
+    log.info(f"Applicant {uid} voided by {user.uid}")
+
+
 @router.post("/release/mentor-volunteer", dependencies=[Depends(require_director)])
 async def release_mentor_volunteer_decisions() -> None:
     """Update applicant status based on decision and send decision emails."""

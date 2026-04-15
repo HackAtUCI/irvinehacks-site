@@ -103,6 +103,7 @@ class HackerApplicantSummary(BaseRecord):
     last_name: str
     status: str
     decision: Optional[Decision] = None
+    is_voided: bool = False
     reviewers: list[str] = []
     resume_reviewed: bool = False
     avg_score: float
@@ -218,6 +219,7 @@ async def hacker_applicants(
             "status",
             "first_name",
             "last_name",
+            "is_voided",
             "application_data",
         ],
         sort=[("application_data.submission_time", DESCENDING)],

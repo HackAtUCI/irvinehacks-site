@@ -47,36 +47,40 @@ function Portal() {
 
 	const rejected = status === Status.Rejected || identity?.is_voided;
 
+	console.log("rejected: ", rejected)
+
 	return (
 		<div className="relative">
 			<div className="bg-transparent text-black max-w-6xl rounded-2xl p-6 flex flex-col mb-24 w-full">
-				<div className="mb-12">
-					<QRCodeComponent className="max-w-xs mx-auto" size={180} />
-					<p className="mt-4 text-white text-center">
-						If selected to attend, please show this QR code to our staff to
-						check-in.
-					</p>
-				</div>
+				{!rejected && (
+					<div className="mb-12">
+						<QRCodeComponent className="max-w-xs mx-auto" size={180} />
+						<p className="mt-4 text-white text-center">
+							If selected to attend, please show this QR code to our staff to
+							check-in.
+						</p>
+					</div>
+				)}
 
 				<h2 className="font-bold font-display text-[var(--color-white)] mb-4 md:mb-[42px] text-[15px] sm:text-2xl md:text-[40px] md:leading-10">
 					{roleToDisplay} Application Status
 				</h2>
 				<AvatarDisplay />
 				<VerticalTimeline
-					status={identity?.decision ? identity?.decision : (status as Status)}
+					status={rejected ? Status.Rejected : (identity?.decision ? identity?.decision : (status as Status))}
 				/>
 				<Message
-					status={status as Status}
-					decision={identity?.decision as Decision}
+					status={rejected ? Status.Rejected : (status as Status)}
+					decision={rejected ? Decision.Rejected : (identity?.decision as Decision)}
 				/>
-				{needsToSignWaiver && (
+				{!rejected && needsToSignWaiver && (
 					<SignWaiver
 						status={status as Status}
 						decision={identity?.decision as Decision}
 						waitlistOpen={waitlistOpen}
 					/>
 				)}
-				{needsToRSVP && <ConfirmAttendance status={status as Status} />}
+				{!rejected && needsToRSVP && <ConfirmAttendance status={status as Status} />}
 				{rejected && <ReturnHome />}
 			</div>
 		</div>

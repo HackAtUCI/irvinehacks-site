@@ -58,6 +58,7 @@ class IdentityResponse(BaseModel):
     status: Union[str, None] = None
     decision: Union[str, None] = None
     roles: list[Role] = []
+    is_voided: bool = False
 
 
 class CharacterIndexes(BaseModel):
@@ -134,7 +135,7 @@ async def me(
     if not user:
         return IdentityResponse()
     user_record = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": user.uid}, ["roles", "status", "decision"]
+        Collection.USERS, {"_id": user.uid}, ["roles", "status", "decision", "is_voided"]
     )
 
     if not user_record:

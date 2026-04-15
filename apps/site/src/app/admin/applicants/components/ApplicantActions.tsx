@@ -5,7 +5,11 @@ import ButtonDropdown, {
 } from "@cloudscape-design/components/button-dropdown";
 
 import { isDirector, isReviewer } from "@/lib/admin/authorization";
-import { submitReview, voidApplicant, unvoidApplicant } from "@/lib/admin/useApplicant";
+import {
+	submitReview,
+	voidApplicant,
+	unvoidApplicant,
+} from "@/lib/admin/useApplicant";
 import UserContext from "@/lib/admin/UserContext";
 import { Decision, Uid } from "@/lib/userRecord";
 import { decisionsToScores } from "@/lib/decisionScores";

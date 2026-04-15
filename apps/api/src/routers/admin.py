@@ -87,6 +87,7 @@ class SimplifiedApplicantSummary(BaseRecord):
     first_name: str
     last_name: str
     status: str
+    is_voided: bool = False
     application_data: SimplifiedApplicationDataSummary
 
 
@@ -169,6 +170,7 @@ async def mentor_volunteer_applicants(
             "status",
             "first_name",
             "last_name",
+            "is_voided",
             "application_data.school",
             "application_data.submission_time",
             "application_data.reviews",

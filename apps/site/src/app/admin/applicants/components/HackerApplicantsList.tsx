@@ -55,9 +55,15 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 
 	const { applicantList, loading } = useHackerApplicants();
 
-	const selectedStatusValues = selectedStatuses.map(({ value }) => value);
-	const selectedDecisionValues = selectedDecisions.map(({ value }) => value);
-	const uciNetIDFilterValues = uciNetIDFilter.map(({ value }) => value);
+	const selectedStatusValues = new Set(
+		selectedStatuses.map(({ value }) => value),
+	);
+	const selectedDecisionValues = new Set(
+		selectedDecisions.map(({ value }) => value),
+	);
+	const uciNetIDFilterValues = new Set(
+		uciNetIDFilter.map(({ value }) => value),
+	);
 
 	const [acceptedCount, setAcceptedCount] = useState(0);
 	const [waitlistedCount, setWaitlistedCount] = useState(0);
@@ -79,25 +85,27 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		}
 	}, [top400]);
 
+	const voidedSelected = selectedDecisionValues.has("VOIDED");
+	const nonVoidedDecisions = new Set(
+		[...selectedDecisionValues].filter((v) => v !== "VOIDED"),
+	);
+
 	const filteredApplicants = applicantList.filter((applicant) => {
 		if (
-			selectedStatusValues.includes(Status.Pending) &&
+			selectedStatusValues.has(Status.Pending) &&
 			applicant.avg_score === OVERQUALIFIED_SCORE
 		)
 			return false;
 
 		if (
-			selectedStatusValues.length !== 0 &&
-			((selectedStatusValues.includes("RESUME_REVIEWED") &&
+			selectedStatusValues.size !== 0 &&
+			((selectedStatusValues.has("RESUME_REVIEWED") &&
 				applicant.resume_reviewed) ||
-				(selectedStatusValues.includes("RESUME_NOT_REVIEWED") &&
+				(selectedStatusValues.has("RESUME_NOT_REVIEWED") &&
 					!applicant.resume_reviewed))
 		) {
 			return true;
 		}
-
-		const voidedSelected = selectedDecisionValues.includes("VOIDED");
-		const nonVoidedDecisions = selectedDecisionValues.filter(v => v !== "VOIDED");
 
 		let matchesDecision: boolean;
 		if (selectedDecisions.length === 0) {
@@ -109,17 +117,17 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		} else {
 			// Non-voided applicants match against their actual decision
 			matchesDecision =
-				nonVoidedDecisions.length > 0 &&
-				nonVoidedDecisions.includes(applicant.decision || "-");
+				nonVoidedDecisions.size > 0 &&
+				nonVoidedDecisions.has(applicant.decision || "-");
 		}
 
 		return (
 			(selectedStatuses.length === 0 ||
-				selectedStatusValues.includes(applicant.status)) &&
+				selectedStatusValues.has(applicant.status)) &&
 			matchesDecision &&
 			(uciNetIDFilter.length === 0 ||
 				applicant.reviewers.some((reviewer) =>
-					uciNetIDFilterValues.includes(reviewer),
+					uciNetIDFilterValues.has(reviewer),
 				))
 		);
 	});

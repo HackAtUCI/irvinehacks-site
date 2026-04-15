@@ -62,7 +62,7 @@ const RESUME_REVIEW_OPTIONS: Options = [
 ];
 
 const VOIDED_OPTION: MultiselectProps.Option = {
-	label: "Voided",
+	label: "voided",
 	value: "VOIDED",
 	iconName: "status-stopped",
 };

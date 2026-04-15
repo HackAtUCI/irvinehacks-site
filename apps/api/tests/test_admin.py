@@ -472,6 +472,7 @@ def test_hacker_applicants_returns_correct_applicants(
             "resume_reviewed": False,
             "status": "REVIEWED",
             "decision": "ACCEPTED",
+            "is_voided": False,
             "avg_score": 82.75,
             "reviewers": ["edu.uci.alicia", "edu.uci.alicia2"],
             "application_data": {

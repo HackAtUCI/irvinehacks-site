@@ -69,10 +69,11 @@ const VOIDED_OPTION: MultiselectProps.Option = {
 
 const STATUS_OPTIONS = Object.values(ReviewStatus)
 	.map(statusOption)
-	.concat(RESUME_REVIEW_OPTIONS)
+	.concat(RESUME_REVIEW_OPTIONS);
 
-
-const DECISION_OPTIONS = Object.values(Decision).map(statusOption).concat([VOIDED_OPTION]);
+const DECISION_OPTIONS = Object.values(Decision)
+	.map(statusOption)
+	.concat([VOIDED_OPTION]);
 
 function ApplicantFilters({
 	selectedStatuses,

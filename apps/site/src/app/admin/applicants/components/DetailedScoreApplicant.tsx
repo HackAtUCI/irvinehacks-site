@@ -69,7 +69,7 @@ function DetailedScoreApplicant({
 			setNotes("");
 		});
 	};
-	
+
 	return (
 		<ContentLayout
 			header={

@@ -235,7 +235,12 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 					{
 						id: "status",
 						header: "Status",
-						content: (applicant) => <ApplicantStatus status={applicant.status} isVoided={applicant.is_voided} />,
+						content: (applicant) => (
+							<ApplicantStatus
+								status={applicant.status}
+								isVoided={applicant.is_voided}
+							/>
+						),
 					},
 					...(hackathonName === "zothacks" ? [resumeReviewedColumn] : []),
 					{
@@ -369,7 +374,13 @@ const CardHeader = ({
 };
 
 const DecisionStatus = ({ decision, is_voided }: HackerApplicantSummary) =>
-	is_voided ? <ApplicantStatus status={decision ?? Status.Pending} isVoided /> : decision ? <ApplicantStatus status={decision} /> : "-";
+	is_voided ? (
+		<ApplicantStatus status={decision ?? Status.Pending} isVoided />
+	) : decision ? (
+		<ApplicantStatus status={decision} />
+	) : (
+		"-"
+	);
 
 const ResumeReviewedStatus = ({ resume_reviewed }: HackerApplicantSummary) => (
 	<ApplicantStatus

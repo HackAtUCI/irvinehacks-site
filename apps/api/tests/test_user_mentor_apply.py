@@ -95,6 +95,7 @@ EXPECTED_USER = Applicant(
     roles=(Role.APPLICANT, Role.MENTOR),
     application_data=EXPECTED_APPLICATION_DATA,
     status=Status.PENDING_REVIEW,
+    is_voided=False,
 )
 
 resume_handler.IRVINEHACKS_MENTOR_RESUMES_FOLDER_ID = "MENTOR_RESUMES_FOLDER_ID"

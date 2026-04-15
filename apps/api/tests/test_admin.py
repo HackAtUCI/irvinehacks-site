@@ -110,6 +110,7 @@ def test_can_submit_nonhacker_review(
                 [datetime(2023, 1, 19), "edu.uci.alicia", 100],
             ]
         },
+        "is_voided": False,
     }
 
     mock_mongodb_handler_retrieve_one.side_effect = [
@@ -148,6 +149,7 @@ def test_submit_hacker_review_with_one_reviewer_works(
                 [datetime(2023, 1, 19), "edu.uci.alicia2", 100],
             ]
         },
+        "is_voided": False,
     }
 
     mock_mongodb_handler_retrieve_one.side_effect = [
@@ -185,6 +187,7 @@ def test_submit_hacker_review_with_two_reviewers_works(
                 [datetime(2023, 1, 19), "edu.uci.alicia2", 100],
             ]
         },
+        "is_voided": False,
     }
 
     mock_mongodb_handler_retrieve_one.side_effect = [
@@ -224,6 +227,7 @@ def test_submit_hacker_review_with_three_reviewers_fails(
                 [datetime(2023, 1, 19), "edu.uci.alicia2", 100],
             ]
         },
+        "is_voided": False,
     }
 
     mock_mongodb_handler_retrieve_one.side_effect = [
@@ -433,6 +437,7 @@ def test_hacker_applicants_returns_correct_applicants(
             "first_name": "sydnee",
             "last_name": "unknown",
             "status": "REVIEWED",
+            "is_voided": False,
             "application_data": {
                 "school": "Hamburger University",
                 "submission_time": datetime(2023, 1, 12, 9, 0, 0),
@@ -535,6 +540,7 @@ def test_review_on_invalid_value(
                 [datetime(2023, 1, 19), "edu.uci.alicia", 100],
             ]
         },
+        "is_voided": False,
     }
 
     mock_mongodb_handler_retrieve_one.side_effect = [
@@ -565,6 +571,7 @@ def test_error_on_hacker_invalid_value(
                 [datetime(2023, 1, 19), "edu.uci.alicia", 0],
             ]
         },
+        "is_voided": False,
     }
 
     mock_mongodb_handler_retrieve_one.side_effect = [
@@ -657,6 +664,7 @@ async def test_handle_detailed_scores_review_success(
                 [datetime(2023, 1, 19), "edu.uci.alicia2", 100],
             ]
         },
+        "is_voided": False,
     }
 
     mock_mongodb_handler_retrieve_one.return_value = applicant_record
@@ -710,6 +718,7 @@ async def test_handle_detailed_scores_review_non_lead_user(
                 [datetime(2023, 1, 19), "edu.uci.alicia2", 100],
             ]
         },
+        "is_voided": False,
     }
 
     mock_mongodb_handler_retrieve_one.return_value = applicant_record

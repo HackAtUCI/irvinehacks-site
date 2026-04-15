@@ -64,6 +64,7 @@ EXPECTED_USER = Applicant(
     roles=(Role.APPLICANT, Role.VOLUNTEER),
     application_data=EXPECTED_APPLICATION_DATA,
     status=Status.PENDING_REVIEW,
+    is_voided=False,
 )
 
 app = FastAPI()

@@ -51,6 +51,7 @@ def test_no_identity_when_unauthenticated() -> None:
         "status": None,
         "roles": [],
         "decision": None,
+        "is_voided": False,
     }
 
 
@@ -64,7 +65,9 @@ def test_plain_identity_when_no_user_record(
     res = client.get("/me")
 
     mock_mongodb_handler_retrieve_one.assert_awaited_once_with(
-        Collection.USERS, {"_id": "edu.stanford.tree"}, ["roles", "status", "decision"]
+        Collection.USERS,
+        {"_id": "edu.stanford.tree"},
+        ["roles", "status", "decision", "is_voided"],
     )
     data = res.json()
     assert data == {
@@ -72,6 +75,7 @@ def test_plain_identity_when_no_user_record(
         "status": None,
         "decision": None,
         "roles": [],
+        "is_voided": False,
     }
 
 
@@ -144,6 +148,7 @@ def test_user_me_route_returns_correct_type(
         "status": Status.WAIVER_SIGNED,
         "roles": [Role.VOLUNTEER],
         "decision": None,
+        "is_voided": False,
     }
 
     client = UserTestClient(GuestUser(email="tree@stanford.edu"), app)
@@ -155,4 +160,5 @@ def test_user_me_route_returns_correct_type(
         "status": Status.WAIVER_SIGNED,
         "roles": [Role.VOLUNTEER],
         "decision": None,
+        "is_voided": False,
     }

@@ -11,6 +11,7 @@ def test_key_uid_not_in_applicant_model_dump() -> None:
         roles=(Role.APPLICANT,),
         status=Status.ATTENDING,
         application_data=EXPECTED_APPLICATION_DATA,
+        is_voided=False,
     )
 
     assert "uid" not in test_applicant.model_dump()

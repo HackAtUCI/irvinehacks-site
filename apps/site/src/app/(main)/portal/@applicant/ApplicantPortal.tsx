@@ -47,7 +47,7 @@ function Portal() {
 
 	const rejected = status === Status.Rejected || identity?.is_voided;
 
-	console.log("rejected: ", rejected)
+	console.log("rejected: ", rejected);
 
 	return (
 		<div className="relative">
@@ -67,11 +67,19 @@ function Portal() {
 				</h2>
 				<AvatarDisplay />
 				<VerticalTimeline
-					status={rejected ? Status.Rejected : (identity?.decision ? identity?.decision : (status as Status))}
+					status={
+						rejected
+							? Status.Rejected
+							: identity?.decision
+							  ? identity?.decision
+							  : (status as Status)
+					}
 				/>
 				<Message
 					status={rejected ? Status.Rejected : (status as Status)}
-					decision={rejected ? Decision.Rejected : (identity?.decision as Decision)}
+					decision={
+						rejected ? Decision.Rejected : (identity?.decision as Decision)
+					}
 				/>
 				{!rejected && needsToSignWaiver && (
 					<SignWaiver
@@ -80,7 +88,9 @@ function Portal() {
 						waitlistOpen={waitlistOpen}
 					/>
 				)}
-				{!rejected && needsToRSVP && <ConfirmAttendance status={status as Status} />}
+				{!rejected && needsToRSVP && (
+					<ConfirmAttendance status={status as Status} />
+				)}
 				{rejected && <ReturnHome />}
 			</div>
 		</div>

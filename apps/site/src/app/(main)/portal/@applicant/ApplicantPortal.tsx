@@ -42,8 +42,8 @@ function Portal() {
 	const waitlistStarted = waitlistStatus?.is_started ?? false;
 	const waitlistOpen = waitlistStatus?.is_open ?? false;
 
-	const needsToSignWaiver = isAccepted || (isWaitlisted && waitlistStarted);
-	const needsToRSVP = isAccepted || (isWaitlisted && waitlistOpen);
+	const needsToSignWaiver = !identity?.is_voided && (isAccepted || (isWaitlisted && waitlistStarted));
+	const needsToRSVP = !identity?.is_voided && (isAccepted || (isWaitlisted && waitlistOpen));
 
 	const rejected = status === Status.Rejected || identity?.is_voided;
 
@@ -81,14 +81,14 @@ function Portal() {
 						rejected ? Decision.Rejected : (identity?.decision as Decision)
 					}
 				/>
-				{!rejected && needsToSignWaiver && (
+				{needsToSignWaiver && (
 					<SignWaiver
 						status={status as Status}
 						decision={identity?.decision as Decision}
 						waitlistOpen={waitlistOpen}
 					/>
 				)}
-				{!rejected && needsToRSVP && (
+				{needsToRSVP && (
 					<ConfirmAttendance status={status as Status} />
 				)}
 				{rejected && <ReturnHome />}

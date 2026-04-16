@@ -58,19 +58,24 @@ export default function LateArrivalForm({ status }: LateArrivalFormProps) {
 			<p className="text-white text-lg mb-4">
 				Current selected arrival time:{" "}
 				<strong>
-					{selectedLateTime ? currentArrivalTimeLabel : isWaitlisted ? "6:00 PM" : "5:00 PM"}
+					{selectedLateTime
+						? currentArrivalTimeLabel
+						: isWaitlisted
+						  ? "6:00 PM"
+						  : "5:00 PM"}
 				</strong>
 				<br />
 				<br />
-				Check-in starts Friday at {isWaitlisted ? "6 PM" : "5 PM"}. Late check-in begins at {isWaitlisted ? "7 PM" : "6 PM"}.
+				Check-in starts Friday at {isWaitlisted ? "6 PM" : "5 PM"}. Late
+				check-in begins at {isWaitlisted ? "7 PM" : "6 PM"}.
 				{!selectedLateTime && (
 					<>
 						<br />
 						<br />
-						If you are arriving later than {isWaitlisted ? "6 PM" : "5 PM"}, use the dropdown to change your
-						arrival time. You won&apos;t be able to edit it after submitting.
-						Arriving later than your selected time may result in your spot being
-						given to another attendee.
+						If you are arriving later than {isWaitlisted ? "6 PM" : "5 PM"}, use
+						the dropdown to change your arrival time. You won&apos;t be able to
+						edit it after submitting. Arriving later than your selected time may
+						result in your spot being given to another attendee.
 					</>
 				)}
 			</p>

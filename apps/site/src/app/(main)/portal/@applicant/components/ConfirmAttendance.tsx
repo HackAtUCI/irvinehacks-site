@@ -79,7 +79,11 @@ function ConfirmAttendance({ status }: ConfirmAttendanceProps) {
 			)}
 			{status !== Status.Confirmed && status !== Status.Attending && (
 				<div className="mt-2 md:mt-8">
-					<RsvpForm buttonText={buttonText} showWarning={false} status={status} />
+					<RsvpForm
+						buttonText={buttonText}
+						showWarning={false}
+						status={status}
+					/>
 				</div>
 			)}
 		</div>

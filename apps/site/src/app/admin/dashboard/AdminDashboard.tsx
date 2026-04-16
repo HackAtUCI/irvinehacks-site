@@ -11,6 +11,7 @@ import UserContext from "@/lib/admin/UserContext";
 import ApplicantSummary from "./components/ApplicantSummary";
 import ApplicantTable from "./components/ApplicantTable";
 import HackerCount from "./components/HackerCount";
+import ReviewerSummary from "./components/ReviewerSummary";
 
 function AdminDashboard() {
 	const { roles } = useContext(UserContext);
@@ -21,6 +22,7 @@ function AdminDashboard() {
 				<HackerCount />
 				{isApplicationManager(roles) && <ApplicantSummary />}
 				{isApplicationManager(roles) && <ApplicantTable />}
+				{isApplicationManager(roles) && <ReviewerSummary />}
 			</SpaceBetween>
 		</ContentLayout>
 	);

@@ -24,6 +24,7 @@ import useAvgScoreSetting from "@/lib/admin/useAvgScoreSetting";
 import useHackerApplicants, {
 	HackerApplicantSummary,
 } from "@/lib/admin/useHackerApplicants";
+import { uidToPseudonym } from "@/lib/admin/anonymize";
 import { ParticipantRole, Status } from "@/lib/userRecord";
 import { OVERQUALIFIED_SCORE } from "@/lib/decisionScores";
 import SpaceBetween from "@cloudscape-design/components/space-between";
@@ -177,9 +178,10 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 				last_name={last_name}
 				hackathonName={hackathonName}
 				avg_score={avg_score}
+				isDirector={isUserDirector}
 			/>
 		),
-		[hackathonName],
+		[hackathonName, isUserDirector],
 	);
 
 	const avgScore = ({ avg_score, reviewers }: HackerApplicantSummary) => {
@@ -198,7 +200,8 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 					{
 						id: "uid",
 						header: "UID",
-						content: ({ _id }) => _id,
+						content: ({ _id }) =>
+							isUserDirector ? _id : uidToPseudonym(_id),
 					},
 					extraColumn,
 					{
@@ -305,21 +308,26 @@ const CardHeader = ({
 	last_name,
 	hackathonName,
 	avg_score,
+	isDirector,
 }: Pick<
 	HackerApplicantSummary,
 	"_id" | "first_name" | "last_name" | "avg_score"
 > & {
 	hackathonName: "irvinehacks" | "zothacks";
+	isDirector: boolean;
 }) => {
 	const followWithNextLink = useFollowWithNextLink();
 	const href =
 		hackathonName === "zothacks"
 			? `/admin/applicants/zothacks-hackers/${_id}`
 			: `/admin/applicants/hackers/${_id}`;
+	const displayName = isDirector
+		? `${first_name} ${last_name}`
+		: uidToPseudonym(_id);
 	return (
 		<SpaceBetween direction="horizontal" size="s">
 			<Link href={href} fontSize="inherit" onFollow={followWithNextLink}>
-				{first_name} {last_name}
+				{displayName}
 			</Link>
 			{avg_score === OVERQUALIFIED_SCORE && (
 				<Badge color="red">OVERQUALIFIED</Badge>

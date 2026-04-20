@@ -36,10 +36,10 @@ function CheckInModal({
 	}
 
 	const handleDismiss = () => {
-		if (!checkInConfirmed) {
-			setShowExitWarning(true);
-		} else {
+		if (showExitWarning || checkInConfirmed) {
 			onDismiss();
+		} else {
+			setShowExitWarning(true);
 		}
 	};
 
@@ -95,7 +95,7 @@ function CheckInModal({
 			<SpaceBetween size="s">
 				{showExitWarning && (
 					<Alert type="warning">
-						You haven&apos;t checked in this user yet.
+						You haven&apos;t checked in this participant yet.
 					</Alert>
 				)}
 

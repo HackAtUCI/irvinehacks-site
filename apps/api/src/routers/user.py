@@ -315,12 +315,15 @@ async def _apply_flow(
         status=Status.PENDING_REVIEW,
     )
 
-    # add applicant to database
+    # add applicant to database and clear any drafts
     try:
-        await mongodb_handler.update_one(
+        await mongodb_handler.raw_update_one(
             Collection.USERS,
             {"_id": user.uid},
-            applicant.model_dump(),
+            {
+                "$set": applicant.model_dump(),
+                "$unset": {"draft_application_data": ""},
+            },
             upsert=True,
         )
     except RuntimeError:

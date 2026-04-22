@@ -49,7 +49,24 @@ async def send_application_confirmation_email(
     """Send a confirmation email after a user submits an application.
     Will propagate exceptions from SendGrid."""
     await sendgrid_handler.send_email(
-        Template.CONFIRMATION_EMAIL,
+        Template.SUBMISSION_CONFIRMATION_EMAIL,
+        IH_SENDER,
+        {
+            "email": email,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "application_type": application_type,
+        },
+    )
+
+
+async def send_rsvp_confirmation_email(
+    email: EmailStr, user: ContactInfo, application_type: str
+) -> None:
+    """Send a confirmation email after a user submits an RSVP.
+    Will propagate exceptions from SendGrid."""
+    await sendgrid_handler.send_email(
+        Template.SUBMISSION_CONFIRMATION_EMAIL,
         IH_SENDER,
         {
             "email": email,

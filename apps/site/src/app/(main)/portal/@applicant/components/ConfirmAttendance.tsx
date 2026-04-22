@@ -1,4 +1,5 @@
 import { Status } from "@/lib/userRecord";
+import useUserIdentity from "@/lib/utils/useUserIdentity";
 import LateArrivalForm from "./LateArrivalForm";
 import RsvpForm from "./RsvpForm";
 
@@ -7,6 +8,10 @@ interface ConfirmAttendanceProps {
 }
 
 function ConfirmAttendance({ status }: ConfirmAttendanceProps) {
+	const identity = useUserIdentity();
+	const isWaitlisted =
+		status === Status.Waitlisted || identity?.decision === Status.Waitlisted;
+
 	const buttonText =
 		status === Status.Confirmed || status === Status.Attending
 			? "I am no longer able to attend IrvineHacks 2026"
@@ -33,7 +38,25 @@ function ConfirmAttendance({ status }: ConfirmAttendanceProps) {
 							<span className="underline">NOT</span> be able to RSVP again.
 						</strong>
 					)}
-					{status === Status.Confirmed && <LateArrivalForm />}
+					{status === Status.Confirmed && <LateArrivalForm status={status} />}
+				</>
+			) : isWaitlisted ? (
+				<>
+					<p className="text-xs sm:text-base md:text-2xl">
+						If you plan on attending IrvineHacks 2026, please confirm your
+						attendance using the button below!
+					</p>
+					<p className="text-xs sm:text-base md:text-2xl mt-4">
+						Check-in starts at 6:00 PM on Friday 2/27 for waitlist. If you will
+						be arriving later than 6:00 PM, please change your expected arrival
+						time below. All members of your team must check in in-person on
+						Friday, and at least one person from your team must check in
+						in-person for all 3 days.
+					</p>
+					<p className="text-xs sm:text-base md:text-2xl mt-4 text-[#FF4DEF]">
+						If you do not check in by 7:00 PM or by the arrival time you
+						specify, your spot may be given to another attendee.
+					</p>
 				</>
 			) : (
 				<>
@@ -56,7 +79,11 @@ function ConfirmAttendance({ status }: ConfirmAttendanceProps) {
 			)}
 			{status !== Status.Confirmed && status !== Status.Attending && (
 				<div className="mt-2 md:mt-8">
-					<RsvpForm buttonText={buttonText} showWarning={false} />
+					<RsvpForm
+						buttonText={buttonText}
+						showWarning={false}
+						status={status}
+					/>
 				</div>
 			)}
 		</div>

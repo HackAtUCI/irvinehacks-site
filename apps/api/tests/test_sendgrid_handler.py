@@ -34,7 +34,7 @@ async def test_send_single_email(mock_AsyncClient: AsyncMock) -> None:
     recipient_data = SAMPLE_RECIPIENTS[0]
 
     await sendgrid_handler.send_email(
-        Template.CONFIRMATION_EMAIL, SAMPLE_SENDER, recipient_data
+        Template.SUBMISSION_CONFIRMATION_EMAIL, SAMPLE_SENDER, recipient_data
     )
     mock_client.send_mail_v3.assert_awaited_once_with(
         body={
@@ -48,7 +48,7 @@ async def test_send_single_email(mock_AsyncClient: AsyncMock) -> None:
                     "dynamic_template_data": recipient_data,
                 }
             ],
-            "template_id": Template.CONFIRMATION_EMAIL,
+            "template_id": Template.SUBMISSION_CONFIRMATION_EMAIL,
         }
     )
 
@@ -63,7 +63,7 @@ async def test_send_single_email_with_reply_to(mock_AsyncClient: AsyncMock) -> N
     recipient_data = SAMPLE_RECIPIENTS[0]
 
     await sendgrid_handler.send_email(
-        Template.CONFIRMATION_EMAIL,
+        Template.SUBMISSION_CONFIRMATION_EMAIL,
         SAMPLE_SENDER,
         recipient_data,
         reply_to=SAMPLE_SENDER,
@@ -80,7 +80,7 @@ async def test_send_single_email_with_reply_to(mock_AsyncClient: AsyncMock) -> N
                     "dynamic_template_data": recipient_data,
                 }
             ],
-            "template_id": Template.CONFIRMATION_EMAIL,
+            "template_id": Template.SUBMISSION_CONFIRMATION_EMAIL,
             "reply_to": {
                 "name": SAMPLE_SENDER[1],
                 "email": SAMPLE_SENDER[0],
@@ -97,7 +97,7 @@ async def test_send_multiple_emails(mock_AsyncClient: AsyncMock) -> None:
     mock_AsyncClient.return_value.__aenter__.return_value = mock_client
 
     await sendgrid_handler.send_email(
-        Template.CONFIRMATION_EMAIL,
+        Template.SUBMISSION_CONFIRMATION_EMAIL,
         SAMPLE_SENDER,
         SAMPLE_RECIPIENTS,
         True,
@@ -115,7 +115,7 @@ async def test_send_multiple_emails(mock_AsyncClient: AsyncMock) -> None:
                     "dynamic_template_data": SAMPLE_RECIPIENTS[0],
                 },
             ],
-            "template_id": Template.CONFIRMATION_EMAIL,
+            "template_id": Template.SUBMISSION_CONFIRMATION_EMAIL,
         }
     )
 
@@ -134,7 +134,7 @@ async def test_sendgrid_error_causes_runtime_error(mock_AsyncClient: AsyncMock) 
 
     with pytest.raises(RuntimeError):
         await sendgrid_handler.send_email(
-            Template.CONFIRMATION_EMAIL,
+            Template.SUBMISSION_CONFIRMATION_EMAIL,
             SAMPLE_SENDER,
             SAMPLE_RECIPIENTS,
             True,

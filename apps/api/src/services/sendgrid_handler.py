@@ -17,7 +17,8 @@ SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
 
 class Template(str, Enum):
     # IH 2026
-    CONFIRMATION_EMAIL = "d-5041cae29f974fe18d18976a9381020c"
+    SUBMISSION_CONFIRMATION_EMAIL = "d-5041cae29f974fe18d18976a9381020c"
+    RSVP_CONFIRMATION_EMAIL = ""  # TODO: Configure email template in Sendgrid
     GUEST_TOKEN = "d-19a126a867294a56b8db9d94a23f7b5d"
     WAITLIST_QUEUED_EMAIL = "d-a6de2014ad854658bead73a2718a1152"
     WAITLIST_CLOSED_EMAIL = "d-061b28174c9140a095fa99e81e0e7e9c"
@@ -87,7 +88,7 @@ LogisticsTemplates: TypeAlias = Literal[
 
 @overload
 async def send_email(
-    template_id: Literal[Template.CONFIRMATION_EMAIL],
+    template_id: Literal[Template.SUBMISSION_CONFIRMATION_EMAIL],
     sender_email: Tuple[str, str],
     receiver_data: ConfirmationPersonalization,
     send_to_multiple: Literal[False] = False,
@@ -107,7 +108,7 @@ async def send_email(
 
 @overload
 async def send_email(
-    template_id: Literal[Template.CONFIRMATION_EMAIL],
+    template_id: Literal[Template.SUBMISSION_CONFIRMATION_EMAIL],
     sender_email: Tuple[str, str],
     receiver_data: Iterable[ConfirmationPersonalization],
     send_to_multiple: Literal[True],

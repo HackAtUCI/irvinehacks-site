@@ -10,6 +10,16 @@ from models.user_record import Role, Status
 from routers import user
 from services.mongodb_handler import Collection
 
+USER_EMAIL = "pkfire@uci.edu"
+EXPECTED_USER = Applicant(
+    uid="edu.uci.pkfire",
+    first_name="pk",
+    last_name="fire",
+    roles=(Role.APPLICANT, Role.HACKER),
+    status=Status.PENDING_REVIEW,
+    application_data=EXPECTED_APPLICATION_DATA,
+)
+
 app = FastAPI()
 app.include_router(user.router)
 
@@ -75,11 +85,13 @@ def test_plain_identity_when_no_user_record(
     }
 
 
+@patch("utils.email_handler.send_rsvp_confirmation_email", autospec=True)
 @patch("services.mongodb_handler.update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 def test_user_with_status_waiver_signed_rsvp_changes_status_to_confirmed(
     mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_mongodb_handler_update_one: AsyncMock,
+    mock_send_rsvp_confirmation_email: AsyncMock,
 ) -> None:
     """Test user with WAIVER_SIGNED status has new status of CONFIRMED after RSVP."""
     mock_mongodb_handler_retrieve_one.return_value = {"status": Status.WAIVER_SIGNED}
@@ -91,6 +103,10 @@ def test_user_with_status_waiver_signed_rsvp_changes_status_to_confirmed(
         Collection.USERS,
         {"_id": "edu.stanford.tree"},
         {"status": Status.CONFIRMED, "arrival_time": "17:00"},
+    )
+
+    mock_send_rsvp_confirmation_email.assert_awaited_once_with(
+        USER_EMAIL, EXPECTED_USER, Role.HACKER
     )
 
     assert res.status_code == 303

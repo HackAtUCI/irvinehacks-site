@@ -13,6 +13,7 @@ import ReturnHome from "./components/ReturnHome";
 import VerticalTimeline from "./components/timeline/VerticalTimeline";
 import QRCodeComponent from "./components/QRCode";
 import AvatarDisplay from "./components/AvatarDisplay";
+import RsvpForm from "./components/RsvpForm";
 
 const rolesArray = ["Mentor", "Hacker", "Volunteer"];
 
@@ -61,6 +62,7 @@ function Portal() {
 				<h2 className="font-bold font-display text-[var(--color-white)] mb-4 md:mb-[42px] text-[15px] sm:text-2xl md:text-[40px] md:leading-10">
 					{roleToDisplay} Application Status
 				</h2>
+				<RsvpForm buttonText="RSVP Now" showWarning={true} />
 				<AvatarDisplay />
 				<VerticalTimeline
 					status={identity?.decision ? identity?.decision : (status as Status)}

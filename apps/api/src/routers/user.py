@@ -42,7 +42,7 @@ log = getLogger(__name__)
 
 router = APIRouter()
 
-DEADLINE = datetime(2027, 2, 14, 8, 1, tzinfo=timezone.utc)
+DEADLINE = datetime(2026, 2, 14, 8, 1, tzinfo=timezone.utc)
 WAITLIST_OPEN_TIME = datetime(2026, 2, 20, 20, 0, tzinfo=timezone.utc)
 WAITLIST_CLOSE_TIME = datetime(2026, 2, 23, 8, 1, tzinfo=timezone.utc)
 

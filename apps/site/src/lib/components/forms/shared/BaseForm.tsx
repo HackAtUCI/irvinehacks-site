@@ -1,14 +1,30 @@
 "use client";
 
-import { FormEvent, PropsWithChildren, useState } from "react";
+import {
+	FormEvent,
+	PropsWithChildren,
+	useCallback,
+	useEffect,
+	useState,
+} from "react";
 import Image from "next/image";
 import axios from "axios";
 
 import Button from "@/lib/components/Button/Button";
 
 import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
+import useDraftAutosave from "@/lib/utils/useDraftAutosave";
 
 import cityBackground from "@/assets/backgrounds/alt_illus_moonless.png";
+
+import { DraftContext } from "./DraftContext";
+
+interface DraftResponse {
+	draft_application_data: {
+		application_type: string;
+		fields: Record<string, string>;
+	} | null;
+}
 
 // Ensure this array matches FIELDS_SUPPORTING_OTHER in ApplicationData.py
 const FIELDS_WITH_OTHER = [
@@ -35,6 +51,45 @@ export default function BaseForm({
 }: PropsWithChildren<BaseFormProps>) {
 	const [submitting, setSubmitting] = useState(false);
 	const [sessionExpired, setSessionExpired] = useState(false);
+	const [fields, setFields] = useState<Record<string, string>>({});
+	const [hasUserEdited, setHasUserEdited] = useState(false);
+	const [draftLoaded, setDraftLoaded] = useState(false);
+
+	// Hydrate textareas from any previously saved draft
+	useEffect(() => {
+		axios
+			.get<DraftResponse>("/api/user/application/draft")
+			.then((res) => {
+				const draft = res.data.draft_application_data;
+				if (draft && draft.application_type === applicationType) {
+					setFields(draft.fields);
+				}
+			})
+			.catch((err) => {
+				if (axios.isAxiosError(err) && err.response?.status === 401) {
+					setSessionExpired(true);
+				}
+			})
+			.finally(() => {
+				setDraftLoaded(true);
+			});
+	}, [applicationType]);
+
+	const handleSessionExpired = useCallback(() => {
+		setSessionExpired(true);
+	}, []);
+
+	const setValue = useCallback((name: string, value: string) => {
+		setFields((prev) => ({ ...prev, [name]: value }));
+		setHasUserEdited(true);
+	}, []);
+
+	useDraftAutosave(
+		applicationType,
+		fields,
+		hasUserEdited,
+		handleSessionExpired,
+	);
 
 	const handleSubmit = async (
 		event: FormEvent<HTMLFormElement>,
@@ -135,13 +190,19 @@ export default function BaseForm({
 						readOnly
 						hidden
 					/>
-					{children}
-					<Button
-						text="Submit"
-						className="text-2xl !px-11 !py-2"
-						isLightVersion={true}
-						disabled={submitting}
-					/>
+					<DraftContext.Provider value={{ initialValues: fields, setValue }}>
+						{draftLoaded ? (
+							children
+						) : (
+							<p className="text-[var(--color-white)]">Loading your draft...</p>
+						)}
+						<Button
+							text="Submit"
+							className="text-2xl !px-11 !py-2"
+							isLightVersion={true}
+							disabled={submitting || !draftLoaded}
+						/>
+					</DraftContext.Provider>
 					{sessionExpired && sessionExpiredMessage}
 				</form>
 			</div>

@@ -28,7 +28,7 @@ function ApplicantOverview({ applicant }: ApplicantOverviewProps) {
 				</div>
 				<div>
 					<Box variant="awsui-key-label">Status</Box>
-					<ApplicantStatus status={status} />
+					<ApplicantStatus status={status} isVoided={applicant.is_voided} />
 				</div>
 				<div>
 					<Box variant="awsui-key-label">Reviews</Box>

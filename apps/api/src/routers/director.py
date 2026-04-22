@@ -360,12 +360,63 @@ async def toggle_avg_score_setting() -> dict[str, bool]:
     return {"show_with_one_reviewer": new_value}
 
 
+@router.post("/void")
+async def void_applicant(
+    user: Annotated[User, Depends(require_director)],
+    uid: str = Body(embed=True),
+) -> None:
+    """Void an applicant without changing their status."""
+    record = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": uid, "roles": {"$exists": True}}, ["is_voided"]
+    )
+    if not record:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Applicant not found.")
+
+    ok = await mongodb_handler.update_one(
+        Collection.USERS, {"_id": uid}, {"is_voided": True}
+    )
+    if not ok:
+        raise RuntimeError(f"Could not void applicant {uid}.")
+
+    log.info(f"Applicant {uid} voided by {user.uid}")
+
+
+@router.post("/unvoid")
+async def unvoid_applicant(
+    user: Annotated[User, Depends(require_director)],
+    uid: str = Body(embed=True),
+) -> None:
+    """Reverse a void, preserving the applicant's original status."""
+    record = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": uid, "roles": {"$exists": True}}, ["is_voided"]
+    )
+    if not record:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Applicant not found.")
+
+    if not record.get("is_voided"):
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST, "Applicant is not currently voided."
+        )
+
+    ok = await mongodb_handler.update_one(
+        Collection.USERS, {"_id": uid}, {"is_voided": False}
+    )
+    if not ok:
+        raise RuntimeError(f"Could not unvoid applicant {uid}.")
+
+    log.info(f"Applicant {uid} unvoided by {user.uid}")
+
+
 @router.post("/release/mentor-volunteer", dependencies=[Depends(require_director)])
 async def release_mentor_volunteer_decisions() -> None:
     """Update applicant status based on decision and send decision emails."""
     mentor_records = await mongodb_handler.retrieve(
         Collection.USERS,
-        {"status": Status.REVIEWED, "roles": {"$in": [Role.MENTOR]}},
+        {
+            "status": Status.REVIEWED,
+            "roles": {"$in": [Role.MENTOR]},
+            "is_voided": {"$ne": True},
+        },
         ["_id", "application_data.reviews", "first_name"],
     )
 
@@ -374,7 +425,11 @@ async def release_mentor_volunteer_decisions() -> None:
 
     volunteer_records = await mongodb_handler.retrieve(
         Collection.USERS,
-        {"status": Status.REVIEWED, "roles": {"$in": [Role.VOLUNTEER]}},
+        {
+            "status": Status.REVIEWED,
+            "roles": {"$in": [Role.VOLUNTEER]},
+            "is_voided": {"$ne": True},
+        },
         ["_id", "application_data.reviews", "first_name"],
     )
 
@@ -390,7 +445,11 @@ async def release_hacker_decisions() -> None:
     """Update hacker applicant status based on decision and send decision emails."""
     records = await mongodb_handler.retrieve(
         Collection.USERS,
-        {"status": Status.REVIEWED, "roles": {"$in": [Role.HACKER]}},
+        {
+            "status": Status.REVIEWED,
+            "roles": {"$in": [Role.HACKER]},
+            "is_voided": {"$ne": True},
+        },
         ["_id", "application_data.reviews", "first_name"],
     )
 

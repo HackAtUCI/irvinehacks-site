@@ -4,7 +4,7 @@ import StatusIndicator, {
 
 import { Status } from "@/lib/userRecord";
 
-export const StatusLabels = {
+export const StatusLabels: Record<Status, string> & { VOIDED: string } = {
 	[Status.Accepted]: "accepted",
 	[Status.Rejected]: "rejected",
 	[Status.Waitlisted]: "waitlisted",
@@ -14,6 +14,7 @@ export const StatusLabels = {
 	[Status.Confirmed]: "confirmed",
 	[Status.Attending]: "attending",
 	[Status.Queued]: "queued",
+	VOIDED: "void",
 };
 
 const StatusTypes: Record<Status, StatusIndicatorProps.Type> = {
@@ -30,9 +31,13 @@ const StatusTypes: Record<Status, StatusIndicatorProps.Type> = {
 
 interface ApplicantStatusProps {
 	status: Status;
+	isVoided?: boolean;
 }
 
-function ApplicantStatus({ status }: ApplicantStatusProps) {
+function ApplicantStatus({ status, isVoided }: ApplicantStatusProps) {
+	if (isVoided) {
+		return <StatusIndicator type="stopped">void</StatusIndicator>;
+	}
 	return (
 		<StatusIndicator
 			type={StatusTypes[status]}

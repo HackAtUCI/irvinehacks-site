@@ -55,13 +55,20 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 
 	const { applicantList, loading } = useHackerApplicants();
 
-	const selectedStatusValues = selectedStatuses.map(({ value }) => value);
-	const selectedDecisionValues = selectedDecisions.map(({ value }) => value);
-	const uciNetIDFilterValues = uciNetIDFilter.map(({ value }) => value);
+	const selectedStatusValues = new Set(
+		selectedStatuses.map(({ value }) => value),
+	);
+	const selectedDecisionValues = new Set(
+		selectedDecisions.map(({ value }) => value),
+	);
+	const uciNetIDFilterValues = new Set(
+		uciNetIDFilter.map(({ value }) => value),
+	);
 
 	const [acceptedCount, setAcceptedCount] = useState(0);
 	const [waitlistedCount, setWaitlistedCount] = useState(0);
 	const [rejectedCount, setRejectCount] = useState(0);
+	const [voidedCount, setVoidedCount] = useState(0);
 
 	const { thresholds } = useHackerThresholds();
 	const acceptThreshold = thresholds?.accept;
@@ -78,36 +85,55 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		}
 	}, [top400]);
 
+	const voidedSelected = selectedDecisionValues.has("VOIDED");
+	const nonVoidedDecisions = new Set(
+		[...selectedDecisionValues].filter((v) => v !== "VOIDED"),
+	);
+
 	const filteredApplicants = applicantList.filter((applicant) => {
 		if (
-			selectedStatusValues.includes(Status.Pending) &&
+			selectedStatusValues.has(Status.Pending) &&
 			applicant.avg_score === OVERQUALIFIED_SCORE
 		)
 			return false;
 
 		if (
-			selectedStatusValues.length !== 0 &&
-			((selectedStatusValues.includes("RESUME_REVIEWED") &&
+			selectedStatusValues.size !== 0 &&
+			((selectedStatusValues.has("RESUME_REVIEWED") &&
 				applicant.resume_reviewed) ||
-				(selectedStatusValues.includes("RESUME_NOT_REVIEWED") &&
+				(selectedStatusValues.has("RESUME_NOT_REVIEWED") &&
 					!applicant.resume_reviewed))
 		) {
 			return true;
 		}
 
+		let matchesDecision: boolean;
+		if (selectedDecisions.length === 0) {
+			// No decision filter: show everything
+			matchesDecision = true;
+		} else if (applicant.is_voided) {
+			// Voided applicants only show when "VOIDED" is selected
+			matchesDecision = voidedSelected;
+		} else {
+			// Non-voided applicants match against their actual decision
+			matchesDecision =
+				nonVoidedDecisions.size > 0 &&
+				nonVoidedDecisions.has(applicant.decision || "-");
+		}
+
 		return (
 			(selectedStatuses.length === 0 ||
-				selectedStatusValues.includes(applicant.status)) &&
-			(selectedDecisions.length === 0 ||
-				selectedDecisionValues.includes(applicant.decision || "-")) &&
+				selectedStatusValues.has(applicant.status)) &&
+			matchesDecision &&
 			(uciNetIDFilter.length === 0 ||
 				applicant.reviewers.some((reviewer) =>
-					uciNetIDFilterValues.includes(reviewer),
+					uciNetIDFilterValues.has(reviewer),
 				))
 		);
 	});
 
 	const filteredApplicants400 = [...applicantList]
+		.filter((applicant) => !applicant.is_voided)
 		.filter((applicant) => applicant.avg_score !== -1)
 		.sort((a, b) => b.avg_score - a.avg_score)
 		.slice(0, 400);
@@ -116,21 +142,26 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		const accepted = acceptThreshold ? acceptThreshold : 0;
 		const waitlisted = waitlistThreshold ? waitlistThreshold : 0;
 
-		const acceptedCount = applicantList.filter(
+		const activeApplicants = applicantList.filter((a) => !a.is_voided);
+
+		const acceptedCount = activeApplicants.filter(
 			(applicant) => applicant.avg_score >= accepted,
 		).length;
 		setAcceptedCount(acceptedCount);
 
-		const waitlistedCount = applicantList.filter(
+		const waitlistedCount = activeApplicants.filter(
 			(applicant) =>
 				applicant.avg_score >= waitlisted && applicant.avg_score < accepted,
 		).length;
 		setWaitlistedCount(waitlistedCount);
 
-		const rejectedCount = applicantList.filter(
+		const rejectedCount = activeApplicants.filter(
 			(applicant) => applicant.avg_score < waitlisted,
 		).length;
 		setRejectCount(rejectedCount);
+
+		const voidedCount = applicantList.filter((a) => a.is_voided).length;
+		setVoidedCount(voidedCount);
 	}, [applicantList, acceptThreshold, waitlistThreshold]);
 
 	const items = top400 ? filteredApplicants400 : filteredApplicants;
@@ -204,7 +235,7 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 					{
 						id: "status",
 						header: "Status",
-						content: ApplicantStatus,
+						content: StatusColumn,
 					},
 					...(hackathonName === "zothacks" ? [resumeReviewedColumn] : []),
 					{
@@ -278,6 +309,15 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 						>
 							{rejectedCount} applicants with &quot;rejected&quot; status
 						</div>
+						<div
+							style={{
+								fontSize: "0.875rem",
+								color: "#5f6b7a",
+								marginTop: "4px",
+							}}
+						>
+							{voidedCount} applicants with &quot;voided&quot; status
+						</div>
 					</Header>
 					<Checkbox
 						checked={top400}
@@ -328,8 +368,18 @@ const CardHeader = ({
 	);
 };
 
-const DecisionStatus = ({ decision }: HackerApplicantSummary) =>
-	decision ? <ApplicantStatus status={decision} /> : "-";
+const StatusColumn = ({ status, is_voided }: HackerApplicantSummary) => (
+	<ApplicantStatus status={status} isVoided={is_voided} />
+);
+
+const DecisionStatus = ({ decision, is_voided }: HackerApplicantSummary) =>
+	is_voided ? (
+		<ApplicantStatus status={decision ?? Status.Pending} isVoided />
+	) : decision ? (
+		<ApplicantStatus status={decision} />
+	) : (
+		"-"
+	);
 
 const ResumeReviewedStatus = ({ resume_reviewed }: HackerApplicantSummary) => (
 	<ApplicantStatus

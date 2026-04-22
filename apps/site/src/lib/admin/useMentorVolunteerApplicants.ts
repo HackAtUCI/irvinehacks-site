@@ -9,6 +9,7 @@ export interface ApplicantSummary {
 	last_name: string;
 	status: Status;
 	decision: Decision | null;
+	is_voided: boolean;
 	application_data: {
 		school: string;
 		submission_time: string;

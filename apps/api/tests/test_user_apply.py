@@ -134,6 +134,7 @@ EXPECTED_USER = Applicant(
     roles=(Role.APPLICANT, Role.HACKER),
     status=Status.PENDING_REVIEW,
     application_data=EXPECTED_APPLICATION_DATA,
+    is_voided=False,
 )
 
 EXPECTED_USER_WITHOUT_RESUME = Applicant(
@@ -143,6 +144,7 @@ EXPECTED_USER_WITHOUT_RESUME = Applicant(
     roles=(Role.APPLICANT, Role.HACKER),
     status=Status.PENDING_REVIEW,
     application_data=EXPECTED_APPLICATION_DATA_WITHOUT_RESUME,
+    is_voided=False,
 )
 
 EXPECTED_ZOTHACKS_HACKER_USER = Applicant(
@@ -152,6 +154,7 @@ EXPECTED_ZOTHACKS_HACKER_USER = Applicant(
     roles=(Role.APPLICANT, Role.HACKER),
     status=Status.PENDING_REVIEW,
     application_data=EXPECTED_ZOTHACKS_HACKER_APPLICATION_DATA,
+    is_voided=False,
 )
 
 

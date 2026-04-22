@@ -1,12 +1,15 @@
 "use client";
 import { useState, useContext } from "react";
+import Button from "@cloudscape-design/components/button";
 import ContentLayout from "@cloudscape-design/components/content-layout";
 import Header from "@cloudscape-design/components/header";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import Spinner from "@cloudscape-design/components/spinner";
 import { FlashbarProps } from "@cloudscape-design/components/flashbar";
 
+import { isDirector } from "@/lib/admin/authorization";
 import NotificationContext from "@/lib/admin/NotificationContext";
+import UserContext from "@/lib/admin/UserContext";
 import useApplicant, {
 	IrvineHacksHackerApplicationData,
 	IrvineHacksMentorApplicationData,
@@ -40,12 +43,15 @@ interface ApplicantProps {
 
 function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 	const { setNotifications } = useContext(NotificationContext);
+	const { roles } = useContext(UserContext);
 	const {
 		applicant,
 		loading,
 		submitReview,
 		submitDetailedReview,
 		deleteNotes,
+		voidApplicant,
+		unvoidApplicant,
 	} = useApplicant(uid, applicationType);
 	const [scores, setScores] = useState<ScoredFields>({});
 	const [notes, setNotes] = useState("");
@@ -105,11 +111,30 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 									notes={notes}
 									onSubmitDetailedReview={handleSubmitDetailedReview}
 								/>
+								{isDirector(roles) &&
+									(applicant.is_voided ? (
+										<Button
+											onClick={() => unvoidApplicant(applicant._id)}
+											iconName="status-pending"
+										>
+											Unvoid
+										</Button>
+									) : (
+										<Button
+											onClick={() => voidApplicant(applicant._id)}
+											iconName="status-stopped"
+										>
+											Void
+										</Button>
+									))}
 							</SpaceBetween>
 						) : (
 							<ApplicantActions
 								applicant={applicant._id}
 								submitReview={submitReview}
+								voidApplicant={voidApplicant}
+								unvoidApplicant={unvoidApplicant}
+								isVoided={applicant.is_voided}
 							/>
 						)
 					}
@@ -169,6 +194,22 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 							notes={notes}
 							onSubmitDetailedReview={handleSubmitDetailedReview}
 						/>
+						{isDirector(roles) &&
+							(applicant.is_voided ? (
+								<Button
+									onClick={() => unvoidApplicant(applicant._id)}
+									iconName="status-pending"
+								>
+									Unvoid
+								</Button>
+							) : (
+								<Button
+									onClick={() => voidApplicant(applicant._id)}
+									iconName="status-stopped"
+								>
+									Void
+								</Button>
+							))}
 					</SpaceBetween>
 				)}
 			</div>

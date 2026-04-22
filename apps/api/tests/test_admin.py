@@ -13,8 +13,10 @@ from routers.admin import (
     _handle_detailed_scores_review,
     _handle_global_only_review,
     delete_notes,
+    submit_detailed_review,
     GlobalScores,
     DeleteNotesRequest,
+    DetailedReviewRequest,
     ZotHacksHackerDetailedScores,
 )
 from services.mongodb_handler import Collection
@@ -108,6 +110,7 @@ def test_can_submit_nonhacker_review(
                 [datetime(2023, 1, 19), "edu.uci.alicia", 100],
             ]
         },
+        "is_voided": False,
     }
 
     mock_mongodb_handler_retrieve_one.side_effect = [
@@ -146,6 +149,7 @@ def test_submit_hacker_review_with_one_reviewer_works(
                 [datetime(2023, 1, 19), "edu.uci.alicia2", 100],
             ]
         },
+        "is_voided": False,
     }
 
     mock_mongodb_handler_retrieve_one.side_effect = [
@@ -183,6 +187,7 @@ def test_submit_hacker_review_with_two_reviewers_works(
                 [datetime(2023, 1, 19), "edu.uci.alicia2", 100],
             ]
         },
+        "is_voided": False,
     }
 
     mock_mongodb_handler_retrieve_one.side_effect = [
@@ -222,6 +227,7 @@ def test_submit_hacker_review_with_three_reviewers_fails(
                 [datetime(2023, 1, 19), "edu.uci.alicia2", 100],
             ]
         },
+        "is_voided": False,
     }
 
     mock_mongodb_handler_retrieve_one.side_effect = [
@@ -431,6 +437,7 @@ def test_hacker_applicants_returns_correct_applicants(
             "first_name": "sydnee",
             "last_name": "unknown",
             "status": "REVIEWED",
+            "is_voided": False,
             "application_data": {
                 "school": "Hamburger University",
                 "submission_time": datetime(2023, 1, 12, 9, 0, 0),
@@ -470,6 +477,7 @@ def test_hacker_applicants_returns_correct_applicants(
             "resume_reviewed": False,
             "status": "REVIEWED",
             "decision": "ACCEPTED",
+            "is_voided": False,
             "avg_score": 82.75,
             "reviewers": ["edu.uci.alicia", "edu.uci.alicia2"],
             "application_data": {
@@ -532,6 +540,7 @@ def test_review_on_invalid_value(
                 [datetime(2023, 1, 19), "edu.uci.alicia", 100],
             ]
         },
+        "is_voided": False,
     }
 
     mock_mongodb_handler_retrieve_one.side_effect = [
@@ -562,6 +571,7 @@ def test_error_on_hacker_invalid_value(
                 [datetime(2023, 1, 19), "edu.uci.alicia", 0],
             ]
         },
+        "is_voided": False,
     }
 
     mock_mongodb_handler_retrieve_one.side_effect = [
@@ -654,6 +664,7 @@ async def test_handle_detailed_scores_review_success(
                 [datetime(2023, 1, 19), "edu.uci.alicia2", 100],
             ]
         },
+        "is_voided": False,
     }
 
     mock_mongodb_handler_retrieve_one.return_value = applicant_record
@@ -707,6 +718,7 @@ async def test_handle_detailed_scores_review_non_lead_user(
                 [datetime(2023, 1, 19), "edu.uci.alicia2", 100],
             ]
         },
+        "is_voided": False,
     }
 
     mock_mongodb_handler_retrieve_one.return_value = applicant_record
@@ -818,3 +830,57 @@ async def test_delete_reviewer_notes_success(
             "$set": {f"application_data.reviews.0.{notes_field_index}": None},
         },
     )
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_submit_review_voided_applicant_fails(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+    """Test that a reviewer cannot submit a review for a voided applicant."""
+    post_data = {"applicant": "edu.uci.sydnee", "score": 0}
+
+    returned_record: dict[str, Any] = {
+        "_id": "edu.uci.sydnee",
+        "roles": ["Applicant", "Mentor"],
+        "application_data": {
+            "reviews": [],
+        },
+        "is_voided": True,
+    }
+
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        HACKER_REVIEWER_IDENTITY,
+        returned_record,
+    ]
+
+    res = reviewer_client.post("/review", json=post_data)
+
+    assert res.status_code == 400
+    mock_mongodb_handler_raw_update_one.assert_not_awaited()
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+@pytest.mark.asyncio
+async def test_submit_detailed_review_voided_applicant_fails(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test that a reviewer cannot submit a detailed review for a voided applicant."""
+    applicant_record: dict[str, Any] = {
+        "_id": "edu.uci.test",
+        "is_voided": True,
+    }
+
+    mock_mongodb_handler_retrieve_one.return_value = applicant_record
+
+    review_request = DetailedReviewRequest(
+        applicant="edu.uci.test",
+        scores=GlobalScores(resume=8, hackathon_experience=10),
+    )
+
+    with pytest.raises(HTTPException) as exc_info:
+        await submit_detailed_review(review_request, USER_REVIEWER)
+
+    assert exc_info.value.status_code == 400
+    assert exc_info.value.detail == "Application is voided"

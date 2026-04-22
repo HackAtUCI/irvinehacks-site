@@ -80,6 +80,7 @@ class BareApplicant(UserRecord):
 
     roles: RoleWithApplicant
     status: ApplicantStatus
+    is_voided: bool = False
     decision: Optional[Decision] = None
 
 

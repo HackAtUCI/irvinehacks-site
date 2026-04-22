@@ -61,11 +61,19 @@ const RESUME_REVIEW_OPTIONS: Options = [
 	},
 ];
 
+const VOIDED_OPTION: MultiselectProps.Option = {
+	label: "voided",
+	value: "VOIDED",
+	iconName: "status-stopped",
+};
+
 const STATUS_OPTIONS = Object.values(ReviewStatus)
 	.map(statusOption)
 	.concat(RESUME_REVIEW_OPTIONS);
 
-const DECISION_OPTIONS = Object.values(Decision).map(statusOption);
+const DECISION_OPTIONS = Object.values(Decision)
+	.map(statusOption)
+	.concat([VOIDED_OPTION]);
 
 function ApplicantFilters({
 	selectedStatuses,

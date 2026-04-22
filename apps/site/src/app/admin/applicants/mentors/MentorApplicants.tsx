@@ -21,7 +21,7 @@ import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
 
 import UserContext from "@/lib/admin/UserContext";
 import { isMentorReviewer } from "@/lib/admin/authorization";
-import { ParticipantRole } from "@/lib/userRecord";
+import { ParticipantRole, Status } from "@/lib/userRecord";
 
 function MentorApplicants() {
 	const router = useRouter();
@@ -36,23 +36,45 @@ function MentorApplicants() {
 	const [selectedDecisions, setSelectedDecisions] = useState<Options>([]);
 	const { applicantList, loading } = useMentorVolunteerApplicants("mentors");
 
-	const selectedStatusValues = selectedStatuses.map(({ value }) => value);
-	const selectedDecisionValues = selectedDecisions.map(({ value }) => value);
-
-	const filteredApplicants = applicantList.filter(
-		(applicant) =>
-			(selectedStatuses.length === 0 ||
-				selectedStatusValues.includes(applicant.status)) &&
-			(selectedDecisions.length === 0 ||
-				selectedDecisionValues.includes(applicant.decision || "-")),
+	const selectedStatusValues = new Set(
+		selectedStatuses.map(({ value }) => value),
 	);
+	const selectedDecisionValues = new Set(
+		selectedDecisions.map(({ value }) => value),
+	);
+
+	const voidedSelected = selectedDecisionValues.has("VOIDED");
+	const nonVoidedDecisions = new Set(
+		[...selectedDecisionValues].filter((v) => v !== "VOIDED"),
+	);
+
+	const filteredApplicants = applicantList.filter((applicant) => {
+		const matchesStatus =
+			selectedStatuses.length === 0 ||
+			selectedStatusValues.has(applicant.status);
+
+		let matchesDecision: boolean;
+		if (selectedDecisions.length === 0) {
+			matchesDecision = true;
+		} else if (applicant.is_voided) {
+			matchesDecision = voidedSelected;
+		} else {
+			matchesDecision =
+				nonVoidedDecisions.size > 0 &&
+				nonVoidedDecisions.has(applicant.decision || "-");
+		}
+
+		return matchesStatus && matchesDecision;
+	});
 
 	const items = filteredApplicants;
 
+	const activeApplicants = applicantList.filter((a) => !a.is_voided);
+
 	const counter =
 		selectedStatuses.length > 0 || selectedDecisions.length > 0
-			? `(${items.length}/${applicantList.length})`
-			: `(${applicantList.length})`;
+			? `(${items.length}/${activeApplicants.length})`
+			: `(${activeApplicants.length})`;
 
 	const emptyContent = (
 		<Box textAlign="center" color="inherit">
@@ -78,7 +100,7 @@ function MentorApplicants() {
 					{
 						id: "status",
 						header: "Status",
-						content: ApplicantStatus,
+						content: StatusWithVoided,
 					},
 					{
 						id: "submission_time",
@@ -127,7 +149,17 @@ const CardHeader = ({ _id, first_name, last_name }: ApplicantSummary) => {
 	);
 };
 
-const DecisionStatus = ({ decision }: ApplicantSummary) =>
-	decision ? <ApplicantStatus status={decision} /> : "-";
+const StatusWithVoided = ({ status, is_voided }: ApplicantSummary) => (
+	<ApplicantStatus status={status} isVoided={is_voided} />
+);
+
+const DecisionStatus = ({ decision, is_voided }: ApplicantSummary) =>
+	is_voided ? (
+		<ApplicantStatus status={decision ?? Status.Pending} isVoided />
+	) : decision ? (
+		<ApplicantStatus status={decision} />
+	) : (
+		"-"
+	);
 
 export default MentorApplicants;

@@ -87,6 +87,7 @@ class SimplifiedApplicantSummary(BaseRecord):
     first_name: str
     last_name: str
     status: str
+    is_voided: bool = False
     application_data: SimplifiedApplicationDataSummary
 
 
@@ -103,6 +104,7 @@ class HackerApplicantSummary(BaseRecord):
     last_name: str
     status: str
     decision: Optional[Decision] = None
+    is_voided: bool = False
     reviewers: list[str] = []
     resume_reviewed: bool = False
     avg_score: float
@@ -168,6 +170,7 @@ async def mentor_volunteer_applicants(
             "status",
             "first_name",
             "last_name",
+            "is_voided",
             "application_data.school",
             "application_data.submission_time",
             "application_data.reviews",
@@ -218,6 +221,7 @@ async def hacker_applicants(
             "status",
             "first_name",
             "last_name",
+            "is_voided",
             "application_data",
         ],
         sort=[("application_data.submission_time", DESCENDING)],
@@ -411,11 +415,14 @@ async def submit_review(
     applicant_record = await mongodb_handler.retrieve_one(
         Collection.USERS,
         {"_id": applicant_review.applicant},
-        ["_id", "application_data.reviews", "roles"],
+        ["_id", "application_data.reviews", "roles", "is_voided"],
     )
     if not applicant_record:
         log.error("Could not retrieve applicant after submitting review")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    if applicant_record.get("is_voided"):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Application is voided")
 
     if Role.HACKER in applicant_record["roles"]:
         if applicant_review.score < 0 or applicant_review.score > 10:
@@ -469,6 +476,16 @@ async def submit_detailed_review(
     reviewer: User = Depends(require_reviewer),
 ) -> None:
     """Submit a review decision from the reviewer for the given hacker applicant."""
+    applicant_record = await mongodb_handler.retrieve_one(
+        Collection.USERS,
+        {"_id": applicant_review.applicant},
+        ["is_voided"],
+    )
+    if not applicant_record:
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
+    if applicant_record.get("is_voided"):
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Application is voided")
+
     if isinstance(applicant_review.scores, GlobalScores):
         await _handle_global_only_review(
             applicant_review.applicant, applicant_review.scores, reviewer

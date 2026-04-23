@@ -4,6 +4,7 @@ import { useState } from "react";
 import RequiredAsterisk from "./RequiredAsterisk";
 import normalizeWhitespace from "@/lib/utils/normalizeWhitespace";
 import getWordCount from "@/lib/utils/getWordCount";
+import { useDraftContext } from "./shared/DraftContext";
 
 interface TextfieldProps {
 	name: string;
@@ -30,9 +31,17 @@ export default function Textfield({
 	maxCharCount = 1500,
 	textAreaClass = "h-48",
 }: TextfieldProps) {
-	const [value, setValue] = useState("");
+	const draftContext = useDraftContext();
+	const [value, setValue] = useState(
+		() => draftContext?.initialValues[name] ?? "",
+	);
 
 	const wordCount = getWordCount(value);
+
+	const commitValue = (nextValue: string) => {
+		setValue(nextValue);
+		draftContext?.setValue(name, nextValue);
+	};
 
 	const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
 		let nextValue = e.target.value;
@@ -44,7 +53,7 @@ export default function Textfield({
 
 		// Allow deletion
 		if (nextValue.length < value.length) {
-			setValue(nextValue);
+			commitValue(nextValue);
 			return;
 		}
 
@@ -54,12 +63,12 @@ export default function Textfield({
 
 			if (nextWordCount > maxWordCount) {
 				const truncated = truncateToWordCount(nextValue, maxWordCount);
-				setValue(truncated);
+				commitValue(truncated);
 				return;
 			}
 		}
 
-		setValue(nextValue);
+		commitValue(nextValue);
 	};
 
 	return (

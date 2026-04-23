@@ -13,6 +13,7 @@ import ApplicantFilters, {
 	Options,
 } from "@/app/admin/applicants/components/ApplicantFilters";
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
+import AutoDecisionBadge from "@/app/admin/applicants/components/AutoDecisionBadge";
 
 import UserContext from "@/lib/admin/UserContext";
 import { isDirector, isHackerReviewer } from "@/lib/admin/authorization";
@@ -170,13 +171,22 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 	};
 
 	const renderHeader = useCallback(
-		({ _id, first_name, last_name, avg_score }: HackerApplicantSummary) => (
+		({
+			_id,
+			first_name,
+			last_name,
+			avg_score,
+			decision,
+			auto_decision_reason,
+		}: HackerApplicantSummary) => (
 			<CardHeader
 				_id={_id}
 				first_name={first_name}
 				last_name={last_name}
 				hackathonName={hackathonName}
 				avg_score={avg_score}
+				decision={decision}
+				auto_decision_reason={auto_decision_reason}
 			/>
 		),
 		[hackathonName],
@@ -305,9 +315,16 @@ const CardHeader = ({
 	last_name,
 	hackathonName,
 	avg_score,
+	decision,
+	auto_decision_reason,
 }: Pick<
 	HackerApplicantSummary,
-	"_id" | "first_name" | "last_name" | "avg_score"
+	| "_id"
+	| "first_name"
+	| "last_name"
+	| "avg_score"
+	| "decision"
+	| "auto_decision_reason"
 > & {
 	hackathonName: "irvinehacks" | "zothacks";
 }) => {
@@ -324,6 +341,7 @@ const CardHeader = ({
 			{avg_score === OVERQUALIFIED_SCORE && (
 				<Badge color="red">OVERQUALIFIED</Badge>
 			)}
+			<AutoDecisionBadge reason={auto_decision_reason} decision={decision} />
 		</SpaceBetween>
 	);
 };

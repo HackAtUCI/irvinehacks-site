@@ -87,6 +87,8 @@ class SimplifiedApplicantSummary(BaseRecord):
     first_name: str
     last_name: str
     status: str
+    decision: Optional[Decision] = None
+    auto_decision_reason: Optional[str] = None
     application_data: SimplifiedApplicationDataSummary
 
 
@@ -95,6 +97,7 @@ class ApplicantSummary(BaseRecord):
     last_name: str
     status: str
     decision: Optional[Decision] = None
+    auto_decision_reason: Optional[str] = None
     application_data: ApplicationDataSummary
 
 
@@ -103,6 +106,7 @@ class HackerApplicantSummary(BaseRecord):
     last_name: str
     status: str
     decision: Optional[Decision] = None
+    auto_decision_reason: Optional[str] = None
     reviewers: list[str] = []
     resume_reviewed: bool = False
     avg_score: float
@@ -168,9 +172,13 @@ async def mentor_volunteer_applicants(
             "status",
             "first_name",
             "last_name",
+            "roles",
             "application_data.school",
             "application_data.submission_time",
             "application_data.reviews",
+            "application_data.is_18_older",
+            "application_data.education_level",
+            "application_data.graduation_year",
         ],
     )
 
@@ -218,6 +226,7 @@ async def hacker_applicants(
             "status",
             "first_name",
             "last_name",
+            "roles",
             "application_data",
         ],
         sort=[("application_data.submission_time", DESCENDING)],

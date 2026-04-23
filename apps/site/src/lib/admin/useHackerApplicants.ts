@@ -9,6 +9,7 @@ export interface HackerApplicantSummary {
 	last_name: string;
 	status: Status;
 	decision: Decision | null;
+	auto_decision_reason: string | null;
 	reviewers: ReadonlyArray<string>;
 	avg_score: number;
 	resume_reviewed: boolean;

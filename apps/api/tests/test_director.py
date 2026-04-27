@@ -269,3 +269,71 @@ def test_release_hacker_decisions_works(
 
     assert res.status_code == 200
     assert returned_records[0]["decision"] == Decision.ACCEPTED
+
+
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_void_applicant_succeeds(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_update_one: AsyncMock,
+) -> None:
+    """Test that a director can void an applicant."""
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        {"status": "REVIEWED"},
+    ]
+    mock_mongodb_handler_update_one.return_value = True
+
+    res = director_client.post("/void-applicant/edu.uci.someone")
+
+    assert res.status_code == 200
+    mock_mongodb_handler_update_one.assert_awaited_once_with(
+        Collection.USERS,
+        {"_id": "edu.uci.someone"},
+        {"status": Decision.VOIDED, "decision": Decision.VOIDED},
+    )
+
+
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_void_applicant_404_when_missing(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_update_one: AsyncMock,
+) -> None:
+    """Test that voiding a non-existent applicant returns 404."""
+    mock_mongodb_handler_retrieve_one.side_effect = [DIRECTOR_IDENTITY, None]
+
+    res = director_client.post("/void-applicant/edu.uci.ghost")
+
+    assert res.status_code == 404
+    mock_mongodb_handler_update_one.assert_not_awaited()
+
+
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_void_applicant_400_when_already_voided(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_update_one: AsyncMock,
+) -> None:
+    """Test that voiding an already-voided applicant returns 400."""
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        {"status": Decision.VOIDED},
+    ]
+
+    res = director_client.post("/void-applicant/edu.uci.someone")
+
+    assert res.status_code == 400
+    mock_mongodb_handler_update_one.assert_not_awaited()
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_void_applicant_forbidden_for_non_director(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test that non-directors cannot void applicants."""
+    mock_mongodb_handler_retrieve_one.return_value = HACKER_REVIEWER_IDENTITY
+
+    res = reviewer_client.post("/void-applicant/edu.uci.someone")
+
+    assert res.status_code == 403

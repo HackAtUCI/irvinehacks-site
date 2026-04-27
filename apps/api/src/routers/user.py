@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from logging import getLogger
-from typing import Annotated, Any, Optional, Union
+from typing import Annotated, Any, Literal, Optional, Union
 from urllib.parse import urlencode
 
 from fastapi import (
@@ -315,12 +315,15 @@ async def _apply_flow(
         status=Status.PENDING_REVIEW,
     )
 
-    # add applicant to database
+    # add applicant to database and clear any drafts
     try:
-        await mongodb_handler.update_one(
+        await mongodb_handler.raw_update_one(
             Collection.USERS,
             {"_id": user.uid},
-            applicant.model_dump(),
+            {
+                "$set": applicant.model_dump(),
+                "$unset": {"draft_application_data": ""},
+            },
             upsert=True,
         )
     except RuntimeError:
@@ -342,6 +345,63 @@ async def _apply_flow(
         "Thank you for submitting an application to ZotHacks 2025! Please "
         + "visit https://zothacks.com/portal to see your application status."
     )
+
+
+class DraftApplicationData(BaseModel):
+    application_type: Literal["Hacker", "Mentor", "Volunteer"]
+    fields: dict[str, str]
+
+
+class DraftApplicationResponse(BaseModel):
+    draft_application_data: Union[DraftApplicationData, None] = None
+
+
+@router.get("/application/draft")
+async def get_application_draft(
+    user: Annotated[User, Depends(require_user_identity)],
+) -> DraftApplicationResponse:
+    user_record = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": user.uid}, ["draft_application_data"]
+    )
+
+    if not user_record:
+        return DraftApplicationResponse()
+
+    return DraftApplicationResponse(**user_record)
+
+
+@router.post("/application/draft", status_code=status.HTTP_204_NO_CONTENT)
+async def save_application_draft(
+    user: Annotated[User, Depends(require_user_identity)],
+    draft: DraftApplicationData,
+) -> None:
+    now = datetime.now(timezone.utc)
+
+    if _is_past_deadline(now):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Applications have closed.")
+
+    existing_record = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": user.uid, "roles": {"$exists": True}}, ["roles"]
+    )
+
+    if existing_record and existing_record.get("roles"):
+        log.error(
+            "User %s already has role %s but tried to save a draft.",
+            user,
+            existing_record["roles"],
+        )
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "User already has a role.")
+
+    try:
+        await mongodb_handler.raw_update_one(
+            Collection.USERS,
+            {"_id": user.uid},
+            {"$set": {"draft_application_data": draft.model_dump()}},
+            upsert=True,
+        )
+    except RuntimeError:
+        log.error("Could not save draft for user %s to MongoDB.", user.uid)
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @router.get("/waiver")

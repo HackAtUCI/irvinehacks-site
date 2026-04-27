@@ -1,4 +1,5 @@
 from unittest.mock import AsyncMock, patch
+
 from fastapi import FastAPI
 
 from routers import user
@@ -23,7 +24,8 @@ client = UserTestClient(TEST_USER, app)
 def test_autosave_draft(
     mock_raw_update_one: AsyncMock,
     mock_retrieve_one: AsyncMock,
-):
+) -> None:
+    """Test that autosave draft works when user has no existing role."""
     # No existing role → allow draft
     mock_retrieve_one.return_value = None
     mock_raw_update_one.return_value = True

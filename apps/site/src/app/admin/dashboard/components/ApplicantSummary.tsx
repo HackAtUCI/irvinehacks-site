@@ -61,7 +61,7 @@ function ApplicantSummary() {
 		Status.Confirmed,
 		Status.Attending,
 		Status.Queued,
-		Status.Voided
+		Status.Voided,
 	].map((status) => ({
 		title: status,
 		value: (summary as Record<string, number>)[status] ?? 0,

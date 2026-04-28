@@ -747,10 +747,10 @@ async def _handle_global_only_review(
 
     # Check if applicant is voided before submitted review
     applicant_record = await mongodb_handler.retrieve_one(
-            Collection.USERS,
-            {"_id": applicant},
-            ["status"],
-        )
+        Collection.USERS,
+        {"_id": applicant},
+        ["status"],
+    )
     if applicant_record and applicant_record.get("status") == Decision.VOIDED:
         log.error(
             "%s tried to submit global-only review on voided applicant %s",

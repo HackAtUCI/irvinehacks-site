@@ -16,6 +16,7 @@ import { ParticipantRole } from "@/lib/userRecord";
 import { ScoredFields } from "@/lib/detailedScores";
 import ZotHacksHackerApplication from "../zothacks-hackers/components/ZotHacksHackerApplication";
 import HackerApplicantActions from "./HackerApplicantActions";
+import VoidApplicantButton from "./VoidApplicantButton";
 import { ZothacksHackerScoringGuidelinesType } from "../zothacks-hackers/components/getScoringGuidelines";
 
 interface ApplicantProps {
@@ -30,8 +31,13 @@ function DetailedScoreApplicant({
 	guidelines,
 }: ApplicantProps) {
 	const { setNotifications } = useContext(NotificationContext);
-	const { applicant, loading, submitDetailedReview, deleteNotes } =
-		useApplicant(uid, applicationType);
+	const {
+		applicant,
+		loading,
+		submitDetailedReview,
+		deleteNotes,
+		voidApplicant,
+	} = useApplicant(uid, applicationType);
 	const [scores, setScores] = useState<ScoredFields>({});
 	const [notes, setNotes] = useState("");
 
@@ -78,15 +84,26 @@ function DetailedScoreApplicant({
 					description="Applicant"
 					actions={
 						applicant.roles.includes(ParticipantRole.Hacker) ? (
-							<HackerApplicantActions
-								applicant={applicant._id}
-								reviews={application_data.reviews}
-								scores={scores}
-								notes={notes}
-								onSubmitDetailedReview={handleSubmitDetailedReview}
-							/>
+							<SpaceBetween direction="horizontal" size="xs">
+								<VoidApplicantButton
+									uid={applicant._id}
+									status={applicant.status}
+									onVoid={voidApplicant}
+								/>
+								<HackerApplicantActions
+									applicant={applicant._id}
+									reviews={application_data.reviews}
+									scores={scores}
+									notes={notes}
+									onSubmitDetailedReview={handleSubmitDetailedReview}
+								/>
+							</SpaceBetween>
 						) : (
-							<></>
+							<VoidApplicantButton
+								uid={applicant._id}
+								status={applicant.status}
+								onVoid={voidApplicant}
+							/>
 						)
 					}
 				>

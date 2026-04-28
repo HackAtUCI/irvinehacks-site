@@ -60,8 +60,7 @@ function VoidApplicantButton({
 						setNotifications((prev) => prev.filter((msg) => msg.id !== id));
 				},
 			};
-			if (setNotifications)
-				setNotifications((prev) => [errorMessage, ...prev]);
+			if (setNotifications) setNotifications((prev) => [errorMessage, ...prev]);
 		}
 	};
 

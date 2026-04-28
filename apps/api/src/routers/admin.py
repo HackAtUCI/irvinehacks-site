@@ -411,11 +411,17 @@ async def submit_review(
     applicant_record = await mongodb_handler.retrieve_one(
         Collection.USERS,
         {"_id": applicant_review.applicant},
-        ["_id", "application_data.reviews", "roles"],
+        ["_id", "application_data.reviews", "roles", "status"],
     )
     if not applicant_record:
         log.error("Could not retrieve applicant after submitting review")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    if applicant_record.get("status") == Decision.VOIDED:
+        log.error("%s tried to review voided applicant %s", reviewer, app)
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST, "Cannot review a voided applicant."
+        )
 
     if Role.HACKER in applicant_record["roles"]:
         if applicant_review.score < 0 or applicant_review.score > 10:
@@ -502,7 +508,7 @@ async def delete_notes(
     applicant_record = await mongodb_handler.retrieve_one(
         Collection.USERS,
         {"_id": delete_notes_request.applicant},
-        ["_id", "application_data.reviews", "roles"],
+        ["_id", "application_data.reviews", "roles", "status"],
     )
 
     # Check if applicant record exists
@@ -511,6 +517,17 @@ async def delete_notes(
             "Could not retrieve applicant while attempting to delete reviewer notes"
         )
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    if applicant_record.get("status") == Decision.VOIDED:
+        log.error(
+            "%s tried to delete notes on voided applicant %s",
+            reviewer,
+            delete_notes_request.applicant,
+        )
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            "Cannot modify reviews on a voided applicant.",
+        )
 
     # Check if review index is valid and belongs to reviewer
     reviews = applicant_record.get("application_data", {}).get("reviews", [])
@@ -728,6 +745,22 @@ async def _handle_global_only_review(
     # Check if user has LEAD role for resume-only reviews
     await require_lead(reviewer)
 
+    # Check if applicant is voided before submitted review
+    applicant_record = await mongodb_handler.retrieve_one(
+            Collection.USERS,
+            {"_id": applicant},
+            ["status"],
+        )
+    if applicant_record and applicant_record.get("status") == Decision.VOIDED:
+        log.error(
+            "%s tried to submit global-only review on voided applicant %s",
+            reviewer,
+            applicant,
+        )
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST, "Cannot review a voided applicant."
+        )
+
     # Update the user record with global field scores
     await mongodb_handler.update_one(
         Collection.USERS,
@@ -768,11 +801,21 @@ async def _handle_irvinehacks_detailed_scores_review(
     applicant_record = await mongodb_handler.retrieve_one(
         Collection.USERS,
         {"_id": applicant},
-        ["_id", "application_data.reviews", "roles"],
+        ["_id", "application_data.reviews", "roles", "status"],
     )
     if not applicant_record:
         log.error("Could not retrieve applicant after submitting review")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    if applicant_record.get("status") == Decision.VOIDED:
+        log.error(
+            "%s tried to submit IH detailed review on voided applicant %s",
+            reviewer,
+            applicant,
+        )
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST, "Cannot review a voided applicant."
+        )
 
     unique_reviewers = applicant_review_processor.get_unique_reviewers(applicant_record)
 
@@ -839,11 +882,22 @@ async def _handle_detailed_scores_review(
             "_id",
             "application_data.reviews",
             "roles",
+            "status",
         ],
     )
     if not applicant_record:
         log.error("Could not retrieve applicant after submitting review")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    if applicant_record.get("status") == Decision.VOIDED:
+        log.error(
+            "%s tried to submit detailed review on voided applicant %s",
+            reviewer,
+            applicant,
+        )
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST, "Cannot review a voided applicant."
+        )
 
     if Role.HACKER in applicant_record["roles"]:
         unique_reviewers = applicant_review_processor.get_unique_reviewers(

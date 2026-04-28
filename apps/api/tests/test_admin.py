@@ -774,6 +774,39 @@ async def test_handle_detailed_scores_review_applicant_not_found(
     mock_mongodb_handler_retrieve_one.assert_awaited_once()
 
 
+@patch("routers.admin.require_lead", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_handle_detailed_scores_review_voided_applicant(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_require_lead: AsyncMock,
+) -> None:
+    """Test detailed scores review submission fails for a voided applicant."""
+    applicant = "edu.uci.test"
+    scores = ZotHacksHackerDetailedScores(
+        resume=8,
+        elevator_pitch_saq=7,
+        tech_experience_saq=9,
+        learn_about_self_saq=6,
+        pixel_art_saq=8,
+        hackathon_experience=10,
+    )
+    reviewer = USER_REVIEWER
+
+    mock_mongodb_handler_retrieve_one.return_value = {
+        "_id": applicant,
+        "roles": ["Applicant", "Hacker"],
+        "status": Decision.VOIDED,
+        "application_data": {"reviews": []},
+    }
+
+    with pytest.raises(HTTPException) as exc_info:
+        await _handle_detailed_scores_review(applicant, scores, reviewer)
+
+    assert exc_info.value.status_code == 400
+    assert exc_info.value.detail == "Cannot review a voided applicant."
+    mock_mongodb_handler_retrieve_one.assert_awaited_once()
+
+
 @patch("services.mongodb_handler.raw_update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 async def test_delete_reviewer_notes_success(

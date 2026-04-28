@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 from fastapi import FastAPI
 
@@ -18,16 +18,17 @@ TEST_USER = NativeUser(
 client = UserTestClient(TEST_USER, app)
 
 
-@patch("services.mongodb_handler.get_database")
-def test_autosave_draft(mock_db: MagicMock) -> None:
-    """Test that autosave draft works when user has no existing role."""
-    mock_collection = AsyncMock()
-    mock_collection.find_one.return_value = None
-    mock_collection.update_one.return_value = MagicMock(acknowledged=True)
-
-    mock_db_instance = MagicMock()
-    mock_db_instance.__getitem__.return_value = mock_collection
-    mock_db.return_value = mock_db_instance
+@patch("routers.user._is_past_deadline", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+def test_autosave_draft(
+    mock_raw_update_one: AsyncMock,
+    mock_retrieve_one: AsyncMock,
+    mock_is_past_deadline: Mock,
+) -> None:
+    mock_retrieve_one.return_value = None
+    mock_raw_update_one.return_value = None
+    mock_is_past_deadline.return_value = False
 
     res = client.post(
         "/application/draft",

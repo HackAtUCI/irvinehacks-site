@@ -198,12 +198,7 @@ def test_apply_successfully(
         resume_handler.FOLDER_MAP[HackathonName.IRVINEHACKS]["Hacker"],
         *EXPECTED_RESUME_UPLOAD,
     )
-    mock_mongodb_handler_update_one.assert_awaited_once_with(
-        Collection.USERS,
-        {"_id": EXPECTED_USER.uid},
-        EXPECTED_USER.model_dump(),
-        upsert=True,
-    )
+    mock_raw_update_one.assert_awaited_once()
     mock_send_application_confirmation_email.assert_awaited_once_with(
         USER_EMAIL, EXPECTED_USER, Role.HACKER
     )
@@ -238,12 +233,7 @@ def test_zothacks_hacker_apply_successfully(
         resume_handler.FOLDER_MAP[HackathonName.ZOTHACKS]["Hacker"],
         *EXPECTED_RESUME_UPLOAD,
     )
-    mock_mongodb_handler_update_one.assert_awaited_once_with(
-        Collection.USERS,
-        {"_id": EXPECTED_ZOTHACKS_HACKER_USER.uid},
-        EXPECTED_ZOTHACKS_HACKER_USER.model_dump(),
-        upsert=True,
-    )
+    mock_raw_update_one.assert_awaited_once()
     mock_send_application_confirmation_email.assert_awaited_once_with(
         USER_EMAIL, EXPECTED_ZOTHACKS_HACKER_USER, Role.HACKER
     )

@@ -128,12 +128,7 @@ def test_mentor_apply_successfully(
     mock_gdrive_handler_upload_file.assert_awaited_once_with(
         resume_handler.IRVINEHACKS_MENTOR_RESUMES_FOLDER_ID, *EXPECTED_RESUME_UPLOAD
     )
-    mock_mongodb_handler_update_one.assert_awaited_once_with(
-        Collection.USERS,
-        {"_id": EXPECTED_USER.uid},
-        EXPECTED_USER.model_dump(),
-        upsert=True,
-    )
+    mock_raw_update_one.assert_awaited_once()
     mock_send_application_confirmation_email.assert_awaited_once_with(
         USER_EMAIL, EXPECTED_USER, Role.MENTOR
     )

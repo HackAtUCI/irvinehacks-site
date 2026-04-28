@@ -510,9 +510,7 @@ async def void_applicant(
         raise HTTPException(status.HTTP_404_NOT_FOUND)
 
     if record["status"] == Decision.VOIDED:
-        raise HTTPException(
-            status.HTTP_400_BAD_REQUEST, "Applicant is already voided."
-        )
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Applicant is already voided.")
 
     ok = await mongodb_handler.update_one(
         Collection.USERS,

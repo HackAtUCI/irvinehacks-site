@@ -21,6 +21,14 @@ function Message({ status, decision }: MessageProps) {
 				next year!
 			</p>
 		);
+	} else if (decision === Decision.Voided) {
+		message = (
+			<p className="mb-0">
+				Thank you for applying to IrvineHacks this year. Unfortunately, your
+				application has been voided and is no longer being considered for this
+				year&apos;s event. We would love to see you apply again next year!
+			</p>
+		);
 	} else if (status === Status.Confirmed) {
 		message = (
 			<p className="mb-0">
@@ -81,6 +89,7 @@ function Message({ status, decision }: MessageProps) {
 			case Status.Accepted:
 			case Status.Signed:
 			case Status.Attending:
+			case Status.Voided:
 			case PostAcceptedStatus.Queued: {
 				message = <></>;
 				break;
@@ -114,7 +123,7 @@ function Message({ status, decision }: MessageProps) {
 					Status.Confirmed,
 				] as Status[]
 			).includes(status)) ||
-		([Decision.Rejected] as Decision[]).includes(decision);
+		([Decision.Rejected, Decision.Voided] as Decision[]).includes(decision);
 
 	return (
 		showMessage && (

@@ -45,7 +45,9 @@ function Portal() {
 	const needsToSignWaiver = isAccepted || (isWaitlisted && waitlistStarted);
 	const needsToRSVP = isAccepted || (isWaitlisted && waitlistOpen);
 
-	const rejected = status === Status.Rejected;
+	const showReturnHome =
+		status === Status.Rejected ||
+		status === Status.Voided
 
 	return (
 		<div className="relative">
@@ -77,7 +79,7 @@ function Portal() {
 					/>
 				)}
 				{needsToRSVP && <ConfirmAttendance status={status as Status} />}
-				{rejected && <ReturnHome />}
+				{showReturnHome && <ReturnHome />}
 			</div>
 		</div>
 	);

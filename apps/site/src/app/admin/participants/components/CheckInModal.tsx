@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
+import Alert from "@cloudscape-design/components/alert";
 import Box from "@cloudscape-design/components/box";
 import Button from "@cloudscape-design/components/button";
 import Modal from "@cloudscape-design/components/modal";
@@ -13,25 +14,73 @@ export interface ActionModalProps {
 	onDismiss: () => void;
 	onConfirm: (participant: Participant, type: string) => void;
 	participant: Participant | null;
+	checkInConfirmed: boolean;
 }
 
-function CheckInModal({ onDismiss, onConfirm, participant }: ActionModalProps) {
+function CheckInModal({
+	onDismiss,
+	onConfirm,
+	participant,
+	checkInConfirmed,
+}: ActionModalProps) {
 	const [selectedType, setSelectedType] = useState("accepted");
+	const [showExitWarning, setShowExitWarning] = useState(false);
+
+	useEffect(() => {
+		setShowExitWarning(false);
+		setSelectedType("accepted");
+	}, [participant]);
 
 	if (!participant) {
 		return null;
 	}
 
+	const handleDismiss = () => {
+		if (showExitWarning || checkInConfirmed) {
+			onDismiss();
+		} else {
+			setShowExitWarning(true);
+		}
+	};
+
+	if (checkInConfirmed) {
+		return (
+			<Modal
+				onDismiss={onDismiss}
+				visible={true}
+				footer={
+					<Box float="right">
+						<Button variant="primary" onClick={onDismiss}>
+							Close
+						</Button>
+					</Box>
+				}
+				header={`Participant Name: ${participant.first_name} ${participant.last_name}`}
+			>
+				<Alert type="success">
+					{participant.first_name} {participant.last_name} has been successfully
+					checked in!
+				</Alert>
+			</Modal>
+		);
+	}
+
 	return (
 		<Modal
-			onDismiss={onDismiss}
+			onDismiss={handleDismiss}
 			visible={true}
 			footer={
 				<Box float="right">
 					<SpaceBetween direction="horizontal" size="xs">
-						<Button variant="link" onClick={onDismiss}>
-							Cancel
-						</Button>
+						{showExitWarning ? (
+							<Button variant="link" onClick={onDismiss}>
+								Exit Anyway
+							</Button>
+						) : (
+							<Button variant="link" onClick={handleDismiss}>
+								Cancel
+							</Button>
+						)}
 						<Button
 							variant="primary"
 							onClick={() => onConfirm(participant, selectedType)}
@@ -41,9 +90,15 @@ function CheckInModal({ onDismiss, onConfirm, participant }: ActionModalProps) {
 					</SpaceBetween>
 				</Box>
 			}
-			header={`Participant Name: ${participant?.first_name} ${participant?.last_name}`}
+			header={`Participant Name: ${participant.first_name} ${participant.last_name}`}
 		>
 			<SpaceBetween size="s">
+				{showExitWarning && (
+					<Alert type="warning">
+						You haven&apos;t checked in this participant yet.
+					</Alert>
+				)}
+
 				{selectedType === "accepted" && (
 					<div>
 						<p>

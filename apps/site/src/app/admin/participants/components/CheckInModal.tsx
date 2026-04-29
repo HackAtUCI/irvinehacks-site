@@ -105,29 +105,24 @@ function CheckInModal({
 							<strong>General Check-in Instructions</strong>
 						</p>
 						<TextContent>
-							<ol>
-								<li>
-									Ask for a photo ID and check participant is 18+ years old.
-								</li>
-								<li>Have participant sign the SPFB sheet.</li>
-								<li>
-									Check if the participant has joined Slack (there is a column
-									to indicate it). If not, ask a check-in lead to add them.
-								</li>
-								<li>Ask participant to fill in badge.</li>
+							<ul>
+								<li>Photo ID, 18+</li>
+								<li>Sign the SPFB sheet</li>
+								<li>Joined Slack? If not, ask for check-in lead</li>
+								<li>Fill in badge</li>
 								<li>
 									Inform participant regarding the following:
-									<ol>
-										<li>Can head inside ballroom to talk to sponsors.</li>
-										<li>Team formation starts at 7pm at Moss Cove B.</li>
-										<li>Opening ceremony starts at 8pm.</li>
+									<ul>
+										<li>Talk to sponsors inside ballroom</li>
+										<li>Team formation starts at 7pm at Moss Cove B</li>
+										<li>Opening ceremony starts at 8pm</li>
 										<li>
 											Schedule is available on website at
 											<b> irvinehacks.com/schedule.</b>
 										</li>
-									</ol>
+									</ul>
 								</li>
-							</ol>
+							</ul>
 						</TextContent>
 					</div>
 				)}

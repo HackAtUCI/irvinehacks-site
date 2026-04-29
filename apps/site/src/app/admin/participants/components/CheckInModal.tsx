@@ -50,29 +50,28 @@ function CheckInModal({ onDismiss, onConfirm, participant }: ActionModalProps) {
 							<strong>General Check-in Instructions</strong>
 						</p>
 						<TextContent>
-							<ol>
+							<ul>
 								<li>
-									Ask for a photo ID and check participant is 18+ years old.
+									Photo ID, 18+
 								</li>
-								<li>Have participant sign the SPFB sheet.</li>
+								<li>Sign the SPFB sheet</li>
 								<li>
-									Check if the participant has joined Slack (there is a column
-									to indicate it). If not, ask a check-in lead to add them.
+									Joined Slack? If not, ask for check-in lead
 								</li>
-								<li>Ask participant to fill in badge.</li>
+								<li>Fill in badge</li>
 								<li>
 									Inform participant regarding the following:
-									<ol>
-										<li>Can head inside ballroom to talk to sponsors.</li>
-										<li>Team formation starts at 7pm at Moss Cove B.</li>
-										<li>Opening ceremony starts at 8pm.</li>
+									<ul>
+										<li>Talk to sponsors inside ballroom</li>
+										<li>Team formation starts at 7pm at Moss Cove B</li>
+										<li>Opening ceremony starts at 8pm</li>
 										<li>
 											Schedule is available on website at
 											<b> irvinehacks.com/schedule.</b>
 										</li>
-									</ol>
+									</ul>
 								</li>
-							</ol>
+							</ul>
 						</TextContent>
 					</div>
 				)}

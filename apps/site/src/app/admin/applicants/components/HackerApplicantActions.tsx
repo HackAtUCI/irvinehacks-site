@@ -73,17 +73,19 @@ function HackerApplicantActions({
 
 		if (hasMissingFields) {
 			const msgId = `missing-fields-${Date.now()}`;
+			const dismiss = () =>
+				setNotifications?.((prev) => prev.filter((m) => m.id !== msgId));
 			setNotifications?.((prev) => [
 				{
 					type: "error",
 					content: "Missing required fields.",
 					id: msgId,
 					dismissible: true,
-					onDismiss: () =>
-						setNotifications((prev) => prev.filter((m) => m.id !== msgId)),
+					onDismiss: dismiss,
 				} as FlashbarProps.MessageDefinition,
 				...prev,
 			]);
+			setTimeout(dismiss, 3000);
 			return;
 		}
 

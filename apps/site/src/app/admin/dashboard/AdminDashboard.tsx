@@ -4,6 +4,7 @@ import { useContext } from "react";
 
 import ContentLayout from "@cloudscape-design/components/content-layout";
 import SpaceBetween from "@cloudscape-design/components/space-between";
+import ExpandableSection from "@cloudscape-design/components/expandable-section";
 
 import { isApplicationManager } from "@/lib/admin/authorization";
 import UserContext from "@/lib/admin/UserContext";
@@ -21,8 +22,17 @@ function AdminDashboard() {
 			<SpaceBetween size="l">
 				<HackerCount />
 				{isApplicationManager(roles) && <ApplicantSummary />}
-				{isApplicationManager(roles) && <ApplicantTable />}
-				{isApplicationManager(roles) && <ReviewerSummary />}
+				{isApplicationManager(roles) && (
+					<ExpandableSection headerText="Applicant Table" defaultExpanded>
+						<ApplicantTable />
+					</ExpandableSection>
+				)}
+
+				{isApplicationManager(roles) && (
+					<ExpandableSection headerText="Reviewer Summary" defaultExpanded>
+						<ReviewerSummary />
+					</ExpandableSection>
+				)}
 			</SpaceBetween>
 		</ContentLayout>
 	);

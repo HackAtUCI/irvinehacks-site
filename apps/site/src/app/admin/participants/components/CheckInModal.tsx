@@ -51,13 +51,9 @@ function CheckInModal({ onDismiss, onConfirm, participant }: ActionModalProps) {
 						</p>
 						<TextContent>
 							<ul>
-								<li>
-									Photo ID, 18+
-								</li>
+								<li>Photo ID, 18+</li>
 								<li>Sign the SPFB sheet</li>
-								<li>
-									Joined Slack? If not, ask for check-in lead
-								</li>
+								<li>Joined Slack? If not, ask for check-in lead</li>
 								<li>Fill in badge</li>
 								<li>
 									Inform participant regarding the following:

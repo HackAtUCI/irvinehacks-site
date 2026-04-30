@@ -119,9 +119,7 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 						)
 					}
 				>
-					{isUserDirector
-						? `${first_name} ${last_name}`
-						: uidToPseudonym(uid)}
+					{isUserDirector ? `${first_name} ${last_name}` : uidToPseudonym(uid)}
 				</Header>
 			}
 		>

@@ -19,18 +19,19 @@ import { isDirector } from "@/lib/admin/authorization";
 import AddOrganizer from "./AddOrganizer";
 import useOrganizers, { Organizer } from "@/lib/admin/useOrganizers";
 
-const createCardHeaderFactory =
-	(
-		onEdit: (organizer: Organizer) => void,
-		onRemove: (organizer: Organizer) => void,
-	) =>
-	(organizer: Organizer) => (
-		<CardHeader
-			organizer={organizer}
-			onEdit={() => onEdit(organizer)}
-			onRemove={() => onRemove(organizer)}
-		/>
-	);
+const createCardHeaderFactory = (
+	onEdit: (organizer: Organizer) => void,
+	onRemove: (organizer: Organizer) => void,
+) =>
+	function OrganizerCardHeader(organizer: Organizer) {
+		return (
+			<CardHeader
+				organizer={organizer}
+				onEdit={() => onEdit(organizer)}
+				onRemove={() => onRemove(organizer)}
+			/>
+		);
+	};
 
 function Organizers() {
 	const router = useRouter();

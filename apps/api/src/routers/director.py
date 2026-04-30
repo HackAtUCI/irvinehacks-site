@@ -153,6 +153,40 @@ async def add_organizer(
     )
 
 
+@router.post("/update-organizers")
+async def update_organizer(
+    user: Annotated[User, Depends(require_director)],
+    uid: str = Body(..., embed=True),
+    roles: list[Role] = Body(),
+) -> None:
+    """Updates organizer's roles"""
+    log.info("%s updating %s's roles", user, uid)
+
+    await mongodb_handler.update_one(
+        Collection.USERS,
+        {"_id": uid},
+        {
+            "_id": uid,
+            "roles": roles,
+        },
+        upsert=True,
+    )
+
+
+@router.post("/delete-organizers")
+async def delete_organizer(
+    user: Annotated[User, Depends(require_director)],
+    uid: str = Body(..., embed=True)
+) -> None:
+    """Delete organizer from all perms"""
+    log.info("%s clearing %s's roles", user, uid)
+
+    await mongodb_handler.delete_one(
+        Collection.USERS,
+        {"_id": uid},
+    )
+
+
 @router.get("/apply-reminder", dependencies=[Depends(require_director)])
 async def get_apply_reminder_senders() -> list[tuple[datetime, str, int]]:
     """Get data about every sender that sent out apply reminder emails"""

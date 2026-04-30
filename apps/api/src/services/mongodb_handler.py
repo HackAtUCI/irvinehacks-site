@@ -188,3 +188,18 @@ async def bulk_update(
 
     log.info(f"Bulk write completed: {result.modified_count} documents modified")
     return result.modified_count > 0
+
+
+async def delete_one(
+    collection: Collection,
+    query: Mapping[str, object],
+) -> bool:
+    """Delete a single document matching the query."""
+    DB = get_database()
+    COLLECTION = DB[collection.value]
+    result = await COLLECTION.delete_one(query)
+    if not result.acknowledged:
+        log.error("MongoDB document deletion was not acknowledged")
+        raise RuntimeError("Could not delete document from MongoDB collection")
+    return result.deleted_count > 0
+

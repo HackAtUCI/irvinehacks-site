@@ -450,7 +450,27 @@ async def waiver_webhook(
 
 
 DEFAULT_CHECKIN_TIME = "17:00"
-ARRIVAL_TIMES = (DEFAULT_CHECKIN_TIME, "18:00", "18:30", "19:00", "19:30")
+WAITLIST_DEFAULT_CHECKIN_TIME = "18:00"
+ACCEPTED_LATE_ARRIVAL_TIMES = ("18:00", "18:30", "19:00", "19:30")
+WAITLIST_LATE_ARRIVAL_TIMES = ("19:00", "19:30", "20:00", "20:30")
+ARRIVAL_TIMES = (
+    DEFAULT_CHECKIN_TIME,
+    WAITLIST_DEFAULT_CHECKIN_TIME,
+    *ACCEPTED_LATE_ARRIVAL_TIMES,
+    *WAITLIST_LATE_ARRIVAL_TIMES,
+)
+
+
+def _allowed_late_arrival_times(decision: Optional[str]) -> tuple[str, ...]:
+    if decision == Decision.WAITLISTED:
+        return WAITLIST_LATE_ARRIVAL_TIMES
+    return ACCEPTED_LATE_ARRIVAL_TIMES
+
+
+def _default_checkin_for(decision: Optional[str]) -> str:
+    if decision == Decision.WAITLISTED:
+        return WAITLIST_DEFAULT_CHECKIN_TIME
+    return DEFAULT_CHECKIN_TIME
 
 
 @router.post("/rsvp")
@@ -485,19 +505,24 @@ async def rsvp(
             "Waiver must be signed before being able to RSVP.",
         )
 
-    # Default check-in time is 5:00pm (17:00)
-    arrival_value: str = DEFAULT_CHECKIN_TIME
+    decision = user_record.get("decision")
+    allowed_late_times = _allowed_late_arrival_times(decision)
+    arrival_value: str = _default_checkin_for(decision)
+    is_late = False
     if arrival_time and arrival_time.strip():
-        if arrival_time.strip() not in ARRIVAL_TIMES:
+        submitted = arrival_time.strip()
+        if submitted not in allowed_late_times:
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST,
                 "Invalid arrival time.",
             )
-        arrival_value = arrival_time.strip()
+        arrival_value = submitted
+        is_late = True
 
     updated_fields: dict[str, Any] = {
         "status": new_status,
         "arrival_time": arrival_value,
+        "arrival_approved": is_late,
     }
     await mongodb_handler.update_one(
         Collection.USERS, {"_id": user.uid}, updated_fields
@@ -515,11 +540,14 @@ async def get_arrival_time(
 ) -> dict[str, Any]:
     """Get the current arrival time for the user."""
     user_record = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": user.uid}, ["arrival_time"]
+        Collection.USERS, {"_id": user.uid}, ["arrival_time", "arrival_approved"]
     )
     if not user_record:
-        return {"arrival_time": None}
-    return {"arrival_time": user_record.get("arrival_time")}
+        return {"arrival_time": None, "approved": False}
+    return {
+        "arrival_time": user_record.get("arrival_time"),
+        "approved": bool(user_record.get("arrival_approved", False)),
+    }
 
 
 @router.post("/rsvp/late-arrival")
@@ -541,21 +569,29 @@ async def rsvp_late_arrival(
             "You must RSVP before setting an arrival time.",
         )
 
-    # Default check-in time is 5:00pm (17:00)
-    arrival_value: str = DEFAULT_CHECKIN_TIME
+    decision = user_record.get("decision")
+    allowed_late_times = _allowed_late_arrival_times(decision)
+    arrival_value: str = _default_checkin_for(decision)
+    is_late = False
     if arrival_time and arrival_time.strip():
-        if arrival_time.strip() not in ARRIVAL_TIMES:
+        submitted = arrival_time.strip()
+        if submitted not in allowed_late_times:
             raise HTTPException(
                 status.HTTP_400_BAD_REQUEST,
                 "Invalid arrival time.",
             )
-        arrival_value = arrival_time.strip()
+        arrival_value = submitted
+        is_late = True
 
     await mongodb_handler.update_one(
-        Collection.USERS, {"_id": user.uid}, {"arrival_time": arrival_value}
+        Collection.USERS,
+        {"_id": user.uid},
+        {"arrival_time": arrival_value, "arrival_approved": is_late},
     )
 
-    log.info(f"User {user.uid} set arrival_time to {arrival_value}.")
+    log.info(
+        f"User {user.uid} set arrival_time to {arrival_value} (approved={is_late})."
+    )
 
     return RedirectResponse("/portal", status.HTTP_303_SEE_OTHER)
 

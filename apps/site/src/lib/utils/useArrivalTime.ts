@@ -3,6 +3,7 @@ import useSWR from "swr";
 
 export interface ArrivalTimeResponse {
 	arrival_time: string | null;
+	approved?: boolean;
 }
 
 const fetcher = async (url: string) => {

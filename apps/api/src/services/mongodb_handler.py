@@ -202,4 +202,3 @@ async def delete_one(
         log.error("MongoDB document deletion was not acknowledged")
         raise RuntimeError("Could not delete document from MongoDB collection")
     return result.deleted_count > 0
-

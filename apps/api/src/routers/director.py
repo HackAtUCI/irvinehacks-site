@@ -175,8 +175,7 @@ async def update_organizer(
 
 @router.post("/delete-organizers")
 async def delete_organizer(
-    user: Annotated[User, Depends(require_director)],
-    uid: str = Body(..., embed=True)
+    user: Annotated[User, Depends(require_director)], uid: str = Body(..., embed=True)
 ) -> None:
     """Delete organizer from all perms"""
     log.info("%s clearing %s's roles", user, uid)

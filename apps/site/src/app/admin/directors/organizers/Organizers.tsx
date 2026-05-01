@@ -114,8 +114,8 @@ function Organizers() {
 			/>
 
 			<ConfirmationModal
-				buttonText="Remove roles"
-				modalText={`Remove all admin roles for ${removingOrganizer?.first_name} ${removingOrganizer?.last_name}?`}
+				buttonText="Remove Organizer"
+				modalText={`Remove organizer ${removingOrganizer?.first_name} ${removingOrganizer?.last_name}?`}
 				onConfirm={async () => {
 					if (!removingOrganizer) {
 						return;

@@ -109,12 +109,12 @@ function CheckInModal({
 								<li>
 									<label>
 										<input type="checkbox" /> Check ID photo matches
-										participant's face
+										participant&apos;s face
 									</label>
 								</li>
 								<li>
 									<label>
-										<input type="checkbox" /> Check participant's{" "}
+										<input type="checkbox" /> Check participant&apos;s{" "}
 										<strong>date of birth </strong>
 										is before <strong>October 10, 2008</strong>
 									</label>

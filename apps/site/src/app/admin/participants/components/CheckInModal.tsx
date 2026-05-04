@@ -105,20 +105,66 @@ function CheckInModal({
 							<strong>General Check-in Instructions</strong>
 						</p>
 						<TextContent>
-							<ul>
-								<li>Photo ID, 18+</li>
-								<li>Sign the SPFB sheet</li>
-								<li>Joined Slack? If not, ask for check-in lead</li>
-								<li>Fill in badge</li>
+							<ul style={{ listStyle: "none", padding: 0 }}>
 								<li>
-									Inform participant regarding the following:
-									<ul>
-										<li>Talk to sponsors inside ballroom</li>
-										<li>Team formation starts at 7pm at Moss Cove B</li>
-										<li>Opening ceremony starts at 8pm</li>
+									<label>
+										<input type="checkbox" /> Check ID photo matches
+										participant's face
+									</label>
+								</li>
+								<li>
+									<label>
+										<input type="checkbox" /> Check participant's{" "}
+										<strong>date of birth </strong>
+										is before <strong>October 10, 2008</strong>
+									</label>
+								</li>
+								<li>
+									<label>
+										<input type="checkbox" /> Ask participant to sign the SPFB
+										sheet
+									</label>
+								</li>
+								<li>
+									<label>
+										<input type="checkbox" /> Joined Slack? If not, ask for
+										check-in lead
+									</label>
+								</li>
+								<li>
+									<label>
+										<input type="checkbox" /> Fill out badge
+									</label>
+								</li>
+								<li>
+									<label>
+										<input type="checkbox" /> Inform participant regarding the
+										following:
+									</label>
+									<ul style={{ listStyle: "none", padding: "0 0 0 1.5rem" }}>
 										<li>
-											Schedule is available on website at
-											<b> irvinehacks.com/schedule.</b>
+											<label>
+												<input type="checkbox" /> Talk to sponsors inside
+												ballroom
+											</label>
+										</li>
+										<li>
+											<label>
+												<input type="checkbox" /> Team formation starts at 7pm
+												at Moss Cove B
+											</label>
+										</li>
+										<li>
+											<label>
+												<input type="checkbox" /> Opening ceremony starts at 8pm
+											</label>
+										</li>
+										<li>
+											<label>
+												<input type="checkbox" /> Schedule is available on
+												website at
+												<b> irvinehacks.com/schedule.</b>
+											</label>
 										</li>
 									</ul>
 								</li>

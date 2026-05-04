@@ -108,7 +108,7 @@ function AdminSidebar() {
 	if (isCheckInLead(roles)) {
 		navigationItems.splice(1, 0, {
 			type: "link",
-			text: "Check-In Leads",
+			text: "Queue Management",
 			href: "/admin/checkin-leads",
 		});
 	}

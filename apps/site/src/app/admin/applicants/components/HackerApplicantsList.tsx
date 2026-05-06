@@ -211,9 +211,7 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 				)}
 				duplicateNameApproved={duplicate_name_approved}
 				isDirector={isUserDirector}
-				onApproveDuplicate={(approved) =>
-					approveDuplicateName(_id, approved)
-				}
+				onApproveDuplicate={(approved) => approveDuplicateName(_id, approved)}
 			/>
 		),
 		[hackathonName, duplicateNames, isUserDirector, approveDuplicateName],
@@ -362,8 +360,9 @@ const CardHeader = ({
 			? `/admin/applicants/zothacks-hackers/${_id}`
 			: `/admin/applicants/hackers/${_id}`;
 
-	const duplicateIcon = isDuplicate && (
-		duplicateNameApproved ? (
+	const duplicateIcon =
+		isDuplicate &&
+		(duplicateNameApproved ? (
 			<span
 				title={
 					isDirector
@@ -375,9 +374,7 @@ const CardHeader = ({
 					alignItems: "center",
 					cursor: isDirector ? "pointer" : "default",
 				}}
-				onClick={
-					isDirector ? () => onApproveDuplicate(false) : undefined
-				}
+				onClick={isDirector ? () => onApproveDuplicate(false) : undefined}
 			>
 				<Icon name="status-positive" variant="success" />
 			</span>
@@ -393,14 +390,11 @@ const CardHeader = ({
 					alignItems: "center",
 					cursor: isDirector ? "pointer" : "default",
 				}}
-				onClick={
-					isDirector ? () => onApproveDuplicate(true) : undefined
-				}
+				onClick={isDirector ? () => onApproveDuplicate(true) : undefined}
 			>
 				<Icon name="status-warning" variant="warning" />
 			</span>
-		)
-	);
+		));
 
 	return (
 		<div style={{ display: "flex", alignItems: "center", gap: "8px" }}>

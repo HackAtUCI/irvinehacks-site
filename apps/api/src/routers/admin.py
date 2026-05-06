@@ -22,7 +22,6 @@ from services import mongodb_handler
 from services.mongodb_handler import BaseRecord, Collection
 from utils import email_handler
 
-
 log = getLogger(__name__)
 
 router = APIRouter()
@@ -943,12 +942,10 @@ async def _try_update_applicant_with_query(
             update_query,
         )
         if not modified:
-            log.warning(
-                f"""
+            log.warning(f"""
                 Update query did not modify any documents
                 for {applicant}: {update_query}
-                """
-            )
+                """)
     except RuntimeError:
         log.error(err_msg)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)

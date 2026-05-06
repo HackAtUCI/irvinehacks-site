@@ -19,6 +19,7 @@ function Participants() {
 	} = useParticipants();
 	const [checkinParticipant, setCheckinParticipant] =
 		useState<Participant | null>(null);
+	const [checkInConfirmed, setCheckInConfirmed] = useState(false);
 
 	const { setNotifications } = useContext(NotificationContext);
 
@@ -65,7 +66,7 @@ function Participants() {
 			} else if (type === "waitlisted") {
 				await queueParticipant(participant);
 			}
-			setCheckinParticipant(null);
+			setCheckInConfirmed(true);
 			if (setNotifications) {
 				const message =
 					type === "accepted"
@@ -135,9 +136,13 @@ function Participants() {
 				updateWaiverStatus={onUpdateWaiver}
 			/>
 			<CheckInModal
-				onDismiss={() => setCheckinParticipant(null)}
+				onDismiss={() => {
+					setCheckinParticipant(null);
+					setCheckInConfirmed(false);
+				}}
 				onConfirm={sendCheckIn}
 				participant={checkinParticipant}
+				checkInConfirmed={checkInConfirmed}
 			/>
 		</>
 	);

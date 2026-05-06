@@ -23,6 +23,7 @@ function AddOrganizer() {
 	const [email, setEmail] = useState("");
 	const [firstName, setFirstName] = useState("");
 	const [lastName, setLastName] = useState("");
+	const [isCheckInLead, setCheckInLead] = useState(false);
 	const [isHackerReviewer, setHackerReviewer] = useState(true);
 	const [isMentorReviewer, setMentorReviewer] = useState(false);
 	const [isVolunteerReviewer, setVolunteerReviewer] = useState(false);
@@ -39,6 +40,9 @@ function AddOrganizer() {
 		}
 
 		const roles = ["Organizer"];
+		if (isCheckInLead) {
+			roles.push("Check-in Lead");
+		}
 		if (isHackerReviewer) {
 			roles.push("Hacker Reviewer");
 		}
@@ -94,6 +98,12 @@ function AddOrganizer() {
 					/>
 				</FormField>
 				<FormField label="Reviewer roles">
+					<Checkbox
+						onChange={({ detail }) => setCheckInLead(detail.checked)}
+						checked={isCheckInLead}
+					>
+						Check-in Lead
+					</Checkbox>
 					<Checkbox
 						onChange={({ detail }) => setHackerReviewer(detail.checked)}
 						checked={isHackerReviewer}

@@ -14,12 +14,12 @@ const fetcher = async (url: string) => {
 };
 
 function useOrganizers() {
-	const { data, error, isLoading } = useSWR<Organizer[]>(
+	const { data, error, isLoading, mutate } = useSWR<Organizer[]>(
 		"/api/director/organizers",
 		fetcher,
 	);
 
-	return { organizerList: data || [], loading: isLoading, error };
+	return { organizerList: data || [], loading: isLoading, error, mutate };
 }
 
 export default useOrganizers;

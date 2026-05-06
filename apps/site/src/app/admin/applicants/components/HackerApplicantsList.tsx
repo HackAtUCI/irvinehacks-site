@@ -60,7 +60,8 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 	const [selectedDecisions, setSelectedDecisions] = useState<Options>([]);
 	const [uciNetIDFilter, setUCINetIDFilter] = useState<Options>([]);
 
-	const { applicantList, loading } = useHackerApplicants();
+	const { applicantList, loading, approveDuplicateName } =
+		useHackerApplicants();
 
 	const selectedStatusValues = selectedStatuses.map(({ value }) => value);
 	const selectedDecisionValues = selectedDecisions.map(({ value }) => value);
@@ -192,7 +193,13 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 	}, [applicantList]);
 
 	const renderHeader = useCallback(
-		({ _id, first_name, last_name, avg_score }: HackerApplicantSummary) => (
+		({
+			_id,
+			first_name,
+			last_name,
+			avg_score,
+			duplicate_name_approved,
+		}: HackerApplicantSummary) => (
 			<CardHeader
 				_id={_id}
 				first_name={first_name}
@@ -200,12 +207,16 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 				hackathonName={hackathonName}
 				avg_score={avg_score}
 				isDuplicate={duplicateNames.has(
-					// check set for name dupe, non case-sensitive
 					`${first_name} ${last_name}`.trim().toLowerCase(),
 				)}
+				duplicateNameApproved={duplicate_name_approved}
+				isDirector={isUserDirector}
+				onApproveDuplicate={(approved) =>
+					approveDuplicateName(_id, approved)
+				}
 			/>
 		),
-		[hackathonName, duplicateNames],
+		[hackathonName, duplicateNames, isUserDirector, approveDuplicateName],
 	);
 
 	const avgScore = ({ avg_score, reviewers }: HackerApplicantSummary) => {
@@ -332,31 +343,71 @@ const CardHeader = ({
 	hackathonName,
 	avg_score,
 	isDuplicate,
+	duplicateNameApproved,
+	isDirector,
+	onApproveDuplicate,
 }: Pick<
 	HackerApplicantSummary,
 	"_id" | "first_name" | "last_name" | "avg_score"
 > & {
 	hackathonName: "irvinehacks" | "zothacks";
 	isDuplicate: boolean;
+	duplicateNameApproved: boolean;
+	isDirector: boolean;
+	onApproveDuplicate: (approved: boolean) => void;
 }) => {
 	const followWithNextLink = useFollowWithNextLink();
 	const href =
 		hackathonName === "zothacks"
 			? `/admin/applicants/zothacks-hackers/${_id}`
 			: `/admin/applicants/hackers/${_id}`;
+
+	const duplicateIcon = isDuplicate && (
+		duplicateNameApproved ? (
+			<span
+				title={
+					isDirector
+						? "Duplicate name approved: click to revoke"
+						: "Duplicate name verified by director"
+				}
+				style={{
+					display: "flex",
+					alignItems: "center",
+					cursor: isDirector ? "pointer" : "default",
+				}}
+				onClick={
+					isDirector ? () => onApproveDuplicate(false) : undefined
+				}
+			>
+				<Icon name="status-positive" variant="success" />
+			</span>
+		) : (
+			<span
+				title={
+					isDirector
+						? "Duplicate name: click to approve"
+						: "Duplicate name; possibly applied multiple times"
+				}
+				style={{
+					display: "flex",
+					alignItems: "center",
+					cursor: isDirector ? "pointer" : "default",
+				}}
+				onClick={
+					isDirector ? () => onApproveDuplicate(true) : undefined
+				}
+			>
+				<Icon name="status-warning" variant="warning" />
+			</span>
+		)
+	);
+
 	return (
 		<div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
 			<Link href={href} fontSize="inherit" onFollow={followWithNextLink}>
 				{first_name} {last_name}
 			</Link>
-			{isDuplicate && (
-				<span
-					title="Duplicate name: possibly applied multiple times"
-					style={{ display: "flex", alignItems: "center" }}
-				>
-					<Icon name="status-warning" variant="warning" />
-				</span>
-			)}
+			{duplicateIcon}
 			{avg_score === OVERQUALIFIED_SCORE && (
 				<Badge color="red">OVERQUALIFIED</Badge>
 			)}

@@ -37,3 +37,7 @@ yarn-error.log*
 
 # Python
 .venv
+
+# Claude
+.claude/
+*CLAUDE.MD

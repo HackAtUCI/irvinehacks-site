@@ -468,6 +468,7 @@ def test_hacker_applicants_returns_correct_applicants(
             "first_name": "sydnee",
             "last_name": "unknown",
             "resume_reviewed": False,
+            "duplicate_name_approved": False,
             "status": "REVIEWED",
             "decision": "ACCEPTED",
             "avg_score": 82.75,

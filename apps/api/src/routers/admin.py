@@ -22,7 +22,6 @@ from services import mongodb_handler
 from services.mongodb_handler import BaseRecord, Collection
 from utils import email_handler
 
-
 log = getLogger(__name__)
 
 router = APIRouter()
@@ -51,6 +50,7 @@ require_mentor_reviewer = require_role({Role.DIRECTOR, Role.MENTOR_REVIEWER})
 require_volunteer_reviewer = require_role({Role.DIRECTOR, Role.VOLUNTEER_REVIEWER})
 require_checkin_lead = require_role({Role.DIRECTOR, Role.CHECKIN_LEAD})
 require_organizer = require_role({Role.ORGANIZER})
+require_director = require_role({Role.DIRECTOR})
 
 
 class ApplicationDataSummary(BaseModel):
@@ -105,6 +105,7 @@ class HackerApplicantSummary(BaseRecord):
     decision: Optional[Decision] = None
     reviewers: list[str] = []
     resume_reviewed: bool = False
+    duplicate_name_approved: bool = False
     avg_score: float
     application_data: Union[ApplicationDataSummary, ZotHacksApplicationDataSummary]
 
@@ -219,6 +220,7 @@ async def hacker_applicants(
             "first_name",
             "last_name",
             "application_data",
+            "duplicate_name_approved",
         ],
         sort=[("application_data.submission_time", DESCENDING)],
     )
@@ -275,6 +277,24 @@ async def hacker_applicant(
 ) -> Applicant:
     """Get record of a hacker applicant by uid."""
     return await applicant(uid, "Hacker")
+
+
+class ApproveDuplicateRequest(BaseModel):
+    approved: bool
+
+
+@router.post("/applicant/hacker/{uid}/approve-duplicate")
+async def approve_duplicate_name(
+    uid: str,
+    body: ApproveDuplicateRequest,
+    director: Annotated[User, Depends(require_director)],
+) -> None:
+    """Director-only: mark a hacker applicant's duplicate name as approved or revoke approval."""
+    await mongodb_handler.update_one(
+        Collection.USERS,
+        {"_id": uid, "roles": Role.HACKER},
+        {"duplicate_name_approved": body.approved},
+    )
 
 
 @router.get("/applicant/mentor/{uid}", dependencies=[Depends(require_mentor_reviewer)])
@@ -922,12 +942,10 @@ async def _try_update_applicant_with_query(
             update_query,
         )
         if not modified:
-            log.warning(
-                f"""
+            log.warning(f"""
                 Update query did not modify any documents
                 for {applicant}: {update_query}
-                """
-            )
+                """)
     except RuntimeError:
         log.error(err_msg)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)

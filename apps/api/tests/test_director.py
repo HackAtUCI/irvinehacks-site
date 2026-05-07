@@ -54,7 +54,7 @@ EXPECTED_ORGANIZER = director.OrganizerSummary(
     first_name="Albert",
     last_name="Wang",
     roles=[Role.ORGANIZER],
-    committee=["Tech"]
+    committee=["Tech"],
 )
 
 

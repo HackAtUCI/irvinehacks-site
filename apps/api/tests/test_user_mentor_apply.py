@@ -11,7 +11,6 @@ from auth.user_identity import NativeUser, UserTestClient
 from models.ApplicationData import ProcessedMentorApplicationData
 from models.user_record import Applicant, Status, Role
 from routers import user
-from services.mongodb_handler import Collection
 from utils import resume_handler
 
 

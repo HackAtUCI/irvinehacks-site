@@ -8,7 +8,6 @@ from auth.user_identity import NativeUser, UserTestClient
 from models.ApplicationData import ProcessedVolunteerApplication
 from models.user_record import Applicant, Role, Status
 from routers import user
-from services.mongodb_handler import Collection
 
 
 TEST_DEADLINE = datetime(2026, 10, 1, 8, 0, 0, tzinfo=timezone.utc)

@@ -50,7 +50,10 @@ SAMPLE_ORGANIZER = {
 }
 
 EXPECTED_ORGANIZER = director.OrganizerSummary(
-    uid="edu.uci.albert", first_name="Albert", last_name="Wang", roles=[Role.ORGANIZER],
+    uid="edu.uci.albert",
+    first_name="Albert",
+    last_name="Wang",
+    roles=[Role.ORGANIZER],
     committee=["Tech"]
 )
 

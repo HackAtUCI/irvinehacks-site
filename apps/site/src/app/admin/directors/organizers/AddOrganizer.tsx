@@ -65,7 +65,7 @@ function AddOrganizer() {
 		if (isMarketing) committees.push("Marketing");
 		if (isTech) committees.push("Tech");
 
-		if (committees.length == 0) {
+		if (committees.length === 0) {
 			setNoCommitteeError("Please select at least one committee");
 			return;
 		} else {

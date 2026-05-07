@@ -27,7 +27,7 @@ class Role(str, Enum):
     ORGANIZER = "Organizer"
     VOLUNTEER = "Volunteer"
     CHECKIN_LEAD = "Check-in Lead"
-    COMMUNICATION_LEAD = "Communications Lead"
+    COMMUNICATIONS_LEAD = "Communications Lead"
     EMCEE = "Emcee"
     DECORATIONS_MEMBER = "Decorations Member"
     FOOD_MEMBER = "Food Member"

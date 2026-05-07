@@ -17,12 +17,12 @@ import useDraftAutosave from "@/lib/utils/useDraftAutosave";
 
 import cityBackground from "@/assets/backgrounds/alt_illus_moonless.png";
 
-import { DraftContext } from "./DraftContext";
+import { DraftContext, DraftFieldValue } from "./DraftContext";
 
 interface DraftResponse {
 	draft_application_data: {
 		application_type: string;
-		fields: Record<string, string>;
+		fields: Record<string, DraftFieldValue>;
 	} | null;
 }
 
@@ -51,7 +51,7 @@ export default function BaseForm({
 }: PropsWithChildren<BaseFormProps>) {
 	const [submitting, setSubmitting] = useState(false);
 	const [sessionExpired, setSessionExpired] = useState(false);
-	const [fields, setFields] = useState<Record<string, string>>({});
+	const [fields, setFields] = useState<Record<string, DraftFieldValue>>({});
 	const [hasUserEdited, setHasUserEdited] = useState(false);
 	const [draftLoaded, setDraftLoaded] = useState(false);
 
@@ -79,7 +79,7 @@ export default function BaseForm({
 		setSessionExpired(true);
 	}, []);
 
-	const setValue = useCallback((name: string, value: string) => {
+	const setValue = useCallback((name: string, value: DraftFieldValue) => {
 		setFields((prev) => ({ ...prev, [name]: value }));
 		setHasUserEdited(true);
 	}, []);

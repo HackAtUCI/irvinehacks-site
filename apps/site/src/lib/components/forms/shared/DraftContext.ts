@@ -2,9 +2,11 @@
 
 import { createContext, useContext } from "react";
 
+export type DraftFieldValue = string | number;
+
 export interface DraftContextValue {
-	initialValues: Record<string, string>;
-	setValue: (name: string, value: string) => void;
+	initialValues: Record<string, DraftFieldValue>;
+	setValue: (name: string, value: DraftFieldValue) => void;
 }
 
 export const DraftContext = createContext<DraftContextValue | null>(null);

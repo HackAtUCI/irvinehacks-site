@@ -45,6 +45,7 @@ router = APIRouter()
 DEADLINE = datetime(2026, 2, 14, 8, 1, tzinfo=timezone.utc)
 WAITLIST_OPEN_TIME = datetime(2026, 2, 20, 20, 0, tzinfo=timezone.utc)
 WAITLIST_CLOSE_TIME = datetime(2026, 2, 23, 8, 1, tzinfo=timezone.utc)
+MAX_HACKER_CAP = 400
 
 HACKATHON_EXPERIENCE_SCORE_MAP = {
     "first_time": 5,
@@ -89,7 +90,7 @@ async def _get_waitlist_status() -> WaitlistStatus:
         confirmed_count = await mongodb_handler.count(
             Collection.USERS, {"status": Status.CONFIRMED, "roles": Role.HACKER}
         )
-        is_open = confirmed_count < 400
+        is_open = confirmed_count < MAX_HACKER_CAP
 
     return WaitlistStatus(is_started=is_started, is_open=is_open)
 
@@ -468,6 +469,14 @@ async def rsvp(
 
     new_status: Status
     if user_record["status"] == Status.WAIVER_SIGNED:
+        if (
+            user_record.get("decision") == Decision.WAITLISTED
+            and not (await _get_waitlist_status()).is_open
+        ):
+            raise HTTPException(
+                status.HTTP_403_FORBIDDEN,
+                "Waitlist is closed.",
+            )
         new_status = Status.CONFIRMED
     elif user_record["status"] == Status.CONFIRMED:
         new_status = Status.WAIVER_SIGNED

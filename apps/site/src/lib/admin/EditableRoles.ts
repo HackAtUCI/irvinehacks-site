@@ -5,6 +5,14 @@ export const EDITABLE_ROLES = [
 	"Hacker Reviewer",
 	"Mentor Reviewer",
 	"Volunteer Reviewer",
+	"Communications Lead",
+	"Emcee",
+	"Decorations Member",
+	"Food Member",
+	"Judging Lead",
+	"Social Events Member",
+	"Swag Member",
+	"Workshop Member",
 ];
 
 export const REMOVABLE_ORGANIZER_ROLES = new Set(EDITABLE_ROLES);

@@ -120,6 +120,7 @@ async def add_organizer(
     first_name: str = Body(),
     last_name: str = Body(),
     roles: list[Role] = Body(),
+    committees: list[str] = Body(),
 ) -> None:
     """Adds an organizer record"""
     log.info("%s adding organizer", user)
@@ -148,6 +149,7 @@ async def add_organizer(
             "first_name": first_name,
             "last_name": last_name,
             "roles": roles,
+            "committee": committees,
         },
         upsert=True,
     )

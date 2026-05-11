@@ -289,7 +289,8 @@ async def approve_duplicate_name(
     body: ApproveDuplicateRequest,
     director: Annotated[User, Depends(require_director)],
 ) -> None:
-    """Director-only: mark a hacker applicant's duplicate name as approved or revoke approval."""
+    """Director-only: mark a hacker applicant's duplicate name as
+    approved or revoke approval."""
     await mongodb_handler.update_one(
         Collection.USERS,
         {"_id": uid, "roles": Role.HACKER},

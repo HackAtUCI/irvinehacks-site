@@ -22,6 +22,8 @@ const pathTitles: PathTitles = {
 	"email-sender": "Email Sender",
 	"zothacks-hackers": "ZotHacks Hacker Applications",
 	scores: "Scores",
+	"run-of-the-show": "Run of the Show",
+	"my-availability": "My Availability",
 };
 
 const DEFAULT_ITEMS = [{ text: "Admin Dashboard", href: BASE_PATH }];

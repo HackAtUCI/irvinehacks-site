@@ -30,6 +30,18 @@ function AdminSidebar() {
 		{ type: "link", text: "Dashboard", href: "/admin/dashboard" },
 		{ type: "link", text: "Participants", href: "/admin/participants" },
 		{ type: "link", text: "Events", href: "/admin/events" },
+		{
+			type: "link-group",
+			text: "Run of the Show",
+			href: "/admin/run-of-the-show",
+			items: [
+				{
+					type: "link",
+					text: "My Availability",
+					href: "/admin/run-of-the-show/my-availability",
+				},
+			],
+		},
 		{ type: "divider" },
 		{ type: "link", text: "Back to main site", href: "/" },
 	];

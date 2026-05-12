@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useContext, useState } from "react";
 
-import Alert from "@cloudscape-design/components/alert";
 import Box from "@cloudscape-design/components/box";
 import Button from "@cloudscape-design/components/button";
 import Header from "@cloudscape-design/components/header";
 import SpaceBetween from "@cloudscape-design/components/space-between";
+
+import NotificationContext from "@/lib/admin/NotificationContext";
 
 type AvailabilityStatus = "not-submitted" | "submitted" | "editing";
 type DragMode = "select" | "deselect" | null;
@@ -41,11 +42,30 @@ export default function MyAvailability() {
 	const [status, setStatus] = useState<AvailabilityStatus>("not-submitted");
 	const [dragMode, setDragMode] = useState<DragMode>(null);
 
+	const { setNotifications } = useContext(NotificationContext);
+
 	// TODO: locked feature from backend
 	const isLocked = false;
 
 	const selectedCount = selectedBlocks.size;
 	const isEditable = !isLocked && status !== "submitted";
+
+	function showSuccessNotification(content: string) {
+		if (!setNotifications) return;
+
+		setNotifications([
+			{
+				type: "success",
+				content,
+				dismissible: true,
+				onDismiss: () => setNotifications([]),
+			},
+		]);
+
+		window.setTimeout(() => {
+			setNotifications([]);
+		}, 3000);
+	}
 
 	function applyBlockSelection(blockId: string, mode: Exclude<DragMode, null>) {
 		setSelectedBlocks((previous) => {
@@ -85,8 +105,16 @@ export default function MyAvailability() {
 	}
 
 	function handleSubmit() {
+		const wasEditing = status === "editing";
+
 		// TODO: submit to backend
 		setStatus("submitted");
+
+		showSuccessNotification(
+			wasEditing
+				? "Availability updated successfully."
+				: "Availability submitted successfully.",
+		);
 	}
 
 	function handleEdit() {
@@ -118,24 +146,8 @@ export default function MyAvailability() {
 				IrvineHacks 2027 Availability
 			</Header>
 
-			{/* {isLocked && (
-				<Alert type="warning" header="Availability is locked">
-					You can view your submitted availability, but you can no longer edit
-					it.
-				</Alert>
-			)} */}
-
-			{status === "submitted" && !isLocked && (
-				<Alert type="success" header="Availability submitted">
-					Your availability has been saved. You can edit it until availability
-					is locked.
-				</Alert>
-			)}
-
 			<SpaceBetween size="s">
-				<Box>
-					Shifts before 10 AM are worth 2x points.
-				</Box>
+				<Box>Shifts before 10 AM are worth 2x points.</Box>
 
 				<div
 					onMouseUp={stopDragging}
@@ -184,20 +196,9 @@ export default function MyAvailability() {
 										paddingBottom: "10px",
 									}}
 								>
-									<div
-										style={{
-											fontSize: "16px",
-										}}
-									>
-										{day.label}
-									</div>
-									<div
-										style={{
-											fontSize: "22px",
-										}}
-									>
-										{day.weekday}
-									</div>
+									<div style={{ fontSize: "16px" }}>{day.label}</div>
+
+									<div style={{ fontSize: "22px" }}>{day.weekday}</div>
 								</div>
 							))}
 						</div>

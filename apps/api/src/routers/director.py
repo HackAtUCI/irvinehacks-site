@@ -59,7 +59,7 @@ class OrganizerSummary(BaseRecord):
     first_name: str
     last_name: str
     roles: list[Role]
-    committee: list[str]
+    committees: list[str]
 
 
 class RawOrganizerData(BaseModel):
@@ -121,7 +121,7 @@ async def add_organizer(
     first_name: str = Body(),
     last_name: str = Body(),
     roles: list[Role] = Body(),
-    committee: list[str] = Body(),
+    committees: list[str] = Body(),
 ) -> None:
     """Adds an organizer record"""
     log.info("%s adding organizer", user)
@@ -150,7 +150,7 @@ async def add_organizer(
             "first_name": first_name,
             "last_name": last_name,
             "roles": roles,
-            "committee": committee,
+            "committees": committees,
         },
         upsert=True,
     )

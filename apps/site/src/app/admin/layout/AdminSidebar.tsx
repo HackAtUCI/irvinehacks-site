@@ -113,6 +113,11 @@ function AdminSidebar() {
 					text: "Email Sender",
 					href: "/admin/directors/email-sender",
 				},
+				{
+					type: "link",
+					text: "Availability Management",
+					href: "/admin/directors/availability-management",
+				},
 			],
 		});
 	}

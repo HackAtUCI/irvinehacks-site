@@ -81,8 +81,16 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 		notes: string | null,
 	) => {
 		submitDetailedReview(Uid, scores, notes).then(() => {
-			if (setNotifications)
+			if (setNotifications) {
 				setNotifications((prev) => [successMessage, ...prev]);
+				setTimeout(
+					() =>
+						setNotifications((prev) =>
+							prev.filter((msg) => msg.id !== successMessage.id),
+						),
+					3000,
+				);
+			}
 			setNotes("");
 		});
 	};

@@ -46,10 +46,15 @@ SAMPLE_ORGANIZER = {
     "first_name": "Albert",
     "last_name": "Wang",
     "roles": [Role.ORGANIZER],
+    "committee": ["Tech"],
 }
 
 EXPECTED_ORGANIZER = director.OrganizerSummary(
-    uid="edu.uci.albert", first_name="Albert", last_name="Wang", roles=[Role.ORGANIZER]
+    uid="edu.uci.albert",
+    first_name="Albert",
+    last_name="Wang",
+    roles=[Role.ORGANIZER],
+    committee=["Tech"],
 )
 
 
@@ -68,6 +73,7 @@ def test_can_retrieve_organizers(
             "first_name": "Peter",
             "last_name": "Anteater",
             "roles": ["Organizer"],
+            "committee": ["Tech"],
         },
     ]
 
@@ -82,6 +88,7 @@ def test_can_retrieve_organizers(
             "first_name": "Peter",
             "last_name": "Anteater",
             "roles": ["Organizer"],
+            "committee": ["Tech"],
         },
     ]
 

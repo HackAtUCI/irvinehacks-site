@@ -37,8 +37,3 @@ yarn-error.log*
 
 # Python
 .venv
-
-
-# Claude specific files
-.claude
-*CLAUDE.md

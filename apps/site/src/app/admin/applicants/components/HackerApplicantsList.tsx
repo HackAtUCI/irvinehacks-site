@@ -1,6 +1,13 @@
 "use client";
 
-import { ReactNode, useContext, useEffect, useState, useCallback } from "react";
+import {
+	ReactNode,
+	useContext,
+	useEffect,
+	useState,
+	useCallback,
+	useMemo,
+} from "react";
 import { useRouter } from "next/navigation";
 import Box from "@cloudscape-design/components/box";
 import Cards from "@cloudscape-design/components/cards";
@@ -12,6 +19,7 @@ import { useFollowWithNextLink } from "@/app/admin/layout/common";
 import ApplicantFilters, {
 	Options,
 } from "@/app/admin/applicants/components/ApplicantFilters";
+import { SelectProps } from "@cloudscape-design/components/select";
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
 
 import UserContext from "@/lib/admin/UserContext";
@@ -26,8 +34,8 @@ import useHackerApplicants, {
 } from "@/lib/admin/useHackerApplicants";
 import { ParticipantRole, Status } from "@/lib/userRecord";
 import { OVERQUALIFIED_SCORE } from "@/lib/decisionScores";
-import SpaceBetween from "@cloudscape-design/components/space-between";
 import Badge from "@cloudscape-design/components/badge";
+import Icon from "@cloudscape-design/components/icon";
 
 type ColumnDef = {
 	id: string;
@@ -52,8 +60,13 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 	const [selectedStatuses, setSelectedStatuses] = useState<Options>([]);
 	const [selectedDecisions, setSelectedDecisions] = useState<Options>([]);
 	const [uciNetIDFilter, setUCINetIDFilter] = useState<Options>([]);
+	const [sortOption, setSortOption] = useState<SelectProps.Option>({
+		value: "latest",
+		label: "Newest",
+	});
 
-	const { applicantList, loading } = useHackerApplicants();
+	const { applicantList, loading, approveDuplicateName } =
+		useHackerApplicants();
 
 	const selectedStatusValues = selectedStatuses.map(({ value }) => value);
 	const selectedDecisionValues = selectedDecisions.map(({ value }) => value);
@@ -133,7 +146,30 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		setRejectCount(rejectedCount);
 	}, [applicantList, acceptThreshold, waitlistThreshold]);
 
-	const items = top400 ? filteredApplicants400 : filteredApplicants;
+	const baseItems = top400 ? filteredApplicants400 : filteredApplicants;
+	const items = useMemo(() => {
+		if (!sortOption?.value) return baseItems;
+		return [...baseItems].sort((a, b) => {
+			switch (sortOption.value) {
+				case "first_name_asc":
+					return a.first_name.localeCompare(b.first_name);
+				case "first_name_desc":
+					return b.first_name.localeCompare(a.first_name);
+				case "latest":
+					return (
+						new Date(b.application_data.submission_time).getTime() -
+						new Date(a.application_data.submission_time).getTime()
+					);
+				case "oldest":
+					return (
+						new Date(a.application_data.submission_time).getTime() -
+						new Date(b.application_data.submission_time).getTime()
+					);
+				default:
+					return 0;
+			}
+		});
+	}, [baseItems, sortOption]);
 
 	const counter =
 		selectedStatuses.length > 0 ||
@@ -169,17 +205,44 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		content: ResumeReviewedStatus,
 	};
 
+	const duplicateNames = useMemo(() => {
+		const nameCounts = new Map<string, number>();
+
+		for (const { first_name, last_name } of applicantList) {
+			const name = `${first_name} ${last_name}`.trim().toLowerCase();
+			nameCounts.set(name, (nameCounts.get(name) ?? 0) + 1);
+		}
+
+		return new Set(
+			[...nameCounts.entries()]
+				.filter(([, count]) => count > 1)
+				.map(([name]) => name),
+		);
+	}, [applicantList]);
+
 	const renderHeader = useCallback(
-		({ _id, first_name, last_name, avg_score }: HackerApplicantSummary) => (
+		({
+			_id,
+			first_name,
+			last_name,
+			avg_score,
+			duplicate_name_approved,
+		}: HackerApplicantSummary) => (
 			<CardHeader
 				_id={_id}
 				first_name={first_name}
 				last_name={last_name}
 				hackathonName={hackathonName}
 				avg_score={avg_score}
+				isDuplicate={duplicateNames.has(
+					`${first_name} ${last_name}`.trim().toLowerCase(),
+				)}
+				duplicateNameApproved={duplicate_name_approved}
+				isDirector={isUserDirector}
+				onApproveDuplicate={(approved) => approveDuplicateName(_id, approved)}
 			/>
 		),
-		[hackathonName],
+		[hackathonName, duplicateNames, isUserDirector, approveDuplicateName],
 	);
 
 	const avgScore = ({ avg_score, reviewers }: HackerApplicantSummary) => {
@@ -244,6 +307,8 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 					uciNetIDFilter={uciNetIDFilter}
 					setUCINetIDFilter={setUCINetIDFilter}
 					applicantType={ParticipantRole.Hacker}
+					sortOption={sortOption}
+					setSortOption={setSortOption}
 				/>
 			}
 			empty={emptyContent}
@@ -305,26 +370,72 @@ const CardHeader = ({
 	last_name,
 	hackathonName,
 	avg_score,
+	isDuplicate,
+	duplicateNameApproved,
+	isDirector,
+	onApproveDuplicate,
 }: Pick<
 	HackerApplicantSummary,
 	"_id" | "first_name" | "last_name" | "avg_score"
 > & {
 	hackathonName: "irvinehacks" | "zothacks";
+	isDuplicate: boolean;
+	duplicateNameApproved: boolean;
+	isDirector: boolean;
+	onApproveDuplicate: (approved: boolean) => void;
 }) => {
 	const followWithNextLink = useFollowWithNextLink();
 	const href =
 		hackathonName === "zothacks"
 			? `/admin/applicants/zothacks-hackers/${_id}`
 			: `/admin/applicants/hackers/${_id}`;
+
+	const duplicateIcon =
+		isDuplicate &&
+		(duplicateNameApproved ? (
+			<span
+				title={
+					isDirector
+						? "Duplicate name approved: click to revoke"
+						: "Duplicate name verified by director"
+				}
+				style={{
+					display: "flex",
+					alignItems: "center",
+					cursor: isDirector ? "pointer" : "default",
+				}}
+				onClick={isDirector ? () => onApproveDuplicate(false) : undefined}
+			>
+				<Icon name="status-positive" variant="success" />
+			</span>
+		) : (
+			<span
+				title={
+					isDirector
+						? "Duplicate name: click to approve"
+						: "Duplicate name; possibly applied multiple times"
+				}
+				style={{
+					display: "flex",
+					alignItems: "center",
+					cursor: isDirector ? "pointer" : "default",
+				}}
+				onClick={isDirector ? () => onApproveDuplicate(true) : undefined}
+			>
+				<Icon name="status-warning" variant="warning" />
+			</span>
+		));
+
 	return (
-		<SpaceBetween direction="horizontal" size="s">
+		<div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
 			<Link href={href} fontSize="inherit" onFollow={followWithNextLink}>
 				{first_name} {last_name}
 			</Link>
+			{duplicateIcon}
 			{avg_score === OVERQUALIFIED_SCORE && (
 				<Badge color="red">OVERQUALIFIED</Badge>
 			)}
-		</SpaceBetween>
+		</div>
 	);
 };
 

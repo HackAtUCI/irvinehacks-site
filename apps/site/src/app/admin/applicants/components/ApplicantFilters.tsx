@@ -5,6 +5,7 @@ import { IconProps } from "@cloudscape-design/components/icon";
 import Multiselect, {
 	MultiselectProps,
 } from "@cloudscape-design/components/multiselect";
+import Select, { SelectProps } from "@cloudscape-design/components/select";
 
 import {
 	Decision,
@@ -28,6 +29,8 @@ interface ApplicantFiltersProps {
 	uciNetIDFilter?: Options;
 	setUCINetIDFilter?: Dispatch<SetStateAction<Options>>;
 	applicantType: ParticipantRole;
+	sortOption?: SelectProps.Option;
+	setSortOption?: Dispatch<SetStateAction<SelectProps.Option>>;
 }
 
 const StatusIcons: Record<Status, IconProps.Name> = {
@@ -68,6 +71,13 @@ const STATUS_OPTIONS = Object.values(ReviewStatus)
 
 const DECISION_OPTIONS = Object.values(Decision).map(statusOption);
 
+const SORT_OPTIONS: SelectProps.Option[] = [
+	{ value: "first_name_asc", label: "Alphabetical (A-Z)" },
+	{ value: "first_name_desc", label: "Alphabetical (Z-A)" },
+	{ value: "latest", label: "Newest" },
+	{ value: "oldest", label: "Oldest" },
+];
+
 function ApplicantFilters({
 	selectedStatuses,
 	setSelectedStatuses,
@@ -76,31 +86,27 @@ function ApplicantFilters({
 	uciNetIDFilter,
 	setUCINetIDFilter,
 	applicantType,
+	sortOption,
+	setSortOption,
 }: ApplicantFiltersProps) {
 	const { applicantList, loading } = useHackerApplicants();
 
 	let reviewerOptions: Options = [];
 	if (!loading && applicantList.length > 0) {
-		const reviewerCountMap = new Map<string, number>();
-
-		for (const applicant of applicantList) {
-			for (const id of applicant.reviewers || []) {
-				reviewerCountMap.set(id, (reviewerCountMap.get(id) ?? 0) + 1);
-			}
-		}
-
-		reviewerOptions = Array.from(reviewerCountMap.entries()).map(
-			([id, count]) => ({
-				label: `${id.split(".")[2]} - ${count} application${
-					count === 1 ? "" : "s"
-				} reviewed`,
-				value: id,
-			}),
+		const reviewerIdsSet = new Set(
+			applicantList.flatMap((applicant) => applicant.reviewers || []),
 		);
+
+		const reviewerIds = Array.from(reviewerIdsSet);
+
+		reviewerOptions = reviewerIds.map((id) => ({
+			label: id.split(".")[2],
+			value: id,
+		}));
 	}
 
 	return (
-		<ColumnLayout columns={3}>
+		<ColumnLayout columns={4}>
 			<Multiselect
 				selectedOptions={selectedStatuses}
 				onChange={({ detail }) => setSelectedStatuses(detail.selectedOptions)}
@@ -125,6 +131,16 @@ function ApplicantFilters({
 					options={reviewerOptions}
 					placeholder="Search by Reviewer's UCINetID"
 					selectedAriaLabel="Selected"
+				/>
+			)}
+			{setSortOption && (
+				<Select
+					selectedOption={sortOption ?? null}
+					onChange={({ detail }) =>
+						detail.selectedOption && setSortOption(detail.selectedOption)
+					}
+					options={SORT_OPTIONS}
+					placeholder="Order by"
 				/>
 			)}
 		</ColumnLayout>

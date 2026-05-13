@@ -38,7 +38,7 @@ class PublishedDraft(BaseModel):
 class DraftInfo(BaseModel):
     minimum_pts: int = Field(ge=0)
     template_name: str
-    draft: TemplateInfo
+    draft: ScheduleTemplateInfo
 
 
 class Draft(BaseModel):

@@ -11,6 +11,7 @@ from admin import applicant_review_processor
 from auth.authorization import require_role
 from auth.user_identity import User, uci_email, utc_now
 from models.ApplicationData import Decision
+from models.Schedule import Hour, Shift, ScheduleTemplate, ScheduleTemplateInfo, PublishedDraft, DraftInfo, Draft
 from models.user_record import Role, Status
 from services import mongodb_handler, sendgrid_handler
 from services.mongodb_handler import BaseRecord, Collection
@@ -529,6 +530,153 @@ async def waitlist_transfer() -> None:
             personalizations,
             True,
         )
+
+
+@router.get("/templates")
+async def templates(
+    user: Annotated[User, Depends(require_director)],
+) -> list[ScheduleTemplate]:
+    """Gets records of all schedule templates"""
+    log.info("%s requested schedule templates", user)
+
+    records = await mongodb_handler.retrieve(
+        Collection.SETTINGS, {"_id": "templates"}
+    )
+
+    records = records[0]["templates"]
+
+    try:
+        return TypeAdapter(list[ScheduleTemplate]).validate_python(records)
+    except ValidationError:
+        raise RuntimeError("Could not parse template.")
+
+
+@router.post("/update-template-name")
+async def update_template_name(
+    user: Annotated[User, Depends(require_director)],
+    old_template_name: str = Body(),
+    new_template_name: str = Body(),
+) -> None:
+    """Updates template name"""
+    log.info("%s updated template name to %s", user, new_template_name)
+
+    await mongodb_handler.update_one(
+        Collection.SETTINGS,
+        {
+            "_id": "templates",
+            "templates.$.template_name": old_template_name
+        },
+        {
+            "template_name": new_template_name
+        },
+        upsert=True,
+    )
+
+
+@router.post("/delete-template")
+async def delete_template(
+    user: Annotated[User, Depends(require_director)],
+    template_name: str = Body(),
+) -> None:
+    """Deletes template"""
+    log.info("%s deleted template", user)
+
+    await mongodb_handler.delete_one(
+        Collection.SETTINGS,
+        {
+            "_id": "templates",
+            "templates.$.template_name": template_name,
+        }
+    )
+
+
+@router.post("/duplicate-template")
+async def duplicate_template(
+    user: Annotated[User, Depends(require_director)],
+    old_template: ScheduleTemplate,
+    new_template_name: str = Body(),
+) -> None:
+    """Makes a copy of template"""
+    log.info("%s made a copy of %s", user, old_template.template_name)
+
+    records = await mongodb_handler.retrieve(
+        Collection.SETTINGS,
+        {"_id": "templates"},
+    )
+
+    templates = records[0]["templates"]
+
+    old_template_obj = next(
+        t for t in templates
+        if t["template_name"] == old_template.template_name
+    )
+
+    new_template = ScheduleTemplate(
+        template_name=f"Copy of {new_template_name}",
+        temp_info=ScheduleTemplateInfo.model_validate(
+            old_template_obj["temp_info"]
+        ),
+    )
+
+    await mongodb_handler.update_one(
+        Collection.SETTINGS,
+        {"_id": "templates"},
+        {
+            "$push": {
+                "templates": new_template.model_dump()
+            }
+        },
+    )
+
+
+@router.post("/create-template")
+async def create_template(
+    user: Annotated[User, Depends(require_director)],
+    template_name: str = Body(),
+) -> None:
+    """Creates a template"""
+    log.info("%s created a new template", user)
+
+    new_template = ScheduleTemplate(
+        template_name=template_name,
+        temp_info=ScheduleTemplateInfo(),
+    )
+
+    await mongodb_handler.update_one(
+        Collection.SETTINGS,
+        {"_id": "templates"},
+        {"$push": {"templates": new_template.model_dump()}},
+        upsert=True,
+    )
+
+
+@router.post("/update-template-info")
+async def update_template_info(
+    user: Annotated[User, Depends(require_director)],
+    event_dates: list[datetime],
+    shifts: list[Shift],
+    template_name: str = Body(),
+) -> None:
+    """Update template info"""
+    log.info("%s updated template info", user)
+
+    await mongodb_handler.update_one(
+        Collection.SETTINGS,
+        {
+            "_id": "templates",
+            "templates.template_name": template_name,
+        },
+        {
+            "$set": {
+                "templates.$.temp_info": {
+                    "event_dates": event_dates,
+                    "shifts": [
+                        shift.model_dump() for shift in shifts
+                    ],
+                }
+            }
+        },
+    )
 
 
 async def _process_decision(

@@ -135,7 +135,9 @@ function ApplicantFilters({
 			{setSortOption && (
 				<Select
 					selectedOption={sortOption ?? null}
-					onChange={({ detail }) => detail.selectedOption && setSortOption(detail.selectedOption)}
+					onChange={({ detail }) =>
+						detail.selectedOption && setSortOption(detail.selectedOption)
+					}
 					options={SORT_OPTIONS}
 					placeholder="Order by"
 				/>

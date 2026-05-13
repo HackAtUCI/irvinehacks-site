@@ -24,6 +24,7 @@ const pathTitles: PathTitles = {
 	scores: "Scores",
 	"run-of-the-show": "Run of the Show",
 	"my-availability": "My Availability",
+	"availability-management": "Availability Management",
 };
 
 const DEFAULT_ITEMS = [{ text: "Admin Dashboard", href: BASE_PATH }];

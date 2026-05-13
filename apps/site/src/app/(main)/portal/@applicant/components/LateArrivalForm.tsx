@@ -2,24 +2,35 @@
 
 import { useState } from "react";
 import Button from "@/lib/components/Button/Button";
-import ControlledDropdownSelect from "@/lib/components/forms/ControlledDropdownSelect";
 import useArrivalTime from "@/lib/utils/useArrivalTime";
 
-const ARRIVAL_TIMES = [
-	{ value: "18:00", text: "6:00 PM" },
-	{ value: "18:30", text: "6:30 PM" },
-	{ value: "19:00", text: "7:00 PM" },
-	{ value: "19:30", text: "7:30 PM" },
-];
+const LATE_ARRIVAL_MIN = "18:00";
+const LATE_ARRIVAL_MAX = "19:30";
+const DEFAULT_CHECKIN_TIME = "17:00";
+
+function formatTimeLabel(value: string): string {
+	const [hours, minutes] = value.split(":");
+	const date = new Date();
+	date.setHours(Number(hours), Number(minutes));
+	return date.toLocaleString("en-US", {
+		hour: "numeric",
+		minute: "numeric",
+		hour12: true,
+	});
+}
 
 export default function LateArrivalForm() {
-	const [arrivalTime, setArrivalTime] = useState<string>("18:00");
+	const [arrivalTime, setArrivalTime] = useState<string>(LATE_ARRIVAL_MIN);
 	const arrivalData = useArrivalTime();
-	const currentArrivalTimeLabel = ARRIVAL_TIMES.find(
-		(t) => t.value === arrivalData?.arrival_time,
-	)?.text;
 
-	const selectedLateTime = arrivalData?.arrival_time !== "17:00";
+	const selectedLateTime =
+		arrivalData?.arrival_time !== undefined &&
+		arrivalData?.arrival_time !== null &&
+		arrivalData.arrival_time !== DEFAULT_CHECKIN_TIME;
+
+	const currentArrivalTimeLabel = arrivalData?.arrival_time
+		? formatTimeLabel(arrivalData.arrival_time)
+		: "5:00 PM";
 
 	return (
 		<div className="mt-2 md:mt-8">
@@ -31,9 +42,7 @@ export default function LateArrivalForm() {
 
 			<p className="text-white text-lg mb-4">
 				Current selected arrival time:{" "}
-				<strong>
-					{selectedLateTime ? currentArrivalTimeLabel : "5:00 PM"}
-				</strong>
+				<strong>{currentArrivalTimeLabel}</strong>
 				<br />
 				<br />
 				Check-in starts Friday at 5 PM. Late check-in begins at 6 PM.
@@ -41,10 +50,10 @@ export default function LateArrivalForm() {
 					<>
 						<br />
 						<br />
-						If you are arriving later than 5 PM, use the dropdown to change your
-						arrival time. You won&apos;t be able to edit it after submitting.
-						Arriving later than your selected time may result in your spot being
-						given to another attendee.
+						If you are arriving later than 5 PM, use the time picker to choose
+						your arrival time (between 6:00 PM and 7:30 PM). You won&apos;t be
+						able to edit it after submitting. Arriving later than your selected
+						time may result in your spot being given to another attendee.
 					</>
 				)}
 			</p>
@@ -55,15 +64,22 @@ export default function LateArrivalForm() {
 					action="/api/user/rsvp/late-arrival"
 					className="space-y-4"
 				>
-					<ControlledDropdownSelect
-						name="arrival_time"
-						labelText=""
-						values={ARRIVAL_TIMES}
-						containerClass="flex flex-col w-full max-w-md text-[var(--color-white)]"
-						value={arrivalTime}
-						onChange={setArrivalTime}
-						required={true}
-					/>
+					<div className="flex flex-col w-full text-[var(--color-white)]">
+						<label className="text-lg mb-2" htmlFor="arrival_time">
+							Arrival time
+						</label>
+						<input
+							id="arrival_time"
+							name="arrival_time"
+							type="time"
+							min={LATE_ARRIVAL_MIN}
+							max={LATE_ARRIVAL_MAX}
+							value={arrivalTime}
+							onChange={(e) => setArrivalTime(e.target.value)}
+							required
+							className="bg-[#e1e1e1] text-[var(--color-black)] text-lg h-10 p-1.5 rounded-md"
+						/>
+					</div>
 
 					<div className="mt-2 md:mt-8">
 						<Button

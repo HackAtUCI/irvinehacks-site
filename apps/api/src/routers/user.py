@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, timezone
 from logging import getLogger
 from typing import Annotated, Any, Literal, Optional, Union
@@ -451,7 +452,22 @@ async def waiver_webhook(
 
 
 DEFAULT_CHECKIN_TIME = "17:00"
-ARRIVAL_TIMES = (DEFAULT_CHECKIN_TIME, "18:00", "18:30", "19:00", "19:30")
+LATE_ARRIVAL_MIN = "18:00"
+LATE_ARRIVAL_MAX = "19:30"
+_TIME_PATTERN = re.compile(r"^([01]\d|2[0-3]):[0-5]\d$")
+
+
+def _validate_late_arrival_time(value: str) -> str:
+    """Return a cleaned HH:MM string in the allowed late-arrival window."""
+    cleaned = value.strip()
+    if not _TIME_PATTERN.match(cleaned) or not (
+        LATE_ARRIVAL_MIN <= cleaned <= LATE_ARRIVAL_MAX
+    ):
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            "Invalid arrival time.",
+        )
+    return cleaned
 
 
 @router.post("/rsvp")
@@ -497,12 +513,7 @@ async def rsvp(
     # Default check-in time is 5:00pm (17:00)
     arrival_value: str = DEFAULT_CHECKIN_TIME
     if arrival_time and arrival_time.strip():
-        if arrival_time.strip() not in ARRIVAL_TIMES:
-            raise HTTPException(
-                status.HTTP_400_BAD_REQUEST,
-                "Invalid arrival time.",
-            )
-        arrival_value = arrival_time.strip()
+        arrival_value = _validate_late_arrival_time(arrival_time)
 
     updated_fields: dict[str, Any] = {
         "status": new_status,
@@ -553,12 +564,7 @@ async def rsvp_late_arrival(
     # Default check-in time is 5:00pm (17:00)
     arrival_value: str = DEFAULT_CHECKIN_TIME
     if arrival_time and arrival_time.strip():
-        if arrival_time.strip() not in ARRIVAL_TIMES:
-            raise HTTPException(
-                status.HTTP_400_BAD_REQUEST,
-                "Invalid arrival time.",
-            )
-        arrival_value = arrival_time.strip()
+        arrival_value = _validate_late_arrival_time(arrival_time)
 
     await mongodb_handler.update_one(
         Collection.USERS, {"_id": user.uid}, {"arrival_time": arrival_value}

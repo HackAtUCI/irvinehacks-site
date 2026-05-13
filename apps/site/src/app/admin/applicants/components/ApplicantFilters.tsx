@@ -105,7 +105,7 @@ function ApplicantFilters({
 	}
 
 	return (
-		<ColumnLayout columns={3}>
+		<ColumnLayout columns={4}>
 			<Multiselect
 				selectedOptions={selectedStatuses}
 				onChange={({ detail }) => setSelectedStatuses(detail.selectedOptions)}

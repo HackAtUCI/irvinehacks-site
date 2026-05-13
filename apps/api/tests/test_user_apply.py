@@ -16,7 +16,6 @@ from models.ApplicationData import (
 
 from models.user_record import Applicant, Status, Role
 from routers import user
-from services.mongodb_handler import Collection
 from utils import resume_handler
 
 from utils.hackathon_context import HackathonName

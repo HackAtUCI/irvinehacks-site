@@ -24,7 +24,7 @@ function Message({ status, decision }: MessageProps) {
 	} else if (decision === Decision.Voided) {
 		message = (
 			<p className="mb-0">
-				Thank you for applying to IrvineHacks this year. Unfortunately, your
+				Thank you for applying to IrvineHacks this year. Your
 				application has been voided and is no longer being considered for this
 				year&apos;s event. We would love to see you apply again next year!
 			</p>

@@ -62,7 +62,7 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 	const [uciNetIDFilter, setUCINetIDFilter] = useState<Options>([]);
 	const [sortOption, setSortOption] = useState<SelectProps.Option>({
 		value: "latest",
-		label: "Latest Registered",
+		label: "Newest",
 	});
 
 	const { applicantList, loading, approveDuplicateName } =

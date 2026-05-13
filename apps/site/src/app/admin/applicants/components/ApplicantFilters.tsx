@@ -73,8 +73,8 @@ const DECISION_OPTIONS = Object.values(Decision).map(statusOption);
 const SORT_OPTIONS: SelectProps.Option[] = [
 	{ value: "first_name_asc", label: "Alphabetical (A-Z)" },
 	{ value: "first_name_desc", label: "Alphabetical (Z-A)" },
-	{ value: "latest", label: "Latest Registered" },
-	{ value: "oldest", label: "Oldest Registered" },
+	{ value: "latest", label: "Newest" },
+	{ value: "oldest", label: "Oldest" },
 ];
 
 function ApplicantFilters({

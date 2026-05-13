@@ -59,6 +59,7 @@ class OrganizerSummary(BaseRecord):
     first_name: str
     last_name: str
     roles: list[Role]
+    committee: list[str]
 
 
 class RawOrganizerData(BaseModel):
@@ -120,6 +121,7 @@ async def add_organizer(
     first_name: str = Body(),
     last_name: str = Body(),
     roles: list[Role] = Body(),
+    committee: list[str] = Body(),
 ) -> None:
     """Adds an organizer record"""
     log.info("%s adding organizer", user)
@@ -148,8 +150,42 @@ async def add_organizer(
             "first_name": first_name,
             "last_name": last_name,
             "roles": roles,
+            "committee": committee,
         },
         upsert=True,
+    )
+
+
+@router.post("/update-organizers")
+async def update_organizer(
+    user: Annotated[User, Depends(require_director)],
+    uid: str = Body(..., embed=True),
+    roles: list[Role] = Body(),
+) -> None:
+    """Updates organizer's roles"""
+    log.info("%s updating %s's roles", user, uid)
+
+    await mongodb_handler.update_one(
+        Collection.USERS,
+        {"_id": uid},
+        {
+            "_id": uid,
+            "roles": roles,
+        },
+        upsert=True,
+    )
+
+
+@router.post("/delete-organizers")
+async def delete_organizer(
+    user: Annotated[User, Depends(require_director)], uid: str = Body(..., embed=True)
+) -> None:
+    """Delete organizer from all perms"""
+    log.info("%s clearing %s's roles", user, uid)
+
+    await mongodb_handler.delete_one(
+        Collection.USERS,
+        {"_id": uid},
     )
 
 

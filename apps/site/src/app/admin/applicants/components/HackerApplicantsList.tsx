@@ -1,8 +1,5 @@
 "use client";
 
-<<<<<<< HEAD
-import { ReactNode, useContext, useEffect, useState, useCallback, useMemo } from "react";
-=======
 import {
 	ReactNode,
 	useContext,
@@ -11,7 +8,6 @@ import {
 	useCallback,
 	useMemo,
 } from "react";
->>>>>>> origin/main
 import { useRouter } from "next/navigation";
 import Box from "@cloudscape-design/components/box";
 import Cards from "@cloudscape-design/components/cards";
@@ -64,9 +60,10 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 	const [selectedStatuses, setSelectedStatuses] = useState<Options>([]);
 	const [selectedDecisions, setSelectedDecisions] = useState<Options>([]);
 	const [uciNetIDFilter, setUCINetIDFilter] = useState<Options>([]);
-	const [sortOption, setSortOption] = useState<SelectProps.Option>(
-		{ value: "latest", label: "Latest Registered" },
-	);
+	const [sortOption, setSortOption] = useState<SelectProps.Option>({
+		value: "latest",
+		label: "Latest Registered",
+	});
 
 	const { applicantList, loading, approveDuplicateName } =
 		useHackerApplicants();
@@ -159,11 +156,15 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 				case "first_name_desc":
 					return b.first_name.localeCompare(a.first_name);
 				case "latest":
-					return new Date(b.application_data.submission_time).getTime() -
-					new Date(a.application_data.submission_time).getTime();
+					return (
+						new Date(b.application_data.submission_time).getTime() -
+						new Date(a.application_data.submission_time).getTime()
+					);
 				case "oldest":
-					return new Date(a.application_data.submission_time).getTime() -
-						new Date(b.application_data.submission_time).getTime();
+					return (
+						new Date(a.application_data.submission_time).getTime() -
+						new Date(b.application_data.submission_time).getTime()
+					);
 				default:
 					return 0;
 			}

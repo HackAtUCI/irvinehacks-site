@@ -41,7 +41,7 @@ async def test_subevent_checkin_success(
     mock_raw_update_one: AsyncMock,
 ) -> None:
     """
-    Subevent check-in succeeds for a hacker when event 
+    Subevent check-in succeeds for a hacker when event
     exists and UID not already checked in.
     """
     event_id = "event1"

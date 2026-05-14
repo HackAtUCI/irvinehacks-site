@@ -9,6 +9,7 @@ class Hour(BaseModel):
 
 class Shift(BaseModel):
     shift_name: str
+    num_organizers: int
     organizers: list[str] = []
     hour: Hour
     committee_prereq: str

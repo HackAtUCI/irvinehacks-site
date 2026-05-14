@@ -100,7 +100,7 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 			return false;
 
 		if (
-			applicant.status == Status.Voided &&
+			applicant.status === Status.Voided &&
 			isOrganizer && !isUserDirector
 		)
 			return false;

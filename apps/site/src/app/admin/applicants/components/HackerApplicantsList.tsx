@@ -23,7 +23,11 @@ import { SelectProps } from "@cloudscape-design/components/select";
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
 
 import UserContext from "@/lib/admin/UserContext";
-import { isDirector, hasAdminRole, isHackerReviewer } from "@/lib/admin/authorization";
+import {
+	isDirector,
+	hasAdminRole,
+	isHackerReviewer,
+} from "@/lib/admin/authorization";
 import ApplicantReviewerIndicator from "../components/ApplicantReviewerIndicator";
 import HackerThresholdInputs from "../components/HackerThresholdInputs";
 

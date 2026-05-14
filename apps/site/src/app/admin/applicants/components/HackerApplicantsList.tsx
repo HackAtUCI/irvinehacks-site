@@ -56,7 +56,7 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 	}
 
 	const isUserDirector = isDirector(roles);
-	const isOrganizer = hasAdminRole(roles)
+	const isOrganizer = hasAdminRole(roles);
 
 	const [selectedStatuses, setSelectedStatuses] = useState<Options>([]);
 	const [selectedDecisions, setSelectedDecisions] = useState<Options>([]);

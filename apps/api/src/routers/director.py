@@ -594,7 +594,6 @@ async def delete_template(
 async def duplicate_template(
     user: Annotated[User, Depends(require_director)],
     old_template: ScheduleTemplate,
-    new_template_name: str = Body(),
 ) -> None:
     """Makes a copy of template"""
     log.info("%s made a copy of %s", user, old_template.template_name)
@@ -612,7 +611,7 @@ async def duplicate_template(
     )
 
     new_template = ScheduleTemplate(
-        template_name=f"Copy of {new_template_name}",
+        template_name=f"Copy of {old_template.template_name}",
         temp_info=ScheduleTemplateInfo.model_validate(
             old_template_obj["temp_info"]
         ),
@@ -674,6 +673,182 @@ async def update_template_info(
                         shift.model_dump() for shift in shifts
                     ],
                 }
+            }
+        },
+    )
+
+
+@router.get("/drafts")
+async def drafts(
+    user: Annotated[User, Depends(require_director)],
+) -> list[Draft]:
+    """Gets records of all drafts"""
+    log.info("%s requested drafts", user)
+
+    records = await mongodb_handler.retrieve(
+        Collection.SETTINGS, {"_id": "drafts"}
+    )
+
+    records = records[0]["drafts"]
+
+    try:
+        return TypeAdapter(list[Draft]).validate_python(records)
+    except ValidationError:
+        raise RuntimeError("Could not parse draft.")
+
+
+@router.post("/update-draft-name")
+async def update_draft_name(
+    user: Annotated[User, Depends(require_director)],
+    old_draft_name: str = Body(),
+    new_draft_name: str = Body(),
+) -> None:
+    """Updates draft name"""
+    log.info("%s updated draft name to %s", user, new_draft_name)
+
+    await mongodb_handler.update_one(
+        Collection.SETTINGS,
+        {
+            "_id": "drafts",
+            "draft.$.draft_name": old_draft_name
+        },
+        {
+            "draft_name": new_draft_name
+        },
+        upsert=True,
+    )
+
+
+@router.post("/delete-draft")
+async def delete_draft(
+    user: Annotated[User, Depends(require_director)],
+    draft_name: str = Body(),
+) -> None:
+    """Deletes draft"""
+    log.info("%s deleted draft", user)
+
+    await mongodb_handler.delete_one(
+        Collection.SETTINGS,
+        {
+            "_id": "drafts",
+            "drafts.$.draft_name": draft_name,
+        }
+    )
+
+
+@router.post("/duplicate-draft")
+async def duplicate_draft(
+    user: Annotated[User, Depends(require_director)],
+    old_draft: Draft,
+) -> None:
+    """Makes a copy of template"""
+    log.info("%s made a copy of %s", user, old_draft.draft_name)
+
+    records = await mongodb_handler.retrieve(
+        Collection.SETTINGS,
+        {"_id": "drafts"},
+    )
+
+    drafts = records[0]["drafts"]
+
+    old_draft_obj = next(
+        t for t in drafts
+        if t["draft_name"] == old_draft.draft_name
+    )
+
+    new_draft = Draft(
+        draft_name=f"Copy of {old_draft.draft_name}",
+        draft_info=DraftInfo.model_validate(
+            old_draft_obj["draft_info"]
+        ),
+    )
+
+    await mongodb_handler.update_one(
+        Collection.SETTINGS,
+        {"_id": "drafts"},
+        {
+            "$push": {
+                "drafts": new_draft.model_dump()
+            }
+        },
+    )
+
+
+@router.post("/create-draft")
+async def create_draft(
+    user: Annotated[User, Depends(require_director)],
+    minimum_points: int,
+    template_name: str = Body(),
+    draft_name: str = Body(),
+   
+) -> None:
+    """Creates a draft"""
+    log.info("%s created a new template", user)
+
+    new_draft = Draft(
+        draft_name=draft_name,
+        # TODO: finish the rest of parameters
+        draft_info=DraftInfo(
+            minimum_pts=minimum_points),
+            template_name=template_name,
+            draft=Draft()
+    )
+
+    await mongodb_handler.update_one(
+        Collection.SETTINGS,
+        {"_id": "drafts"},
+        {"$push": {"drafts": new_draft.model_dump()}},
+        upsert=True,
+    )
+
+    #TODO: edit orgs shifted
+@router.post("/update-draft-info")
+async def update_draft_info(
+    user: Annotated[User, Depends(require_director)],
+    event_dates: list[datetime],
+    shifts: list[Shift],
+    template_name: str = Body(),
+) -> None:
+    """Update template info"""
+    log.info("%s updated template info", user)
+
+    await mongodb_handler.update_one(
+        Collection.SETTINGS,
+        {
+            "_id": "templates",
+            "templates.template_name": template_name,
+        },
+        {
+            "$set": {
+                "templates.$.temp_info": {
+                    "event_dates": event_dates,
+                    "shifts": [
+                        shift.model_dump() for shift in shifts
+                    ],
+                }
+            }
+        },
+    )
+
+
+@router.post("/publish-draft")
+async def publish_draft(
+    user: Annotated[User, Depends(require_director)],
+    published_time: datetime,
+    draft_name: str = Body(),
+) -> None:
+    """Publish draft"""
+    log.info("%s published draft", user)
+
+    await mongodb_handler.update_one(
+        Collection.SETTINGS,
+        {
+            "_id": "published_draft"
+        },
+        {
+            "$set": {
+                "draft_name": draft_name,
+                "publish_time": published_time
             }
         },
     )

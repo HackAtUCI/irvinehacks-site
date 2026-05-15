@@ -46,4 +46,4 @@ class Draft(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
     draft_name: str
-    drafts: list[DraftInfo]
+    draft_info: DraftInfo

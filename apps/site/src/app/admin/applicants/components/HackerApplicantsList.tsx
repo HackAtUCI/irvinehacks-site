@@ -23,7 +23,11 @@ import { SelectProps } from "@cloudscape-design/components/select";
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
 
 import UserContext from "@/lib/admin/UserContext";
-import { isDirector, isHackerReviewer } from "@/lib/admin/authorization";
+import {
+	isDirector,
+	hasAdminRole,
+	isHackerReviewer,
+} from "@/lib/admin/authorization";
 import ApplicantReviewerIndicator from "../components/ApplicantReviewerIndicator";
 import HackerThresholdInputs from "../components/HackerThresholdInputs";
 
@@ -56,6 +60,7 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 	}
 
 	const isUserDirector = isDirector(roles);
+	const isOrganizer = hasAdminRole(roles);
 
 	const [selectedStatuses, setSelectedStatuses] = useState<Options>([]);
 	const [selectedDecisions, setSelectedDecisions] = useState<Options>([]);
@@ -96,6 +101,9 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 			selectedStatusValues.includes(Status.Pending) &&
 			applicant.avg_score === OVERQUALIFIED_SCORE
 		)
+			return false;
+
+		if (applicant.status === Status.Voided && isOrganizer && !isUserDirector)
 			return false;
 
 		if (

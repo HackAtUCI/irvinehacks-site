@@ -39,6 +39,7 @@ const StatusIcons: Record<Status, IconProps.Name> = {
 	[Decision.Accepted]: "status-positive",
 	[Decision.Rejected]: "status-pending",
 	[Decision.Waitlisted]: "status-negative",
+	[Decision.Voided]: "status-stopped",
 	[PostAcceptedStatus.Signed]: "status-in-progress",
 	[PostAcceptedStatus.Confirmed]: "status-positive",
 	[PostAcceptedStatus.Attending]: "status-positive",

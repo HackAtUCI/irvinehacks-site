@@ -9,6 +9,7 @@ export const decisionsToScores: Record<Decision, number> = {
 	[Decision.Accepted]: acceptScore,
 	[Decision.Waitlisted]: waitlistScore,
 	[Decision.Rejected]: rejectScore,
+	[Decision.Voided]: rejectScore,
 };
 
 export const scoresToDecisions: Record<string, Decision> = {

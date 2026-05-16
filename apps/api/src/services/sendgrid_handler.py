@@ -18,7 +18,8 @@ SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
 class Template(str, Enum):
     # IH 2026
     SUBMISSION_CONFIRMATION_EMAIL = "d-5041cae29f974fe18d18976a9381020c"
-    RSVP_CONFIRMATION_EMAIL = ""  # TODO: Configure email template in Sendgrid
+    RSVP_CONFIRMATION_EMAIL = "d-48b73d68a0d74da2ba653bbb9efd937c"
+    WITHDRAWAL_CONFIRMATION_EMAIL = "d-23b3155f63904ac987d4dac3d91f294f"
     GUEST_TOKEN = "d-19a126a867294a56b8db9d94a23f7b5d"
     WAITLIST_QUEUED_EMAIL = "d-a6de2014ad854658bead73a2718a1152"
     WAITLIST_CLOSED_EMAIL = "d-061b28174c9140a095fa99e81e0e7e9c"
@@ -76,6 +77,8 @@ ApplicationUpdateTemplates: TypeAlias = Literal[
     Template.WAITLIST_TRANSFER_EMAIL,
     Template.WAITLIST_QUEUED_EMAIL,
     Template.WAITLIST_CLOSED_EMAIL,
+    Template.RSVP_CONFIRMATION_EMAIL,
+    Template.WITHDRAWAL_CONFIRMATION_EMAIL,
 ]
 
 LogisticsTemplates: TypeAlias = Literal[

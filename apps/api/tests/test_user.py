@@ -4,21 +4,11 @@ from fastapi import FastAPI, status
 from fastapi.testclient import TestClient
 
 from auth.user_identity import GuestUser, UserTestClient
-
-# from models.ApplicationData import Decision
 from models.user_record import Role, Status
 from routers import user
 from services.mongodb_handler import Collection
 
-USER_EMAIL = "pkfire@uci.edu"
-EXPECTED_USER = Applicant(
-    uid="edu.uci.pkfire",
-    first_name="pk",
-    last_name="fire",
-    roles=(Role.APPLICANT, Role.HACKER),
-    status=Status.PENDING_REVIEW,
-    application_data=EXPECTED_APPLICATION_DATA,
-)
+USER_EMAIL = "tree@stanford.edu"
 
 app = FastAPI()
 app.include_router(user.router)
@@ -27,8 +17,9 @@ client = TestClient(app, follow_redirects=False)
 
 
 def test_login_as_uci_redirects_to_saml() -> None:
-    """Tests that logging in with UCI email redirects to SAML for UCI SSO"""
+    """Tests that logging in with UCI email redirects to SAML for UCI SSO."""
     res = client.post("/login", data={"email": "hack@uci.edu"}, follow_redirects=False)
+
     assert res.status_code == status.HTTP_303_SEE_OTHER
     assert res.headers["location"] == "/api/saml/login?return_to=%2Fportal"
 
@@ -40,6 +31,7 @@ def test_login_as_non_uci_redirects_to_guest_login() -> None:
         data={"email": "jeff@amazon.com"},
         follow_redirects=False,
     )
+
     assert res.status_code == status.HTTP_307_TEMPORARY_REDIRECT
     assert res.headers["location"] == "/api/guest/login?return_to=%2Fbooks"
 
@@ -47,6 +39,7 @@ def test_login_as_non_uci_redirects_to_guest_login() -> None:
 def test_logout() -> None:
     """Test that logging out removes the authentication cookie."""
     res = client.get("/logout")
+
     assert res.status_code == status.HTTP_303_SEE_OTHER
     assert res.headers["location"] == "/"
     assert res.headers["Set-Cookie"].startswith('irvinehacks_auth=""; Max-Age=0;')
@@ -56,6 +49,7 @@ def test_no_identity_when_unauthenticated() -> None:
     """Test that identity is empty when not authenticated."""
     res = client.get("/me")
     data = res.json()
+
     assert data == {
         "uid": None,
         "status": None,
@@ -70,12 +64,16 @@ def test_plain_identity_when_no_user_record(
 ) -> None:
     """Test that identity contains just uid when there is no associated user record."""
     mock_mongodb_handler_retrieve_one.return_value = None
-    client = UserTestClient(GuestUser(email="tree@stanford.edu"), app)
-    res = client.get("/me")
+
+    auth_client = UserTestClient(GuestUser(email=USER_EMAIL), app)
+    res = auth_client.get("/me")
 
     mock_mongodb_handler_retrieve_one.assert_awaited_once_with(
-        Collection.USERS, {"_id": "edu.stanford.tree"}, ["roles", "status", "decision"]
+        Collection.USERS,
+        {"_id": "edu.stanford.tree"},
+        ["roles", "status", "decision"],
     )
+
     data = res.json()
     assert data == {
         "uid": "edu.stanford.tree",
@@ -94,10 +92,13 @@ def test_user_with_status_waiver_signed_rsvp_changes_status_to_confirmed(
     mock_send_rsvp_confirmation_email: AsyncMock,
 ) -> None:
     """Test user with WAIVER_SIGNED status has new status of CONFIRMED after RSVP."""
-    mock_mongodb_handler_retrieve_one.return_value = {"status": Status.WAIVER_SIGNED}
+    mock_mongodb_handler_retrieve_one.return_value = {
+        "status": Status.WAIVER_SIGNED,
+        "first_name": "tree",
+    }
 
-    client = UserTestClient(GuestUser(email="tree@stanford.edu"), app)
-    res = client.post("/rsvp", follow_redirects=False)
+    auth_client = UserTestClient(GuestUser(email=USER_EMAIL), app)
+    res = auth_client.post("/rsvp", follow_redirects=False)
 
     mock_mongodb_handler_update_one.assert_awaited_once_with(
         Collection.USERS,
@@ -106,10 +107,11 @@ def test_user_with_status_waiver_signed_rsvp_changes_status_to_confirmed(
     )
 
     mock_send_rsvp_confirmation_email.assert_awaited_once_with(
-        USER_EMAIL, EXPECTED_USER, Role.HACKER
+        USER_EMAIL,
+        "tree",
     )
 
-    assert res.status_code == 303
+    assert res.status_code == status.HTTP_303_SEE_OTHER
 
 
 @patch("services.mongodb_handler.update_one", autospec=True)
@@ -118,11 +120,11 @@ def test_user_with_status_confirmed_un_rsvp_changes_status_to_waiver_signed(
     mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_mongodb_handler_update_one: AsyncMock,
 ) -> None:
-    """Test user with WAIVER_SIGNED status has new status of CONFIRMED after RSVP."""
+    """Test user with CONFIRMED status has new status of WAIVER_SIGNED after un-RSVP."""
     mock_mongodb_handler_retrieve_one.return_value = {"status": Status.CONFIRMED}
 
-    client = UserTestClient(GuestUser(email="tree@stanford.edu"), app)
-    res = client.post("/rsvp", follow_redirects=False)
+    auth_client = UserTestClient(GuestUser(email=USER_EMAIL), app)
+    res = auth_client.post("/rsvp", follow_redirects=False)
 
     mock_mongodb_handler_update_one.assert_awaited_once_with(
         Collection.USERS,
@@ -130,40 +132,22 @@ def test_user_with_status_confirmed_un_rsvp_changes_status_to_waiver_signed(
         {"status": Status.WAIVER_SIGNED, "arrival_time": "17:00"},
     )
 
-    assert res.status_code == 303
-
-
-# TODO: revisit after fixing docusign
-# @patch("services.mongodb_handler.update_one", autospec=True)
-# @patch("services.mongodb_handler.retrieve_one", autospec=True)
-# def test_user_with_status_accepted_un_rsvp_returns_403(
-#     mock_mongodb_handler_retrieve_one: AsyncMock,
-#     mock_mongodb_handler_update_one: AsyncMock,
-# ) -> None:
-#     """Test user with ACCEPTED status has no status change after RSVP."""
-#     mock_mongodb_handler_retrieve_one.return_value = {"status": Decision.ACCEPTED}
-
-#     client = UserTestClient(GuestUser(email="tree@stanford.edu"), app)
-#     res = client.post("/rsvp", follow_redirects=False)
-
-#     mock_mongodb_handler_update_one.assert_not_awaited()
-
-#     assert res.status_code == 403
+    assert res.status_code == status.HTTP_303_SEE_OTHER
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 def test_user_me_route_returns_correct_type(
     mock_mongodb_handler_retrieve_one: AsyncMock,
 ) -> None:
-    """Test user me route returns correct fields as listed in user.IdentityResponse"""
+    """Test user me route returns correct fields as listed in user.IdentityResponse."""
     mock_mongodb_handler_retrieve_one.return_value = {
         "status": Status.WAIVER_SIGNED,
         "roles": [Role.VOLUNTEER],
         "decision": None,
     }
 
-    client = UserTestClient(GuestUser(email="tree@stanford.edu"), app)
-    res = client.get("/me")
+    auth_client = UserTestClient(GuestUser(email=USER_EMAIL), app)
+    res = auth_client.get("/me")
     data = res.json()
 
     assert data == {

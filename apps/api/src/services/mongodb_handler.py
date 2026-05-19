@@ -137,11 +137,12 @@ async def raw_update_one(
     update: Mapping[str, object],
     *,
     upsert: bool = False,
+    array_filters: Optional[list[dict[str, object]]] = None,
 ) -> bool:
     """Search for and update a document using the provided query and raw update."""
     DB = get_database()
     COLLECTION = DB[collection.value]
-    result = await COLLECTION.update_one(query, update, upsert=upsert)
+    result = await COLLECTION.update_one(query, update, upsert=upsert, array_filters=array_filters)
     if not result.acknowledged:
         log.error("MongoDB document update was not acknowledged")
         raise RuntimeError("Could not update documents in MongoDB collection")

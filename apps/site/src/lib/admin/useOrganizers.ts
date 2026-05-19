@@ -6,6 +6,7 @@ export interface Organizer {
 	first_name: string;
 	last_name: string;
 	roles: ReadonlyArray<string>;
+	committees: string[];
 }
 
 const fetcher = async (url: string) => {

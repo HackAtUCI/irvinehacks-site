@@ -1,13 +1,19 @@
 "use client";
 
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
+import Alert from "@cloudscape-design/components/alert";
 import Box from "@cloudscape-design/components/box";
 import Button from "@cloudscape-design/components/button";
+import Container from "@cloudscape-design/components/container";
 import Header from "@cloudscape-design/components/header";
 import SpaceBetween from "@cloudscape-design/components/space-between";
+import Spinner from "@cloudscape-design/components/spinner";
+import axios from "axios";
 
 import NotificationContext from "@/lib/admin/NotificationContext";
+import useAvailability, { AvailabilitySlot } from "@/lib/admin/useAvailability";
+import useAvailabilityLock from "@/lib/admin/useAvailabilityLock";
 
 type AvailabilityStatus = "not-submitted" | "submitted" | "editing";
 type DragMode = "select" | "deselect" | null;
@@ -24,31 +30,89 @@ const EVENT_DAYS: EventDay[] = [
 	{ date: "2027-10-11", label: "Oct 11", weekday: "Sun" },
 ];
 
-const HOURS = Array.from({ length: 16 }, (_, index) => 9 + index);
+const SLOT_START_MINUTES = Array.from(
+	{ length: 30 },
+	(_, index) => 9 * 60 + index * 30,
+);
 
-function formatHour(hour: number) {
-	if (hour === 24) return "12 AM";
-	if (hour === 12) return "12 PM";
-	if (hour > 12) return `${hour - 12} PM`;
-	return `${hour} AM`;
+function formatSlotTime(totalMinutes: number) {
+	const hour = Math.floor(totalMinutes / 60);
+	const minute = totalMinutes % 60;
+	const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+	const period = hour >= 12 ? "PM" : "AM";
+	return `${displayHour}:${minute.toString().padStart(2, "0")} ${period}`;
 }
 
-function getBlockId(date: string, hour: number) {
-	return `${date}-${hour}`;
+function formatHourLabel(totalMinutes: number) {
+	const hour = Math.floor(totalMinutes / 60);
+	const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+	const period = hour >= 12 ? "PM" : "AM";
+	return `${displayHour} ${period}`;
+}
+
+function getSlotStartTime(totalMinutes: number) {
+	const hour = Math.floor(totalMinutes / 60);
+	const minute = totalMinutes % 60;
+	return `${hour.toString().padStart(2, "0")}:${minute
+		.toString()
+		.padStart(2, "0")}`;
+}
+
+function getBlockId(date: string, startTime: string) {
+	return `${date}-${startTime}`;
+}
+
+function slotsToBlockIds(availability: AvailabilitySlot[]) {
+	return new Set(
+		availability.map((slot) => getBlockId(slot.date, slot.start_time)),
+	);
+}
+
+function blockIdsToSlots(blockIds: Set<string>): AvailabilitySlot[] {
+	return Array.from(blockIds)
+		.map((blockId) => {
+			const [year, month, day, startTime] = blockId.split("-");
+			return {
+				date: `${year}-${month}-${day}`,
+				start_time: startTime,
+			};
+		})
+		.sort(
+			(a, b) =>
+				a.date.localeCompare(b.date) ||
+				a.start_time.localeCompare(b.start_time),
+		);
 }
 
 export default function MyAvailability() {
 	const [selectedBlocks, setSelectedBlocks] = useState<Set<string>>(new Set());
 	const [status, setStatus] = useState<AvailabilityStatus>("not-submitted");
 	const [dragMode, setDragMode] = useState<DragMode>(null);
+	const [saving, setSaving] = useState(false);
 
 	const { setNotifications } = useContext(NotificationContext);
+	const {
+		availability,
+		submittedAt,
+		loading: availabilityLoading,
+		error: availabilityError,
+		submitAvailability,
+	} = useAvailability();
+	const {
+		isLocked,
+		loading: lockLoading,
+		error: lockError,
+	} = useAvailabilityLock();
 
-	// TODO: locked feature from backend
-	const isLocked = false;
+	useEffect(() => {
+		setSelectedBlocks(slotsToBlockIds(availability));
+		setStatus(submittedAt ? "submitted" : "not-submitted");
+	}, [availability, submittedAt]);
 
 	const selectedCount = selectedBlocks.size;
-	const isEditable = !isLocked && status !== "submitted";
+	const isLoading = availabilityLoading || lockLoading;
+	const error = availabilityError || lockError;
+	const isEditable = !isLocked && status !== "submitted" && !saving;
 
 	function showSuccessNotification(content: string) {
 		if (!setNotifications) return;
@@ -81,10 +145,10 @@ export default function MyAvailability() {
 		});
 	}
 
-	function handleBlockMouseDown(date: string, hour: number) {
+	function handleBlockMouseDown(date: string, startTime: string) {
 		if (!isEditable) return;
 
-		const blockId = getBlockId(date, hour);
+		const blockId = getBlockId(date, startTime);
 		const nextDragMode: Exclude<DragMode, null> = selectedBlocks.has(blockId)
 			? "deselect"
 			: "select";
@@ -93,10 +157,10 @@ export default function MyAvailability() {
 		applyBlockSelection(blockId, nextDragMode);
 	}
 
-	function handleBlockMouseEnter(date: string, hour: number) {
+	function handleBlockMouseEnter(date: string, startTime: string) {
 		if (!isEditable || dragMode === null) return;
 
-		const blockId = getBlockId(date, hour);
+		const blockId = getBlockId(date, startTime);
 		applyBlockSelection(blockId, dragMode);
 	}
 
@@ -104,22 +168,73 @@ export default function MyAvailability() {
 		setDragMode(null);
 	}
 
-	function handleSubmit() {
+	function showErrorNotification(content: string) {
+		if (!setNotifications) return;
+
+		setNotifications([
+			{
+				type: "error",
+				content,
+				dismissible: true,
+				onDismiss: () => setNotifications([]),
+			},
+		]);
+	}
+
+	async function handleSubmit() {
 		const wasEditing = status === "editing";
 
-		// TODO: submit to backend
-		setStatus("submitted");
+		try {
+			setSaving(true);
+			await submitAvailability(blockIdsToSlots(selectedBlocks));
+			setStatus("submitted");
 
-		showSuccessNotification(
-			wasEditing
-				? "Availability updated successfully."
-				: "Availability submitted successfully.",
-		);
+			showSuccessNotification(
+				wasEditing
+					? "Availability updated successfully."
+					: "Availability submitted successfully.",
+			);
+		} catch (err) {
+			const message =
+				axios.isAxiosError(err) && err.response?.status === 403
+					? "Availability submissions are locked."
+					: "Unable to save availability. Please try again.";
+			showErrorNotification(message);
+		} finally {
+			setSaving(false);
+		}
 	}
 
 	function handleEdit() {
 		if (isLocked) return;
 		setStatus("editing");
+	}
+
+	if (isLoading) {
+		return (
+			<SpaceBetween size="l">
+				<Header variant="h1">IrvineHacks 2027 Availability</Header>
+
+				<Container>
+					<SpaceBetween size="s" direction="horizontal" alignItems="center">
+						<Spinner />
+						<Box color="text-body-secondary">Loading availability...</Box>
+					</SpaceBetween>
+				</Container>
+			</SpaceBetween>
+		);
+	}
+
+	if (error) {
+		return (
+			<SpaceBetween size="l">
+				<Header variant="h1">IrvineHacks 2027 Availability</Header>
+
+				<Alert type="error" header="Unable to load availability">
+					Please refresh the page and try again.
+				</Alert>
+			</SpaceBetween>
+		);
 	}
 
 	return (
@@ -136,7 +251,8 @@ export default function MyAvailability() {
 						<Button
 							variant="primary"
 							onClick={handleSubmit}
-							disabled={isLocked || selectedCount === 0}
+							disabled={isLocked || selectedCount === 0 || saving}
+							loading={saving}
 						>
 							Submit Availability
 						</Button>
@@ -147,6 +263,12 @@ export default function MyAvailability() {
 			</Header>
 
 			<SpaceBetween size="s">
+				{isLocked && (
+					<Alert type="warning" header="Availability is locked">
+						Availability submissions are no longer editable.
+					</Alert>
+				)}
+
 				<Box>Shifts before 10 AM are worth 2x points.</Box>
 
 				<div
@@ -162,16 +284,18 @@ export default function MyAvailability() {
 					<div>
 						<div style={{ height: "58px" }} />
 
-						{HOURS.map((hour) => (
-							<Box key={hour} fontSize="body-m">
+						{SLOT_START_MINUTES.map((slotStartMinutes) => (
+							<Box key={slotStartMinutes} fontSize="body-m">
 								<div
 									style={{
-										height: "44px",
+										height: "28px",
 										display: "flex",
 										alignItems: "flex-start",
 									}}
 								>
-									{formatHour(hour)}
+									{slotStartMinutes % 60 === 0
+										? formatHourLabel(slotStartMinutes)
+										: ""}
 								</div>
 							</Box>
 						))}
@@ -221,8 +345,9 @@ export default function MyAvailability() {
 										borderRight: "1px solid #111",
 									}}
 								>
-									{HOURS.map((hour, hourIndex) => {
-										const blockId = getBlockId(day.date, hour);
+									{SLOT_START_MINUTES.map((slotStartMinutes, slotIndex) => {
+										const startTime = getSlotStartTime(slotStartMinutes);
+										const blockId = getBlockId(day.date, startTime);
 										const isSelected = selectedBlocks.has(blockId);
 
 										return (
@@ -231,21 +356,21 @@ export default function MyAvailability() {
 												type="button"
 												disabled={!isEditable}
 												aria-pressed={isSelected}
-												aria-label={`${day.weekday}, ${day.label}, ${formatHour(
-													hour,
-												)}`}
+												aria-label={`${day.weekday}, ${
+													day.label
+												}, ${formatSlotTime(slotStartMinutes)}`}
 												onMouseDown={(event) => {
 													event.preventDefault();
-													handleBlockMouseDown(day.date, hour);
+													handleBlockMouseDown(day.date, startTime);
 												}}
 												onMouseEnter={() =>
-													handleBlockMouseEnter(day.date, hour)
+													handleBlockMouseEnter(day.date, startTime)
 												}
 												style={{
-													height: "44px",
+													height: "28px",
 													border: "none",
 													borderBottom:
-														hourIndex === HOURS.length - 1
+														slotIndex === SLOT_START_MINUTES.length - 1
 															? "none"
 															: "1px dotted #8f8f8f",
 													background: isSelected ? "#bfbfbf" : "white",

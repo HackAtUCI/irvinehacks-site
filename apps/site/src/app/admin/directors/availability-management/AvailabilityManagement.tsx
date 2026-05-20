@@ -11,11 +11,14 @@ import Header from "@cloudscape-design/components/header";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import Spinner from "@cloudscape-design/components/spinner";
 import Toggle from "@cloudscape-design/components/toggle";
+import axios from "axios";
 
 import { isDirector } from "@/lib/admin/authorization";
 import NotificationContext from "@/lib/admin/NotificationContext";
 import UserContext from "@/lib/admin/UserContext";
 
+import useAvailabilityLock from "@/lib/admin/useAvailabilityLock";
+import useAvailabilitySubmissions from "@/lib/admin/useAvailabilitySubmissions";
 import useOrganizers from "@/lib/admin/useOrganizers";
 
 type AvailabilityOrganizer = {
@@ -116,20 +119,38 @@ export default function AvailabilityManagement() {
 	const { roles } = useContext(UserContext);
 	const { setNotifications } = useContext(NotificationContext);
 
-	const { organizerList, loading, error } = useOrganizers();
+	const {
+		organizerList,
+		loading: organizersLoading,
+		error: organizersError,
+	} = useOrganizers();
+	const {
+		submittedOrganizerIds,
+		loading: submissionsLoading,
+		error: submissionsError,
+	} = useAvailabilitySubmissions();
+	const {
+		isLocked,
+		loading: lockLoading,
+		error: lockError,
+		setLocked,
+	} = useAvailabilityLock();
 
-	const [isLocked, setIsLocked] = useState(false);
+	const [savingLock, setSavingLock] = useState(false);
+
+	const submittedOrganizerIdSet = useMemo(
+		() => new Set(submittedOrganizerIds),
+		[submittedOrganizerIds],
+	);
 
 	const organizers: AvailabilityOrganizer[] = useMemo(() => {
 		return organizerList.map((organizer) => ({
 			id: organizer._id,
 			name: getOrganizerName(organizer.first_name, organizer.last_name),
 			committee: getPrimaryCommittee(organizer.committees),
-
-			// TODO: Replace with real availability submission status once backend exists.
-			hasSubmitted: false,
+			hasSubmitted: submittedOrganizerIdSet.has(organizer._id),
 		}));
-	}, [organizerList]);
+	}, [organizerList, submittedOrganizerIdSet]);
 
 	const submittedOrganizers = useMemo(
 		() => organizers.filter((organizer) => organizer.hasSubmitted),
@@ -145,12 +166,15 @@ export default function AvailabilityManagement() {
 	const submittedCount = submittedOrganizers.length;
 	const notSubmittedCount = notSubmittedOrganizers.length;
 
-	function showNotification(content: string) {
+	function showNotification(
+		content: string,
+		type: "success" | "error" = "success",
+	) {
 		if (!setNotifications) return;
 
 		setNotifications([
 			{
-				type: "success",
+				type,
 				content,
 				dismissible: true,
 				onDismiss: () => setNotifications([]),
@@ -162,21 +186,35 @@ export default function AvailabilityManagement() {
 		}, 3000);
 	}
 
-	function handleLockToggle(checked: boolean) {
-		setIsLocked(checked);
+	async function handleLockToggle(checked: boolean) {
+		try {
+			setSavingLock(true);
+			const nextLocked = await setLocked(checked);
 
-		showNotification(
-			checked
-				? "Availability submissions are now locked."
-				: "Availability submissions are now unlocked.",
-		);
+			showNotification(
+				nextLocked
+					? "Availability submissions are now locked."
+					: "Availability submissions are now unlocked.",
+			);
+		} catch (err) {
+			const message =
+				axios.isAxiosError(err) && err.response?.status === 403
+					? "Only directors can update the availability lock."
+					: "Unable to update availability lock. Please try again.";
+			showNotification(message, "error");
+		} finally {
+			setSavingLock(false);
+		}
 	}
 
-    const router = useRouter();
+	const router = useRouter();
 
 	if (!isDirector(roles)) {
 		router.push("/admin/dashboard");
 	}
+
+	const loading = organizersLoading || submissionsLoading || lockLoading;
+	const error = organizersError || submissionsError || lockError;
 
 	if (loading) {
 		return (
@@ -261,6 +299,7 @@ export default function AvailabilityManagement() {
 						actions={
 							<Toggle
 								checked={isLocked}
+								disabled={savingLock}
 								onChange={({ detail }) => handleLockToggle(detail.checked)}
 							>
 								Lock Availability
@@ -277,10 +316,16 @@ export default function AvailabilityManagement() {
 							There are no organizers to display yet.
 						</Alert>
 					) : (
-						<OrganizerGroup
-							title="Not Submitted"
-							organizers={notSubmittedOrganizers}
-						/>
+						<>
+							<OrganizerGroup
+								title="Submitted"
+								organizers={submittedOrganizers}
+							/>
+							<OrganizerGroup
+								title="Not Submitted"
+								organizers={notSubmittedOrganizers}
+							/>
+						</>
 					)}
 				</SpaceBetween>
 			</Container>

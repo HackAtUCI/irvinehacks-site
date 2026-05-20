@@ -49,6 +49,7 @@ class Collection(str, Enum):
     EVENTS = "events"
     EMAILS = "emails"
     CODES = "codes"
+    AVAILABILITY = "availability"
 
 
 def get_database() -> AgnosticDatabase[Any]:
@@ -142,7 +143,9 @@ async def raw_update_one(
     """Search for and update a document using the provided query and raw update."""
     DB = get_database()
     COLLECTION = DB[collection.value]
-    result = await COLLECTION.update_one(query, update, upsert=upsert, array_filters=array_filters)
+    result = await COLLECTION.update_one(
+        query, update, upsert=upsert, array_filters=array_filters
+    )
     if not result.acknowledged:
         log.error("MongoDB document update was not acknowledged")
         raise RuntimeError("Could not update documents in MongoDB collection")

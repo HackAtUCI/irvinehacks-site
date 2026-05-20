@@ -349,7 +349,7 @@ async def _apply_flow(
 
 class DraftApplicationData(BaseModel):
     application_type: Literal["Hacker", "Mentor", "Volunteer"]
-    fields: dict[str, Union[str, int]]
+    fields: dict[str, Union[str, int, list[str]]]
 
 
 class DraftApplicationResponse(BaseModel):

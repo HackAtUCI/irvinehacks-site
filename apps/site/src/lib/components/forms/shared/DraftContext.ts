@@ -2,7 +2,7 @@
 
 import { createContext, useContext } from "react";
 
-export type DraftFieldValue = string | number;
+export type DraftFieldValue = string | number | string[];
 
 export interface DraftContextValue {
 	initialValues: Record<string, DraftFieldValue>;

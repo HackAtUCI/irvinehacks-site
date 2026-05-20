@@ -118,6 +118,11 @@ function AdminSidebar() {
 					text: "Availability Management",
 					href: "/admin/directors/availability-management",
 				},
+				{
+					type: "link",
+					text: "Template Gallery",
+					href: "/admin/directors/template-gallery",
+				},
 			],
 		});
 	}

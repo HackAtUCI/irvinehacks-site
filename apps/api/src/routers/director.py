@@ -555,7 +555,7 @@ async def templates(
         raise RuntimeError("Could not parse template.")
 
 
-@router.post("/update-template-name")
+@router.post("/rename-template")
 async def update_template_name(
     user: Annotated[User, Depends(require_director)],
     old_template_name: str = Body(),
@@ -597,10 +597,10 @@ async def delete_template(
 @router.post("/duplicate-template")
 async def duplicate_template(
     user: Annotated[User, Depends(require_director)],
-    old_template: ScheduleTemplate,
+    old_template_name: str,
 ) -> None:
     """Makes a copy of template"""
-    log.info("%s made a copy of %s", user, old_template.template_name)
+    log.info("%s made a copy of %s", user, old_template_name)
 
     records = await mongodb_handler.retrieve_one(
         Collection.SETTINGS,
@@ -619,11 +619,11 @@ async def duplicate_template(
 
     old_template_obj = next(
         t for t in templates
-        if t.template_name == old_template.template_name
+        if t.template_name == old_template_name
     )
 
     new_template = ScheduleTemplate(
-        template_name=f"Copy of {old_template.template_name}",
+        template_name=f"Copy of {old_template_name}",
         template_info=ScheduleTemplateInfo.model_validate(
             old_template_obj.template_info
         ),

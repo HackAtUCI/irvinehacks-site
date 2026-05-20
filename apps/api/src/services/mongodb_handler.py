@@ -206,3 +206,17 @@ async def delete_one(
         log.error("MongoDB document deletion was not acknowledged")
         raise RuntimeError("Could not delete document from MongoDB collection")
     return result.deleted_count > 0
+
+
+async def delete(
+    collection: Collection,
+    query: Mapping[str, object],
+) -> bool:
+    """Delete all documents matching the query."""
+    DB = get_database()
+    COLLECTION = DB[collection.value]
+    result = await COLLECTION.delete_many(query)
+    if not result.acknowledged:
+        log.error("MongoDB document deletion was not acknowledged")
+        raise RuntimeError("Could not delete documents from MongoDB collection")
+    return result.deleted_count > 0

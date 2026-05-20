@@ -5,11 +5,14 @@ import { useRouter } from "next/navigation";
 
 import Alert from "@cloudscape-design/components/alert";
 import Box from "@cloudscape-design/components/box";
+import Button from "@cloudscape-design/components/button";
 import ColumnLayout from "@cloudscape-design/components/column-layout";
 import Container from "@cloudscape-design/components/container";
 import Header from "@cloudscape-design/components/header";
+import Modal from "@cloudscape-design/components/modal";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import Spinner from "@cloudscape-design/components/spinner";
+import TextContent from "@cloudscape-design/components/text-content";
 import Toggle from "@cloudscape-design/components/toggle";
 import axios from "axios";
 
@@ -128,6 +131,7 @@ export default function AvailabilityManagement() {
 		submittedOrganizerIds,
 		loading: submissionsLoading,
 		error: submissionsError,
+		clearAvailability,
 	} = useAvailabilitySubmissions();
 	const {
 		isLocked,
@@ -137,6 +141,8 @@ export default function AvailabilityManagement() {
 	} = useAvailabilityLock();
 
 	const [savingLock, setSavingLock] = useState(false);
+	const [clearingAvailability, setClearingAvailability] = useState(false);
+	const [clearModalVisible, setClearModalVisible] = useState(false);
 
 	const submittedOrganizerIdSet = useMemo(
 		() => new Set(submittedOrganizerIds),
@@ -204,6 +210,23 @@ export default function AvailabilityManagement() {
 			showNotification(message, "error");
 		} finally {
 			setSavingLock(false);
+		}
+	}
+
+	async function handleClearAvailability() {
+		try {
+			setClearingAvailability(true);
+			await clearAvailability();
+			setClearModalVisible(false);
+			showNotification("All availability submissions have been cleared.");
+		} catch (err) {
+			const message =
+				axios.isAxiosError(err) && err.response?.status === 403
+					? "Only directors can clear availability submissions."
+					: "Unable to clear availability submissions. Please try again.";
+			showNotification(message, "error");
+		} finally {
+			setClearingAvailability(false);
 		}
 	}
 
@@ -291,12 +314,24 @@ export default function AvailabilityManagement() {
 				</Container>
 			</ColumnLayout>
 
-			<Container
-				header={
-					<Header
-						variant="h2"
-						description="Organizers can no longer edit their availability."
-						actions={
+			<Container header={<Header variant="h2">Availability</Header>}>
+				<SpaceBetween size="l">
+					<SpaceBetween size="m">
+						<div
+							style={{
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "space-between",
+								gap: "24px",
+							}}
+						>
+							<div>
+								<Box fontSize="heading-m">Lock Availability</Box>
+								<Box color="text-body-secondary">
+									Organizers can no longer edit their submissions
+								</Box>
+							</div>
+
 							<Toggle
 								checked={isLocked}
 								disabled={savingLock}
@@ -304,13 +339,41 @@ export default function AvailabilityManagement() {
 							>
 								Lock Availability
 							</Toggle>
-						}
-					>
-						Availability
-					</Header>
-				}
-			>
-				<SpaceBetween size="l">
+						</div>
+
+						<div
+							style={{
+								display: "flex",
+								alignItems: "center",
+								justifyContent: "space-between",
+								gap: "24px",
+							}}
+						>
+							<div>
+								<Box fontSize="heading-m">Clear All Availability</Box>
+								<Box color="text-body-secondary">
+									Remove all recorded availabilities
+								</Box>
+							</div>
+
+							<Button
+								variant="primary"
+								disabled={submittedCount === 0}
+								onClick={() => setClearModalVisible(true)}
+							>
+								Confirm
+							</Button>
+						</div>
+					</SpaceBetween>
+
+					<hr
+						style={{
+							border: 0,
+							borderTop: "1px solid #d5dbdb",
+							margin: 0,
+						}}
+					/>
+
 					{organizers.length === 0 ? (
 						<Alert type="info" header="No organizers found">
 							There are no organizers to display yet.
@@ -329,6 +392,43 @@ export default function AvailabilityManagement() {
 					)}
 				</SpaceBetween>
 			</Container>
+
+			<Modal
+				visible={clearModalVisible}
+				onDismiss={() => {
+					if (!clearingAvailability) {
+						setClearModalVisible(false);
+					}
+				}}
+				header="Clear all availability?"
+				footer={
+					<Box float="right">
+						<SpaceBetween direction="horizontal" size="xs">
+							<Button
+								variant="link"
+								disabled={clearingAvailability}
+								onClick={() => setClearModalVisible(false)}
+							>
+								Cancel
+							</Button>
+							<Button
+								variant="primary"
+								loading={clearingAvailability}
+								onClick={handleClearAvailability}
+							>
+								Clear all availability
+							</Button>
+						</SpaceBetween>
+					</Box>
+				}
+			>
+				<TextContent>
+					<p>
+						This removes every organizer&apos;s submitted availability. This
+						action cannot be undone.
+					</p>
+				</TextContent>
+			</Modal>
 		</SpaceBetween>
 	);
 }

@@ -156,3 +156,13 @@ async def get_availability_submissions() -> list[str]:
         )
     except (KeyError, ValidationError):
         raise RuntimeError("Could not parse availability submissions.")
+
+
+@router.delete("", dependencies=[Depends(require_director)])
+async def clear_availability() -> None:
+    """Clear all organizer availability submissions."""
+    try:
+        await mongodb_handler.delete(Collection.AVAILABILITY, {})
+    except RuntimeError:
+        log.error("Could not clear availability submissions")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)

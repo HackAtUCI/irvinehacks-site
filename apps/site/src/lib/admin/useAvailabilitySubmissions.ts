@@ -14,11 +14,17 @@ function useAvailabilitySubmissions() {
 		fetcher,
 	);
 
+	const clearAvailability = async () => {
+		await axios.delete("/api/availability");
+		await mutate([], false);
+	};
+
 	return {
 		submittedOrganizerIds: data ?? [],
 		loading: isLoading,
 		error,
 		mutate,
+		clearAvailability,
 	};
 }
 

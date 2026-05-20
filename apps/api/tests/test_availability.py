@@ -191,3 +191,31 @@ def test_get_availability_submissions(
 
     assert res.status_code == 200
     assert res.json() == ["edu.uci.alicia", "edu.uci.petr"]
+
+
+@patch("services.mongodb_handler.delete", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_director_can_clear_availability(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_delete: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
+
+    res = director_client.delete("/availability")
+
+    assert res.status_code == 200
+    mock_mongodb_handler_delete.assert_awaited_once_with(Collection.AVAILABILITY, {})
+
+
+@patch("services.mongodb_handler.delete", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_organizer_cannot_clear_availability(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_delete: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.return_value = ORGANIZER_IDENTITY
+
+    res = organizer_client.delete("/availability")
+
+    assert res.status_code == 403
+    mock_mongodb_handler_delete.assert_not_awaited()

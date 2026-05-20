@@ -50,6 +50,15 @@ require_hacker_reviewer = require_role({Role.DIRECTOR, Role.HACKER_REVIEWER})
 require_mentor_reviewer = require_role({Role.DIRECTOR, Role.MENTOR_REVIEWER})
 require_volunteer_reviewer = require_role({Role.DIRECTOR, Role.VOLUNTEER_REVIEWER})
 require_checkin_lead = require_role({Role.DIRECTOR, Role.CHECKIN_LEAD})
+require_hacker_portal_viewer = require_role(
+    {Role.DIRECTOR, Role.LEAD, Role.CHECKIN_LEAD, Role.HACKER_REVIEWER}
+)
+require_mentor_portal_viewer = require_role(
+    {Role.DIRECTOR, Role.LEAD, Role.CHECKIN_LEAD, Role.MENTOR_REVIEWER}
+)
+require_volunteer_portal_viewer = require_role(
+    {Role.DIRECTOR, Role.LEAD, Role.CHECKIN_LEAD, Role.VOLUNTEER_REVIEWER}
+)
 require_organizer = require_role({Role.ORGANIZER})
 
 
@@ -269,7 +278,9 @@ async def applicant(
         raise RuntimeError("Could not parse applicant data.")
 
 
-@router.get("/applicant/hacker/{uid}", dependencies=[Depends(require_hacker_reviewer)])
+@router.get(
+    "/applicant/hacker/{uid}", dependencies=[Depends(require_hacker_portal_viewer)]
+)
 async def hacker_applicant(
     uid: str,
 ) -> Applicant:
@@ -277,7 +288,9 @@ async def hacker_applicant(
     return await applicant(uid, "Hacker")
 
 
-@router.get("/applicant/mentor/{uid}", dependencies=[Depends(require_mentor_reviewer)])
+@router.get(
+    "/applicant/mentor/{uid}", dependencies=[Depends(require_mentor_portal_viewer)]
+)
 async def mentor_applicant(
     uid: str,
 ) -> Applicant:
@@ -286,7 +299,8 @@ async def mentor_applicant(
 
 
 @router.get(
-    "/applicant/volunteer/{uid}", dependencies=[Depends(require_volunteer_reviewer)]
+    "/applicant/volunteer/{uid}",
+    dependencies=[Depends(require_volunteer_portal_viewer)],
 )
 async def volunteer_applicant(
     uid: str,

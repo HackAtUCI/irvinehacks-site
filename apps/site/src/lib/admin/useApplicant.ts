@@ -1,7 +1,13 @@
 import axios from "axios";
 import useSWR from "swr";
 
-import { ParticipantRole, Status, Uid, Score } from "@/lib/userRecord";
+import {
+	Decision,
+	ParticipantRole,
+	Status,
+	Uid,
+	Score,
+} from "@/lib/userRecord";
 
 export type Review = [string, Uid, Score, string | null];
 
@@ -167,6 +173,7 @@ export interface Applicant {
 	last_name: string;
 	roles: ReadonlyArray<ParticipantRole>;
 	status: Status;
+	decision?: Decision;
 	application_data: ApplicationData;
 }
 

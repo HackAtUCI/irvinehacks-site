@@ -1,12 +1,15 @@
 "use client";
 import { useState, useContext } from "react";
+import Button from "@cloudscape-design/components/button";
 import ContentLayout from "@cloudscape-design/components/content-layout";
 import Header from "@cloudscape-design/components/header";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import Spinner from "@cloudscape-design/components/spinner";
 import { FlashbarProps } from "@cloudscape-design/components/flashbar";
 
+import { canViewPortalPreview } from "@/lib/admin/authorization";
 import NotificationContext from "@/lib/admin/NotificationContext";
+import UserContext from "@/lib/admin/UserContext";
 import useApplicant, {
 	IrvineHacksHackerApplicationData,
 	IrvineHacksMentorApplicationData,
@@ -40,6 +43,9 @@ interface ApplicantProps {
 
 function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 	const { setNotifications } = useContext(NotificationContext);
+	const { roles: viewerRoles } = useContext(UserContext);
+	const previewHref = `/portal-preview/${applicationType}/${uid}`;
+	const showPortalPreviewLink = canViewPortalPreview(viewerRoles);
 	const {
 		applicant,
 		loading,
@@ -94,6 +100,11 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 					actions={
 						applicant.roles.includes(ParticipantRole.Hacker) ? (
 							<SpaceBetween direction="horizontal" size="xs">
+								{showPortalPreviewLink && (
+									<Button href={previewHref} target="_blank" external>
+										View as applicant
+									</Button>
+								)}
 								<ApplicantNavigationButtons
 									uid={uid}
 									basePath="/admin/applicants/hackers" // hardcoded for Irvinehacks (Applicant.tsx)
@@ -107,10 +118,17 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 								/>
 							</SpaceBetween>
 						) : (
-							<ApplicantActions
-								applicant={applicant._id}
-								submitReview={submitReview}
-							/>
+							<SpaceBetween direction="horizontal" size="xs">
+								{showPortalPreviewLink && (
+									<Button href={previewHref} target="_blank" external>
+										View as applicant
+									</Button>
+								)}
+								<ApplicantActions
+									applicant={applicant._id}
+									submitReview={submitReview}
+								/>
+							</SpaceBetween>
 						)
 					}
 				>

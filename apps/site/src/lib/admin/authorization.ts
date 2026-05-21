@@ -42,6 +42,12 @@ export function isLead(roles: ReadonlyArray<Role>): boolean {
 	return roles.includes(AdminRole.Lead);
 }
 
+export function canViewPortalPreview(roles: ReadonlyArray<Role>): boolean {
+	return (
+		isDirector(roles) || isLead(roles) || roles.includes(AdminRole.CheckInLead)
+	);
+}
+
 export function isHackerReviewer(roles: ReadonlyArray<Role>): boolean {
 	return (
 		roles.includes(AdminRole.Director) ||

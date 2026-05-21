@@ -4,9 +4,13 @@ import RsvpForm from "./RsvpForm";
 
 interface ConfirmAttendanceProps {
 	status: Status;
+	readOnly?: boolean;
 }
 
-function ConfirmAttendance({ status }: ConfirmAttendanceProps) {
+function ConfirmAttendance({
+	status,
+	readOnly = false,
+}: ConfirmAttendanceProps) {
 	const buttonText =
 		status === Status.Confirmed || status === Status.Attending
 			? "I am no longer able to attend IrvineHacks 2026"
@@ -33,7 +37,9 @@ function ConfirmAttendance({ status }: ConfirmAttendanceProps) {
 							<span className="underline">NOT</span> be able to RSVP again.
 						</strong>
 					)}
-					{status === Status.Confirmed && <LateArrivalForm />}
+					{status === Status.Confirmed && (
+						<LateArrivalForm readOnly={readOnly} />
+					)}
 				</>
 			) : (
 				<>
@@ -56,7 +62,11 @@ function ConfirmAttendance({ status }: ConfirmAttendanceProps) {
 			)}
 			{status !== Status.Confirmed && status !== Status.Attending && (
 				<div className="mt-2 md:mt-8">
-					<RsvpForm buttonText={buttonText} showWarning={false} />
+					<RsvpForm
+						buttonText={buttonText}
+						showWarning={false}
+						readOnly={readOnly}
+					/>
 				</div>
 			)}
 		</div>

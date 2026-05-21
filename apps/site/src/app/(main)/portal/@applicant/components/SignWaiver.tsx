@@ -5,9 +5,15 @@ interface SignWaiverProps {
 	status: Status;
 	decision: Decision;
 	waitlistOpen: boolean;
+	readOnly?: boolean;
 }
 
-function SignWaiver({ status, decision, waitlistOpen }: SignWaiverProps) {
+function SignWaiver({
+	status,
+	decision,
+	waitlistOpen,
+	readOnly = false,
+}: SignWaiverProps) {
 	return (
 		<div className="mt-4 md:mt-10 text-[var(--color-white)]">
 			<h3 className="font-bold font-display mb-[9px] md:mb-[20px] text-[0.9375rem] sm:text-2xl md:text-[2.5rem] md:leading-10">
@@ -26,14 +32,23 @@ function SignWaiver({ status, decision, waitlistOpen }: SignWaiverProps) {
 				)}
 			</p>
 			<div className="mt-6 md:mt-12">
-				<Button
-					text="Sign Waiver to attend IrvineHacks 2026"
-					href="https://app.hellosign.com/s/1C2DkqYe"
-					newWindow={true}
-					usePrefetch={false}
-					isLightVersion={true}
-					className="!bg-pink !w-full md:!w-[875px] !font-sans !font-medium md:text-3xl !leading-none !tracking-normal !text-center"
-				/>
+				{readOnly ? (
+					<Button
+						text="Sign Waiver to attend IrvineHacks 2026"
+						isLightVersion={true}
+						disabled={true}
+						className="!bg-pink !w-full md:!w-[875px] !font-sans !font-medium md:text-3xl !leading-none !tracking-normal !text-center"
+					/>
+				) : (
+					<Button
+						text="Sign Waiver to attend IrvineHacks 2026"
+						href="https://app.hellosign.com/s/1C2DkqYe"
+						newWindow={true}
+						usePrefetch={false}
+						isLightVersion={true}
+						className="!bg-pink !w-full md:!w-[875px] !font-sans !font-medium md:text-3xl !leading-none !tracking-normal !text-center"
+					/>
+				)}
 			</div>
 			<p className="text-xl w-full text-center mt-2 text-yellow-500">
 				If you have signed the waiver and received a confirmation, you do not

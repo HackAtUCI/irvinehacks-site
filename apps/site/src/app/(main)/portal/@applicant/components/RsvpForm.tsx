@@ -7,6 +7,7 @@ import ControlledDropdownSelect from "@/lib/components/forms/ControlledDropdownS
 interface RsvpFormProps {
 	buttonText: string;
 	showWarning: boolean;
+	readOnly?: boolean;
 }
 
 // Only late options, 6:00 PM is default from first dropdown
@@ -17,7 +18,11 @@ const LATE_ARRIVAL_TIME_OPTIONS = [
 	{ value: "19:30", label: "7:30 PM" },
 ] as const;
 
-export default function RsvpForm({ buttonText, showWarning }: RsvpFormProps) {
+export default function RsvpForm({
+	buttonText,
+	showWarning,
+	readOnly = false,
+}: RsvpFormProps) {
 	const [comingLateChoice, setComingLateChoice] = useState<"" | "no" | "yes">(
 		"",
 	);
@@ -32,6 +37,10 @@ export default function RsvpForm({ buttonText, showWarning }: RsvpFormProps) {
 			method="post"
 			action="/api/user/rsvp"
 			onSubmit={(event) => {
+				if (readOnly) {
+					event.preventDefault();
+					return;
+				}
 				if (showWarning && !confirm(confirmationMessage)) {
 					event.preventDefault();
 				}
@@ -77,6 +86,7 @@ export default function RsvpForm({ buttonText, showWarning }: RsvpFormProps) {
 				<Button
 					text={buttonText}
 					isLightVersion={true}
+					disabled={readOnly}
 					className="text-xs sm:text-base md:text-4xl !bg-pink"
 				/>
 			</div>

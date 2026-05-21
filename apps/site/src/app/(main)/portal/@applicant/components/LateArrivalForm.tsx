@@ -12,7 +12,13 @@ const ARRIVAL_TIMES = [
 	{ value: "19:30", text: "7:30 PM" },
 ];
 
-export default function LateArrivalForm() {
+interface LateArrivalFormProps {
+	readOnly?: boolean;
+}
+
+export default function LateArrivalForm({
+	readOnly = false,
+}: LateArrivalFormProps = {}) {
 	const [arrivalTime, setArrivalTime] = useState<string>("18:00");
 	const arrivalData = useArrivalTime();
 	const currentArrivalTimeLabel = ARRIVAL_TIMES.find(
@@ -53,6 +59,11 @@ export default function LateArrivalForm() {
 				<form
 					method="post"
 					action="/api/user/rsvp/late-arrival"
+					onSubmit={(event) => {
+						if (readOnly) {
+							event.preventDefault();
+						}
+					}}
 					className="space-y-4"
 				>
 					<ControlledDropdownSelect
@@ -69,6 +80,7 @@ export default function LateArrivalForm() {
 						<Button
 							text="Save arrival time"
 							isLightVersion={true}
+							disabled={readOnly}
 							className="text-xs sm:text-base md:text-4xl !bg-pink"
 						/>
 					</div>

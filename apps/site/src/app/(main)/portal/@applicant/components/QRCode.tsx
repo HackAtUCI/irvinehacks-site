@@ -2,17 +2,20 @@ import useUserIdentity from "@/lib/utils/useUserIdentity";
 import QRCode from "react-qr-code";
 
 interface QRCodeComponentProps {
+	uid?: string;
 	className?: string;
 	size?: number;
 }
 
 export default function QRCodeComponent({
+	uid: uidProp,
 	className = "",
 	size = 200,
 }: QRCodeComponentProps) {
 	const identity = useUserIdentity();
+	const uid = uidProp ?? identity?.uid;
 
-	if (!identity) {
+	if (uid === undefined) {
 		return (
 			<div className={`text-center p-4 ${className}`}>
 				<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
@@ -30,7 +33,7 @@ export default function QRCodeComponent({
 			<div className="mb-4 flex justify-center">
 				<QRCode
 					id="qr-code-svg"
-					value={identity.uid ?? ""}
+					value={uid ?? ""}
 					size={size}
 					style={{ height: "auto", maxWidth: "100%", width: "100%" }}
 					viewBox={`0 0 ${size} ${size}`}

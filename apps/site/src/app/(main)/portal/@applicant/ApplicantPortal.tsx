@@ -2,7 +2,8 @@
 
 import { redirect } from "next/navigation";
 
-import useUserIdentity from "@/lib/utils/useUserIdentity";
+import useUserIdentity, { Identity } from "@/lib/utils/useUserIdentity";
+import { ApplicationData } from "@/lib/utils/useApplicationData";
 import { Decision, Status } from "@/lib/userRecord";
 import useWaitlistOpen from "@/lib/utils/useWaitlistOpen";
 
@@ -16,8 +17,19 @@ import AvatarDisplay from "./components/AvatarDisplay";
 
 const rolesArray = ["Mentor", "Hacker", "Volunteer"];
 
-function Portal() {
-	const identity = useUserIdentity();
+interface PortalProps {
+	identity?: Identity;
+	applicationData?: ApplicationData;
+	readOnly?: boolean;
+}
+
+function Portal({
+	identity: identityProp,
+	applicationData,
+	readOnly = false,
+}: PortalProps = {}) {
+	const hookIdentity = useUserIdentity();
+	const identity = identityProp ?? hookIdentity;
 	const { waitlistStatus, isLoading: isWaitlistLoading } = useWaitlistOpen();
 
 	if (!identity || isWaitlistLoading) {
@@ -26,7 +38,7 @@ function Portal() {
 
 	const status = identity.status;
 
-	if (status === null) {
+	if (status === null && identityProp === undefined) {
 		redirect("/#apply");
 	}
 
@@ -50,8 +62,17 @@ function Portal() {
 	return (
 		<div className="relative">
 			<div className="bg-transparent text-black max-w-6xl rounded-2xl p-6 flex flex-col mb-24 w-full">
+				{readOnly && (
+					<div className="bg-yellow-500/20 border-2 border-yellow-400 rounded-lg p-4 mb-6 text-yellow-200 text-center font-display">
+						Preview mode — actions are disabled
+					</div>
+				)}
 				<div className="mb-12">
-					<QRCodeComponent className="max-w-xs mx-auto" size={180} />
+					<QRCodeComponent
+						uid={identity.uid ?? undefined}
+						className="max-w-xs mx-auto"
+						size={180}
+					/>
 					<p className="mt-4 text-white text-center">
 						If selected to attend, please show this QR code to our staff to
 						check-in.
@@ -61,7 +82,7 @@ function Portal() {
 				<h2 className="font-bold font-display text-[var(--color-white)] mb-4 md:mb-[42px] text-[15px] sm:text-2xl md:text-[40px] md:leading-10">
 					{roleToDisplay} Application Status
 				</h2>
-				<AvatarDisplay />
+				<AvatarDisplay applicationData={applicationData} />
 				<VerticalTimeline
 					status={identity?.decision ? identity?.decision : (status as Status)}
 				/>
@@ -74,9 +95,12 @@ function Portal() {
 						status={status as Status}
 						decision={identity?.decision as Decision}
 						waitlistOpen={waitlistOpen}
+						readOnly={readOnly}
 					/>
 				)}
-				{needsToRSVP && <ConfirmAttendance status={status as Status} />}
+				{needsToRSVP && (
+					<ConfirmAttendance status={status as Status} readOnly={readOnly} />
+				)}
 				{rejected && <ReturnHome />}
 			</div>
 		</div>

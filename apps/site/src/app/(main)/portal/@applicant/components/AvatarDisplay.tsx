@@ -34,7 +34,9 @@ import companion4 from "@/assets/images/characterCustomizer/companion_4.png";
 import blankBody from "@/assets/images/characterCustomizer/blank_body.png";
 import blankHead from "@/assets/images/characterCustomizer/blank_head.png";
 import blankTail from "@/assets/images/characterCustomizer/blank_tail.png";
-import useApplicationData from "@/lib/utils/useApplicationData";
+import useApplicationData, {
+	ApplicationData,
+} from "@/lib/utils/useApplicationData";
 
 const HEADS: [StaticImageData, string][] = [
 	[head1, "Kitty Headphones"],
@@ -64,8 +66,13 @@ const COMPANIONS: [StaticImageData, string][] = [
 
 const imageWidth = 600;
 
-export const AvatarDisplay = () => {
-	const data = useApplicationData();
+interface AvatarDisplayProps {
+	applicationData?: ApplicationData;
+}
+
+export const AvatarDisplay = ({ applicationData }: AvatarDisplayProps = {}) => {
+	const hookData = useApplicationData();
+	const data = applicationData ?? hookData;
 
 	return (
 		<div className="relative w-full border-white border-4 rounded-xl bg-gradient-to-b from-[#02031D] via-[#090D83] via-54% to-[#090D83] mb-10">

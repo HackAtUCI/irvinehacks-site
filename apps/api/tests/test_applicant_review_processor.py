@@ -299,48 +299,6 @@ def test_auto_reject_graduated_hacker() -> None:
     )
 
 
-def test_auto_accept_graduated_mentor() -> None:
-    """Mentors with education_level == 'graduate' are auto-accepted."""
-    record: dict[str, Any] = {
-        "_id": "edu.uci.mentor",
-        "status": "PENDING_REVIEW",
-        "roles": [Role.APPLICANT, Role.MENTOR],
-        "application_data": {
-            "is_18_older": True,
-            "education_level": "graduate",
-            "reviews": [],
-        },
-    }
-
-    applicant_review_processor.include_review_decision(record)
-    assert record["decision"] == "ACCEPTED"
-    assert (
-        record["auto_decision_reason"]
-        == applicant_review_processor.AUTO_REASON_GRADUATED
-    )
-
-
-def test_auto_accept_graduated_zothacks_mentor_via_grad_year() -> None:
-    """ZotHacks mentors are auto-accepted when graduation_year is in the past."""
-    record: dict[str, Any] = {
-        "_id": "edu.uci.zhmentor",
-        "status": "PENDING_REVIEW",
-        "roles": [Role.APPLICANT, Role.MENTOR],
-        "application_data": {
-            "is_18_older": True,
-            "graduation_year": datetime.now().year - 1,
-            "reviews": [],
-        },
-    }
-
-    applicant_review_processor.include_review_decision(record)
-    assert record["decision"] == "ACCEPTED"
-    assert (
-        record["auto_decision_reason"]
-        == applicant_review_processor.AUTO_REASON_GRADUATED
-    )
-
-
 def test_auto_decision_skipped_when_no_rule_matches() -> None:
     """Score-based logic still runs when no auto-rule matches; reason is None."""
     record: dict[str, Any] = {

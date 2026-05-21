@@ -179,8 +179,8 @@ def _compute_auto_decision(
     if _is_graduated(app_data):
         if Role.HACKER in roles:
             return Decision.REJECTED, AUTO_REASON_GRADUATED
-        if Role.MENTOR in roles:
-            return Decision.ACCEPTED, AUTO_REASON_GRADUATED
+        # if Role.MENTOR in roles:
+        #     return Decision.ACCEPTED, AUTO_REASON_GRADUATED
 
     return None
 

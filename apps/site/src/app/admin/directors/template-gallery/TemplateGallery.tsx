@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import axios from "axios";
 
 import Cards from "@cloudscape-design/components/cards";
@@ -23,7 +23,7 @@ const createCardHeaderFactory = (
 ) =>
 	function TemplateCardHeader(template: Template) {
 		return (
-			<TemplateCardHeader
+			<TemplateCardHeaderContent
 				template={template}
 				onDuplicate={() => onDuplicate(template)}
 				onRename={() => onRename(template)}
@@ -41,12 +41,6 @@ function TemplateGallery() {
 	}
 
 	const { templateList, loading, mutate } = useTemplates();
-	const [renamingTemplate, setRenamingTemplate] = useState<Template | null>(
-		null,
-	);
-	const [deletingTemplate, setDeletingTemplate] = useState<Template | null>(
-		null,
-	);
 
 	async function handleCreate() {
 		router.push("/admin/directors/template-management/new");
@@ -133,7 +127,7 @@ interface CardHeaderProps {
 	onDelete: () => void;
 }
 
-function TemplateCardHeader({
+function TemplateCardHeaderContent({
 	template,
 	onDuplicate,
 	onRename,

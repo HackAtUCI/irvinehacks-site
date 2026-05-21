@@ -11,7 +11,6 @@ import Input from "@cloudscape-design/components/input";
 import DatePicker from "@cloudscape-design/components/date-picker";
 import FormField from "@cloudscape-design/components/form-field";
 import TimeInput from "@cloudscape-design/components/time-input";
-import Container from "@cloudscape-design/components/container";
 
 import Form from "@cloudscape-design/components/form";
 
@@ -47,6 +46,29 @@ function emptyShift(): Shift {
 	};
 }
 
+function setDateTime(
+	dateTime: string,
+	setDate: (date: string) => void,
+	setTime: (time: string) => void,
+) {
+	const [date, time] = dateTime.split("T");
+	setDate(date ?? "");
+	setTime(time?.slice(0, 5) ?? "");
+}
+
+function shiftToPayload(shift: Shift) {
+	return {
+		shiftName: shift.shiftName,
+		location: shift.location,
+		pointValue: shift.pointValue,
+		requiredCommittee: shift.requiredCommittee,
+		requiredSubcommittee: shift.requiredSubcommittee,
+		preAssignedOrganizers: shift.preAssignedOrganizers,
+		start_time: `${shift.startDate}T${shift.startTime}:00`,
+		end_time: `${shift.endDate}T${shift.endTime}:00`,
+	};
+}
+
 function TemplateManagement() {
 	const { templateName } = useParams<{ templateName: string }>();
 	const router = useRouter();
@@ -65,24 +87,18 @@ function TemplateManagement() {
 			.get(`/api/director/templates/${decodeURIComponent(templateName)}`)
 			.then(({ data }) => {
 				setName(data.template_name);
-				setEventStart(data.event_start);
-				setEventEnd(data.event_end);
+				setDateTime(data.event_start, setEventStartDate, setEventStartTime);
+				setDateTime(data.event_end, setEventEndDate, setEventEndTime);
 				setShifts(data.shifts ?? [emptyShift()]);
 			});
-	}, [templateName]);
+	}, [isNew, templateName]);
 
 	async function handleSave() {
 		const payload = {
 			template_name: name,
 			event_start: `${eventStartDate}T${eventStartTime}:00`,
 			event_end: `${eventEndDate}T${eventEndTime}:00`,
-			shifts: shifts.map(
-				({ id, startDate, startTime, endDate, endTime, ...rest }) => ({
-					...rest,
-					start_time: `${startDate}T${startTime}:00`,
-					end_time: `${endDate}T${endTime}:00`,
-				}),
-			),
+			shifts: shifts.map(shiftToPayload),
 		};
 
 		if (isNew) {

@@ -10,6 +10,7 @@ from fastapi import (
     Header,
     HTTPException,
     Request,
+    Response,
     status,
 )
 from fastapi.datastructures import URL, FormData
@@ -126,6 +127,13 @@ async def logout() -> RedirectResponse:
     user_identity.remove_user_identity(response)
     return response
 
+@router.post("/refresh")
+async def refresh_token(
+    user: Annotated[User, Depends(require_user_identity)],
+    response: Response,
+) -> None:
+    """Issue a new token for the user, extending their session by 1 hour."""
+    user_identity.issue_user_identity(user, response)
 
 @router.get("/me")
 async def me(

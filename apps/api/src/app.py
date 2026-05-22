@@ -9,6 +9,8 @@ from middleware.error_logging import register_exception_handlers
 
 logging.basicConfig(level=logging.INFO)
 
+enable_dev_login = os.getenv("ENABLE_DEV_LOGIN") == "true"
+
 # TODO: check FastAPI CLI usage instead
 if os.getenv("DEPLOYMENT") == "LOCAL":
     from routers import dev
@@ -19,6 +21,10 @@ if os.getenv("DEPLOYMENT") == "LOCAL":
     app.include_router(dev.router, prefix="/dev", tags=["dev"])
 else:
     app = FastAPI()
+    if enable_dev_login:
+        from routers import dev
+
+        app.include_router(dev.router, prefix="/dev", tags=["dev"])
 
 app.include_router(saml.router, prefix="/saml", tags=["saml"])
 app.include_router(guest.router, prefix="/guest", tags=["guest"])

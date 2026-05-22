@@ -48,7 +48,7 @@ class WebhookPayload(BaseModel):
     data: EnvelopeCompletedData
 
 
-DOCUSIGN_HMAC_KEY = os.getenv("DOCUSIGN_HMAC_KEY", "")
+DOCUSIGN_HMAC_KEY = os.getenv("DOCUSIGN_HMAC_KEY", "").strip()
 STAGING_ENV = os.getenv("DEPLOYMENT") == "STAGING"
 
 if STAGING_ENV:
@@ -81,9 +81,19 @@ def waiver_form_url(email: EmailStr, user_name: str) -> str:
 
 def verify_webhook_signature(payload: bytes, signature: str) -> bool:
     """Verify POST request content is signed according to the secret key."""
+    signature = signature.strip()
     hmac_hash = hmac.new(DOCUSIGN_HMAC_KEY.encode(), payload, hashlib.sha256)
     result = base64.b64encode(hmac_hash.digest())
-    return hmac.compare_digest(result, signature.encode())
+    is_valid = hmac.compare_digest(result, signature.encode())
+
+    if not is_valid:
+        log.warning(
+            "DocuSign HMAC mismatch: key_configured=%s key_length=%d",
+            bool(DOCUSIGN_HMAC_KEY),
+            len(DOCUSIGN_HMAC_KEY),
+        )
+
+    return is_valid
 
 
 async def process_webhook_event(payload: WebhookPayload) -> None:

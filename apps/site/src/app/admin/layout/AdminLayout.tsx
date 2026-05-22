@@ -2,7 +2,7 @@
 
 import { useRouter, usePathname } from "next/navigation";
 
-import { PropsWithChildren, useEffect, useState } from "react";
+import { PropsWithChildren, useCallback, useEffect, useState } from "react";
 
 import AppLayout from "@cloudscape-design/components/app-layout";
 import Flashbar, {
@@ -18,6 +18,8 @@ import useUserIdentityStatic from "@/lib/admin/useUserIdentityStatic";
 
 import AdminSidebar from "./AdminSidebar";
 import Breadcrumbs from "./Breadcrumbs";
+import SessionTimeoutModal from "./SessionTimeoutModal";
+import { useSessionTimeout } from "@/lib/admin/useSessionTimeout";
 
 function AdminLayout({ children }: PropsWithChildren) {
 	const identity = useUserIdentityStatic();
@@ -26,6 +28,28 @@ function AdminLayout({ children }: PropsWithChildren) {
 	const [notifications, setNotifications] = useState<
 		FlashbarProps.MessageDefinition[]
 	>([]);
+	const [showTimeoutModal, setShowTimeoutModal] = useState(false);
+	const handleWarning = useCallback(() => {
+		setShowTimeoutModal(true);
+	}, []);
+	const handleExpired = useCallback(() => {
+		setShowTimeoutModal(false);
+	}, []);
+
+	const { logout, extendSession } = useSessionTimeout({
+		onWarning: handleWarning,
+		onExpired: handleExpired,
+	});
+
+	const handleExtend = useCallback(async () => {
+		setShowTimeoutModal(false);
+		await extendSession();
+	}, [extendSession]);
+
+	const handleLogout = useCallback(() => {
+		setShowTimeoutModal(false);
+		logout();
+	}, [logout]);
 
 	useEffect(() => {
 		setNotifications(() => []);
@@ -92,6 +116,11 @@ function AdminLayout({ children }: PropsWithChildren) {
 								inProgressIconAriaLabel: "In progress",
 							}}
 							stackItems
+						/>
+						<SessionTimeoutModal
+							visible={showTimeoutModal}
+							onExtend={handleExtend}
+							onLogout={handleLogout}
 						/>
 					</div>
 				</NotificationContext.Provider>

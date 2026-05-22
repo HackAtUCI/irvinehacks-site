@@ -30,7 +30,16 @@ function AdminLayout({ children }: PropsWithChildren) {
 	useEffect(() => {
 		setNotifications(() => []);
 
-		if (!document.cookie.includes("hackathon=irvinehacks")) {
+		if (pathName.includes("/zothacks")) {
+			document.cookie =
+				"hackathon=zothacks; path=/; max-age=" + 60 * 60 * 24 * 30;
+			return;
+		}
+
+		const hasHackathonCookie = document.cookie
+			.split("; ")
+			.some((cookie) => cookie.startsWith("hackathon="));
+		if (!hasHackathonCookie) {
 			document.cookie =
 				"hackathon=irvinehacks; path=/; max-age=" + 60 * 60 * 24 * 30;
 		}

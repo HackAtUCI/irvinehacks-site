@@ -28,13 +28,10 @@ function AdminLayout({ children }: PropsWithChildren) {
 	const [notifications, setNotifications] = useState<
 		FlashbarProps.MessageDefinition[]
 	>([]);
-	
 	const [showTimeoutModal, setShowTimeoutModal] = useState(false);
-	
 	const handleWarning = useCallback(() => {
 		setShowTimeoutModal(true);
 	}, []);
-	
 	const handleExpired = useCallback(() => {
 		setShowTimeoutModal(false);
 	}, []);
@@ -52,7 +49,7 @@ function AdminLayout({ children }: PropsWithChildren) {
 	const handleLogout = useCallback(() => {
 		setShowTimeoutModal(false);
 		logout();
-	}, [logout]); 
+	}, [logout]);
 
 	useEffect(() => {
 		setNotifications(() => []);

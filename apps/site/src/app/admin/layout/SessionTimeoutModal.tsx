@@ -83,7 +83,12 @@ function SessionTimeoutModal({
 				>
 					{formattedTime}
 				</Box>
-				<Box variant="p" textAlign="center" color="text-body-secondary" fontSize="body-s">
+				<Box
+					variant="p"
+					textAlign="center"
+					color="text-body-secondary"
+					fontSize="body-s"
+				>
 					Would you like to keep working?
 				</Box>
 			</SpaceBetween>

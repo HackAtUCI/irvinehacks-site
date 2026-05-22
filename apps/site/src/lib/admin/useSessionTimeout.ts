@@ -11,7 +11,10 @@ interface UseSessionTimeoutOptions {
 	onExpired: () => void;
 }
 
-export function useSessionTimeout({ onWarning, onExpired }: UseSessionTimeoutOptions) {
+export function useSessionTimeout({
+	onWarning,
+	onExpired,
+}: UseSessionTimeoutOptions) {
 	const router = useRouter();
 	const warningTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const expirationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -48,7 +51,9 @@ export function useSessionTimeout({ onWarning, onExpired }: UseSessionTimeoutOpt
 					logout();
 				}, WARNING_TIME);
 			}, remainingTime - WARNING_TIME);
-		}, [clearTimers, logout, onExpired, onWarning])
+		},
+		[clearTimers, logout, onExpired, onWarning],
+	);
 
 	const extendSession = useCallback(async () => {
 		try {
@@ -65,10 +70,13 @@ export function useSessionTimeout({ onWarning, onExpired }: UseSessionTimeoutOpt
 		if (!localStorage.getItem(STORAGE_KEY)) {
 			localStorage.setItem(STORAGE_KEY, Date.now().toString());
 		}
-		const sessionStart = parseInt(localStorage.getItem(STORAGE_KEY) ?? Date.now.toString(), 10);
+		const sessionStart = parseInt(
+			localStorage.getItem(STORAGE_KEY) ?? Date.now.toString(),
+			10,
+		);
 		const elapsed = Date.now() - sessionStart;
 		const remaining = SESSION_DURATION - elapsed;
-		if (remaining <= 0){
+		if (remaining <= 0) {
 			onExpired();
 			logout();
 			return;
@@ -76,7 +84,6 @@ export function useSessionTimeout({ onWarning, onExpired }: UseSessionTimeoutOpt
 		scheduleTimers(remaining);
 		return clearTimers;
 	}, [clearTimers, logout, onExpired, scheduleTimers]);
-	
-	return { logout, extendSession };
 
+	return { logout, extendSession };
 }

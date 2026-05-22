@@ -127,6 +127,7 @@ async def logout() -> RedirectResponse:
     user_identity.remove_user_identity(response)
     return response
 
+
 @router.post("/refresh")
 async def refresh_token(
     user: Annotated[User, Depends(require_user_identity)],
@@ -134,6 +135,7 @@ async def refresh_token(
 ) -> None:
     """Issue a new token for the user, extending their session by 1 hour."""
     user_identity.issue_user_identity(user, response)
+
 
 @router.get("/me")
 async def me(

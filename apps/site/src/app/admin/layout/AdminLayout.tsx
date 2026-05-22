@@ -5,9 +5,12 @@ import { useRouter, usePathname } from "next/navigation";
 import { PropsWithChildren, useEffect, useState } from "react";
 
 import AppLayout from "@cloudscape-design/components/app-layout";
+import Box from "@cloudscape-design/components/box";
 import Flashbar, {
 	FlashbarProps,
 } from "@cloudscape-design/components/flashbar";
+import SpaceBetween from "@cloudscape-design/components/space-between";
+import Spinner from "@cloudscape-design/components/spinner";
 import axios from "axios";
 import { SWRConfig } from "swr";
 
@@ -46,7 +49,24 @@ function AdminLayout({ children }: PropsWithChildren) {
 	}, [pathName]);
 
 	if (!identity) {
-		return "Loading...";
+		return (
+			<div
+				style={{
+					alignItems: "center",
+					display: "flex",
+					justifyContent: "center",
+					minHeight: "100vh",
+					padding: "2rem",
+				}}
+			>
+				<SpaceBetween size="m" alignItems="center">
+					<Spinner size="large" />
+					<Box variant="h2" textAlign="center">
+						Loading...
+					</Box>
+				</SpaceBetween>
+			</div>
+		);
 	}
 
 	const { uid, roles } = identity;

@@ -17,8 +17,12 @@ export function middleware(request: NextRequest) {
 	}
 
 	const isAdminApi = pathname.startsWith("/admin");
+	const host = request.headers.get("host") || "";
+	const defaultHackathon = host.includes("zothacks.com")
+		? "zothacks"
+		: "irvinehacks";
 
-	let hackathon = request.headers.get("X-Hackathon-Name") || "irvinehacks";
+	let hackathon = request.headers.get("X-Hackathon-Name") || defaultHackathon;
 	if (isAdminApi) {
 		const selected = request.cookies.get("hackathon")?.value;
 		if (selected && ALLOWED_HACKATHONS.has(selected)) {

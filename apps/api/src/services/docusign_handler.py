@@ -49,28 +49,34 @@ class WebhookPayload(BaseModel):
     data: EnvelopeCompletedData
 
 
-DOCUSIGN_HMAC_KEY = os.getenv("DOCUSIGN_HMAC_KEY", "").strip()
 STAGING_ENV = os.getenv("DEPLOYMENT") == "STAGING"
 
+# Shared secret used by DocuSign Connect to sign webhook payloads.
+# Both IrvineHacks and ZotHacks Connect configs should use this same value.
+DOCUSIGN_HMAC_KEY = os.getenv("DOCUSIGN_HMAC_KEY", "").strip()
+
 if STAGING_ENV:
-    POWERFORM_ID = UUID("155a2cee-437f-4aa4-bc58-bd1cb01cde20")
+    IRVINEHACKS_POWERFORM_ID = UUID("155a2cee-437f-4aa4-bc58-bd1cb01cde20")
     ZOTHACKS_POWERFORM_ID = UUID("af2330a2-d3b5-4510-a83b-90e6ab15d54c")
     ACCOUNT_ID = UUID("e6262c0d-c7c1-444b-99b1-e5c6ceaa4b40")
     DOCUSIGN_ENV = "na3"
-    POWERFORM_IDS = {
-        HackathonName.IRVINEHACKS: POWERFORM_ID,
-        HackathonName.ZOTHACKS: ZOTHACKS_POWERFORM_ID,
-    }
 else:
-    # If POWERFORM_ID changed here, also update PowerFormId in next.config.js
-    POWERFORM_ID = UUID("155a2cee-437f-4aa4-bc58-bd1cb01cde20")
+    # If the IrvineHacks public /waiver redirect still matters, also update
+    # PowerFormId in next.config.js when this ID changes.
+    IRVINEHACKS_POWERFORM_ID = UUID("155a2cee-437f-4aa4-bc58-bd1cb01cde20")
     ZOTHACKS_POWERFORM_ID = UUID("af2330a2-d3b5-4510-a83b-90e6ab15d54c")
     ACCOUNT_ID = UUID("e6262c0d-c7c1-444b-99b1-e5c6ceaa4b40")
     DOCUSIGN_ENV = "na3"
-    POWERFORM_IDS = {
-        HackathonName.IRVINEHACKS: POWERFORM_ID,
-        HackathonName.ZOTHACKS: ZOTHACKS_POWERFORM_ID,
-    }
+
+# Backwards-compatible alias for existing tests/imports.
+POWERFORM_ID = IRVINEHACKS_POWERFORM_ID
+
+# A completed webhook does not include our site's hackathon cookie/header, so
+# webhook processing routes to the correct Mongo database by PowerForm ID.
+POWERFORM_IDS = {
+    HackathonName.IRVINEHACKS: IRVINEHACKS_POWERFORM_ID,
+    HackathonName.ZOTHACKS: ZOTHACKS_POWERFORM_ID,
+}
 
 
 def _powerform_id_for_current_hackathon() -> UUID:

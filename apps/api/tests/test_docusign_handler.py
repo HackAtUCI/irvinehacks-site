@@ -1,4 +1,5 @@
 from copy import deepcopy
+from typing import Any
 from unittest.mock import AsyncMock, patch
 
 from models.ApplicationData import Decision
@@ -8,7 +9,7 @@ from services.docusign_handler import ACCOUNT_ID, POWERFORM_ID, WebhookPayload
 from services.mongodb_handler import Collection
 from utils.hackathon_context import HackathonName, hackathon_name_ctx
 
-SAMPLE_WEBHOOK_PAYLOAD = {
+SAMPLE_WEBHOOK_PAYLOAD: dict[str, Any] = {
     "event": "envelope-completed",
     "data": {
         "accountId": str(ACCOUNT_ID),

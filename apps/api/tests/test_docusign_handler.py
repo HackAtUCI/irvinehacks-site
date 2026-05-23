@@ -1,3 +1,4 @@
+from copy import deepcopy
 from unittest.mock import AsyncMock, patch
 
 from models.ApplicationData import Decision
@@ -5,6 +6,7 @@ from models.user_record import Role, Status
 from services import docusign_handler
 from services.docusign_handler import ACCOUNT_ID, POWERFORM_ID, WebhookPayload
 from services.mongodb_handler import Collection
+from utils.hackathon_context import HackathonName, hackathon_name_ctx
 
 SAMPLE_WEBHOOK_PAYLOAD = {
     "event": "envelope-completed",
@@ -121,4 +123,27 @@ async def test_user_record_updated_even_for_non_applicant(
     await docusign_handler.process_webhook_event(SAMPLE_WEBHOOK_DATA)
     mock_mongodb_handler_update_one.assert_awaited_once_with(
         Collection.USERS, {"_id": SAMPLE_UID}, {"status": Status.WAIVER_SIGNED}
+    )
+
+
+@patch("utils.waiver_handler.process_waiver_completion", autospec=True)
+async def test_zothacks_powerform_sets_zothacks_context(
+    mock_process_waiver_completion: AsyncMock,
+) -> None:
+    """ZotHacks waiver webhooks should update the ZotHacks database."""
+    zothacks_payload = deepcopy(SAMPLE_WEBHOOK_PAYLOAD)
+    zothacks_payload["data"]["envelopeSummary"]["powerForm"]["powerFormId"] = str(
+        docusign_handler.ZOTHACKS_POWERFORM_ID
+    )
+    zothacks_data = WebhookPayload.model_validate(zothacks_payload)
+
+    async def assert_zothacks_context(uid: str, email: str) -> None:
+        assert hackathon_name_ctx.get() == HackathonName.ZOTHACKS
+
+    mock_process_waiver_completion.side_effect = assert_zothacks_context
+
+    await docusign_handler.process_webhook_event(zothacks_data)
+
+    mock_process_waiver_completion.assert_awaited_once_with(
+        SAMPLE_UID, "john@founders.gov"
     )

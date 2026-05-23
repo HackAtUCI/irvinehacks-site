@@ -80,7 +80,7 @@ def test_unknown_powerform_is_rejected(mock_verify_webhook_signature: Mock) -> N
     mock_verify_webhook_signature.return_value = True
 
     invalid_webhook_payload = deepcopy(SAMPLE_WEBHOOK_PAYLOAD)
-    summary = invalid_webhook_payload["data"]["envelopeSummary"]  # type: ignore[index]
+    summary = invalid_webhook_payload["data"]["envelopeSummary"]
     summary["powerForm"]["powerFormId"] = str(uuid4())
     res = client.post(
         "/waiver",

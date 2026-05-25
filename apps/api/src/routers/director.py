@@ -46,6 +46,10 @@ RSVP_REMINDER_EMAIL_TEMPLATES: dict[
 }
 
 
+class CreateTemplateRequest(BaseModel):
+    template_name: str
+
+
 class ApplyReminderSenders(BaseModel):
     _id: str
     senders: list[tuple[datetime, str, int]]
@@ -644,34 +648,40 @@ async def duplicate_template(
 @router.post("/create-template")
 async def create_template(
     user: Annotated[User, Depends(require_director)],
-    template_name: str = Body(),
+    request: CreateTemplateRequest,
 ) -> None:
     """Creates a template"""
     log.info("%s created a new template", user)
 
     new_template = ScheduleTemplate(
-        template_name=template_name,
+        template_name=request.template_name,
         template_info=ScheduleTemplateInfo(),
         drafts=[],
     )
 
-    await mongodb_handler.update_one(
+    await mongodb_handler.raw_update_one(
         Collection.SETTINGS,
         {"_id": "templates"},
-        {"$push": {"templates": new_template.model_dump()}},
+        {"$setOnInsert": {"_id": "templates", "templates": []}},
         upsert=True,
     )
 
+    await mongodb_handler.raw_update_one(
+        Collection.SETTINGS,
+        {"_id": "templates"},
+        {"$push": {"templates": new_template.model_dump()}},
+    )
 
-@router.post("/update-template-info")
-async def update_template_info(
+
+@router.post("/update-template")
+async def update_template(
     user: Annotated[User, Depends(require_director)],
     event_dates: list[datetime],
     shifts: list[Shift],
     template_name: str = Body(),
 ) -> None:
-    """Update template info"""
-    log.info("%s updated template info", user)
+    """Update template"""
+    log.info("%s updated template", user)
 
     await mongodb_handler.update_one(
         Collection.SETTINGS,

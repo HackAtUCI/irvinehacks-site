@@ -3,13 +3,16 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class Hour(BaseModel):
-    time: datetime
+    start_time: datetime
+    end_time: datetime
     director_on_shift: list[str] = []
 
 
 class Shift(BaseModel):
     shift_name: str
+    location: str
     min_num_organizers: int
+    shift_pts: int
     organizers: list[str] = []
     hour: Hour
     committee_prereq: str

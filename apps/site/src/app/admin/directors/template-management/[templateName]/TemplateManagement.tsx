@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
+import Box from "@cloudscape-design/components/box";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import Header from "@cloudscape-design/components/header";
 import Button from "@cloudscape-design/components/button";
@@ -60,15 +61,19 @@ function setDateTime(
 
 function shiftToPayload(shift: Shift) {
 	return {
-		shiftName: shift.shiftName,
-		num_orgs: shift.num_orgs,
+		shift_name: shift.shiftName,
 		location: shift.location,
-		pointValue: shift.pointValue,
-		requiredCommittee: shift.requiredCommittee,
-		requiredSubcommittee: shift.requiredSubcommittee,
-		preAssignedOrganizers: shift.preAssignedOrganizers,
-		start_time: `${shift.startDate}T${shift.startTime}:00`,
-		end_time: `${shift.endDate}T${shift.endTime}:00`,
+		min_num_organizers: Number(shift.num_orgs),
+		shift_pts: Number(shift.pointValue),
+		organizers: [],
+		hour: {
+			start_time: `${shift.startDate}T${shift.startTime}:00`,
+			end_time: `${shift.endDate}T${shift.endTime}:00`,
+			director_on_shift: [],
+		},
+		committee_prereq: shift.requiredCommittee,
+		subcommittee_prereq: shift.requiredSubcommittee,
+		preassigned_orgs: shift.preAssignedOrganizers,
 	};
 }
 
@@ -84,6 +89,42 @@ function TemplateManagement() {
 	const [eventEndTime, setEventEndTime] = useState("");
 	const [shifts, setShifts] = useState<Shift[]>([emptyShift()]);
 
+	const [errors, setErrors] = useState({
+		name: "",
+		eventStartDate: "",
+		eventStartTime: "",
+		eventEndDate: "",
+		eventEndTime: "",
+	});
+
+	const [shiftError, setShiftError] = useState("");
+
+	function validate() {
+		const newErrors = {
+			name: name ? "" : "Template name is required",
+			eventStartDate: eventStartDate ? "" : "Event start date is required",
+			eventStartTime: eventStartTime ? "" : "Event start time is required",
+			eventEndDate: eventEndDate ? "" : "Event end date is required",
+			eventEndTime: eventEndTime ? "" : "Event end time is required",
+		};
+		setErrors(newErrors);
+		return Object.values(newErrors).every((e) => e === "");
+	}
+
+	function validateShifts() {
+		return shifts.every(
+			(s) =>
+				s.shiftName &&
+				s.location &&
+				s.num_orgs &&
+				s.startDate &&
+				s.startTime &&
+				s.endDate &&
+				s.endTime &&
+				s.pointValue,
+		);
+	}
+
 	useEffect(() => {
 		if (isNew) return;
 		axios
@@ -97,6 +138,14 @@ function TemplateManagement() {
 	}, [isNew, templateName]);
 
 	async function handleSave() {
+		if (!validate()) {
+			return;
+		}
+		if (!validateShifts()) {
+			setShiftError("All information in red are required");
+			return;
+		}
+
 		const payload = {
 			template_name: name,
 			event_start: `${eventStartDate}T${eventStartTime}:00`,
@@ -105,10 +154,19 @@ function TemplateManagement() {
 		};
 
 		if (isNew) {
-			await axios.post("/api/director/create-template", payload);
-		} else {
-			await axios.post("/api/director/update-template", payload);
+			const body = { template_name: name };
+			console.log(JSON.stringify(body));
+			await axios.post("/api/director/create-template", body);
 		}
+		await axios.post("/api/director/update-template", {
+			template_name: payload.template_name,
+			event_dates: [
+				`${eventStartDate}T${eventStartTime}:00`,
+				`${eventEndDate}T${eventEndTime}:00`,
+			],
+			shifts: shifts.map(shiftToPayload),
+		});
+
 		router.push("/admin/directors/template-gallery");
 	}
 
@@ -117,6 +175,7 @@ function TemplateManagement() {
 	}
 
 	function updateShift(id: string, updated: Partial<Shift>) {
+		setShiftError("");
 		setShifts((prev) =>
 			prev.map((s) => (s.id === id ? { ...s, ...updated } : s)),
 		);
@@ -166,6 +225,7 @@ function TemplateManagement() {
 										Template name <span style={{ color: "red" }}>*</span>
 									</>
 								}
+								errorText={errors.name}
 							>
 								<Input
 									value={name}
@@ -190,6 +250,7 @@ function TemplateManagement() {
 										Event start date <span style={{ color: "red" }}>*</span>
 									</>
 								}
+								errorText={errors.eventStartDate}
 							>
 								<DatePicker
 									value={eventStartDate}
@@ -206,6 +267,7 @@ function TemplateManagement() {
 										Event start time <span style={{ color: "red" }}>*</span>
 									</>
 								}
+								errorText={errors.eventStartTime}
 							>
 								<TimeInput
 									value={eventStartTime}
@@ -222,6 +284,7 @@ function TemplateManagement() {
 										Event end date <span style={{ color: "red" }}>*</span>
 									</>
 								}
+								errorText={errors.eventEndDate}
 							>
 								<DatePicker
 									value={eventEndDate}
@@ -238,6 +301,7 @@ function TemplateManagement() {
 										Event end time <span style={{ color: "red" }}>*</span>
 									</>
 								}
+								errorText={errors.eventEndTime}
 							>
 								<TimeInput
 									value={eventEndTime}
@@ -258,6 +322,8 @@ function TemplateManagement() {
 						onDelete={() => deleteShift(shift.id)}
 					/>
 				))}
+
+				{shiftError && <Box color="text-status-error">{shiftError}</Box>}
 
 				<Button
 					variant="normal"

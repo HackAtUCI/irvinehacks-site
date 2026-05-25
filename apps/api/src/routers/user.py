@@ -465,6 +465,7 @@ DEFAULT_CHECKIN_TIME = "17:00"
 LATE_ARRIVAL_MIN = "18:00"
 LATE_ARRIVAL_MAX = "19:30"
 _TIME_PATTERN = re.compile(r"^([01]\d|2[0-3]):[0-5]\d$")
+MAX_LATE_ARRIVAL_REASON_LENGTH = 2048
 
 
 def _validate_late_arrival_time(value: str) -> str:
@@ -480,10 +481,26 @@ def _validate_late_arrival_time(value: str) -> str:
     return cleaned
 
 
+def _validate_late_arrival_reason(value: Optional[str]) -> str:
+    cleaned = value.strip() if value else ""
+    if not cleaned:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            "Late arrival reason is required.",
+        )
+    if len(cleaned) > MAX_LATE_ARRIVAL_REASON_LENGTH:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            "Late arrival reason is too long.",
+        )
+    return cleaned
+
+
 @router.post("/rsvp")
 async def rsvp(
     user: Annotated[User, Depends(require_user_identity)],
     arrival_time: Annotated[Optional[str], Form()] = None,
+    late_arrival_reason: Annotated[Optional[str], Form()] = None,
 ) -> RedirectResponse:
     """Change user status for RSVP"""
     user_record = await mongodb_handler.retrieve_one(
@@ -529,6 +546,10 @@ async def rsvp(
         "status": new_status,
         "arrival_time": arrival_value,
     }
+    if arrival_value != DEFAULT_CHECKIN_TIME:
+        updated_fields["late_arrival_reason"] = _validate_late_arrival_reason(
+            late_arrival_reason
+        )
     await mongodb_handler.update_one(
         Collection.USERS, {"_id": user.uid}, updated_fields
     )
@@ -547,13 +568,25 @@ async def get_arrival_time(
     user_record = await mongodb_handler.retrieve_one(
         Collection.USERS,
         {"_id": user.uid},
-        ["arrival_time", "late_arrival_edit_request"],
+        [
+            "arrival_time",
+            "late_arrival_reason",
+            "late_arrival_edit_request",
+            "late_arrival_edit_reason",
+        ],
     )
     if not user_record:
-        return {"arrival_time": None, "late_arrival_edit_request": None}
+        return {
+            "arrival_time": None,
+            "late_arrival_reason": None,
+            "late_arrival_edit_request": None,
+            "late_arrival_edit_reason": None,
+        }
     return {
         "arrival_time": user_record.get("arrival_time"),
+        "late_arrival_reason": user_record.get("late_arrival_reason"),
         "late_arrival_edit_request": user_record.get("late_arrival_edit_request"),
+        "late_arrival_edit_reason": user_record.get("late_arrival_edit_reason"),
     }
 
 
@@ -561,6 +594,7 @@ async def get_arrival_time(
 async def rsvp_late_arrival(
     user: Annotated[User, Depends(require_user_identity)],
     arrival_time: Annotated[Optional[str], Form()] = None,
+    late_arrival_reason: Annotated[Optional[str], Form()] = None,
 ) -> RedirectResponse:
     """Submit or update expected arrival time (default 6pm; Friday 6pm–7:30pm).
 
@@ -585,6 +619,7 @@ async def rsvp_late_arrival(
     arrival_value: str = DEFAULT_CHECKIN_TIME
     if arrival_time and arrival_time.strip():
         arrival_value = _validate_late_arrival_time(arrival_time)
+    reason_value = _validate_late_arrival_reason(late_arrival_reason)
 
     current_time = user_record.get("arrival_time", DEFAULT_CHECKIN_TIME)
     already_has_late_time = (
@@ -592,15 +627,25 @@ async def rsvp_late_arrival(
     )
 
     if already_has_late_time:
+        if arrival_value == current_time:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                "Please choose a new arrival time before submitting.",
+            )
         await mongodb_handler.update_one(
             Collection.USERS,
             {"_id": user.uid},
-            {"late_arrival_edit_request": arrival_value},
+            {
+                "late_arrival_edit_request": arrival_value,
+                "late_arrival_edit_reason": reason_value,
+            },
         )
         log.info(f"User {user.uid} requested edit of arrival_time to {arrival_value}.")
     else:
         await mongodb_handler.update_one(
-            Collection.USERS, {"_id": user.uid}, {"arrival_time": arrival_value}
+            Collection.USERS,
+            {"_id": user.uid},
+            {"arrival_time": arrival_value, "late_arrival_reason": reason_value},
         )
         log.info(f"User {user.uid} set arrival_time to {arrival_value}.")
 

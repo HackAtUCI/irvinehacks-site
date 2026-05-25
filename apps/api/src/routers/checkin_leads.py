@@ -154,7 +154,9 @@ class LateArrivalRecord(BaseModel):
     first_name: str
     last_name: str
     arrival_time: str
+    late_arrival_reason: Optional[str] = None
     late_arrival_edit_request: Optional[str] = None
+    late_arrival_edit_reason: Optional[str] = None
     status: str
     decision: Optional[str] = None
 
@@ -181,7 +183,9 @@ async def late_arrivals() -> list[LateArrivalRecord]:
             "first_name",
             "last_name",
             "arrival_time",
+            "late_arrival_reason",
             "late_arrival_edit_request",
+            "late_arrival_edit_reason",
             "status",
             "decision",
         ],
@@ -193,7 +197,9 @@ async def late_arrivals() -> list[LateArrivalRecord]:
             first_name=r["first_name"],
             last_name=r["last_name"],
             arrival_time=r.get("arrival_time", DEFAULT_CHECKIN_TIME),
+            late_arrival_reason=r.get("late_arrival_reason"),
             late_arrival_edit_request=r.get("late_arrival_edit_request"),
+            late_arrival_edit_reason=r.get("late_arrival_edit_reason"),
             status=r["status"],
             decision=r.get("decision"),
         )
@@ -206,7 +212,9 @@ class LateArrivalEditRequest(BaseModel):
     first_name: str
     last_name: str
     arrival_time: str
+    late_arrival_reason: Optional[str] = None
     late_arrival_edit_request: str
+    late_arrival_edit_reason: Optional[str] = None
     status: str
     decision: Optional[str] = None
 
@@ -229,7 +237,9 @@ async def late_arrival_edit_requests() -> list[LateArrivalEditRequest]:
             "first_name",
             "last_name",
             "arrival_time",
+            "late_arrival_reason",
             "late_arrival_edit_request",
+            "late_arrival_edit_reason",
             "status",
             "decision",
         ],
@@ -241,7 +251,9 @@ async def late_arrival_edit_requests() -> list[LateArrivalEditRequest]:
             first_name=r["first_name"],
             last_name=r["last_name"],
             arrival_time=r.get("arrival_time", DEFAULT_CHECKIN_TIME),
+            late_arrival_reason=r.get("late_arrival_reason"),
             late_arrival_edit_request=r["late_arrival_edit_request"],
+            late_arrival_edit_reason=r.get("late_arrival_edit_reason"),
             status=r["status"],
             decision=r.get("decision"),
         )
@@ -261,7 +273,7 @@ async def approve_late_arrival_edit(uid: str) -> None:
     record = await mongodb_handler.retrieve_one(
         Collection.USERS,
         {"_id": uid},
-        ["late_arrival_edit_request"],
+        ["late_arrival_edit_request", "late_arrival_edit_reason"],
     )
     if not record:
         raise HTTPException(status_code=404, detail="User not found.")
@@ -269,12 +281,16 @@ async def approve_late_arrival_edit(uid: str) -> None:
         raise HTTPException(status_code=400, detail="No pending edit request.")
 
     new_time = record["late_arrival_edit_request"]
+    new_reason = record.get("late_arrival_edit_reason")
     await mongodb_handler.raw_update_one(
         Collection.USERS,
         {"_id": uid},
         {
-            "$set": {"arrival_time": new_time},
-            "$unset": {"late_arrival_edit_request": ""},
+            "$set": {"arrival_time": new_time, "late_arrival_reason": new_reason},
+            "$unset": {
+                "late_arrival_edit_request": "",
+                "late_arrival_edit_reason": "",
+            },
         },
     )
     log.info(f"Approved arrival time edit for {uid}: arrival_time set to {new_time}.")
@@ -299,7 +315,12 @@ async def reject_late_arrival_edit(uid: str) -> None:
     await mongodb_handler.raw_update_one(
         Collection.USERS,
         {"_id": uid},
-        {"$unset": {"late_arrival_edit_request": ""}},
+        {
+            "$unset": {
+                "late_arrival_edit_request": "",
+                "late_arrival_edit_reason": "",
+            }
+        },
     )
     log.info(f"Rejected arrival time edit request for {uid}.")
 

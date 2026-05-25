@@ -21,6 +21,9 @@ function formatTimeLabel(value: string): string {
 
 export default function LateArrivalForm() {
 	const [arrivalTime, setArrivalTime] = useState<string>(LATE_ARRIVAL_MIN);
+	const [arrivalReason, setArrivalReason] = useState("");
+	const [showLateArrivalFields, setShowLateArrivalFields] = useState(false);
+	const [confirmedOnTimeArrival, setConfirmedOnTimeArrival] = useState(false);
 	const [isEditing, setIsEditing] = useState(false);
 	const [errorMessage, setErrorMessage] = useState("");
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,6 +49,12 @@ export default function LateArrivalForm() {
 			return;
 		}
 
+		const cleanedReason = arrivalReason.trim();
+		if (!cleanedReason) {
+			setErrorMessage("Please tell us why you are arriving late.");
+			return;
+		}
+
 		if (isEditing && arrivalTime === arrivalData?.arrival_time) {
 			setErrorMessage("Please choose a new arrival time before submitting.");
 			return;
@@ -53,7 +62,10 @@ export default function LateArrivalForm() {
 
 		setIsSubmitting(true);
 		try {
-			const formData = new URLSearchParams({ arrival_time: arrivalTime });
+			const formData = new URLSearchParams({
+				arrival_time: arrivalTime,
+				late_arrival_reason: cleanedReason,
+			});
 			const response = await fetch("/api/user/rsvp/late-arrival", {
 				method: "POST",
 				headers: {
@@ -70,14 +82,20 @@ export default function LateArrivalForm() {
 			if (isEditing) {
 				await mutate({
 					arrival_time: arrivalData?.arrival_time ?? DEFAULT_CHECKIN_TIME,
+					late_arrival_reason: arrivalData?.late_arrival_reason ?? null,
 					late_arrival_edit_request: arrivalTime,
+					late_arrival_edit_reason: cleanedReason,
 				});
 				setIsEditing(false);
+				setArrivalReason("");
 			} else {
 				await mutate({
 					arrival_time: arrivalTime,
+					late_arrival_reason: cleanedReason,
 					late_arrival_edit_request: null,
+					late_arrival_edit_reason: null,
 				});
+				setArrivalReason("");
 			}
 		} catch (error) {
 			setErrorMessage(
@@ -108,10 +126,8 @@ export default function LateArrivalForm() {
 					<>
 						<br />
 						<br />
-						If you are arriving later than 5 PM, use the time picker to choose
-						your arrival time (between 6:00 PM and 7:30 PM). Arriving later than
-						your selected time may result in your spot being given to another
-						attendee.
+						Arriving later than your selected time may result in your spot being
+						given to another attendee.
 					</>
 				)}
 			</p>
@@ -119,6 +135,12 @@ export default function LateArrivalForm() {
 			{pendingRequest && !isEditing && (
 				<p className="text-yellow-300 text-lg mb-4">
 					Pending approval: <strong>{formatTimeLabel(pendingRequest)}</strong>
+					{arrivalData?.late_arrival_edit_reason && (
+						<>
+							<br />
+							Reason: <strong>{arrivalData.late_arrival_edit_reason}</strong>
+						</>
+					)}
 					<br />
 					Your edit request is awaiting approval.
 				</p>
@@ -130,7 +152,43 @@ export default function LateArrivalForm() {
 				</p>
 			)}
 
-			{!selectedLateTime && (
+			{!selectedLateTime && !showLateArrivalFields && (
+				<div className="space-y-4">
+					<p className="text-white text-lg">Are you arriving after 5 PM?</p>
+					<div className="flex flex-wrap gap-4 items-center">
+						<button
+							type="button"
+							onClick={() => {
+								setConfirmedOnTimeArrival(false);
+								setShowLateArrivalFields(true);
+								setErrorMessage("");
+							}}
+							className="bg-pink text-white text-base rounded-md px-4 py-2"
+						>
+							Yes
+						</button>
+						<button
+							type="button"
+							onClick={() => {
+								setArrivalReason("");
+								setConfirmedOnTimeArrival(true);
+								setShowLateArrivalFields(false);
+								setErrorMessage("");
+							}}
+							className="text-white underline text-lg"
+						>
+							No
+						</button>
+					</div>
+					{confirmedOnTimeArrival && (
+						<p className="text-white text-lg">
+							Your arrival time will stay at <strong>5:00 PM</strong>.
+						</p>
+					)}
+				</div>
+			)}
+
+			{!selectedLateTime && showLateArrivalFields && (
 				<form
 					method="post"
 					action="/api/user/rsvp/late-arrival"
@@ -141,6 +199,9 @@ export default function LateArrivalForm() {
 						<label className="text-lg mb-2" htmlFor="arrival_time">
 							Arrival time
 						</label>
+						<p className="text-white text-base mb-2">
+							Choose a time between 6:00 PM and 7:30 PM.
+						</p>
 						<input
 							id="arrival_time"
 							name="arrival_time"
@@ -154,6 +215,22 @@ export default function LateArrivalForm() {
 						/>
 					</div>
 
+					<div className="flex flex-col w-full text-[var(--color-white)]">
+						<label className="text-lg mb-2" htmlFor="late_arrival_reason">
+							Reason
+						</label>
+						<textarea
+							id="late_arrival_reason"
+							name="late_arrival_reason"
+							value={arrivalReason}
+							onChange={(e) => setArrivalReason(e.target.value)}
+							required
+							maxLength={2048}
+							rows={3}
+							className="bg-[#e1e1e1] text-[var(--color-black)] text-lg p-1.5 rounded-md"
+						/>
+					</div>
+
 					<div className="mt-2 md:mt-8">
 						<Button
 							text="Save arrival time"
@@ -161,6 +238,17 @@ export default function LateArrivalForm() {
 							disabled={isSubmitting}
 							className="text-xs sm:text-base md:text-4xl !bg-pink"
 						/>
+						<button
+							type="button"
+							onClick={() => {
+								setArrivalReason("");
+								setShowLateArrivalFields(false);
+								setErrorMessage("");
+							}}
+							className="text-white underline text-base ml-4"
+						>
+							Cancel
+						</button>
 					</div>
 				</form>
 			)}
@@ -170,6 +258,7 @@ export default function LateArrivalForm() {
 					type="button"
 					onClick={() => {
 						setArrivalTime(arrivalData?.arrival_time ?? LATE_ARRIVAL_MIN);
+						setArrivalReason("");
 						setErrorMessage("");
 						setIsEditing(true);
 					}}
@@ -203,6 +292,22 @@ export default function LateArrivalForm() {
 						/>
 					</div>
 
+					<div className="flex flex-col w-full max-w-md text-[var(--color-white)]">
+						<label className="text-lg mb-2" htmlFor="late_arrival_edit_reason">
+							Reason
+						</label>
+						<textarea
+							id="late_arrival_edit_reason"
+							name="late_arrival_reason"
+							value={arrivalReason}
+							onChange={(e) => setArrivalReason(e.target.value)}
+							required
+							maxLength={2048}
+							rows={3}
+							className="bg-[#e1e1e1] text-[var(--color-black)] text-lg p-1.5 rounded-md"
+						/>
+					</div>
+
 					<div className="mt-4 flex gap-4 items-center">
 						<Button
 							text="Submit request"
@@ -214,6 +319,7 @@ export default function LateArrivalForm() {
 							type="button"
 							onClick={() => {
 								setErrorMessage("");
+								setArrivalReason("");
 								setIsEditing(false);
 							}}
 							className="text-white underline text-base"

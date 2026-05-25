@@ -17,6 +17,7 @@ export default function RsvpForm({ buttonText, showWarning }: RsvpFormProps) {
 		"",
 	);
 	const [arrivalTime, setArrivalTime] = useState<string>(LATE_ARRIVAL_MIN);
+	const [arrivalReason, setArrivalReason] = useState("");
 
 	const comingLate = comingLateChoice === "yes";
 	const confirmationMessage =
@@ -43,27 +44,51 @@ export default function RsvpForm({ buttonText, showWarning }: RsvpFormProps) {
 				]}
 				containerClass="flex flex-col w-full text-[var(--color-white)]"
 				value={comingLateChoice}
-				onChange={(v) => setComingLateChoice(v as "" | "no" | "yes")}
+				onChange={(v) => {
+					const value = v as "" | "no" | "yes";
+					setComingLateChoice(value);
+					if (value !== "yes") {
+						setArrivalReason("");
+					}
+				}}
 			/>
 
 			{comingLate && (
-				<div className="flex flex-col w-full text-[var(--color-white)]">
-					<label className="text-lg mb-2" htmlFor="arrival_time">
-						Late Check-in starts at 6:00 PM on Friday. Choose your expected
-						arrival time (between 6:00 PM and 7:30 PM).
-					</label>
-					<input
-						id="arrival_time"
-						name="arrival_time"
-						type="time"
-						min={LATE_ARRIVAL_MIN}
-						max={LATE_ARRIVAL_MAX}
-						value={arrivalTime}
-						onChange={(e) => setArrivalTime(e.target.value)}
-						required
-						className="bg-[#e1e1e1] text-[var(--color-black)] text-lg h-10 p-1.5 rounded-md"
-					/>
-				</div>
+				<>
+					<div className="flex flex-col w-full text-[var(--color-white)]">
+						<label className="text-lg mb-2" htmlFor="arrival_time">
+							Late Check-in starts at 6:00 PM on Friday. Choose your expected
+							arrival time (between 6:00 PM and 7:30 PM).
+						</label>
+						<input
+							id="arrival_time"
+							name="arrival_time"
+							type="time"
+							min={LATE_ARRIVAL_MIN}
+							max={LATE_ARRIVAL_MAX}
+							value={arrivalTime}
+							onChange={(e) => setArrivalTime(e.target.value)}
+							required
+							className="bg-[#e1e1e1] text-[var(--color-black)] text-lg h-10 p-1.5 rounded-md"
+						/>
+					</div>
+
+					<div className="flex flex-col w-full text-[var(--color-white)]">
+						<label className="text-lg mb-2" htmlFor="late_arrival_reason">
+							Reason for late arrival
+						</label>
+						<textarea
+							id="late_arrival_reason"
+							name="late_arrival_reason"
+							value={arrivalReason}
+							onChange={(e) => setArrivalReason(e.target.value)}
+							required
+							maxLength={2048}
+							rows={3}
+							className="bg-[#e1e1e1] text-[var(--color-black)] text-lg p-1.5 rounded-md"
+						/>
+					</div>
+				</>
 			)}
 
 			<div className="mt-2 md:mt-8">

@@ -6,6 +6,8 @@ from routers.checkin_leads import (
     queue_participants,
     close_walkins,
     _process_status,
+    approve_late_arrival_edit,
+    reject_late_arrival_edit,
 )
 from routers.user import DEFAULT_CHECKIN_TIME
 from models.user_record import Role, Status
@@ -170,3 +172,58 @@ async def test_process_status_failure(mock_update: AsyncMock) -> None:
     mock_update.return_value = False
     with pytest.raises(RuntimeError, match="Expected to modify at least one document"):
         await _process_status(["user1"], Status.CONFIRMED)
+
+
+@pytest.mark.asyncio
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_approve_late_arrival_edit_preserves_reason(
+    mock_retrieve_one: AsyncMock,
+    mock_raw_update_one: AsyncMock,
+) -> None:
+    mock_retrieve_one.return_value = {
+        "late_arrival_edit_request": "18:45",
+        "late_arrival_edit_reason": "Midterm ends late",
+    }
+
+    await approve_late_arrival_edit("uci.edu.fiona")
+
+    mock_raw_update_one.assert_awaited_once_with(
+        Collection.USERS,
+        {"_id": "uci.edu.fiona"},
+        {
+            "$set": {
+                "arrival_time": "18:45",
+                "late_arrival_reason": "Midterm ends late",
+            },
+            "$unset": {
+                "late_arrival_edit_request": "",
+                "late_arrival_edit_reason": "",
+            },
+        },
+    )
+
+
+@pytest.mark.asyncio
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_reject_late_arrival_edit_clears_reason(
+    mock_retrieve_one: AsyncMock,
+    mock_raw_update_one: AsyncMock,
+) -> None:
+    mock_retrieve_one.return_value = {
+        "late_arrival_edit_request": "18:45",
+    }
+
+    await reject_late_arrival_edit("uci.edu.fiona")
+
+    mock_raw_update_one.assert_awaited_once_with(
+        Collection.USERS,
+        {"_id": "uci.edu.fiona"},
+        {
+            "$unset": {
+                "late_arrival_edit_request": "",
+                "late_arrival_edit_reason": "",
+            }
+        },
+    )

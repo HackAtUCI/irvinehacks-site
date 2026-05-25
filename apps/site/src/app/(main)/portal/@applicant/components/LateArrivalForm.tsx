@@ -41,10 +41,7 @@ export default function LateArrivalForm() {
 		event.preventDefault();
 		setErrorMessage("");
 
-		if (
-			arrivalTime < LATE_ARRIVAL_MIN ||
-			arrivalTime > LATE_ARRIVAL_MAX
-		) {
+		if (arrivalTime < LATE_ARRIVAL_MIN || arrivalTime > LATE_ARRIVAL_MAX) {
 			setErrorMessage("Please choose a time between 6:00 PM and 7:30 PM.");
 			return;
 		}
@@ -67,9 +64,7 @@ export default function LateArrivalForm() {
 
 			if (!response.ok) {
 				const body = await response.json().catch(() => null);
-				throw new Error(
-					body?.detail ?? "We could not save your arrival time.",
-				);
+				throw new Error(body?.detail ?? "We could not save your arrival time.");
 			}
 
 			if (isEditing) {

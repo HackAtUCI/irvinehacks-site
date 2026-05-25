@@ -9,6 +9,8 @@ import Button from "@cloudscape-design/components/button";
 import DatePicker from "@cloudscape-design/components/date-picker";
 import TimeInput from "@cloudscape-design/components/time-input";
 import Header from "@cloudscape-design/components/header";
+import Multiselect from "@cloudscape-design/components/multiselect";
+import useOrganizers from "@/lib/admin/useOrganizers";
 
 const committeeOptions = [
 	{ label: "Corporate", value: "Corporate" },
@@ -59,6 +61,12 @@ export default function ShiftCard({
 	onDuplicate,
 	onDelete,
 }: ShiftCardProps) {
+	const { organizerList } = useOrganizers();
+
+	const organizerOptions = organizerList.map((org) => ({
+		label: `${org.first_name} ${org.last_name}`,
+		value: org._id,
+	}));
 	return (
 		<Container
 			header={
@@ -250,10 +258,24 @@ export default function ShiftCard({
 					</FormField>
 
 					<FormField label="Pre assigned organizers">
-						<Input
-							value=""
+						<Multiselect
+							selectedOptions={(shift.preAssignedOrganizers ?? []).map((id) => {
+								const org = organizerList.find((o) => o._id === id);
+								return {
+									label: org ? `${org.first_name} ${org.last_name}` : id,
+									value: id,
+								};
+							})}
+							onChange={({ detail }) =>
+								onChange({
+									preAssignedOrganizers: detail.selectedOptions.map(
+										(o) => o.value ?? "",
+									),
+								})
+							}
+							options={organizerOptions}
 							placeholder="Search organizers..."
-							onChange={() => {}}
+							filteringType="auto"
 						/>
 					</FormField>
 				</div>

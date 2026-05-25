@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import axios from "axios";
 
 import Cards from "@cloudscape-design/components/cards";
@@ -15,6 +15,7 @@ import StatusIndicator from "@cloudscape-design/components/status-indicator";
 import UserContext from "@/lib/admin/UserContext";
 import { isDirector } from "@/lib/admin/authorization";
 import useTemplates, { Template } from "@/lib/admin/useTemplates";
+import RenameTemplateModal from "./RenameTemplateModal";
 
 const createCardHeaderFactory = (
 	onDuplicate: (t: Template) => void,
@@ -41,6 +42,9 @@ function TemplateGallery() {
 	}
 
 	const { templateList, loading, mutate } = useTemplates();
+	const [renamingTemplate, setRenamingTemplate] = useState<Template | null>(
+		null,
+	);
 
 	async function handleCreate() {
 		router.push("/admin/directors/template-management/new");
@@ -48,25 +52,18 @@ function TemplateGallery() {
 
 	async function handleDelete(template: Template) {
 		await axios.post("/api/director/delete-template", {
-			old_template_name: template.name,
+			template_name: template.name,
 		});
 		await mutate();
 	}
 
 	async function handleRename(template: Template) {
-		const newName = prompt("New template name:", template.name);
-		if (!newName || newName === template.name) return;
-
-		await axios.post("/api/director/rename-template", {
-			old_template_name: template.name,
-			new_template_name: newName,
-		});
-		await mutate();
+		setRenamingTemplate(template);
 	}
 
 	async function handleDuplicate(template: Template) {
 		await axios.post("/api/director/duplicate-template", {
-			template_name: template.name,
+			old_template_name: template.name,
 		});
 		await mutate();
 	}
@@ -78,45 +75,58 @@ function TemplateGallery() {
 	);
 
 	return (
-		<Cards
-			cardDefinition={{
-				header: createCardHeaderFactory(
-					handleDuplicate,
-					handleRename,
-					handleDelete,
-				),
-				sections: [
-					{
-						id: "dates",
-						header: "Dates",
-						content: ({ startDate, endDate }) =>
-							`${formatDate(startDate)} - ${formatDate(endDate)}`,
-					},
-				],
-			}}
-			loading={loading}
-			loadingText="Loading templates"
-			items={templateList}
-			trackBy="_id"
-			variant="full-page"
-			empty={emptyContent}
-			header={
-				<Header
-					counter={`(${templateList.length})`}
-					actions={
-						<Button
-							iconName="add-plus"
-							variant="primary"
-							onClick={handleCreate}
-						>
-							New Template
-						</Button>
-					}
-				>
-					Template Gallery
-				</Header>
-			}
-		/>
+		<>
+			<Cards
+				cardDefinition={{
+					header: createCardHeaderFactory(
+						handleDuplicate,
+						handleRename,
+						handleDelete,
+					),
+					sections: [
+						{
+							id: "dates",
+							header: "Dates",
+							content: ({ startDate, endDate }) =>
+								`${formatDate(startDate)} - ${formatDate(endDate)}`,
+						},
+					],
+				}}
+				loading={loading}
+				loadingText="Loading templates"
+				items={templateList}
+				trackBy="_id"
+				variant="full-page"
+				empty={emptyContent}
+				header={
+					<Header
+						counter={`(${templateList.length})`}
+						actions={
+							<Button
+								iconName="add-plus"
+								variant="primary"
+								onClick={handleCreate}
+							>
+								New Template
+							</Button>
+						}
+					>
+						Template Gallery
+					</Header>
+				}
+			/>
+			<RenameTemplateModal
+				templateName={renamingTemplate?.name ?? null}
+				onDismiss={() => setRenamingTemplate(null)}
+				onConfirm={async (newName) => {
+					await axios.post("/api/director/rename-template", {
+						old_template_name: renamingTemplate!.name,
+						new_template_name: newName,
+					});
+					await mutate();
+				}}
+			/>
+		</>
 	);
 }
 

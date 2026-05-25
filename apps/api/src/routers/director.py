@@ -611,46 +611,43 @@ async def template(
 @router.post("/rename-template")
 async def update_template_name(
     user: Annotated[User, Depends(require_director)],
-    old_template_name: str = Body(),
-    new_template_name: str = Body(),
+    old_template_name: str = Body(embed=True),
+    new_template_name: str = Body(embed=True),
 ) -> None:
     """Updates template name"""
     log.info("%s updated template name to %s", user, new_template_name)
 
-    await mongodb_handler.update_one(
+    await mongodb_handler.raw_update_one(
         Collection.SETTINGS,
         {
             "_id": "templates",
-            "templates.$.template_name": old_template_name
+            "templates.template_name": old_template_name
         },
         {
-            "template_name": new_template_name
+            "$set": {"templates.$.template_name": new_template_name}
         },
-        upsert=True,
     )
 
 
 @router.post("/delete-template")
 async def delete_template(
     user: Annotated[User, Depends(require_director)],
-    template_name: str = Body(),
+    template_name: str = Body(embed=True),
 ) -> None:
     """Deletes template"""
     log.info("%s deleted template", user)
 
-    await mongodb_handler.delete_one(
+    await mongodb_handler.raw_update_one(
         Collection.SETTINGS,
-        {
-            "_id": "templates",
-            "templates.$.template_name": template_name,
-        }
+        {"_id": "templates"},
+        {"$pull": {"templates": {"template_name": template_name}}},
     )
 
 
 @router.post("/duplicate-template")
 async def duplicate_template(
     user: Annotated[User, Depends(require_director)],
-    old_template_name: str,
+    old_template_name: str = Body(embed=True),
 ) -> None:
     """Makes a copy of template"""
     log.info("%s made a copy of %s", user, old_template_name)

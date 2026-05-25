@@ -587,9 +587,7 @@ async def rsvp_late_arrival(
             {"_id": user.uid},
             {"late_arrival_edit_request": arrival_value},
         )
-        log.info(
-            f"User {user.uid} requested edit of arrival_time to {arrival_value}."
-        )
+        log.info(f"User {user.uid} requested edit of arrival_time to {arrival_value}.")
     else:
         await mongodb_handler.update_one(
             Collection.USERS, {"_id": user.uid}, {"arrival_time": arrival_value}

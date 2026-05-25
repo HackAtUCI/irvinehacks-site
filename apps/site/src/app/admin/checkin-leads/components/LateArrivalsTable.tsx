@@ -69,8 +69,8 @@ function ApproveModalBody({ item }: { item: LateArrivalRecord }) {
 function RejectModalBody({ item }: { item: LateArrivalRecord }) {
 	return (
 		<p>
-			Reject the edit request for <strong>{item.id}</strong>? Their arrival
-			time will remain <strong>{formatTime(item.arrival_time)}</strong>.
+			Reject the edit request for <strong>{item.id}</strong>? Their arrival time
+			will remain <strong>{formatTime(item.arrival_time)}</strong>.
 		</p>
 	);
 }

@@ -533,13 +533,18 @@ async def rsvp(
 async def get_arrival_time(
     user: Annotated[User, Depends(require_user_identity)],
 ) -> dict[str, Any]:
-    """Get the current arrival time for the user."""
+    """Get the current arrival time and any pending edit request for the user."""
     user_record = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": user.uid}, ["arrival_time"]
+        Collection.USERS,
+        {"_id": user.uid},
+        ["arrival_time", "late_arrival_edit_request"],
     )
     if not user_record:
-        return {"arrival_time": None}
-    return {"arrival_time": user_record.get("arrival_time")}
+        return {"arrival_time": None, "late_arrival_edit_request": None}
+    return {
+        "arrival_time": user_record.get("arrival_time"),
+        "late_arrival_edit_request": user_record.get("late_arrival_edit_request"),
+    }
 
 
 @router.post("/rsvp/late-arrival")
@@ -547,9 +552,15 @@ async def rsvp_late_arrival(
     user: Annotated[User, Depends(require_user_identity)],
     arrival_time: Annotated[Optional[str], Form()] = None,
 ) -> RedirectResponse:
-    """Submit or update expected arrival time (default 6pm; Friday 6pm–7:30pm)."""
+    """Submit or update expected arrival time (default 6pm; Friday 6pm–7:30pm).
+
+    First submission sets arrival_time directly. Subsequent submissions create a
+    pending edit request requiring director/check-in lead approval.
+    """
     user_record = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": user.uid}, ["status", "decision"]
+        Collection.USERS,
+        {"_id": user.uid},
+        ["status", "arrival_time"],
     )
 
     if not user_record or "status" not in user_record:
@@ -561,16 +572,25 @@ async def rsvp_late_arrival(
             "You must RSVP before setting an arrival time.",
         )
 
-    # Default check-in time is 5:00pm (17:00)
     arrival_value: str = DEFAULT_CHECKIN_TIME
     if arrival_time and arrival_time.strip():
         arrival_value = _validate_late_arrival_time(arrival_time)
 
-    await mongodb_handler.update_one(
-        Collection.USERS, {"_id": user.uid}, {"arrival_time": arrival_value}
-    )
+    current_time = user_record.get("arrival_time", DEFAULT_CHECKIN_TIME)
+    already_has_late_time = current_time is not None and current_time != DEFAULT_CHECKIN_TIME
 
-    log.info(f"User {user.uid} set arrival_time to {arrival_value}.")
+    if already_has_late_time:
+        await mongodb_handler.update_one(
+            Collection.USERS,
+            {"_id": user.uid},
+            {"late_arrival_edit_request": arrival_value},
+        )
+        log.info(f"User {user.uid} requested edit of arrival_time to {arrival_value}.")
+    else:
+        await mongodb_handler.update_one(
+            Collection.USERS, {"_id": user.uid}, {"arrival_time": arrival_value}
+        )
+        log.info(f"User {user.uid} set arrival_time to {arrival_value}.")
 
     return RedirectResponse("/portal", status.HTTP_303_SEE_OTHER)
 

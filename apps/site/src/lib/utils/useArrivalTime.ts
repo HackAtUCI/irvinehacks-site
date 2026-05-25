@@ -3,6 +3,7 @@ import useSWR from "swr";
 
 export interface ArrivalTimeResponse {
 	arrival_time: string | null;
+	late_arrival_edit_request: string | null;
 }
 
 const fetcher = async (url: string) => {

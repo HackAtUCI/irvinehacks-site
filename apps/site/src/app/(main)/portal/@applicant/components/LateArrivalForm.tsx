@@ -21,12 +21,15 @@ function formatTimeLabel(value: string): string {
 
 export default function LateArrivalForm() {
 	const [arrivalTime, setArrivalTime] = useState<string>(LATE_ARRIVAL_MIN);
+	const [isEditing, setIsEditing] = useState(false);
 	const arrivalData = useArrivalTime();
 
 	const selectedLateTime =
 		arrivalData?.arrival_time !== undefined &&
 		arrivalData?.arrival_time !== null &&
 		arrivalData.arrival_time !== DEFAULT_CHECKIN_TIME;
+
+	const pendingRequest = arrivalData?.late_arrival_edit_request ?? null;
 
 	const currentArrivalTimeLabel = arrivalData?.arrival_time
 		? formatTimeLabel(arrivalData.arrival_time)
@@ -51,12 +54,20 @@ export default function LateArrivalForm() {
 						<br />
 						<br />
 						If you are arriving later than 5 PM, use the time picker to choose
-						your arrival time (between 6:00 PM and 7:30 PM). You won&apos;t be
-						able to edit it after submitting. Arriving later than your selected
-						time may result in your spot being given to another attendee.
+						your arrival time (between 6:00 PM and 7:30 PM). Arriving later than
+						your selected time may result in your spot being given to another
+						attendee.
 					</>
 				)}
 			</p>
+
+			{pendingRequest && !isEditing && (
+				<p className="text-yellow-300 text-lg mb-4">
+					Pending approval: <strong>{formatTimeLabel(pendingRequest)}</strong>
+					<br />
+					Your edit request is awaiting approval from a check-in lead.
+				</p>
+			)}
 
 			{!selectedLateTime && (
 				<form
@@ -87,6 +98,56 @@ export default function LateArrivalForm() {
 							isLightVersion={true}
 							className="text-xs sm:text-base md:text-4xl !bg-pink"
 						/>
+					</div>
+				</form>
+			)}
+
+			{selectedLateTime && !isEditing && (
+				<button
+					type="button"
+					onClick={() => setIsEditing(true)}
+					className="text-white underline text-lg"
+				>
+					Request edit
+				</button>
+			)}
+
+			{selectedLateTime && isEditing && (
+				<form
+					method="post"
+					action="/api/user/rsvp/late-arrival"
+					className="space-y-4"
+				>
+					<div className="flex flex-col w-full max-w-md text-[var(--color-white)]">
+						<label className="text-lg mb-2" htmlFor="arrival_time_edit">
+							New arrival time
+						</label>
+						<input
+							id="arrival_time_edit"
+							name="arrival_time"
+							type="time"
+							min={LATE_ARRIVAL_MIN}
+							max={LATE_ARRIVAL_MAX}
+							value={arrivalTime}
+							onChange={(e) => setArrivalTime(e.target.value)}
+							required
+							className="bg-[#e1e1e1] text-[var(--color-black)] text-lg h-10 p-1.5 rounded-md"
+						/>
+					</div>
+
+					<div className="mt-4 flex gap-4 items-center">
+						<Button
+							text="Submit request"
+							isLightVersion={true}
+							className="!text-base !bg-pink"
+						/>
+						<button
+							type="button"
+							onClick={() => setIsEditing(false)}
+							className="text-white underline text-base"
+						>
+							Cancel
+						</button>
 					</div>
 				</form>
 			)}

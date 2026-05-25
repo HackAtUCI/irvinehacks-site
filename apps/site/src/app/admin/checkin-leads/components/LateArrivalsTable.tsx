@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useContext, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import axios from "axios";
 
 import Box from "@cloudscape-design/components/box";
@@ -17,7 +17,17 @@ import TextContent from "@cloudscape-design/components/text-content";
 import NotificationContext from "@/lib/admin/NotificationContext";
 import useLateArrivals, { LateArrivalRecord } from "./useLateArrivals";
 
-/** Returns true if the current wall-clock time (HH:MM) is >= the row's arrival_time. */
+function formatTime(value: string): string {
+	const [hours, minutes] = value.split(":");
+	const date = new Date();
+	date.setHours(Number(hours), Number(minutes));
+	return date.toLocaleString("en-US", {
+		hour: "numeric",
+		minute: "numeric",
+		hour12: true,
+	});
+}
+
 function isPastArrivalTime(arrivalTime: string): boolean {
 	const now = new Date();
 	const currentHHMM = `${String(now.getHours()).padStart(2, "0")}:${String(
@@ -26,27 +36,25 @@ function isPastArrivalTime(arrivalTime: string): boolean {
 	return currentHHMM >= arrivalTime;
 }
 
-const IdCell = (item: LateArrivalRecord) => item.id;
+type ModalAction =
+	| { type: "waitlist"; item: LateArrivalRecord }
+	| { type: "approve"; item: LateArrivalRecord }
+	| { type: "reject"; item: LateArrivalRecord };
 
+const IdCell = (item: LateArrivalRecord) => item.id;
 const NameCell = (item: LateArrivalRecord) =>
 	`${item.first_name} ${item.last_name}`;
-
-const ArrivalTimeCell = (item: LateArrivalRecord) => {
-	const [hours, minutes] = item.arrival_time.split(":");
-	const date = new Date();
-	date.setHours(Number(hours), Number(minutes));
-
-	return date.toLocaleString("en-US", {
-		hour: "numeric",
-		minute: "numeric",
-		hour12: true,
-	});
-};
-
+const ArrivalTimeCell = (item: LateArrivalRecord) => formatTime(item.arrival_time);
+const RequestedTimeCell = (item: LateArrivalRecord) =>
+	item.late_arrival_edit_request ? (
+		<StatusIndicator type="warning">
+			{formatTime(item.late_arrival_edit_request)}
+		</StatusIndicator>
+	) : (
+		"—"
+	);
 const StatusCell = (item: LateArrivalRecord) => item.status;
-
 const DecisionCell = (item: LateArrivalRecord) => item.decision ?? "—";
-
 const ArrivalStatusCell = (item: LateArrivalRecord) =>
 	isPastArrivalTime(item.arrival_time) ? (
 		<StatusIndicator type="error">Past</StatusIndicator>
@@ -57,46 +65,50 @@ const ArrivalStatusCell = (item: LateArrivalRecord) =>
 function LateArrivalsTable() {
 	const { setNotifications } = useContext(NotificationContext);
 	const { lateArrivals, loading, error, mutate } = useLateArrivals();
-	const [movingIds, setMovingIds] = useState<Set<string>>(new Set());
-	const [pendingItem, setPendingItem] = useState<LateArrivalRecord | null>(
-		null,
+	const [loadingIds, setLoadingIds] = useState<Set<string>>(new Set());
+	const [pendingAction, setPendingAction] = useState<ModalAction | null>(null);
+
+	const notify = useCallback(
+		(type: FlashbarProps.MessageDefinition["type"], content: string) => {
+			if (!setNotifications) return;
+			const msgId = `${type}-${Date.now()}`;
+			setNotifications((prev) => [
+				{
+					type,
+					content,
+					id: msgId,
+					dismissible: true,
+					onDismiss: () =>
+						setNotifications((p) => p.filter((m) => m.id !== msgId)),
+				},
+				...prev,
+			]);
+		},
+		[setNotifications],
 	);
 
-	const handleMoveToWaitlist = async (id: string) => {
-		setMovingIds((prev) => new Set(prev).add(id));
+	const handleAction = async (action: ModalAction) => {
+		const { id } = action.item;
+		setLoadingIds((prev) => new Set(prev).add(id));
 		try {
-			await axios.post(`/api/checkin-leads/move-to-waitlist/${id}`);
+			if (action.type === "waitlist") {
+				await axios.post(`/api/checkin-leads/move-to-waitlist/${id}`);
+				notify("success", `Moved ${id} to waitlist.`);
+			} else if (action.type === "approve") {
+				await axios.post(`/api/checkin-leads/approve-late-arrival-edit/${id}`);
+				notify("success", `Approved arrival time edit for ${id}.`);
+			} else if (action.type === "reject") {
+				await axios.post(`/api/checkin-leads/reject-late-arrival-edit/${id}`);
+				notify("info", `Rejected arrival time edit for ${id}.`);
+			}
 			await mutate();
-			if (setNotifications) {
-				const msgId = `waitlist-success-${id}-${Date.now()}`;
-				const successMsg: FlashbarProps.MessageDefinition = {
-					type: "success",
-					content: `Successfully moved ${id} to waitlist (status: WAIVER_SIGNED).`,
-					id: msgId,
-					dismissible: true,
-					onDismiss: () =>
-						setNotifications((prev) => prev.filter((m) => m.id !== msgId)),
-				};
-				setNotifications((prev) => [successMsg, ...prev]);
-			}
 		} catch (err) {
-			if (setNotifications) {
-				const msgId = `waitlist-error-${id}-${Date.now()}`;
-				const detail = axios.isAxiosError(err)
-					? err.response?.data?.detail ?? err.message
-					: String(err);
-				const errorMsg: FlashbarProps.MessageDefinition = {
-					type: "error",
-					content: `Failed to move ${id} to waitlist: ${detail}`,
-					id: msgId,
-					dismissible: true,
-					onDismiss: () =>
-						setNotifications((prev) => prev.filter((m) => m.id !== msgId)),
-				};
-				setNotifications((prev) => [errorMsg, ...prev]);
-			}
+			const detail = axios.isAxiosError(err)
+				? (err.response?.data?.detail ?? err.message)
+				: String(err);
+			notify("error", `Action failed for ${id}: ${detail}`);
 		} finally {
-			setMovingIds((prev) => {
+			setLoadingIds((prev) => {
 				const next = new Set(prev);
 				next.delete(id);
 				return next;
@@ -105,16 +117,38 @@ function LateArrivalsTable() {
 	};
 
 	const ActionCell = useCallback(
-		(item: LateArrivalRecord) => (
-			<Button
-				variant="inline-link"
-				loading={movingIds.has(item.id)}
-				onClick={() => setPendingItem(item)}
-			>
-				Move to Waitlist
-			</Button>
-		),
-		[movingIds],
+		(item: LateArrivalRecord) => {
+			if (item.late_arrival_edit_request) {
+				return (
+					<SpaceBetween direction="horizontal" size="xs">
+						<Button
+							variant="inline-link"
+							loading={loadingIds.has(item.id)}
+							onClick={() => setPendingAction({ type: "approve", item })}
+						>
+							Approve
+						</Button>
+						<Button
+							variant="inline-link"
+							loading={loadingIds.has(item.id)}
+							onClick={() => setPendingAction({ type: "reject", item })}
+						>
+							Reject
+						</Button>
+					</SpaceBetween>
+				);
+			}
+			return (
+				<Button
+					variant="inline-link"
+					loading={loadingIds.has(item.id)}
+					onClick={() => setPendingAction({ type: "waitlist", item })}
+				>
+					Move to Waitlist
+				</Button>
+			);
+		},
+		[loadingIds],
 	);
 
 	const columnDefinitions = [
@@ -124,6 +158,11 @@ function LateArrivalsTable() {
 			cell: ArrivalStatusCell,
 		},
 		{ id: "arrival_time", header: "Arrival Time", cell: ArrivalTimeCell },
+		{
+			id: "requested_time",
+			header: "Requested Time",
+			cell: RequestedTimeCell,
+		},
 		{ id: "id", header: "ID", cell: IdCell },
 		{ id: "name", header: "Name", cell: NameCell },
 		{ id: "status", header: "Status", cell: StatusCell },
@@ -131,26 +170,65 @@ function LateArrivalsTable() {
 		{ id: "action", header: "Action", cell: ActionCell },
 	];
 
+	const modalContent: Record<
+		ModalAction["type"],
+		{ header: string; body: (item: LateArrivalRecord) => React.ReactNode }
+	> = {
+		waitlist: {
+			header: "Move to waitlist?",
+			body: (item) => (
+				<p>
+					Confirm moving <strong>{item.id}</strong> to waitlist and setting
+					status to <strong>WAIVER_SIGNED</strong>?
+				</p>
+			),
+		},
+		approve: {
+			header: "Approve arrival time edit?",
+			body: (item) => (
+				<p>
+					Approve changing <strong>{item.id}</strong>&apos;s arrival time from{" "}
+					<strong>{formatTime(item.arrival_time)}</strong> to{" "}
+					<strong>{formatTime(item.late_arrival_edit_request!)}</strong>?
+				</p>
+			),
+		},
+		reject: {
+			header: "Reject arrival time edit?",
+			body: (item) => (
+				<p>
+					Reject the edit request for <strong>{item.id}</strong>? Their arrival
+					time will remain <strong>{formatTime(item.arrival_time)}</strong>.
+				</p>
+			),
+		},
+	};
+
 	return (
 		<>
 			<Modal
-				visible={pendingItem !== null}
-				onDismiss={() => setPendingItem(null)}
-				header="Are you sure?"
+				visible={pendingAction !== null}
+				onDismiss={() => setPendingAction(null)}
+				header={
+					pendingAction ? modalContent[pendingAction.type].header : ""
+				}
 				footer={
 					<Box float="right">
 						<SpaceBetween direction="horizontal" size="xs">
-							<Button variant="link" onClick={() => setPendingItem(null)}>
+							<Button variant="link" onClick={() => setPendingAction(null)}>
 								Cancel
 							</Button>
 							<Button
 								variant="primary"
-								loading={pendingItem !== null && movingIds.has(pendingItem.id)}
+								loading={
+									pendingAction !== null &&
+									loadingIds.has(pendingAction.item.id)
+								}
 								onClick={() => {
-									if (!pendingItem) return;
-									const id = pendingItem.id;
-									setPendingItem(null);
-									handleMoveToWaitlist(id);
+									if (!pendingAction) return;
+									const action = pendingAction;
+									setPendingAction(null);
+									handleAction(action);
 								}}
 							>
 								Confirm
@@ -160,10 +238,8 @@ function LateArrivalsTable() {
 				}
 			>
 				<TextContent>
-					<p>
-						Confirm moving <strong>{pendingItem?.id}</strong> to waitlist and
-						setting status to <strong>WAIVER_SIGNED</strong>?
-					</p>
+					{pendingAction &&
+						modalContent[pendingAction.type].body(pendingAction.item)}
 				</TextContent>
 			</Modal>
 
@@ -171,7 +247,7 @@ function LateArrivalsTable() {
 				header={
 					<Header
 						variant="h2"
-						description="Confirmed hackers with a non-default (late) arrival time"
+						description="Confirmed hackers with a late arrival time or a pending edit request"
 					>
 						Late Arrivals
 					</Header>

@@ -154,6 +154,7 @@ class LateArrivalRecord(BaseModel):
     first_name: str
     last_name: str
     arrival_time: str
+    late_arrival_edit_request: Optional[str] = None
     status: str
     decision: Optional[str] = None
 
@@ -163,15 +164,26 @@ class LateArrivalRecord(BaseModel):
     dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
 )
 async def late_arrivals() -> list[LateArrivalRecord]:
-    """Return all CONFIRMED hackers who specified a non-default arrival time."""
+    """Return all CONFIRMED hackers with a non-default arrival time or a pending edit request."""
     records: list[dict[str, Any]] = await mongodb_handler.retrieve(
         Collection.USERS,
         {
             "roles": Role.HACKER,
             "status": Status.CONFIRMED,
-            "arrival_time": {"$exists": True, "$ne": DEFAULT_CHECKIN_TIME},
+            "$or": [
+                {"arrival_time": {"$exists": True, "$ne": DEFAULT_CHECKIN_TIME}},
+                {"late_arrival_edit_request": {"$exists": True, "$ne": None}},
+            ],
         },
-        ["_id", "first_name", "last_name", "arrival_time", "status", "decision"],
+        [
+            "_id",
+            "first_name",
+            "last_name",
+            "arrival_time",
+            "late_arrival_edit_request",
+            "status",
+            "decision",
+        ],
     )
 
     return [
@@ -179,12 +191,110 @@ async def late_arrivals() -> list[LateArrivalRecord]:
             id=str(r["_id"]),
             first_name=r["first_name"],
             last_name=r["last_name"],
-            arrival_time=r["arrival_time"],
+            arrival_time=r.get("arrival_time", DEFAULT_CHECKIN_TIME),
+            late_arrival_edit_request=r.get("late_arrival_edit_request"),
             status=r["status"],
             decision=r.get("decision"),
         )
         for r in records
     ]
+
+
+class LateArrivalEditRequest(BaseModel):
+    id: str
+    first_name: str
+    last_name: str
+    arrival_time: str
+    late_arrival_edit_request: str
+    status: str
+    decision: Optional[str] = None
+
+
+@router.get(
+    "/late-arrival-edit-requests",
+    dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
+)
+async def late_arrival_edit_requests() -> list[LateArrivalEditRequest]:
+    """Return all CONFIRMED hackers with a pending arrival time edit request."""
+    records: list[dict[str, Any]] = await mongodb_handler.retrieve(
+        Collection.USERS,
+        {
+            "roles": Role.HACKER,
+            "status": Status.CONFIRMED,
+            "late_arrival_edit_request": {"$exists": True, "$ne": None},
+        },
+        [
+            "_id",
+            "first_name",
+            "last_name",
+            "arrival_time",
+            "late_arrival_edit_request",
+            "status",
+            "decision",
+        ],
+    )
+
+    return [
+        LateArrivalEditRequest(
+            id=str(r["_id"]),
+            first_name=r["first_name"],
+            last_name=r["last_name"],
+            arrival_time=r.get("arrival_time", DEFAULT_CHECKIN_TIME),
+            late_arrival_edit_request=r["late_arrival_edit_request"],
+            status=r["status"],
+            decision=r.get("decision"),
+        )
+        for r in records
+    ]
+
+
+@router.post(
+    "/approve-late-arrival-edit/{uid}",
+    dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
+)
+async def approve_late_arrival_edit(uid: str) -> None:
+    """Approve a pending arrival time edit — apply the requested time and clear the request."""
+    record = await mongodb_handler.retrieve_one(
+        Collection.USERS,
+        {"_id": uid},
+        ["late_arrival_edit_request"],
+    )
+    if not record:
+        raise HTTPException(status_code=404, detail="User not found.")
+    if not record.get("late_arrival_edit_request"):
+        raise HTTPException(status_code=400, detail="No pending edit request.")
+
+    new_time = record["late_arrival_edit_request"]
+    await mongodb_handler.raw_update_one(
+        Collection.USERS,
+        {"_id": uid},
+        {"$set": {"arrival_time": new_time}, "$unset": {"late_arrival_edit_request": ""}},
+    )
+    log.info(f"Approved arrival time edit for {uid}: arrival_time set to {new_time}.")
+
+
+@router.post(
+    "/reject-late-arrival-edit/{uid}",
+    dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
+)
+async def reject_late_arrival_edit(uid: str) -> None:
+    """Reject a pending arrival time edit — clear the request, keep original time."""
+    record = await mongodb_handler.retrieve_one(
+        Collection.USERS,
+        {"_id": uid},
+        ["late_arrival_edit_request"],
+    )
+    if not record:
+        raise HTTPException(status_code=404, detail="User not found.")
+    if not record.get("late_arrival_edit_request"):
+        raise HTTPException(status_code=400, detail="No pending edit request.")
+
+    await mongodb_handler.raw_update_one(
+        Collection.USERS,
+        {"_id": uid},
+        {"$unset": {"late_arrival_edit_request": ""}},
+    )
+    log.info(f"Rejected arrival time edit request for {uid}.")
 
 
 @router.post(

@@ -50,8 +50,7 @@ export default function RsvpForm({ buttonText, showWarning }: RsvpFormProps) {
 				<div className="flex flex-col w-full text-[var(--color-white)]">
 					<label className="text-lg mb-2" htmlFor="arrival_time">
 						Late Check-in starts at 6:00 PM on Friday. Choose your expected
-						arrival time (between 6:00 PM and 7:30 PM). You will not be able to
-						edit this time.
+						arrival time (between 6:00 PM and 7:30 PM).
 					</label>
 					<input
 						id="arrival_time"

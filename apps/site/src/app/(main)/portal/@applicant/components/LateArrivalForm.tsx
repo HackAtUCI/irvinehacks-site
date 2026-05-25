@@ -65,7 +65,7 @@ export default function LateArrivalForm() {
 				<p className="text-yellow-300 text-lg mb-4">
 					Pending approval: <strong>{formatTimeLabel(pendingRequest)}</strong>
 					<br />
-					Your edit request is awaiting approval from a check-in lead.
+					Your edit request is awaiting approval.
 				</p>
 			)}
 

@@ -35,6 +35,7 @@ const subcommitteeOptions = [
 interface Shift {
 	shiftName: string;
 	location: string;
+	num_orgs: string;
 	startDate: string;
 	startTime: string;
 	endDate: string;
@@ -88,7 +89,7 @@ export default function ShiftCard({
 				<div
 					style={{
 						display: "grid",
-						gridTemplateColumns: "2fr 2fr 1fr",
+						gridTemplateColumns: "3fr 2fr 1fr 1fr",
 						gap: "20px",
 						alignItems: "end",
 					}}
@@ -116,6 +117,18 @@ export default function ShiftCard({
 						<Input
 							value={shift.location}
 							onChange={({ detail }) => onChange({ location: detail.value })}
+						/>
+					</FormField>
+					<FormField
+						label={
+							<>
+								Max # of orgs <span style={{ color: "red" }}>*</span>
+							</>
+						}
+					>
+						<Input
+							value={shift.num_orgs}
+							onChange={({ detail }) => onChange({ num_orgs: detail.value })}
 						/>
 					</FormField>
 
@@ -223,13 +236,13 @@ export default function ShiftCard({
 					<FormField label="Required subcommittee">
 						<Select
 							selectedOption={
-								committeeOptions.find(
-									(opt) => opt.value === shift.requiredCommittee,
+								subcommitteeOptions.find(
+									(opt) => opt.value === shift.requiredSubcommittee,
 								) ?? null
 							}
 							onChange={({ detail }) =>
 								onChange({
-									requiredCommittee: detail.selectedOption?.value ?? "",
+									requiredSubcommittee: detail.selectedOption?.value ?? "",
 								})
 							}
 							options={subcommitteeOptions}

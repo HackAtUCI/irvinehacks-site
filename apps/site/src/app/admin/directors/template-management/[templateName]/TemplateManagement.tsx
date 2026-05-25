@@ -20,6 +20,7 @@ interface Shift {
 	id: string;
 	shiftName: string;
 	location: string;
+	num_orgs: string;
 	startDate: string;
 	startTime: string;
 	endDate: string;
@@ -35,6 +36,7 @@ function emptyShift(): Shift {
 		id: crypto.randomUUID(),
 		shiftName: "",
 		location: "",
+		num_orgs: "",
 		startDate: "",
 		startTime: "",
 		endDate: "",
@@ -59,6 +61,7 @@ function setDateTime(
 function shiftToPayload(shift: Shift) {
 	return {
 		shiftName: shift.shiftName,
+		num_orgs: shift.num_orgs,
 		location: shift.location,
 		pointValue: shift.pointValue,
 		requiredCommittee: shift.requiredCommittee,

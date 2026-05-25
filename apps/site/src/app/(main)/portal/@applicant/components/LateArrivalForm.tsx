@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import Button from "@/lib/components/Button/Button";
 import useArrivalTime from "@/lib/utils/useArrivalTime";
 
@@ -22,7 +22,9 @@ function formatTimeLabel(value: string): string {
 export default function LateArrivalForm() {
 	const [arrivalTime, setArrivalTime] = useState<string>(LATE_ARRIVAL_MIN);
 	const [isEditing, setIsEditing] = useState(false);
-	const arrivalData = useArrivalTime();
+	const [errorMessage, setErrorMessage] = useState("");
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const { arrivalData, mutate } = useArrivalTime();
 
 	const selectedLateTime =
 		arrivalData?.arrival_time !== undefined &&
@@ -34,6 +36,64 @@ export default function LateArrivalForm() {
 	const currentArrivalTimeLabel = arrivalData?.arrival_time
 		? formatTimeLabel(arrivalData.arrival_time)
 		: "5:00 PM";
+
+	async function submitArrivalTime(event: FormEvent<HTMLFormElement>) {
+		event.preventDefault();
+		setErrorMessage("");
+
+		if (
+			arrivalTime < LATE_ARRIVAL_MIN ||
+			arrivalTime > LATE_ARRIVAL_MAX
+		) {
+			setErrorMessage("Please choose a time between 6:00 PM and 7:30 PM.");
+			return;
+		}
+
+		if (isEditing && arrivalTime === arrivalData?.arrival_time) {
+			setErrorMessage("Please choose a new arrival time before submitting.");
+			return;
+		}
+
+		setIsSubmitting(true);
+		try {
+			const formData = new URLSearchParams({ arrival_time: arrivalTime });
+			const response = await fetch("/api/user/rsvp/late-arrival", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: formData,
+			});
+
+			if (!response.ok) {
+				const body = await response.json().catch(() => null);
+				throw new Error(
+					body?.detail ?? "We could not save your arrival time.",
+				);
+			}
+
+			if (isEditing) {
+				await mutate({
+					arrival_time: arrivalData?.arrival_time ?? DEFAULT_CHECKIN_TIME,
+					late_arrival_edit_request: arrivalTime,
+				});
+				setIsEditing(false);
+			} else {
+				await mutate({
+					arrival_time: arrivalTime,
+					late_arrival_edit_request: null,
+				});
+			}
+		} catch (error) {
+			setErrorMessage(
+				error instanceof Error
+					? error.message
+					: "We could not save your arrival time.",
+			);
+		} finally {
+			setIsSubmitting(false);
+		}
+	}
 
 	return (
 		<div className="mt-2 md:mt-8">
@@ -69,10 +129,17 @@ export default function LateArrivalForm() {
 				</p>
 			)}
 
+			{errorMessage && (
+				<p className="text-yellow-300 text-lg mb-4" role="alert">
+					{errorMessage}
+				</p>
+			)}
+
 			{!selectedLateTime && (
 				<form
 					method="post"
 					action="/api/user/rsvp/late-arrival"
+					onSubmit={submitArrivalTime}
 					className="space-y-4"
 				>
 					<div className="flex flex-col w-full text-[var(--color-white)]">
@@ -96,6 +163,7 @@ export default function LateArrivalForm() {
 						<Button
 							text="Save arrival time"
 							isLightVersion={true}
+							disabled={isSubmitting}
 							className="text-xs sm:text-base md:text-4xl !bg-pink"
 						/>
 					</div>
@@ -105,7 +173,11 @@ export default function LateArrivalForm() {
 			{selectedLateTime && !isEditing && (
 				<button
 					type="button"
-					onClick={() => setIsEditing(true)}
+					onClick={() => {
+						setArrivalTime(arrivalData?.arrival_time ?? LATE_ARRIVAL_MIN);
+						setErrorMessage("");
+						setIsEditing(true);
+					}}
 					className="text-white underline text-lg"
 				>
 					Request edit
@@ -116,6 +188,7 @@ export default function LateArrivalForm() {
 				<form
 					method="post"
 					action="/api/user/rsvp/late-arrival"
+					onSubmit={submitArrivalTime}
 					className="space-y-4"
 				>
 					<div className="flex flex-col w-full max-w-md text-[var(--color-white)]">
@@ -139,11 +212,15 @@ export default function LateArrivalForm() {
 						<Button
 							text="Submit request"
 							isLightVersion={true}
+							disabled={isSubmitting}
 							className="!text-base !bg-pink"
 						/>
 						<button
 							type="button"
-							onClick={() => setIsEditing(false)}
+							onClick={() => {
+								setErrorMessage("");
+								setIsEditing(false);
+							}}
 							className="text-white underline text-base"
 						>
 							Cancel

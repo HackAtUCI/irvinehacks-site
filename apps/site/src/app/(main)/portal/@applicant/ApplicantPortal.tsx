@@ -41,9 +41,15 @@ function Portal() {
 
 	const waitlistStarted = waitlistStatus?.is_started ?? false;
 	const waitlistOpen = waitlistStatus?.is_open ?? false;
+	const hasSignedWaiver =
+		status === Status.Signed ||
+		status === Status.Confirmed ||
+		status === Status.Attending;
 
-	const needsToSignWaiver = isAccepted || (isWaitlisted && waitlistStarted);
-	const needsToRSVP = isAccepted || (isWaitlisted && waitlistOpen);
+	const needsToSignWaiver =
+		!hasSignedWaiver && (isAccepted || (isWaitlisted && waitlistStarted));
+	const needsToRSVP =
+		hasSignedWaiver && (isAccepted || (isWaitlisted && waitlistOpen));
 
 	const showReturnHome = status === Status.Rejected || status === Status.Voided;
 

@@ -43,7 +43,7 @@ async def require_accepted_applicant(
     record = await mongodb_handler.retrieve_one(
         Collection.USERS,
         {"_id": user.uid},
-        ["roles", "status", "first_name", "last_name"],
+        ["roles", "status", "decision", "first_name", "last_name"],
     )
 
     try:
@@ -55,7 +55,7 @@ async def require_accepted_applicant(
             Status.WAIVER_SIGNED,
             Status.CONFIRMED,
             Status.ATTENDING,
-        ):
+        ) and applicant_record.decision not in (Decision.ACCEPTED, Decision.WAITLISTED):
             raise HTTPException(
                 status.HTTP_403_FORBIDDEN, "User was not accepted or waitlisted."
             )

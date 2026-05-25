@@ -67,8 +67,10 @@ function shiftToPayload(shift: Shift) {
 		shift_pts: Number(shift.pointValue),
 		organizers: [],
 		hour: {
-			start_time: `${shift.startDate}T${shift.startTime}:00`,
-			end_time: `${shift.endDate}T${shift.endTime}:00`,
+			start_time: new Date(
+				`${shift.startDate}T${shift.startTime}`,
+			).toISOString(),
+			end_time: new Date(`${shift.endDate}T${shift.endTime}`).toISOString(),
 			director_on_shift: [],
 		},
 		committee_prereq: shift.requiredCommittee,
@@ -148,8 +150,10 @@ function TemplateManagement() {
 
 		const payload = {
 			template_name: name,
-			event_start: `${eventStartDate}T${eventStartTime}:00`,
-			event_end: `${eventEndDate}T${eventEndTime}:00`,
+			event_start: new Date(
+				`${eventStartDate}T${eventStartTime}`,
+			).toISOString(),
+			event_end: new Date(`${eventEndDate}T${eventEndTime}`).toISOString(),
 			shifts: shifts.map(shiftToPayload),
 		};
 
@@ -161,8 +165,8 @@ function TemplateManagement() {
 		await axios.post("/api/director/update-template", {
 			template_name: payload.template_name,
 			event_dates: [
-				`${eventStartDate}T${eventStartTime}:00`,
-				`${eventEndDate}T${eventEndTime}:00`,
+				new Date(`${eventStartDate}T${eventStartTime}`).toISOString(),
+				new Date(`${eventEndDate}T${eventEndTime}`).toISOString(),
 			],
 			shifts: shifts.map(shiftToPayload),
 		});

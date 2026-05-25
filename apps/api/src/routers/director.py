@@ -559,6 +559,55 @@ async def templates(
         raise RuntimeError("Could not parse template.")
 
 
+@router.get("/templates/{template_name}")
+async def template(
+    user: Annotated[User, Depends(require_director)],
+    template_name: str,
+) -> dict[str, Any]:
+    """Get a single schedule template by name."""
+    log.info("%s requested template %s", user, template_name)
+
+    records = await mongodb_handler.retrieve_one(
+        Collection.SETTINGS,
+        {"_id": "templates"},
+        ["templates"],
+    )
+
+    if not records:
+        log.info("No templates available.")
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
+
+    try:
+        templates = TypeAdapter(list[ScheduleTemplate]).validate_python(
+            records["templates"]
+        )
+    except ValidationError:
+        raise RuntimeError("Could not parse template.")
+
+    for template_obj in templates:
+        if template_obj.template_name == template_name:
+            event_dates = template_obj.template_info.event_dates
+            return {
+                "template_name": template_obj.template_name,
+                "event_start": (
+                    event_dates[0].isoformat()
+                    if len(event_dates) > 0
+                    else None
+                ),
+                "event_end": (
+                    event_dates[1].isoformat()
+                    if len(event_dates) > 1
+                    else event_dates[0].isoformat()
+                    if len(event_dates) == 1
+                    else None
+                ),
+                "shifts": [shift.model_dump() for shift in template_obj.template_info.shifts],
+                "drafts": [draft.model_dump() for draft in template_obj.drafts],
+            }
+
+    raise HTTPException(status.HTTP_404_NOT_FOUND)
+
+
 @router.post("/rename-template")
 async def update_template_name(
     user: Annotated[User, Depends(require_director)],
@@ -634,7 +683,7 @@ async def duplicate_template(
         drafts=[],
     )
 
-    await mongodb_handler.update_one(
+    await mongodb_handler.raw_update_one(
         Collection.SETTINGS,
         {"_id": "templates"},
         {
@@ -650,7 +699,6 @@ async def create_template(
     user: Annotated[User, Depends(require_director)],
     request: CreateTemplateRequest,
 ) -> None:
-    """Creates a template"""
     log.info("%s created a new template", user)
 
     new_template = ScheduleTemplate(
@@ -678,27 +726,23 @@ async def update_template(
     user: Annotated[User, Depends(require_director)],
     event_dates: list[datetime],
     shifts: list[Shift],
-    template_name: str = Body(),
+    template_name: str = Body(embed=True),  # ← add embed=True
 ) -> None:
-    """Update template"""
     log.info("%s updated template", user)
 
-    await mongodb_handler.update_one(
+    await mongodb_handler.raw_update_one(  # ← raw_update_one
         Collection.SETTINGS,
-        {
-            "_id": "templates",
-            "templates.template_name": template_name,
-        },
+        {"_id": "templates"},
         {
             "$set": {
-                "templates.$.temp_info": {
-                    "event_dates": event_dates,
-                    "shifts": [
-                        shift.model_dump() for shift in shifts
-                    ],
+                "templates.$[t].template_info": {
+                    "event_dates": [d.isoformat() for d in event_dates],
+                    "shifts": [shift.model_dump() for shift in shifts],
+                    "org_availabilities": {},
                 }
             }
         },
+        array_filters=[{"t.template_name": template_name}],  # ← now works
     )
 
 

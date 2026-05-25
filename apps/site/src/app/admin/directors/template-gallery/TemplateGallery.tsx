@@ -148,7 +148,7 @@ function TemplateCardHeaderContent({
 				<span
 					style={{ cursor: "pointer", fontWeight: 600 }}
 					onClick={() =>
-						router.push(`/admin/template-management/${template.name}`)
+						router.push(`/admin/directors/template-management/${template.name}`)
 					}
 				>
 					{template.name}

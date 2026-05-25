@@ -577,7 +577,9 @@ async def rsvp_late_arrival(
         arrival_value = _validate_late_arrival_time(arrival_time)
 
     current_time = user_record.get("arrival_time", DEFAULT_CHECKIN_TIME)
-    already_has_late_time = current_time is not None and current_time != DEFAULT_CHECKIN_TIME
+    already_has_late_time = (
+        current_time is not None and current_time != DEFAULT_CHECKIN_TIME
+    )
 
     if already_has_late_time:
         await mongodb_handler.update_one(
@@ -585,7 +587,9 @@ async def rsvp_late_arrival(
             {"_id": user.uid},
             {"late_arrival_edit_request": arrival_value},
         )
-        log.info(f"User {user.uid} requested edit of arrival_time to {arrival_value}.")
+        log.info(
+            f"User {user.uid} requested edit of arrival_time to {arrival_value}."
+        )
     else:
         await mongodb_handler.update_one(
             Collection.USERS, {"_id": user.uid}, {"arrival_time": arrival_value}

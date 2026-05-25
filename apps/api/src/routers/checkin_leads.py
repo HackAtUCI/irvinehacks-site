@@ -164,7 +164,8 @@ class LateArrivalRecord(BaseModel):
     dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
 )
 async def late_arrivals() -> list[LateArrivalRecord]:
-    """Return all CONFIRMED hackers with a non-default arrival time or a pending edit request."""
+    """Return all CONFIRMED hackers with a non-default arrival time
+    or a pending edit request."""
     records: list[dict[str, Any]] = await mongodb_handler.retrieve(
         Collection.USERS,
         {
@@ -253,7 +254,10 @@ async def late_arrival_edit_requests() -> list[LateArrivalEditRequest]:
     dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
 )
 async def approve_late_arrival_edit(uid: str) -> None:
-    """Approve a pending arrival time edit — apply the requested time and clear the request."""
+    """Approve a pending arrival time edit.
+
+    Applies the requested time and clears the pending request field.
+    """
     record = await mongodb_handler.retrieve_one(
         Collection.USERS,
         {"_id": uid},
@@ -268,7 +272,10 @@ async def approve_late_arrival_edit(uid: str) -> None:
     await mongodb_handler.raw_update_one(
         Collection.USERS,
         {"_id": uid},
-        {"$set": {"arrival_time": new_time}, "$unset": {"late_arrival_edit_request": ""}},
+        {
+            "$set": {"arrival_time": new_time},
+            "$unset": {"late_arrival_edit_request": ""},
+        },
     )
     log.info(f"Approved arrival time edit for {uid}: arrival_time set to {new_time}.")
 

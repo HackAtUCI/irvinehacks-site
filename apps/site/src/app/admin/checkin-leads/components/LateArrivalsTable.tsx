@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useContext, useState } from "react";
+import { useCallback, useContext, useState } from "react";
 import axios from "axios";
 
 import Box from "@cloudscape-design/components/box";
@@ -41,10 +41,45 @@ type ModalAction =
 	| { type: "approve"; item: LateArrivalRecord }
 	| { type: "reject"; item: LateArrivalRecord };
 
+const MODAL_HEADERS: Record<ModalAction["type"], string> = {
+	waitlist: "Move to waitlist?",
+	approve: "Approve arrival time edit?",
+	reject: "Reject arrival time edit?",
+};
+
+function WaitlistModalBody({ item }: { item: LateArrivalRecord }) {
+	return (
+		<p>
+			Confirm moving <strong>{item.id}</strong> to waitlist and setting status
+			to <strong>WAIVER_SIGNED</strong>?
+		</p>
+	);
+}
+
+function ApproveModalBody({ item }: { item: LateArrivalRecord }) {
+	return (
+		<p>
+			Approve changing <strong>{item.id}</strong>&apos;s arrival time from{" "}
+			<strong>{formatTime(item.arrival_time)}</strong> to{" "}
+			<strong>{formatTime(item.late_arrival_edit_request!)}</strong>?
+		</p>
+	);
+}
+
+function RejectModalBody({ item }: { item: LateArrivalRecord }) {
+	return (
+		<p>
+			Reject the edit request for <strong>{item.id}</strong>? Their arrival
+			time will remain <strong>{formatTime(item.arrival_time)}</strong>.
+		</p>
+	);
+}
+
 const IdCell = (item: LateArrivalRecord) => item.id;
 const NameCell = (item: LateArrivalRecord) =>
 	`${item.first_name} ${item.last_name}`;
-const ArrivalTimeCell = (item: LateArrivalRecord) => formatTime(item.arrival_time);
+const ArrivalTimeCell = (item: LateArrivalRecord) =>
+	formatTime(item.arrival_time);
 const RequestedTimeCell = (item: LateArrivalRecord) =>
 	item.late_arrival_edit_request ? (
 		<StatusIndicator type="warning">
@@ -104,7 +139,7 @@ function LateArrivalsTable() {
 			await mutate();
 		} catch (err) {
 			const detail = axios.isAxiosError(err)
-				? (err.response?.data?.detail ?? err.message)
+				? err.response?.data?.detail ?? err.message
 				: String(err);
 			notify("error", `Action failed for ${id}: ${detail}`);
 		} finally {
@@ -170,48 +205,20 @@ function LateArrivalsTable() {
 		{ id: "action", header: "Action", cell: ActionCell },
 	];
 
-	const modalContent: Record<
-		ModalAction["type"],
-		{ header: string; body: (item: LateArrivalRecord) => React.ReactNode }
-	> = {
-		waitlist: {
-			header: "Move to waitlist?",
-			body: (item) => (
-				<p>
-					Confirm moving <strong>{item.id}</strong> to waitlist and setting
-					status to <strong>WAIVER_SIGNED</strong>?
-				</p>
-			),
-		},
-		approve: {
-			header: "Approve arrival time edit?",
-			body: (item) => (
-				<p>
-					Approve changing <strong>{item.id}</strong>&apos;s arrival time from{" "}
-					<strong>{formatTime(item.arrival_time)}</strong> to{" "}
-					<strong>{formatTime(item.late_arrival_edit_request!)}</strong>?
-				</p>
-			),
-		},
-		reject: {
-			header: "Reject arrival time edit?",
-			body: (item) => (
-				<p>
-					Reject the edit request for <strong>{item.id}</strong>? Their arrival
-					time will remain <strong>{formatTime(item.arrival_time)}</strong>.
-				</p>
-			),
-		},
-	};
+	function renderModalBody(action: ModalAction) {
+		if (action.type === "waitlist")
+			return <WaitlistModalBody item={action.item} />;
+		if (action.type === "approve")
+			return <ApproveModalBody item={action.item} />;
+		return <RejectModalBody item={action.item} />;
+	}
 
 	return (
 		<>
 			<Modal
 				visible={pendingAction !== null}
 				onDismiss={() => setPendingAction(null)}
-				header={
-					pendingAction ? modalContent[pendingAction.type].header : ""
-				}
+				header={pendingAction ? MODAL_HEADERS[pendingAction.type] : ""}
 				footer={
 					<Box float="right">
 						<SpaceBetween direction="horizontal" size="xs">
@@ -238,8 +245,7 @@ function LateArrivalsTable() {
 				}
 			>
 				<TextContent>
-					{pendingAction &&
-						modalContent[pendingAction.type].body(pendingAction.item)}
+					{pendingAction && renderModalBody(pendingAction)}
 				</TextContent>
 			</Modal>
 

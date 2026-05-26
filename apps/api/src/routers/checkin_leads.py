@@ -14,6 +14,8 @@ from services import mongodb_handler, sendgrid_handler
 from services.mongodb_handler import Collection
 from services.sendgrid_handler import (
     ApplicationUpdatePersonalization,
+    LateArrivalApprovalPersonalization,
+    LateArrivalRejectionPersonalization,
     Template,
 )
 from utils.email_handler import IH_SENDER, recover_email_from_uid
@@ -273,7 +275,7 @@ async def approve_late_arrival_edit(uid: str) -> None:
     record = await mongodb_handler.retrieve_one(
         Collection.USERS,
         {"_id": uid},
-        ["late_arrival_edit_request", "late_arrival_edit_reason"],
+        ["first_name", "late_arrival_edit_request", "late_arrival_edit_reason"],
     )
     if not record:
         raise HTTPException(status_code=404, detail="User not found.")
@@ -286,12 +288,27 @@ async def approve_late_arrival_edit(uid: str) -> None:
         Collection.USERS,
         {"_id": uid},
         {
-            "$set": {"arrival_time": new_time, "late_arrival_reason": new_reason},
+            "$set": {
+                "arrival_time": new_time,
+                "late_arrival_reason": new_reason,
+            },
             "$unset": {
                 "late_arrival_edit_request": "",
                 "late_arrival_edit_reason": "",
             },
         },
+    )
+    await sendgrid_handler.send_email(
+        Template.LATE_ARRIVAL_APPROVED_EMAIL,
+        IH_SENDER,
+        [
+            LateArrivalApprovalPersonalization(
+                email=recover_email_from_uid(uid),
+                first_name=record["first_name"],
+                arrival_time=new_time,
+            )
+        ],
+        True,
     )
     log.info(f"Approved arrival time edit for {uid}: arrival_time set to {new_time}.")
 
@@ -305,7 +322,7 @@ async def reject_late_arrival_edit(uid: str) -> None:
     record = await mongodb_handler.retrieve_one(
         Collection.USERS,
         {"_id": uid},
-        ["late_arrival_edit_request"],
+        ["first_name", "late_arrival_edit_request", "late_arrival_edit_reason"],
     )
     if not record:
         raise HTTPException(status_code=404, detail="User not found.")
@@ -319,8 +336,20 @@ async def reject_late_arrival_edit(uid: str) -> None:
             "$unset": {
                 "late_arrival_edit_request": "",
                 "late_arrival_edit_reason": "",
-            }
+            },
         },
+    )
+    await sendgrid_handler.send_email(
+        Template.LATE_ARRIVAL_REJECTED_EMAIL,
+        IH_SENDER,
+        [
+            LateArrivalRejectionPersonalization(
+                email=recover_email_from_uid(uid),
+                first_name=record["first_name"],
+                requested_time=record["late_arrival_edit_request"],
+            )
+        ],
+        True,
     )
     log.info(f"Rejected arrival time edit request for {uid}.")
 

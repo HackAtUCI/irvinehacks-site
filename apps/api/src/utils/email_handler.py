@@ -66,10 +66,8 @@ async def send_rsvp_confirmation_email(email: EmailStr, first_name: str) -> None
     await sendgrid_handler.send_email(
         Template.RSVP_CONFIRMATION_EMAIL,
         IH_SENDER,
-        {
-            "email": email,
-            "first_name": first_name,
-        },
+        ApplicationUpdatePersonalization(email=email, first_name=first_name),
+        False,
     )
 
 

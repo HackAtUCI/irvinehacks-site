@@ -10,56 +10,31 @@ import DatePicker from "@cloudscape-design/components/date-picker";
 import TimeInput from "@cloudscape-design/components/time-input";
 import Header from "@cloudscape-design/components/header";
 import Multiselect from "@cloudscape-design/components/multiselect";
+
 import useOrganizers from "@/lib/admin/useOrganizers";
-
-const committeeOptions = [
-	{ label: "Corporate", value: "Corporate" },
-	{ label: "Design", value: "Design" },
-	{ label: "Logistics", value: "Logistics" },
-	{ label: "Marketing", value: "Marketing" },
-	{ label: "Tech", value: "Tech" },
-];
-
-const subcommitteeOptions = [
-	{ label: "Check-in Lead", value: "Check-in Lead" },
-	{ label: "Communications Lead", value: "Communications Lead" },
-	{ label: "Decorations", value: "Decorations Member" },
-	{ label: "Emcee", value: "Emcee" },
-	{ label: "Food", value: "Food Member" },
-	{ label: "Judging Lead", value: "Judging Lead" },
-	{ label: "Mentor", value: "Mentor Reviewer" },
-	{ label: "Social Events", value: "Social Events Member" },
-	{ label: "Swag", value: "Swag Member" },
-	{ label: "Volunteer Lead", value: "Volunteer Reviewer" },
-	{ label: "Workshop", value: "Workshop Member" },
-];
-
-interface Shift {
-	shiftName: string;
-	location: string;
-	num_orgs: string;
-	startDate: string;
-	startTime: string;
-	endDate: string;
-	endTime: string;
-	pointValue: string;
-	requiredCommittee: string;
-	requiredSubcommittee: string;
-	preAssignedOrganizers: string[];
-}
+import type { Shift, ShiftErrors } from "./ShiftTypes";
+import { subcommitteeOptions, committeeOptions } from "./CommitteeOptions";
 
 interface ShiftCardProps {
 	shift: Shift;
+	eventStart?: string;
+	eventEnd?: string;
+	errors?: ShiftErrors;
 	onChange: (updated: Partial<Shift>) => void;
+	onValidate?: (updatedShift: Shift, errors: ShiftErrors) => void;
 	onDuplicate: () => void;
 	onDelete: () => void;
 }
 
 export default function ShiftCard({
 	shift,
+	eventStart,
+	eventEnd,
+	errors,
 	onChange,
 	onDuplicate,
 	onDelete,
+	onValidate,
 }: ShiftCardProps) {
 	const { organizerList } = useOrganizers();
 
@@ -67,6 +42,62 @@ export default function ShiftCard({
 		label: `${org.first_name} ${org.last_name}`,
 		value: org._id,
 	}));
+
+	function handleUpdate(updated: Partial<Shift>) {
+		const newShift = { ...shift, ...updated };
+
+		onChange(updated);
+
+		validateShift(newShift);
+	}
+
+	function validateShift(s: Shift) {
+		const newErrors: ShiftErrors = {};
+
+		if (!s.shiftName) newErrors.shiftName = "Required";
+		if (!s.location) newErrors.location = "Required";
+		if (!s.num_orgs) newErrors.num_orgs = "Required";
+		if (!s.pointValue) newErrors.pointValue = "Required";
+		if (!s.startDate) newErrors.startDate = "Required";
+		if (!s.startTime) newErrors.startTime = "Required";
+		if (!s.endDate) newErrors.endDate = "Required";
+		if (!s.endTime) newErrors.endTime = "Required";
+
+		if (s.num_orgs && isNaN(Number(s.num_orgs))) {
+			newErrors.num_orgs = "Must be a number";
+		}
+
+		if (s.pointValue && isNaN(Number(s.pointValue))) {
+			newErrors.pointValue = "Must be a number";
+		}
+
+		if (s.startDate && s.startTime && s.endDate && s.endTime) {
+			const shiftStart = new Date(`${s.startDate}T${s.startTime}`);
+			const shiftEnd = new Date(`${s.endDate}T${s.endTime}`);
+
+			const eventStartDt = eventStart ? new Date(eventStart) : null;
+			const eventEndDt = eventEnd ? new Date(eventEnd) : null;
+
+			if (shiftStart >= shiftEnd) {
+				newErrors.endTime = "Shift must end after it starts";
+			}
+
+			if (eventStartDt && !isNaN(eventStartDt.getTime())) {
+				if (shiftStart < eventStartDt) {
+					newErrors.startDate = "Shift starts before event begins";
+				}
+			}
+
+			if (eventEndDt && !isNaN(eventEndDt.getTime())) {
+				if (shiftEnd > eventEndDt) {
+					newErrors.endDate = "Shift ends after event ends";
+				}
+			}
+		}
+
+		onValidate?.(s, newErrors);
+	}
+
 	return (
 		<Container
 			header={
@@ -108,10 +139,13 @@ export default function ShiftCard({
 								Shift name <span style={{ color: "red" }}>*</span>
 							</>
 						}
+						errorText={errors?.shiftName}
 					>
 						<Input
 							value={shift.shiftName}
-							onChange={({ detail }) => onChange({ shiftName: detail.value })}
+							onChange={({ detail }) =>
+								handleUpdate({ shiftName: detail.value })
+							}
 						/>
 					</FormField>
 
@@ -121,10 +155,13 @@ export default function ShiftCard({
 								Location <span style={{ color: "red" }}>*</span>
 							</>
 						}
+						errorText={errors?.location}
 					>
 						<Input
 							value={shift.location}
-							onChange={({ detail }) => onChange({ location: detail.value })}
+							onChange={({ detail }) =>
+								handleUpdate({ location: detail.value })
+							}
 						/>
 					</FormField>
 					<FormField
@@ -133,10 +170,13 @@ export default function ShiftCard({
 								Max # of orgs <span style={{ color: "red" }}>*</span>
 							</>
 						}
+						errorText={errors?.num_orgs}
 					>
 						<Input
 							value={shift.num_orgs}
-							onChange={({ detail }) => onChange({ num_orgs: detail.value })}
+							onChange={({ detail }) =>
+								handleUpdate({ num_orgs: detail.value })
+							}
 						/>
 					</FormField>
 
@@ -146,10 +186,13 @@ export default function ShiftCard({
 								Point value <span style={{ color: "red" }}>*</span>
 							</>
 						}
+						errorText={errors?.pointValue}
 					>
 						<Input
 							value={shift.pointValue}
-							onChange={({ detail }) => onChange({ pointValue: detail.value })}
+							onChange={({ detail }) =>
+								handleUpdate({ pointValue: detail.value })
+							}
 						/>
 					</FormField>
 				</div>
@@ -167,10 +210,13 @@ export default function ShiftCard({
 								Start date <span style={{ color: "red" }}>*</span>
 							</>
 						}
+						errorText={errors?.startDate}
 					>
 						<DatePicker
 							value={shift.startDate}
-							onChange={({ detail }) => onChange({ startDate: detail.value })}
+							onChange={({ detail }) =>
+								handleUpdate({ startDate: detail.value })
+							}
 							placeholder="YYYY/MM/DD"
 						/>
 					</FormField>
@@ -181,10 +227,13 @@ export default function ShiftCard({
 								Start time <span style={{ color: "red" }}>*</span>
 							</>
 						}
+						errorText={errors?.startTime}
 					>
 						<TimeInput
 							value={shift.startTime}
-							onChange={({ detail }) => onChange({ startTime: detail.value })}
+							onChange={({ detail }) =>
+								handleUpdate({ startTime: detail.value })
+							}
 							placeholder="hh:mm"
 						/>
 					</FormField>
@@ -195,10 +244,11 @@ export default function ShiftCard({
 								End date <span style={{ color: "red" }}>*</span>
 							</>
 						}
+						errorText={errors?.endDate}
 					>
 						<DatePicker
 							value={shift.endDate}
-							onChange={({ detail }) => onChange({ endDate: detail.value })}
+							onChange={({ detail }) => handleUpdate({ endDate: detail.value })}
 							placeholder="YYYY/MM/DD"
 						/>
 					</FormField>
@@ -209,10 +259,11 @@ export default function ShiftCard({
 								End time <span style={{ color: "red" }}>*</span>
 							</>
 						}
+						errorText={errors?.endTime}
 					>
 						<TimeInput
 							value={shift.endTime}
-							onChange={({ detail }) => onChange({ endTime: detail.value })}
+							onChange={({ detail }) => handleUpdate({ endTime: detail.value })}
 							placeholder="hh:mm"
 						/>
 					</FormField>
@@ -233,7 +284,7 @@ export default function ShiftCard({
 								) ?? null
 							}
 							onChange={({ detail }) =>
-								onChange({
+								handleUpdate({
 									requiredCommittee: detail.selectedOption?.value ?? "",
 								})
 							}
@@ -249,7 +300,7 @@ export default function ShiftCard({
 								) ?? null
 							}
 							onChange={({ detail }) =>
-								onChange({
+								handleUpdate({
 									requiredSubcommittee: detail.selectedOption?.value ?? "",
 								})
 							}

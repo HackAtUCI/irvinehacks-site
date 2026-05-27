@@ -723,11 +723,11 @@ async def update_template(
     user: Annotated[User, Depends(require_director)],
     event_dates: list[datetime],
     shifts: list[Shift],
-    template_name: str = Body(embed=True),  # ← add embed=True
+    template_name: str = Body(embed=True),
 ) -> None:
     log.info("%s updated template", user)
 
-    await mongodb_handler.raw_update_one(  # ← raw_update_one
+    await mongodb_handler.raw_update_one(
         Collection.SETTINGS,
         {"_id": "templates"},
         {
@@ -739,7 +739,7 @@ async def update_template(
                 }
             }
         },
-        array_filters=[{"t.template_name": template_name}],  # ← now works
+        array_filters=[{"t.template_name": template_name}],
     )
 
 

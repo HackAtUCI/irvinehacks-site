@@ -16,21 +16,7 @@ import TimeInput from "@cloudscape-design/components/time-input";
 import Form from "@cloudscape-design/components/form";
 
 import ShiftCard from "./ShiftCard";
-
-interface Shift {
-	id: string;
-	shiftName: string;
-	location: string;
-	num_orgs: string;
-	startDate: string;
-	startTime: string;
-	endDate: string;
-	endTime: string;
-	pointValue: string;
-	requiredCommittee: string;
-	requiredSubcommittee: string;
-	preAssignedOrganizers: string[];
-}
+import type { Shift, ShiftErrors } from "./ShiftTypes";
 
 function emptyShift(): Shift {
 	return {
@@ -90,6 +76,9 @@ function TemplateManagement() {
 	const [eventStartTime, setEventStartTime] = useState("");
 	const [eventEndTime, setEventEndTime] = useState("");
 	const [shifts, setShifts] = useState<Shift[]>([emptyShift()]);
+	const [shiftErrors, setShiftErrors] = useState<Record<string, ShiftErrors>>(
+		{},
+	);
 
 	const [errors, setErrors] = useState({
 		name: "",
@@ -100,8 +89,7 @@ function TemplateManagement() {
 	});
 
 	const [shiftError, setShiftError] = useState("");
-
-	function validate() {
+	function validateEventFields() {
 		const newErrors = {
 			name: name ? "" : "Template name is required",
 			eventStartDate: eventStartDate ? "" : "Event start date is required",
@@ -113,8 +101,8 @@ function TemplateManagement() {
 		return Object.values(newErrors).every((e) => e === "");
 	}
 
-	function validateShifts() {
-		return shifts.every(
+	function validateShiftRequiredFields() {
+		const valid = shifts.every(
 			(s) =>
 				s.shiftName &&
 				s.location &&
@@ -123,8 +111,14 @@ function TemplateManagement() {
 				s.startTime &&
 				s.endDate &&
 				s.endTime &&
-				s.pointValue,
+				s.pointValue &&
+				!isNaN(Number(s.pointValue)),
 		);
+
+		if (!valid) {
+			setShiftError("Please fill in all required shift fields");
+		}
+		return valid;
 	}
 
 	useEffect(() => {
@@ -140,11 +134,10 @@ function TemplateManagement() {
 	}, [isNew, templateName]);
 
 	async function handleSave() {
-		if (!validate()) {
+		if (!validateEventFields()) {
 			return;
 		}
-		if (!validateShifts()) {
-			setShiftError("All information in red are required");
+		if (!validateShiftRequiredFields()) {
 			return;
 		}
 
@@ -321,7 +314,16 @@ function TemplateManagement() {
 					<ShiftCard
 						key={shift.id}
 						shift={shift}
+						eventStart={`${eventStartDate}T${eventStartTime}`}
+						eventEnd={`${eventEndDate}T${eventEndTime}`}
+						errors={shiftErrors[shift.id]}
 						onChange={(updated) => updateShift(shift.id, updated)}
+						onValidate={(updatedShift, errors) =>
+							setShiftErrors((prev) => ({
+								...prev,
+								[shift.id]: errors,
+							}))
+						}
 						onDuplicate={() => duplicateShift(shift.id)}
 						onDelete={() => deleteShift(shift.id)}
 					/>

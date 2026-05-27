@@ -1,5 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field
+from typing import Optional
 
 
 class Hour(BaseModel):
@@ -15,8 +16,9 @@ class Shift(BaseModel):
     shift_pts: int
     organizers: list[str] = []
     hour: Hour
-    committee_prereq: str
-    subcommittee_prereq: str
+
+    committee_prereq: Optional[str] = None
+    subcommittee_prereq: Optional[str] = None
     preassigned_orgs: list[str] = []
 
 

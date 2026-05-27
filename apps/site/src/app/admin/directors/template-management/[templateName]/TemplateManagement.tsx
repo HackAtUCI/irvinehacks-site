@@ -45,6 +45,29 @@ function setDateTime(
 	setTime(time?.slice(0, 5) ?? "");
 }
 
+function shiftFromAPI(apiShift: any): Shift {
+	const startDT = apiShift.hour?.start_time ?? "";
+	const endDT = apiShift.hour?.end_time ?? "";
+
+	const [startDate, startTimeFull] = startDT.split("T");
+	const [endDate, endTimeFull] = endDT.split("T");
+
+	return {
+		id: crypto.randomUUID(),
+		shiftName: apiShift.shift_name ?? "",
+		location: apiShift.location ?? "",
+		num_orgs: String(apiShift.min_num_organizers ?? ""),
+		pointValue: String(apiShift.shift_pts ?? ""),
+		startDate: startDate ?? "",
+		startTime: startTimeFull?.slice(0, 5) ?? "",
+		endDate: endDate ?? "",
+		endTime: endTimeFull?.slice(0, 5) ?? "",
+		requiredCommittee: apiShift.committee_prereq ?? "",
+		requiredSubcommittee: apiShift.subcommittee_prereq ?? "",
+		preAssignedOrganizers: apiShift.preassigned_orgs ?? [],
+	};
+}
+
 function shiftToPayload(shift: Shift) {
 	return {
 		shift_name: shift.shiftName,
@@ -89,6 +112,9 @@ function TemplateManagement() {
 	});
 
 	const [shiftError, setShiftError] = useState("");
+	function toISODate(cloudscapeDate: string) {
+		return cloudscapeDate.replace(/\//g, "-");
+	}
 	function validateEventFields() {
 		const newErrors = {
 			name: name ? "" : "Template name is required",
@@ -129,7 +155,7 @@ function TemplateManagement() {
 				setName(data.template_name);
 				setDateTime(data.event_start, setEventStartDate, setEventStartTime);
 				setDateTime(data.event_end, setEventEndDate, setEventEndTime);
-				setShifts(data.shifts ?? [emptyShift()]);
+				setShifts(data.shifts?.map(shiftFromAPI) ?? [emptyShift()]);
 			});
 	}, [isNew, templateName]);
 
@@ -158,8 +184,10 @@ function TemplateManagement() {
 		await axios.post("/api/director/update-template", {
 			template_name: payload.template_name,
 			event_dates: [
-				new Date(`${eventStartDate}T${eventStartTime}`).toISOString(),
-				new Date(`${eventEndDate}T${eventEndTime}`).toISOString(),
+				new Date(
+					`${toISODate(eventStartDate)}T${eventStartTime}`,
+				).toISOString(),
+				new Date(`${toISODate(eventEndDate)}T${eventEndTime}`).toISOString(),
 			],
 			shifts: shifts.map(shiftToPayload),
 		});

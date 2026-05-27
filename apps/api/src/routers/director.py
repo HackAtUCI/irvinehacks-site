@@ -725,7 +725,6 @@ async def update_template(
     shifts: list[Shift],
     template_name: str = Body(embed=True),
 ) -> None:
-    log.info("%s updated template", user)
 
     await mongodb_handler.raw_update_one(
         Collection.SETTINGS,
@@ -734,13 +733,14 @@ async def update_template(
             "$set": {
                 "templates.$[t].template_info": {
                     "event_dates": [d.isoformat() for d in event_dates],
-                    "shifts": [shift.model_dump() for shift in shifts],
+                    "shifts": [shift.model_dump(mode="json") for shift in shifts],
                     "org_availabilities": {},
                 }
             }
         },
         array_filters=[{"t.template_name": template_name}],
     )
+    log.info("Template name searched: '%s'", template_name)
 
 
 @router.get("/drafts")

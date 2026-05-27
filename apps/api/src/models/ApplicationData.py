@@ -22,6 +22,7 @@ class Decision(str, Enum):
     ACCEPTED = "ACCEPTED"
     WAITLISTED = "WAITLISTED"
     REJECTED = "REJECTED"
+    VOIDED = "VOIDED"
 
 
 Review = tuple[

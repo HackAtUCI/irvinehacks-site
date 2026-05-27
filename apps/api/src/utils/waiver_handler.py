@@ -19,7 +19,9 @@ async def process_waiver_completion(uid: str, email: EmailStr) -> None:
     the submission.
     """
     record = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": uid}, ["roles", "status", "first_name", "last_name"]
+        Collection.USERS,
+        {"_id": uid},
+        ["roles", "status", "decision", "first_name", "last_name"],
     )
 
     if not record:
@@ -41,7 +43,10 @@ async def process_waiver_completion(uid: str, email: EmailStr) -> None:
         elif applicant_record.status == Status.ATTENDING:
             log.warning(f"User {uid} has already signed the waiver and is attending.")
             return
-        elif applicant_record.status != Decision.ACCEPTED:
+        elif (
+            applicant_record.status != Decision.ACCEPTED
+            and applicant_record.decision != Decision.ACCEPTED
+        ):
             log.warning(f"User {uid} attempted to sign waiver but was not accepted.")
             return
 

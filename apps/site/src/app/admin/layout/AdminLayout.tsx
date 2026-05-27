@@ -2,12 +2,15 @@
 
 import { useRouter, usePathname } from "next/navigation";
 
-import { PropsWithChildren, useEffect, useState } from "react";
+import { PropsWithChildren, useCallback, useEffect, useState } from "react";
 
 import AppLayout from "@cloudscape-design/components/app-layout";
+import Box from "@cloudscape-design/components/box";
 import Flashbar, {
 	FlashbarProps,
 } from "@cloudscape-design/components/flashbar";
+import SpaceBetween from "@cloudscape-design/components/space-between";
+import Spinner from "@cloudscape-design/components/spinner";
 import axios from "axios";
 import { SWRConfig } from "swr";
 
@@ -18,6 +21,8 @@ import useUserIdentityStatic from "@/lib/admin/useUserIdentityStatic";
 
 import AdminSidebar from "./AdminSidebar";
 import Breadcrumbs from "./Breadcrumbs";
+import SessionTimeoutModal from "./SessionTimeoutModal";
+import { useSessionTimeout } from "@/lib/admin/useSessionTimeout";
 
 function AdminLayout({ children }: PropsWithChildren) {
 	const identity = useUserIdentityStatic();
@@ -26,18 +31,66 @@ function AdminLayout({ children }: PropsWithChildren) {
 	const [notifications, setNotifications] = useState<
 		FlashbarProps.MessageDefinition[]
 	>([]);
+	const [showTimeoutModal, setShowTimeoutModal] = useState(false);
+	const handleWarning = useCallback(() => {
+		setShowTimeoutModal(true);
+	}, []);
+	const handleExpired = useCallback(() => {
+		setShowTimeoutModal(false);
+	}, []);
+
+	const { logout, extendSession } = useSessionTimeout({
+		onWarning: handleWarning,
+		onExpired: handleExpired,
+	});
+
+	const handleExtend = useCallback(async () => {
+		setShowTimeoutModal(false);
+		await extendSession();
+	}, [extendSession]);
+
+	const handleLogout = useCallback(() => {
+		setShowTimeoutModal(false);
+		logout();
+	}, [logout]);
 
 	useEffect(() => {
 		setNotifications(() => []);
 
-		if (!document.cookie.includes("hackathon=irvinehacks")) {
+		if (pathName.includes("/zothacks")) {
+			document.cookie =
+				"hackathon=zothacks; path=/; max-age=" + 60 * 60 * 24 * 30;
+			return;
+		}
+
+		const hasHackathonCookie = document.cookie
+			.split("; ")
+			.some((cookie) => cookie.startsWith("hackathon="));
+		if (!hasHackathonCookie) {
 			document.cookie =
 				"hackathon=irvinehacks; path=/; max-age=" + 60 * 60 * 24 * 30;
 		}
 	}, [pathName]);
 
 	if (!identity) {
-		return "Loading...";
+		return (
+			<div
+				style={{
+					alignItems: "center",
+					display: "flex",
+					justifyContent: "center",
+					minHeight: "100vh",
+					padding: "2rem",
+				}}
+			>
+				<SpaceBetween size="m" alignItems="center">
+					<Spinner size="large" />
+					<Box variant="h2" textAlign="center">
+						Loading...
+					</Box>
+				</SpaceBetween>
+			</div>
+		);
 	}
 
 	const { uid, roles } = identity;
@@ -92,6 +145,11 @@ function AdminLayout({ children }: PropsWithChildren) {
 								inProgressIconAriaLabel: "In progress",
 							}}
 							stackItems
+						/>
+						<SessionTimeoutModal
+							visible={showTimeoutModal}
+							onExtend={handleExtend}
+							onLogout={handleLogout}
 						/>
 					</div>
 				</NotificationContext.Provider>

@@ -21,6 +21,7 @@ import ApplicantActions from "./ApplicantActions";
 import ApplicantNavigationButtons from "./ApplicantNavigationButtons";
 import ApplicantOverview from "./ApplicantOverview";
 import HackerApplicantActions from "./HackerApplicantActions";
+import VoidApplicantButton from "./VoidApplicantButton";
 import { ParticipantRole } from "@/lib/userRecord";
 import { ScoredFields } from "@/lib/detailedScores";
 import { IrvineHacksHackerScoringGuidelinesType } from "@/app/admin/applicants/hackers/components/getScoringGuidelines";
@@ -46,6 +47,7 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 		submitReview,
 		submitDetailedReview,
 		deleteNotes,
+		voidApplicant,
 	} = useApplicant(uid, applicationType);
 	const [scores, setScores] = useState<ScoredFields>({});
 	const [notes, setNotes] = useState("");
@@ -79,8 +81,16 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 		notes: string | null,
 	) => {
 		submitDetailedReview(Uid, scores, notes).then(() => {
-			if (setNotifications)
+			if (setNotifications) {
 				setNotifications((prev) => [successMessage, ...prev]);
+				setTimeout(
+					() =>
+						setNotifications((prev) =>
+							prev.filter((msg) => msg.id !== successMessage.id),
+						),
+					3000,
+				);
+			}
 			setNotes("");
 		});
 	};
@@ -94,6 +104,11 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 					actions={
 						applicant.roles.includes(ParticipantRole.Hacker) ? (
 							<SpaceBetween direction="horizontal" size="xs">
+								<VoidApplicantButton
+									uid={applicant._id}
+									status={applicant.status}
+									onVoid={voidApplicant}
+								/>
 								<ApplicantNavigationButtons
 									uid={uid}
 									basePath="/admin/applicants/hackers" // hardcoded for Irvinehacks (Applicant.tsx)
@@ -107,10 +122,17 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 								/>
 							</SpaceBetween>
 						) : (
-							<ApplicantActions
-								applicant={applicant._id}
-								submitReview={submitReview}
-							/>
+							<SpaceBetween direction="horizontal" size="xs">
+								<VoidApplicantButton
+									uid={applicant._id}
+									status={applicant.status}
+									onVoid={voidApplicant}
+								/>
+								<ApplicantActions
+									applicant={applicant._id}
+									submitReview={submitReview}
+								/>
+							</SpaceBetween>
 						)
 					}
 				>

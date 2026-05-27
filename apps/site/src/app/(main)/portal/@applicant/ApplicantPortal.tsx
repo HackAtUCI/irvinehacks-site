@@ -13,7 +13,6 @@ import ReturnHome from "./components/ReturnHome";
 import VerticalTimeline from "./components/timeline/VerticalTimeline";
 import QRCodeComponent from "./components/QRCode";
 import AvatarDisplay from "./components/AvatarDisplay";
-import RsvpForm from "./components/RsvpForm";
 
 const rolesArray = ["Mentor", "Hacker", "Volunteer"];
 
@@ -42,11 +41,17 @@ function Portal() {
 
 	const waitlistStarted = waitlistStatus?.is_started ?? false;
 	const waitlistOpen = waitlistStatus?.is_open ?? false;
+	const hasSignedWaiver =
+		status === Status.Signed ||
+		status === Status.Confirmed ||
+		status === Status.Attending;
 
-	const needsToSignWaiver = isAccepted || (isWaitlisted && waitlistStarted);
-	const needsToRSVP = isAccepted || (isWaitlisted && waitlistOpen);
+	const needsToSignWaiver =
+		!hasSignedWaiver && (isAccepted || (isWaitlisted && waitlistStarted));
+	const needsToRSVP =
+		hasSignedWaiver && (isAccepted || (isWaitlisted && waitlistOpen));
 
-	const rejected = status === Status.Rejected;
+	const showReturnHome = status === Status.Rejected || status === Status.Voided;
 
 	return (
 		<div className="relative">
@@ -62,10 +67,10 @@ function Portal() {
 				<h2 className="font-bold font-display text-[var(--color-white)] mb-4 md:mb-[42px] text-[15px] sm:text-2xl md:text-[40px] md:leading-10">
 					{roleToDisplay} Application Status
 				</h2>
-				<RsvpForm buttonText="RSVP Now" showWarning={true} />
 				<AvatarDisplay />
 				<VerticalTimeline
-					status={identity?.decision ? identity?.decision : (status as Status)}
+					status={status as Status}
+					decision={identity?.decision as Decision | null}
 				/>
 				<Message
 					status={status as Status}
@@ -79,7 +84,7 @@ function Portal() {
 					/>
 				)}
 				{needsToRSVP && <ConfirmAttendance status={status as Status} />}
-				{rejected && <ReturnHome />}
+				{showReturnHome && <ReturnHome />}
 			</div>
 		</div>
 	);

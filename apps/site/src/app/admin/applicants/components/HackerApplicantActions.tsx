@@ -2,10 +2,12 @@ import { useContext } from "react";
 
 import Box from "@cloudscape-design/components/box";
 import Button from "@cloudscape-design/components/button";
+import { FlashbarProps } from "@cloudscape-design/components/flashbar";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 
 import { Review } from "@/lib/admin/useApplicant";
 import { Uid } from "@/lib/userRecord";
+import NotificationContext from "@/lib/admin/NotificationContext";
 import UserContext from "@/lib/admin/UserContext";
 import { isReviewer } from "@/lib/admin/authorization";
 import {
@@ -46,6 +48,7 @@ function HackerApplicantActions({
 	onSubmitDetailedReview,
 }: ApplicantActionsProps) {
 	const { uid, roles } = useContext(UserContext);
+	const { setNotifications } = useContext(NotificationContext);
 
 	const uniqueReviewers = Array.from(
 		new Set(reviews.map((review) => review[1])),
@@ -61,7 +64,31 @@ function HackerApplicantActions({
 	}
 
 	const handleClick = () => {
-		// TODO: use flashbar or modal for submit status
+		const hasMissingFields = [
+			"previous_experience",
+			"frq_change",
+			"frq_ambition",
+			"frq_character",
+		].some((field) => !(field in scores));
+
+		if (hasMissingFields) {
+			const msgId = `missing-fields-${Date.now()}`;
+			const dismiss = () =>
+				setNotifications?.((prev) => prev.filter((m) => m.id !== msgId));
+			setNotifications?.((prev) => [
+				{
+					type: "error",
+					content: "Missing required fields.",
+					id: msgId,
+					dismissible: true,
+					onDismiss: dismiss,
+				} as FlashbarProps.MessageDefinition,
+				...prev,
+			]);
+			setTimeout(dismiss, 3000);
+			return;
+		}
+
 		onSubmitDetailedReview(applicant, scores, notes ?? null);
 	};
 

@@ -24,6 +24,8 @@ class Template(str, Enum):
     WAITLIST_QUEUED_EMAIL = "d-a6de2014ad854658bead73a2718a1152"
     WAITLIST_CLOSED_EMAIL = "d-061b28174c9140a095fa99e81e0e7e9c"
     APPLY_REMINDER = "d-a830eddcfaf74bc6af2c07357c67863f"
+    LATE_ARRIVAL_APPROVED_EMAIL = "d-a5fc44ba668e4c4eb256901165ce63b5"
+    LATE_ARRIVAL_REJECTED_EMAIL = "d-49b746e9c9fc494e83d4db99c613fe82"
 
     # IH 2025
     HACKER_ACCEPTED_EMAIL = "d-07fa796cf6c34518a7124a68d4790d82"
@@ -62,6 +64,16 @@ class ApplicationUpdatePersonalization(PersonalizationData):
     first_name: str
 
 
+class LateArrivalApprovalPersonalization(PersonalizationData):
+    first_name: str
+    arrival_time: str
+
+
+class LateArrivalRejectionPersonalization(PersonalizationData):
+    first_name: str
+    requested_time: str
+
+
 ApplicationUpdateTemplates: TypeAlias = Literal[
     Template.HACKER_ACCEPTED_EMAIL,
     Template.HACKER_WAITLISTED_EMAIL,
@@ -86,6 +98,11 @@ LogisticsTemplates: TypeAlias = Literal[
     Template.MENTOR_LOGISTICS_EMAIL,
     Template.VOLUNTEER_LOGISTICS_EMAIL,
     Template.HACKER_WAITLISTED_LOGISTICS_EMAIL,
+]
+
+LateArrivalTemplates: TypeAlias = Literal[
+    Template.LATE_ARRIVAL_APPROVED_EMAIL,
+    Template.LATE_ARRIVAL_REJECTED_EMAIL,
 ]
 
 
@@ -174,6 +191,26 @@ async def send_email(
     template_id: LogisticsTemplates,
     sender_email: Tuple[str, str],
     receiver_data: Iterable[ApplicationUpdatePersonalization],
+    send_to_multiple: Literal[True],
+    reply_to: Union[Tuple[str, str], None] = None,
+) -> None: ...
+
+
+@overload
+async def send_email(
+    template_id: Literal[Template.LATE_ARRIVAL_APPROVED_EMAIL],
+    sender_email: Tuple[str, str],
+    receiver_data: Iterable[LateArrivalApprovalPersonalization],
+    send_to_multiple: Literal[True],
+    reply_to: Union[Tuple[str, str], None] = None,
+) -> None: ...
+
+
+@overload
+async def send_email(
+    template_id: Literal[Template.LATE_ARRIVAL_REJECTED_EMAIL],
+    sender_email: Tuple[str, str],
+    receiver_data: Iterable[LateArrivalRejectionPersonalization],
     send_to_multiple: Literal[True],
     reply_to: Union[Tuple[str, str], None] = None,
 ) -> None: ...

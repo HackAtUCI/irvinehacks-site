@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 
 from auth.user_identity import GuestUser, UserTestClient
 
-# from models.ApplicationData import Decision
+from models.ApplicationData import Decision
 from models.user_record import Role, Status
 from routers import user
 from services.mongodb_handler import Collection
@@ -98,6 +98,38 @@ def test_user_with_status_waiver_signed_rsvp_changes_status_to_confirmed(
 
 @patch("services.mongodb_handler.update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_user_with_late_arrival_rsvp_saves_reason(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_update_one: AsyncMock,
+) -> None:
+    """Test RSVP with late arrival stores the arrival time and reason."""
+    mock_mongodb_handler_retrieve_one.return_value = {"status": Status.WAIVER_SIGNED}
+
+    client = UserTestClient(GuestUser(email="tree@stanford.edu"), app)
+    res = client.post(
+        "/rsvp",
+        data={
+            "arrival_time": "18:30",
+            "late_arrival_reason": "Class gets out late",
+        },
+        follow_redirects=False,
+    )
+
+    mock_mongodb_handler_update_one.assert_awaited_once_with(
+        Collection.USERS,
+        {"_id": "edu.stanford.tree"},
+        {
+            "status": Status.CONFIRMED,
+            "arrival_time": "18:30",
+            "late_arrival_reason": "Class gets out late",
+        },
+    )
+
+    assert res.status_code == 303
+
+
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
 def test_user_with_status_confirmed_un_rsvp_changes_status_to_waiver_signed(
     mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_mongodb_handler_update_one: AsyncMock,
@@ -117,22 +149,21 @@ def test_user_with_status_confirmed_un_rsvp_changes_status_to_waiver_signed(
     assert res.status_code == 303
 
 
-# TODO: revisit after fixing docusign
-# @patch("services.mongodb_handler.update_one", autospec=True)
-# @patch("services.mongodb_handler.retrieve_one", autospec=True)
-# def test_user_with_status_accepted_un_rsvp_returns_403(
-#     mock_mongodb_handler_retrieve_one: AsyncMock,
-#     mock_mongodb_handler_update_one: AsyncMock,
-# ) -> None:
-#     """Test user with ACCEPTED status has no status change after RSVP."""
-#     mock_mongodb_handler_retrieve_one.return_value = {"status": Decision.ACCEPTED}
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_user_with_status_accepted_rsvp_returns_403(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_update_one: AsyncMock,
+) -> None:
+    """Test accepted user cannot RSVP before signing waiver."""
+    mock_mongodb_handler_retrieve_one.return_value = {"status": Decision.ACCEPTED}
 
-#     client = UserTestClient(GuestUser(email="tree@stanford.edu"), app)
-#     res = client.post("/rsvp", follow_redirects=False)
+    client = UserTestClient(GuestUser(email="tree@stanford.edu"), app)
+    res = client.post("/rsvp", follow_redirects=False)
 
-#     mock_mongodb_handler_update_one.assert_not_awaited()
+    mock_mongodb_handler_update_one.assert_not_awaited()
 
-#     assert res.status_code == 403
+    assert res.status_code == 403
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)

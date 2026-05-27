@@ -409,10 +409,14 @@ def test_application_data_with_other_throws_422(
     assert res.status_code == 422
 
 
-def test_past_deadline_causes_403() -> None:
-    user.DEADLINE = datetime(2023, 12, 18, 20, 0, 0, tzinfo=timezone.utc)
-
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+@patch("routers.user._is_past_deadline", autospec=True)
+def test_past_deadline_causes_403(
+    mock_is_past_deadline: Mock,
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    mock_is_past_deadline.return_value = True
     res = client.post("/apply", data=SAMPLE_APPLICATION, files=SAMPLE_FILES)
-    assert res.status_code == 403
 
-    user.DEADLINE = TEST_DEADLINE
+    mock_mongodb_handler_retrieve_one.assert_not_called()
+    assert res.status_code == 403

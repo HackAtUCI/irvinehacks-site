@@ -49,29 +49,47 @@ const MODAL_HEADERS: Record<ModalAction["type"], string> = {
 
 function WaitlistModalBody({ item }: { item: LateArrivalRecord }) {
 	return (
-		<p>
-			Confirm moving <strong>{item.id}</strong> to waitlist and setting status
-			to <strong>WAIVER_SIGNED</strong>?
-		</p>
+		<SpaceBetween size="s">
+			<p>
+				Confirm moving <strong>{item.id}</strong> to waitlist and setting status
+				to <strong>WAIVER_SIGNED</strong>?
+			</p>
+		</SpaceBetween>
 	);
 }
 
 function ApproveModalBody({ item }: { item: LateArrivalRecord }) {
 	return (
-		<p>
-			Approve changing <strong>{item.id}</strong>&apos;s arrival time from{" "}
-			<strong>{formatTime(item.arrival_time)}</strong> to{" "}
-			<strong>{formatTime(item.late_arrival_edit_request!)}</strong>?
-		</p>
+		<SpaceBetween size="s">
+			<p>
+				Approve changing <strong>{item.id}</strong>&apos;s arrival time from{" "}
+				<strong>{formatTime(item.arrival_time)}</strong> to{" "}
+				<strong>{formatTime(item.late_arrival_edit_request!)}</strong>?
+			</p>
+			<p>
+				Reason:{" "}
+				<strong>
+					{item.late_arrival_edit_reason ?? "No reason provided."}
+				</strong>
+			</p>
+		</SpaceBetween>
 	);
 }
 
 function RejectModalBody({ item }: { item: LateArrivalRecord }) {
 	return (
-		<p>
-			Reject the edit request for <strong>{item.id}</strong>? Their arrival time
-			will remain <strong>{formatTime(item.arrival_time)}</strong>.
-		</p>
+		<SpaceBetween size="s">
+			<p>
+				Reject the edit request for <strong>{item.id}</strong>? Their arrival
+				time will remain <strong>{formatTime(item.arrival_time)}</strong>.
+			</p>
+			<p>
+				Reason:{" "}
+				<strong>
+					{item.late_arrival_edit_reason ?? "No reason provided."}
+				</strong>
+			</p>
+		</SpaceBetween>
 	);
 }
 
@@ -88,6 +106,8 @@ const RequestedTimeCell = (item: LateArrivalRecord) =>
 	) : (
 		"—"
 	);
+const ReasonCell = (item: LateArrivalRecord) =>
+	item.late_arrival_edit_reason ?? item.late_arrival_reason ?? "—";
 const StatusCell = (item: LateArrivalRecord) => item.status;
 const DecisionCell = (item: LateArrivalRecord) => item.decision ?? "—";
 const ArrivalStatusCell = (item: LateArrivalRecord) =>
@@ -198,6 +218,7 @@ function LateArrivalsTable() {
 			header: "Requested Time",
 			cell: RequestedTimeCell,
 		},
+		{ id: "reason", header: "Reason", cell: ReasonCell },
 		{ id: "id", header: "ID", cell: IdCell },
 		{ id: "name", header: "Name", cell: NameCell },
 		{ id: "status", header: "Status", cell: StatusCell },

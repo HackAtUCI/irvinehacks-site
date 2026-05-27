@@ -59,6 +59,27 @@ async def test_new_waiver_submission_can_be_processed(
 
 @patch("services.mongodb_handler.update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_waiver_submission_can_be_processed_for_accepted_decision(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_update_one: AsyncMock,
+) -> None:
+    """Waiver signing works when acceptance is stored in decision."""
+    mock_mongodb_handler_retrieve_one.return_value = {
+        "_id": SAMPLE_UID,
+        "first_name": "Ian",
+        "last_name": "Dai",
+        "roles": [Role.APPLICANT],
+        "status": Status.REVIEWED,
+        "decision": Decision.ACCEPTED,
+    }
+    await docusign_handler.process_webhook_event(SAMPLE_WEBHOOK_DATA)
+    mock_mongodb_handler_update_one.assert_awaited_once_with(
+        Collection.USERS, {"_id": SAMPLE_UID}, {"status": Status.WAIVER_SIGNED}
+    )
+
+
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
 async def test_no_op_when_user_already_signed_waiver(
     mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_mongodb_handler_update_one: AsyncMock,

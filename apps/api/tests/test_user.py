@@ -4,6 +4,7 @@ from fastapi import FastAPI, status
 from fastapi.testclient import TestClient
 
 from auth.user_identity import GuestUser, UserTestClient
+
 from models.ApplicationData import Decision
 from models.user_record import Role, Status
 from routers import user
@@ -152,6 +153,38 @@ def test_user_with_late_arrival_rsvp_saves_reason(
     mock_send_rsvp_confirmation_email.assert_awaited_once_with(
         USER_EMAIL,
         "tree",
+    )
+
+    assert res.status_code == 303
+
+
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_user_with_late_arrival_rsvp_saves_reason(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_update_one: AsyncMock,
+) -> None:
+    """Test RSVP with late arrival stores the arrival time and reason."""
+    mock_mongodb_handler_retrieve_one.return_value = {"status": Status.WAIVER_SIGNED}
+
+    client = UserTestClient(GuestUser(email="tree@stanford.edu"), app)
+    res = client.post(
+        "/rsvp",
+        data={
+            "arrival_time": "18:30",
+            "late_arrival_reason": "Class gets out late",
+        },
+        follow_redirects=False,
+    )
+
+    mock_mongodb_handler_update_one.assert_awaited_once_with(
+        Collection.USERS,
+        {"_id": "edu.stanford.tree"},
+        {
+            "status": Status.CONFIRMED,
+            "arrival_time": "18:30",
+            "late_arrival_reason": "Class gets out late",
+        },
     )
 
     assert res.status_code == 303

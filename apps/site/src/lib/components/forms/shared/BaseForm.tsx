@@ -58,10 +58,12 @@ export default function BaseForm({
 	// Hydrate textareas from any previously saved draft
 	useEffect(() => {
 		axios
-			.get<DraftResponse>("/api/user/application/draft")
+			.get<DraftResponse>("/api/user/application/draft", {
+				params: { application_type: applicationType },
+			})
 			.then((res) => {
 				const draft = res.data.draft_application_data;
-				if (draft && draft.application_type === applicationType) {
+				if (draft) {
 					setFields(draft.fields);
 				}
 			})

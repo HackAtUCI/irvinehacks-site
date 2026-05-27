@@ -244,8 +244,8 @@ async def _apply_flow(
     # Check if current datetime is past application deadline
     now = datetime.now(timezone.utc)
 
-    # if _is_past_deadline(now):
-    #     raise HTTPException(status.HTTP_403_FORBIDDEN, "Applications have closed.")
+    if _is_past_deadline(now):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Applications have closed.")
 
     # check if user already has a role
     existing_record = await mongodb_handler.retrieve_one(
@@ -553,7 +553,7 @@ async def rsvp(
     if new_status == Status.CONFIRMED:
         try:
             await email_handler.send_rsvp_confirmation_email(
-                user.email, user_record["first_name"]
+                user.email, user_record.get("first_name", user.email.split("@")[0])
             )
         except RuntimeError:
             log.error("Could not send RSVP email with SendGrid to %s.", user.uid)

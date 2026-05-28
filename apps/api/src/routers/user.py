@@ -504,7 +504,7 @@ async def rsvp(
 ) -> RedirectResponse:
     """Change user status for RSVP"""
     user_record = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": user.uid}, ["status", "decision"]
+        Collection.USERS, {"_id": user.uid}, ["status", "decision", "first_name"]
     )
 
     if not user_record or "status" not in user_record:
@@ -549,6 +549,15 @@ async def rsvp(
 
     old_status = user_record["status"]
     log.info(f"User {user.uid} changed status from {old_status} to {new_status}.")
+
+    if new_status == Status.CONFIRMED:
+        try:
+            await email_handler.send_rsvp_confirmation_email(
+                user.email, user_record.get("first_name", user.email.split("@")[0])
+            )
+        except RuntimeError:
+            log.error("Could not send RSVP email with SendGrid to %s.", user.uid)
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     return RedirectResponse("/portal", status.HTTP_303_SEE_OTHER)
 

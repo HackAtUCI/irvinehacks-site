@@ -69,7 +69,8 @@ function Portal() {
 				</h2>
 				<AvatarDisplay />
 				<VerticalTimeline
-					status={identity?.decision ? identity?.decision : (status as Status)}
+					status={status as Status}
+					decision={identity?.decision as Decision | null}
 				/>
 				<Message
 					status={status as Status}

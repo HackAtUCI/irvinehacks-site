@@ -3,6 +3,8 @@
 import React from "react";
 import { useState } from "react";
 
+import { useDraftContext } from "@/lib/components/forms/shared/DraftContext";
+
 function as12Hour(hour: number) {
 	const suffix = hour >= 12 ? "PM" : "AM";
 
@@ -25,12 +27,31 @@ export default function DayShift({
 	shiftLabel,
 }: ShiftInputs) {
 	const num_hours = endHour - startHour;
+	const draftContext = useDraftContext();
 
-	const [availability, setAvailability] = useState(
-		Array<boolean>(num_hours).fill(false),
-	);
+	const [availability, setAvailability] = useState<boolean[]>(() => {
+		const saved = draftContext?.initialValues[shiftLabel];
+		const savedHours = new Set<string>();
+		if (Array.isArray(saved)) {
+			for (const v of saved) {
+				if (typeof v === "string") savedHours.add(v);
+			}
+		}
+		return Array.from({ length: num_hours }, (_, i) =>
+			savedHours.has(String(startHour + i)),
+		);
+	});
 	const [isMouseDown, setIsMouseDown] = useState(false);
 	const [firstClicked, setFirstClicked] = useState(false);
+
+	const publishDraft = (next: boolean[]) => {
+		if (!draftContext) return;
+		const hours: string[] = [];
+		next.forEach((selected, i) => {
+			if (selected) hours.push(String(startHour + i));
+		});
+		draftContext.setValue(shiftLabel, hours);
+	};
 
 	function onMouseDown(
 		e: React.MouseEvent<HTMLDivElement, MouseEvent>,
@@ -40,20 +61,28 @@ export default function DayShift({
 		// TODO: edge case - React doesn't guarantee immediate updates
 		setIsMouseDown(true);
 		setFirstClicked(availability[i]);
-		setAvailability((available) => [
-			...available.slice(0, i),
-			!available[i],
-			...available.slice(i + 1),
-		]);
+		setAvailability((available) => {
+			const next = [
+				...available.slice(0, i),
+				!available[i],
+				...available.slice(i + 1),
+			];
+			publishDraft(next);
+			return next;
+		});
 	}
 
 	function onMouseOver(i: number) {
 		if (isMouseDown) {
-			setAvailability((available) => [
-				...available.slice(0, i),
-				!firstClicked,
-				...available.slice(i + 1),
-			]);
+			setAvailability((available) => {
+				const next = [
+					...available.slice(0, i),
+					!firstClicked,
+					...available.slice(i + 1),
+				];
+				publishDraft(next);
+				return next;
+			});
 		}
 	}
 

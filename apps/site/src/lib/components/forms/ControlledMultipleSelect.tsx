@@ -41,6 +41,7 @@ export default function ControlledMultipleSelect({
 							key={`option-${i}`}
 							name={name}
 							value={item.value}
+							checked={Boolean(controlledObject[item.value])}
 							onChange={() =>
 								setControlledObject({
 									...controlledObject,

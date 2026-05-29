@@ -202,7 +202,7 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 						header: "UID",
 						content: ({ _id }) => (isUserDirector ? _id : uidToPseudonym(_id)),
 					},
-					extraColumn,
+					...(isUserDirector ? [extraColumn] : []),
 					{
 						id: "status",
 						header: "Status",

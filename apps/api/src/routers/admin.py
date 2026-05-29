@@ -109,6 +109,40 @@ class HackerApplicantSummary(BaseRecord):
     application_data: Union[ApplicationDataSummary, ZotHacksApplicationDataSummary]
 
 
+class RedactedApplicationDataSummary(BaseModel):
+    submission_time: datetime
+    reviews: list[Review] = []
+
+
+class RedactedHackerApplicantSummary(BaseRecord):
+    first_name: str = ""
+    last_name: str = ""
+    status: str
+    decision: Optional[Decision] = None
+    reviewers: list[str] = []
+    resume_reviewed: bool = False
+    avg_score: float
+    application_data: RedactedApplicationDataSummary
+
+
+class RedactedHackerApplicationData(BaseModel):
+    frq_change: str
+    frq_ambition: str
+    frq_character: str
+    submission_time: datetime
+    reviews: list[Review] = []
+    review_breakdown: dict[str, dict[str, float]] = {}
+
+
+class RedactedHackerApplicant(BaseRecord):
+    first_name: str = ""
+    last_name: str = ""
+    roles: tuple[Role, ...]
+    status: ApplicantStatus
+    decision: Optional[Decision] = None
+    application_data: RedactedHackerApplicationData
+
+
 class ReviewRequest(BaseModel):
     applicant: str
     score: float
@@ -128,8 +162,8 @@ class IrvineHacksHackerDetailedScores(BaseModel):
     frq_change: float
     frq_ambition: float
     frq_character: float
-    previous_experience: float
-    has_socials: float
+    previous_experience: Optional[float] = None
+    has_socials: Optional[float] = None
 
 
 class GlobalScores(BaseModel):
@@ -206,7 +240,7 @@ async def volunteer_applicants(
 @router.get("/applicants/hackers")
 async def hacker_applicants(
     user: Annotated[User, Depends(require_hacker_reviewer)],
-) -> list[HackerApplicantSummary]:
+) -> Union[list[HackerApplicantSummary], list[RedactedHackerApplicantSummary]]:
     """Get records of all hacker applicants."""
     log.info("%s requested hacker applicants", user)
 
@@ -246,22 +280,75 @@ async def hacker_applicants(
         # )
 
     try:
+        if not await _user_has_role(user.uid, Role.DIRECTOR):
+            return TypeAdapter(list[RedactedHackerApplicantSummary]).validate_python(
+                [_redact_hacker_applicant_summary(record) for record in records]
+            )
         return TypeAdapter(list[HackerApplicantSummary]).validate_python(records)
     except ValidationError:
         raise RuntimeError("Could not parse applicant data.")
+
+
+async def _user_has_role(uid: str, role: Role) -> bool:
+    record = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": uid}, ["roles"]
+    )
+    return bool(record and role in record.get("roles", []))
+
+
+def _redact_hacker_applicant_summary(
+    record: dict[str, object],
+) -> dict[str, object]:
+    application_data = record.get("application_data", {})
+    if not isinstance(application_data, dict):
+        application_data = {}
+
+    return {
+        "_id": record["_id"],
+        "first_name": "",
+        "last_name": "",
+        "status": record["status"],
+        "decision": record.get("decision"),
+        "reviewers": record.get("reviewers", []),
+        "resume_reviewed": record.get("resume_reviewed", False),
+        "avg_score": record.get("avg_score", -1),
+        "application_data": {
+            "submission_time": application_data.get("submission_time"),
+            "reviews": application_data.get("reviews", []),
+        },
+    }
+
+
+def _redact_hacker_applicant(record: dict[str, object]) -> RedactedHackerApplicant:
+    application_data = record.get("application_data", {})
+    if not isinstance(application_data, dict):
+        raise RuntimeError("Could not parse applicant data.")
+
+    return RedactedHackerApplicant.model_validate(
+        {
+            "_id": record["_id"],
+            "first_name": "",
+            "last_name": "",
+            "roles": record["roles"],
+            "status": record["status"],
+            "decision": record.get("decision"),
+            "application_data": {
+                "frq_change": application_data.get("frq_change", ""),
+                "frq_ambition": application_data.get("frq_ambition", ""),
+                "frq_character": application_data.get("frq_character", ""),
+                "submission_time": application_data.get("submission_time"),
+                "reviews": application_data.get("reviews", []),
+                "review_breakdown": application_data.get("review_breakdown", {}),
+            },
+        }
+    )
 
 
 async def applicant(
     uid: str, application_type: Literal["Hacker", "Mentor", "Volunteer"]
 ) -> Applicant:
     """Get record of an applicant by uid."""
-    record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
-        Collection.USERS,
-        {"_id": uid, "roles": [Role.APPLICANT, Role(application_type)]},
-    )
-
-    if not record:
-        raise HTTPException(status.HTTP_404_NOT_FOUND)
+    record = await _applicant_record(uid, application_type)
 
     try:
         return Applicant.model_validate(record)
@@ -269,12 +356,32 @@ async def applicant(
         raise RuntimeError("Could not parse applicant data.")
 
 
-@router.get("/applicant/hacker/{uid}", dependencies=[Depends(require_hacker_reviewer)])
+async def _applicant_record(
+    uid: str, application_type: Literal["Hacker", "Mentor", "Volunteer"]
+) -> dict[str, object]:
+    record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
+        Collection.USERS,
+        {"_id": uid, "roles": [Role.APPLICANT, Role(application_type)]},
+    )
+
+    if not record:
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
+    return record
+
+
+@router.get("/applicant/hacker/{uid}")
 async def hacker_applicant(
     uid: str,
-) -> Applicant:
+    user: Annotated[User, Depends(require_hacker_reviewer)],
+) -> Union[Applicant, RedactedHackerApplicant]:
     """Get record of a hacker applicant by uid."""
-    return await applicant(uid, "Hacker")
+    record = await _applicant_record(uid, "Hacker")
+    if await _user_has_role(user.uid, Role.DIRECTOR):
+        try:
+            return Applicant.model_validate(record)
+        except ValidationError:
+            raise RuntimeError("Could not parse applicant data.")
+    return _redact_hacker_applicant(record)
 
 
 @router.get("/applicant/mentor/{uid}", dependencies=[Depends(require_mentor_reviewer)])
@@ -751,12 +858,14 @@ async def _handle_irvinehacks_detailed_scores_review(
         total_score = -1000.0
     else:
         weighted_sum = 0.0
-        for field, (total_points, weight) in IH_WEIGHTING_CONFIG.items():
-            score_val = score_breakdown.get(field, 0)
+        submitted_weight = 0.0
+        for field, score_val in score_breakdown.items():
+            total_points, weight = IH_WEIGHTING_CONFIG[field]
             weighted_sum += (score_val / total_points) * weight
+            submitted_weight += weight
 
         # Scale to 100 percent
-        total_score = weighted_sum * 100.0
+        total_score = (weighted_sum / submitted_weight) * 100.0
         total_score = max(total_score, -3.0)
 
     if total_score < -1000.0 or total_score > 100.0:

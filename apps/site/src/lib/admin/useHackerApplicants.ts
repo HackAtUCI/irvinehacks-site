@@ -18,8 +18,8 @@ export interface HackerApplicantSummary {
 		submission_time: string;
 		normalized_scores?: Record<string, number>;
 		extra_points?: number;
-		email: string;
-		resume_url: string;
+		email?: string;
+		resume_url?: string;
 		major?: string;
 		linkedin?: string;
 		reviews?: ReadonlyArray<[string, string, number, string?]>;

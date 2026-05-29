@@ -124,7 +124,7 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 			}
 		>
 			<SpaceBetween direction="vertical" size="l">
-				<ApplicantOverview applicant={applicant} />
+				{isUserDirector && <ApplicantOverview applicant={applicant} />}
 				{applicant.roles.includes(ParticipantRole.Hacker) ? (
 					<HackerApplication
 						application_data={
@@ -139,6 +139,7 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 						applicant={applicant._id}
 						reviews={application_data.reviews}
 						onDeleteNotes={(uid, idx) => deleteNotes(uid, idx)}
+						isDirector={isUserDirector}
 					/>
 				) : applicant.roles.includes(ParticipantRole.Mentor) ? (
 					<MentorApplication

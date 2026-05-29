@@ -101,6 +101,8 @@ def _get_avg_score_with_globals_and_breakdown(
     # Review breakdowns should be the most recent scores
     total_score: float = num_reviewers * sum(global_field_scores.values())
     for breakdown in review_breakdowns.values():
+        breakdown_score = 0.0
+        breakdown_weight = 0.0
         for field, score in breakdown.items():
             # TODO: Fields from global_field_scores should not be in breakdowns
             # This check should be removed once breakdown models remove global fields
@@ -108,7 +110,11 @@ def _get_avg_score_with_globals_and_breakdown(
                 continue
 
             total, weight = weight_config[field]
-            total_score += (score / total) * weight
+            breakdown_score += (score / total) * weight
+            breakdown_weight += weight
+
+        if breakdown_weight:
+            total_score += breakdown_score / breakdown_weight
 
     return round((total_score / num_reviewers) * 100.0, 3)
 

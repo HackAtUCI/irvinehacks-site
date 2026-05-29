@@ -73,16 +73,19 @@ function HackerApplicantActions({
 
 		if (isIrvineHacks) {
 			let weightedSum = 0;
-			for (const [field, [maxScore, weight]] of Object.entries(
-				HACKER_WEIGHTING_CONFIG,
+			let submittedWeight = 0;
+			for (const [field, score] of Object.entries(
+				scores as IrvineHacksHackerScoredFields,
 			)) {
-				const score = scores[field as keyof IrvineHacksHackerScoredFields] ?? 0;
+				const [maxScore, weight] =
+					HACKER_WEIGHTING_CONFIG[field as keyof IrvineHacksHackerScoredFields];
 				// In case of any leftover -1 values (though typically filtered out)
 				const normalizedScore = score === -1 ? 0 : score;
 				weightedSum += (normalizedScore / maxScore) * weight;
+				submittedWeight += weight;
 			}
 
-			const totalScore = weightedSum * 100;
+			const totalScore = submittedWeight ? (weightedSum / submittedWeight) * 100 : 0;
 			return Math.max(totalScore, -3);
 		} else if ("resume" in scores && scores.resume === -1000) {
 			return -1000;

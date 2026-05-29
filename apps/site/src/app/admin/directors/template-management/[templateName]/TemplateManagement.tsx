@@ -8,7 +8,6 @@ import Box from "@cloudscape-design/components/box";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import Header from "@cloudscape-design/components/header";
 import Button from "@cloudscape-design/components/button";
-import Input from "@cloudscape-design/components/input";
 import DatePicker from "@cloudscape-design/components/date-picker";
 import FormField from "@cloudscape-design/components/form-field";
 import TimeInput from "@cloudscape-design/components/time-input";
@@ -45,6 +44,10 @@ function setDateTime(
 	setTime(time?.slice(0, 5) ?? "");
 }
 
+function toISODate(cloudscapeDate: string) {
+	return cloudscapeDate.replace(/\//g, "-");
+}
+
 function shiftFromAPI(apiShift: any): Shift {
 	const startDT = apiShift.hour?.start_time ?? "";
 	const endDT = apiShift.hour?.end_time ?? "";
@@ -69,6 +72,9 @@ function shiftFromAPI(apiShift: any): Shift {
 }
 
 function shiftToPayload(shift: Shift) {
+	const startTime = shift.startTime.slice(0, 5);
+	const endTime = shift.endTime.slice(0, 5);
+
 	return {
 		shift_name: shift.shiftName,
 		location: shift.location,
@@ -76,10 +82,8 @@ function shiftToPayload(shift: Shift) {
 		shift_pts: Number(shift.pointValue),
 		organizers: [],
 		hour: {
-			start_time: new Date(
-				`${shift.startDate}T${shift.startTime}`,
-			).toISOString(),
-			end_time: new Date(`${shift.endDate}T${shift.endTime}`).toISOString(),
+			start_time: `${toISODate(shift.startDate)}T${startTime}:00Z`,
+			end_time: `${toISODate(shift.endDate)}T${endTime}:00Z`,
 			director_on_shift: [],
 		},
 		committee_prereq: shift.requiredCommittee,
@@ -112,9 +116,7 @@ function TemplateManagement() {
 	});
 
 	const [shiftError, setShiftError] = useState("");
-	function toISODate(cloudscapeDate: string) {
-		return cloudscapeDate.replace(/\//g, "-");
-	}
+
 	function validateEventFields() {
 		const newErrors = {
 			name: name ? "" : "Template name is required",
@@ -167,12 +169,14 @@ function TemplateManagement() {
 			return;
 		}
 
+		const startTime = eventStartTime.slice(0, 5);
+		const endTime = eventEndTime.slice(0, 5);
 		const payload = {
 			template_name: name,
-			event_start: new Date(
-				`${eventStartDate}T${eventStartTime}`,
-			).toISOString(),
-			event_end: new Date(`${eventEndDate}T${eventEndTime}`).toISOString(),
+			event_dates: [
+				`${toISODate(eventStartDate)}T${startTime}:00Z`,
+				`${toISODate(eventEndDate)}T${endTime}:00Z`,
+			],
 			shifts: shifts.map(shiftToPayload),
 		};
 
@@ -183,13 +187,8 @@ function TemplateManagement() {
 		}
 		await axios.post("/api/director/update-template", {
 			template_name: payload.template_name,
-			event_dates: [
-				new Date(
-					`${toISODate(eventStartDate)}T${eventStartTime}`,
-				).toISOString(),
-				new Date(`${toISODate(eventEndDate)}T${eventEndTime}`).toISOString(),
-			],
-			shifts: shifts.map(shiftToPayload),
+			event_dates: payload.event_dates,
+			shifts: payload.shifts,
 		});
 
 		router.push("/admin/directors/template-gallery");
@@ -236,35 +235,14 @@ function TemplateManagement() {
 						</SpaceBetween>
 					}
 				>
-					Template Management
+					<div style={{ width: "400px" }}>{name}</div>
 				</Header>
 			}
 		>
 			<SpaceBetween size="l">
 				<SpaceBetween size="xl">
-					<SpaceBetween direction="horizontal" size="xxl">
-						<div style={{ width: "400px" }}>
-							<FormField
-								label={
-									<>
-										Template name <span style={{ color: "red" }}>*</span>
-									</>
-								}
-								errorText={errors.name}
-							>
-								<Input
-									value={name}
-									onChange={({ detail }) => setName(detail.value)}
-								/>
-							</FormField>
-						</div>
-					</SpaceBetween>
-
 					<div>
-						<strong>
-							Please use military time (24 hour time format) for all time
-							fields.
-						</strong>
+						Please use military time (24 hour time format) for all time fields.
 					</div>
 
 					<SpaceBetween direction="horizontal" size="xxl">

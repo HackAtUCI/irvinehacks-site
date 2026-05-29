@@ -552,7 +552,6 @@ async def templates(
     if not records:
         log.info("No templates available.")
         return []
-
     try:
         return TypeAdapter(list[ScheduleTemplate]).validate_python(records["templates"])
     except ValidationError:

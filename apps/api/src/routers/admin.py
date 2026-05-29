@@ -105,6 +105,7 @@ class HackerApplicantSummary(BaseRecord):
     decision: Optional[Decision] = None
     reviewers: list[str] = []
     resume_reviewed: bool = False
+    director_previous_experience_reviewed: bool = False
     avg_score: float
     application_data: Union[ApplicationDataSummary, ZotHacksApplicationDataSummary]
 
@@ -121,6 +122,7 @@ class RedactedHackerApplicantSummary(BaseRecord):
     decision: Optional[Decision] = None
     reviewers: list[str] = []
     resume_reviewed: bool = False
+    director_previous_experience_reviewed: bool = False
     avg_score: float
     application_data: RedactedApplicationDataSummary
 
@@ -132,6 +134,13 @@ class RedactedHackerApplicationData(BaseModel):
     submission_time: datetime
     reviews: list[Review] = []
     review_breakdown: dict[str, dict[str, float]] = {}
+
+
+class DirectorPreviousExperienceReview(BaseModel):
+    reviewer: str
+    reviewed_at: datetime
+    previous_experience: Optional[float] = None
+    has_socials: Optional[float] = None
 
 
 class RedactedHackerApplicant(BaseRecord):
@@ -159,11 +168,14 @@ class ZotHacksHackerDetailedScores(BaseModel):
 
 
 class IrvineHacksHackerDetailedScores(BaseModel):
-    frq_change: float
-    frq_ambition: float
-    frq_character: float
+    frq_change: Optional[float] = None
+    frq_ambition: Optional[float] = None
+    frq_character: Optional[float] = None
     previous_experience: Optional[float] = None
     has_socials: Optional[float] = None
+
+
+NON_SCORING_IH_FIELDS = {"previous_experience", "has_socials"}
 
 
 class GlobalScores(BaseModel):
@@ -275,6 +287,11 @@ async def hacker_applicants(
         applicant_review_processor.include_hacker_app_fields_with_global_and_breakdown(
             record, thresholds["accept"], thresholds["waitlist"]
         )
+        application_data = record.get("application_data", {})
+        record["director_previous_experience_reviewed"] = bool(
+            isinstance(application_data, dict)
+            and application_data.get("director_previous_experience_review")
+        )
         # applicant_review_processor.include_hacker_app_fields(
         #     record, thresholds["accept"], thresholds["waitlist"]
         # )
@@ -303,15 +320,18 @@ def _redact_hacker_applicant_summary(
     if not isinstance(application_data, dict):
         application_data = {}
 
+    director_reviewed = bool(record.get("director_previous_experience_reviewed", False))
+
     return {
         "_id": record["_id"],
         "first_name": "",
         "last_name": "",
         "status": record["status"],
-        "decision": record.get("decision"),
+        "decision": record.get("decision") if director_reviewed else None,
         "reviewers": record.get("reviewers", []),
         "resume_reviewed": record.get("resume_reviewed", False),
-        "avg_score": record.get("avg_score", -1),
+        "director_previous_experience_reviewed": director_reviewed,
+        "avg_score": record.get("avg_score", -1) if director_reviewed else -1,
         "application_data": {
             "submission_time": application_data.get("submission_time"),
             "reviews": application_data.get("reviews", []),
@@ -856,17 +876,38 @@ async def _handle_irvinehacks_detailed_scores_review(
     # Check for overqualified auto-reject
     if score_breakdown.get("resume") == -1000:
         total_score = -1000.0
+        director_previous_experience_scores = {}
+        scoring_breakdown = score_breakdown
     else:
+        director_previous_experience_scores = {
+            field: score_breakdown[field]
+            for field in NON_SCORING_IH_FIELDS
+            if field in score_breakdown
+        }
+        if "previous_experience" not in director_previous_experience_scores:
+            director_previous_experience_scores = {}
+        scoring_breakdown = {
+            field: score
+            for field, score in score_breakdown.items()
+            if field not in NON_SCORING_IH_FIELDS
+        }
+
+        if not scoring_breakdown and not director_previous_experience_scores:
+            log.error("No review scores submitted.")
+            raise HTTPException(status.HTTP_400_BAD_REQUEST)
+
         weighted_sum = 0.0
         submitted_weight = 0.0
-        for field, score_val in score_breakdown.items():
+        for field, score_val in scoring_breakdown.items():
             total_points, weight = IH_WEIGHTING_CONFIG[field]
             weighted_sum += (score_val / total_points) * weight
             submitted_weight += weight
 
-        # Scale to 100 percent
-        total_score = (weighted_sum / submitted_weight) * 100.0
-        total_score = max(total_score, -3.0)
+        total_score = (
+            max((weighted_sum / submitted_weight) * 100.0, -3.0)
+            if submitted_weight
+            else 0.0
+        )
 
     if total_score < -1000.0 or total_score > 100.0:
         log.error("Invalid calculated review score: %f", total_score)
@@ -885,38 +926,65 @@ async def _handle_irvinehacks_detailed_scores_review(
 
     unique_reviewers = applicant_review_processor.get_unique_reviewers(applicant_record)
 
-    # Only add a review if there are either less than 2 reviewers
-    # or reviewer is one of the reviewers
-    if len(unique_reviewers) >= 2 and reviewer.uid not in unique_reviewers:
-        log.error(
-            "%s tried to submit a review, but %s already has two reviewers",
-            reviewer,
-            applicant,
-        )
-        raise HTTPException(status.HTTP_403_FORBIDDEN)
-
-    update_query: dict[str, object] = {"$push": {"application_data.reviews": review}}
-    # Because reviewing a hacker requires 2 reviewers, only set the
-    # applicant's status to REVIEWED if there are at least 2 reviewers
-    if len(unique_reviewers | {reviewer.uid}) >= 2:
-        update_query.update({"$set": {"status": "REVIEWED"}})
-
-    await _try_update_applicant_with_query(
-        applicant,
-        update_query=update_query,
-        err_msg=f"{reviewer} could not submit review for {applicant}",
-    )
-
     uid_no_domain = reviewer.uid.split(".")[-1]
-    await _try_update_applicant_with_query(
-        applicant,
-        update_query={
-            "$set": {
-                f"application_data.review_breakdown.{uid_no_domain}": score_breakdown
-            }
-        },
-        err_msg=f"{reviewer} could not submit review for {applicant}",
-    )
+    is_director = await _user_has_role(reviewer.uid, Role.DIRECTOR)
+
+    if scoring_breakdown:
+        # Only add a scoring review if there are either less than 2 reviewers
+        # or reviewer is one of the reviewers. Director previous-experience
+        # review is tracked separately and does not count toward this limit.
+        if len(unique_reviewers) >= 2 and reviewer.uid not in unique_reviewers:
+            log.error(
+                "%s tried to submit a review, but %s already has two reviewers",
+                reviewer,
+                applicant,
+            )
+            raise HTTPException(status.HTTP_403_FORBIDDEN)
+
+        update_query: dict[str, object] = {
+            "$push": {"application_data.reviews": review}
+        }
+        # Because reviewing a hacker requires 2 reviewers, only set the
+        # applicant's status to REVIEWED if there are at least 2 reviewers
+        if len(unique_reviewers | {reviewer.uid}) >= 2:
+            update_query.update({"$set": {"status": "REVIEWED"}})
+
+        await _try_update_applicant_with_query(
+            applicant,
+            update_query=update_query,
+            err_msg=f"{reviewer} could not submit review for {applicant}",
+        )
+
+        await _try_update_applicant_with_query(
+            applicant,
+            update_query={
+                "$set": {
+                    f"application_data.review_breakdown.{uid_no_domain}": scoring_breakdown
+                }
+            },
+            err_msg=f"{reviewer} could not submit review for {applicant}",
+        )
+
+    if is_director and director_previous_experience_scores:
+        director_review = DirectorPreviousExperienceReview(
+            reviewer=reviewer.uid,
+            reviewed_at=utc_now(),
+            **director_previous_experience_scores,
+        )
+        await _try_update_applicant_with_query(
+            applicant,
+            update_query={
+                "$set": {
+                    "application_data.director_previous_experience_review": (
+                        director_review.model_dump()
+                    )
+                }
+            },
+            err_msg=(
+                f"{reviewer} could not submit director previous experience "
+                f"review for {applicant}"
+            ),
+        )
 
     # No update to GlobalScores. For IH, leads decided not to score resume/experience
     # beforehand. GlobalScores was meant for leads to mark applicants as overqualified.

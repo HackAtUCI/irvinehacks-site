@@ -207,7 +207,12 @@ function Scores() {
 	const [isExcludeModalVisible, setIsExcludeModalVisible] = useState(false);
 
 	const filteredApplicants = useMemo(
-		() => applicantList.filter((a) => a.avg_score !== OVERQUALIFIED_SCORE),
+		() =>
+			applicantList.filter(
+				(a) =>
+					a.director_previous_experience_reviewed &&
+					a.avg_score !== OVERQUALIFIED_SCORE,
+			),
 		[applicantList],
 	);
 

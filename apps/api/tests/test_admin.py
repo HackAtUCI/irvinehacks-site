@@ -470,9 +470,10 @@ def test_hacker_applicants_returns_correct_applicants(
             "first_name": "sydnee",
             "last_name": "unknown",
             "resume_reviewed": False,
+            "director_previous_experience_reviewed": False,
             "status": "REVIEWED",
             "decision": "ACCEPTED",
-            "avg_score": 82.75,
+            "avg_score": 73.462,
             "reviewers": ["edu.uci.alicia", "edu.uci.alicia2"],
             "application_data": {
                 "school": "Hamburger University",
@@ -572,6 +573,8 @@ def test_hacker_applicants_redacts_identity_for_reviewers(
     data = res.json()
     assert data[0]["first_name"] == ""
     assert data[0]["last_name"] == ""
+    assert data[0]["director_previous_experience_reviewed"] is False
+    assert data[0]["avg_score"] == -1
     assert "school" not in data[0]["application_data"]
     assert "email" not in data[0]["application_data"]
     assert "resume_url" not in data[0]["application_data"]
@@ -951,6 +954,97 @@ async def test_handle_irvinehacks_detailed_scores_review_accepts_frq_only_scores
         "frq_ambition": 20,
         "frq_character": 20,
     }
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_handle_irvinehacks_director_previous_experience_does_not_score(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+    """Test director previous-experience fields are stored separately from scores."""
+    applicant = "edu.uci.test"
+    scores = IrvineHacksHackerDetailedScores(
+        frq_change=20,
+        frq_ambition=20,
+        frq_character=20,
+        previous_experience=0,
+        has_socials=0,
+    )
+    reviewer = USER_DIRECTOR
+    applicant_record = {
+        "_id": applicant,
+        "roles": ["Applicant", "Hacker"],
+        "application_data": {
+            "reviews": [
+                [datetime(2023, 1, 19), "edu.uci.alicia", 80, None],
+            ]
+        },
+    }
+
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        applicant_record,
+        DIRECTOR_IDENTITY,
+    ]
+    mock_mongodb_handler_raw_update_one.return_value = True
+
+    await _handle_irvinehacks_detailed_scores_review(applicant, scores, reviewer)
+
+    review_update = mock_mongodb_handler_raw_update_one.await_args_list[0].args[2]
+    pushed_review = review_update["$push"]["application_data.reviews"]
+    assert pushed_review[2] == 100
+
+    breakdown_update = mock_mongodb_handler_raw_update_one.await_args_list[1].args[2]
+    assert breakdown_update["$set"]["application_data.review_breakdown.dir"] == {
+        "frq_change": 20,
+        "frq_ambition": 20,
+        "frq_character": 20,
+    }
+
+    director_update = mock_mongodb_handler_raw_update_one.await_args_list[2].args[2]
+    director_review = director_update["$set"][
+        "application_data.director_previous_experience_review"
+    ]
+    assert director_review["reviewer"] == "edu.uci.dir"
+    assert director_review["previous_experience"] == 0
+    assert director_review["has_socials"] == 0
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_handle_irvinehacks_director_can_submit_previous_experience_only(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+    """Test directors can submit previous-experience review without FRQs."""
+    applicant = "edu.uci.test"
+    scores = IrvineHacksHackerDetailedScores(
+        previous_experience=1,
+        has_socials=0,
+    )
+    reviewer = USER_DIRECTOR
+    applicant_record = {
+        "_id": applicant,
+        "roles": ["Applicant", "Hacker"],
+        "application_data": {"reviews": []},
+    }
+
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        applicant_record,
+        DIRECTOR_IDENTITY,
+    ]
+    mock_mongodb_handler_raw_update_one.return_value = True
+
+    await _handle_irvinehacks_detailed_scores_review(applicant, scores, reviewer)
+
+    mock_mongodb_handler_raw_update_one.assert_awaited_once()
+    update = mock_mongodb_handler_raw_update_one.await_args.args[2]
+    director_review = update["$set"][
+        "application_data.director_previous_experience_review"
+    ]
+    assert director_review["reviewer"] == "edu.uci.dir"
+    assert director_review["previous_experience"] == 1
+    assert director_review["has_socials"] == 0
 
 
 @patch("routers.admin.require_lead", autospec=True)

@@ -87,10 +87,12 @@ function IrvineHacksHackerApplication({
 	// Controlled scores for each section
 	const [previousExperienceScore, setPreviousExperienceScore] =
 		useState<number>(
-			formattedUid
-				? application_data?.review_breakdown?.[formattedUid]
-						?.previous_experience ?? -1
-				: -1,
+			application_data.director_previous_experience_review
+				?.previous_experience ??
+				(formattedUid
+					? application_data?.review_breakdown?.[formattedUid]
+							?.previous_experience ?? -1
+					: -1),
 		);
 
 	const [frqChangeScore, setFrqChangeScore] = useState<number>(
@@ -123,10 +125,8 @@ function IrvineHacksHackerApplication({
 		const scoresObject: IrvineHacksHackerScoredFields = {};
 
 		// Only include fields that don't have -1 values
-		if (isDirector) {
-			scoresObject.has_socials = hasSocials;
-		}
 		if (isDirector && previousExperienceScore !== -1) {
+			scoresObject.has_socials = hasSocials;
 			scoresObject.previous_experience = previousExperienceScore;
 		}
 		if (frqChangeScore !== -1) {

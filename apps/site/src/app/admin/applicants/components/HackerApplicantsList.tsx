@@ -7,6 +7,7 @@ import Cards from "@cloudscape-design/components/cards";
 import Header from "@cloudscape-design/components/header";
 import Link from "@cloudscape-design/components/link";
 import Checkbox from "@cloudscape-design/components/checkbox";
+import StatusIndicator from "@cloudscape-design/components/status-indicator";
 
 import { useFollowWithNextLink } from "@/app/admin/layout/common";
 import ApplicantFilters, {
@@ -100,7 +101,11 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 			(selectedStatuses.length === 0 ||
 				selectedStatusValues.includes(applicant.status)) &&
 			(selectedDecisions.length === 0 ||
-				selectedDecisionValues.includes(applicant.decision || "-")) &&
+				selectedDecisionValues.includes(
+					applicant.director_previous_experience_reviewed
+						? applicant.decision || "-"
+						: "-",
+				)) &&
 			(uciNetIDFilter.length === 0 ||
 				applicant.reviewers.some((reviewer) =>
 					uciNetIDFilterValues.includes(reviewer),
@@ -109,7 +114,11 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 	});
 
 	const filteredApplicants400 = [...applicantList]
-		.filter((applicant) => applicant.avg_score !== -1)
+		.filter(
+			(applicant) =>
+				applicant.director_previous_experience_reviewed &&
+				applicant.avg_score !== -1,
+		)
 		.sort((a, b) => b.avg_score - a.avg_score)
 		.slice(0, 400);
 
@@ -117,18 +126,22 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		const accepted = acceptThreshold ? acceptThreshold : 0;
 		const waitlisted = waitlistThreshold ? waitlistThreshold : 0;
 
-		const acceptedCount = applicantList.filter(
+		const scoreReadyApplicants = applicantList.filter(
+			(applicant) => applicant.director_previous_experience_reviewed,
+		);
+
+		const acceptedCount = scoreReadyApplicants.filter(
 			(applicant) => applicant.avg_score >= accepted,
 		).length;
 		setAcceptedCount(acceptedCount);
 
-		const waitlistedCount = applicantList.filter(
+		const waitlistedCount = scoreReadyApplicants.filter(
 			(applicant) =>
 				applicant.avg_score >= waitlisted && applicant.avg_score < accepted,
 		).length;
 		setWaitlistedCount(waitlistedCount);
 
-		const rejectedCount = applicantList.filter(
+		const rejectedCount = scoreReadyApplicants.filter(
 			(applicant) => applicant.avg_score < waitlisted,
 		).length;
 		setRejectCount(rejectedCount);
@@ -170,21 +183,41 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		content: ResumeReviewedStatus,
 	};
 
+	const directorPreviousExperienceReviewedColumn = {
+		id: "director_previous_experience_reviewed",
+		header: "Director Review",
+		content: DirectorPreviousExperienceReviewedStatus,
+	};
+
 	const renderHeader = useCallback(
-		({ _id, first_name, last_name, avg_score }: HackerApplicantSummary) => (
+		({
+			_id,
+			first_name,
+			last_name,
+			avg_score,
+			director_previous_experience_reviewed,
+		}: HackerApplicantSummary) => (
 			<CardHeader
 				_id={_id}
 				first_name={first_name}
 				last_name={last_name}
 				hackathonName={hackathonName}
 				avg_score={avg_score}
+				director_previous_experience_reviewed={
+					director_previous_experience_reviewed
+				}
 				isDirector={isUserDirector}
 			/>
 		),
 		[hackathonName, isUserDirector],
 	);
 
-	const avgScore = ({ avg_score, reviewers }: HackerApplicantSummary) => {
+	const avgScore = ({
+		avg_score,
+		reviewers,
+		director_previous_experience_reviewed,
+	}: HackerApplicantSummary) => {
+		if (!director_previous_experience_reviewed) return "-";
 		if (avg_score === OVERQUALIFIED_SCORE)
 			return <Box color="text-status-error">OVERQUALIFIED</Box>;
 		if (avg_score === -1) return "-";
@@ -203,6 +236,9 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 						content: ({ _id }) => (isUserDirector ? _id : uidToPseudonym(_id)),
 					},
 					...(isUserDirector ? [extraColumn] : []),
+					...(isUserDirector
+						? [directorPreviousExperienceReviewedColumn]
+						: []),
 					{
 						id: "status",
 						header: "Status",
@@ -288,12 +324,13 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 						Show Top 400 Scores
 					</Checkbox>
 					<span>
-						{top400 && "Highest score: " + filteredApplicants400[0]?.avg_score}
+						{top400 &&
+							"Highest score: " + (filteredApplicants400[0]?.avg_score ?? "-")}
 						<br />
 						{top400 &&
 							"Lowest score: " +
-								filteredApplicants400[filteredApplicants400.length - 1]
-									?.avg_score}
+								(filteredApplicants400[filteredApplicants400.length - 1]
+									?.avg_score ?? "-")}
 					</span>
 				</div>
 			}
@@ -307,10 +344,15 @@ const CardHeader = ({
 	last_name,
 	hackathonName,
 	avg_score,
+	director_previous_experience_reviewed,
 	isDirector,
 }: Pick<
 	HackerApplicantSummary,
-	"_id" | "first_name" | "last_name" | "avg_score"
+	| "_id"
+	| "first_name"
+	| "last_name"
+	| "avg_score"
+	| "director_previous_experience_reviewed"
 > & {
 	hackathonName: "irvinehacks" | "zothacks";
 	isDirector: boolean;
@@ -328,20 +370,38 @@ const CardHeader = ({
 			<Link href={href} fontSize="inherit" onFollow={followWithNextLink}>
 				{displayName}
 			</Link>
-			{avg_score === OVERQUALIFIED_SCORE && (
-				<Badge color="red">OVERQUALIFIED</Badge>
-			)}
+			{director_previous_experience_reviewed &&
+				avg_score === OVERQUALIFIED_SCORE && (
+					<Badge color="red">OVERQUALIFIED</Badge>
+				)}
 		</SpaceBetween>
 	);
 };
 
-const DecisionStatus = ({ decision }: HackerApplicantSummary) =>
-	decision ? <ApplicantStatus status={decision} /> : "-";
+const DecisionStatus = ({
+	decision,
+	director_previous_experience_reviewed,
+}: HackerApplicantSummary) =>
+	director_previous_experience_reviewed && decision ? (
+		<ApplicantStatus status={decision} />
+	) : (
+		"-"
+	);
 
 const ResumeReviewedStatus = ({ resume_reviewed }: HackerApplicantSummary) => (
 	<ApplicantStatus
 		status={resume_reviewed ? Status.Reviewed : Status.Pending}
 	/>
+);
+
+const DirectorPreviousExperienceReviewedStatus = ({
+	director_previous_experience_reviewed,
+}: HackerApplicantSummary) => (
+	<StatusIndicator
+		type={director_previous_experience_reviewed ? "success" : "pending"}
+	>
+		{director_previous_experience_reviewed ? "Reviewed" : "Not Reviewed"}
+	</StatusIndicator>
 );
 
 export default HackerApplicantsList;

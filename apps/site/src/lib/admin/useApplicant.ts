@@ -69,6 +69,12 @@ export interface IrvineHacksHackerApplicationData extends BaseApplicationData {
 			has_socials?: number;
 		};
 	};
+	director_previous_experience_review?: {
+		reviewer: Uid;
+		reviewed_at: string;
+		previous_experience?: number;
+		has_socials?: number;
+	} | null;
 	global_field_scores?: { resume?: number };
 	character_head_index: number;
 	character_body_index: number;

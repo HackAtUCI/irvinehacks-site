@@ -5,6 +5,7 @@ from .score_normalizing_handler import IH_WEIGHTING_CONFIG
 
 OVERQUALIFIED = -3
 NOT_FULLY_REVIEWED = -1
+NON_SCORING_IH_FIELDS = {"previous_experience", "has_socials"}
 
 scores_to_decisions: dict[Optional[int], Decision] = {
     100: Decision.ACCEPTED,
@@ -106,7 +107,7 @@ def _get_avg_score_with_globals_and_breakdown(
         for field, score in breakdown.items():
             # TODO: Fields from global_field_scores should not be in breakdowns
             # This check should be removed once breakdown models remove global fields
-            if field in global_field_scores:
+            if field in global_field_scores or field in NON_SCORING_IH_FIELDS:
                 continue
 
             total, weight = weight_config[field]

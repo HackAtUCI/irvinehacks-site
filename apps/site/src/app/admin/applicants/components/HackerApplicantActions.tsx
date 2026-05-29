@@ -7,12 +7,17 @@ import SpaceBetween from "@cloudscape-design/components/space-between";
 import { Review } from "@/lib/admin/useApplicant";
 import { Uid } from "@/lib/userRecord";
 import UserContext from "@/lib/admin/UserContext";
-import { isReviewer } from "@/lib/admin/authorization";
+import { isDirector, isReviewer } from "@/lib/admin/authorization";
 import {
 	IrvineHacksHackerScoredFields,
 	HACKER_WEIGHTING_CONFIG,
 	ZotHacksHackerScoredFields,
 } from "@/lib/detailedScores";
+
+const NON_SCORING_IRVINEHACKS_FIELDS = new Set([
+	"previous_experience",
+	"has_socials",
+]);
 
 interface ColoredTextBoxProps {
 	text: string | undefined;
@@ -46,6 +51,7 @@ function HackerApplicantActions({
 	onSubmitDetailedReview,
 }: ApplicantActionsProps) {
 	const { uid, roles } = useContext(UserContext);
+	const isUserDirector = isDirector(roles);
 
 	const uniqueReviewers = Array.from(
 		new Set(reviews.map((review) => review[1])),
@@ -56,9 +62,13 @@ function HackerApplicantActions({
 		? uniqueReviewers.length < 2 || uniqueReviewers.includes(uid)
 		: false;
 
-	if (!isReviewer(roles)) {
+	if (!isReviewer(roles) && !isUserDirector) {
 		return null;
 	}
+
+	const hasDirectorPreviousExperienceReview = "previous_experience" in scores;
+	const canSubmit =
+		canReview || (isUserDirector && hasDirectorPreviousExperienceReview);
 
 	const handleClick = () => {
 		// TODO: use flashbar or modal for submit status
@@ -77,6 +87,8 @@ function HackerApplicantActions({
 			for (const [field, score] of Object.entries(
 				scores as IrvineHacksHackerScoredFields,
 			)) {
+				if (NON_SCORING_IRVINEHACKS_FIELDS.has(field)) continue;
+
 				const [maxScore, weight] =
 					HACKER_WEIGHTING_CONFIG[field as keyof IrvineHacksHackerScoredFields];
 				// In case of any leftover -1 values (though typically filtered out)
@@ -85,7 +97,9 @@ function HackerApplicantActions({
 				submittedWeight += weight;
 			}
 
-			const totalScore = submittedWeight ? (weightedSum / submittedWeight) * 100 : 0;
+			const totalScore = submittedWeight
+				? (weightedSum / submittedWeight) * 100
+				: 0;
 			return Math.max(totalScore, -3);
 		} else if ("resume" in scores && scores.resume === -1000) {
 			return -1000;
@@ -102,7 +116,7 @@ function HackerApplicantActions({
 
 	const totalScore = calculateTotalScore(scores);
 
-	return canReview ? (
+	return canSubmit ? (
 		<SpaceBetween direction="horizontal" size="xs">
 			<SpaceBetween direction="horizontal" size="xs">
 				{totalScore <= -1000 && (
@@ -118,7 +132,7 @@ function HackerApplicantActions({
 				</Box>
 			</SpaceBetween>
 
-			<Button onClick={handleClick} disabled={!canReview}>
+			<Button onClick={handleClick} disabled={!canSubmit}>
 				Submit
 			</Button>
 		</SpaceBetween>

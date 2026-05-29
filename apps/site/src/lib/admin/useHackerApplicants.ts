@@ -12,6 +12,7 @@ export interface HackerApplicantSummary {
 	reviewers: ReadonlyArray<string>;
 	avg_score: number;
 	resume_reviewed: boolean;
+	director_previous_experience_reviewed: boolean;
 	application_data: {
 		school?: string;
 		school_year?: string;

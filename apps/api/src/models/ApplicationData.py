@@ -29,6 +29,13 @@ Review = tuple[
 ]  # (timestamp, reviewer_uid, score, notes)
 
 
+class DirectorPreviousExperienceReview(BaseModel):
+    reviewer: str
+    reviewed_at: datetime
+    previous_experience: Optional[float] = None
+    has_socials: Optional[float] = None
+
+
 def make_empty_none(val: Union[str, None]) -> Union[str, None]:
     """Browser will send empty strings for unspecified form inputs."""
     if val == "":
@@ -265,6 +272,9 @@ class ProcessedHackerApplicationData(BaseApplicationData):
     global_field_scores: dict[str, float] = {}
     # TODO: Create aliases for these global_field_scores
     # dict[field that can have detailed reviews, score]
+    director_previous_experience_review: Optional[DirectorPreviousExperienceReview] = (
+        None
+    )
 
     @field_serializer("linkedin", "portfolio", "resume_url")
     def url2str(self, val: Union[HttpUrl, None]) -> Union[str, None]:

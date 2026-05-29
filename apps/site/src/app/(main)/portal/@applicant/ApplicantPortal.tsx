@@ -13,8 +13,15 @@ import ReturnHome from "./components/ReturnHome";
 import VerticalTimeline from "./components/timeline/VerticalTimeline";
 import QRCodeComponent from "./components/QRCode";
 import AvatarDisplay from "./components/AvatarDisplay";
+import DeclineAcceptance from "./components/DeclineAcceptance";
 
 const rolesArray = ["Mentor", "Hacker", "Volunteer"];
+const declineableStatuses: Status[] = [
+	Status.Accepted,
+	Status.Reviewed,
+	Status.Signed,
+	Status.Confirmed,
+];
 
 function Portal() {
 	const identity = useUserIdentity();
@@ -52,6 +59,10 @@ function Portal() {
 		hasSignedWaiver && (isAccepted || (isWaitlisted && waitlistOpen));
 
 	const showReturnHome = status === Status.Rejected || status === Status.Voided;
+	const canDeclineAcceptance =
+		roleToDisplay === "Hacker" &&
+		isAccepted &&
+		declineableStatuses.includes(status as Status);
 
 	return (
 		<div className="relative">
@@ -84,6 +95,7 @@ function Portal() {
 					/>
 				)}
 				{needsToRSVP && <ConfirmAttendance status={status as Status} />}
+				{canDeclineAcceptance && <DeclineAcceptance />}
 				{showReturnHome && <ReturnHome />}
 			</div>
 		</div>

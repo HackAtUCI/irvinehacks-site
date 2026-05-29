@@ -196,6 +196,87 @@ def test_user_with_status_accepted_rsvp_returns_403(
     assert res.status_code == 403
 
 
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_accepted_hacker_can_decline_acceptance(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_update_one: AsyncMock,
+) -> None:
+    """Test accepted hackers can void their own application."""
+    mock_mongodb_handler_retrieve_one.return_value = {"status": Decision.ACCEPTED}
+    mock_mongodb_handler_update_one.return_value = True
+
+    auth_client = UserTestClient(GuestUser(email=USER_EMAIL), app)
+    res = auth_client.post("/decline-acceptance", follow_redirects=False)
+
+    mock_mongodb_handler_retrieve_one.assert_awaited_once_with(
+        Collection.USERS,
+        {
+            "_id": "edu.stanford.tree",
+            "roles": {"$all": [Role.APPLICANT, Role.HACKER]},
+        },
+        ["status", "decision"],
+    )
+    mock_mongodb_handler_update_one.assert_awaited_once_with(
+        Collection.USERS,
+        {"_id": "edu.stanford.tree"},
+        {"status": Decision.VOIDED, "decision": Decision.VOIDED},
+    )
+    assert res.status_code == status.HTTP_303_SEE_OTHER
+    assert res.headers["location"] == "/portal"
+
+
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_non_hacker_cannot_decline_acceptance(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_update_one: AsyncMock,
+) -> None:
+    """Test non-hackers cannot use the hacker decline acceptance flow."""
+    mock_mongodb_handler_retrieve_one.return_value = None
+
+    auth_client = UserTestClient(GuestUser(email=USER_EMAIL), app)
+    res = auth_client.post("/decline-acceptance", follow_redirects=False)
+
+    mock_mongodb_handler_update_one.assert_not_awaited()
+    assert res.status_code == status.HTTP_404_NOT_FOUND
+
+
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_unaccepted_hacker_cannot_decline_acceptance(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_update_one: AsyncMock,
+) -> None:
+    """Test hackers who are not accepted cannot void through this flow."""
+    mock_mongodb_handler_retrieve_one.return_value = {"status": Status.PENDING_REVIEW}
+
+    auth_client = UserTestClient(GuestUser(email=USER_EMAIL), app)
+    res = auth_client.post("/decline-acceptance", follow_redirects=False)
+
+    mock_mongodb_handler_update_one.assert_not_awaited()
+    assert res.status_code == status.HTTP_403_FORBIDDEN
+
+
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_checked_in_hacker_cannot_decline_acceptance(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_update_one: AsyncMock,
+) -> None:
+    """Test checked-in hackers cannot void through this flow."""
+    mock_mongodb_handler_retrieve_one.return_value = {
+        "status": Status.ATTENDING,
+        "decision": Decision.ACCEPTED,
+    }
+
+    auth_client = UserTestClient(GuestUser(email=USER_EMAIL), app)
+    res = auth_client.post("/decline-acceptance", follow_redirects=False)
+
+    mock_mongodb_handler_update_one.assert_not_awaited()
+    assert res.status_code == status.HTTP_403_FORBIDDEN
+
+
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 def test_user_me_route_returns_correct_type(
     mock_mongodb_handler_retrieve_one: AsyncMock,

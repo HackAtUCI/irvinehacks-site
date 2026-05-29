@@ -462,6 +462,51 @@ async def request_waiver(
     return RedirectResponse(form_url, status.HTTP_303_SEE_OTHER)
 
 
+@router.post("/decline-acceptance")
+async def decline_acceptance(
+    user: Annotated[User, Depends(require_user_identity)],
+) -> RedirectResponse:
+    """Allow accepted hackers to void their own application."""
+    user_record = await mongodb_handler.retrieve_one(
+        Collection.USERS,
+        {"_id": user.uid, "roles": {"$all": [Role.APPLICANT, Role.HACKER]}},
+        ["status", "decision"],
+    )
+
+    if not user_record or "status" not in user_record:
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
+
+    if user_record["status"] == Decision.VOIDED:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Applicant is already voided.")
+
+    allowed_decline_statuses = {
+        Decision.ACCEPTED,
+        Status.REVIEWED,
+        Status.WAIVER_SIGNED,
+        Status.CONFIRMED,
+    }
+    is_accepted = (
+        user_record["status"] == Decision.ACCEPTED
+        or user_record.get("decision") == Decision.ACCEPTED
+    )
+    if not is_accepted or user_record["status"] not in allowed_decline_statuses:
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN,
+            "Only accepted hackers can decline their spot.",
+        )
+
+    ok = await mongodb_handler.update_one(
+        Collection.USERS,
+        {"_id": user.uid},
+        {"status": Decision.VOIDED, "decision": Decision.VOIDED},
+    )
+    if not ok:
+        raise RuntimeError(f"Error voiding applicant {user.uid}")
+
+    log.info("%s declined their accepted hacker spot.", user.uid)
+    return RedirectResponse("/portal", status.HTTP_303_SEE_OTHER)
+
+
 @router.post("/waiver")
 async def waiver_webhook(
     request: Request,

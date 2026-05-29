@@ -4,10 +4,10 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
+import Box from "@cloudscape-design/components/box";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import Header from "@cloudscape-design/components/header";
 import Button from "@cloudscape-design/components/button";
-import Input from "@cloudscape-design/components/input";
 import DatePicker from "@cloudscape-design/components/date-picker";
 import FormField from "@cloudscape-design/components/form-field";
 import TimeInput from "@cloudscape-design/components/time-input";
@@ -15,26 +15,14 @@ import TimeInput from "@cloudscape-design/components/time-input";
 import Form from "@cloudscape-design/components/form";
 
 import ShiftCard from "./ShiftCard";
-
-interface Shift {
-	id: string;
-	shiftName: string;
-	location: string;
-	startDate: string;
-	startTime: string;
-	endDate: string;
-	endTime: string;
-	pointValue: string;
-	requiredCommittee: string;
-	requiredSubcommittee: string;
-	preAssignedOrganizers: string[];
-}
+import type { Shift, ShiftErrors } from "./ShiftTypes";
 
 function emptyShift(): Shift {
 	return {
 		id: crypto.randomUUID(),
 		shiftName: "",
 		location: "",
+		num_orgs: "",
 		startDate: "",
 		startTime: "",
 		endDate: "",
@@ -56,16 +44,51 @@ function setDateTime(
 	setTime(time?.slice(0, 5) ?? "");
 }
 
-function shiftToPayload(shift: Shift) {
+function toISODate(cloudscapeDate: string) {
+	return cloudscapeDate.replace(/\//g, "-");
+}
+
+function shiftFromAPI(apiShift: any): Shift {
+	const startDT = apiShift.hour?.start_time ?? "";
+	const endDT = apiShift.hour?.end_time ?? "";
+
+	const [startDate, startTimeFull] = startDT.split("T");
+	const [endDate, endTimeFull] = endDT.split("T");
+
 	return {
-		shiftName: shift.shiftName,
+		id: crypto.randomUUID(),
+		shiftName: apiShift.shift_name ?? "",
+		location: apiShift.location ?? "",
+		num_orgs: String(apiShift.min_num_organizers ?? ""),
+		pointValue: String(apiShift.shift_pts ?? ""),
+		startDate: startDate ?? "",
+		startTime: startTimeFull?.slice(0, 5) ?? "",
+		endDate: endDate ?? "",
+		endTime: endTimeFull?.slice(0, 5) ?? "",
+		requiredCommittee: apiShift.committee_prereq ?? "",
+		requiredSubcommittee: apiShift.subcommittee_prereq ?? "",
+		preAssignedOrganizers: apiShift.preassigned_orgs ?? [],
+	};
+}
+
+function shiftToPayload(shift: Shift) {
+	const startTime = shift.startTime.slice(0, 5);
+	const endTime = shift.endTime.slice(0, 5);
+
+	return {
+		shift_name: shift.shiftName,
 		location: shift.location,
-		pointValue: shift.pointValue,
-		requiredCommittee: shift.requiredCommittee,
-		requiredSubcommittee: shift.requiredSubcommittee,
-		preAssignedOrganizers: shift.preAssignedOrganizers,
-		start_time: `${shift.startDate}T${shift.startTime}:00`,
-		end_time: `${shift.endDate}T${shift.endTime}:00`,
+		min_num_organizers: Number(shift.num_orgs),
+		shift_pts: Number(shift.pointValue),
+		organizers: [],
+		hour: {
+			start_time: `${toISODate(shift.startDate)}T${startTime}:00Z`,
+			end_time: `${toISODate(shift.endDate)}T${endTime}:00Z`,
+			director_on_shift: [],
+		},
+		committee_prereq: shift.requiredCommittee,
+		subcommittee_prereq: shift.requiredSubcommittee,
+		preassigned_orgs: shift.preAssignedOrganizers,
 	};
 }
 
@@ -80,6 +103,51 @@ function TemplateManagement() {
 	const [eventStartTime, setEventStartTime] = useState("");
 	const [eventEndTime, setEventEndTime] = useState("");
 	const [shifts, setShifts] = useState<Shift[]>([emptyShift()]);
+	const [shiftErrors, setShiftErrors] = useState<Record<string, ShiftErrors>>(
+		{},
+	);
+
+	const [errors, setErrors] = useState({
+		name: "",
+		eventStartDate: "",
+		eventStartTime: "",
+		eventEndDate: "",
+		eventEndTime: "",
+	});
+
+	const [shiftError, setShiftError] = useState("");
+
+	function validateEventFields() {
+		const newErrors = {
+			name: name ? "" : "Template name is required",
+			eventStartDate: eventStartDate ? "" : "Event start date is required",
+			eventStartTime: eventStartTime ? "" : "Event start time is required",
+			eventEndDate: eventEndDate ? "" : "Event end date is required",
+			eventEndTime: eventEndTime ? "" : "Event end time is required",
+		};
+		setErrors(newErrors);
+		return Object.values(newErrors).every((e) => e === "");
+	}
+
+	function validateShiftRequiredFields() {
+		const valid = shifts.every(
+			(s) =>
+				s.shiftName &&
+				s.location &&
+				s.num_orgs &&
+				s.startDate &&
+				s.startTime &&
+				s.endDate &&
+				s.endTime &&
+				s.pointValue &&
+				!isNaN(Number(s.pointValue)),
+		);
+
+		if (!valid) {
+			setShiftError("Please fill in all required shift fields");
+		}
+		return valid;
+	}
 
 	useEffect(() => {
 		if (isNew) return;
@@ -89,23 +157,40 @@ function TemplateManagement() {
 				setName(data.template_name);
 				setDateTime(data.event_start, setEventStartDate, setEventStartTime);
 				setDateTime(data.event_end, setEventEndDate, setEventEndTime);
-				setShifts(data.shifts ?? [emptyShift()]);
+				setShifts(data.shifts?.map(shiftFromAPI) ?? [emptyShift()]);
 			});
 	}, [isNew, templateName]);
 
 	async function handleSave() {
+		if (!validateEventFields()) {
+			return;
+		}
+		if (!validateShiftRequiredFields()) {
+			return;
+		}
+
+		const startTime = eventStartTime.slice(0, 5);
+		const endTime = eventEndTime.slice(0, 5);
 		const payload = {
 			template_name: name,
-			event_start: `${eventStartDate}T${eventStartTime}:00`,
-			event_end: `${eventEndDate}T${eventEndTime}:00`,
+			event_dates: [
+				`${toISODate(eventStartDate)}T${startTime}:00Z`,
+				`${toISODate(eventEndDate)}T${endTime}:00Z`,
+			],
 			shifts: shifts.map(shiftToPayload),
 		};
 
 		if (isNew) {
-			await axios.post("/api/director/create-template", payload);
-		} else {
-			await axios.post("/api/director/update-template", payload);
+			const body = { template_name: name };
+			console.log(JSON.stringify(body));
+			await axios.post("/api/director/create-template", body);
 		}
+		await axios.post("/api/director/update-template", {
+			template_name: payload.template_name,
+			event_dates: payload.event_dates,
+			shifts: payload.shifts,
+		});
+
 		router.push("/admin/directors/template-gallery");
 	}
 
@@ -114,6 +199,7 @@ function TemplateManagement() {
 	}
 
 	function updateShift(id: string, updated: Partial<Shift>) {
+		setShiftError("");
 		setShifts((prev) =>
 			prev.map((s) => (s.id === id ? { ...s, ...updated } : s)),
 		);
@@ -149,34 +235,14 @@ function TemplateManagement() {
 						</SpaceBetween>
 					}
 				>
-					Template Management
+					<div style={{ width: "400px" }}>{name}</div>
 				</Header>
 			}
 		>
 			<SpaceBetween size="l">
 				<SpaceBetween size="xl">
-					<SpaceBetween direction="horizontal" size="xxl">
-						<div style={{ width: "400px" }}>
-							<FormField
-								label={
-									<>
-										Template name <span style={{ color: "red" }}>*</span>
-									</>
-								}
-							>
-								<Input
-									value={name}
-									onChange={({ detail }) => setName(detail.value)}
-								/>
-							</FormField>
-						</div>
-					</SpaceBetween>
-
 					<div>
-						<strong>
-							Please use military time (24 hour time format) for all time
-							fields.
-						</strong>
+						Please use military time (24 hour time format) for all time fields.
 					</div>
 
 					<SpaceBetween direction="horizontal" size="xxl">
@@ -187,6 +253,7 @@ function TemplateManagement() {
 										Event start date <span style={{ color: "red" }}>*</span>
 									</>
 								}
+								errorText={errors.eventStartDate}
 							>
 								<DatePicker
 									value={eventStartDate}
@@ -203,6 +270,7 @@ function TemplateManagement() {
 										Event start time <span style={{ color: "red" }}>*</span>
 									</>
 								}
+								errorText={errors.eventStartTime}
 							>
 								<TimeInput
 									value={eventStartTime}
@@ -219,6 +287,7 @@ function TemplateManagement() {
 										Event end date <span style={{ color: "red" }}>*</span>
 									</>
 								}
+								errorText={errors.eventEndDate}
 							>
 								<DatePicker
 									value={eventEndDate}
@@ -235,6 +304,7 @@ function TemplateManagement() {
 										Event end time <span style={{ color: "red" }}>*</span>
 									</>
 								}
+								errorText={errors.eventEndTime}
 							>
 								<TimeInput
 									value={eventEndTime}
@@ -250,11 +320,22 @@ function TemplateManagement() {
 					<ShiftCard
 						key={shift.id}
 						shift={shift}
+						eventStart={`${eventStartDate}T${eventStartTime}`}
+						eventEnd={`${eventEndDate}T${eventEndTime}`}
+						errors={shiftErrors[shift.id]}
 						onChange={(updated) => updateShift(shift.id, updated)}
+						onValidate={(updatedShift, errors) =>
+							setShiftErrors((prev) => ({
+								...prev,
+								[shift.id]: errors,
+							}))
+						}
 						onDuplicate={() => duplicateShift(shift.id)}
 						onDelete={() => deleteShift(shift.id)}
 					/>
 				))}
+
+				{shiftError && <Box color="text-status-error">{shiftError}</Box>}
 
 				<Button
 					variant="normal"

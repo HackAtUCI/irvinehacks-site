@@ -54,8 +54,40 @@ EXPECTED_ORGANIZER = director.OrganizerSummary(
     first_name="Albert",
     last_name="Wang",
     roles=[Role.ORGANIZER],
-    committee=["Tech"],
+    committees=["Tech"],
 )
+
+SCHEDULE_TEMPLATE = {
+    '_id': 'templates',
+    'templates': [
+        {'template_name': 'test2',
+         'template_info': {
+            'event_dates': [
+                    '2026-05-27T22:00:00+00:00', '2026-06-08T22:00:00+00:00'
+                ],
+            'shifts': [
+                {'shift_name': 'f',
+                 'location': 'fs',
+                    'min_num_organizers': 2,
+                    'shift_pts': 2,
+                    'organizers': [],
+                    'hour': {
+                        'start_time': '2026-05-29T19:00:00Z',
+                        'end_time': '2026-05-29T20:00:00Z',
+                        'director_on_shift': []
+                    },
+                    'committee_prereq': 'Logistics',
+                    'subcommittee_prereq': 'Emcee',
+                    'preassigned_orgs': []}
+            ],
+            'org_availabilities': {}
+            }, 'drafts': []}]
+    }
+
+EMPTY_TEMPLATE = {
+    '_id': 'templates',
+    'templates': [],
+    }
 
 
 @patch("services.mongodb_handler.retrieve", autospec=True)
@@ -276,3 +308,246 @@ def test_release_hacker_decisions_works(
 
     assert res.status_code == 200
     assert returned_records[0]["decision"] == Decision.ACCEPTED
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_can_retrieve_templates(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test that the /templates route works!"""
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        SCHEDULE_TEMPLATE,
+    ]
+    res = director_client.get("/templates")
+    assert res.status_code == 200
+    data = res.json()
+    assert data == [
+        {
+            "template_name": "test2",
+            "template_info": {
+                "event_dates": [
+                    "2026-05-27T22:00:00Z",
+                    "2026-06-08T22:00:00Z",
+                ],
+                "shifts": [
+                    {
+                        "shift_name": "f",
+                        "location": "fs",
+                        "min_num_organizers": 2,
+                        "shift_pts": 2,
+                        "organizers": [],
+                        "hour": {
+                            "start_time": "2026-05-29T19:00:00Z",
+                            "end_time": "2026-05-29T20:00:00Z",
+                            "director_on_shift": [],
+                        },
+                        "committee_prereq": "Logistics",
+                        "subcommittee_prereq": "Emcee",
+                        "preassigned_orgs": [],
+                    }
+                ],
+                "org_availabilities": {},
+            },
+            "drafts": [],
+        }
+    ]
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_no_templates_to_retrieve(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test for no templates available!"""
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        EMPTY_TEMPLATE,
+    ]
+    res = director_client.get("/templates")
+    assert res.status_code == 200
+    data = res.json()
+    print(data)
+    assert data == []
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_can_retrieve_single_template(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test that a single template can be retrieved by name."""
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        SCHEDULE_TEMPLATE,
+    ]
+    res = director_client.get("/templates/test2")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["template_name"] == "test2"
+    assert data["event_start"] == "2026-05-27T22:00:00+00:00"
+    assert data["event_end"] == "2026-06-08T22:00:00+00:00"
+    assert len(data["shifts"]) == 1
+    assert data["shifts"][0]["shift_name"] == "f"
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_retrieve_nonexistent_template_returns_404(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test that a 404 is returned when template name doesn't exist."""
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        SCHEDULE_TEMPLATE,
+    ]
+    res = director_client.get("/templates/nonexistent")
+    assert res.status_code == 404
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_retrieve_template_no_records_returns_404(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test that a 404 is returned when there are no templates at all."""
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        None,
+    ]
+    res = director_client.get("/templates/test2")
+    assert res.status_code == 404
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_can_rename_template(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+    """Test that a template can be renamed."""
+    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
+
+    res = director_client.post(
+        "/rename-template",
+        json={
+            "old_template_name": "test2",
+            "new_template_name": "test3",
+        },
+    )
+
+    assert res.status_code == 200
+    mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
+        Collection.SETTINGS,
+        {
+            "_id": "templates",
+            "templates.template_name": "test2",
+        },
+        {"$set": {"templates.$.template_name": "test3"}},
+    )
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_can_delete_template(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+    """Test that a template can be deleted."""
+    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
+
+    res = director_client.post(
+        "/delete-template",
+        json={"template_name": "test2"},
+    )
+
+    assert res.status_code == 200
+    mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
+        Collection.SETTINGS,
+        {"_id": "templates"},
+        {"$pull": {"templates": {"template_name": "test2"}}},
+    )
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_can_duplicate_template(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+    """Test that a template can be duplicated."""
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        SCHEDULE_TEMPLATE,
+    ]
+
+    res = director_client.post(
+        "/duplicate-template",
+        json={"old_template_name": "test2"},
+    )
+
+    assert res.status_code == 200
+    call_args = mock_mongodb_handler_raw_update_one.call_args
+    pushed_template = call_args[0][2]["$push"]["templates"]
+    assert pushed_template["template_name"] == "Copy of test2"
+    assert pushed_template["drafts"] == []
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_can_create_template(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+    """Test that a template can be created."""
+    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
+
+    res = director_client.post(
+        "/create-template",
+        json={"template_name": "new_template"},
+    )
+
+    assert res.status_code == 200
+    second_call = mock_mongodb_handler_raw_update_one.call_args_list[1]
+    pushed_template = second_call[0][2]["$push"]["templates"]
+    assert pushed_template["template_name"] == "new_template"
+    assert pushed_template["drafts"] == []
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_can_update_template(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+    """Test that a template can be updated."""
+    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
+
+    res = director_client.post(
+        "/update-template",
+        json={
+            "template_name": "test2",
+            "event_dates": [
+                "2026-05-27T22:00:00Z",
+                "2026-06-08T22:00:00Z",
+            ],
+            "shifts": [
+                {
+                    "shift_name": "f",
+                    "location": "fs",
+                    "min_num_organizers": 2,
+                    "shift_pts": 2,
+                    "organizers": [],
+                    "hour": {
+                        "start_time": "2026-05-29T19:00:00Z",
+                        "end_time": "2026-05-29T20:00:00Z",
+                        "director_on_shift": [],
+                    },
+                    "committee_prereq": "Logistics",
+                    "subcommittee_prereq": "Emcee",
+                    "preassigned_orgs": [],
+                }
+            ],
+        },
+    )
+
+    assert res.status_code == 200
+    mock_mongodb_handler_raw_update_one.assert_awaited_once()
+    call_args = mock_mongodb_handler_raw_update_one.call_args
+    assert call_args[1]["array_filters"] == [{"t.template_name": "test2"}]

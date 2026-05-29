@@ -6,11 +6,15 @@ from routers.checkin_leads import (
     queue_participants,
     close_walkins,
     _process_status,
+    approve_late_arrival_edit,
+    reject_late_arrival_edit,
 )
 from routers.user import DEFAULT_CHECKIN_TIME
 from models.user_record import Role, Status
 from models.ApplicationData import Decision
 from services.mongodb_handler import Collection
+from services.sendgrid_handler import Template
+from utils.email_handler import IH_SENDER
 
 
 @pytest.mark.asyncio
@@ -170,3 +174,89 @@ async def test_process_status_failure(mock_update: AsyncMock) -> None:
     mock_update.return_value = False
     with pytest.raises(RuntimeError, match="Expected to modify at least one document"):
         await _process_status(["user1"], Status.CONFIRMED)
+
+
+@pytest.mark.asyncio
+@patch("services.sendgrid_handler.send_email", autospec=True)
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_approve_late_arrival_edit_preserves_reason(
+    mock_retrieve_one: AsyncMock,
+    mock_raw_update_one: AsyncMock,
+    mock_send_email: AsyncMock,
+) -> None:
+    mock_retrieve_one.return_value = {
+        "first_name": "Fiona",
+        "late_arrival_edit_request": "18:45",
+        "late_arrival_edit_reason": "Midterm ends late",
+    }
+
+    await approve_late_arrival_edit("edu.uci.fiona")
+
+    mock_raw_update_one.assert_awaited_once_with(
+        Collection.USERS,
+        {"_id": "edu.uci.fiona"},
+        {
+            "$set": {
+                "arrival_time": "18:45",
+                "late_arrival_reason": "Midterm ends late",
+            },
+            "$unset": {
+                "late_arrival_edit_request": "",
+                "late_arrival_edit_reason": "",
+            },
+        },
+    )
+    mock_send_email.assert_awaited_once_with(
+        Template.LATE_ARRIVAL_APPROVED_EMAIL,
+        IH_SENDER,
+        [
+            {
+                "email": "fiona@uci.edu",
+                "first_name": "Fiona",
+                "arrival_time": "18:45",
+            }
+        ],
+        True,
+    )
+
+
+@pytest.mark.asyncio
+@patch("services.sendgrid_handler.send_email", autospec=True)
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_reject_late_arrival_edit_clears_reason(
+    mock_retrieve_one: AsyncMock,
+    mock_raw_update_one: AsyncMock,
+    mock_send_email: AsyncMock,
+) -> None:
+    mock_retrieve_one.return_value = {
+        "first_name": "Fiona",
+        "late_arrival_edit_request": "18:45",
+        "late_arrival_edit_reason": "Midterm ends late",
+    }
+
+    await reject_late_arrival_edit("edu.uci.fiona")
+
+    mock_raw_update_one.assert_awaited_once_with(
+        Collection.USERS,
+        {"_id": "edu.uci.fiona"},
+        {
+            "$unset": {
+                "late_arrival_edit_request": "",
+                "late_arrival_edit_reason": "",
+            },
+        },
+    )
+    mock_send_email.assert_awaited_once_with(
+        Template.LATE_ARRIVAL_REJECTED_EMAIL,
+        IH_SENDER,
+        [
+            {
+                "email": "fiona@uci.edu",
+                "first_name": "Fiona",
+                "requested_time": "18:45",
+            }
+        ],
+        True,
+    )

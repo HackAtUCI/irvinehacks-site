@@ -3,6 +3,9 @@ import useSWR from "swr";
 
 export interface ArrivalTimeResponse {
 	arrival_time: string | null;
+	late_arrival_reason: string | null;
+	late_arrival_edit_request: string | null;
+	late_arrival_edit_reason: string | null;
 }
 
 const fetcher = async (url: string) => {
@@ -11,12 +14,12 @@ const fetcher = async (url: string) => {
 };
 
 function useArrivalTime() {
-	const { data } = useSWR<ArrivalTimeResponse>(
+	const { data, mutate } = useSWR<ArrivalTimeResponse>(
 		"/api/user/rsvp/late-arrival",
 		fetcher,
 	);
 
-	return data;
+	return { arrivalData: data, mutate };
 }
 
 export default useArrivalTime;

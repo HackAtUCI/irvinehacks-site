@@ -252,7 +252,10 @@ def _checkins_to_dict(raw: Any) -> dict[str, datetime]:
 
 
 async def subevent_checkin(event_id: str, uid: str, organizer: User) -> None:
-    """Check in a hacker to a subevent. checkins as {uid: ISODate} & Hacker role only."""
+    """Check in a hacker to a subevent.
+
+    checkins stored as {uid: ISODate}; Hacker role only.
+    """
     user_doc: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
         Collection.USERS, {"_id": uid, "roles": {"$exists": True}}, ["roles"]
     )

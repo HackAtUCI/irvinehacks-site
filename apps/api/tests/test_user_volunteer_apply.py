@@ -8,7 +8,6 @@ from auth.user_identity import NativeUser, UserTestClient
 from models.ApplicationData import ProcessedVolunteerApplication
 from models.user_record import Applicant, Role, Status
 from routers import user
-from services.mongodb_handler import Collection
 
 
 TEST_DEADLINE = datetime(2026, 10, 1, 8, 0, 0, tzinfo=timezone.utc)
@@ -172,10 +171,14 @@ def test_volunteer_application_data_is_bson_encodable() -> None:
     assert len(encoded) == 587
 
 
-def test_volunteer_past_deadline_causes_403() -> None:
-    user.DEADLINE = datetime(2023, 12, 18, 20, 0, 0, tzinfo=timezone.utc)
-
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+@patch("routers.user._is_past_deadline", autospec=True)
+def test_volunteer_past_deadline_causes_403(
+    mock_is_past_deadline: Mock,
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    mock_is_past_deadline.return_value = True
     res = client.post("/volunteer", data=SAMPLE_APPLICATION)
-    assert res.status_code == 403
 
-    user.DEADLINE = TEST_DEADLINE
+    mock_mongodb_handler_retrieve_one.assert_not_called()
+    assert res.status_code == 403

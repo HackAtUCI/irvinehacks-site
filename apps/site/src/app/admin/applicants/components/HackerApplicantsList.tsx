@@ -19,10 +19,15 @@ import { useFollowWithNextLink } from "@/app/admin/layout/common";
 import ApplicantFilters, {
 	Options,
 } from "@/app/admin/applicants/components/ApplicantFilters";
+import { SelectProps } from "@cloudscape-design/components/select";
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
 
 import UserContext from "@/lib/admin/UserContext";
-import { isDirector, isHackerReviewer } from "@/lib/admin/authorization";
+import {
+	isDirector,
+	hasAdminRole,
+	isHackerReviewer,
+} from "@/lib/admin/authorization";
 import ApplicantReviewerIndicator from "../components/ApplicantReviewerIndicator";
 import HackerThresholdInputs from "../components/HackerThresholdInputs";
 
@@ -55,10 +60,15 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 	}
 
 	const isUserDirector = isDirector(roles);
+	const isOrganizer = hasAdminRole(roles);
 
 	const [selectedStatuses, setSelectedStatuses] = useState<Options>([]);
 	const [selectedDecisions, setSelectedDecisions] = useState<Options>([]);
 	const [uciNetIDFilter, setUCINetIDFilter] = useState<Options>([]);
+	const [sortOption, setSortOption] = useState<SelectProps.Option>({
+		value: "latest",
+		label: "Newest",
+	});
 
 	const { applicantList, loading, approveDuplicateName } =
 		useHackerApplicants();
@@ -91,6 +101,9 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 			selectedStatusValues.includes(Status.Pending) &&
 			applicant.avg_score === OVERQUALIFIED_SCORE
 		)
+			return false;
+
+		if (applicant.status === Status.Voided && isOrganizer && !isUserDirector)
 			return false;
 
 		if (
@@ -141,7 +154,30 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		setRejectCount(rejectedCount);
 	}, [applicantList, acceptThreshold, waitlistThreshold]);
 
-	const items = top400 ? filteredApplicants400 : filteredApplicants;
+	const baseItems = top400 ? filteredApplicants400 : filteredApplicants;
+	const items = useMemo(() => {
+		if (!sortOption?.value) return baseItems;
+		return [...baseItems].sort((a, b) => {
+			switch (sortOption.value) {
+				case "first_name_asc":
+					return a.first_name.localeCompare(b.first_name);
+				case "first_name_desc":
+					return b.first_name.localeCompare(a.first_name);
+				case "latest":
+					return (
+						new Date(b.application_data.submission_time).getTime() -
+						new Date(a.application_data.submission_time).getTime()
+					);
+				case "oldest":
+					return (
+						new Date(a.application_data.submission_time).getTime() -
+						new Date(b.application_data.submission_time).getTime()
+					);
+				default:
+					return 0;
+			}
+		});
+	}, [baseItems, sortOption]);
 
 	const counter =
 		selectedStatuses.length > 0 ||
@@ -279,6 +315,8 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 					uciNetIDFilter={uciNetIDFilter}
 					setUCINetIDFilter={setUCINetIDFilter}
 					applicantType={ParticipantRole.Hacker}
+					sortOption={sortOption}
+					setSortOption={setSortOption}
 				/>
 			}
 			empty={emptyContent}

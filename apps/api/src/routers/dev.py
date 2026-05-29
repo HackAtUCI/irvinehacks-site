@@ -13,10 +13,10 @@ async def impersonate(ucinetid: str) -> RedirectResponse:
     user = NativeUser(
         ucinetid=ucinetid,
         display_name="Local Dev",
-        email="dev@irvinehacks.com",
+        email=f"{ucinetid}@uci.edu",
         affiliations=[],
     )
 
-    res = RedirectResponse("/portal", status_code=303)
+    res = RedirectResponse("/admin/dashboard", status_code=303)
     user_identity.issue_user_identity(user, res)
     return res

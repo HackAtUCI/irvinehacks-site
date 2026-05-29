@@ -41,6 +41,7 @@ export enum Decision {
 	Accepted = "ACCEPTED",
 	Rejected = "REJECTED",
 	Waitlisted = "WAITLISTED",
+	Voided = "VOIDED",
 }
 
 /** The possible statuses for an applicant without a released decision. */

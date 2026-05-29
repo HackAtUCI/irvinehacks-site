@@ -26,6 +26,13 @@ export const VerdictComponent = ({ status }: { status: Status }) => {
 			};
 			break;
 		}
+		case Status.Voided: {
+			verdict = {
+				text: "Application Voided",
+				statusIcon: "Rejected",
+			};
+			break;
+		}
 
 		case Status.Waitlisted:
 		case PostAcceptedStatus.Queued: {

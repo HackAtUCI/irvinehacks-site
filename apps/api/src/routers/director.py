@@ -59,6 +59,7 @@ class OrganizerSummary(BaseRecord):
     first_name: str
     last_name: str
     roles: list[Role]
+    committee: list[str]
 
 
 class RawOrganizerData(BaseModel):
@@ -120,6 +121,7 @@ async def add_organizer(
     first_name: str = Body(),
     last_name: str = Body(),
     roles: list[Role] = Body(),
+    committee: list[str] = Body(),
 ) -> None:
     """Adds an organizer record"""
     log.info("%s adding organizer", user)
@@ -148,6 +150,7 @@ async def add_organizer(
             "first_name": first_name,
             "last_name": last_name,
             "roles": roles,
+            "committee": committee,
         },
         upsert=True,
     )
@@ -526,6 +529,34 @@ async def waitlist_transfer() -> None:
             personalizations,
             True,
         )
+
+
+@router.post("/void-applicant/{uid}")
+async def void_applicant(
+    uid: str,
+    user: Annotated[User, Depends(require_director)],
+) -> None:
+    """Void an applicant and remove them from the active pipeline."""
+    record = await mongodb_handler.retrieve_one(
+        Collection.USERS,
+        {"_id": uid, "roles": Role.APPLICANT},
+        ["status"],
+    )
+    if not record:
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
+
+    if record["status"] == Decision.VOIDED:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Applicant is already voided.")
+
+    ok = await mongodb_handler.update_one(
+        Collection.USERS,
+        {"_id": uid},
+        {"status": Decision.VOIDED, "decision": Decision.VOIDED},
+    )
+    if not ok:
+        raise RuntimeError(f"Error voiding applicant {uid}")
+
+    log.info("%s voided applicant %s", user, uid)
 
 
 async def _process_decision(

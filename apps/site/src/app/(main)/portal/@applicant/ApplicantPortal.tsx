@@ -41,11 +41,17 @@ function Portal() {
 
 	const waitlistStarted = waitlistStatus?.is_started ?? false;
 	const waitlistOpen = waitlistStatus?.is_open ?? false;
+	const hasSignedWaiver =
+		status === Status.Signed ||
+		status === Status.Confirmed ||
+		status === Status.Attending;
 
-	const needsToSignWaiver = isAccepted || (isWaitlisted && waitlistStarted);
-	const needsToRSVP = isAccepted || (isWaitlisted && waitlistOpen);
+	const needsToSignWaiver =
+		!hasSignedWaiver && (isAccepted || (isWaitlisted && waitlistStarted));
+	const needsToRSVP =
+		hasSignedWaiver && (isAccepted || (isWaitlisted && waitlistOpen));
 
-	const rejected = status === Status.Rejected;
+	const showReturnHome = status === Status.Rejected || status === Status.Voided;
 
 	return (
 		<div className="relative">
@@ -63,7 +69,8 @@ function Portal() {
 				</h2>
 				<AvatarDisplay />
 				<VerticalTimeline
-					status={identity?.decision ? identity?.decision : (status as Status)}
+					status={status as Status}
+					decision={identity?.decision as Decision | null}
 				/>
 				<Message
 					status={status as Status}
@@ -77,7 +84,7 @@ function Portal() {
 					/>
 				)}
 				{needsToRSVP && <ConfirmAttendance status={status as Status} />}
-				{rejected && <ReturnHome />}
+				{showReturnHome && <ReturnHome />}
 			</div>
 		</div>
 	);

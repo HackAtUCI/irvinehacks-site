@@ -32,9 +32,10 @@ export default function Textfield({
 	textAreaClass = "h-48",
 }: TextfieldProps) {
 	const draftContext = useDraftContext();
-	const [value, setValue] = useState(
-		() => draftContext?.initialValues[name] ?? "",
-	);
+	const [value, setValue] = useState(() => {
+		const initial = draftContext?.initialValues[name];
+		return typeof initial === "string" ? initial : "";
+	});
 
 	const wordCount = getWordCount(value);
 

@@ -3,6 +3,8 @@
 import { useEffect, useRef } from "react";
 import axios from "axios";
 
+import { DraftFieldValue } from "@/lib/components/forms/shared/DraftContext";
+
 // Prevent excessive API calls by debouncing the autosave
 const DEBOUNCE_MS = 800;
 
@@ -10,7 +12,7 @@ type ApplicationType = "Hacker" | "Mentor" | "Volunteer";
 
 export default function useDraftAutosave(
 	applicationType: ApplicationType,
-	fields: Record<string, string>,
+	fields: Record<string, DraftFieldValue>,
 	hasUserEdited: boolean,
 	onSessionExpired: () => void,
 ) {

@@ -327,14 +327,16 @@ async def _apply_flow(
         status=Status.PENDING_REVIEW,
     )
 
-    # add applicant to database and clear any drafts
+    # add applicant to database and clear any drafts of this application type
     try:
         await mongodb_handler.raw_update_one(
             Collection.USERS,
             {"_id": user.uid},
             {
                 "$set": applicant.model_dump(),
-                "$unset": {"draft_application_data": ""},
+                "$unset": {
+                    f"draft_application_data.{application_type}": "",
+                },
             },
             upsert=True,
         )
@@ -359,9 +361,12 @@ async def _apply_flow(
     )
 
 
+DraftApplicationType = Literal["Hacker", "Mentor", "Volunteer"]
+
+
 class DraftApplicationData(BaseModel):
-    application_type: Literal["Hacker", "Mentor", "Volunteer"]
-    fields: dict[str, str]
+    application_type: DraftApplicationType
+    fields: dict[str, Union[str, int, list[str]]]
 
 
 class DraftApplicationResponse(BaseModel):
@@ -371,6 +376,7 @@ class DraftApplicationResponse(BaseModel):
 @router.get("/application/draft")
 async def get_application_draft(
     user: Annotated[User, Depends(require_user_identity)],
+    application_type: DraftApplicationType,
 ) -> DraftApplicationResponse:
     user_record = await mongodb_handler.retrieve_one(
         Collection.USERS, {"_id": user.uid}, ["draft_application_data"]
@@ -379,7 +385,23 @@ async def get_application_draft(
     if not user_record:
         return DraftApplicationResponse()
 
-    return DraftApplicationResponse(**user_record)
+    stored = user_record.get("draft_application_data")
+    if not isinstance(stored, dict):
+        return DraftApplicationResponse()
+
+    type_draft = stored.get(application_type)
+    if not isinstance(type_draft, dict):
+        return DraftApplicationResponse()
+
+    fields = type_draft.get("fields") or {}
+    if not isinstance(fields, dict):
+        return DraftApplicationResponse()
+
+    return DraftApplicationResponse(
+        draft_application_data=DraftApplicationData(
+            application_type=application_type, fields=fields
+        )
+    )
 
 
 @router.post("/application/draft", status_code=status.HTTP_204_NO_CONTENT)
@@ -408,7 +430,13 @@ async def save_application_draft(
         await mongodb_handler.raw_update_one(
             Collection.USERS,
             {"_id": user.uid},
-            {"$set": {"draft_application_data": draft.model_dump()}},
+            {
+                "$set": {
+                    f"draft_application_data.{draft.application_type}": {
+                        "fields": draft.fields,
+                    }
+                }
+            },
             upsert=True,
         )
     except RuntimeError:

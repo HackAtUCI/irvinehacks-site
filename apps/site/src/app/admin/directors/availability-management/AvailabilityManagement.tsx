@@ -306,7 +306,7 @@ export default function AvailabilityManagement() {
 	if (loading) {
 		return (
 			<SpaceBetween size="l">
-				<Header variant="h1">ZotHacks 2026 Availability Management</Header>
+				<Header variant="h1">Availability Management</Header>
 
 				<Container>
 					<SpaceBetween size="s" direction="horizontal" alignItems="center">
@@ -323,7 +323,7 @@ export default function AvailabilityManagement() {
 	if (error) {
 		return (
 			<SpaceBetween size="l">
-				<Header variant="h1">ZotHacks 2026 Availability Management</Header>
+				<Header variant="h1">Availability Management</Header>
 
 				<Alert type="error" header="Unable to load organizers">
 					Please refresh the page and try again.
@@ -346,7 +346,7 @@ export default function AvailabilityManagement() {
 	if (!templateName) {
 		return (
 			<SpaceBetween size="l">
-				<Header variant="h1">ZotHacks 2026 Availability Management</Header>
+				<Header variant="h1">Availability Management</Header>
 
 				<Container>
 					<SpaceBetween size="m">
@@ -399,7 +399,7 @@ export default function AvailabilityManagement() {
 					</Button>
 				}
 			>
-				ZotHacks 2026 Availability Management
+				{templateName} Availability Management
 			</Header>
 
 			<ColumnLayout columns={3} variant="text-grid">

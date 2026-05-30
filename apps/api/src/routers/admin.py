@@ -994,6 +994,7 @@ async def _handle_irvinehacks_detailed_scores_review(
 
     uid_no_domain = reviewer.uid.split(".")[-1]
     is_director = await _user_has_role(reviewer.uid, Role.DIRECTOR)
+    review_breakdown_key = f"application_data.review_breakdown.{uid_no_domain}"
 
     if scoring_breakdown:
         # Only add a scoring review if there are either less than 2 reviewers
@@ -1023,11 +1024,7 @@ async def _handle_irvinehacks_detailed_scores_review(
 
         await _try_update_applicant_with_query(
             applicant,
-            update_query={
-                "$set": {
-                    f"application_data.review_breakdown.{uid_no_domain}": scoring_breakdown
-                }
-            },
+            update_query={"$set": {review_breakdown_key: scoring_breakdown}},
             err_msg=f"{reviewer} could not submit review for {applicant}",
         )
 
@@ -1176,10 +1173,12 @@ async def _try_update_applicant_with_query(
             update_query,
         )
         if not modified:
-            log.warning(f"""
+            log.warning(
+                f"""
                 Update query did not modify any documents
                 for {applicant}: {update_query}
-                """)
+                """
+            )
     except RuntimeError:
         log.error(err_msg)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)

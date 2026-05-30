@@ -1071,6 +1071,7 @@ async def test_handle_irvinehacks_director_can_submit_previous_experience_only(
     await _handle_irvinehacks_detailed_scores_review(applicant, scores, reviewer)
 
     mock_mongodb_handler_raw_update_one.assert_awaited_once()
+    assert mock_mongodb_handler_raw_update_one.await_args is not None
     update = mock_mongodb_handler_raw_update_one.await_args.args[2]
     director_review = update["$set"][
         "application_data.director_previous_experience_review"

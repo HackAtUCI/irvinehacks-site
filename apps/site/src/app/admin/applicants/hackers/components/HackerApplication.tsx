@@ -181,7 +181,9 @@ function IrvineHacksHackerApplication({
 								<br />
 								<a
 									href={
-										application_data.resume_url ? application_data.resume_url : ""
+										application_data.resume_url
+											? application_data.resume_url
+											: ""
 									}
 									rel="noopener noreferrer"
 									target="_blank"

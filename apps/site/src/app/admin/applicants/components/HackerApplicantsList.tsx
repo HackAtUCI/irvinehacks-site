@@ -266,14 +266,10 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 					director_previous_experience_reviewed
 				}
 				isDirector={isUserDirector}
-			/>
-		),
-		[hackathonName, isUserDirector],
 				isDuplicate={duplicateNames.has(
 					`${first_name} ${last_name}`.trim().toLowerCase(),
 				)}
 				duplicateNameApproved={duplicate_name_approved}
-				isDirector={isUserDirector}
 				onApproveDuplicate={(approved) => approveDuplicateName(_id, approved)}
 			/>
 		),
@@ -304,9 +300,7 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 						content: ({ _id }) => (isUserDirector ? _id : uidToPseudonym(_id)),
 					},
 					...(isUserDirector ? [extraColumn] : []),
-					...(isUserDirector
-						? [directorPreviousExperienceReviewedColumn]
-						: []),
+					...(isUserDirector ? [directorPreviousExperienceReviewedColumn] : []),
 					{
 						id: "status",
 						header: "Status",
@@ -418,7 +412,6 @@ const CardHeader = ({
 	isDirector,
 	isDuplicate,
 	duplicateNameApproved,
-	isDirector,
 	onApproveDuplicate,
 }: Pick<
 	HackerApplicantSummary,
@@ -432,7 +425,6 @@ const CardHeader = ({
 	isDirector: boolean;
 	isDuplicate: boolean;
 	duplicateNameApproved: boolean;
-	isDirector: boolean;
 	onApproveDuplicate: (approved: boolean) => void;
 }) => {
 	const followWithNextLink = useFollowWithNextLink();
@@ -489,11 +481,7 @@ const CardHeader = ({
 				avg_score === OVERQUALIFIED_SCORE && (
 					<Badge color="red">OVERQUALIFIED</Badge>
 				)}
-		</SpaceBetween>
 			{duplicateIcon}
-			{avg_score === OVERQUALIFIED_SCORE && (
-				<Badge color="red">OVERQUALIFIED</Badge>
-			)}
 		</div>
 	);
 };

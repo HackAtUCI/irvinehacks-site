@@ -30,9 +30,9 @@ def test_get_reviewer_stats() -> None:
 
     stats = score_normalizing_handler.get_reviewer_stats(applications)
 
-    # Score for each app: (10/20)*0.20 + (10/20)*0.25 = 0.1 + 0.125 = 0.225
-    # Total scaled score: 0.225 * 100 = 22.5
-    assert stats["bob"]["mean"] == 22.5
+    # Score for each app is normalized against submitted scoring fields only:
+    # ((10/20)*0.20 + (10/20)*0.25) / (0.20 + 0.25) * 100 = 50.0
+    assert stats["bob"]["mean"] == 50.0
     assert stats["bob"]["std"] == 1.0  # Only one distinct score value
 
 
@@ -53,9 +53,9 @@ def test_get_normalized_scores_for_hacker_applicants() -> None:
         all_apps, stats
     )
 
-    # Weighted score for app1: (20/20)*0.20 = 0.2 => 20.0
-    # z = (20.0 - 5.0) / 5.0 = 15.0 / 5.0 = 3.0
-    assert normalized["app1"]["bob"] == 3.0
+    # Weighted score for app1: ((20/20)*0.20) / 0.20 * 100 = 100.0
+    # z = (100.0 - 5.0) / 5.0 = 95.0 / 5.0 = 19.0
+    assert normalized["app1"]["bob"] == 19.0
 
 
 @patch("services.mongodb_handler.retrieve", autospec=True)

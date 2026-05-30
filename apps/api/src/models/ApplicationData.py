@@ -12,9 +12,11 @@ from pydantic import (
     EmailStr,
     Field,
     HttpUrl,
+    SerializerFunctionWrapHandler,
     Tag,
     field_serializer,
     field_validator,
+    model_serializer,
 )
 
 
@@ -276,6 +278,15 @@ class ProcessedHackerApplicationData(BaseApplicationData):
     director_previous_experience_review: Optional[DirectorPreviousExperienceReview] = (
         None
     )
+
+    @model_serializer(mode="wrap")
+    def omit_empty_director_review(
+        self, handler: SerializerFunctionWrapHandler
+    ) -> dict[str, Any]:
+        data: dict[str, Any] = handler(self)
+        if self.director_previous_experience_review is None:
+            data.pop("director_previous_experience_review", None)
+        return data
 
     @field_serializer("linkedin", "portfolio", "resume_url")
     def url2str(self, val: Union[HttpUrl, None]) -> Union[str, None]:

@@ -10,9 +10,11 @@ from auth.user_identity import User
 from models.Availability import (
     AvailabilityLockResponse,
     AvailabilityPayload,
+    AvailabilityTemplateResponse,
     OrganizerAvailability,
     OrganizerAvailabilityResponse,
 )
+from models.Schedule import ScheduleTemplate
 from models.user_record import Role
 from services import mongodb_handler
 from services.mongodb_handler import Collection
@@ -23,15 +25,68 @@ router = APIRouter()
 
 require_organizer = require_role({Role.ORGANIZER})
 require_director = require_role({Role.DIRECTOR})
+require_availability_viewer = require_role({Role.ORGANIZER, Role.DIRECTOR})
 
 AVAILABILITY_SETTINGS_ID = "availability"
 
 
-async def _get_locked() -> bool:
+async def _get_settings(fields: list[str]) -> dict[str, Any]:
     record = await mongodb_handler.retrieve_one(
-        Collection.SETTINGS, {"_id": AVAILABILITY_SETTINGS_ID}, ["locked"]
+        Collection.SETTINGS, {"_id": AVAILABILITY_SETTINGS_ID}, fields
     )
-    return bool(record and record.get("locked", False))
+    return record or {}
+
+
+async def _get_locked() -> bool:
+    settings = await _get_settings(["locked"])
+    return bool(settings.get("locked", False))
+
+
+async def _get_requested_template_name() -> Optional[str]:
+    settings = await _get_settings(["template_name"])
+    template_name = settings.get("template_name")
+    return template_name if isinstance(template_name, str) else None
+
+
+async def _get_template_by_name(
+    template_name: str,
+) -> Optional[ScheduleTemplate]:
+    records = await mongodb_handler.retrieve_one(
+        Collection.SETTINGS,
+        {"_id": "templates"},
+        ["templates"],
+    )
+
+    if not records:
+        return None
+
+    try:
+        templates = TypeAdapter(list[ScheduleTemplate]).validate_python(
+            records["templates"]
+        )
+    except ValidationError:
+        raise RuntimeError("Could not parse template.")
+
+    for template in templates:
+        if template.template_name == template_name:
+            return template
+    return None
+
+
+async def _get_requested_template() -> AvailabilityTemplateResponse:
+    template_name = await _get_requested_template_name()
+    if not template_name:
+        return AvailabilityTemplateResponse()
+
+    template = await _get_template_by_name(template_name)
+    if not template:
+        return AvailabilityTemplateResponse(template_name=template_name)
+
+    return AvailabilityTemplateResponse(
+        template_name=template.template_name,
+        event_dates=template.template_info.event_dates,
+        shifts=template.template_info.shifts,
+    )
 
 
 @router.get("")
@@ -56,6 +111,7 @@ async def get_availability(
 
     return OrganizerAvailabilityResponse(
         availability=availability.availability,
+        template_name=availability.template_name,
         submitted_at=availability.submitted_at,
         updated_at=availability.updated_at,
     )
@@ -72,6 +128,12 @@ async def put_availability(
             status.HTTP_403_FORBIDDEN, "Availability submissions are locked."
         )
 
+    template_name = await _get_requested_template_name()
+    if not template_name:
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN, "Availability has not been requested."
+        )
+
     now = datetime.now(timezone.utc)
     existing_record = await mongodb_handler.retrieve_one(
         Collection.AVAILABILITY,
@@ -79,10 +141,14 @@ async def put_availability(
         ["submitted_at"],
     )
 
-    submitted_at = existing_record.get("submitted_at", now) if existing_record else now
+    if existing_record:
+        submitted_at = existing_record.get("submitted_at", now)
+    else:
+        submitted_at = now
     availability = OrganizerAvailability(
         uid=user.uid,
         availability=payload.availability,
+        template_name=template_name,
         submitted_at=submitted_at,
         updated_at=now,
     )
@@ -100,6 +166,7 @@ async def put_availability(
 
     return OrganizerAvailabilityResponse(
         availability=availability.availability,
+        template_name=availability.template_name,
         submitted_at=availability.submitted_at,
         updated_at=availability.updated_at,
     )
@@ -114,7 +181,76 @@ async def post_availability(
     return await put_availability(user, payload)
 
 
-@router.get("/lock", dependencies=[Depends(require_organizer)])
+@router.get("/template", dependencies=[Depends(require_availability_viewer)])
+async def get_availability_template() -> AvailabilityTemplateResponse:
+    """Get the template currently requested for organizer availability."""
+    return await _get_requested_template()
+
+
+@router.post("/template")
+async def set_availability_template(
+    user: Annotated[User, Depends(require_director)],
+    template_name: str = Body(embed=True),
+) -> AvailabilityTemplateResponse:
+    """Request organizer availability for a schedule template."""
+    template = await _get_template_by_name(template_name)
+    if not template:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Template not found.")
+
+    now = datetime.now(timezone.utc)
+    try:
+        await mongodb_handler.raw_update_one(
+            Collection.SETTINGS,
+            {"_id": AVAILABILITY_SETTINGS_ID},
+            {
+                "$set": {
+                    "template_name": template.template_name,
+                    "requested_at": now,
+                    "requested_by": user.uid,
+                    "locked": False,
+                }
+            },
+            upsert=True,
+        )
+        await mongodb_handler.delete(Collection.AVAILABILITY, {})
+    except RuntimeError:
+        log.error(
+            "Could not request availability for template %s",
+            template_name,
+        )
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    return AvailabilityTemplateResponse(
+        template_name=template.template_name,
+        event_dates=template.template_info.event_dates,
+        shifts=template.template_info.shifts,
+    )
+
+
+@router.delete("/template", dependencies=[Depends(require_director)])
+async def reset_availability_template() -> None:
+    """Clear the template currently requested for organizer availability."""
+    try:
+        await mongodb_handler.raw_update_one(
+            Collection.SETTINGS,
+            {"_id": AVAILABILITY_SETTINGS_ID},
+            {
+                "$unset": {
+                    "template_name": "",
+                    "requested_at": "",
+                    "requested_by": "",
+                },
+                "$set": {"locked": False},
+            },
+            upsert=True,
+        )
+        await mongodb_handler.delete(Collection.AVAILABILITY, {})
+    except RuntimeError:
+        log.error("Could not reset availability template")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@router.get("/lock", dependencies=[Depends(require_availability_viewer)])
 async def get_availability_lock() -> AvailabilityLockResponse:
     """Get the current availability lock state."""
     return AvailabilityLockResponse(locked=await _get_locked())

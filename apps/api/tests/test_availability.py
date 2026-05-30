@@ -43,6 +43,38 @@ SAMPLE_AVAILABILITY = {
     ]
 }
 
+SAMPLE_TEMPLATE_RECORD = {
+    "_id": "templates",
+    "templates": [
+        {
+            "template_name": "IrvineHacks 2027",
+            "template_info": {
+                "event_dates": [
+                    "2027-10-09T09:00:00+00:00",
+                    "2027-10-11T23:30:00+00:00",
+                ],
+                "shifts": [
+                    {
+                        "shift_name": "Check-in",
+                        "location": "Student Center",
+                        "min_num_organizers": 2,
+                        "shift_pts": 1,
+                        "organizers": [],
+                        "hour": {
+                            "start_time": "2027-10-09T09:00:00+00:00",
+                            "end_time": "2027-10-09T11:00:00+00:00",
+                            "director_on_shift": [],
+                        },
+                        "preassigned_orgs": [],
+                    }
+                ],
+                "org_availabilities": {},
+            },
+            "drafts": [],
+        }
+    ],
+}
+
 app = FastAPI()
 app.include_router(availability.router, prefix="/availability")
 
@@ -61,6 +93,7 @@ def test_get_availability_empty(
     assert res.status_code == 200
     assert res.json() == {
         "availability": [],
+        "template_name": None,
         "submitted_at": None,
         "updated_at": None,
     }
@@ -75,6 +108,7 @@ def test_get_availability_existing(
         {
             "_id": "edu.uci.alicia",
             **SAMPLE_AVAILABILITY,
+            "template_name": "IrvineHacks 2027",
             "submitted_at": SUBMITTED_AT,
             "updated_at": UPDATED_AT,
         },
@@ -95,6 +129,7 @@ def test_put_availability(
     mock_mongodb_handler_retrieve_one.side_effect = [
         ORGANIZER_IDENTITY,
         {"locked": False},
+        {"template_name": "IrvineHacks 2027"},
         None,
     ]
 
@@ -102,11 +137,14 @@ def test_put_availability(
 
     assert res.status_code == 200
     mock_mongodb_handler_update_one.assert_awaited_once()
-    collection, query, data = mock_mongodb_handler_update_one.await_args.args[:3]
+    assert mock_mongodb_handler_update_one.await_args is not None
+    awaited_update = mock_mongodb_handler_update_one.await_args
+    collection, query, data = awaited_update.args[:3]
     assert collection == Collection.AVAILABILITY
     assert query == {"_id": "edu.uci.alicia"}
     assert data["_id"] == "edu.uci.alicia"
     assert data["availability"] == SAMPLE_AVAILABILITY["availability"]
+    assert data["template_name"] == "IrvineHacks 2027"
 
 
 @patch("services.mongodb_handler.update_one", autospec=True)
@@ -124,6 +162,107 @@ def test_put_availability_rejects_when_locked(
 
     assert res.status_code == 403
     mock_mongodb_handler_update_one.assert_not_awaited()
+
+
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_put_availability_rejects_when_not_requested(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_update_one: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        ORGANIZER_IDENTITY,
+        {"locked": False},
+        None,
+    ]
+
+    res = organizer_client.put("/availability", json=SAMPLE_AVAILABILITY)
+
+    assert res.status_code == 403
+    mock_mongodb_handler_update_one.assert_not_awaited()
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_get_availability_template(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        ORGANIZER_IDENTITY,
+        {"template_name": "IrvineHacks 2027"},
+        SAMPLE_TEMPLATE_RECORD,
+    ]
+
+    res = organizer_client.get("/availability/template")
+
+    assert res.status_code == 200
+    assert res.json()["template_name"] == "IrvineHacks 2027"
+    assert len(res.json()["shifts"]) == 1
+
+
+@patch("services.mongodb_handler.delete", autospec=True)
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_director_can_request_availability_template(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+    mock_mongodb_handler_delete: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        SAMPLE_TEMPLATE_RECORD,
+    ]
+
+    res = director_client.post(
+        "/availability/template",
+        json={"template_name": "IrvineHacks 2027"},
+    )
+
+    assert res.status_code == 200
+    assert res.json()["template_name"] == "IrvineHacks 2027"
+    mock_mongodb_handler_raw_update_one.assert_awaited_once()
+    assert mock_mongodb_handler_raw_update_one.await_args is not None
+    awaited_raw_update = mock_mongodb_handler_raw_update_one.await_args
+    collection, query, update = awaited_raw_update.args[:3]
+    assert collection == Collection.SETTINGS
+    assert query == {"_id": "availability"}
+    assert update["$set"]["template_name"] == "IrvineHacks 2027"
+    assert update["$set"]["locked"] is False
+    mock_mongodb_handler_delete.assert_awaited_once_with(
+        Collection.AVAILABILITY,
+        {},
+    )
+
+
+@patch("services.mongodb_handler.delete", autospec=True)
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_director_can_reset_availability_template(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+    mock_mongodb_handler_delete: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
+
+    res = director_client.delete("/availability/template")
+
+    assert res.status_code == 200
+    mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
+        Collection.SETTINGS,
+        {"_id": "availability"},
+        {
+            "$unset": {
+                "template_name": "",
+                "requested_at": "",
+                "requested_by": "",
+            },
+            "$set": {"locked": False},
+        },
+        upsert=True,
+    )
+    mock_mongodb_handler_delete.assert_awaited_once_with(
+        Collection.AVAILABILITY,
+        {},
+    )
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
@@ -204,7 +343,10 @@ def test_director_can_clear_availability(
     res = director_client.delete("/availability")
 
     assert res.status_code == 200
-    mock_mongodb_handler_delete.assert_awaited_once_with(Collection.AVAILABILITY, {})
+    mock_mongodb_handler_delete.assert_awaited_once_with(
+        Collection.AVAILABILITY,
+        {},
+    )
 
 
 @patch("services.mongodb_handler.delete", autospec=True)

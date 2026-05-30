@@ -203,7 +203,7 @@ function TemplateManagement() {
 			await axios.post("/api/director/create-template", body);
 		}
 		await axios.post("/api/director/update-template", {
-			original_template_name: decodeURIComponent(templateName),
+			original_template_name: isNew ? name : decodeURIComponent(templateName),
 			template_name: payload.template_name,
 			event_dates: payload.event_dates,
 			shifts: payload.shifts,

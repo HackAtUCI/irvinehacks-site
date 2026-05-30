@@ -14,6 +14,9 @@ import axios from "axios";
 import NotificationContext from "@/lib/admin/NotificationContext";
 import useAvailability, { AvailabilitySlot } from "@/lib/admin/useAvailability";
 import useAvailabilityLock from "@/lib/admin/useAvailabilityLock";
+import useAvailabilityTemplate, {
+	AvailabilityTemplateShift,
+} from "@/lib/admin/useAvailabilityTemplate";
 
 type AvailabilityStatus = "not-submitted" | "submitted" | "editing";
 type DragMode = "select" | "deselect" | null;
@@ -23,17 +26,6 @@ type EventDay = {
 	label: string;
 	weekday: string;
 };
-
-const EVENT_DAYS: EventDay[] = [
-	{ date: "2027-10-09", label: "Oct 9", weekday: "Fri" },
-	{ date: "2027-10-10", label: "Oct 10", weekday: "Sat" },
-	{ date: "2027-10-11", label: "Oct 11", weekday: "Sun" },
-];
-
-const SLOT_START_MINUTES = Array.from(
-	{ length: 30 },
-	(_, index) => 9 * 60 + index * 30,
-);
 
 function formatSlotTime(totalMinutes: number) {
 	const hour = Math.floor(totalMinutes / 60);
@@ -60,6 +52,79 @@ function getSlotStartTime(totalMinutes: number) {
 
 function getBlockId(date: string, startTime: string) {
 	return `${date}-${startTime}`;
+}
+
+function getDatePart(dateTime: string) {
+	return dateTime.split("T")[0] ?? "";
+}
+
+function getMinutesFromDateTime(dateTime: string) {
+	const time = dateTime.split("T")[1]?.slice(0, 5) ?? "00:00";
+	const [hour, minute] = time.split(":").map(Number);
+	return hour * 60 + minute;
+}
+
+function getEventDays(eventDates: string[]): EventDay[] {
+	if (eventDates.length === 0) return [];
+
+	const startDate = getDatePart(eventDates[0]);
+	const endDate = getDatePart(eventDates[eventDates.length - 1]);
+	if (!startDate || !endDate) return [];
+
+	const [startYear, startMonth, startDay] = startDate.split("-").map(Number);
+	const [endYear, endMonth, endDay] = endDate.split("-").map(Number);
+	const current = new Date(Date.UTC(startYear, startMonth - 1, startDay));
+	const end = new Date(Date.UTC(endYear, endMonth - 1, endDay));
+	const days: EventDay[] = [];
+
+	while (current <= end) {
+		const date = current.toISOString().slice(0, 10);
+		days.push({
+			date,
+			label: current.toLocaleDateString("en-US", {
+				month: "short",
+				day: "numeric",
+				timeZone: "UTC",
+			}),
+			weekday: current.toLocaleDateString("en-US", {
+				weekday: "short",
+				timeZone: "UTC",
+			}),
+		});
+		current.setUTCDate(current.getUTCDate() + 1);
+	}
+
+	return days;
+}
+
+function getSlotStartMinutes(
+	eventDates: string[],
+	shifts: AvailabilityTemplateShift[],
+) {
+	const shiftTimes = shifts.flatMap((shift) => [
+		getMinutesFromDateTime(shift.hour.start_time),
+		getMinutesFromDateTime(shift.hour.end_time),
+	]);
+	const start =
+		shiftTimes.length > 0
+			? Math.min(...shiftTimes)
+			: eventDates[0]
+			  ? getMinutesFromDateTime(eventDates[0])
+			  : 9 * 60;
+	const end =
+		shiftTimes.length > 0
+			? Math.max(...shiftTimes)
+			: eventDates[eventDates.length - 1]
+			  ? getMinutesFromDateTime(eventDates[eventDates.length - 1])
+			  : 24 * 60;
+	const roundedStart = Math.floor(start / 30) * 30;
+	const roundedEnd = Math.ceil(end / 30) * 30;
+	const slotCount = Math.max((roundedEnd - roundedStart) / 30, 0);
+
+	return Array.from(
+		{ length: slotCount },
+		(_, index) => roundedStart + index * 30,
+	);
 }
 
 function slotsToBlockIds(availability: AvailabilitySlot[]) {
@@ -99,6 +164,12 @@ export default function MyAvailability() {
 		submitAvailability,
 	} = useAvailability();
 	const {
+		template,
+		templateName,
+		loading: templateLoading,
+		error: templateError,
+	} = useAvailabilityTemplate();
+	const {
 		isLocked,
 		loading: lockLoading,
 		error: lockError,
@@ -110,9 +181,13 @@ export default function MyAvailability() {
 	}, [availability, submittedAt]);
 
 	const selectedCount = selectedBlocks.size;
-	const isLoading = availabilityLoading || lockLoading;
-	const error = availabilityError || lockError;
+	const isLoading = availabilityLoading || lockLoading || templateLoading;
+	const error = availabilityError || lockError || templateError;
 	const isEditable = !isLocked && status !== "submitted" && !saving;
+	const eventDays = template ? getEventDays(template.event_dates) : [];
+	const slotStartMinutes = template
+		? getSlotStartMinutes(template.event_dates, template.shifts)
+		: [];
 
 	function showSuccessNotification(content: string) {
 		if (!setNotifications) return;
@@ -213,7 +288,7 @@ export default function MyAvailability() {
 	if (isLoading) {
 		return (
 			<SpaceBetween size="l">
-				<Header variant="h1">IrvineHacks 2027 Availability</Header>
+				<Header variant="h1">My Availability</Header>
 
 				<Container>
 					<SpaceBetween size="s" direction="horizontal" alignItems="center">
@@ -228,10 +303,35 @@ export default function MyAvailability() {
 	if (error) {
 		return (
 			<SpaceBetween size="l">
-				<Header variant="h1">IrvineHacks 2027 Availability</Header>
+				<Header variant="h1">My Availability</Header>
 
 				<Alert type="error" header="Unable to load availability">
 					Please refresh the page and try again.
+				</Alert>
+			</SpaceBetween>
+		);
+	}
+
+	if (!templateName || !template) {
+		return (
+			<SpaceBetween size="l">
+				<Header variant="h1">My Availability</Header>
+
+				<Alert type="info" header="Availability has not been requested">
+					Directors have not opened organizer availability yet.
+				</Alert>
+			</SpaceBetween>
+		);
+	}
+
+	if (eventDays.length === 0 || slotStartMinutes.length === 0) {
+		return (
+			<SpaceBetween size="l">
+				<Header variant="h1">{templateName} Availability</Header>
+
+				<Alert type="warning" header="Template is missing availability times">
+					Ask a director to add event dates and shifts before submitting
+					availability.
 				</Alert>
 			</SpaceBetween>
 		);
@@ -259,7 +359,7 @@ export default function MyAvailability() {
 					)
 				}
 			>
-				IrvineHacks 2027 Availability
+				{templateName} Availability
 			</Header>
 
 			<SpaceBetween size="s">
@@ -283,9 +383,8 @@ export default function MyAvailability() {
 				>
 					<div>
 						<div style={{ height: "58px" }} />
-
-						{SLOT_START_MINUTES.map((slotStartMinutes) => (
-							<Box key={slotStartMinutes} fontSize="body-m">
+						{slotStartMinutes.map((slotStartMinute) => (
+							<Box key={slotStartMinute} fontSize="body-m">
 								<div
 									style={{
 										height: "28px",
@@ -293,8 +392,8 @@ export default function MyAvailability() {
 										alignItems: "flex-start",
 									}}
 								>
-									{slotStartMinutes % 60 === 0
-										? formatHourLabel(slotStartMinutes)
+									{slotStartMinute % 60 === 0
+										? formatHourLabel(slotStartMinute)
 										: ""}
 								</div>
 							</Box>
@@ -305,11 +404,11 @@ export default function MyAvailability() {
 						<div
 							style={{
 								display: "grid",
-								gridTemplateColumns: "repeat(3, 1fr)",
+								gridTemplateColumns: `repeat(${eventDays.length}, 1fr)`,
 								height: "58px",
 							}}
 						>
-							{EVENT_DAYS.map((day) => (
+							{eventDays.map((day) => (
 								<div
 									key={day.date}
 									style={{
@@ -330,13 +429,13 @@ export default function MyAvailability() {
 						<div
 							style={{
 								display: "grid",
-								gridTemplateColumns: "repeat(3, 1fr)",
+								gridTemplateColumns: `repeat(${eventDays.length}, 1fr)`,
 								borderTop: "1px solid #d0d0d0",
 								borderLeft: "1px solid #d0d0d0",
 								borderBottom: "1px solid #d0d0d0",
 							}}
 						>
-							{EVENT_DAYS.map((day) => (
+							{eventDays.map((day) => (
 								<div
 									key={day.date}
 									style={{
@@ -345,8 +444,8 @@ export default function MyAvailability() {
 										borderRight: "1px solid #111",
 									}}
 								>
-									{SLOT_START_MINUTES.map((slotStartMinutes, slotIndex) => {
-										const startTime = getSlotStartTime(slotStartMinutes);
+									{slotStartMinutes.map((slotStartMinute, slotIndex) => {
+										const startTime = getSlotStartTime(slotStartMinute);
 										const blockId = getBlockId(day.date, startTime);
 										const isSelected = selectedBlocks.has(blockId);
 
@@ -358,7 +457,7 @@ export default function MyAvailability() {
 												aria-pressed={isSelected}
 												aria-label={`${day.weekday}, ${
 													day.label
-												}, ${formatSlotTime(slotStartMinutes)}`}
+												}, ${formatSlotTime(slotStartMinute)}`}
 												onMouseDown={(event) => {
 													event.preventDefault();
 													handleBlockMouseDown(day.date, startTime);
@@ -370,7 +469,7 @@ export default function MyAvailability() {
 													height: "28px",
 													border: "none",
 													borderBottom:
-														slotIndex === SLOT_START_MINUTES.length - 1
+														slotIndex === slotStartMinutes.length - 1
 															? "none"
 															: "1px dotted #8f8f8f",
 													background: isSelected ? "#bfbfbf" : "white",

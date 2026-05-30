@@ -16,7 +16,22 @@ import TimeInput from "@cloudscape-design/components/time-input";
 import Form from "@cloudscape-design/components/form";
 
 import ShiftCard from "./ShiftCard";
-import type { Shift, ShiftErrors, APIShift } from "./ShiftTypes";
+import type { Shift, ShiftErrors } from "./ShiftTypes";
+
+export interface APIShift {
+	shift_name: string;
+	location: string;
+	min_num_organizers: number;
+	shift_pts: number;
+	hour: {
+		start_time: string;
+		end_time: string;
+		director_on_shift: string[];
+	};
+	committee_prereq?: string;
+	subcommittee_prereq?: string;
+	preassigned_orgs: string[];
+}
 
 function emptyShift(): Shift {
 	return {
@@ -72,7 +87,7 @@ function shiftFromAPI(apiShift: APIShift): Shift {
 	};
 }
 
-function shiftToPayload(shift: Shift) {
+function shiftToPayload(shift: any) {
 	const startTime = shift.startTime.slice(0, 5);
 	const endTime = shift.endTime.slice(0, 5);
 
@@ -155,10 +170,11 @@ function TemplateManagement() {
 		axios
 			.get(`/api/director/templates/${decodeURIComponent(templateName)}`)
 			.then(({ data }) => {
+				console.log(data);
 				setName(data.template_name);
 				setDateTime(data.event_start, setEventStartDate, setEventStartTime);
 				setDateTime(data.event_end, setEventEndDate, setEventEndTime);
-				setShifts(data.shifts?.map(shiftFromAPI) ?? [emptyShift()]);
+				setShifts((data.shifts ?? []).map(shiftFromAPI));
 			});
 	}, [isNew, templateName]);
 

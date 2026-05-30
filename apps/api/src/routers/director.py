@@ -11,7 +11,7 @@ from admin import applicant_review_processor
 from auth.authorization import require_role
 from auth.user_identity import User, uci_email, utc_now
 from models.ApplicationData import Decision
-from models.Schedule import Hour, Shift, ScheduleTemplate, ScheduleTemplateInfo, PublishedDraft, DraftInfo, Draft
+from models.Schedule import Shift, ScheduleTemplate, ScheduleTemplateInfo
 from models.user_record import Role, Status
 from services import mongodb_handler, sendgrid_handler
 from services.mongodb_handler import BaseRecord, Collection

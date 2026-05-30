@@ -87,7 +87,7 @@ function shiftFromAPI(apiShift: APIShift): Shift {
 	};
 }
 
-function shiftToPayload(shift: any) {
+function shiftToPayload(shift: Shift) {
 	const startTime = shift.startTime.slice(0, 5);
 	const endTime = shift.endTime.slice(0, 5);
 

@@ -723,6 +723,7 @@ async def update_template(
     event_dates: list[datetime],
     shifts: list[Shift],
     template_name: str = Body(embed=True),
+    original_template_name: str = Body(embed=True),
 ) -> None:
 
     await mongodb_handler.raw_update_one(
@@ -730,6 +731,7 @@ async def update_template(
         {"_id": "templates"},
         {
             "$set": {
+                "templates.$[t].template_name": template_name,
                 "templates.$[t].template_info": {
                     "event_dates": [d.isoformat() for d in event_dates],
                     "shifts": [shift.model_dump(mode="json") for shift in shifts],
@@ -737,9 +739,9 @@ async def update_template(
                 }
             }
         },
-        array_filters=[{"t.template_name": template_name}],
+        array_filters=[{"t.template_name": original_template_name}],
     )
-    log.info("Template name searched: '%s'", template_name)
+    log.info("Template name searched: '%s'", original_template_name)
 
 
 async def _process_decision(

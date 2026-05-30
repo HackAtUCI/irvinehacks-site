@@ -10,12 +10,13 @@ import Header from "@cloudscape-design/components/header";
 import Button from "@cloudscape-design/components/button";
 import DatePicker from "@cloudscape-design/components/date-picker";
 import FormField from "@cloudscape-design/components/form-field";
+import Input from "@cloudscape-design/components/input";
 import TimeInput from "@cloudscape-design/components/time-input";
 
 import Form from "@cloudscape-design/components/form";
 
 import ShiftCard from "./ShiftCard";
-import type { Shift, ShiftErrors } from "./ShiftTypes";
+import type { Shift, ShiftErrors, APIShift } from "./ShiftTypes";
 
 function emptyShift(): Shift {
 	return {
@@ -48,7 +49,7 @@ function toISODate(cloudscapeDate: string) {
 	return cloudscapeDate.replace(/\//g, "-");
 }
 
-function shiftFromAPI(apiShift: any): Shift {
+function shiftFromAPI(apiShift: APIShift): Shift {
 	const startDT = apiShift.hour?.start_time ?? "";
 	const endDT = apiShift.hour?.end_time ?? "";
 
@@ -186,6 +187,7 @@ function TemplateManagement() {
 			await axios.post("/api/director/create-template", body);
 		}
 		await axios.post("/api/director/update-template", {
+			original_template_name: decodeURIComponent(templateName),
 			template_name: payload.template_name,
 			event_dates: payload.event_dates,
 			shifts: payload.shifts,
@@ -225,7 +227,7 @@ function TemplateManagement() {
 				<Header
 					variant="h1"
 					actions={
-						<SpaceBetween direction="horizontal" size="xs">
+						<SpaceBetween direction="horizontal" size="l">
 							<Button variant="normal" onClick={handleDiscard}>
 								Discard
 							</Button>
@@ -235,7 +237,15 @@ function TemplateManagement() {
 						</SpaceBetween>
 					}
 				>
-					<div style={{ width: "400px" }}>{name}</div>
+					<FormField label="Template name">
+						<div style={{ width: "600px" }}>
+							<Input
+								value={name}
+								onChange={({ detail }) => setName(detail.value)}
+								placeholder="Enter template name"
+							/>
+						</div>
+					</FormField>
 				</Header>
 			}
 		>

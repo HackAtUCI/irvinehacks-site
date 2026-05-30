@@ -23,3 +23,19 @@ export interface ShiftErrors {
 	endDate?: string;
 	endTime?: string;
 }
+
+export type APIShift = {
+	shift_name?: string;
+	location?: string;
+	min_num_organizers?: number;
+	shift_pts?: number;
+	committee_prereq?: string;
+	subcommittee_prereq?: string;
+	preassigned_orgs?: string[];
+
+	hour?: {
+		start_time?: string;
+		end_time?: string;
+		director_on_shift?: string[];
+	};
+};

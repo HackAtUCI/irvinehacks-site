@@ -3,10 +3,17 @@ from typing import Annotated, Optional
 
 from pydantic import BaseModel, Field
 
+from models.Schedule import Shift
 from services.mongodb_handler import BaseRecord
 
-AvailabilityDate = Annotated[str, Field(pattern=r"^\d{4}-\d{2}-\d{2}$")]
-AvailabilityStartTime = Annotated[str, Field(pattern=r"^([01]\d|2[0-3]):(00|30)$")]
+AVAILABILITY_DATE_PATTERN = r"^\d{4}-\d{2}-\d{2}$"
+AVAILABILITY_START_TIME_PATTERN = r"^([01]\d|2[0-3]):(00|30)$"
+
+AvailabilityDate = Annotated[str, Field(pattern=AVAILABILITY_DATE_PATTERN)]
+AvailabilityStartTime = Annotated[
+    str,
+    Field(pattern=AVAILABILITY_START_TIME_PATTERN),
+]
 
 
 class AvailabilitySlot(BaseModel):
@@ -16,12 +23,14 @@ class AvailabilitySlot(BaseModel):
 
 class OrganizerAvailability(BaseRecord):
     availability: list[AvailabilitySlot] = []
+    template_name: Optional[str] = None
     submitted_at: datetime
     updated_at: datetime
 
 
 class OrganizerAvailabilityResponse(BaseModel):
     availability: list[AvailabilitySlot] = []
+    template_name: Optional[str] = None
     submitted_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
@@ -32,3 +41,9 @@ class AvailabilityPayload(BaseModel):
 
 class AvailabilityLockResponse(BaseModel):
     locked: bool = False
+
+
+class AvailabilityTemplateResponse(BaseModel):
+    template_name: Optional[str] = None
+    event_dates: list[datetime] = []
+    shifts: list[Shift] = []

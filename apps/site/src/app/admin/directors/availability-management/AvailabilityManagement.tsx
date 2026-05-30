@@ -10,6 +10,7 @@ import ColumnLayout from "@cloudscape-design/components/column-layout";
 import Container from "@cloudscape-design/components/container";
 import Header from "@cloudscape-design/components/header";
 import Modal from "@cloudscape-design/components/modal";
+import Select, { SelectProps } from "@cloudscape-design/components/select";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import Spinner from "@cloudscape-design/components/spinner";
 import TextContent from "@cloudscape-design/components/text-content";
@@ -22,7 +23,9 @@ import UserContext from "@/lib/admin/UserContext";
 
 import useAvailabilityLock from "@/lib/admin/useAvailabilityLock";
 import useAvailabilitySubmissions from "@/lib/admin/useAvailabilitySubmissions";
+import useAvailabilityTemplate from "@/lib/admin/useAvailabilityTemplate";
 import useOrganizers from "@/lib/admin/useOrganizers";
+import useTemplates from "@/lib/admin/useTemplates";
 
 type AvailabilityOrganizer = {
 	id: string;
@@ -132,6 +135,7 @@ export default function AvailabilityManagement() {
 		loading: submissionsLoading,
 		error: submissionsError,
 		clearAvailability,
+		mutate: mutateSubmissions,
 	} = useAvailabilitySubmissions();
 	const {
 		isLocked,
@@ -139,10 +143,23 @@ export default function AvailabilityManagement() {
 		error: lockError,
 		setLocked,
 	} = useAvailabilityLock();
+	const {
+		templateName,
+		loading: availabilityTemplateLoading,
+		error: availabilityTemplateError,
+		requestAvailabilityTemplate,
+		resetAvailabilityTemplate,
+	} = useAvailabilityTemplate();
+	const { templateList, loading: templatesLoading } = useTemplates();
 
 	const [savingLock, setSavingLock] = useState(false);
 	const [clearingAvailability, setClearingAvailability] = useState(false);
 	const [clearModalVisible, setClearModalVisible] = useState(false);
+	const [requestingTemplate, setRequestingTemplate] = useState(false);
+	const [resettingTemplate, setResettingTemplate] = useState(false);
+	const [resetModalVisible, setResetModalVisible] = useState(false);
+	const [selectedTemplate, setSelectedTemplate] =
+		useState<SelectProps.Option | null>(null);
 
 	const submittedOrganizerIdSet = useMemo(
 		() => new Set(submittedOrganizerIds),
@@ -230,14 +247,61 @@ export default function AvailabilityManagement() {
 		}
 	}
 
+	async function handleRequestTemplate() {
+		if (!selectedTemplate?.value) return;
+
+		try {
+			setRequestingTemplate(true);
+			await requestAvailabilityTemplate(selectedTemplate.value);
+			await mutateSubmissions([], false);
+			showNotification("Availability has been requested.");
+		} catch (err) {
+			const message =
+				axios.isAxiosError(err) && err.response?.status === 404
+					? "That template could not be found."
+					: "Unable to request availability. Please try again.";
+			showNotification(message, "error");
+		} finally {
+			setRequestingTemplate(false);
+		}
+	}
+
+	async function handleResetTemplate() {
+		try {
+			setResettingTemplate(true);
+			await resetAvailabilityTemplate();
+			await mutateSubmissions([], false);
+			setSelectedTemplate(null);
+			setResetModalVisible(false);
+			showNotification("Availability template has been reset.");
+		} catch (err) {
+			const message =
+				axios.isAxiosError(err) && err.response?.status === 403
+					? "Only directors can reset the availability template."
+					: "Unable to reset availability template. Please try again.";
+			showNotification(message, "error");
+		} finally {
+			setResettingTemplate(false);
+		}
+	}
+
 	const router = useRouter();
 
 	if (!isDirector(roles)) {
 		router.push("/admin/dashboard");
 	}
 
-	const loading = organizersLoading || submissionsLoading || lockLoading;
-	const error = organizersError || submissionsError || lockError;
+	const loading =
+		organizersLoading ||
+		submissionsLoading ||
+		lockLoading ||
+		availabilityTemplateLoading ||
+		templatesLoading;
+	const error =
+		organizersError ||
+		submissionsError ||
+		lockError ||
+		availabilityTemplateError;
 
 	if (loading) {
 		return (
@@ -268,13 +332,74 @@ export default function AvailabilityManagement() {
 		);
 	}
 
+	const templateOptions: SelectProps.Options = templateList.map((template) => ({
+		label: template.name,
+		value: template.name,
+		description:
+			template.startDate && template.endDate
+				? `${new Date(template.startDate).toLocaleDateString()} - ${new Date(
+						template.endDate,
+				  ).toLocaleDateString()}`
+				: undefined,
+	}));
+
+	if (!templateName) {
+		return (
+			<SpaceBetween size="l">
+				<Header variant="h1">Availability Management</Header>
+
+				<Container>
+					<SpaceBetween size="m">
+						<Header variant="h2">Choose a template</Header>
+						{templateList.length === 0 ? (
+							<Alert type="info" header="No templates created">
+								Create a shift template before requesting organizer
+								availability.
+							</Alert>
+						) : (
+							<SpaceBetween direction="horizontal" size="s" alignItems="center">
+								<div style={{ width: "360px" }}>
+									<Select
+										selectedOption={selectedTemplate}
+										onChange={({ detail }) =>
+											setSelectedTemplate(detail.selectedOption)
+										}
+										options={templateOptions}
+										placeholder="Choose a template"
+									/>
+								</div>
+								<Button
+									variant="primary"
+									onClick={handleRequestTemplate}
+									disabled={!selectedTemplate?.value}
+									loading={requestingTemplate}
+								>
+									Submit
+								</Button>
+							</SpaceBetween>
+						)}
+					</SpaceBetween>
+				</Container>
+			</SpaceBetween>
+		);
+	}
+
 	return (
 		<SpaceBetween size="l">
 			<Header
 				variant="h1"
-				description="Monitor organizer availability submissions and lock availability before generating schedules."
+				description={`Current template: ${templateName}`}
+				actions={
+					<Button
+						onClick={() => setResetModalVisible(true)}
+						disabled={resettingTemplate}
+						loading={resettingTemplate}
+					>
+						Reset template
+					</Button>
+				}
 			>
-				Availability Management
+				{templateName} Availability Management
 			</Header>
 
 			<ColumnLayout columns={3} variant="text-grid">
@@ -426,6 +551,44 @@ export default function AvailabilityManagement() {
 					<p>
 						This removes every organizer&apos;s submitted availability. This
 						action cannot be undone.
+					</p>
+				</TextContent>
+			</Modal>
+
+			<Modal
+				visible={resetModalVisible}
+				onDismiss={() => {
+					if (!resettingTemplate) {
+						setResetModalVisible(false);
+					}
+				}}
+				header="Reset availability template?"
+				footer={
+					<Box float="right">
+						<SpaceBetween direction="horizontal" size="xs">
+							<Button
+								variant="link"
+								disabled={resettingTemplate}
+								onClick={() => setResetModalVisible(false)}
+							>
+								Cancel
+							</Button>
+							<Button
+								variant="primary"
+								loading={resettingTemplate}
+								onClick={handleResetTemplate}
+							>
+								Reset template
+							</Button>
+						</SpaceBetween>
+					</Box>
+				}
+			>
+				<TextContent>
+					<p>
+						Are you sure you want to clear all availabilities? This resets the
+						current template and removes every organizer&apos;s submitted
+						availability.
 					</p>
 				</TextContent>
 			</Modal>

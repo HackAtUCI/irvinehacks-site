@@ -8,6 +8,7 @@ export interface AvailabilitySlot {
 
 export interface AvailabilityResponse {
 	availability: AvailabilitySlot[];
+	template_name: string | null;
 	submitted_at: string | null;
 	updated_at: string | null;
 }
@@ -35,6 +36,7 @@ function useAvailability() {
 
 	return {
 		availability: data?.availability ?? [],
+		templateName: data?.template_name ?? null,
 		submittedAt: data?.submitted_at ?? null,
 		updatedAt: data?.updated_at ?? null,
 		loading: isLoading,

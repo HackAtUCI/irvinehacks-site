@@ -28,7 +28,7 @@ const config: Config = {
 				heading: ["Ethnocentric"],
 				display: ["NicoMoji"],
 				sans: ["Lexend Giga"],
-				cantarell: ["Cantarell", "sans-serif"]
+				cantarell: ["Cantarell", "sans-serif"],
 			},
 			colors: {
 				white: "var(--color-white)",

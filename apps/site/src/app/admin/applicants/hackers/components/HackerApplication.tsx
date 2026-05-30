@@ -55,6 +55,7 @@ interface IrvineHacksHackerApplicationProps {
 	applicant: Uid;
 	reviews: Review[];
 	onDeleteNotes: (uid: Uid, idx: number) => void;
+	isDirector: boolean;
 }
 
 function IrvineHacksHackerApplication({
@@ -67,6 +68,7 @@ function IrvineHacksHackerApplication({
 	onNotesChange,
 	reviews,
 	onDeleteNotes,
+	isDirector,
 }: IrvineHacksHackerApplicationProps) {
 	const { uid: reviewer_uid } = useContext(UserContext);
 	const formattedUid = reviewer_uid?.split(".").at(-1);
@@ -85,10 +87,12 @@ function IrvineHacksHackerApplication({
 	// Controlled scores for each section
 	const [previousExperienceScore, setPreviousExperienceScore] =
 		useState<number>(
-			formattedUid
-				? application_data?.review_breakdown?.[formattedUid]
-						?.previous_experience ?? -1
-				: -1,
+			application_data.director_previous_experience_review
+				?.previous_experience ??
+				(formattedUid
+					? application_data?.review_breakdown?.[formattedUid]
+							?.previous_experience ?? -1
+					: -1),
 		);
 
 	const [frqChangeScore, setFrqChangeScore] = useState<number>(
@@ -110,17 +114,19 @@ function IrvineHacksHackerApplication({
 	const [showResume, setShowResume] = useState<boolean>(false);
 
 	const hasSocials =
-		application_data.linkedin || application_data.portfolio ? 1 : 0;
+		isDirector && (application_data.linkedin || application_data.portfolio)
+			? 1
+			: 0;
 
-	const hackathonExperienceScore = application_data.is_first_hackathon ? 5 : 0;
+	const hackathonExperienceScore =
+		isDirector && application_data.is_first_hackathon ? 5 : 0;
 
 	useEffect(() => {
-		const scoresObject: IrvineHacksHackerScoredFields = {
-			has_socials: hasSocials,
-		};
+		const scoresObject: IrvineHacksHackerScoredFields = {};
 
 		// Only include fields that don't have -1 values
-		if (previousExperienceScore !== -1) {
+		if (isDirector && previousExperienceScore !== -1) {
+			scoresObject.has_socials = hasSocials;
 			scoresObject.previous_experience = previousExperienceScore;
 		}
 		if (frqChangeScore !== -1) {
@@ -141,71 +147,78 @@ function IrvineHacksHackerApplication({
 		frqAmbitionScore,
 		frqCharacterScore,
 		application_data,
+		isDirector,
 		onScoreChange,
 	]);
 
 	return (
 		<SpaceBetween direction="vertical" size="m">
 			<Header variant="h2">IrvineHacks Hacker Application</Header>
-			<Container>
-				{Object.entries(IH_HACKER_APPLICATION_SECTIONS).map(
-					([section, propsToShow]) => (
-						<HackerApplicationSection
-							key={section}
-							title={section}
-							data={application_data}
-							propsToShow={propsToShow}
-						/>
-					),
-				)}
-			</Container>
-			<ScoreSection
-				title="Previous Experience"
-				leftColumn={
-					guidelines?.guidelines?.prev_experience && (
-						<PortableText value={guidelines.guidelines.prev_experience} />
-					)
-				}
-				rightColumn={
-					<>
-						<Button onClick={() => setShowResume(true)}>View resume</Button>
-						<br />
-						<a
-							href={
-								application_data.resume_url ? application_data.resume_url : ""
-							}
-							rel="noopener noreferrer"
-							target="_blank"
-						>
-							{application_data.resume_url}
-						</a>
-						{showResume && (
-							<Modal
-								onDismiss={() => setShowResume(false)}
-								visible={showResume}
-								closeAriaLabel="Close modal"
-								header="Resume"
-								size="max"
-							>
-								<Box>
-									<iframe
-										src={`${application_data.resume_url}/preview`}
-										title="Resume"
-										style={{ width: "100%", height: "80vh", border: 0 }}
-									/>
-								</Box>
-							</Modal>
+			{isDirector && (
+				<>
+					<Container>
+						{Object.entries(IH_HACKER_APPLICATION_SECTIONS).map(
+							([section, propsToShow]) => (
+								<HackerApplicationSection
+									key={section}
+									title={section}
+									data={application_data}
+									propsToShow={propsToShow}
+								/>
+							),
 						)}
-					</>
-				}
-				options={previousExperienceOptions}
-				useDropdown
-				value={previousExperienceScore}
-				onChange={(value) => {
-					setPreviousExperienceScore(value);
-					onResumeScore(value, hackathonExperienceScore);
-				}}
-			/>
+					</Container>
+					<ScoreSection
+						title="Previous Experience"
+						leftColumn={
+							guidelines?.guidelines?.prev_experience && (
+								<PortableText value={guidelines.guidelines.prev_experience} />
+							)
+						}
+						rightColumn={
+							<>
+								<Button onClick={() => setShowResume(true)}>View resume</Button>
+								<br />
+								<a
+									href={
+										application_data.resume_url
+											? application_data.resume_url
+											: ""
+									}
+									rel="noopener noreferrer"
+									target="_blank"
+								>
+									{application_data.resume_url}
+								</a>
+								{showResume && (
+									<Modal
+										onDismiss={() => setShowResume(false)}
+										visible={showResume}
+										closeAriaLabel="Close modal"
+										header="Resume"
+										size="max"
+									>
+										<Box>
+											<iframe
+												src={`${application_data.resume_url}/preview`}
+												title="Resume"
+												style={{ width: "100%", height: "80vh", border: 0 }}
+											/>
+										</Box>
+									</Modal>
+								)}
+							</>
+						}
+						options={previousExperienceOptions}
+						useDropdown
+						value={previousExperienceScore}
+						onChange={(value) => {
+							setPreviousExperienceScore(value);
+							onResumeScore(value, hackathonExperienceScore);
+						}}
+					/>
+				</>
+			)}
 			{guidelines?.guidelines?.frq_guideline && (
 				<Container>
 					<SpaceBetween direction="vertical" size="m">
@@ -256,12 +269,14 @@ function IrvineHacksHackerApplication({
 				onChange={setFrqCharacterScore}
 				wordLimit={75}
 			/>
-			<CharacterDisplay
-				headIndex={application_data.character_head_index}
-				bodyIndex={application_data.character_body_index}
-				feetIndex={application_data.character_feet_index}
-				companionIndex={application_data.character_companion_index}
-			/>
+			{isDirector && (
+				<CharacterDisplay
+					headIndex={application_data.character_head_index}
+					bodyIndex={application_data.character_body_index}
+					feetIndex={application_data.character_feet_index}
+					companionIndex={application_data.character_companion_index}
+				/>
+			)}
 			<ReviewerNotes
 				applicant={applicant}
 				notes={notes}

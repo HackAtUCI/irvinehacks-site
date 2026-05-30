@@ -12,9 +12,11 @@ from pydantic import (
     EmailStr,
     Field,
     HttpUrl,
+    SerializerFunctionWrapHandler,
     Tag,
     field_serializer,
     field_validator,
+    model_serializer,
 )
 
 
@@ -28,6 +30,13 @@ class Decision(str, Enum):
 Review = tuple[
     datetime, str, float, Optional[Annotated[str, Field(max_length=2048)]]
 ]  # (timestamp, reviewer_uid, score, notes)
+
+
+class DirectorPreviousExperienceReview(BaseModel):
+    reviewer: str
+    reviewed_at: datetime
+    previous_experience: Optional[float] = None
+    has_socials: Optional[float] = None
 
 
 def make_empty_none(val: Union[str, None]) -> Union[str, None]:
@@ -266,6 +275,18 @@ class ProcessedHackerApplicationData(BaseApplicationData):
     global_field_scores: dict[str, float] = {}
     # TODO: Create aliases for these global_field_scores
     # dict[field that can have detailed reviews, score]
+    director_previous_experience_review: Optional[DirectorPreviousExperienceReview] = (
+        None
+    )
+
+    @model_serializer(mode="wrap")
+    def omit_empty_director_review(
+        self, handler: SerializerFunctionWrapHandler
+    ) -> dict[str, Any]:
+        data: dict[str, Any] = handler(self)
+        if self.director_previous_experience_review is None:
+            data.pop("director_previous_experience_review", None)
+        return data
 
     @field_serializer("linkedin", "portfolio", "resume_url")
     def url2str(self, val: Union[HttpUrl, None]) -> Union[str, None]:

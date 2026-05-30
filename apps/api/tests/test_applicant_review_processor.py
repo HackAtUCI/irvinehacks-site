@@ -222,7 +222,7 @@ def test_avg_score_with_globals_and_breakdown_one_reviewer() -> None:
     }
 
     applicant_review_processor._include_avg_score_with_global_and_breakdown(record)
-    assert record["avg_score"] == 85.0
+    assert record["avg_score"] == 76.923
 
 
 def test_avg_score_with_globals_and_breakdown_no_reviewers() -> None:

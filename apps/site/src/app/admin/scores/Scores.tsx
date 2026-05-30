@@ -70,10 +70,10 @@ const downloadCSV = (
 
 		return [
 			`${a.first_name} ${a.last_name}`,
-			a.application_data.email,
+			a.application_data.email || "",
 			a.application_data.major || "",
 			a.application_data.linkedin || "",
-			a.application_data.resume_url,
+			a.application_data.resume_url || "",
 			a.avgNormalizedScore.toFixed(2),
 			comments,
 		]
@@ -110,7 +110,7 @@ const ResumeModalButton = (
 					variant="link"
 					onClick={() =>
 						window.open(
-							item.application_data.resume_url,
+							item.application_data.resume_url || "",
 							"_blank",
 							"noopener,noreferrer",
 						)
@@ -128,7 +128,7 @@ const ResumeModalButton = (
 			>
 				<Box>
 					<iframe
-						src={`${item.application_data.resume_url}/preview`}
+						src={`${item.application_data.resume_url || ""}/preview`}
 						title="Resume"
 						style={{ width: "100%", height: "80vh", border: 0 }}
 					/>
@@ -174,7 +174,7 @@ const COLUMNS = [
 	{
 		id: "email",
 		header: "Email",
-		cell: (item: ScoredHackerApplicant) => item.application_data.email,
+		cell: (item: ScoredHackerApplicant) => item.application_data.email || "-",
 	},
 	{
 		id: "major",
@@ -207,7 +207,12 @@ function Scores() {
 	const [isExcludeModalVisible, setIsExcludeModalVisible] = useState(false);
 
 	const filteredApplicants = useMemo(
-		() => applicantList.filter((a) => a.avg_score !== OVERQUALIFIED_SCORE),
+		() =>
+			applicantList.filter(
+				(a) =>
+					a.director_previous_experience_reviewed &&
+					a.avg_score !== OVERQUALIFIED_SCORE,
+			),
 		[applicantList],
 	);
 

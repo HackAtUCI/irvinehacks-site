@@ -12,6 +12,7 @@ export interface HackerApplicantSummary {
 	reviewers: ReadonlyArray<string>;
 	avg_score: number;
 	resume_reviewed: boolean;
+	director_previous_experience_reviewed: boolean;
 	duplicate_name_approved: boolean;
 	application_data: {
 		school?: string;
@@ -19,8 +20,8 @@ export interface HackerApplicantSummary {
 		submission_time: string;
 		normalized_scores?: Record<string, number>;
 		extra_points?: number;
-		email: string;
-		resume_url: string;
+		email?: string;
+		resume_url?: string;
 		major?: string;
 		linkedin?: string;
 		reviews?: ReadonlyArray<[string, string, number, string?]>;

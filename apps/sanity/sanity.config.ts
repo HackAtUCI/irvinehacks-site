@@ -27,7 +27,7 @@ export default defineConfig({
 									"zothacksHackerScoringGuidelines",
 									"irvinehacksHackerScoringGuidelines",
 									"irvinehacksMentorScoringGuidelines",
-								].includes(listItem.getId()!)
+								].includes(listItem.getId()!),
 						),
 						S.divider(),
 						S.listItem()
@@ -37,15 +37,15 @@ export default defineConfig({
 								S.document()
 									.schemaType("resourceCategoryOrder")
 									.documentId("resourceCategoryOrder")
-									.title("Resource Categories Order")
+									.title("Resource Categories Order"),
 							),
 						S.listItem()
 							.title("Resource Categories")
 							.icon(Folders)
 							.child(
 								S.documentTypeList("resourceCategory").title(
-									"Resource Categories"
-								)
+									"Resource Categories",
+								),
 							),
 						S.listItem()
 							.title("Resources")
@@ -57,8 +57,8 @@ export default defineConfig({
 							.icon(Newspaper)
 							.child(
 								S.documentTypeList("zothacksHackerScoringGuidelines").title(
-									"Zothacks Hacker Scoring Guidelines"
-								)
+									"Zothacks Hacker Scoring Guidelines",
+								),
 							),
 						S.divider(),
 						S.listItem()
@@ -66,16 +66,16 @@ export default defineConfig({
 							.icon(Newspaper)
 							.child(
 								S.documentTypeList("irvinehacksHackerScoringGuidelines").title(
-									"IrvineHacks Hacker Scoring Guidelines"
-								)
+									"IrvineHacks Hacker Scoring Guidelines",
+								),
 							),
 						S.listItem()
 							.title("IrvineHacks Mentor Scoring Guidelines")
 							.icon(Newspaper)
 							.child(
 								S.documentTypeList("irvinehacksMentorScoringGuidelines").title(
-									"IrvineHacks Mentor Scoring Guidelines"
-								)
+									"IrvineHacks Mentor Scoring Guidelines",
+								),
 							),
 					]),
 		}),

@@ -13,8 +13,15 @@ import ReturnHome from "./components/ReturnHome";
 import VerticalTimeline from "./components/timeline/VerticalTimeline";
 import QRCodeComponent from "./components/QRCode";
 import AvatarDisplay from "./components/AvatarDisplay";
+import DeclineAcceptance from "./components/DeclineAcceptance";
 
 const rolesArray = ["Mentor", "Hacker", "Volunteer"];
+const declineableStatuses: Status[] = [
+	Status.Accepted,
+	Status.Reviewed,
+	Status.Signed,
+	Status.Confirmed,
+];
 
 function Portal() {
 	const identity = useUserIdentity();
@@ -41,11 +48,21 @@ function Portal() {
 
 	const waitlistStarted = waitlistStatus?.is_started ?? false;
 	const waitlistOpen = waitlistStatus?.is_open ?? false;
+	const hasSignedWaiver =
+		status === Status.Signed ||
+		status === Status.Confirmed ||
+		status === Status.Attending;
 
-	const needsToSignWaiver = isAccepted || (isWaitlisted && waitlistStarted);
-	const needsToRSVP = isAccepted || (isWaitlisted && waitlistOpen);
+	const needsToSignWaiver =
+		!hasSignedWaiver && (isAccepted || (isWaitlisted && waitlistStarted));
+	const needsToRSVP =
+		hasSignedWaiver && (isAccepted || (isWaitlisted && waitlistOpen));
 
-	const rejected = status === Status.Rejected;
+	const showReturnHome = status === Status.Rejected || status === Status.Voided;
+	const canDeclineAcceptance =
+		roleToDisplay === "Hacker" &&
+		isAccepted &&
+		declineableStatuses.includes(status as Status);
 
 	return (
 		<div className="relative">
@@ -63,7 +80,8 @@ function Portal() {
 				</h2>
 				<AvatarDisplay />
 				<VerticalTimeline
-					status={identity?.decision ? identity?.decision : (status as Status)}
+					status={status as Status}
+					decision={identity?.decision as Decision | null}
 				/>
 				<Message
 					status={status as Status}
@@ -77,7 +95,8 @@ function Portal() {
 					/>
 				)}
 				{needsToRSVP && <ConfirmAttendance status={status as Status} />}
-				{rejected && <ReturnHome />}
+				{canDeclineAcceptance && <DeclineAcceptance />}
+				{showReturnHome && <ReturnHome />}
 			</div>
 		</div>
 	);

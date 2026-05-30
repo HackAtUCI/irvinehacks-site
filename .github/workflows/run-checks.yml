@@ -103,11 +103,21 @@ jobs:
       - name: Install frontend dependencies
         run: pnpm install
 
-      - name: Format with Prettier
+      - name: Format with Prettier (review)
         uses: EPMatt/reviewdog-action-prettier@v1
+        if: github.event_name == 'pull_request'
         with:
           level: warning
           reporter: github-pr-review
+          filter_mode: file
+          prettier_flags: apps/site/src
+
+      - name: Format with Prettier (check)
+        uses: EPMatt/reviewdog-action-prettier@v1
+        if: github.event_name == 'push'
+        with:
+          level: warning
+          reporter: github-check
           filter_mode: file
           prettier_flags: apps/site/src
 

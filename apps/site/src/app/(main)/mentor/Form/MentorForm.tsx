@@ -13,21 +13,49 @@ import MultipleSelect from "@/lib/components/forms/MultipleSelect";
 import ControlledMultipleSelect from "@/lib/components/forms/ControlledMultipleSelect";
 import ExtraQuestions from "@/lib/components/forms/shared/ExtraQuestions";
 import ShiftAvailability from "../../volunteer/components/ShiftAvailability";
+import { useDraftContext } from "@/lib/components/forms/shared/DraftContext";
+
+const MENTOR_TYPE_KEYS = ["is_tech_mentor", "is_design_mentor"] as const;
 
 export default function MentorForm() {
-	const [mentorSelection, setMentorSelection] = useState<
+	return (
+		<BaseForm applicationType="Mentor" applyPath="/api/user/mentor">
+			<MentorFormFields />
+		</BaseForm>
+	);
+}
+
+function MentorFormFields() {
+	const draftContext = useDraftContext();
+
+	const [mentorSelection, setMentorSelectionState] = useState<
 		Record<string, boolean>
-	>({
-		is_tech_mentor: false,
-		is_design_mentor: false,
+	>(() => {
+		const saved = draftContext?.initialValues["mentor_type"];
+		const selectedSet = new Set<string>();
+		if (Array.isArray(saved)) {
+			for (const value of saved) {
+				if (typeof value === "string") selectedSet.add(value);
+			}
+		}
+		return {
+			is_tech_mentor: selectedSet.has("is_tech_mentor"),
+			is_design_mentor: selectedSet.has("is_design_mentor"),
+		};
 	});
+
+	const setMentorSelection = (next: Record<string, boolean>) => {
+		setMentorSelectionState(next);
+		const selected = MENTOR_TYPE_KEYS.filter((key) => next[key]);
+		draftContext?.setValue("mentor_type", selected);
+	};
 
 	const hidden = !Object.values(mentorSelection).some((value) =>
 		Boolean(value),
 	);
 
 	return (
-		<BaseForm applicationType="Mentor" applyPath="/api/user/mentor">
+		<>
 			<div className="w-11/12">
 				<p className="text-lg">
 					[Note] If you have any questions about IrvineHacks or being a mentor,
@@ -112,6 +140,6 @@ export default function MentorForm() {
 				containerClass={`${hidden && "hidden"} flex flex-col w-11/12`}
 				isRequired={false}
 			/> */}
-		</BaseForm>
+		</>
 	);
 }

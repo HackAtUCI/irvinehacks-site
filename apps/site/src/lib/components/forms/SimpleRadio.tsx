@@ -1,5 +1,8 @@
+"use client";
+
 import { ReactNode } from "react";
 import RequiredAsterisk from "./RequiredAsterisk";
+import { useDraftContext } from "./shared/DraftContext";
 
 interface SimpleRadioProps {
 	name: string;
@@ -29,6 +32,10 @@ export default function SimpleRadio({
 	labelClass,
 	isRequired,
 }: SimpleRadioProps) {
+	const draftContext = useDraftContext();
+	const initial = draftContext?.initialValues[name];
+	const initialValue = typeof initial === "string" ? initial : "";
+
 	return (
 		<div className={containerClassTotal}>
 			<p className={titleClass}>
@@ -51,6 +58,12 @@ export default function SimpleRadio({
 								name={name}
 								value={value.inputValue}
 								required={isRequired}
+								defaultChecked={initialValue === value.inputValue}
+								onChange={(e) => {
+									if (e.target.checked) {
+										draftContext?.setValue(name, value.inputValue);
+									}
+								}}
 							/>
 							<label
 								htmlFor={`option_${name}_${value.inputValue}`}

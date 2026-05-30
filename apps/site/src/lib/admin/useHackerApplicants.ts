@@ -13,6 +13,7 @@ export interface HackerApplicantSummary {
 	avg_score: number;
 	resume_reviewed: boolean;
 	director_previous_experience_reviewed: boolean;
+	duplicate_name_approved: boolean;
 	application_data: {
 		school?: string;
 		school_year?: string;
@@ -40,7 +41,20 @@ function useHackerApplicants() {
 
 	const refetch = () => mutate();
 
-	return { applicantList: data || [], loading: isLoading, error, refetch };
+	const approveDuplicateName = async (uid: string, approved: boolean) => {
+		await axios.post(`/api/admin/applicant/hacker/${uid}/approve-duplicate`, {
+			approved,
+		});
+		mutate();
+	};
+
+	return {
+		applicantList: data || [],
+		loading: isLoading,
+		error,
+		refetch,
+		approveDuplicateName,
+	};
 }
 
 export default useHackerApplicants;

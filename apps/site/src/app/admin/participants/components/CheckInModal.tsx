@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
+import Alert from "@cloudscape-design/components/alert";
 import Box from "@cloudscape-design/components/box";
 import Button from "@cloudscape-design/components/button";
 import Modal from "@cloudscape-design/components/modal";
@@ -13,25 +14,73 @@ export interface ActionModalProps {
 	onDismiss: () => void;
 	onConfirm: (participant: Participant, type: string) => void;
 	participant: Participant | null;
+	checkInConfirmed: boolean;
 }
 
-function CheckInModal({ onDismiss, onConfirm, participant }: ActionModalProps) {
+function CheckInModal({
+	onDismiss,
+	onConfirm,
+	participant,
+	checkInConfirmed,
+}: ActionModalProps) {
 	const [selectedType, setSelectedType] = useState("accepted");
+	const [showExitWarning, setShowExitWarning] = useState(false);
+
+	useEffect(() => {
+		setShowExitWarning(false);
+		setSelectedType("accepted");
+	}, [participant]);
 
 	if (!participant) {
 		return null;
 	}
 
+	const handleDismiss = () => {
+		if (showExitWarning || checkInConfirmed) {
+			onDismiss();
+		} else {
+			setShowExitWarning(true);
+		}
+	};
+
+	if (checkInConfirmed) {
+		return (
+			<Modal
+				onDismiss={onDismiss}
+				visible={true}
+				footer={
+					<Box float="right">
+						<Button variant="primary" onClick={onDismiss}>
+							Close
+						</Button>
+					</Box>
+				}
+				header={`Participant Name: ${participant.first_name} ${participant.last_name}`}
+			>
+				<Alert type="success">
+					{participant.first_name} {participant.last_name} has been successfully
+					checked in!
+				</Alert>
+			</Modal>
+		);
+	}
+
 	return (
 		<Modal
-			onDismiss={onDismiss}
+			onDismiss={handleDismiss}
 			visible={true}
 			footer={
 				<Box float="right">
 					<SpaceBetween direction="horizontal" size="xs">
-						<Button variant="link" onClick={onDismiss}>
-							Cancel
-						</Button>
+						{showExitWarning ? (
+							<Button variant="link" onClick={onDismiss}>
+								Exit Anyway
+							</Button>
+						) : (
+							<Button variant="link" onClick={handleDismiss}>
+								Cancel
+							</Button>
+						)}
 						<Button
 							variant="primary"
 							onClick={() => onConfirm(participant, selectedType)}
@@ -41,38 +90,85 @@ function CheckInModal({ onDismiss, onConfirm, participant }: ActionModalProps) {
 					</SpaceBetween>
 				</Box>
 			}
-			header={`Participant Name: ${participant?.first_name} ${participant?.last_name}`}
+			header={`Participant Name: ${participant.first_name} ${participant.last_name}`}
 		>
 			<SpaceBetween size="s">
+				{showExitWarning && (
+					<Alert type="warning">
+						You haven&apos;t checked in this participant yet.
+					</Alert>
+				)}
+
 				{selectedType === "accepted" && (
 					<div>
 						<p>
 							<strong>General Check-in Instructions</strong>
 						</p>
 						<TextContent>
-							<ol>
+							<ul style={{ listStyle: "none", padding: 0 }}>
 								<li>
-									Ask for a photo ID and check participant is 18+ years old.
+									<label>
+										<input type="checkbox" /> Check ID photo matches
+										participant&apos;s face
+									</label>
 								</li>
-								<li>Have participant sign the SPFB sheet.</li>
 								<li>
-									Check if the participant has joined Slack (there is a column
-									to indicate it). If not, ask a check-in lead to add them.
+									<label>
+										<input type="checkbox" /> Check participant&apos;s{" "}
+										<strong>date of birth </strong>
+										is before <strong>October 10, 2008</strong>
+									</label>
 								</li>
-								<li>Ask participant to fill in badge.</li>
 								<li>
-									Inform participant regarding the following:
-									<ol>
-										<li>Can head inside ballroom to talk to sponsors.</li>
-										<li>Team formation starts at 7pm at Moss Cove B.</li>
-										<li>Opening ceremony starts at 8pm.</li>
+									<label>
+										<input type="checkbox" /> Ask participant to sign the SPFB
+										sheet
+									</label>
+								</li>
+								<li>
+									<label>
+										<input type="checkbox" /> Joined Slack? If not, ask for
+										check-in lead
+									</label>
+								</li>
+								<li>
+									<label>
+										<input type="checkbox" /> Fill out badge
+									</label>
+								</li>
+								<li>
+									<label>
+										<input type="checkbox" /> Inform participant regarding the
+										following:
+									</label>
+									<ul style={{ listStyle: "none", padding: "0 0 0 1.5rem" }}>
 										<li>
-											Schedule is available on website at
-											<b> irvinehacks.com/schedule.</b>
+											<label>
+												<input type="checkbox" /> Talk to sponsors inside
+												ballroom
+											</label>
 										</li>
-									</ol>
+										<li>
+											<label>
+												<input type="checkbox" /> Team formation starts at 7pm
+												at Moss Cove B
+											</label>
+										</li>
+										<li>
+											<label>
+												<input type="checkbox" /> Opening ceremony starts at 8pm
+											</label>
+										</li>
+										<li>
+											<label>
+												<input type="checkbox" /> Schedule is available on
+												website at
+												<b> irvinehacks.com/schedule.</b>
+											</label>
+										</li>
+									</ul>
 								</li>
-							</ol>
+							</ul>
 						</TextContent>
 					</div>
 				)}

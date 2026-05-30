@@ -22,7 +22,6 @@ from services import mongodb_handler
 from services.mongodb_handler import BaseRecord, Collection
 from utils import email_handler
 
-
 log = getLogger(__name__)
 
 router = APIRouter()
@@ -51,6 +50,7 @@ require_mentor_reviewer = require_role({Role.DIRECTOR, Role.MENTOR_REVIEWER})
 require_volunteer_reviewer = require_role({Role.DIRECTOR, Role.VOLUNTEER_REVIEWER})
 require_checkin_lead = require_role({Role.DIRECTOR, Role.CHECKIN_LEAD})
 require_organizer = require_role({Role.ORGANIZER})
+require_director = require_role({Role.DIRECTOR})
 
 
 class ApplicationDataSummary(BaseModel):
@@ -106,6 +106,7 @@ class HackerApplicantSummary(BaseRecord):
     reviewers: list[str] = []
     resume_reviewed: bool = False
     director_previous_experience_reviewed: bool = False
+    duplicate_name_approved: bool = False
     avg_score: float
     application_data: Union[ApplicationDataSummary, ZotHacksApplicationDataSummary]
 
@@ -265,6 +266,7 @@ async def hacker_applicants(
             "first_name",
             "last_name",
             "application_data",
+            "duplicate_name_approved",
         ],
         sort=[("application_data.submission_time", DESCENDING)],
     )
@@ -404,6 +406,27 @@ async def hacker_applicant(
     return _redact_hacker_applicant(record)
 
 
+class ApproveDuplicateRequest(BaseModel):
+    approved: bool
+
+
+@router.post("/applicant/hacker/{uid}/approve-duplicate")
+async def approve_duplicate_name(
+    uid: str,
+    body: ApproveDuplicateRequest,
+    director: Annotated[User, Depends(require_director)],
+) -> None:
+    """
+    Director-only: mark a hacker applicant's duplicate name
+    as approved or revoke approval.
+    """
+    await mongodb_handler.update_one(
+        Collection.USERS,
+        {"_id": uid, "roles": Role.HACKER},
+        {"duplicate_name_approved": body.approved},
+    )
+
+
 @router.get("/applicant/mentor/{uid}", dependencies=[Depends(require_mentor_reviewer)])
 async def mentor_applicant(
     uid: str,
@@ -538,11 +561,17 @@ async def submit_review(
     applicant_record = await mongodb_handler.retrieve_one(
         Collection.USERS,
         {"_id": applicant_review.applicant},
-        ["_id", "application_data.reviews", "roles"],
+        ["_id", "application_data.reviews", "roles", "status"],
     )
     if not applicant_record:
         log.error("Could not retrieve applicant after submitting review")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    if applicant_record.get("status") == Decision.VOIDED:
+        log.error("%s tried to review voided applicant %s", reviewer, app)
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST, "Cannot review a voided applicant."
+        )
 
     if Role.HACKER in applicant_record["roles"]:
         if applicant_review.score < 0 or applicant_review.score > 10:
@@ -629,7 +658,7 @@ async def delete_notes(
     applicant_record = await mongodb_handler.retrieve_one(
         Collection.USERS,
         {"_id": delete_notes_request.applicant},
-        ["_id", "application_data.reviews", "roles"],
+        ["_id", "application_data.reviews", "roles", "status"],
     )
 
     # Check if applicant record exists
@@ -638,6 +667,17 @@ async def delete_notes(
             "Could not retrieve applicant while attempting to delete reviewer notes"
         )
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    if applicant_record.get("status") == Decision.VOIDED:
+        log.error(
+            "%s tried to delete notes on voided applicant %s",
+            reviewer,
+            delete_notes_request.applicant,
+        )
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            "Cannot modify reviews on a voided applicant.",
+        )
 
     # Check if review index is valid and belongs to reviewer
     reviews = applicant_record.get("application_data", {}).get("reviews", [])
@@ -855,6 +895,22 @@ async def _handle_global_only_review(
     # Check if user has LEAD role for resume-only reviews
     await require_lead(reviewer)
 
+    # Check if applicant is voided before submitted review
+    applicant_record = await mongodb_handler.retrieve_one(
+        Collection.USERS,
+        {"_id": applicant},
+        ["status"],
+    )
+    if applicant_record and applicant_record.get("status") == Decision.VOIDED:
+        log.error(
+            "%s tried to submit global-only review on voided applicant %s",
+            reviewer,
+            applicant,
+        )
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST, "Cannot review a voided applicant."
+        )
+
     # Update the user record with global field scores
     await mongodb_handler.update_one(
         Collection.USERS,
@@ -918,11 +974,21 @@ async def _handle_irvinehacks_detailed_scores_review(
     applicant_record = await mongodb_handler.retrieve_one(
         Collection.USERS,
         {"_id": applicant},
-        ["_id", "application_data.reviews", "roles"],
+        ["_id", "application_data.reviews", "roles", "status"],
     )
     if not applicant_record:
         log.error("Could not retrieve applicant after submitting review")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    if applicant_record.get("status") == Decision.VOIDED:
+        log.error(
+            "%s tried to submit IH detailed review on voided applicant %s",
+            reviewer,
+            applicant,
+        )
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST, "Cannot review a voided applicant."
+        )
 
     unique_reviewers = applicant_review_processor.get_unique_reviewers(applicant_record)
 
@@ -1016,11 +1082,22 @@ async def _handle_detailed_scores_review(
             "_id",
             "application_data.reviews",
             "roles",
+            "status",
         ],
     )
     if not applicant_record:
         log.error("Could not retrieve applicant after submitting review")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    if applicant_record.get("status") == Decision.VOIDED:
+        log.error(
+            "%s tried to submit detailed review on voided applicant %s",
+            reviewer,
+            applicant,
+        )
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST, "Cannot review a voided applicant."
+        )
 
     if Role.HACKER in applicant_record["roles"]:
         unique_reviewers = applicant_review_processor.get_unique_reviewers(
@@ -1099,12 +1176,10 @@ async def _try_update_applicant_with_query(
             update_query,
         )
         if not modified:
-            log.warning(
-                f"""
+            log.warning(f"""
                 Update query did not modify any documents
                 for {applicant}: {update_query}
-                """
-            )
+                """)
     except RuntimeError:
         log.error(err_msg)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -143,3 +143,7 @@ This Turborepo includes the following packages/apps:
 - [TypeScript](https://www.typescriptlang.org/) for static type checking
 - [ESLint](https://eslint.org/) for code linting
 - [Prettier](https://prettier.io) for code formatting
+
+## Documentation
+
+- [GitBook Documentation](https://app.gitbook.com/o/DqX4DW2sybIRPczSjFbZ/s/4KIsLjSBshSrtVh5jKQl/) includes in-depth documentation of this repository

@@ -1,4 +1,7 @@
+"use client";
+
 import RequiredAsterisk from "./RequiredAsterisk";
+import { useDraftContext } from "./shared/DraftContext";
 
 interface TextProps {
 	name: string;
@@ -17,6 +20,10 @@ export default function TextInput({
 	type,
 	isRequired,
 }: TextProps) {
+	const draftContext = useDraftContext();
+	const initial = draftContext?.initialValues[name];
+	const defaultValue = typeof initial === "string" ? initial : "";
+
 	return (
 		<div className={containerClass}>
 			<label className="text-lg mb-2" htmlFor={name}>
@@ -29,6 +36,8 @@ export default function TextInput({
 				id={name}
 				required={isRequired}
 				placeholder={placeholder}
+				defaultValue={defaultValue}
+				onChange={(e) => draftContext?.setValue(name, e.target.value)}
 			/>
 		</div>
 	);

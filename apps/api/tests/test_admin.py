@@ -471,6 +471,7 @@ def test_hacker_applicants_returns_correct_applicants(
             "last_name": "unknown",
             "resume_reviewed": False,
             "director_previous_experience_reviewed": False,
+            "duplicate_name_approved": False,
             "status": "REVIEWED",
             "decision": "ACCEPTED",
             "avg_score": 73.462,
@@ -746,7 +747,9 @@ def test_error_on_hacker_invalid_value(
 
 @patch("routers.admin.require_lead", autospec=True)
 @patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
 async def test_handle_global_only_review_success(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_mongodb_handler_update_one: AsyncMock,
     mock_require_lead: AsyncMock,
 ) -> None:
@@ -756,6 +759,10 @@ async def test_handle_global_only_review_success(
     reviewer = USER_REVIEWER
 
     mock_require_lead.return_value = None
+    mock_mongodb_handler_retrieve_one.return_value = {
+        "_id": applicant,
+        "roles": ["Applicant", "Hacker"],
+    }
     mock_mongodb_handler_update_one.return_value = True
 
     await _handle_global_only_review(applicant, scores, reviewer)
@@ -790,6 +797,32 @@ async def test_handle_global_only_review_forbidden(
 
     assert exc_info.value.status_code == 403
     mock_require_lead.assert_awaited_once_with(reviewer)
+
+
+@patch("routers.admin.require_lead", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_handle_global_only_review_voided_applicant(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_require_lead: AsyncMock,
+) -> None:
+    """Test resume-only review submission fails for a voided applicant."""
+    applicant = "edu.uci.test"
+    scores = GlobalScores(resume=8, hackathon_experience=10)
+    reviewer = USER_REVIEWER
+
+    mock_require_lead.return_value = None
+    mock_mongodb_handler_retrieve_one.return_value = {
+        "_id": applicant,
+        "roles": ["Applicant", "Hacker"],
+        "status": Decision.VOIDED,
+    }
+
+    with pytest.raises(HTTPException) as exc_info:
+        await _handle_global_only_review(applicant, scores, reviewer)
+
+    assert exc_info.value.status_code == 400
+    assert exc_info.value.detail == "Cannot review a voided applicant."
+    mock_mongodb_handler_retrieve_one.assert_awaited_once()
 
 
 @patch("routers.admin._handle_global_only_review", autospec=True)
@@ -1071,6 +1104,39 @@ async def test_handle_detailed_scores_review_applicant_not_found(
         await _handle_detailed_scores_review(applicant, scores, reviewer)
 
     assert exc_info.value.status_code == 500
+    mock_mongodb_handler_retrieve_one.assert_awaited_once()
+
+
+@patch("routers.admin.require_lead", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_handle_detailed_scores_review_voided_applicant(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_require_lead: AsyncMock,
+) -> None:
+    """Test detailed scores review submission fails for a voided applicant."""
+    applicant = "edu.uci.test"
+    scores = ZotHacksHackerDetailedScores(
+        resume=8,
+        elevator_pitch_saq=7,
+        tech_experience_saq=9,
+        learn_about_self_saq=6,
+        pixel_art_saq=8,
+        hackathon_experience=10,
+    )
+    reviewer = USER_REVIEWER
+
+    mock_mongodb_handler_retrieve_one.return_value = {
+        "_id": applicant,
+        "roles": ["Applicant", "Hacker"],
+        "status": Decision.VOIDED,
+        "application_data": {"reviews": []},
+    }
+
+    with pytest.raises(HTTPException) as exc_info:
+        await _handle_detailed_scores_review(applicant, scores, reviewer)
+
+    assert exc_info.value.status_code == 400
+    assert exc_info.value.detail == "Cannot review a voided applicant."
     mock_mongodb_handler_retrieve_one.assert_awaited_once()
 
 

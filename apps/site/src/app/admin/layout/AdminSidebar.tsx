@@ -1,6 +1,6 @@
 import { usePathname } from "next/navigation";
 
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 
 import SideNavigation, {
 	SideNavigationProps,
@@ -20,11 +20,28 @@ import UserContext from "@/lib/admin/UserContext";
 
 import { BASE_PATH, useFollowWithNextLink } from "./common";
 
+type HackathonMode = "irvinehacks" | "zothacks";
+
+function getHackathonMode(): HackathonMode {
+	const value = document.cookie
+		.split("; ")
+		.find((cookie) => cookie.startsWith("hackathon="))
+		?.split("=")[1];
+
+	return value === "zothacks" ? "zothacks" : "irvinehacks";
+}
+
 function AdminSidebar() {
 	const pathname = usePathname();
 	const followWithNextLink = useFollowWithNextLink();
 
 	const { roles } = useContext(UserContext);
+	const [hackathonMode, setHackathonMode] =
+		useState<HackathonMode>("irvinehacks");
+
+	useEffect(() => {
+		setHackathonMode(getHackathonMode());
+	}, [pathname]);
 
 	const navigationItems: SideNavigationProps.Item[] = [
 		{ type: "link", text: "Dashboard", href: "/admin/dashboard" },
@@ -36,31 +53,32 @@ function AdminSidebar() {
 
 	const applicationLinks: SideNavigationProps.Link[] = [];
 
-	// if (isHackerReviewer(roles)) {
-	// 	applicationLinks.push({
-	// 		type: "link",
-	// 		text: "ZotHacks Hacker Applications",
-	// 		href: "/admin/applicants/zothacks-hackers",
-	// 	});
-	// }
-
 	if (isHackerReviewer(roles)) {
 		applicationLinks.push({
 			type: "link",
-			text: "IH Hacker Applications",
-			href: "/admin/applicants/hackers",
+			text:
+				hackathonMode === "zothacks"
+					? "ZH Hacker Applications"
+					: "IH Hacker Applications",
+			href:
+				hackathonMode === "zothacks"
+					? "/admin/applicants/zothacks-hackers"
+					: "/admin/applicants/hackers",
 		});
 	}
 
 	if (isMentorReviewer(roles)) {
 		applicationLinks.push({
 			type: "link",
-			text: "IH Mentor Applications",
+			text:
+				hackathonMode === "zothacks"
+					? "ZH Mentor Applications"
+					: "IH Mentor Applications",
 			href: "/admin/applicants/mentors",
 		});
 	}
 
-	if (isVolunteerReviewer(roles)) {
+	if (hackathonMode === "irvinehacks" && isVolunteerReviewer(roles)) {
 		applicationLinks.push({
 			type: "link",
 			text: "IH Volunteer Applications",
@@ -108,7 +126,7 @@ function AdminSidebar() {
 	if (isCheckInLead(roles)) {
 		navigationItems.splice(1, 0, {
 			type: "link",
-			text: "Check-In Leads",
+			text: "Queue Management",
 			href: "/admin/checkin-leads",
 		});
 	}

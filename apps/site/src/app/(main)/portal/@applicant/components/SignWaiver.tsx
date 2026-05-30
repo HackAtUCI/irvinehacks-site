@@ -16,7 +16,7 @@ function SignWaiver({ status, decision, waitlistOpen }: SignWaiverProps) {
 			<p className="font-sans font-normal md:text-2xl">
 				In order to attend IrvineHacks 2026, all participants must complete the
 				Participation Waiver and review the Code of Conduct. The button below
-				will take you to a DropboxSign form to sign the waiver.{" "}
+				will take you to a DocuSign form to sign the waiver.{" "}
 				{((decision === Decision.Waitlisted && waitlistOpen) ||
 					status !== Status.Confirmed) && (
 					<span>
@@ -28,7 +28,7 @@ function SignWaiver({ status, decision, waitlistOpen }: SignWaiverProps) {
 			<div className="mt-6 md:mt-12">
 				<Button
 					text="Sign Waiver to attend IrvineHacks 2026"
-					href="https://app.hellosign.com/s/1C2DkqYe"
+					href="/api/user/waiver"
 					newWindow={true}
 					usePrefetch={false}
 					isLightVersion={true}

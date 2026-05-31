@@ -1,3 +1,5 @@
+import hashlib
+import hmac
 from datetime import date, datetime
 from logging import getLogger
 from typing import Annotated, Any, Literal, Mapping, Optional, Union
@@ -14,6 +16,7 @@ from admin.score_normalizing_handler import (
     add_normalized_scores_to_all_hacker_applicants,
     add_uids_to_exclude_from_hacker_normalization,
 )
+from auth import user_identity
 from auth.authorization import require_role
 from auth.user_identity import User, utc_now
 from models.ApplicationData import Decision, Review
@@ -159,6 +162,28 @@ class ReviewRequest(BaseModel):
     notes: Optional[str] = None  # notes from reviewer
 
 
+def _hacker_applicant_token(uid: str) -> str:
+    secret = user_identity.JWT_SECRET.encode()
+    return hmac.new(secret, uid.encode(), hashlib.sha256).hexdigest()[:24]
+
+
+def _redact_reviewers(reviewers: list[str], reviewer_uid: str) -> list[str]:
+    return [uid if uid == reviewer_uid else "reviewer" for uid in reviewers]
+
+
+def _redact_reviews(reviews: list[Review], reviewer_uid: str) -> list[Review]:
+    redacted_reviews: list[Review] = []
+    for review in reviews:
+        date = review[0]
+        uid = review[1]
+        score = review[2]
+        notes = review[3] if len(review) > 3 else None
+        redacted_reviews.append(
+            (date, uid if uid == reviewer_uid else "reviewer", score, notes)
+        )
+    return redacted_reviews
+
+
 class ZotHacksHackerDetailedScores(BaseModel):
     resume: Optional[int] = None
     elevator_pitch_saq: int
@@ -301,7 +326,10 @@ async def hacker_applicants(
     try:
         if not await _user_has_role(user.uid, Role.DIRECTOR):
             return TypeAdapter(list[RedactedHackerApplicantSummary]).validate_python(
-                [_redact_hacker_applicant_summary(record) for record in records]
+                [
+                    _redact_hacker_applicant_summary(record, user.uid)
+                    for record in records
+                ]
             )
         return TypeAdapter(list[HackerApplicantSummary]).validate_python(records)
     except ValidationError:
@@ -316,39 +344,47 @@ async def _user_has_role(uid: str, role: Role) -> bool:
 
 
 def _redact_hacker_applicant_summary(
-    record: dict[str, object],
+    record: dict[str, object], reviewer_uid: str
 ) -> dict[str, object]:
     application_data = record.get("application_data", {})
     if not isinstance(application_data, dict):
         application_data = {}
 
     director_reviewed = bool(record.get("director_previous_experience_reviewed", False))
+    reviewers = record.get("reviewers", [])
+    if not isinstance(reviewers, list):
+        reviewers = []
+    reviewers = [uid for uid in reviewers if isinstance(uid, str)]
 
     return {
-        "_id": record["_id"],
+        "_id": _hacker_applicant_token(str(record["_id"])),
         "first_name": "",
         "last_name": "",
         "status": record["status"],
         "decision": record.get("decision") if director_reviewed else None,
-        "reviewers": record.get("reviewers", []),
+        "reviewers": _redact_reviewers(reviewers, reviewer_uid),
         "resume_reviewed": record.get("resume_reviewed", False),
         "director_previous_experience_reviewed": director_reviewed,
         "avg_score": record.get("avg_score", -1) if director_reviewed else -1,
         "application_data": {
             "submission_time": application_data.get("submission_time"),
-            "reviews": application_data.get("reviews", []),
+            "reviews": _redact_reviews(
+                application_data.get("reviews", []), reviewer_uid
+            ),
         },
     }
 
 
-def _redact_hacker_applicant(record: dict[str, object]) -> RedactedHackerApplicant:
+def _redact_hacker_applicant(
+    record: dict[str, object], reviewer_uid: str
+) -> RedactedHackerApplicant:
     application_data = record.get("application_data", {})
     if not isinstance(application_data, dict):
         raise RuntimeError("Could not parse applicant data.")
 
     return RedactedHackerApplicant.model_validate(
         {
-            "_id": record["_id"],
+            "_id": _hacker_applicant_token(str(record["_id"])),
             "first_name": "",
             "last_name": "",
             "roles": record["roles"],
@@ -359,7 +395,9 @@ def _redact_hacker_applicant(record: dict[str, object]) -> RedactedHackerApplica
                 "frq_ambition": application_data.get("frq_ambition", ""),
                 "frq_character": application_data.get("frq_character", ""),
                 "submission_time": application_data.get("submission_time"),
-                "reviews": application_data.get("reviews", []),
+                "reviews": _redact_reviews(
+                    application_data.get("reviews", []), reviewer_uid
+                ),
                 "review_breakdown": application_data.get("review_breakdown", {}),
             },
         }
@@ -391,19 +429,58 @@ async def _applicant_record(
     return record
 
 
+async def _hacker_applicant_record_for_user(
+    uid_or_token: str, user: User, *, is_director: Optional[bool] = None
+) -> dict[str, object]:
+    if is_director is None:
+        is_director = await _user_has_role(user.uid, Role.DIRECTOR)
+
+    if uid_or_token.startswith("edu."):
+        if not is_director:
+            raise HTTPException(status.HTTP_404_NOT_FOUND)
+        return await _applicant_record(uid_or_token, "Hacker")
+
+    if is_director:
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
+
+    records = await mongodb_handler.retrieve(Collection.USERS, {"roles": Role.HACKER})
+    for record in records:
+        uid = record.get("_id")
+        if isinstance(uid, str) and _hacker_applicant_token(uid) == uid_or_token:
+            return record
+
+    raise HTTPException(status.HTTP_404_NOT_FOUND)
+
+
+async def _resolve_hacker_applicant_uid_for_user(uid_or_token: str, user: User) -> str:
+    if uid_or_token.startswith("edu."):
+        if await _user_has_role(user.uid, Role.DIRECTOR):
+            return uid_or_token
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
+
+    record = await _hacker_applicant_record_for_user(uid_or_token, user)
+    uid = record.get("_id")
+    if not isinstance(uid, str):
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
+    return uid
+
+
 @router.get("/applicant/hacker/{uid}")
 async def hacker_applicant(
     uid: str,
     user: Annotated[User, Depends(require_hacker_reviewer)],
 ) -> Union[Applicant, RedactedHackerApplicant]:
     """Get record of a hacker applicant by uid."""
-    record = await _applicant_record(uid, "Hacker")
-    if await _user_has_role(user.uid, Role.DIRECTOR):
+    is_user_director = await _user_has_role(user.uid, Role.DIRECTOR)
+    record = await _hacker_applicant_record_for_user(
+        uid, user, is_director=is_user_director
+    )
+    if is_user_director:
         try:
             return Applicant.model_validate(record)
         except ValidationError:
             raise RuntimeError("Could not parse applicant data.")
-    return _redact_hacker_applicant(record)
+    return _redact_hacker_applicant(record, user.uid)
 
 
 class ApproveDuplicateRequest(BaseModel):
@@ -556,11 +633,17 @@ async def submit_review(
         applicant_review.notes,
     )
 
-    app = applicant_review.applicant
+    app = (
+        await _resolve_hacker_applicant_uid_for_user(
+            applicant_review.applicant, reviewer
+        )
+        if not applicant_review.applicant.startswith("edu.")
+        else applicant_review.applicant
+    )
 
     applicant_record = await mongodb_handler.retrieve_one(
         Collection.USERS,
-        {"_id": applicant_review.applicant},
+        {"_id": app},
         ["_id", "application_data.reviews", "roles", "status"],
     )
     if not applicant_record:
@@ -601,14 +684,14 @@ async def submit_review(
             update_query.update({"$set": {"status": "REVIEWED"}})
 
         await _try_update_applicant_with_query(
-            applicant_review.applicant,
+            app,
             update_query=update_query,
             err_msg=f"{reviewer} could not submit review for {app}",
         )
 
     else:
         await _try_update_applicant_with_query(
-            applicant_review.applicant,
+            app,
             update_query={
                 "$push": {"application_data.reviews": review},
                 "$set": {"status": "REVIEWED"},
@@ -616,7 +699,7 @@ async def submit_review(
             err_msg=f"{reviewer} could not submit review for {app}",
         )
 
-    log.info("%s reviewed hacker %s", reviewer, applicant_review.applicant)
+    log.info("%s reviewed hacker %s", reviewer, app)
 
 
 @router.post("/detailed-review")
@@ -625,20 +708,21 @@ async def submit_detailed_review(
     reviewer: User = Depends(require_reviewer),
 ) -> None:
     """Submit a review decision from the reviewer for the given hacker applicant."""
+    applicant = await _resolve_hacker_applicant_uid_for_user(
+        applicant_review.applicant, reviewer
+    )
     if isinstance(applicant_review.scores, GlobalScores):
-        await _handle_global_only_review(
-            applicant_review.applicant, applicant_review.scores, reviewer
-        )
+        await _handle_global_only_review(applicant, applicant_review.scores, reviewer)
     elif isinstance(applicant_review.scores, ZotHacksHackerDetailedScores):
         await _handle_detailed_scores_review(
-            applicant_review.applicant,
+            applicant,
             applicant_review.scores,
             reviewer,
             applicant_review.notes,
         )
     elif isinstance(applicant_review.scores, IrvineHacksHackerDetailedScores):
         await _handle_irvinehacks_detailed_scores_review(
-            applicant_review.applicant,
+            applicant,
             applicant_review.scores,
             reviewer,
             applicant_review.notes,
@@ -653,11 +737,18 @@ async def delete_notes(
     reviewer: User = Depends(require_reviewer),
 ) -> None:
     """Delete notes from a review."""
+    applicant = (
+        await _resolve_hacker_applicant_uid_for_user(
+            delete_notes_request.applicant, reviewer
+        )
+        if not delete_notes_request.applicant.startswith("edu.")
+        else delete_notes_request.applicant
+    )
 
     # Get applicant record
     applicant_record = await mongodb_handler.retrieve_one(
         Collection.USERS,
-        {"_id": delete_notes_request.applicant},
+        {"_id": applicant},
         ["_id", "application_data.reviews", "roles", "status"],
     )
 
@@ -672,14 +763,13 @@ async def delete_notes(
         log.error(
             "%s tried to delete notes on voided applicant %s",
             reviewer,
-            delete_notes_request.applicant,
+            applicant,
         )
         raise HTTPException(
             status.HTTP_400_BAD_REQUEST,
             "Cannot modify reviews on a voided applicant.",
         )
 
-    # Check if review index is valid and belongs to reviewer
     reviews = applicant_record.get("application_data", {}).get("reviews", [])
     if (
         not (0 <= delete_notes_request.review_index < len(reviews))
@@ -699,19 +789,20 @@ async def delete_notes(
 
     # Update review in applicant record to set note to null
     await _try_update_applicant_with_query(
-        delete_notes_request.applicant,
+        applicant,
         update_query=update_query,
         err_msg=f"""
             {reviewer} could not delete notes from review
             {delete_notes_request.review_index} for
-            {delete_notes_request.applicant}
+            {applicant}
         """,
     )
 
     log.info(
         "%s deleted notes from review %d for %s",
         reviewer,
-        delete_notes_request.applicant,
+        delete_notes_request.review_index,
+        applicant,
     )
 
 
@@ -993,8 +1084,8 @@ async def _handle_irvinehacks_detailed_scores_review(
     unique_reviewers = applicant_review_processor.get_unique_reviewers(applicant_record)
 
     uid_no_domain = reviewer.uid.split(".")[-1]
-    is_director = await _user_has_role(reviewer.uid, Role.DIRECTOR)
     review_breakdown_key = f"application_data.review_breakdown.{uid_no_domain}"
+    is_director = await _user_has_role(reviewer.uid, Role.DIRECTOR)
 
     if scoring_breakdown:
         # Only add a scoring review if there are either less than 2 reviewers

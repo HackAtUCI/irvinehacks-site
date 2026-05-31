@@ -233,10 +233,13 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		content: DirectorPreviousExperienceReviewedStatus,
 	};
 	const duplicateNames = useMemo(() => {
+		if (!isUserDirector) return new Set<string>();
+
 		const nameCounts = new Map<string, number>();
 
 		for (const { first_name, last_name } of applicantList) {
 			const name = `${first_name} ${last_name}`.trim().toLowerCase();
+			if (!name) continue;
 			nameCounts.set(name, (nameCounts.get(name) ?? 0) + 1);
 		}
 
@@ -245,7 +248,7 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 				.filter(([, count]) => count > 1)
 				.map(([name]) => name),
 		);
-	}, [applicantList]);
+	}, [applicantList, isUserDirector]);
 
 	const renderHeader = useCallback(
 		({
@@ -266,9 +269,10 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 					director_previous_experience_reviewed
 				}
 				isDirector={isUserDirector}
-				isDuplicate={duplicateNames.has(
-					`${first_name} ${last_name}`.trim().toLowerCase(),
-				)}
+				isDuplicate={
+					isUserDirector &&
+					duplicateNames.has(`${first_name} ${last_name}`.trim().toLowerCase())
+				}
 				duplicateNameApproved={duplicate_name_approved}
 				onApproveDuplicate={(approved) => approveDuplicateName(_id, approved)}
 			/>
@@ -336,17 +340,19 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 			trackBy="_id"
 			variant="full-page"
 			filter={
-				<ApplicantFilters
-					selectedStatuses={selectedStatuses}
-					setSelectedStatuses={setSelectedStatuses}
-					selectedDecisions={selectedDecisions}
-					setSelectedDecisions={setSelectedDecisions}
-					uciNetIDFilter={uciNetIDFilter}
-					setUCINetIDFilter={setUCINetIDFilter}
-					applicantType={ParticipantRole.Hacker}
-					sortOption={sortOption}
-					setSortOption={setSortOption}
-				/>
+				isUserDirector ? (
+					<ApplicantFilters
+						selectedStatuses={selectedStatuses}
+						setSelectedStatuses={setSelectedStatuses}
+						selectedDecisions={selectedDecisions}
+						setSelectedDecisions={setSelectedDecisions}
+						uciNetIDFilter={uciNetIDFilter}
+						setUCINetIDFilter={setUCINetIDFilter}
+						applicantType={ParticipantRole.Hacker}
+						sortOption={sortOption}
+						setSortOption={setSortOption}
+					/>
+				) : null
 			}
 			empty={emptyContent}
 			header={

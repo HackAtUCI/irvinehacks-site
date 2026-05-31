@@ -7,6 +7,9 @@ import Spinner from "@cloudscape-design/components/spinner";
 import { FlashbarProps } from "@cloudscape-design/components/flashbar";
 
 import NotificationContext from "@/lib/admin/NotificationContext";
+import UserContext from "@/lib/admin/UserContext";
+import { isDirector } from "@/lib/admin/authorization";
+import { uidToPseudonym } from "@/lib/admin/anonymize";
 import useApplicant, {
 	ZotHacksHackerApplicationData,
 } from "@/lib/admin/useApplicant";
@@ -31,6 +34,8 @@ function DetailedScoreApplicant({
 	guidelines,
 }: ApplicantProps) {
 	const { setNotifications } = useContext(NotificationContext);
+	const { roles } = useContext(UserContext);
+	const isUserDirector = isDirector(roles);
 	const {
 		applicant,
 		loading,
@@ -107,12 +112,12 @@ function DetailedScoreApplicant({
 						)
 					}
 				>
-					{first_name} {last_name}
+					{isUserDirector ? `${first_name} ${last_name}` : uidToPseudonym(uid)}
 				</Header>
 			}
 		>
 			<SpaceBetween direction="vertical" size="l">
-				<ApplicantOverview applicant={applicant} />
+				{isUserDirector && <ApplicantOverview applicant={applicant} />}
 				{applicant.roles.includes(ParticipantRole.Hacker) ? (
 					<ZotHacksHackerApplication
 						applicant={applicant._id}

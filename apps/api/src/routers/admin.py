@@ -381,7 +381,9 @@ async def hacker_review_assignments(
         and record.get("status") != Decision.VOIDED
         and len(_unique_reviewers(record)) < 2
     ]
-    overflow_assignment_records = active_assignment_records[REVIEW_ASSIGNMENT_BATCH_SIZE:]
+    overflow_assignment_records = active_assignment_records[
+        REVIEW_ASSIGNMENT_BATCH_SIZE:
+    ]
     for record in overflow_assignment_records:
         await mongodb_handler.raw_update_one(
             Collection.USERS,

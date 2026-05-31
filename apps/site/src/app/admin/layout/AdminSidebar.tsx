@@ -123,6 +123,11 @@ function AdminSidebar() {
 					text: "Template Gallery",
 					href: "/admin/directors/template-gallery",
 				},
+				{
+					type: "link",
+					text: "Shift Management",
+					href: "/admin/directors/shift-management",
+				},
 			],
 		});
 	}

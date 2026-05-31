@@ -359,17 +359,19 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 			trackBy="_id"
 			variant="full-page"
 			filter={
-				<ApplicantFilters
-					selectedStatuses={selectedStatuses}
-					setSelectedStatuses={setSelectedStatuses}
-					selectedDecisions={selectedDecisions}
-					setSelectedDecisions={setSelectedDecisions}
-					uciNetIDFilter={isUserDirector ? uciNetIDFilter : undefined}
-					setUCINetIDFilter={isUserDirector ? setUCINetIDFilter : undefined}
-					applicantType={ParticipantRole.Hacker}
-					sortOption={sortOption}
-					setSortOption={isUserDirector ? setSortOption : undefined}
-				/>
+				isUserDirector ? (
+					<ApplicantFilters
+						selectedStatuses={selectedStatuses}
+						setSelectedStatuses={setSelectedStatuses}
+						selectedDecisions={selectedDecisions}
+						setSelectedDecisions={setSelectedDecisions}
+						uciNetIDFilter={uciNetIDFilter}
+						setUCINetIDFilter={setUCINetIDFilter}
+						applicantType={ParticipantRole.Hacker}
+						sortOption={sortOption}
+						setSortOption={setSortOption}
+					/>
+				) : null
 			}
 			empty={emptyContent}
 			header={

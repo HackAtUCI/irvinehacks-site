@@ -26,8 +26,6 @@ function ApplicantNavigationButtons({
 	const { assignedApplicantIds, loading: assignmentsLoading } =
 		useHackerReviewAssignments(useAssignedQueue);
 
-	if (loading || assignmentsLoading || applicantList.length === 0) return null;
-
 	const navigationList = useMemo(() => {
 		if (!useAssignedQueue) return applicantList;
 
@@ -39,6 +37,8 @@ function ApplicantNavigationButtons({
 			return applicant ? [applicant] : [];
 		});
 	}, [applicantList, assignedApplicantIds, useAssignedQueue]);
+
+	if (loading || assignmentsLoading || applicantList.length === 0) return null;
 
 	if (navigationList.length === 0) return null;
 

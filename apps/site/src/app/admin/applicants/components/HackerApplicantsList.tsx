@@ -78,6 +78,7 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 	const {
 		assignedApplicantIds,
 		targetCount,
+		completedCount,
 		loading: assignmentsLoading,
 	} = useHackerReviewAssignments(!isUserDirector);
 	const reviewableApplicantList = useMemo(() => {
@@ -363,8 +364,8 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 					setSelectedStatuses={setSelectedStatuses}
 					selectedDecisions={selectedDecisions}
 					setSelectedDecisions={setSelectedDecisions}
-					uciNetIDFilter={uciNetIDFilter}
-					setUCINetIDFilter={setUCINetIDFilter}
+					uciNetIDFilter={isUserDirector ? uciNetIDFilter : undefined}
+					setUCINetIDFilter={isUserDirector ? setUCINetIDFilter : undefined}
 					applicantType={ParticipantRole.Hacker}
 					sortOption={sortOption}
 					setSortOption={isUserDirector ? setSortOption : undefined}
@@ -385,6 +386,7 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 							>
 								Showing your assigned review queue
 								{targetCount ? ` (${items.length}/${targetCount})` : ""}
+								{completedCount ? `, ${completedCount} reviewed` : ""}
 							</div>
 						)}
 						<div

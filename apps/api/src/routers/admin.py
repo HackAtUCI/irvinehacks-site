@@ -204,6 +204,7 @@ class DeleteNotesRequest(BaseModel):
 class ReviewAssignmentsResponse(BaseModel):
     applicant_ids: list[str]
     target_count: int
+    completed_count: int
 
 
 class WaiverStatusRequest(BaseModel):
@@ -368,21 +369,35 @@ async def hacker_review_assignments(
         ],
         sort=[("application_data.submission_time", DESCENDING)],
     )
+    completed_assignments = sum(
+        1 for record in records if _reviewer_has_reviewed(record, user.uid)
+    )
 
-    active_assignments = [
-        str(record["_id"])
+    active_assignment_records = [
+        record
         for record in records
         if user.uid in _assigned_reviewers(record)
         and not _reviewer_has_reviewed(record, user.uid)
         and record.get("status") != Decision.VOIDED
         and len(_unique_reviewers(record)) < 2
     ]
+    overflow_assignment_records = active_assignment_records[REVIEW_ASSIGNMENT_BATCH_SIZE:]
+    for record in overflow_assignment_records:
+        await mongodb_handler.raw_update_one(
+            Collection.USERS,
+            {"_id": record["_id"]},
+            {"$pull": {"assigned_reviewers": user.uid}},
+        )
+
+    active_assignment_records = active_assignment_records[:REVIEW_ASSIGNMENT_BATCH_SIZE]
+    active_assignments = [str(record["_id"]) for record in active_assignment_records]
 
     needed_assignments = REVIEW_ASSIGNMENT_BATCH_SIZE - len(active_assignments)
     if needed_assignments <= 0:
         return ReviewAssignmentsResponse(
             applicant_ids=active_assignments,
             target_count=REVIEW_ASSIGNMENT_BATCH_SIZE,
+            completed_count=completed_assignments,
         )
 
     candidates = [
@@ -407,6 +422,7 @@ async def hacker_review_assignments(
         applicant_ids=active_assignments
         + [str(record["_id"]) for record in new_assignments],
         target_count=REVIEW_ASSIGNMENT_BATCH_SIZE,
+        completed_count=completed_assignments,
     )
 
 

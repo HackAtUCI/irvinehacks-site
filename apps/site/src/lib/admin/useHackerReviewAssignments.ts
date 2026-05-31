@@ -4,6 +4,7 @@ import useSWR from "swr";
 interface HackerReviewAssignmentsResponse {
 	applicant_ids: string[];
 	target_count: number;
+	completed_count: number;
 }
 
 const HACKER_REVIEW_ASSIGNMENTS_ROUTE = "/api/admin/review-assignments/hackers";
@@ -23,6 +24,7 @@ function useHackerReviewAssignments(enabled = true) {
 	return {
 		assignedApplicantIds: data?.applicant_ids ?? [],
 		targetCount: data?.target_count ?? 0,
+		completedCount: data?.completed_count ?? 0,
 		loading: enabled && isLoading,
 		error,
 		mutate,

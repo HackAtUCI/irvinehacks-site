@@ -1,4 +1,5 @@
-import { Landing, ChooseCharacter } from "./sections";
+import Landing from "./sections/Landing/Landing";
+import ChooseCharacter from "./sections/ChooseCharacter/ChooseCharacter";
 
 export const revalidate = 60;
 

@@ -123,7 +123,7 @@ function ApplicantFilters({
 				placeholder="Choose reviews"
 				selectedAriaLabel="Selected"
 			/>
-			{applicantType === ParticipantRole.Hacker && (
+			{applicantType === ParticipantRole.Hacker && setUCINetIDFilter && (
 				<Multiselect
 					selectedOptions={uciNetIDFilter ?? []}
 					onChange={({ detail }) => setUCINetIDFilter?.(detail.selectedOptions)}

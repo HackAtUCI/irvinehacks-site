@@ -1,10 +1,14 @@
 "use client";
 
+import { useContext, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@cloudscape-design/components/button";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 
+import UserContext from "@/lib/admin/UserContext";
+import { isDirector } from "@/lib/admin/authorization";
 import useHackerApplicants from "@/lib/admin/useHackerApplicants";
+import useHackerReviewAssignments from "@/lib/admin/useHackerReviewAssignments";
 
 interface ApplicantNavigationButtonsProps {
 	uid: string;
@@ -16,34 +20,37 @@ function ApplicantNavigationButtons({
 	basePath,
 }: ApplicantNavigationButtonsProps) {
 	const router = useRouter();
+	const { roles } = useContext(UserContext);
+	const useAssignedQueue = !isDirector(roles);
 	const { applicantList, loading } = useHackerApplicants();
+	const { assignedApplicantIds, loading: assignmentsLoading } =
+		useHackerReviewAssignments(useAssignedQueue);
 
-	if (loading || applicantList.length === 0) return null;
+	const navigationList = useMemo(() => {
+		if (!useAssignedQueue) return applicantList;
 
-	const currentIndex = applicantList.findIndex((a) => a._id === uid);
+		const applicantById = new Map(
+			applicantList.map((applicant) => [applicant._id, applicant]),
+		);
+		return assignedApplicantIds.flatMap((applicantId) => {
+			const applicant = applicantById.get(applicantId);
+			return applicant ? [applicant] : [];
+		});
+	}, [applicantList, assignedApplicantIds, useAssignedQueue]);
+
+	if (loading || assignmentsLoading || applicantList.length === 0) return null;
+
+	if (navigationList.length === 0) return null;
+
+	const currentIndex = navigationList.findIndex((a) => a._id === uid);
 
 	const prevApplicant =
-		currentIndex > 0 ? applicantList[currentIndex - 1] : null;
+		currentIndex > 0 ? navigationList[currentIndex - 1] : null;
 
 	const nextApplicant =
-		currentIndex < applicantList.length - 1
-			? applicantList[currentIndex + 1]
+		currentIndex !== -1 && currentIndex < navigationList.length - 1
+			? navigationList[currentIndex + 1]
 			: null;
-
-	const unreviewedApplicants = applicantList.filter(
-		(a) => (a.reviewers?.length ?? 0) < 2,
-	);
-
-	const nextUnreviewed =
-		applicantList
-			.slice(currentIndex + 1)
-			.find((a) => (a.reviewers?.length ?? 0) < 2) ?? unreviewedApplicants[0];
-
-	const allReviewed = unreviewedApplicants.length === 0;
-
-	const lastUnreviewed =
-		!allReviewed &&
-		unreviewedApplicants[unreviewedApplicants.length - 1]._id === uid;
 
 	return (
 		<SpaceBetween direction="horizontal" size="xs">
@@ -62,14 +69,6 @@ function ApplicantNavigationButtons({
 				}
 			>
 				Next
-			</Button>
-			<Button
-				disabled={allReviewed || lastUnreviewed}
-				onClick={() =>
-					nextUnreviewed && router.push(`${basePath}/${nextUnreviewed._id}`)
-				}
-			>
-				Next Unreviewed
 			</Button>
 		</SpaceBetween>
 	);

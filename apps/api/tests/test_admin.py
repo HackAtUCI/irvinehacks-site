@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Any
-from unittest.mock import ANY, AsyncMock, patch
+from unittest.mock import ANY, AsyncMock, MagicMock, patch
 
 import pytest
 from fastapi import FastAPI, HTTPException
@@ -91,6 +91,129 @@ def test_cannot_retrieve_applicants_without_role(
 
     assert res.status_code == 403
     mock_mongodb_handler_retrieve.assert_not_awaited()
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+@patch("routers.admin.random.shuffle", autospec=True)
+def test_hacker_review_assignments_are_created(
+    mock_shuffle: MagicMock,
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_retrieve: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+    mock_shuffle.side_effect = lambda records: records.reverse()
+    mock_mongodb_handler_retrieve_one.return_value = HACKER_REVIEWER_IDENTITY
+    mock_mongodb_handler_retrieve.return_value = [
+        {
+            "_id": "edu.uci.applicant1",
+            "status": "PENDING",
+            "application_data": {
+                "reviews": [],
+                "submission_time": datetime(2026, 1, 1),
+            },
+            "assigned_reviewers": [],
+        },
+        {
+            "_id": "edu.uci.applicant2",
+            "status": "PENDING",
+            "application_data": {
+                "reviews": [],
+                "submission_time": datetime(2026, 1, 2),
+            },
+            "assigned_reviewers": [],
+        },
+    ]
+
+    res = reviewer_client.get("/review-assignments/hackers")
+
+    assert res.status_code == 200
+    assert res.json()["applicant_ids"] == [
+        "edu.uci.applicant2",
+        "edu.uci.applicant1",
+    ]
+    assert res.json()["target_count"] == 10
+    mock_shuffle.assert_called_once()
+    assert mock_mongodb_handler_raw_update_one.await_count == 2
+    first_update = mock_mongodb_handler_raw_update_one.await_args_list[0]
+    assert first_update.args == (
+        Collection.USERS,
+        {"_id": "edu.uci.applicant2"},
+        {"$addToSet": {"assigned_reviewers": "edu.uci.alicia"}},
+    )
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_hacker_review_assignments_keep_active_assignments(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_retrieve: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.return_value = HACKER_REVIEWER_IDENTITY
+    mock_mongodb_handler_retrieve.return_value = [
+        {
+            "_id": "edu.uci.assigned",
+            "status": "PENDING",
+            "application_data": {
+                "reviews": [],
+                "submission_time": datetime(2026, 1, 1),
+            },
+            "assigned_reviewers": ["edu.uci.alicia"],
+        },
+        {
+            "_id": "edu.uci.reviewed",
+            "status": "REVIEWED",
+            "application_data": {
+                "reviews": [[datetime(2026, 1, 2), "edu.uci.alicia", 10, None]],
+                "submission_time": datetime(2026, 1, 2),
+            },
+            "assigned_reviewers": ["edu.uci.alicia"],
+        },
+    ]
+
+    res = reviewer_client.get("/review-assignments/hackers")
+
+    assert res.status_code == 200
+    assert res.json()["applicant_ids"] == ["edu.uci.assigned"]
+    mock_mongodb_handler_raw_update_one.assert_not_awaited()
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_hacker_review_assignments_caps_active_assignments(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_retrieve: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.return_value = HACKER_REVIEWER_IDENTITY
+    mock_mongodb_handler_retrieve.return_value = [
+        {
+            "_id": f"edu.uci.assigned{i}",
+            "status": "PENDING",
+            "application_data": {
+                "reviews": [],
+                "submission_time": datetime(2026, 1, i + 1),
+            },
+            "assigned_reviewers": ["edu.uci.alicia"],
+        }
+        for i in range(12)
+    ]
+
+    res = reviewer_client.get("/review-assignments/hackers")
+
+    assert res.status_code == 200
+    assert len(res.json()["applicant_ids"]) == 10
+    assert mock_mongodb_handler_raw_update_one.await_count == 2
+    first_update = mock_mongodb_handler_raw_update_one.await_args_list[0]
+    assert first_update.args == (
+        Collection.USERS,
+        {"_id": "edu.uci.assigned10"},
+        {"$pull": {"assigned_reviewers": "edu.uci.alicia"}},
+    )
 
 
 @patch("services.mongodb_handler.raw_update_one", autospec=True)

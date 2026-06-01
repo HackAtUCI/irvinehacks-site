@@ -74,12 +74,29 @@ function HackerApplicantActions({
 		canReview || (isUserDirector && hasDirectorPreviousExperienceReview);
 
 	const handleClick = () => {
-		const hasMissingFields = [
-			"previous_experience",
+		const hasIrvineHacksScoring = [
 			"frq_change",
 			"frq_ambition",
 			"frq_character",
-		].some((field) => !(field in scores));
+		].some((field) => field in scores);
+		const hasZotHacksScoring = [
+			"elevator_pitch_saq",
+			"tech_experience_saq",
+			"learn_about_self_saq",
+			"pixel_art_saq",
+		].some((field) => field in scores);
+		const hasMissingFields =
+			(hasIrvineHacksScoring &&
+				["frq_change", "frq_ambition", "frq_character"].some(
+					(field) => !(field in scores),
+				)) ||
+			(hasZotHacksScoring &&
+				[
+					"elevator_pitch_saq",
+					"tech_experience_saq",
+					"learn_about_self_saq",
+					"pixel_art_saq",
+				].some((field) => !(field in scores)));
 
 		if (hasMissingFields) {
 			const msgId = `missing-fields-${Date.now()}`;

@@ -15,6 +15,7 @@ import useApplicant, {
 } from "@/lib/admin/useApplicant";
 
 import ApplicantOverview from "./ApplicantOverview";
+import ApplicantNavigationButtons from "./ApplicantNavigationButtons";
 import { ParticipantRole } from "@/lib/userRecord";
 import { ScoredFields } from "@/lib/detailedScores";
 import ZotHacksHackerApplication from "../zothacks-hackers/components/ZotHacksHackerApplication";
@@ -95,6 +96,10 @@ function DetailedScoreApplicant({
 									status={applicant.status}
 									onVoid={voidApplicant}
 								/>
+								<ApplicantNavigationButtons
+									uid={uid}
+									basePath="/admin/applicants/zothacks-hackers"
+								/>
 								<HackerApplicantActions
 									applicant={applicant._id}
 									reviews={application_data.reviews}
@@ -161,6 +166,10 @@ function DetailedScoreApplicant({
 					scores={scores}
 					notes={notes}
 					onSubmitDetailedReview={handleSubmitDetailedReview}
+				/>
+				<ApplicantNavigationButtons
+					uid={uid}
+					basePath="/admin/applicants/zothacks-hackers"
 				/>
 			</div>
 		</ContentLayout>

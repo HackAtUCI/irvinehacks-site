@@ -1,5 +1,7 @@
 import hashlib
 import hmac
+import random
+
 from datetime import date, datetime
 from logging import getLogger
 from typing import Annotated, Any, Literal, Mapping, Optional, Union
@@ -224,8 +226,50 @@ class DeleteNotesRequest(BaseModel):
     review_index: int
 
 
+class ReviewAssignmentsResponse(BaseModel):
+    applicant_ids: list[str]
+    target_count: int
+    completed_count: int
+
+
 class WaiverStatusRequest(BaseModel):
     is_signed: bool
+
+
+REVIEW_ASSIGNMENT_BATCH_SIZE = 10
+
+
+def _reviewer_has_reviewed(record: Mapping[str, Any], reviewer_uid: str) -> bool:
+    application_data = record.get("application_data", {})
+    if not isinstance(application_data, Mapping):
+        return False
+
+    reviews = application_data.get("reviews", [])
+    return any(review[1] == reviewer_uid for review in reviews)
+
+
+def _unique_reviewers(record: Mapping[str, Any]) -> set[str]:
+    application_data = record.get("application_data", {})
+    if not isinstance(application_data, Mapping):
+        return set()
+
+    reviews = application_data.get("reviews", [])
+    return {review[1] for review in reviews}
+
+
+def _assigned_reviewers(record: Mapping[str, Any]) -> list[str]:
+    assigned_reviewers = record.get("assigned_reviewers", [])
+    return assigned_reviewers if isinstance(assigned_reviewers, list) else []
+
+
+def _is_review_assignable(record: Mapping[str, Any], reviewer_uid: str) -> bool:
+    if record.get("status") == Decision.VOIDED:
+        return False
+    if reviewer_uid in _unique_reviewers(record):
+        return False
+    if len(_unique_reviewers(record)) >= 2:
+        return False
+    return len(_assigned_reviewers(record)) < 2
 
 
 async def mentor_volunteer_applicants(
@@ -334,6 +378,82 @@ async def hacker_applicants(
         return TypeAdapter(list[HackerApplicantSummary]).validate_python(records)
     except ValidationError:
         raise RuntimeError("Could not parse applicant data.")
+
+
+@router.get("/review-assignments/hackers")
+async def hacker_review_assignments(
+    user: Annotated[User, Depends(require_hacker_reviewer)],
+) -> ReviewAssignmentsResponse:
+    """Get or create the current reviewer's hacker application assignments."""
+    records: list[dict[str, object]] = await mongodb_handler.retrieve(
+        Collection.USERS,
+        {"roles": Role.HACKER},
+        [
+            "_id",
+            "status",
+            "application_data.reviews",
+            "application_data.submission_time",
+            "assigned_reviewers",
+        ],
+        sort=[("application_data.submission_time", DESCENDING)],
+    )
+    completed_assignments = sum(
+        1 for record in records if _reviewer_has_reviewed(record, user.uid)
+    )
+
+    active_assignment_records = [
+        record
+        for record in records
+        if user.uid in _assigned_reviewers(record)
+        and not _reviewer_has_reviewed(record, user.uid)
+        and record.get("status") != Decision.VOIDED
+        and len(_unique_reviewers(record)) < 2
+    ]
+    overflow_assignment_records = active_assignment_records[
+        REVIEW_ASSIGNMENT_BATCH_SIZE:
+    ]
+    for record in overflow_assignment_records:
+        await mongodb_handler.raw_update_one(
+            Collection.USERS,
+            {"_id": record["_id"]},
+            {"$pull": {"assigned_reviewers": user.uid}},
+        )
+
+    active_assignment_records = active_assignment_records[:REVIEW_ASSIGNMENT_BATCH_SIZE]
+    active_assignments = [str(record["_id"]) for record in active_assignment_records]
+
+    needed_assignments = REVIEW_ASSIGNMENT_BATCH_SIZE - len(active_assignments)
+    if needed_assignments <= 0:
+        return ReviewAssignmentsResponse(
+            applicant_ids=active_assignments,
+            target_count=REVIEW_ASSIGNMENT_BATCH_SIZE,
+            completed_count=completed_assignments,
+        )
+
+    candidates = [
+        record
+        for record in records
+        if str(record["_id"]) not in active_assignments
+        and user.uid not in _assigned_reviewers(record)
+        and _is_review_assignable(record, user.uid)
+    ]
+    random.shuffle(candidates)
+    candidates.sort(key=lambda record: len(_assigned_reviewers(record)))
+
+    new_assignments = candidates[:needed_assignments]
+    for record in new_assignments:
+        await mongodb_handler.raw_update_one(
+            Collection.USERS,
+            {"_id": record["_id"]},
+            {"$addToSet": {"assigned_reviewers": user.uid}},
+        )
+
+    return ReviewAssignmentsResponse(
+        applicant_ids=active_assignments
+        + [str(record["_id"]) for record in new_assignments],
+        target_count=REVIEW_ASSIGNMENT_BATCH_SIZE,
+        completed_count=completed_assignments,
+    )
 
 
 async def _user_has_role(uid: str, role: Role) -> bool:

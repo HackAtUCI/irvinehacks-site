@@ -36,9 +36,8 @@ const nextConfig = {
 			},
 			{
 				source: "/incident",
-				destination:
-					"https://docs.google.com/forms/d/e/1FAIpQLSf-Frl5wHNoBMs9_pBlaUFyw525N5HqtJaDdmooEssUSREggQ/viewform?usp=sharing",
-				permanent: true,
+				destination: "/",
+				permanent: false,
 			},
 			{
 				source: "/devpost",
@@ -47,9 +46,8 @@ const nextConfig = {
 			},
 			{
 				source: "/feedback",
-				destination:
-					"https://docs.google.com/forms/d/e/1FAIpQLSfFP7D0WMwUn0cSnNCU6W1OQtv6qa10SdjL2FkigZHkY92voQ/viewform",
-				permanent: true,
+				destination: "/",
+				permanent: false,
 			},
 		];
 	},

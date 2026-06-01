@@ -6,122 +6,26 @@ import { useRouter } from "next/navigation";
 import Alert from "@cloudscape-design/components/alert";
 import Box from "@cloudscape-design/components/box";
 import Button from "@cloudscape-design/components/button";
-import ColumnLayout from "@cloudscape-design/components/column-layout";
 import Container from "@cloudscape-design/components/container";
+import FormField from "@cloudscape-design/components/form-field";
 import Header from "@cloudscape-design/components/header";
+import Input from "@cloudscape-design/components/input";
 import Modal from "@cloudscape-design/components/modal";
 import Select, { SelectProps } from "@cloudscape-design/components/select";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import Spinner from "@cloudscape-design/components/spinner";
 import TextContent from "@cloudscape-design/components/text-content";
-import Toggle from "@cloudscape-design/components/toggle";
 import axios from "axios";
 
 import { isDirector } from "@/lib/admin/authorization";
 import NotificationContext from "@/lib/admin/NotificationContext";
 import UserContext from "@/lib/admin/UserContext";
 
-import useAvailabilityLock from "@/lib/admin/useAvailabilityLock";
-import useAvailabilitySubmissions from "@/lib/admin/useAvailabilitySubmissions";
 import useAvailabilityTemplate from "@/lib/admin/useAvailabilityTemplate";
 import useOrganizers from "@/lib/admin/useOrganizers";
 import useTemplates from "@/lib/admin/useTemplates";
 
-type AvailabilityOrganizer = {
-	id: string;
-	name: string;
-	committee: string;
-	hasSubmitted: boolean;
-};
-
-const COMMITTEE_BADGE_COLORS: Record<string, string> = {
-	Corporate: "#ead7ff",
-	Design: "#d7eadf",
-	Logistics: "#fff0c2",
-	Marketing: "#d8e8ff",
-	Tech: "#ffd8c9",
-	Unassigned: "#e9ebed",
-};
-
-function getOrganizerName(firstName: string, lastName: string) {
-	const fullName = `${firstName} ${lastName}`.trim();
-	return fullName || "Unknown Organizer";
-}
-
-function getPrimaryCommittee(committees: string[] | undefined) {
-	if (!committees || committees.length === 0) {
-		return "Unassigned";
-	}
-
-	const raw = committees[0];
-	return raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase();
-}
-
-function getCommitteeColor(committee: string) {
-	return COMMITTEE_BADGE_COLORS[committee] ?? "#e9ebed";
-}
-
-function groupByCommittee(organizers: AvailabilityOrganizer[]) {
-	return organizers.reduce<Record<string, AvailabilityOrganizer[]>>(
-		(groups, organizer) => {
-			if (!groups[organizer.committee]) {
-				groups[organizer.committee] = [];
-			}
-
-			groups[organizer.committee].push(organizer);
-			return groups;
-		},
-		{},
-	);
-}
-
-function OrganizerGroup({
-	title,
-	organizers,
-}: {
-	title: string;
-	organizers: AvailabilityOrganizer[];
-}) {
-	const groupedOrganizers = groupByCommittee(organizers);
-
-	return (
-		<SpaceBetween size="m">
-			<Header variant="h3">{title}</Header>
-
-			{Object.entries(groupedOrganizers).map(
-				([committee, committeeOrganizers]) => (
-					<SpaceBetween key={committee} size="xs">
-						<Box fontWeight="bold">{committee}</Box>
-
-						<div
-							style={{
-								display: "flex",
-								flexWrap: "wrap",
-								gap: "8px",
-							}}
-						>
-							{committeeOrganizers.map((organizer) => (
-								<span
-									key={organizer.id}
-									style={{
-										backgroundColor: getCommitteeColor(organizer.committee),
-										borderRadius: "8px",
-										padding: "4px 10px",
-										fontSize: "14px",
-									}}
-								>
-									{organizer.name}
-								</span>
-							))}
-						</div>
-					</SpaceBetween>
-				),
-			)}
-		</SpaceBetween>
-	);
-}
-
-export default function AvailabilityManagement() {
+export default function ShiftManagement() {
 	const { roles } = useContext(UserContext);
 	const { setNotifications } = useContext(NotificationContext);
 
@@ -130,19 +34,7 @@ export default function AvailabilityManagement() {
 		loading: organizersLoading,
 		error: organizersError,
 	} = useOrganizers();
-	const {
-		submittedOrganizerIds,
-		loading: submissionsLoading,
-		error: submissionsError,
-		clearAvailability,
-		mutate: mutateSubmissions,
-	} = useAvailabilitySubmissions();
-	const {
-		isLocked,
-		loading: lockLoading,
-		error: lockError,
-		setLocked,
-	} = useAvailabilityLock();
+
 	const {
 		templateName,
 		loading: availabilityTemplateLoading,
@@ -152,7 +44,6 @@ export default function AvailabilityManagement() {
 	} = useAvailabilityTemplate();
 	const { templateList, loading: templatesLoading } = useTemplates();
 
-	const [savingLock, setSavingLock] = useState(false);
 	const [clearingAvailability, setClearingAvailability] = useState(false);
 	const [clearModalVisible, setClearModalVisible] = useState(false);
 	const [requestingTemplate, setRequestingTemplate] = useState(false);
@@ -160,34 +51,6 @@ export default function AvailabilityManagement() {
 	const [resetModalVisible, setResetModalVisible] = useState(false);
 	const [selectedTemplate, setSelectedTemplate] =
 		useState<SelectProps.Option | null>(null);
-
-	const submittedOrganizerIdSet = useMemo(
-		() => new Set(submittedOrganizerIds),
-		[submittedOrganizerIds],
-	);
-
-	const organizers: AvailabilityOrganizer[] = useMemo(() => {
-		return organizerList.map((organizer) => ({
-			id: organizer._id,
-			name: getOrganizerName(organizer.first_name, organizer.last_name),
-			committee: getPrimaryCommittee(organizer.committees),
-			hasSubmitted: submittedOrganizerIdSet.has(organizer._id),
-		}));
-	}, [organizerList, submittedOrganizerIdSet]);
-
-	const submittedOrganizers = useMemo(
-		() => organizers.filter((organizer) => organizer.hasSubmitted),
-		[organizers],
-	);
-
-	const notSubmittedOrganizers = useMemo(
-		() => organizers.filter((organizer) => !organizer.hasSubmitted),
-		[organizers],
-	);
-
-	const totalOrganizerCount = organizers.length;
-	const submittedCount = submittedOrganizers.length;
-	const notSubmittedCount = notSubmittedOrganizers.length;
 
 	function showNotification(
 		content: string,
@@ -209,31 +72,9 @@ export default function AvailabilityManagement() {
 		}, 3000);
 	}
 
-	async function handleLockToggle(checked: boolean) {
-		try {
-			setSavingLock(true);
-			const nextLocked = await setLocked(checked);
-
-			showNotification(
-				nextLocked
-					? "Availability submissions are now locked."
-					: "Availability submissions are now unlocked.",
-			);
-		} catch (err) {
-			const message =
-				axios.isAxiosError(err) && err.response?.status === 403
-					? "Only directors can update the availability lock."
-					: "Unable to update availability lock. Please try again.";
-			showNotification(message, "error");
-		} finally {
-			setSavingLock(false);
-		}
-	}
-
 	async function handleClearAvailability() {
 		try {
 			setClearingAvailability(true);
-			await clearAvailability();
 			setClearModalVisible(false);
 			showNotification("All availability submissions have been cleared.");
 		} catch (err) {
@@ -253,7 +94,6 @@ export default function AvailabilityManagement() {
 		try {
 			setRequestingTemplate(true);
 			await requestAvailabilityTemplate(selectedTemplate.value);
-			await mutateSubmissions([], false);
 			showNotification("Availability has been requested.");
 		} catch (err) {
 			const message =
@@ -270,14 +110,13 @@ export default function AvailabilityManagement() {
 		try {
 			setResettingTemplate(true);
 			await resetAvailabilityTemplate();
-			await mutateSubmissions([], false);
 			setSelectedTemplate(null);
 			setResetModalVisible(false);
 			showNotification("Availability template has been reset.");
 		} catch (err) {
 			const message =
 				axios.isAxiosError(err) && err.response?.status === 403
-					? "Only directors can reset the availability template."
+					? "Only directors can reset the template."
 					: "Unable to reset template. Please try again.";
 			showNotification(message, "error");
 		} finally {
@@ -292,16 +131,8 @@ export default function AvailabilityManagement() {
 	}
 
 	const loading =
-		organizersLoading ||
-		submissionsLoading ||
-		lockLoading ||
-		availabilityTemplateLoading ||
-		templatesLoading;
-	const error =
-		organizersError ||
-		submissionsError ||
-		lockError ||
-		availabilityTemplateError;
+		organizersLoading || availabilityTemplateLoading || templatesLoading;
+	const error = organizersError || availabilityTemplateError;
 
 	if (loading) {
 		return (
@@ -346,15 +177,14 @@ export default function AvailabilityManagement() {
 	if (!templateName) {
 		return (
 			<SpaceBetween size="l">
-				<Header variant="h1">Availability Management</Header>
+				<Header variant="h1">Shift Management</Header>
 
 				<Container>
 					<SpaceBetween size="m">
 						<Header variant="h2">Choose a template</Header>
 						{templateList.length === 0 ? (
 							<Alert type="info" header="No templates created">
-								Create a shift template before requesting organizer
-								availability.
+								Create a shift template before creating a shift draft.
 							</Alert>
 						) : (
 							<SpaceBetween direction="horizontal" size="s" alignItems="center">
@@ -399,122 +229,51 @@ export default function AvailabilityManagement() {
 					</Button>
 				}
 			>
-				{templateName} Availability Management
+				{templateName} Shift Management
 			</Header>
 
-			<ColumnLayout columns={3} variant="text-grid">
-				<Container>
-					<SpaceBetween size="xs">
-						<Box fontSize="heading-xl" fontWeight="bold">
-							{totalOrganizerCount}
-						</Box>
-						<Box fontWeight="bold">Total organizers</Box>
-					</SpaceBetween>
-				</Container>
-
-				<Container>
-					<SpaceBetween size="xs">
-						<Box
-							fontSize="heading-xl"
-							fontWeight="bold"
-							color="text-status-success"
-						>
-							{submittedCount}
-						</Box>
-						<Box fontWeight="bold">Submitted</Box>
-					</SpaceBetween>
-				</Container>
-
-				<Container>
-					<SpaceBetween size="xs">
-						<Box
-							fontSize="heading-xl"
-							fontWeight="bold"
-							color="text-status-error"
-						>
-							{notSubmittedCount}
-						</Box>
-						<Box fontWeight="bold">Not submitted</Box>
-					</SpaceBetween>
-				</Container>
-			</ColumnLayout>
-
-			<Container header={<Header variant="h2">Availability</Header>}>
-				<SpaceBetween size="l">
-					<SpaceBetween size="m">
-						<div
-							style={{
-								display: "flex",
-								alignItems: "center",
-								justifyContent: "space-between",
-								gap: "24px",
-							}}
-						>
-							<div>
-								<Box fontSize="heading-m">Lock Availability</Box>
-								<Box color="text-body-secondary">
-									Organizers can no longer edit their submissions
-								</Box>
-							</div>
-
-							<Toggle
-								checked={isLocked}
-								disabled={savingLock}
-								onChange={({ detail }) => handleLockToggle(detail.checked)}
-							>
-								Lock Availability
-							</Toggle>
-						</div>
-
-						<div
-							style={{
-								display: "flex",
-								alignItems: "center",
-								justifyContent: "space-between",
-								gap: "24px",
-							}}
-						>
-							<div>
-								<Box fontSize="heading-m">Clear All Availability</Box>
-								<Box color="text-body-secondary">
-									Remove all recorded availabilities
-								</Box>
-							</div>
-
-							<Button
-								variant="primary"
-								disabled={submittedCount === 0}
-								onClick={() => setClearModalVisible(true)}
-							>
-								Confirm
-							</Button>
-						</div>
-					</SpaceBetween>
-
-					<hr
+			<Container header={<Header variant="h2">Shift Settings</Header>}>
+				<SpaceBetween size="m">
+					<div
 						style={{
-							border: 0,
-							borderTop: "1px solid #d5dbdb",
-							margin: 0,
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "space-between",
+							gap: "24px",
 						}}
-					/>
+					>
+						<div>
+							<Box fontSize="heading-m">Minimum shift points</Box>
+							<Box color="text-body-secondary">
+								Each organizer must be assigned at least this many points.
+							</Box>
+						</div>
+						<FormField>
+							<Input value="" onChange={() => {}} />
+						</FormField>
+					</div>
 
-					{organizers.length === 0 ? (
-						<Alert type="info" header="No organizers found">
-							There are no organizers to display yet.
-						</Alert>
-					) : (
-						<>
-							<OrganizerGroup
-								title="Submitted"
-								organizers={submittedOrganizers}
-							/>
-							<OrganizerGroup
-								title="Not Submitted"
-								organizers={notSubmittedOrganizers}
-							/>
-						</>
-					)}
+					<div
+						style={{
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "space-between",
+							gap: "24px",
+						}}
+					>
+						<div>
+							<Box fontSize="heading-m">Auto-assign shifts</Box>
+							<Box color="text-body-secondary">
+								Assign shifts based on availability and minimum points.
+							</Box>
+						</div>
+						<Button
+							variant="primary"
+							onClick={() => setClearModalVisible(true)}
+						>
+							Auto-assign
+						</Button>
+					</div>
 				</SpaceBetween>
 			</Container>
 

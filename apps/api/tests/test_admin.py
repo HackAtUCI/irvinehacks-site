@@ -12,6 +12,7 @@ from routers import admin
 from routers.admin import (
     _handle_detailed_scores_review,
     _handle_global_only_review,
+    _hacker_applicant_token,
     delete_notes,
     GlobalScores,
     DeleteNotesRequest,
@@ -706,9 +707,11 @@ def test_hacker_applicants_redacts_identity_for_reviewers(
     assert data[0]["application_data"]["submission_time"] == "2023-01-12T09:00:00"
 
 
+@patch("services.mongodb_handler.retrieve", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 def test_hacker_applicant_redacts_identity_for_reviewers(
     mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_retrieve: AsyncMock,
 ) -> None:
     """Test that hacker reviewer detail pages only receive FRQs."""
     applicant_record: dict[str, object] = {
@@ -732,11 +735,13 @@ def test_hacker_applicant_redacts_identity_for_reviewers(
     }
     mock_mongodb_handler_retrieve_one.side_effect = [
         HACKER_REVIEWER_IDENTITY,
-        applicant_record,
         HACKER_REVIEWER_IDENTITY,
     ]
+    mock_mongodb_handler_retrieve.return_value = [applicant_record]
 
-    res = reviewer_client.get("/applicant/hacker/edu.uci.sydnee")
+    res = reviewer_client.get(
+        f"/applicant/hacker/{_hacker_applicant_token('edu.uci.sydnee')}"
+    )
 
     assert res.status_code == 200
     data = res.json()
@@ -750,6 +755,21 @@ def test_hacker_applicant_redacts_identity_for_reviewers(
         "reviews": [],
         "review_breakdown": {},
     }
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_hacker_applicant_hides_direct_uid_urls_for_reviewers(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test that reviewers cannot confirm guessed hacker applicant UIDs."""
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        HACKER_REVIEWER_IDENTITY,
+        HACKER_REVIEWER_IDENTITY,
+    ]
+
+    res = reviewer_client.get("/applicant/hacker/edu.uci.friend")
+
+    assert res.status_code == 404
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
@@ -794,8 +814,8 @@ def test_hacker_applicant_returns_full_application_for_directors(
     }
     mock_mongodb_handler_retrieve_one.side_effect = [
         DIRECTOR_IDENTITY,
-        applicant_record,
         DIRECTOR_IDENTITY,
+        applicant_record,
     ]
 
     res = director_client.get("/applicant/hacker/edu.uci.sydnee")

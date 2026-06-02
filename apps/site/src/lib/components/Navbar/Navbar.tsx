@@ -1,29 +1,17 @@
 "use client";
 
 import * as NavMenu from "@radix-ui/react-navigation-menu";
-import clsx from "clsx";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-import Button from "@/lib/components/Button/Button";
 import HackLogo from "@/lib/components/HackLogo/HackLogo";
 import NavLinkItem from "./NavbarHelpers";
 
 import hamburger from "@/assets/icons/navigation-icon.svg";
-import { Identity } from "@/lib/utils/getUserIdentity";
-import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
 
-import buttonStyles from "@/lib/components/Button/Button.module.css";
 import styles from "./Navbar.module.scss";
 
-interface NavbarProps {
-	identity: Identity;
-}
-
-function Navbar({ identity }: NavbarProps) {
-	const { uid, status } = identity;
-	const isLoggedIn = uid === null;
-
+function Navbar() {
 	const [listShown, setListShown] = useState(false);
 	const [hasScrolled, setHasScrolled] = useState(false);
 	const [hidden, setHidden] = useState(true);
@@ -34,8 +22,6 @@ function Navbar({ identity }: NavbarProps) {
 
 		window.addEventListener("scroll", scrollHandler);
 	}, []);
-
-	const deadlinePassed = hasDeadlinePassed();
 
 	return (
 		<NavMenu.Root
@@ -71,15 +57,8 @@ function Navbar({ identity }: NavbarProps) {
 					onTransitionEnd={() => setHidden(!listShown)}
 				>
 					<NavLinkItem href="/">Home</NavLinkItem>
-					<NavLinkItem href="/resources">Resources</NavLinkItem>
-					<NavLinkItem href="/schedule">Schedule</NavLinkItem>
-					<NavLinkItem
-						href="/incident"
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						Report Incident
-					</NavLinkItem>
+					<NavLinkItem href="/">Resources</NavLinkItem>
+					<NavLinkItem href="/">Schedule</NavLinkItem>
 					<NavLinkItem
 						href="/devpost"
 						target="_blank"
@@ -87,33 +66,6 @@ function Navbar({ identity }: NavbarProps) {
 					>
 						Devpost
 					</NavLinkItem>
-					<NavLinkItem
-						href="/feedback"
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						Feedback
-					</NavLinkItem>
-					{!status && !deadlinePassed && (
-						<NavLinkItem href="/apply">Apply</NavLinkItem>
-					)}
-
-					{status !== null && <NavLinkItem href="/portal">Portal</NavLinkItem>}
-					{isLoggedIn ? (
-						<Button
-							text="Log In"
-							href="/login"
-							usePrefetch={false}
-							isLightVersion
-						/>
-					) : (
-						<a
-							href="/logout"
-							className={clsx(buttonStyles.button, buttonStyles.lightButton)}
-						>
-							Log Out
-						</a>
-					)}
 				</NavMenu.List>
 			</div>
 		</NavMenu.Root>

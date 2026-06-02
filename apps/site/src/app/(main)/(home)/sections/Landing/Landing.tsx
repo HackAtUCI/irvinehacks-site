@@ -4,7 +4,6 @@ import { Suspense } from "react";
 import Image from "next/image";
 import { PerspectiveCamera } from "@react-three/drei";
 
-import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
 import View from "@/components/canvas/View";
 import Button from "@/lib/components/Button/Button";
 import Fireflies from "../../components/Fireflies";
@@ -15,8 +14,6 @@ import fogRight from "@/assets/images/fog-right.png";
 import styles from "./Landing.module.css";
 
 const Landing = () => {
-	const deadlinePassed = hasDeadlinePassed();
-
 	return (
 		<section className={styles.landingBackground}>
 			<View className="absolute w-full h-full">
@@ -32,11 +29,7 @@ const Landing = () => {
 					IrvineHacks 2024
 				</h1>
 				<p className="font-display text-2xl md:text-3xl">January 26&ndash;28</p>
-				{deadlinePassed ? (
-					<Button className="z-10" text="Applications have closed!" disabled />
-				) : (
-					<Button className="z-10" text="Apply" href="/apply" />
-				)}
+				<Button className="z-10" text="Applications have closed!" disabled />
 			</div>
 		</section>
 	);

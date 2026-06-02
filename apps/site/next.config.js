@@ -31,13 +31,13 @@ const nextConfig = {
 		return [
 			{
 				source: "/mentor",
-				destination: "https://forms.gle/yCmXvG89ygvxUSCd7",
-				permanent: true,
+				destination: "/",
+				permanent: false,
 			},
 			{
 				source: "/volunteer",
-				destination: "https://forms.gle/erpJjErKLJkEZMw48",
-				permanent: true,
+				destination: "/",
+				permanent: false,
 			},
 			{
 				source: "/waiver",
@@ -46,8 +46,8 @@ const nextConfig = {
 			},
 			{
 				source: "/incident",
-				destination: "https://forms.gle/A6BdsSzYSiyeTP8Y6",
-				permanent: true,
+				destination: "/",
+				permanent: false,
 			},
 			{
 				source: "/devpost",
@@ -56,8 +56,8 @@ const nextConfig = {
 			},
 			{
 				source: "/feedback",
-				destination: "https://forms.gle/c154z45wRx7ARnrE9",
-				permanent: true,
+				destination: "/",
+				permanent: false,
 			},
 		];
 	},

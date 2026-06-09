@@ -8,10 +8,9 @@ export interface IrvineHacksHackerScoredFields {
 
 export interface ZotHacksHackerScoredFields {
 	resume?: number;
-	elevator_pitch_saq?: number;
-	tech_experience_saq?: number;
-	learn_about_self_saq?: number;
-	pixel_art_saq?: number;
+	collaboration_saq?: number;
+	tech_inspiration_saq?: number;
+	uci_gift_saq?: number;
 	hackathon_experience?: number;
 }
 

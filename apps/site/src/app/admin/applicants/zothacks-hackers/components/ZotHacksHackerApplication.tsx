@@ -6,7 +6,6 @@ import Container from "@cloudscape-design/components/container";
 import Header from "@cloudscape-design/components/header";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import { PortableText } from "@portabletext/react";
-import PixelArtDisplay from "./PixelArtDisplay";
 import ZotHacksHackerApplicationSection from "./ZotHacksHackerApplicationSection";
 import {
 	HackathonExperience,
@@ -105,27 +104,22 @@ function ZotHacksHackerApplication({
 		const allowedValues = new Set(resumeOptions.map((o) => Number(o.value)));
 		return allowedValues.has(Number(raw)) ? Number(raw) : -1;
 	});
-	const [elevatorScore, setElevatorScore] = useState<number>(
+	const [collaborationScore, setCollaborationScore] = useState<number>(
 		formattedUid
 			? application_data?.review_breakdown?.[formattedUid]
-					?.elevator_pitch_saq ?? -1
+					?.collaboration_saq ?? -1
 			: -1,
 	);
-	const [techExperienceScore, setTechExperienceScore] = useState<number>(
+	const [techInspirationScore, setTechInspirationScore] = useState<number>(
 		formattedUid
 			? application_data?.review_breakdown?.[formattedUid]
-					?.tech_experience_saq ?? -1
+					?.tech_inspiration_saq ?? -1
 			: -1,
 	);
-	const [learnAboutSelfScore, setLearnAboutSelfScore] = useState<number>(
+	const [uciGiftScore, setUciGiftScore] = useState<number>(
 		formattedUid
 			? application_data?.review_breakdown?.[formattedUid]
-					?.learn_about_self_saq ?? -1
-			: -1,
-	);
-	const [pixelArtScore, setPixelArtScore] = useState<number>(
-		formattedUid
-			? application_data?.review_breakdown?.[formattedUid]?.pixel_art_saq ?? -1
+					?.uci_gift_saq ?? -1
 			: -1,
 	);
 
@@ -145,27 +139,23 @@ function ZotHacksHackerApplication({
 		if (resumeScore !== -1) {
 			scoresObject.resume = resumeScore;
 		}
-		if (elevatorScore !== -1) {
-			scoresObject.elevator_pitch_saq = elevatorScore;
+		if (collaborationScore !== -1) {
+			scoresObject.collaboration_saq = collaborationScore;
 		}
-		if (techExperienceScore !== -1) {
-			scoresObject.tech_experience_saq = techExperienceScore;
+		if (techInspirationScore !== -1) {
+			scoresObject.tech_inspiration_saq = techInspirationScore;
 		}
-		if (learnAboutSelfScore !== -1) {
-			scoresObject.learn_about_self_saq = learnAboutSelfScore;
-		}
-		if (pixelArtScore !== -1) {
-			scoresObject.pixel_art_saq = pixelArtScore;
+		if (uciGiftScore !== -1) {
+			scoresObject.uci_gift_saq = uciGiftScore;
 		}
 
 		onScoreChange(scoresObject);
 	}, [
 		hackathonExperienceScore,
 		resumeScore,
-		elevatorScore,
-		techExperienceScore,
-		learnAboutSelfScore,
-		pixelArtScore,
+		collaborationScore,
+		techInspirationScore,
+		uciGiftScore,
 		onScoreChange,
 	]);
 
@@ -219,61 +209,40 @@ function ZotHacksHackerApplication({
 				disabled={isResumeDisabled}
 			/>
 			<ScoreSection
-				title="If you had 30 seconds in an elevator with your dream mentor, how would
-					you explain why you’re joining ZotHacks? [75 word limit]"
+				title="Tell us about a time when collaboration was instrumental in your success. [Max 100 words]"
 				min={0}
 				max={20}
 				leftColumn={
-					<PortableText value={guidelines.guidelines.elevator_pitch_saq} />
+					<PortableText value={guidelines.guidelines.collaboration_saq} />
 				}
-				rightColumn={<p>{application_data.elevator_pitch_saq}</p>}
-				value={elevatorScore}
-				onChange={setElevatorScore}
+				rightColumn={<p>{application_data.collaboration_saq}</p>}
+				value={collaborationScore}
+				onChange={setCollaborationScore}
+				wordLimit={100}
+			/>
+			<ScoreSection
+				title="Describe an application or technological concept that inspires your growth. Why is it important to you? (Ex: Robots in surgery, quantum computing, social media, etc.) [Max 100 words]"
+				min={0}
+				max={20}
+				leftColumn={
+					<PortableText value={guidelines.guidelines.tech_inspiration_saq} />
+				}
+				rightColumn={<p>{application_data.tech_inspiration_saq}</p>}
+				value={techInspirationScore}
+				onChange={setTechInspirationScore}
+				wordLimit={100}
+			/>
+			<ScoreSection
+				title="If you could give each person at UCI one item under $100, what would it be and why? [Max 75 words]"
+				min={0}
+				max={20}
+				leftColumn={
+					<PortableText value={guidelines.guidelines.uci_gift_saq} />
+				}
+				rightColumn={<p>{application_data.uci_gift_saq}</p>}
+				value={uciGiftScore}
+				onChange={setUciGiftScore}
 				wordLimit={75}
-			/>
-			<ScoreSection
-				title="Describe a positive or negative experience dealing with technology
-					[100 words]"
-				min={0}
-				max={20}
-				leftColumn={
-					<PortableText value={guidelines.guidelines.tech_experience_saq} />
-				}
-				rightColumn={<p>{application_data.tech_experience_saq}</p>}
-				value={techExperienceScore}
-				onChange={setTechExperienceScore}
-				wordLimit={100}
-			/>
-			<ScoreSection
-				title="What’s one thing you hope to learn about yourself at UCI — and how
-					might ZotHacks help with that? [100 words]"
-				min={0}
-				max={20}
-				leftColumn={
-					<PortableText value={guidelines.guidelines.learn_about_self_saq} />
-				}
-				rightColumn={<p>{application_data.learn_about_self_saq}</p>}
-				value={learnAboutSelfScore}
-				onChange={setLearnAboutSelfScore}
-				wordLimit={100}
-			/>
-			<ScoreSection
-				title="Pixel art: Draw something that represents you. Briefly explain your
-					art. [100 words]"
-				min={0}
-				max={20}
-				leftColumn={
-					<PortableText value={guidelines.guidelines.pixel_art_saq} />
-				}
-				rightColumn={
-					<div>
-						<p>{application_data.pixel_art_saq}</p>
-						<PixelArtDisplay gridColors={application_data.pixel_art_data} />
-					</div>
-				}
-				value={pixelArtScore}
-				onChange={setPixelArtScore}
-				wordLimit={100}
 			/>
 			<ReviewerNotes
 				applicant={applicant}

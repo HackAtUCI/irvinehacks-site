@@ -181,8 +181,10 @@ class BaseZotHacksHackerApplicationData(BaseModel):
     school_year: str
     dietary_restrictions: list[str] = []
     allergies: Union[str, None] = Field(None, max_length=2048)
+
     major: str
     hackathon_experience: Literal["first_time", "some_experience", "veteran"]
+
     collaboration_saq: str = Field(max_length=1024)
     tech_inspiration_saq: str = Field(max_length=1024)
     uci_gift_saq: str = Field(max_length=1024)
@@ -194,21 +196,40 @@ class BaseZotHacksMentorApplicationData(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, str_max_length=1024)
 
     is_18_older: bool
-    pronouns: str
-    degree: str
-    major: str
-    graduation_year: int
-    mentoring_experience: str = Field(max_length=2048)
-    help_participants_frq: str = Field(max_length=2048)
-    new_team_help_frq: str = Field(max_length=2048)
-    tech_stack_frq: str = Field(max_length=2048)
-    frontend_backend_frq: str = Field(max_length=2048)
-    skills: list[str] = []
+    pronouns: list[str] = []
+    dietary_restrictions: list[str] = []
+    allergies: Union[str, None] = Field(None, max_length=2048)
 
+    phone_number: str
+    discord_username: str
+    major: str
+    academic_status: str
+
+    linkedin: NullableHttpUrl = None
     github: NullableHttpUrl = None
     portfolio: NullableHttpUrl = None
-    linkedin: NullableHttpUrl = None
+
+    tech_stack_frq: str = Field(max_length=2048)
+    frontend_backend_frq: str = Field(max_length=2048)
+    teaching_experience_frq: str = Field(max_length=2048)
+    team_leadership_frq: str = Field(max_length=2048)
     comments: Union[str, None] = Field(None, max_length=2048)
+
+    skill_python: int
+    skill_java: int
+    skill_c__: int
+    skill_javascript: int
+    skill_c_: int
+    skill_html_css: int
+    skill_react: int
+    skill_next_js: int
+    skill_github_pages: int
+    skill_other: int
+    skill_git: int
+    skill_sql__any_variation_: int
+    skill_aws_services: int
+    skill_vercel: int
+    skill_netlify: int
 
 
 class RawHackerApplicationData(BaseApplicationData):
@@ -248,7 +269,7 @@ class RawZotHacksHackerApplicationData(BaseZotHacksHackerApplicationData):
 class RawZotHacksMentorApplicationData(BaseZotHacksMentorApplicationData):
     first_name: str
     last_name: str
-    resume: UploadFile
+    resume: Union[UploadFile, None] = None
     application_type: Literal["Mentor"]
 
 
@@ -347,7 +368,7 @@ def get_discriminator_value(v: Any) -> str:
             return "volunteer"
         if "tech_inspiration_saq" in v:
             return "zothacks_hacker"
-        if "help_participants_frq" in v:
+        if "tech_stack_frq" in v:
             return "zothacks_mentor"
 
     if "frq_ambition" in dir(v):
@@ -358,7 +379,7 @@ def get_discriminator_value(v: Any) -> str:
         return "volunteer"
     if "tech_inspiration_saq" in dir(v):
         return "zothacks_hacker"
-    if "help_participants_frq" in dir(v):
+    if "tech_stack_frq" in dir(v):
         return "zothacks_mentor"
     return ""
 
@@ -406,13 +427,13 @@ def get_raw_mentor_discriminator_value(v: Any) -> str:
         # Check for unique fields to distinguish between the two types
         if "mentor_prev_experience_saq1" in v:
             return "mentor"
-        if "help_participants_frq" in v:
+        if "tech_stack_frq" in v:
             return "zothacks_mentor"
 
     # For object instances, check attributes
     if hasattr(v, "mentor_prev_experience_saq1"):
         return "mentor"
-    if hasattr(v, "help_participants_frq"):
+    if hasattr(v, "tech_stack_frq"):
         return "zothacks_mentor"
 
     return ""

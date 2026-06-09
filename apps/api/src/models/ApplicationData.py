@@ -269,7 +269,7 @@ class RawZotHacksHackerApplicationData(BaseZotHacksHackerApplicationData):
 class RawZotHacksMentorApplicationData(BaseZotHacksMentorApplicationData):
     first_name: str
     last_name: str
-    resume: UploadFile
+    resume: Union[UploadFile, None] = None
     application_type: Literal["Mentor"]
 
 

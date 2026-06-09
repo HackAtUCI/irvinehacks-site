@@ -1,5 +1,4 @@
 import copy
-import json
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, Mock, patch
 
@@ -71,11 +70,9 @@ SAMPLE_ZOTHACKS_HACKER_APPLICATION = {
     "allergies": "s",
     "major": "Computer Science",
     "hackathon_experience": "veteran",
-    "elevator_pitch_saq": "s",
-    "tech_experience_saq": "ss",
-    "learn_about_self_saq": "s",
-    "pixel_art_saq": "sss",
-    "pixel_art_data": json.dumps([0] * 64),
+    "collaboration_saq": "s",
+    "tech_inspiration_saq": "ss",
+    "uci_gift_saq": "s",
     "comments": "a",
     "application_type": "Hacker",
 }

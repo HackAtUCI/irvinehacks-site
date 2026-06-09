@@ -128,7 +128,7 @@ def _decode_user_identity(user_token: Union[str, None]) -> Union[User, None]:
     except ValueError:
         return None
 
-    if decoded_token.sub.startswith("edu.uci.") and UCI_SSO_ENABLED:
+    if decoded_token.sub.startswith("edu.uci.") and "ucinetid" in decoded_token.data:
         return NativeUser(**decoded_token.data)
     return GuestUser(**decoded_token.data)
 

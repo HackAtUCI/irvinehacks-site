@@ -982,10 +982,9 @@ async def test_handle_detailed_scores_review_success(
     applicant = "edu.uci.test"
     scores = ZotHacksHackerDetailedScores(
         resume=8,
-        elevator_pitch_saq=7,
-        tech_experience_saq=9,
-        learn_about_self_saq=6,
-        pixel_art_saq=8,
+        collaboration_saq=7,
+        tech_inspiration_saq=9,
+        uci_gift_saq=6,
         hackathon_experience=10,
     )
     reviewer = USER_REVIEWER
@@ -1035,10 +1034,9 @@ async def test_handle_detailed_scores_review_non_lead_user(
     applicant = "edu.uci.test"
     scores = ZotHacksHackerDetailedScores(
         resume=8,
-        elevator_pitch_saq=7,
-        tech_experience_saq=9,
-        learn_about_self_saq=6,
-        pixel_art_saq=8,
+        collaboration_saq=7,
+        tech_inspiration_saq=9,
+        uci_gift_saq=6,
         hackathon_experience=10,
     )
     reviewer = USER_REVIEWER
@@ -1078,10 +1076,9 @@ async def test_handle_detailed_scores_review_invalid_score(
     applicant = "edu.uci.test"
     scores = ZotHacksHackerDetailedScores(
         resume=100,  # This will make total score > 100
-        elevator_pitch_saq=100,
-        tech_experience_saq=100,
-        learn_about_self_saq=100,
-        pixel_art_saq=100,
+        collaboration_saq=100,
+        tech_inspiration_saq=100,
+        uci_gift_saq=100,
         hackathon_experience=10,
     )
     reviewer = USER_REVIEWER
@@ -1234,10 +1231,9 @@ async def test_handle_detailed_scores_review_applicant_not_found(
     applicant = "edu.uci.test"
     scores = ZotHacksHackerDetailedScores(
         resume=8,
-        elevator_pitch_saq=7,
-        tech_experience_saq=9,
-        learn_about_self_saq=6,
-        pixel_art_saq=8,
+        collaboration_saq=7,
+        tech_inspiration_saq=9,
+        uci_gift_saq=6,
         hackathon_experience=10,
     )
     reviewer = USER_REVIEWER
@@ -1261,10 +1257,9 @@ async def test_handle_detailed_scores_review_voided_applicant(
     applicant = "edu.uci.test"
     scores = ZotHacksHackerDetailedScores(
         resume=8,
-        elevator_pitch_saq=7,
-        tech_experience_saq=9,
-        learn_about_self_saq=6,
-        pixel_art_saq=8,
+        collaboration_saq=7,
+        tech_inspiration_saq=9,
+        uci_gift_saq=6,
         hackathon_experience=10,
     )
     reviewer = USER_REVIEWER

@@ -8,10 +8,9 @@ export const ZothacksHackerScoringGuidelines = z.object({
 	_type: z.literal("zothacksHackerScoringGuidelines"),
 	guidelines: z.object({
 		resume: z.array(z.any()),
-		elevator_pitch_saq: z.array(z.any()),
-		tech_experience_saq: z.array(z.any()),
-		learn_about_self_saq: z.array(z.any()),
-		pixel_art_saq: z.array(z.any()),
+		collaboration_saq: z.array(z.any()),
+		tech_inspiration_saq: z.array(z.any()),
+		uci_gift_saq: z.array(z.any()),
 	}),
 });
 
@@ -26,10 +25,9 @@ export const getZothacksHackerScoringGuidelines = cache(async () => {
       _type,
       guidelines {
         resume,
-        elevator_pitch_saq,
-        tech_experience_saq,
-        learn_about_self_saq,
-        pixel_art_saq
+        collaboration_saq,
+        tech_inspiration_saq,
+        uci_gift_saq
       }
     }`,
 	);

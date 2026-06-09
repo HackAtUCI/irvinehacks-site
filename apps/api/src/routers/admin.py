@@ -188,10 +188,9 @@ def _redact_reviews(reviews: list[Review], reviewer_uid: str) -> list[Review]:
 
 class ZotHacksHackerDetailedScores(BaseModel):
     resume: Optional[int] = None
-    elevator_pitch_saq: int
-    tech_experience_saq: int
-    learn_about_self_saq: int
-    pixel_art_saq: int
+    collaboration_saq: int
+    tech_inspiration_saq: int
+    uci_gift_saq: int
     hackathon_experience: Optional[int] = None
 
 

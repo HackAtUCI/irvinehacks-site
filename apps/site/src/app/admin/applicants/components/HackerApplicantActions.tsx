@@ -80,10 +80,9 @@ function HackerApplicantActions({
 			"frq_character",
 		].some((field) => field in scores);
 		const hasZotHacksScoring = [
-			"elevator_pitch_saq",
-			"tech_experience_saq",
-			"learn_about_self_saq",
-			"pixel_art_saq",
+			"collaboration_saq",
+			"tech_inspiration_saq",
+			"uci_gift_saq",
 		].some((field) => field in scores);
 		const hasMissingFields =
 			(hasIrvineHacksScoring &&
@@ -91,12 +90,9 @@ function HackerApplicantActions({
 					(field) => !(field in scores),
 				)) ||
 			(hasZotHacksScoring &&
-				[
-					"elevator_pitch_saq",
-					"tech_experience_saq",
-					"learn_about_self_saq",
-					"pixel_art_saq",
-				].some((field) => !(field in scores)));
+				["collaboration_saq", "tech_inspiration_saq", "uci_gift_saq"].some(
+					(field) => !(field in scores),
+				));
 
 		if (hasMissingFields) {
 			const msgId = `missing-fields-${Date.now()}`;

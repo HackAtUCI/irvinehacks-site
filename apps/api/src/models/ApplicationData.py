@@ -1,6 +1,5 @@
 from datetime import datetime
 from enum import Enum
-import json
 from typing import Annotated, Any, Literal, Union, Optional
 
 from fastapi import UploadFile
@@ -15,7 +14,6 @@ from pydantic import (
     SerializerFunctionWrapHandler,
     Tag,
     field_serializer,
-    field_validator,
     model_serializer,
 )
 
@@ -185,20 +183,10 @@ class BaseZotHacksHackerApplicationData(BaseModel):
     allergies: Union[str, None] = Field(None, max_length=2048)
     major: str
     hackathon_experience: Literal["first_time", "some_experience", "veteran"]
-
-    elevator_pitch_saq: str = Field(max_length=1024)
-    tech_experience_saq: str = Field(max_length=2048)
-    learn_about_self_saq: str = Field(max_length=2048)
-    pixel_art_saq: str = Field(max_length=2048)
-    pixel_art_data: list[int] = Field(..., min_length=64, max_length=64)
-
+    collaboration_saq: str = Field(max_length=1024)
+    tech_inspiration_saq: str = Field(max_length=1024)
+    uci_gift_saq: str = Field(max_length=1024)
     comments: Union[str, None] = Field(None, max_length=2048)
-
-    @field_validator("pixel_art_data", mode="before")
-    def parse_pixel_art(cls, v: str) -> Any:
-        if isinstance(v, str):
-            return json.loads(v)
-        return v
 
 
 # Not tested for ZH 2025
@@ -357,7 +345,7 @@ def get_discriminator_value(v: Any) -> str:
             return "mentor"
         if "frq_volunteer" in v:
             return "volunteer"
-        if "elevator_pitch_saq" in v:
+        if "tech_inspiration_saq" in v:
             return "zothacks_hacker"
         if "help_participants_frq" in v:
             return "zothacks_mentor"
@@ -368,7 +356,7 @@ def get_discriminator_value(v: Any) -> str:
         return "mentor"
     if "frq_volunteer" in dir(v):
         return "volunteer"
-    if "elevator_pitch_saq" in dir(v):
+    if "tech_inspiration_saq" in dir(v):
         return "zothacks_hacker"
     if "help_participants_frq" in dir(v):
         return "zothacks_mentor"
@@ -392,13 +380,13 @@ def get_raw_hacker_discriminator_value(v: Any) -> str:
     if isinstance(v, dict):
         if "frq_ambition" in v:
             return "hacker"
-        if "elevator_pitch_saq" in v:
+        if "tech_inspiration_saq" in v:
             return "zothacks_hacker"
 
     # For object instances, check attributes
     if hasattr(v, "frq_ambition"):
         return "hacker"
-    if hasattr(v, "elevator_pitch_saq"):
+    if hasattr(v, "tech_inspiration_saq"):
         return "zothacks_hacker"
     return ""
 

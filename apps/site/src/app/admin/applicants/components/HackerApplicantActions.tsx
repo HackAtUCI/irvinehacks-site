@@ -90,11 +90,9 @@ function HackerApplicantActions({
 					(field) => !(field in scores),
 				)) ||
 			(hasZotHacksScoring &&
-				[
-					"collaboration_saq",
-					"tech_inspiration_saq",
-					"uci_gift_saq",
-				].some((field) => !(field in scores)));
+				["collaboration_saq", "tech_inspiration_saq", "uci_gift_saq"].some(
+					(field) => !(field in scores),
+				));
 
 		if (hasMissingFields) {
 			const msgId = `missing-fields-${Date.now()}`;

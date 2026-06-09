@@ -1,6 +1,5 @@
 from datetime import datetime
 from enum import Enum
-import json
 from typing import Annotated, Any, Literal, Union, Optional
 
 from fastapi import UploadFile
@@ -15,7 +14,6 @@ from pydantic import (
     SerializerFunctionWrapHandler,
     Tag,
     field_serializer,
-    field_validator,
     model_serializer,
 )
 
@@ -185,12 +183,11 @@ class BaseZotHacksHackerApplicationData(BaseModel):
     allergies: Union[str, None] = Field(None, max_length=2048)
     major: str
     hackathon_experience: Literal["first_time", "some_experience", "veteran"]
-
     collaboration_saq: str = Field(max_length=1024)
     tech_inspiration_saq: str = Field(max_length=1024)
     uci_gift_saq: str = Field(max_length=1024)
-
     comments: Union[str, None] = Field(None, max_length=2048)
+
 
 # Not tested for ZH 2025
 class BaseZotHacksMentorApplicationData(BaseModel):

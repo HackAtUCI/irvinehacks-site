@@ -106,8 +106,8 @@ function ZotHacksHackerApplication({
 	});
 	const [collaborationScore, setCollaborationScore] = useState<number>(
 		formattedUid
-			? application_data?.review_breakdown?.[formattedUid]
-					?.collaboration_saq ?? -1
+			? application_data?.review_breakdown?.[formattedUid]?.collaboration_saq ??
+					-1
 			: -1,
 	);
 	const [techInspirationScore, setTechInspirationScore] = useState<number>(
@@ -118,8 +118,7 @@ function ZotHacksHackerApplication({
 	);
 	const [uciGiftScore, setUciGiftScore] = useState<number>(
 		formattedUid
-			? application_data?.review_breakdown?.[formattedUid]
-					?.uci_gift_saq ?? -1
+			? application_data?.review_breakdown?.[formattedUid]?.uci_gift_saq ?? -1
 			: -1,
 	);
 
@@ -236,9 +235,7 @@ function ZotHacksHackerApplication({
 				title="If you could give each person at UCI one item under $100, what would it be and why? [Max 75 words]"
 				min={0}
 				max={20}
-				leftColumn={
-					<PortableText value={guidelines.guidelines.uci_gift_saq} />
-				}
+				leftColumn={<PortableText value={guidelines.guidelines.uci_gift_saq} />}
 				rightColumn={<p>{application_data.uci_gift_saq}</p>}
 				value={uciGiftScore}
 				onChange={setUciGiftScore}

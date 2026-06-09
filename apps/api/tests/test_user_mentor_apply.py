@@ -65,6 +65,43 @@ SAMPLE_APPLICATION = {
     "is_18_older": "true",
 }
 
+SAMPLE_ZOTHACKS_MENTOR_APPLICATION = {
+    "first_name": "pk",
+    "last_name": "fire",
+    "application_type": "Mentor",
+    "is_18_older": "true",
+    "pronouns": ["he/him"],
+    "dietary_restrictions": ["none"],
+    "allergies": "",
+    "phone_number": "9495551234",
+    "discord_username": "pkfire",
+    "major": "Computer Science",
+    "academic_status": "Undergraduate",
+    "linkedin": "",
+    "github": "https://github.com",
+    "portfolio": "",
+    "tech_stack_frq": "Python, TypeScript, and React.",
+    "frontend_backend_frq": "I can help with both frontend and backend.",
+    "teaching_experience_frq": "I have mentored classmates in project courses.",
+    "team_leadership_frq": "I led a small project team.",
+    "comments": "Excited for ZotHacks.",
+    "skill_python": "5",
+    "skill_java": "4",
+    "skill_c__": "3",
+    "skill_javascript": "5",
+    "skill_c_": "2",
+    "skill_html_css": "5",
+    "skill_react": "5",
+    "skill_next_js": "4",
+    "skill_github_pages": "3",
+    "skill_other": "1",
+    "skill_git": "5",
+    "skill_sql__any_variation_": "3",
+    "skill_aws_services": "2",
+    "skill_vercel": "4",
+    "skill_netlify": "3",
+}
+
 
 SAMPLE_RESUME = ("my-resume.pdf", b"resume", "application/pdf")
 SAMPLE_FILES = {"resume": SAMPLE_RESUME}
@@ -132,6 +169,46 @@ def test_mentor_apply_successfully(
         USER_EMAIL, EXPECTED_USER, Role.MENTOR
     )
     assert res.status_code == 201
+
+
+@patch("utils.email_handler.send_application_confirmation_email", autospec=True)
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("routers.user._is_past_deadline", autospec=True)
+@patch("routers.user.datetime", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_zothacks_mentor_apply_successfully(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_datetime: Mock,
+    mock_is_past_deadline: Mock,
+    mock_mongodb_handler_update_one: AsyncMock,
+    mock_raw_update_one: AsyncMock,
+    mock_send_application_confirmation_email: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.return_value = None
+    mock_datetime.now.return_value = SAMPLE_SUBMISSION_TIME
+    mock_is_past_deadline.return_value = False
+
+    res = client.post("/mentor", data=SAMPLE_ZOTHACKS_MENTOR_APPLICATION)
+
+    assert res.status_code == 201
+    mock_raw_update_one.assert_awaited_once()
+    applicant = mock_raw_update_one.await_args.args[2]["$set"]
+    application_data = applicant["application_data"]
+    assert application_data["tech_stack_frq"] == "Python, TypeScript, and React."
+    assert application_data["frontend_backend_frq"] == (
+        "I can help with both frontend and backend."
+    )
+    assert application_data["teaching_experience_frq"] == (
+        "I have mentored classmates in project courses."
+    )
+    assert application_data["team_leadership_frq"] == "I led a small project team."
+    assert application_data["skill_python"] == 5
+    assert application_data["skill_sql__any_variation_"] == 3
+    assert application_data["github"] == "https://github.com/"
+    assert application_data["linkedin"] is None
+    assert application_data["resume_url"] is None
+    mock_send_application_confirmation_email.assert_awaited_once()
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)

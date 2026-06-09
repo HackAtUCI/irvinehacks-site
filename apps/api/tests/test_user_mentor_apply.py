@@ -193,7 +193,9 @@ def test_zothacks_mentor_apply_successfully(
 
     assert res.status_code == 201
     mock_raw_update_one.assert_awaited_once()
-    applicant = mock_raw_update_one.await_args.args[2]["$set"]
+    update_call = mock_raw_update_one.await_args
+    assert update_call is not None
+    applicant = update_call.args[2]["$set"]
     application_data = applicant["application_data"]
     assert application_data["tech_stack_frq"] == "Python, TypeScript, and React."
     assert application_data["frontend_backend_frq"] == (

@@ -21,7 +21,9 @@ import ApplicantActions from "./ApplicantActions";
 import ApplicantNavigationButtons from "./ApplicantNavigationButtons";
 import ApplicantOverview from "./ApplicantOverview";
 import HackerApplicantActions from "./HackerApplicantActions";
-import { ParticipantRole } from "@/lib/userRecord";
+import DirectorAutoAcceptButton from "./DirectorAutoAcceptButton";
+import AutoDecisionBadge from "./AutoDecisionBadge";
+import { Decision, ParticipantRole } from "@/lib/userRecord";
 import { ScoredFields } from "@/lib/detailedScores";
 import { IrvineHacksHackerScoringGuidelinesType } from "@/app/admin/applicants/hackers/components/getScoringGuidelines";
 import { IrvineHacksMentorScoringGuidelinesType } from "@/app/admin/applicants/mentors/components/getScoringGuidelines";
@@ -46,6 +48,8 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 		submitReview,
 		submitDetailedReview,
 		deleteNotes,
+		directorAutoAccept,
+		directorUndoAutoAccept,
 	} = useApplicant(uid, applicationType);
 	const [scores, setScores] = useState<ScoredFields>({});
 	const [notes, setNotes] = useState("");
@@ -85,6 +89,52 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 		});
 	};
 
+	const autoAcceptSuccessMessage: FlashbarProps.MessageDefinition = {
+		type: "success",
+		content: "Successfully auto-accepted applicant!",
+		id: `auto-accept-${Date.now()}`,
+		dismissible: true,
+		onDismiss: () => {
+			if (setNotifications)
+				setNotifications((prev) =>
+					prev.filter((msg) => msg.id !== autoAcceptSuccessMessage.id),
+				);
+		},
+	};
+
+	const handleDirectorAutoAccept = (Uid: string) =>
+		directorAutoAccept(Uid).then(() => {
+			if (setNotifications)
+				setNotifications((prev) => [autoAcceptSuccessMessage, ...prev]);
+		});
+
+	const undoAutoAcceptSuccessMessage: FlashbarProps.MessageDefinition = {
+		type: "success",
+		content: "Successfully removed auto-accept!",
+		id: `undo-auto-accept-${Date.now()}`,
+		dismissible: true,
+		onDismiss: () => {
+			if (setNotifications)
+				setNotifications((prev) =>
+					prev.filter((msg) => msg.id !== undoAutoAcceptSuccessMessage.id),
+				);
+		},
+	};
+
+	const handleDirectorUndoAutoAccept = (Uid: string) =>
+		directorUndoAutoAccept(Uid).then(() => {
+			if (setNotifications)
+				setNotifications((prev) => [undoAutoAcceptSuccessMessage, ...prev]);
+		});
+
+	const autoAcceptDecision =
+		applicant.auto_decision_reason === "DIRECTOR_AUTO_ACCEPT"
+			? Decision.Accepted
+			: applicant.auto_decision_reason === "UNDER_18" ||
+				  applicant.auto_decision_reason === "GRADUATED"
+				? Decision.Rejected
+				: null;
+
 	return (
 		<ContentLayout
 			header={
@@ -97,6 +147,12 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 								<ApplicantNavigationButtons
 									uid={uid}
 									basePath="/admin/applicants/hackers" // hardcoded for Irvinehacks (Applicant.tsx)
+								/>
+								<DirectorAutoAcceptButton
+									applicant={applicant._id}
+									autoDecisionReason={applicant.auto_decision_reason}
+									onAutoAccept={handleDirectorAutoAccept}
+									onUndoAutoAccept={handleDirectorUndoAutoAccept}
 								/>
 								<HackerApplicantActions
 									applicant={applicant._id}
@@ -114,7 +170,11 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 						)
 					}
 				>
-					{first_name} {last_name}
+					{first_name} {last_name}{" "}
+					<AutoDecisionBadge
+						reason={applicant.auto_decision_reason}
+						decision={autoAcceptDecision}
+					/>
 				</Header>
 			}
 		>
@@ -161,6 +221,12 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 						<ApplicantNavigationButtons
 							uid={uid}
 							basePath="/admin/applicants/hackers" // hardcoded for Irvinehacks (Applicant.tsx)
+						/>
+						<DirectorAutoAcceptButton
+							applicant={applicant._id}
+							autoDecisionReason={applicant.auto_decision_reason}
+							onAutoAccept={handleDirectorAutoAccept}
+							onUndoAutoAccept={handleDirectorUndoAutoAccept}
 						/>
 						<HackerApplicantActions
 							applicant={applicant._id}

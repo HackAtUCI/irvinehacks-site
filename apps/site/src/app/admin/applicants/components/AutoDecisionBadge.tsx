@@ -5,6 +5,7 @@ import { Decision } from "@/lib/userRecord";
 const REASON_LABELS: Record<string, string> = {
 	UNDER_18: "Under 18",
 	GRADUATED: "Graduated",
+	DIRECTOR_AUTO_ACCEPT: "Director Auto Accept",
 };
 
 interface AutoDecisionBadgeProps {

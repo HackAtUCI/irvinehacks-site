@@ -167,6 +167,7 @@ export interface Applicant {
 	last_name: string;
 	roles: ReadonlyArray<ParticipantRole>;
 	status: Status;
+	auto_decision_reason?: string | null;
 	application_data: ApplicationData;
 }
 
@@ -216,15 +217,6 @@ function useApplicant(
 		mutate();
 	}
 
-	return {
-		applicant: data,
-		loading: isLoading,
-		error,
-		submitReview,
-		submitDetailedReview,
-		deleteNotes,
-	};
-
 	async function deleteNotes(uid: Uid, reviewIndex: number) {
 		await axios.delete("/api/admin/delete-notes", {
 			data: {
@@ -232,9 +224,31 @@ function useApplicant(
 				review_index: reviewIndex,
 			},
 		});
-		// Re-fetch the applicant to get the updated reviews
 		mutate();
 	}
+
+	async function directorAutoAccept(uid: Uid) {
+		await axios.post(`/api/admin/applicant/hacker/${uid}/director-auto-accept`);
+		mutate();
+	}
+
+	async function directorUndoAutoAccept(uid: Uid) {
+		await axios.post(
+			`/api/admin/applicant/hacker/${uid}/director-undo-auto-accept`,
+		);
+		mutate();
+	}
+
+	return {
+		applicant: data,
+		loading: isLoading,
+		error,
+		submitReview,
+		submitDetailedReview,
+		deleteNotes,
+		directorAutoAccept,
+		directorUndoAutoAccept,
+	};
 }
 
 export type submitReview = (

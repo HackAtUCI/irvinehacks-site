@@ -51,6 +51,7 @@ require_mentor_reviewer = require_role({Role.DIRECTOR, Role.MENTOR_REVIEWER})
 require_volunteer_reviewer = require_role({Role.DIRECTOR, Role.VOLUNTEER_REVIEWER})
 require_checkin_lead = require_role({Role.DIRECTOR, Role.CHECKIN_LEAD})
 require_organizer = require_role({Role.ORGANIZER})
+require_director = require_role({Role.DIRECTOR})
 
 
 class ApplicationDataSummary(BaseModel):
@@ -160,6 +161,18 @@ class WaiverStatusRequest(BaseModel):
     is_signed: bool
 
 
+async def _persist_auto_decision_status_if_needed(record: dict[str, object]) -> None:
+    update = applicant_review_processor.get_auto_decision_status_update(record)
+    if update is None:
+        return
+
+    ok = await mongodb_handler.update_one(
+        Collection.USERS, {"_id": record["_id"]}, update
+    )
+    if ok:
+        record.update(update)
+
+
 async def mentor_volunteer_applicants(
     application_type: Literal["Mentor", "Volunteer"],
 ) -> list[SimplifiedApplicantSummary]:
@@ -173,6 +186,7 @@ async def mentor_volunteer_applicants(
             "first_name",
             "last_name",
             "roles",
+            "auto_decision_reason",
             "application_data.school",
             "application_data.submission_time",
             "application_data.reviews",
@@ -183,6 +197,7 @@ async def mentor_volunteer_applicants(
     )
 
     for record in records:
+        await _persist_auto_decision_status_if_needed(record)
         applicant_review_processor.include_review_decision(record)
 
     try:
@@ -227,6 +242,7 @@ async def hacker_applicants(
             "first_name",
             "last_name",
             "roles",
+            "auto_decision_reason",
             "application_data",
         ],
         sort=[("application_data.submission_time", DESCENDING)],
@@ -238,6 +254,7 @@ async def hacker_applicants(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     for record in records:
+        await _persist_auto_decision_status_if_needed(record)
         # TODO: Use different route for different avg score types.
 
         # Difference between them:
@@ -272,6 +289,8 @@ async def applicant(
     if not record:
         raise HTTPException(status.HTTP_404_NOT_FOUND)
 
+    await _persist_auto_decision_status_if_needed(record)
+
     try:
         return Applicant.model_validate(record)
     except ValidationError:
@@ -284,6 +303,74 @@ async def hacker_applicant(
 ) -> Applicant:
     """Get record of a hacker applicant by uid."""
     return await applicant(uid, "Hacker")
+
+
+@router.post("/applicant/hacker/{uid}/director-auto-accept")
+async def director_auto_accept_hacker(
+    uid: str,
+    director: Annotated[User, Depends(require_director)],
+) -> None:
+    record = await mongodb_handler.retrieve_one(
+        Collection.USERS,
+        {"_id": uid, "roles": Role.HACKER},
+        ["_id", "auto_decision_reason"],
+    )
+    if not record:
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
+
+    if (
+        record.get("auto_decision_reason")
+        == applicant_review_processor.AUTO_REASON_DIRECTOR_AUTO_ACCEPT
+    ):
+        return
+
+    ok = await mongodb_handler.update_one(
+        Collection.USERS,
+        {"_id": uid},
+        {
+            "status": UserStatus.REVIEWED,
+            "auto_decision_reason": (
+                applicant_review_processor.AUTO_REASON_DIRECTOR_AUTO_ACCEPT
+            ),
+        },
+    )
+    if not ok:
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    log.info("%s director auto-accepted hacker %s", director, uid)
+
+
+@router.post("/applicant/hacker/{uid}/director-undo-auto-accept")
+async def director_undo_auto_accept_hacker(
+    uid: str,
+    director: Annotated[User, Depends(require_director)],
+) -> None:
+    record = await mongodb_handler.retrieve_one(
+        Collection.USERS,
+        {"_id": uid, "roles": Role.HACKER},
+        ["_id", "auto_decision_reason"],
+    )
+    if not record:
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
+
+    if (
+        record.get("auto_decision_reason")
+        != applicant_review_processor.AUTO_REASON_DIRECTOR_AUTO_ACCEPT
+    ):
+        return
+
+    ok = await mongodb_handler.raw_update_one(
+        Collection.USERS,
+        {"_id": uid},
+        {
+            "$set": {"status": UserStatus.PENDING_REVIEW},
+            "$unset": {"auto_decision_reason": "", "decision": ""},
+        },
+    )
+    if not ok:
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    log.info("%s removed director auto-accept for hacker %s", director, uid)
 
 
 @router.get("/applicant/mentor/{uid}", dependencies=[Depends(require_mentor_reviewer)])

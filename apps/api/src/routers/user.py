@@ -16,6 +16,7 @@ from fastapi.datastructures import URL, FormData
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, EmailStr, TypeAdapter, ValidationError
 
+from admin import applicant_review_processor
 from auth import user_identity
 from auth.authorization import require_accepted_applicant
 from auth.user_identity import User, require_user_identity, use_user_identity
@@ -314,6 +315,15 @@ async def _apply_flow(
         application_data=processed_application_data,
         status=Status.PENDING_REVIEW,
     )
+
+    status_update = applicant_review_processor.get_auto_decision_status_update(
+        applicant.model_dump()
+    )
+    if status_update:
+        if "status" in status_update:
+            applicant.status = Status(status_update["status"])
+        if "auto_decision_reason" in status_update:
+            applicant.auto_decision_reason = status_update["auto_decision_reason"]
 
     # add applicant to database and clear any drafts
     try:

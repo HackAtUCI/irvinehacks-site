@@ -81,6 +81,7 @@ class BareApplicant(UserRecord):
     roles: RoleWithApplicant
     status: ApplicantStatus
     decision: Optional[Decision] = None
+    auto_decision_reason: Optional[str] = None
 
 
 class Applicant(BareApplicant):

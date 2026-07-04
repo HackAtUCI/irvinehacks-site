@@ -366,7 +366,7 @@ async def release_mentor_volunteer_decisions() -> None:
     mentor_records = await mongodb_handler.retrieve(
         Collection.USERS,
         {"status": Status.REVIEWED, "roles": {"$in": [Role.MENTOR]}},
-        ["_id", "application_data.reviews", "first_name"],
+        ["_id", "application_data.reviews", "first_name", "auto_decision_reason"],
     )
 
     for record in mentor_records:
@@ -375,7 +375,7 @@ async def release_mentor_volunteer_decisions() -> None:
     volunteer_records = await mongodb_handler.retrieve(
         Collection.USERS,
         {"status": Status.REVIEWED, "roles": {"$in": [Role.VOLUNTEER]}},
-        ["_id", "application_data.reviews", "first_name"],
+        ["_id", "application_data.reviews", "first_name", "auto_decision_reason"],
     )
 
     for record in volunteer_records:
@@ -391,7 +391,7 @@ async def release_hacker_decisions() -> None:
     records = await mongodb_handler.retrieve(
         Collection.USERS,
         {"status": Status.REVIEWED, "roles": {"$in": [Role.HACKER]}},
-        ["_id", "application_data.reviews", "first_name"],
+        ["_id", "application_data.reviews", "first_name", "auto_decision_reason"],
     )
 
     thresholds: Optional[dict[str, float]] = await retrieve_thresholds()

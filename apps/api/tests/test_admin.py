@@ -818,3 +818,73 @@ async def test_delete_reviewer_notes_success(
             "$set": {f"application_data.reviews.0.{notes_field_index}": None},
         },
     )
+
+
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_director_auto_accept_hacker(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_update_one: AsyncMock,
+) -> None:
+    uid = "edu.uci.zh-mentor"
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        {"_id": uid, "auto_decision_reason": None},
+    ]
+    mock_mongodb_handler_update_one.return_value = True
+
+    res = director_client.post(f"/applicant/hacker/{uid}/director-auto-accept")
+
+    assert res.status_code == 200
+    mock_mongodb_handler_update_one.assert_awaited_once_with(
+        Collection.USERS,
+        {"_id": uid},
+        {
+            "status": "REVIEWED",
+            "auto_decision_reason": "DIRECTOR_AUTO_ACCEPT",
+        },
+    )
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_director_undo_auto_accept_hacker(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+    uid = "edu.uci.zh-mentor"
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        {"_id": uid, "auto_decision_reason": "DIRECTOR_AUTO_ACCEPT"},
+    ]
+    mock_mongodb_handler_raw_update_one.return_value = True
+
+    res = director_client.post(f"/applicant/hacker/{uid}/director-undo-auto-accept")
+
+    assert res.status_code == 200
+    mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
+        Collection.USERS,
+        {"_id": uid},
+        {
+            "$set": {"status": "PENDING_REVIEW"},
+            "$unset": {"auto_decision_reason": "", "decision": ""},
+        },
+    )
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_director_undo_auto_accept_is_noop_when_not_auto_accepted(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+    uid = "edu.uci.zh-mentor"
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        {"_id": uid, "auto_decision_reason": None},
+    ]
+
+    res = director_client.post(f"/applicant/hacker/{uid}/director-undo-auto-accept")
+
+    assert res.status_code == 200
+    mock_mongodb_handler_raw_update_one.assert_not_awaited()

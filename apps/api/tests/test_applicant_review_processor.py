@@ -344,3 +344,50 @@ def test_volunteer_graduated_does_not_auto_decide() -> None:
     applicant_review_processor.include_review_decision(record)
     assert record["decision"] is None
     assert record["auto_decision_reason"] is None
+
+
+def test_get_auto_decision_status_update_for_under_18() -> None:
+    record: dict[str, Any] = {
+        "_id": "edu.uci.minor",
+        "status": "PENDING_REVIEW",
+        "roles": [Role.APPLICANT, Role.HACKER],
+        "application_data": {"is_18_older": False},
+    }
+
+    update = applicant_review_processor.get_auto_decision_status_update(record)
+    assert update == {
+        "status": "REVIEWED",
+        "auto_decision_reason": applicant_review_processor.AUTO_REASON_UNDER_18,
+    }
+
+
+def test_get_auto_decision_status_update_skips_when_already_reviewed() -> None:
+    record: dict[str, Any] = {
+        "_id": "edu.uci.minor",
+        "status": "REVIEWED",
+        "roles": [Role.APPLICANT, Role.HACKER],
+        "application_data": {"is_18_older": False},
+    }
+
+    assert applicant_review_processor.get_auto_decision_status_update(record) is None
+
+
+def test_director_auto_accept_from_persisted_reason() -> None:
+    record: dict[str, Any] = {
+        "_id": "edu.uci.returning",
+        "status": "REVIEWED",
+        "roles": [Role.APPLICANT, Role.HACKER],
+        "auto_decision_reason": (
+            applicant_review_processor.AUTO_REASON_DIRECTOR_AUTO_ACCEPT
+        ),
+        "application_data": {"reviews": [], "review_breakdown": {}},
+    }
+
+    applicant_review_processor._include_decision_based_on_threshold_and_score_breakdown(
+        record, accept=80.0, waitlist=50.0
+    )
+    assert record["decision"] == "ACCEPTED"
+    assert (
+        record["auto_decision_reason"]
+        == applicant_review_processor.AUTO_REASON_DIRECTOR_AUTO_ACCEPT
+    )

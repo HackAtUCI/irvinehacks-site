@@ -157,7 +157,6 @@ def test_missing_credentials_raise_runtime_error(  # type: ignore[no-untyped-def
     monkeypatch,
 ) -> None:
     """Test a clear error is raised when no service account is configured."""
-    monkeypatch.delenv("WALLET_SERVICE_ACCOUNT_FILE", raising=False)
     monkeypatch.delenv("GOOGLE_WALLET_SERVICE_ACCOUNT_CREDENTIALS", raising=False)
 
     try:

@@ -25,7 +25,7 @@ For deployment, the following environment variables need to be set:
 - `MENTOR_RESUMES_FOLDER_ID`, the ID of the Google Drive folder to upload mentor resumes to
 - Either `SERVICE_ACCOUNT_FILE` or `GOOGLE_SERVICE_ACCOUNT_CREDENTIALS`: We use a Google service acccount in tandem with aiogoogle to automatically upload resumes when submitting a form. The keys are JSON that can either be stored in a file, in which case the path of the file should be stored in `SERVICE_ACCOUNT_FILE`, or be stored directly in `GOOGLE_SERVICE_ACCOUNT_CREDENTIALS`. For local development, it is recommended to take the `SERVICE_ACCOUNT_FILE` approach.
 - `DOCUSIGN_HMAC_KEY`, the shared HMAC key for validating DocuSign Connect webhook event payloads. Both IrvineHacks and ZotHacks DocuSign Connect configurations should use this same value; the API distinguishes hackathons by PowerForm ID.
-- Either `WALLET_SERVICE_ACCOUNT_FILE` or `GOOGLE_WALLET_SERVICE_ACCOUNT_CREDENTIALS`: A Google service account key JSON used to sign "Add to Google Wallet" pass JWTs for the ZotHacks check-in pass. This service account must be granted access in the Google Wallet Business Console for the relevant issuer, so it is kept separate from the Drive service account above. Follows the same file-vs-inline-JSON convention as `SERVICE_ACCOUNT_FILE`/`GOOGLE_SERVICE_ACCOUNT_CREDENTIALS`.
+- `GOOGLE_WALLET_SERVICE_ACCOUNT_CREDENTIALS`: A Google service account key JSON used to sign "Add to Google Wallet" pass JWTs for the ZotHacks check-in pass. This service account must be granted access in the Google Wallet Business Console for the relevant issuer, so it is kept separate from the Drive service account above.
 
 For staging, the following environment variables should also bet set:
 

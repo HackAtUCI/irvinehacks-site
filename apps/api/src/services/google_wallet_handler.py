@@ -31,13 +31,9 @@ _UID_HASH_LENGTH = 10
 
 def _get_service_account() -> dict[str, Any]:
     """Get the Wallet-authorized service account key used to sign pass JWTs."""
-    service_account_file = os.getenv("WALLET_SERVICE_ACCOUNT_FILE")
     service_account_credentials = os.getenv("GOOGLE_WALLET_SERVICE_ACCOUNT_CREDENTIALS")
 
-    if service_account_file:
-        with open(service_account_file) as f:
-            return cast(dict[str, Any], json.load(f))
-    elif service_account_credentials:
+    if service_account_credentials:
         service_account_credentials = service_account_credentials.replace("\n", "\\n")
         return cast(dict[str, Any], json.loads(service_account_credentials))
     else:

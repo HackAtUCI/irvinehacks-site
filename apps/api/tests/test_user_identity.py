@@ -28,6 +28,22 @@ def test_can_encode_and_decode_native_user() -> None:
     assert decoded_user == user
 
 
+def test_can_decode_native_user_when_sso_is_disabled() -> None:
+    """Test local dev impersonation tokens decode when UCI SSO is disabled."""
+    user = NativeUser(
+        ucinetid="hack",
+        display_name="Hack at UCI",
+        email="hack@uci.edu",
+        affiliations=[],
+    )
+
+    jwt_token = user_identity._generate_jwt_token(user)
+    with patch("auth.user_identity.UCI_SSO_ENABLED", False):
+        decoded_user = user_identity._decode_user_identity(jwt_token)
+
+    assert decoded_user == user
+
+
 def test_can_encode_and_decode_guest_user() -> None:
     """Test that a `GuestUser` can be encoded and decoded via JWT."""
     user = GuestUser(

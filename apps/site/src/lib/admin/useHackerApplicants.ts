@@ -13,14 +13,16 @@ export interface HackerApplicantSummary {
 	reviewers: ReadonlyArray<string>;
 	avg_score: number;
 	resume_reviewed: boolean;
+	director_previous_experience_reviewed: boolean;
+	duplicate_name_approved: boolean;
 	application_data: {
 		school?: string;
 		school_year?: string;
 		submission_time: string;
 		normalized_scores?: Record<string, number>;
 		extra_points?: number;
-		email: string;
-		resume_url: string;
+		email?: string;
+		resume_url?: string;
 		major?: string;
 		linkedin?: string;
 		reviews?: ReadonlyArray<[string, string, number, string?]>;
@@ -40,7 +42,20 @@ function useHackerApplicants() {
 
 	const refetch = () => mutate();
 
-	return { applicantList: data || [], loading: isLoading, error, refetch };
+	const approveDuplicateName = async (uid: string, approved: boolean) => {
+		await axios.post(`/api/admin/applicant/hacker/${uid}/approve-duplicate`, {
+			approved,
+		});
+		mutate();
+	};
+
+	return {
+		applicantList: data || [],
+		loading: isLoading,
+		error,
+		refetch,
+		approveDuplicateName,
+	};
 }
 
 export default useHackerApplicants;

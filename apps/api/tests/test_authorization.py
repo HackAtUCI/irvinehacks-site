@@ -66,6 +66,27 @@ async def test_accepted_applicant_is_fine(
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_applicant_with_accepted_decision_is_fine(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """User with accepted decision is fine even when status is still REVIEWED."""
+    mock_mongodb_handler_retrieve_one.return_value = {
+        "_id": "edu.uci.hacker1",
+        "roles": [Role.APPLICANT],
+        "status": "REVIEWED",
+        "decision": Decision.ACCEPTED,
+        "first_name": "Ian",
+        "last_name": "Dai",
+    }
+
+    user, applicant = await authorization.require_accepted_applicant(
+        User(uid="edu.uci.hacker1", email="hacker1@uci.edu")
+    )
+    assert user.uid == "edu.uci.hacker1"
+    assert applicant.decision == Decision.ACCEPTED
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
 async def test_non_applicant_is_unapplied(
     mock_mongodb_handler_retrieve_one: AsyncMock,
 ) -> None:

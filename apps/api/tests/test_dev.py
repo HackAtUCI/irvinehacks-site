@@ -11,7 +11,7 @@ def test_impersonate() -> None:
     res = client.get("/impersonate/stuffed", follow_redirects=False)
 
     assert res.status_code == 303
-    assert res.headers["location"] == "/portal"
+    assert res.headers["location"] == "/admin/dashboard"
     set_cookie = res.headers["Set-Cookie"].split(";")[0]
     cookie_name, cookie_value = set_cookie.split("=")
     assert cookie_name == "irvinehacks_auth"

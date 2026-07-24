@@ -1,6 +1,5 @@
 from datetime import datetime
 from enum import Enum
-import json
 from typing import Annotated, Any, Literal, Union, Optional
 
 from fastapi import UploadFile
@@ -12,9 +11,10 @@ from pydantic import (
     EmailStr,
     Field,
     HttpUrl,
+    SerializerFunctionWrapHandler,
     Tag,
     field_serializer,
-    field_validator,
+    model_serializer,
 )
 
 
@@ -22,11 +22,19 @@ class Decision(str, Enum):
     ACCEPTED = "ACCEPTED"
     WAITLISTED = "WAITLISTED"
     REJECTED = "REJECTED"
+    VOIDED = "VOIDED"
 
 
 Review = tuple[
     datetime, str, float, Optional[Annotated[str, Field(max_length=2048)]]
 ]  # (timestamp, reviewer_uid, score, notes)
+
+
+class DirectorPreviousExperienceReview(BaseModel):
+    reviewer: str
+    reviewed_at: datetime
+    previous_experience: Optional[float] = None
+    has_socials: Optional[float] = None
 
 
 def make_empty_none(val: Union[str, None]) -> Union[str, None]:
@@ -173,22 +181,14 @@ class BaseZotHacksHackerApplicationData(BaseModel):
     school_year: str
     dietary_restrictions: list[str] = []
     allergies: Union[str, None] = Field(None, max_length=2048)
+
     major: str
     hackathon_experience: Literal["first_time", "some_experience", "veteran"]
 
-    elevator_pitch_saq: str = Field(max_length=1024)
-    tech_experience_saq: str = Field(max_length=2048)
-    learn_about_self_saq: str = Field(max_length=2048)
-    pixel_art_saq: str = Field(max_length=2048)
-    pixel_art_data: list[int] = Field(..., min_length=64, max_length=64)
-
+    collaboration_saq: str = Field(max_length=1024)
+    tech_inspiration_saq: str = Field(max_length=1024)
+    uci_gift_saq: str = Field(max_length=1024)
     comments: Union[str, None] = Field(None, max_length=2048)
-
-    @field_validator("pixel_art_data", mode="before")
-    def parse_pixel_art(cls, v: str) -> Any:
-        if isinstance(v, str):
-            return json.loads(v)
-        return v
 
 
 # Not tested for ZH 2025
@@ -196,21 +196,40 @@ class BaseZotHacksMentorApplicationData(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, str_max_length=1024)
 
     is_18_older: bool
-    pronouns: str
-    degree: str
-    major: str
-    graduation_year: int
-    mentoring_experience: str = Field(max_length=2048)
-    help_participants_frq: str = Field(max_length=2048)
-    new_team_help_frq: str = Field(max_length=2048)
-    tech_stack_frq: str = Field(max_length=2048)
-    frontend_backend_frq: str = Field(max_length=2048)
-    skills: list[str] = []
+    pronouns: list[str] = []
+    dietary_restrictions: list[str] = []
+    allergies: Union[str, None] = Field(None, max_length=2048)
 
+    phone_number: str
+    discord_username: str
+    major: str
+    academic_status: str
+
+    linkedin: NullableHttpUrl = None
     github: NullableHttpUrl = None
     portfolio: NullableHttpUrl = None
-    linkedin: NullableHttpUrl = None
+
+    tech_stack_frq: str = Field(max_length=2048)
+    frontend_backend_frq: str = Field(max_length=2048)
+    teaching_experience_frq: str = Field(max_length=2048)
+    team_leadership_frq: str = Field(max_length=2048)
     comments: Union[str, None] = Field(None, max_length=2048)
+
+    skill_python: int
+    skill_java: int
+    skill_c__: int
+    skill_javascript: int
+    skill_c_: int
+    skill_html_css: int
+    skill_react: int
+    skill_next_js: int
+    skill_github_pages: int
+    skill_other: int
+    skill_git: int
+    skill_sql__any_variation_: int
+    skill_aws_services: int
+    skill_vercel: int
+    skill_netlify: int
 
 
 class RawHackerApplicationData(BaseApplicationData):
@@ -250,7 +269,7 @@ class RawZotHacksHackerApplicationData(BaseZotHacksHackerApplicationData):
 class RawZotHacksMentorApplicationData(BaseZotHacksMentorApplicationData):
     first_name: str
     last_name: str
-    resume: UploadFile
+    resume: Union[UploadFile, None] = None
     application_type: Literal["Mentor"]
 
 
@@ -265,6 +284,18 @@ class ProcessedHackerApplicationData(BaseApplicationData):
     global_field_scores: dict[str, float] = {}
     # TODO: Create aliases for these global_field_scores
     # dict[field that can have detailed reviews, score]
+    director_previous_experience_review: Optional[DirectorPreviousExperienceReview] = (
+        None
+    )
+
+    @model_serializer(mode="wrap")
+    def omit_empty_director_review(
+        self, handler: SerializerFunctionWrapHandler
+    ) -> dict[str, Any]:
+        data: dict[str, Any] = handler(self)
+        if self.director_previous_experience_review is None:
+            data.pop("director_previous_experience_review", None)
+        return data
 
     @field_serializer("linkedin", "portfolio", "resume_url")
     def url2str(self, val: Union[HttpUrl, None]) -> Union[str, None]:
@@ -335,9 +366,9 @@ def get_discriminator_value(v: Any) -> str:
             return "mentor"
         if "frq_volunteer" in v:
             return "volunteer"
-        if "elevator_pitch_saq" in v:
+        if "tech_inspiration_saq" in v:
             return "zothacks_hacker"
-        if "help_participants_frq" in v:
+        if "tech_stack_frq" in v:
             return "zothacks_mentor"
 
     if "frq_ambition" in dir(v):
@@ -346,9 +377,9 @@ def get_discriminator_value(v: Any) -> str:
         return "mentor"
     if "frq_volunteer" in dir(v):
         return "volunteer"
-    if "elevator_pitch_saq" in dir(v):
+    if "tech_inspiration_saq" in dir(v):
         return "zothacks_hacker"
-    if "help_participants_frq" in dir(v):
+    if "tech_stack_frq" in dir(v):
         return "zothacks_mentor"
     return ""
 
@@ -370,13 +401,13 @@ def get_raw_hacker_discriminator_value(v: Any) -> str:
     if isinstance(v, dict):
         if "frq_ambition" in v:
             return "hacker"
-        if "elevator_pitch_saq" in v:
+        if "tech_inspiration_saq" in v:
             return "zothacks_hacker"
 
     # For object instances, check attributes
     if hasattr(v, "frq_ambition"):
         return "hacker"
-    if hasattr(v, "elevator_pitch_saq"):
+    if hasattr(v, "tech_inspiration_saq"):
         return "zothacks_hacker"
     return ""
 
@@ -396,13 +427,13 @@ def get_raw_mentor_discriminator_value(v: Any) -> str:
         # Check for unique fields to distinguish between the two types
         if "mentor_prev_experience_saq1" in v:
             return "mentor"
-        if "help_participants_frq" in v:
+        if "tech_stack_frq" in v:
             return "zothacks_mentor"
 
     # For object instances, check attributes
     if hasattr(v, "mentor_prev_experience_saq1"):
         return "mentor"
-    if hasattr(v, "help_participants_frq"):
+    if hasattr(v, "tech_stack_frq"):
         return "zothacks_mentor"
 
     return ""

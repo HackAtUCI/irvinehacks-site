@@ -2,17 +2,24 @@ import { useContext } from "react";
 
 import Box from "@cloudscape-design/components/box";
 import Button from "@cloudscape-design/components/button";
+import { FlashbarProps } from "@cloudscape-design/components/flashbar";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 
 import { Review } from "@/lib/admin/useApplicant";
 import { Uid } from "@/lib/userRecord";
+import NotificationContext from "@/lib/admin/NotificationContext";
 import UserContext from "@/lib/admin/UserContext";
-import { isReviewer } from "@/lib/admin/authorization";
+import { isDirector, isReviewer } from "@/lib/admin/authorization";
 import {
 	IrvineHacksHackerScoredFields,
 	HACKER_WEIGHTING_CONFIG,
 	ZotHacksHackerScoredFields,
 } from "@/lib/detailedScores";
+
+const NON_SCORING_IRVINEHACKS_FIELDS = new Set([
+	"previous_experience",
+	"has_socials",
+]);
 
 interface ColoredTextBoxProps {
 	text: string | undefined;
@@ -46,6 +53,8 @@ function HackerApplicantActions({
 	onSubmitDetailedReview,
 }: ApplicantActionsProps) {
 	const { uid, roles } = useContext(UserContext);
+	const isUserDirector = isDirector(roles);
+	const { setNotifications } = useContext(NotificationContext);
 
 	const uniqueReviewers = Array.from(
 		new Set(reviews.map((review) => review[1])),
@@ -56,12 +65,53 @@ function HackerApplicantActions({
 		? uniqueReviewers.length < 2 || uniqueReviewers.includes(uid)
 		: false;
 
-	if (!isReviewer(roles)) {
+	if (!isReviewer(roles) && !isUserDirector) {
 		return null;
 	}
 
+	const hasDirectorPreviousExperienceReview = "previous_experience" in scores;
+	const canSubmit =
+		canReview || (isUserDirector && hasDirectorPreviousExperienceReview);
+
 	const handleClick = () => {
-		// TODO: use flashbar or modal for submit status
+		const hasIrvineHacksScoring = [
+			"frq_change",
+			"frq_ambition",
+			"frq_character",
+		].some((field) => field in scores);
+		const hasZotHacksScoring = [
+			"collaboration_saq",
+			"tech_inspiration_saq",
+			"uci_gift_saq",
+		].some((field) => field in scores);
+		const hasMissingFields =
+			(hasIrvineHacksScoring &&
+				["frq_change", "frq_ambition", "frq_character"].some(
+					(field) => !(field in scores),
+				)) ||
+			(hasZotHacksScoring &&
+				["collaboration_saq", "tech_inspiration_saq", "uci_gift_saq"].some(
+					(field) => !(field in scores),
+				));
+
+		if (hasMissingFields) {
+			const msgId = `missing-fields-${Date.now()}`;
+			const dismiss = () =>
+				setNotifications?.((prev) => prev.filter((m) => m.id !== msgId));
+			setNotifications?.((prev) => [
+				{
+					type: "error",
+					content: "Missing required fields.",
+					id: msgId,
+					dismissible: true,
+					onDismiss: dismiss,
+				} as FlashbarProps.MessageDefinition,
+				...prev,
+			]);
+			setTimeout(dismiss, 3000);
+			return;
+		}
+
 		onSubmitDetailedReview(applicant, scores, notes ?? null);
 	};
 
@@ -73,16 +123,23 @@ function HackerApplicantActions({
 
 		if (isIrvineHacks) {
 			let weightedSum = 0;
-			for (const [field, [maxScore, weight]] of Object.entries(
-				HACKER_WEIGHTING_CONFIG,
+			let submittedWeight = 0;
+			for (const [field, score] of Object.entries(
+				scores as IrvineHacksHackerScoredFields,
 			)) {
-				const score = scores[field as keyof IrvineHacksHackerScoredFields] ?? 0;
+				if (NON_SCORING_IRVINEHACKS_FIELDS.has(field)) continue;
+
+				const [maxScore, weight] =
+					HACKER_WEIGHTING_CONFIG[field as keyof IrvineHacksHackerScoredFields];
 				// In case of any leftover -1 values (though typically filtered out)
 				const normalizedScore = score === -1 ? 0 : score;
 				weightedSum += (normalizedScore / maxScore) * weight;
+				submittedWeight += weight;
 			}
 
-			const totalScore = weightedSum * 100;
+			const totalScore = submittedWeight
+				? (weightedSum / submittedWeight) * 100
+				: 0;
 			return Math.max(totalScore, -3);
 		} else if ("resume" in scores && scores.resume === -1000) {
 			return -1000;
@@ -99,7 +156,7 @@ function HackerApplicantActions({
 
 	const totalScore = calculateTotalScore(scores);
 
-	return canReview ? (
+	return canSubmit ? (
 		<SpaceBetween direction="horizontal" size="xs">
 			<SpaceBetween direction="horizontal" size="xs">
 				{totalScore <= -1000 && (
@@ -115,7 +172,7 @@ function HackerApplicantActions({
 				</Box>
 			</SpaceBetween>
 
-			<Button onClick={handleClick} disabled={!canReview}>
+			<Button onClick={handleClick} disabled={!canSubmit}>
 				Submit
 			</Button>
 		</SpaceBetween>

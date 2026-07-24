@@ -1,6 +1,7 @@
+import re
 from datetime import datetime, timezone
 from logging import getLogger
-from typing import Annotated, Any, Optional, Union
+from typing import Annotated, Any, Literal, Optional, Union
 from urllib.parse import urlencode
 
 from fastapi import (
@@ -10,6 +11,7 @@ from fastapi import (
     Header,
     HTTPException,
     Request,
+    Response,
     status,
 )
 from fastapi.datastructures import URL, FormData
@@ -46,6 +48,8 @@ router = APIRouter()
 DEADLINE = datetime(2026, 2, 14, 8, 1, tzinfo=timezone.utc)
 WAITLIST_OPEN_TIME = datetime(2026, 2, 20, 20, 0, tzinfo=timezone.utc)
 WAITLIST_CLOSE_TIME = datetime(2026, 2, 23, 8, 1, tzinfo=timezone.utc)
+MAX_HACKER_CAP = 400
+
 
 HACKATHON_EXPERIENCE_SCORE_MAP = {
     "first_time": 5,
@@ -84,13 +88,12 @@ def _is_past_deadline(now: datetime) -> bool:
 async def _get_waitlist_status() -> WaitlistStatus:
     now = datetime.now(timezone.utc)
     is_started = now >= WAITLIST_OPEN_TIME
-
     is_open = False
     if is_started and now < WAITLIST_CLOSE_TIME:
         confirmed_count = await mongodb_handler.count(
             Collection.USERS, {"status": Status.CONFIRMED, "roles": Role.HACKER}
         )
-        is_open = confirmed_count < 400
+        is_open = confirmed_count < MAX_HACKER_CAP
 
     return WaitlistStatus(is_started=is_started, is_open=is_open)
 
@@ -125,6 +128,15 @@ async def logout() -> RedirectResponse:
     response = RedirectResponse("/", status.HTTP_303_SEE_OTHER)
     user_identity.remove_user_identity(response)
     return response
+
+
+@router.post("/refresh")
+async def refresh_token(
+    user: Annotated[User, Depends(require_user_identity)],
+    response: Response,
+) -> None:
+    """Issue a new token for the user, extending their session by 1 hour."""
+    user_identity.issue_user_identity(user, response)
 
 
 @router.get("/me")
@@ -325,12 +337,17 @@ async def _apply_flow(
         if "auto_decision_reason" in status_update:
             applicant.auto_decision_reason = status_update["auto_decision_reason"]
 
-    # add applicant to database
+    # add applicant to database and clear any drafts of this application type
     try:
-        await mongodb_handler.update_one(
+        await mongodb_handler.raw_update_one(
             Collection.USERS,
             {"_id": user.uid},
-            applicant.model_dump(),
+            {
+                "$set": applicant.model_dump(),
+                "$unset": {
+                    f"draft_application_data.{application_type}": "",
+                },
+            },
             upsert=True,
         )
     except RuntimeError:
@@ -354,6 +371,89 @@ async def _apply_flow(
     )
 
 
+DraftApplicationType = Literal["Hacker", "Mentor", "Volunteer"]
+
+
+class DraftApplicationData(BaseModel):
+    application_type: DraftApplicationType
+    fields: dict[str, Union[str, int, list[str]]]
+
+
+class DraftApplicationResponse(BaseModel):
+    draft_application_data: Union[DraftApplicationData, None] = None
+
+
+@router.get("/application/draft")
+async def get_application_draft(
+    user: Annotated[User, Depends(require_user_identity)],
+    application_type: DraftApplicationType,
+) -> DraftApplicationResponse:
+    user_record = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": user.uid}, ["draft_application_data"]
+    )
+
+    if not user_record:
+        return DraftApplicationResponse()
+
+    stored = user_record.get("draft_application_data")
+    if not isinstance(stored, dict):
+        return DraftApplicationResponse()
+
+    type_draft = stored.get(application_type)
+    if not isinstance(type_draft, dict):
+        return DraftApplicationResponse()
+
+    fields = type_draft.get("fields") or {}
+    if not isinstance(fields, dict):
+        return DraftApplicationResponse()
+
+    return DraftApplicationResponse(
+        draft_application_data=DraftApplicationData(
+            application_type=application_type, fields=fields
+        )
+    )
+
+
+@router.post("/application/draft", status_code=status.HTTP_204_NO_CONTENT)
+async def save_application_draft(
+    user: Annotated[User, Depends(require_user_identity)],
+    draft: DraftApplicationData,
+) -> None:
+    now = datetime.now(timezone.utc)
+
+    if _is_past_deadline(now):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Applications have closed.")
+
+    existing_record = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": user.uid, "roles": {"$exists": True}}, ["roles"]
+    )
+
+    if existing_record and existing_record.get("roles"):
+        log.error(
+            "User %s already has role %s but tried to save a draft.",
+            user,
+            existing_record["roles"],
+        )
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "User already has a role.")
+
+    try:
+        await mongodb_handler.raw_update_one(
+            Collection.USERS,
+            {"_id": user.uid},
+            {
+                "$set": {
+                    f"draft_application_data.{draft.application_type}": {
+                        "fields": draft.fields,
+                    }
+                }
+            },
+            upsert=True,
+        )
+    except RuntimeError:
+        log.error("Could not save draft for user %s to MongoDB.", user.uid)
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 @router.get("/waiver")
 async def request_waiver(
     user: Annotated[tuple[User, BareApplicant], Depends(require_accepted_applicant)],
@@ -370,6 +470,51 @@ async def request_waiver(
     # TODO: email may not match UCInetID format from `docusign_handler._acquire_uid`
     form_url = docusign_handler.waiver_form_url(user_data.email, user_name)
     return RedirectResponse(form_url, status.HTTP_303_SEE_OTHER)
+
+
+@router.post("/decline-acceptance")
+async def decline_acceptance(
+    user: Annotated[User, Depends(require_user_identity)],
+) -> RedirectResponse:
+    """Allow accepted hackers to void their own application."""
+    user_record = await mongodb_handler.retrieve_one(
+        Collection.USERS,
+        {"_id": user.uid, "roles": {"$all": [Role.APPLICANT, Role.HACKER]}},
+        ["status", "decision"],
+    )
+
+    if not user_record or "status" not in user_record:
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
+
+    if user_record["status"] == Decision.VOIDED:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Applicant is already voided.")
+
+    allowed_decline_statuses = {
+        Decision.ACCEPTED,
+        Status.REVIEWED,
+        Status.WAIVER_SIGNED,
+        Status.CONFIRMED,
+    }
+    is_accepted = (
+        user_record["status"] == Decision.ACCEPTED
+        or user_record.get("decision") == Decision.ACCEPTED
+    )
+    if not is_accepted or user_record["status"] not in allowed_decline_statuses:
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN,
+            "Only accepted hackers can decline their spot.",
+        )
+
+    ok = await mongodb_handler.update_one(
+        Collection.USERS,
+        {"_id": user.uid},
+        {"status": Decision.VOIDED, "decision": Decision.VOIDED},
+    )
+    if not ok:
+        raise RuntimeError(f"Error voiding applicant {user.uid}")
+
+    log.info("%s declined their accepted hacker spot.", user.uid)
+    return RedirectResponse("/portal", status.HTTP_303_SEE_OTHER)
 
 
 @router.post("/waiver")
@@ -400,17 +545,49 @@ async def waiver_webhook(
 
 
 DEFAULT_CHECKIN_TIME = "17:00"
-ARRIVAL_TIMES = (DEFAULT_CHECKIN_TIME, "18:00", "18:30", "19:00", "19:30")
+LATE_ARRIVAL_MIN = "18:00"
+LATE_ARRIVAL_MAX = "19:30"
+_TIME_PATTERN = re.compile(r"^([01]\d|2[0-3]):[0-5]\d$")
+MAX_LATE_ARRIVAL_REASON_LENGTH = 2048
+
+
+def _validate_late_arrival_time(value: str) -> str:
+    """Return a cleaned HH:MM string in the allowed late-arrival window."""
+    cleaned = value.strip()
+    if not _TIME_PATTERN.match(cleaned) or not (
+        LATE_ARRIVAL_MIN <= cleaned <= LATE_ARRIVAL_MAX
+    ):
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            "Invalid arrival time.",
+        )
+    return cleaned
+
+
+def _validate_late_arrival_reason(value: Optional[str]) -> str:
+    cleaned = value.strip() if value else ""
+    if not cleaned:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            "Late arrival reason is required.",
+        )
+    if len(cleaned) > MAX_LATE_ARRIVAL_REASON_LENGTH:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            "Late arrival reason is too long.",
+        )
+    return cleaned
 
 
 @router.post("/rsvp")
 async def rsvp(
     user: Annotated[User, Depends(require_user_identity)],
     arrival_time: Annotated[Optional[str], Form()] = None,
+    late_arrival_reason: Annotated[Optional[str], Form()] = None,
 ) -> RedirectResponse:
     """Change user status for RSVP"""
     user_record = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": user.uid}, ["status", "decision"]
+        Collection.USERS, {"_id": user.uid}, ["status", "decision", "first_name"]
     )
 
     if not user_record or "status" not in user_record:
@@ -418,16 +595,17 @@ async def rsvp(
 
     new_status: Status
     if user_record["status"] == Status.WAIVER_SIGNED:
+        if (
+            user_record.get("decision") == Decision.WAITLISTED
+            and not (await _get_waitlist_status()).is_open
+        ):
+            raise HTTPException(
+                status.HTTP_403_FORBIDDEN,
+                "Waitlist is closed.",
+            )
         new_status = Status.CONFIRMED
     elif user_record["status"] == Status.CONFIRMED:
         new_status = Status.WAIVER_SIGNED
-    elif user_record["decision"] == Decision.ACCEPTED:
-        new_status = Status.CONFIRMED
-    elif (
-        user_record["decision"] == Decision.WAITLISTED
-        and (await _get_waitlist_status()).is_open
-    ):
-        new_status = Status.CONFIRMED
     else:
         log.warning(f"User {user.uid} has not signed waiver. Status has not changed.")
         raise HTTPException(
@@ -438,23 +616,31 @@ async def rsvp(
     # Default check-in time is 5:00pm (17:00)
     arrival_value: str = DEFAULT_CHECKIN_TIME
     if arrival_time and arrival_time.strip():
-        if arrival_time.strip() not in ARRIVAL_TIMES:
-            raise HTTPException(
-                status.HTTP_400_BAD_REQUEST,
-                "Invalid arrival time.",
-            )
-        arrival_value = arrival_time.strip()
+        arrival_value = _validate_late_arrival_time(arrival_time)
 
     updated_fields: dict[str, Any] = {
         "status": new_status,
         "arrival_time": arrival_value,
     }
+    if arrival_value != DEFAULT_CHECKIN_TIME:
+        updated_fields["late_arrival_reason"] = _validate_late_arrival_reason(
+            late_arrival_reason
+        )
     await mongodb_handler.update_one(
         Collection.USERS, {"_id": user.uid}, updated_fields
     )
 
     old_status = user_record["status"]
     log.info(f"User {user.uid} changed status from {old_status} to {new_status}.")
+
+    if new_status == Status.CONFIRMED:
+        try:
+            await email_handler.send_rsvp_confirmation_email(
+                user.email, user_record.get("first_name", user.email.split("@")[0])
+            )
+        except RuntimeError:
+            log.error("Could not send RSVP email with SendGrid to %s.", user.uid)
+            raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     return RedirectResponse("/portal", status.HTTP_303_SEE_OTHER)
 
@@ -463,23 +649,47 @@ async def rsvp(
 async def get_arrival_time(
     user: Annotated[User, Depends(require_user_identity)],
 ) -> dict[str, Any]:
-    """Get the current arrival time for the user."""
+    """Get the current arrival time and any pending edit request for the user."""
     user_record = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": user.uid}, ["arrival_time"]
+        Collection.USERS,
+        {"_id": user.uid},
+        [
+            "arrival_time",
+            "late_arrival_reason",
+            "late_arrival_edit_request",
+            "late_arrival_edit_reason",
+        ],
     )
     if not user_record:
-        return {"arrival_time": None}
-    return {"arrival_time": user_record.get("arrival_time")}
+        return {
+            "arrival_time": None,
+            "late_arrival_reason": None,
+            "late_arrival_edit_request": None,
+            "late_arrival_edit_reason": None,
+        }
+    return {
+        "arrival_time": user_record.get("arrival_time"),
+        "late_arrival_reason": user_record.get("late_arrival_reason"),
+        "late_arrival_edit_request": user_record.get("late_arrival_edit_request"),
+        "late_arrival_edit_reason": user_record.get("late_arrival_edit_reason"),
+    }
 
 
 @router.post("/rsvp/late-arrival")
 async def rsvp_late_arrival(
     user: Annotated[User, Depends(require_user_identity)],
     arrival_time: Annotated[Optional[str], Form()] = None,
+    late_arrival_reason: Annotated[Optional[str], Form()] = None,
 ) -> RedirectResponse:
-    """Submit or update expected arrival time (default 6pm; Friday 6pm–7:30pm)."""
+    """Submit or update expected arrival time (default 6pm; Friday 6pm–7:30pm).
+
+    First submission sets arrival_time directly. Subsequent submissions create a
+    pending edit request requiring director/check-in lead approval.
+    """
     user_record = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": user.uid}, ["status", "decision"]
+        Collection.USERS,
+        {"_id": user.uid},
+        ["status", "arrival_time"],
     )
 
     if not user_record or "status" not in user_record:
@@ -491,21 +701,38 @@ async def rsvp_late_arrival(
             "You must RSVP before setting an arrival time.",
         )
 
-    # Default check-in time is 5:00pm (17:00)
     arrival_value: str = DEFAULT_CHECKIN_TIME
     if arrival_time and arrival_time.strip():
-        if arrival_time.strip() not in ARRIVAL_TIMES:
-            raise HTTPException(
-                status.HTTP_400_BAD_REQUEST,
-                "Invalid arrival time.",
-            )
-        arrival_value = arrival_time.strip()
+        arrival_value = _validate_late_arrival_time(arrival_time)
+    reason_value = _validate_late_arrival_reason(late_arrival_reason)
 
-    await mongodb_handler.update_one(
-        Collection.USERS, {"_id": user.uid}, {"arrival_time": arrival_value}
+    current_time = user_record.get("arrival_time", DEFAULT_CHECKIN_TIME)
+    already_has_late_time = (
+        current_time is not None and current_time != DEFAULT_CHECKIN_TIME
     )
 
-    log.info(f"User {user.uid} set arrival_time to {arrival_value}.")
+    if already_has_late_time:
+        if arrival_value == current_time:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                "Please choose a new arrival time before submitting.",
+            )
+        await mongodb_handler.update_one(
+            Collection.USERS,
+            {"_id": user.uid},
+            {
+                "late_arrival_edit_request": arrival_value,
+                "late_arrival_edit_reason": reason_value,
+            },
+        )
+        log.info(f"User {user.uid} requested edit of arrival_time to {arrival_value}.")
+    else:
+        await mongodb_handler.update_one(
+            Collection.USERS,
+            {"_id": user.uid},
+            {"arrival_time": arrival_value, "late_arrival_reason": reason_value},
+        )
+        log.info(f"User {user.uid} set arrival_time to {arrival_value}.")
 
     return RedirectResponse("/portal", status.HTTP_303_SEE_OTHER)
 

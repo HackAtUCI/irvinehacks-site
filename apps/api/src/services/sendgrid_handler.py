@@ -17,11 +17,15 @@ SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
 
 class Template(str, Enum):
     # IH 2026
-    CONFIRMATION_EMAIL = "d-5041cae29f974fe18d18976a9381020c"
+    SUBMISSION_CONFIRMATION_EMAIL = "d-5041cae29f974fe18d18976a9381020c"
+    RSVP_CONFIRMATION_EMAIL = "d-48b73d68a0d74da2ba653bbb9efd937c"
+    WITHDRAWAL_CONFIRMATION_EMAIL = "d-23b3155f63904ac987d4dac3d91f294f"
     GUEST_TOKEN = "d-19a126a867294a56b8db9d94a23f7b5d"
     WAITLIST_QUEUED_EMAIL = "d-a6de2014ad854658bead73a2718a1152"
     WAITLIST_CLOSED_EMAIL = "d-061b28174c9140a095fa99e81e0e7e9c"
     APPLY_REMINDER = "d-a830eddcfaf74bc6af2c07357c67863f"
+    LATE_ARRIVAL_APPROVED_EMAIL = "d-a5fc44ba668e4c4eb256901165ce63b5"
+    LATE_ARRIVAL_REJECTED_EMAIL = "d-49b746e9c9fc494e83d4db99c613fe82"
 
     # IH 2025
     HACKER_ACCEPTED_EMAIL = "d-07fa796cf6c34518a7124a68d4790d82"
@@ -60,6 +64,16 @@ class ApplicationUpdatePersonalization(PersonalizationData):
     first_name: str
 
 
+class LateArrivalApprovalPersonalization(PersonalizationData):
+    first_name: str
+    arrival_time: str
+
+
+class LateArrivalRejectionPersonalization(PersonalizationData):
+    first_name: str
+    requested_time: str
+
+
 ApplicationUpdateTemplates: TypeAlias = Literal[
     Template.HACKER_ACCEPTED_EMAIL,
     Template.HACKER_WAITLISTED_EMAIL,
@@ -75,6 +89,8 @@ ApplicationUpdateTemplates: TypeAlias = Literal[
     Template.WAITLIST_TRANSFER_EMAIL,
     Template.WAITLIST_QUEUED_EMAIL,
     Template.WAITLIST_CLOSED_EMAIL,
+    Template.RSVP_CONFIRMATION_EMAIL,
+    Template.WITHDRAWAL_CONFIRMATION_EMAIL,
 ]
 
 LogisticsTemplates: TypeAlias = Literal[
@@ -84,10 +100,15 @@ LogisticsTemplates: TypeAlias = Literal[
     Template.HACKER_WAITLISTED_LOGISTICS_EMAIL,
 ]
 
+LateArrivalTemplates: TypeAlias = Literal[
+    Template.LATE_ARRIVAL_APPROVED_EMAIL,
+    Template.LATE_ARRIVAL_REJECTED_EMAIL,
+]
+
 
 @overload
 async def send_email(
-    template_id: Literal[Template.CONFIRMATION_EMAIL],
+    template_id: Literal[Template.SUBMISSION_CONFIRMATION_EMAIL],
     sender_email: Tuple[str, str],
     receiver_data: ConfirmationPersonalization,
     send_to_multiple: Literal[False] = False,
@@ -107,7 +128,7 @@ async def send_email(
 
 @overload
 async def send_email(
-    template_id: Literal[Template.CONFIRMATION_EMAIL],
+    template_id: Literal[Template.SUBMISSION_CONFIRMATION_EMAIL],
     sender_email: Tuple[str, str],
     receiver_data: Iterable[ConfirmationPersonalization],
     send_to_multiple: Literal[True],
@@ -170,6 +191,26 @@ async def send_email(
     template_id: LogisticsTemplates,
     sender_email: Tuple[str, str],
     receiver_data: Iterable[ApplicationUpdatePersonalization],
+    send_to_multiple: Literal[True],
+    reply_to: Union[Tuple[str, str], None] = None,
+) -> None: ...
+
+
+@overload
+async def send_email(
+    template_id: Literal[Template.LATE_ARRIVAL_APPROVED_EMAIL],
+    sender_email: Tuple[str, str],
+    receiver_data: Iterable[LateArrivalApprovalPersonalization],
+    send_to_multiple: Literal[True],
+    reply_to: Union[Tuple[str, str], None] = None,
+) -> None: ...
+
+
+@overload
+async def send_email(
+    template_id: Literal[Template.LATE_ARRIVAL_REJECTED_EMAIL],
+    sender_email: Tuple[str, str],
+    receiver_data: Iterable[LateArrivalRejectionPersonalization],
     send_to_multiple: Literal[True],
     reply_to: Union[Tuple[str, str], None] = None,
 ) -> None: ...

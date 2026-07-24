@@ -10,14 +10,21 @@ const api = axios.create({
 	baseURL: SERVER_HOST ? `https://${SERVER_HOST}/api/` : LOCAL_API_URL,
 });
 
+const ALLOWED_HACKATHONS = new Set(["irvinehacks", "zothacks"]);
+
 api.interceptors.request.use((config) => {
 	const cookieStore = cookies();
+	const selectedHackathon = cookieStore.get("hackathon")?.value;
+	const hackathon =
+		selectedHackathon && ALLOWED_HACKATHONS.has(selectedHackathon)
+			? selectedHackathon
+			: "irvinehacks";
 
 	// Inject user's client-side cookies along with API request
 	const provided = config.headers.get("Cookie");
 	const newCookies = (provided ? `${provided}; ` : "") + cookieStore.toString();
 	config.headers.set("Cookie", newCookies);
-	config.headers.set("X-Hackathon-Name", "irvinehacks");
+	config.headers.set("X-Hackathon-Name", hackathon);
 
 	return config;
 });

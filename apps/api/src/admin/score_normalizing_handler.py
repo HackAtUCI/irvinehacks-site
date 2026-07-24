@@ -9,6 +9,7 @@ from services import mongodb_handler
 from services.mongodb_handler import Collection
 
 GLOBAL_FIELDS = {"resume", "hackathon_experience"}
+NON_SCORING_IH_FIELDS = {"previous_experience", "has_socials"}
 
 # Dictionary mapping field names to (total_points, weight_percentage)
 # The sum of weight_percentages should be 1.0 (100%)
@@ -155,7 +156,7 @@ def get_normalized_scores_for_hacker_applicants(
 
 
 async def update_hacker_applicants_in_collection(
-    normalized_scores: dict[str, dict[str, float]]
+    normalized_scores: dict[str, dict[str, float]],
 ) -> None:
     operations = [
         UpdateOne(
@@ -168,11 +169,17 @@ async def update_hacker_applicants_in_collection(
 
 
 def _get_weighted_score(scores_dict: dict[str, float]) -> float:
-    total_score = sum(
-        [
-            (score / IH_WEIGHTING_CONFIG[field][0]) * IH_WEIGHTING_CONFIG[field][1]
-            for field, score in scores_dict.items()
-            if field not in GLOBAL_FIELDS
-        ]
-    )
-    return total_score * 100.0
+    total_score = 0.0
+    total_weight = 0.0
+    for field, score in scores_dict.items():
+        if field in GLOBAL_FIELDS or field in NON_SCORING_IH_FIELDS:
+            continue
+
+        field_total, weight = IH_WEIGHTING_CONFIG[field]
+        total_score += (score / field_total) * weight
+        total_weight += weight
+
+    if total_weight == 0:
+        return 0.0
+
+    return (total_score / total_weight) * 100.0

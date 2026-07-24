@@ -1,7 +1,10 @@
+import { useContext } from "react";
 import { Uid } from "@/lib/userRecord";
 import Box from "@cloudscape-design/components/box";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import StatusIndicator from "@cloudscape-design/components/status-indicator";
+import UserContext from "@/lib/admin/UserContext";
+import { isDirector } from "@/lib/admin/authorization";
 
 interface IndicatorContainerProps {
 	displayNumber: number;
@@ -33,6 +36,8 @@ interface ApplicantReviewerIndicatorProps {
 function ApplicantReviewerIndicator({
 	reviewers,
 }: ApplicantReviewerIndicatorProps) {
+	const { roles } = useContext(UserContext);
+	const isUserDirector = isDirector(roles);
 	const formatUid = (uid: Uid) => uid.split(".").at(-1);
 
 	return (
@@ -41,7 +46,13 @@ function ApplicantReviewerIndicator({
 				<IndicatorContainer
 					key={n}
 					displayNumber={n + 1}
-					reviewer={reviewers[n] ? formatUid(reviewers[n]) : ""}
+					reviewer={
+						reviewers[n]
+							? isUserDirector
+								? formatUid(reviewers[n])
+								: "Yes"
+							: ""
+					}
 				/>
 			))}
 		</SpaceBetween>

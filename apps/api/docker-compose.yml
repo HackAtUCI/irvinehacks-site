@@ -25,10 +25,12 @@ services:
     build: .
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
       MONGODB_URI: mongodb://root:example@mongo:27017
       DEPLOYMENT: LOCAL
-      UCI_SSO_ENABLED: "true"
+      UCI_SSO_ENABLED: "false"
       SLACK_SIGNING_SECRET: "secret"
 
 volumes:

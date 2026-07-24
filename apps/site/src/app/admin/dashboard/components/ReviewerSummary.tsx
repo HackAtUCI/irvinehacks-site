@@ -8,6 +8,7 @@ import Input from "@cloudscape-design/components/input";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import StatusIndicator from "@cloudscape-design/components/status-indicator";
 import Table, { TableProps } from "@cloudscape-design/components/table";
+import useOrganizers from "@/lib/admin/useOrganizers";
 import { useCollection } from "@cloudscape-design/collection-hooks";
 
 import { isDirector } from "@/lib/admin/authorization";
@@ -58,26 +59,42 @@ function buildColumns(
 function ReviewerSummary() {
 	const { roles } = useContext(UserContext);
 	const { applicantList, loading } = useHackerApplicants();
+	const { organizerList, loading: organizersLoading } = useOrganizers();
 	const [minimumInput, setMinimumInput] = useState("");
 
 	const minimum = minimumInput !== "" ? parseInt(minimumInput, 10) : null;
 	const director = isDirector(roles);
+	const combinedLoading = loading || organizersLoading;
 
 	const allItems: Row[] = useMemo(() => {
-		if (loading || applicantList.length === 0) return [];
+		if (combinedLoading) return [];
+
+		const nameMap = new Map<string, string>();
+		for (const organizer of organizerList) {
+			nameMap.set(
+				organizer._id,
+				`${organizer.first_name} ${organizer.last_name}`,
+			);
+		}
 
 		const reviewerCountMap = new Map<string, number>();
+		for (const organizer of organizerList) {
+			reviewerCountMap.set(organizer._id, 0);
+		}
+
 		for (const applicant of applicantList) {
 			for (const id of applicant.reviewers || []) {
-				reviewerCountMap.set(id, (reviewerCountMap.get(id) ?? 0) + 1);
+				if (reviewerCountMap.has(id)) {
+					reviewerCountMap.set(id, reviewerCountMap.get(id)! + 1);
+				}
 			}
 		}
 
 		return Array.from(reviewerCountMap.entries()).map(([id, count]) => ({
-			name: id.split(".")[2],
+			name: nameMap.get(id) || id.split(".")[2],
 			count,
 		}));
-	}, [applicantList, loading]);
+	}, [applicantList, combinedLoading, organizerList]);
 
 	const columns = useMemo(() => buildColumns(minimum), [minimum]);
 
@@ -109,7 +126,7 @@ function ReviewerSummary() {
 					{...collectionProps}
 					columnDefinitions={columns}
 					items={items}
-					loading={loading}
+					loading={combinedLoading}
 					loadingText="Loading reviewers"
 					enableKeyboardNavigation
 					stripedRows

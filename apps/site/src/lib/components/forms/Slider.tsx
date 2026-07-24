@@ -1,4 +1,7 @@
+"use client";
+
 import RequiredAsterisk from "./RequiredAsterisk";
+import { useDraftContext } from "./shared/DraftContext";
 
 interface SliderProps {
 	pretext?: string;
@@ -27,6 +30,10 @@ export default function Slider({
 	containerClass,
 	labelText,
 }: SliderProps) {
+	const draftContext = useDraftContext();
+	const initial = draftContext?.initialValues[name];
+	const defaultValue = typeof initial === "string" ? initial : undefined;
+
 	return (
 		<div className={containerClass}>
 			<p className="m-0 text-lg mb-4">
@@ -47,6 +54,8 @@ export default function Slider({
 						max="5"
 						step="1"
 						name={name}
+						defaultValue={defaultValue}
+						onChange={(e) => draftContext?.setValue(name, e.target.value)}
 					/>
 				</div>
 				<div className="hidden md:block flex items-center">

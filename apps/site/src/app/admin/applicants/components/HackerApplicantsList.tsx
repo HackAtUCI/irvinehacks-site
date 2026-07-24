@@ -1,22 +1,35 @@
 "use client";
 
-import { ReactNode, useContext, useEffect, useState, useCallback } from "react";
+import {
+	ReactNode,
+	useContext,
+	useEffect,
+	useState,
+	useCallback,
+	useMemo,
+} from "react";
 import { useRouter } from "next/navigation";
 import Box from "@cloudscape-design/components/box";
 import Cards from "@cloudscape-design/components/cards";
 import Header from "@cloudscape-design/components/header";
 import Link from "@cloudscape-design/components/link";
 import Checkbox from "@cloudscape-design/components/checkbox";
+import StatusIndicator from "@cloudscape-design/components/status-indicator";
 
 import { useFollowWithNextLink } from "@/app/admin/layout/common";
 import ApplicantFilters, {
 	Options,
 } from "@/app/admin/applicants/components/ApplicantFilters";
+import { SelectProps } from "@cloudscape-design/components/select";
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
 import AutoDecisionBadge from "@/app/admin/applicants/components/AutoDecisionBadge";
 
 import UserContext from "@/lib/admin/UserContext";
-import { isDirector, isHackerReviewer } from "@/lib/admin/authorization";
+import {
+	isDirector,
+	hasAdminRole,
+	isHackerReviewer,
+} from "@/lib/admin/authorization";
 import ApplicantReviewerIndicator from "../components/ApplicantReviewerIndicator";
 import HackerThresholdInputs from "../components/HackerThresholdInputs";
 
@@ -25,10 +38,12 @@ import useAvgScoreSetting from "@/lib/admin/useAvgScoreSetting";
 import useHackerApplicants, {
 	HackerApplicantSummary,
 } from "@/lib/admin/useHackerApplicants";
+import useHackerReviewAssignments from "@/lib/admin/useHackerReviewAssignments";
+import { uidToPseudonym } from "@/lib/admin/anonymize";
 import { ParticipantRole, Status } from "@/lib/userRecord";
 import { OVERQUALIFIED_SCORE } from "@/lib/decisionScores";
-import SpaceBetween from "@cloudscape-design/components/space-between";
 import Badge from "@cloudscape-design/components/badge";
+import Icon from "@cloudscape-design/components/icon";
 
 type ColumnDef = {
 	id: string;
@@ -49,12 +64,35 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 	}
 
 	const isUserDirector = isDirector(roles);
+	const isOrganizer = hasAdminRole(roles);
 
 	const [selectedStatuses, setSelectedStatuses] = useState<Options>([]);
 	const [selectedDecisions, setSelectedDecisions] = useState<Options>([]);
 	const [uciNetIDFilter, setUCINetIDFilter] = useState<Options>([]);
+	const [sortOption, setSortOption] = useState<SelectProps.Option>({
+		value: "latest",
+		label: "Newest",
+	});
 
-	const { applicantList, loading } = useHackerApplicants();
+	const { applicantList, loading, approveDuplicateName } =
+		useHackerApplicants();
+	const {
+		assignedApplicantIds,
+		targetCount,
+		completedCount,
+		loading: assignmentsLoading,
+	} = useHackerReviewAssignments(!isUserDirector);
+	const reviewableApplicantList = useMemo(() => {
+		if (isUserDirector) return applicantList;
+
+		const applicantById = new Map(
+			applicantList.map((applicant) => [applicant._id, applicant]),
+		);
+		return assignedApplicantIds.flatMap((applicantId) => {
+			const applicant = applicantById.get(applicantId);
+			return applicant ? [applicant] : [];
+		});
+	}, [applicantList, assignedApplicantIds, isUserDirector]);
 
 	const selectedStatusValues = selectedStatuses.map(({ value }) => value);
 	const selectedDecisionValues = selectedDecisions.map(({ value }) => value);
@@ -79,11 +117,14 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		}
 	}, [top400]);
 
-	const filteredApplicants = applicantList.filter((applicant) => {
+	const filteredApplicants = reviewableApplicantList.filter((applicant) => {
 		if (
 			selectedStatusValues.includes(Status.Pending) &&
 			applicant.avg_score === OVERQUALIFIED_SCORE
 		)
+			return false;
+
+		if (applicant.status === Status.Voided && isOrganizer && !isUserDirector)
 			return false;
 
 		if (
@@ -100,7 +141,11 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 			(selectedStatuses.length === 0 ||
 				selectedStatusValues.includes(applicant.status)) &&
 			(selectedDecisions.length === 0 ||
-				selectedDecisionValues.includes(applicant.decision || "-")) &&
+				selectedDecisionValues.includes(
+					applicant.director_previous_experience_reviewed
+						? applicant.decision || "-"
+						: "-",
+				)) &&
 			(uciNetIDFilter.length === 0 ||
 				applicant.reviewers.some((reviewer) =>
 					uciNetIDFilterValues.includes(reviewer),
@@ -108,8 +153,12 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		);
 	});
 
-	const filteredApplicants400 = [...applicantList]
-		.filter((applicant) => applicant.avg_score !== -1)
+	const filteredApplicants400 = [...reviewableApplicantList]
+		.filter(
+			(applicant) =>
+				applicant.director_previous_experience_reviewed &&
+				applicant.avg_score !== -1,
+		)
 		.sort((a, b) => b.avg_score - a.avg_score)
 		.slice(0, 400);
 
@@ -117,31 +166,59 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		const accepted = acceptThreshold ? acceptThreshold : 0;
 		const waitlisted = waitlistThreshold ? waitlistThreshold : 0;
 
-		const acceptedCount = applicantList.filter(
+		const scoreReadyApplicants = applicantList.filter(
+			(applicant) => applicant.director_previous_experience_reviewed,
+		);
+
+		const acceptedCount = scoreReadyApplicants.filter(
 			(applicant) => applicant.avg_score >= accepted,
 		).length;
 		setAcceptedCount(acceptedCount);
 
-		const waitlistedCount = applicantList.filter(
+		const waitlistedCount = scoreReadyApplicants.filter(
 			(applicant) =>
 				applicant.avg_score >= waitlisted && applicant.avg_score < accepted,
 		).length;
 		setWaitlistedCount(waitlistedCount);
 
-		const rejectedCount = applicantList.filter(
+		const rejectedCount = scoreReadyApplicants.filter(
 			(applicant) => applicant.avg_score < waitlisted,
 		).length;
 		setRejectCount(rejectedCount);
 	}, [applicantList, acceptThreshold, waitlistThreshold]);
 
-	const items = top400 ? filteredApplicants400 : filteredApplicants;
+	const baseItems = top400 ? filteredApplicants400 : filteredApplicants;
+	const items = useMemo(() => {
+		if (!isUserDirector) return baseItems;
+		if (!sortOption?.value) return baseItems;
+		return [...baseItems].sort((a, b) => {
+			switch (sortOption.value) {
+				case "first_name_asc":
+					return a.first_name.localeCompare(b.first_name);
+				case "first_name_desc":
+					return b.first_name.localeCompare(a.first_name);
+				case "latest":
+					return (
+						new Date(b.application_data.submission_time).getTime() -
+						new Date(a.application_data.submission_time).getTime()
+					);
+				case "oldest":
+					return (
+						new Date(a.application_data.submission_time).getTime() -
+						new Date(b.application_data.submission_time).getTime()
+					);
+				default:
+					return 0;
+			}
+		});
+	}, [baseItems, isUserDirector, sortOption]);
 
 	const counter =
 		selectedStatuses.length > 0 ||
 		selectedDecisions.length > 0 ||
 		uciNetIDFilter.length > 0
-			? `(${items.length}/${applicantList.length})`
-			: `(${applicantList.length})`;
+			? `(${items.length}/${reviewableApplicantList.length})`
+			: `(${reviewableApplicantList.length})`;
 
 	const emptyContent = (
 		<Box textAlign="center" color="inherit">
@@ -170,6 +247,29 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		content: ResumeReviewedStatus,
 	};
 
+	const directorPreviousExperienceReviewedColumn = {
+		id: "director_previous_experience_reviewed",
+		header: "Director Review",
+		content: DirectorPreviousExperienceReviewedStatus,
+	};
+	const duplicateNames = useMemo(() => {
+		if (!isUserDirector) return new Set<string>();
+
+		const nameCounts = new Map<string, number>();
+
+		for (const { first_name, last_name } of applicantList) {
+			const name = `${first_name} ${last_name}`.trim().toLowerCase();
+			if (!name) continue;
+			nameCounts.set(name, (nameCounts.get(name) ?? 0) + 1);
+		}
+
+		return new Set(
+			[...nameCounts.entries()]
+				.filter(([, count]) => count > 1)
+				.map(([name]) => name),
+		);
+	}, [applicantList, isUserDirector]);
+
 	const renderHeader = useCallback(
 		({
 			_id,
@@ -178,6 +278,8 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 			avg_score,
 			decision,
 			auto_decision_reason,
+			director_previous_experience_reviewed,
+			duplicate_name_approved,
 		}: HackerApplicantSummary) => (
 			<CardHeader
 				_id={_id}
@@ -187,12 +289,27 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 				avg_score={avg_score}
 				decision={decision}
 				auto_decision_reason={auto_decision_reason}
+				director_previous_experience_reviewed={
+					director_previous_experience_reviewed
+				}
+				isDirector={isUserDirector}
+				isDuplicate={
+					isUserDirector &&
+					duplicateNames.has(`${first_name} ${last_name}`.trim().toLowerCase())
+				}
+				duplicateNameApproved={duplicate_name_approved}
+				onApproveDuplicate={(approved) => approveDuplicateName(_id, approved)}
 			/>
 		),
-		[hackathonName],
+		[hackathonName, duplicateNames, isUserDirector, approveDuplicateName],
 	);
 
-	const avgScore = ({ avg_score, reviewers }: HackerApplicantSummary) => {
+	const avgScore = ({
+		avg_score,
+		reviewers,
+		director_previous_experience_reviewed,
+	}: HackerApplicantSummary) => {
+		if (!director_previous_experience_reviewed) return "-";
 		if (avg_score === OVERQUALIFIED_SCORE)
 			return <Box color="text-status-error">OVERQUALIFIED</Box>;
 		if (avg_score === -1) return "-";
@@ -208,9 +325,10 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 					{
 						id: "uid",
 						header: "UID",
-						content: ({ _id }) => _id,
+						content: ({ _id }) => (isUserDirector ? _id : uidToPseudonym(_id)),
 					},
-					extraColumn,
+					...(isUserDirector ? [extraColumn] : []),
+					...(isUserDirector ? [directorPreviousExperienceReviewedColumn] : []),
 					{
 						id: "status",
 						header: "Status",
@@ -240,27 +358,44 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 					},
 				],
 			}}
-			loading={loading}
+			loading={loading || assignmentsLoading}
 			loadingText="Loading applicants"
 			items={items}
 			trackBy="_id"
 			variant="full-page"
 			filter={
-				<ApplicantFilters
-					selectedStatuses={selectedStatuses}
-					setSelectedStatuses={setSelectedStatuses}
-					selectedDecisions={selectedDecisions}
-					setSelectedDecisions={setSelectedDecisions}
-					uciNetIDFilter={uciNetIDFilter}
-					setUCINetIDFilter={setUCINetIDFilter}
-					applicantType={ParticipantRole.Hacker}
-				/>
+				isUserDirector ? (
+					<ApplicantFilters
+						selectedStatuses={selectedStatuses}
+						setSelectedStatuses={setSelectedStatuses}
+						selectedDecisions={selectedDecisions}
+						setSelectedDecisions={setSelectedDecisions}
+						uciNetIDFilter={uciNetIDFilter}
+						setUCINetIDFilter={setUCINetIDFilter}
+						applicantType={ParticipantRole.Hacker}
+						sortOption={sortOption}
+						setSortOption={setSortOption}
+					/>
+				) : null
 			}
 			empty={emptyContent}
 			header={
 				<div>
 					<Header actions={isUserDirector && <HackerThresholdInputs />}>
 						Hacker Applicants {counter}
+						{!isUserDirector && (
+							<div
+								style={{
+									fontSize: "0.875rem",
+									color: "#5f6b7a",
+									marginTop: "4px",
+								}}
+							>
+								Showing your assigned review queue
+								{targetCount ? ` (${items.length}/${targetCount})` : ""}
+								{completedCount ? `, ${completedCount} reviewed` : ""}
+							</div>
+						)}
 						<div
 							style={{
 								fontSize: "0.875rem",
@@ -296,12 +431,13 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 						Show Top 400 Scores
 					</Checkbox>
 					<span>
-						{top400 && "Highest score: " + filteredApplicants400[0]?.avg_score}
+						{top400 &&
+							"Highest score: " + (filteredApplicants400[0]?.avg_score ?? "-")}
 						<br />
 						{top400 &&
 							"Lowest score: " +
-								filteredApplicants400[filteredApplicants400.length - 1]
-									?.avg_score}
+								(filteredApplicants400[filteredApplicants400.length - 1]
+									?.avg_score ?? "-")}
 					</span>
 				</div>
 			}
@@ -317,6 +453,11 @@ const CardHeader = ({
 	avg_score,
 	decision,
 	auto_decision_reason,
+	director_previous_experience_reviewed,
+	isDirector,
+	isDuplicate,
+	duplicateNameApproved,
+	onApproveDuplicate,
 }: Pick<
 	HackerApplicantSummary,
 	| "_id"
@@ -325,34 +466,98 @@ const CardHeader = ({
 	| "avg_score"
 	| "decision"
 	| "auto_decision_reason"
+	| "director_previous_experience_reviewed"
 > & {
 	hackathonName: "irvinehacks" | "zothacks";
+	isDirector: boolean;
+	isDuplicate: boolean;
+	duplicateNameApproved: boolean;
+	onApproveDuplicate: (approved: boolean) => void;
 }) => {
 	const followWithNextLink = useFollowWithNextLink();
 	const href =
 		hackathonName === "zothacks"
 			? `/admin/applicants/zothacks-hackers/${_id}`
 			: `/admin/applicants/hackers/${_id}`;
+	const displayName = isDirector
+		? `${first_name} ${last_name}`
+		: uidToPseudonym(_id);
+
+	const duplicateIcon =
+		isDuplicate &&
+		(duplicateNameApproved ? (
+			<span
+				title={
+					isDirector
+						? "Duplicate name approved: click to revoke"
+						: "Duplicate name verified by director"
+				}
+				style={{
+					display: "flex",
+					alignItems: "center",
+					cursor: isDirector ? "pointer" : "default",
+				}}
+				onClick={isDirector ? () => onApproveDuplicate(false) : undefined}
+			>
+				<Icon name="status-positive" variant="success" />
+			</span>
+		) : (
+			<span
+				title={
+					isDirector
+						? "Duplicate name: click to approve"
+						: "Duplicate name; possibly applied multiple times"
+				}
+				style={{
+					display: "flex",
+					alignItems: "center",
+					cursor: isDirector ? "pointer" : "default",
+				}}
+				onClick={isDirector ? () => onApproveDuplicate(true) : undefined}
+			>
+				<Icon name="status-warning" variant="warning" />
+			</span>
+		));
+
 	return (
-		<SpaceBetween direction="horizontal" size="s">
+		<div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
 			<Link href={href} fontSize="inherit" onFollow={followWithNextLink}>
-				{first_name} {last_name}
+				{displayName}
 			</Link>
-			{avg_score === OVERQUALIFIED_SCORE && (
-				<Badge color="red">OVERQUALIFIED</Badge>
-			)}
-			<AutoDecisionBadge reason={auto_decision_reason} decision={decision} />
-		</SpaceBetween>
+			{director_previous_experience_reviewed &&
+				avg_score === OVERQUALIFIED_SCORE && (
+					<Badge color="red">OVERQUALIFIED</Badge>
+				)}
+				<AutoDecisionBadge reason={auto_decision_reason} decision={decision} />
+			{duplicateIcon}
+		</div>
 	);
 };
 
-const DecisionStatus = ({ decision }: HackerApplicantSummary) =>
-	decision ? <ApplicantStatus status={decision} /> : "-";
+const DecisionStatus = ({
+	decision,
+	director_previous_experience_reviewed,
+}: HackerApplicantSummary) =>
+	director_previous_experience_reviewed && decision ? (
+		<ApplicantStatus status={decision} />
+	) : (
+		"-"
+	);
 
 const ResumeReviewedStatus = ({ resume_reviewed }: HackerApplicantSummary) => (
 	<ApplicantStatus
 		status={resume_reviewed ? Status.Reviewed : Status.Pending}
 	/>
+);
+
+const DirectorPreviousExperienceReviewedStatus = ({
+	director_previous_experience_reviewed,
+}: HackerApplicantSummary) => (
+	<StatusIndicator
+		type={director_previous_experience_reviewed ? "success" : "pending"}
+	>
+		{director_previous_experience_reviewed ? "Reviewed" : "Not Reviewed"}
+	</StatusIndicator>
 );
 
 export default HackerApplicantsList;

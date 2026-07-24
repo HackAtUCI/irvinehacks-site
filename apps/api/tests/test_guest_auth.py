@@ -1,5 +1,5 @@
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from unittest.mock import AsyncMock, patch
 
 from auth import guest_auth
@@ -39,18 +39,22 @@ def test_can_validate_key() -> None:
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
-async def test_get_existing_unexpired_key(mock_mongodb_retrieve_one: AsyncMock) -> None:
-    """Test that existing, unexpired guest authorization key can be retrieved."""
-    iat = datetime(2025, 1, 11)
-    exp = datetime(
-        2026, 7, 1, tzinfo=timezone.utc
-    )  # update expire date for this test to not fail :)
-    # this test will fail next year :P
+async def test_get_existing_unexpired_key(
+    mock_mongodb_retrieve_one: AsyncMock,
+) -> None:
+    """Test that an existing, unexpired guest authorization key is retrieved."""
+    now = datetime.now(timezone.utc)
+
     mock_mongodb_retrieve_one.return_value = {
-        "guest_auth": {"iat": iat, "exp": exp, "key": "some-key"}
+        "guest_auth": {
+            "iat": now,
+            "exp": now + timedelta(days=1),
+            "key": "some-key",
+        }
     }
 
     key = await guest_auth._get_existing_key(SAMPLE_EMAIL)
+
     assert key == "some-key"
 
 

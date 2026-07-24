@@ -5,6 +5,7 @@ import { SpaceBetween } from "@cloudscape-design/components";
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
 import { Review } from "@/lib/admin/useApplicant";
 import UserContext from "@/lib/admin/UserContext";
+import { isDirector } from "@/lib/admin/authorization";
 import { Status, Uid } from "@/lib/userRecord";
 import { OVERQUALIFIED_SCORE, scoresToDecisions } from "@/lib/decisionScores";
 
@@ -14,7 +15,8 @@ interface ApplicationReviewsProps {
 }
 
 function ApplicationReviews({ reviews, isHacker }: ApplicationReviewsProps) {
-	const { uid } = useContext(UserContext);
+	const { roles, uid } = useContext(UserContext);
+	const isUserDirector = isDirector(roles);
 
 	if (reviews.length === 0) {
 		return <p>-</p>;
@@ -46,7 +48,7 @@ function ApplicationReviews({ reviews, isHacker }: ApplicationReviewsProps) {
 				) : (
 					<li key={date}>
 						<SpaceBetween direction="horizontal" size="xxxs">
-							{formatUid(reviewer)}
+							{isUserDirector ? formatUid(reviewer) : "Another reviewer"}
 							{isHacker && score === OVERQUALIFIED_SCORE ? (
 								<>
 									{" "}

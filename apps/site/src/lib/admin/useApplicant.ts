@@ -23,11 +23,9 @@ export interface ZotHacksHackerApplicationData extends BaseApplicationData {
 	dietary_restrictions: string[];
 	allergies: string | null;
 	hackathon_experience: HackathonExperience;
-	elevator_pitch_saq: string;
-	tech_experience_saq: string;
-	learn_about_self_saq: string;
-	pixel_art_saq: string;
-	pixel_art_data: number[];
+	collaboration_saq: string;
+	tech_inspiration_saq: string;
+	uci_gift_saq: string;
 	comments: string | null;
 	resume_url: string | null;
 	submission_time: string;
@@ -35,10 +33,9 @@ export interface ZotHacksHackerApplicationData extends BaseApplicationData {
 	review_breakdown: {
 		[reviewer_uid: string]: {
 			resume: number;
-			elevator_pitch_saq: number;
-			tech_experience_saq: number;
-			learn_about_self_saq: number;
-			pixel_art_saq: number;
+			collaboration_saq: number;
+			tech_inspiration_saq: number;
+			uci_gift_saq: number;
 		};
 	};
 	global_field_scores?: { resume?: number };
@@ -69,6 +66,12 @@ export interface IrvineHacksHackerApplicationData extends BaseApplicationData {
 			has_socials?: number;
 		};
 	};
+	director_previous_experience_review?: {
+		reviewer: Uid;
+		reviewed_at: string;
+		previous_experience?: number;
+		has_socials?: number;
+	} | null;
 	global_field_scores?: { resume?: number };
 	character_head_index: number;
 	character_body_index: number;
@@ -217,6 +220,11 @@ function useApplicant(
 		mutate();
 	}
 
+	async function voidApplicant(uid: Uid) {
+		await axios.post(`/api/director/void-applicant/${uid}`);
+		mutate();
+	}
+
 	async function deleteNotes(uid: Uid, reviewIndex: number) {
 		await axios.delete("/api/admin/delete-notes", {
 			data: {
@@ -246,6 +254,7 @@ function useApplicant(
 		submitReview,
 		submitDetailedReview,
 		deleteNotes,
+		voidApplicant,
 		directorAutoAccept,
 		directorUndoAutoAccept,
 	};
@@ -262,5 +271,6 @@ export type submitDetailedReview = (
 	notes?: string | null,
 ) => Promise<void>;
 export type deleteNotes = (uid: Uid, reviewIndex: number) => Promise<void>;
+export type voidApplicant = (uid: Uid) => Promise<void>;
 
 export default useApplicant;

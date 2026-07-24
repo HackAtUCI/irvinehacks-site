@@ -6,6 +6,9 @@ export interface LateArrivalRecord {
 	first_name: string;
 	last_name: string;
 	arrival_time: string;
+	late_arrival_reason: string | null;
+	late_arrival_edit_request: string | null;
+	late_arrival_edit_reason: string | null;
 	status: string;
 	decision: string | null;
 }

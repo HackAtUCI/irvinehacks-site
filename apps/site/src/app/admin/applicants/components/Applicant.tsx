@@ -7,6 +7,9 @@ import Spinner from "@cloudscape-design/components/spinner";
 import { FlashbarProps } from "@cloudscape-design/components/flashbar";
 
 import NotificationContext from "@/lib/admin/NotificationContext";
+import UserContext from "@/lib/admin/UserContext";
+import { isDirector } from "@/lib/admin/authorization";
+import { uidToPseudonym } from "@/lib/admin/anonymize";
 import useApplicant, {
 	IrvineHacksHackerApplicationData,
 	IrvineHacksMentorApplicationData,
@@ -24,6 +27,7 @@ import HackerApplicantActions from "./HackerApplicantActions";
 import DirectorAutoAcceptButton from "./DirectorAutoAcceptButton";
 import AutoDecisionBadge from "./AutoDecisionBadge";
 import { Decision, ParticipantRole } from "@/lib/userRecord";
+import VoidApplicantButton from "./VoidApplicantButton";
 import { ScoredFields } from "@/lib/detailedScores";
 import { IrvineHacksHackerScoringGuidelinesType } from "@/app/admin/applicants/hackers/components/getScoringGuidelines";
 import { IrvineHacksMentorScoringGuidelinesType } from "@/app/admin/applicants/mentors/components/getScoringGuidelines";
@@ -42,6 +46,8 @@ interface ApplicantProps {
 
 function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 	const { setNotifications } = useContext(NotificationContext);
+	const { roles } = useContext(UserContext);
+	const isUserDirector = isDirector(roles);
 	const {
 		applicant,
 		loading,
@@ -50,6 +56,7 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 		deleteNotes,
 		directorAutoAccept,
 		directorUndoAutoAccept,
+		voidApplicant,
 	} = useApplicant(uid, applicationType);
 	const [scores, setScores] = useState<ScoredFields>({});
 	const [notes, setNotes] = useState("");
@@ -83,8 +90,16 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 		notes: string | null,
 	) => {
 		submitDetailedReview(Uid, scores, notes).then(() => {
-			if (setNotifications)
+			if (setNotifications) {
 				setNotifications((prev) => [successMessage, ...prev]);
+				setTimeout(
+					() =>
+						setNotifications((prev) =>
+							prev.filter((msg) => msg.id !== successMessage.id),
+						),
+					3000,
+				);
+			}
 			setNotes("");
 		});
 	};
@@ -144,6 +159,11 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 					actions={
 						applicant.roles.includes(ParticipantRole.Hacker) ? (
 							<SpaceBetween direction="horizontal" size="xs">
+								<VoidApplicantButton
+									uid={applicant._id}
+									status={applicant.status}
+									onVoid={voidApplicant}
+								/>
 								<ApplicantNavigationButtons
 									uid={uid}
 									basePath="/admin/applicants/hackers" // hardcoded for Irvinehacks (Applicant.tsx)
@@ -163,14 +183,21 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 								/>
 							</SpaceBetween>
 						) : (
-							<ApplicantActions
-								applicant={applicant._id}
-								submitReview={submitReview}
-							/>
+							<SpaceBetween direction="horizontal" size="xs">
+								<VoidApplicantButton
+									uid={applicant._id}
+									status={applicant.status}
+									onVoid={voidApplicant}
+								/>
+								<ApplicantActions
+									applicant={applicant._id}
+									submitReview={submitReview}
+								/>
+							</SpaceBetween>
 						)
 					}
 				>
-					{first_name} {last_name}{" "}
+					{isUserDirector ? `${first_name} ${last_name}` : uidToPseudonym(uid)}{" "}
 					<AutoDecisionBadge
 						reason={applicant.auto_decision_reason}
 						decision={autoAcceptDecision}
@@ -179,7 +206,7 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 			}
 		>
 			<SpaceBetween direction="vertical" size="l">
-				<ApplicantOverview applicant={applicant} />
+				{isUserDirector && <ApplicantOverview applicant={applicant} />}
 				{applicant.roles.includes(ParticipantRole.Hacker) ? (
 					<HackerApplication
 						application_data={
@@ -194,6 +221,7 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 						applicant={applicant._id}
 						reviews={application_data.reviews}
 						onDeleteNotes={(uid, idx) => deleteNotes(uid, idx)}
+						isDirector={isUserDirector}
 					/>
 				) : applicant.roles.includes(ParticipantRole.Mentor) ? (
 					<MentorApplication

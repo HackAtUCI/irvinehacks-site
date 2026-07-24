@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Any
-from unittest.mock import ANY, AsyncMock, patch
+from unittest.mock import ANY, AsyncMock, MagicMock, patch
 
 import pytest
 from fastapi import FastAPI, HTTPException
@@ -12,10 +12,13 @@ from routers import admin
 from routers.admin import (
     _handle_detailed_scores_review,
     _handle_global_only_review,
+    _hacker_applicant_token,
     delete_notes,
     GlobalScores,
     DeleteNotesRequest,
+    IrvineHacksHackerDetailedScores,
     ZotHacksHackerDetailedScores,
+    _handle_irvinehacks_detailed_scores_review,
 )
 from services.mongodb_handler import Collection
 from services.sendgrid_handler import Template
@@ -89,6 +92,129 @@ def test_cannot_retrieve_applicants_without_role(
 
     assert res.status_code == 403
     mock_mongodb_handler_retrieve.assert_not_awaited()
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+@patch("routers.admin.random.shuffle", autospec=True)
+def test_hacker_review_assignments_are_created(
+    mock_shuffle: MagicMock,
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_retrieve: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+    mock_shuffle.side_effect = lambda records: records.reverse()
+    mock_mongodb_handler_retrieve_one.return_value = HACKER_REVIEWER_IDENTITY
+    mock_mongodb_handler_retrieve.return_value = [
+        {
+            "_id": "edu.uci.applicant1",
+            "status": "PENDING",
+            "application_data": {
+                "reviews": [],
+                "submission_time": datetime(2026, 1, 1),
+            },
+            "assigned_reviewers": [],
+        },
+        {
+            "_id": "edu.uci.applicant2",
+            "status": "PENDING",
+            "application_data": {
+                "reviews": [],
+                "submission_time": datetime(2026, 1, 2),
+            },
+            "assigned_reviewers": [],
+        },
+    ]
+
+    res = reviewer_client.get("/review-assignments/hackers")
+
+    assert res.status_code == 200
+    assert res.json()["applicant_ids"] == [
+        "edu.uci.applicant2",
+        "edu.uci.applicant1",
+    ]
+    assert res.json()["target_count"] == 10
+    mock_shuffle.assert_called_once()
+    assert mock_mongodb_handler_raw_update_one.await_count == 2
+    first_update = mock_mongodb_handler_raw_update_one.await_args_list[0]
+    assert first_update.args == (
+        Collection.USERS,
+        {"_id": "edu.uci.applicant2"},
+        {"$addToSet": {"assigned_reviewers": "edu.uci.alicia"}},
+    )
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_hacker_review_assignments_keep_active_assignments(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_retrieve: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.return_value = HACKER_REVIEWER_IDENTITY
+    mock_mongodb_handler_retrieve.return_value = [
+        {
+            "_id": "edu.uci.assigned",
+            "status": "PENDING",
+            "application_data": {
+                "reviews": [],
+                "submission_time": datetime(2026, 1, 1),
+            },
+            "assigned_reviewers": ["edu.uci.alicia"],
+        },
+        {
+            "_id": "edu.uci.reviewed",
+            "status": "REVIEWED",
+            "application_data": {
+                "reviews": [[datetime(2026, 1, 2), "edu.uci.alicia", 10, None]],
+                "submission_time": datetime(2026, 1, 2),
+            },
+            "assigned_reviewers": ["edu.uci.alicia"],
+        },
+    ]
+
+    res = reviewer_client.get("/review-assignments/hackers")
+
+    assert res.status_code == 200
+    assert res.json()["applicant_ids"] == ["edu.uci.assigned"]
+    mock_mongodb_handler_raw_update_one.assert_not_awaited()
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_hacker_review_assignments_caps_active_assignments(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_retrieve: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.return_value = HACKER_REVIEWER_IDENTITY
+    mock_mongodb_handler_retrieve.return_value = [
+        {
+            "_id": f"edu.uci.assigned{i}",
+            "status": "PENDING",
+            "application_data": {
+                "reviews": [],
+                "submission_time": datetime(2026, 1, i + 1),
+            },
+            "assigned_reviewers": ["edu.uci.alicia"],
+        }
+        for i in range(12)
+    ]
+
+    res = reviewer_client.get("/review-assignments/hackers")
+
+    assert res.status_code == 200
+    assert len(res.json()["applicant_ids"]) == 10
+    assert mock_mongodb_handler_raw_update_one.await_count == 2
+    first_update = mock_mongodb_handler_raw_update_one.await_args_list[0]
+    assert first_update.args == (
+        Collection.USERS,
+        {"_id": "edu.uci.assigned10"},
+        {"$pull": {"assigned_reviewers": "edu.uci.alicia"}},
+    )
 
 
 @patch("services.mongodb_handler.raw_update_one", autospec=True)
@@ -468,9 +594,11 @@ def test_hacker_applicants_returns_correct_applicants(
             "first_name": "sydnee",
             "last_name": "unknown",
             "resume_reviewed": False,
+            "director_previous_experience_reviewed": False,
+            "duplicate_name_approved": False,
             "status": "REVIEWED",
             "decision": "ACCEPTED",
-            "avg_score": 82.75,
+            "avg_score": 73.462,
             "reviewers": ["edu.uci.alicia", "edu.uci.alicia2"],
             "application_data": {
                 "school": "Hamburger University",
@@ -503,16 +631,201 @@ def test_hacker_applicants_returns_correct_applicants(
 
     mock_mongodb_handler_retrieve.return_value = returned_records
     mock_mongodb_handler_retrieve_one.side_effect = [
-        HACKER_REVIEWER_IDENTITY,
+        DIRECTOR_IDENTITY,
         returned_thresholds,
+        DIRECTOR_IDENTITY,
     ]
 
-    res = reviewer_client.get("/applicants/hackers")
+    res = director_client.get("/applicants/hackers")
 
     assert res.status_code == 200
     mock_mongodb_handler_retrieve.assert_awaited_once()
     data = res.json()
     assert data == expected_records
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+@patch("services.mongodb_handler.retrieve", autospec=True)
+def test_hacker_applicants_redacts_identity_for_reviewers(
+    mock_mongodb_handler_retrieve: AsyncMock,
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test that hacker reviewers only receive non-identifying applicant data."""
+    returned_records: list[dict[str, object]] = [
+        {
+            "_id": "edu.uci.sydnee",
+            "first_name": "sydnee",
+            "last_name": "unknown",
+            "status": "REVIEWED",
+            "application_data": {
+                "school": "Hamburger University",
+                "submission_time": datetime(2023, 1, 12, 9, 0, 0),
+                "email": "sydnee@uci.edu",
+                "resume_url": "https://example.com/sydnee.pdf",
+                "major": "Computer Science",
+                "linkedin": "https://linkedin.com/in/sydnee",
+                "reviews": [
+                    [datetime(2023, 1, 19), "edu.uci.alicia", 56, "comment"],
+                    [datetime(2023, 1, 19), "edu.uci.alicia2", 60, "comment2"],
+                ],
+                "review_breakdown": {
+                    "alicia": {
+                        "frq_change": 16,
+                        "frq_ambition": 14,
+                        "frq_character": 12,
+                    },
+                    "alicia2": {
+                        "frq_change": 15,
+                        "frq_ambition": 16,
+                        "frq_character": 15,
+                    },
+                },
+            },
+        }
+    ]
+    returned_thresholds: dict[str, object] = {"accept": 12, "waitlist": 5}
+
+    mock_mongodb_handler_retrieve.return_value = returned_records
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        HACKER_REVIEWER_IDENTITY,
+        returned_thresholds,
+        HACKER_REVIEWER_IDENTITY,
+    ]
+
+    res = reviewer_client.get("/applicants/hackers")
+
+    assert res.status_code == 200
+    data = res.json()
+    assert data[0]["first_name"] == ""
+    assert data[0]["last_name"] == ""
+    assert data[0]["director_previous_experience_reviewed"] is False
+    assert data[0]["avg_score"] == -1
+    assert "school" not in data[0]["application_data"]
+    assert "email" not in data[0]["application_data"]
+    assert "resume_url" not in data[0]["application_data"]
+    assert "linkedin" not in data[0]["application_data"]
+    assert data[0]["application_data"]["submission_time"] == "2023-01-12T09:00:00"
+
+
+@patch("services.mongodb_handler.retrieve", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_hacker_applicant_redacts_identity_for_reviewers(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_retrieve: AsyncMock,
+) -> None:
+    """Test that hacker reviewer detail pages only receive FRQs."""
+    applicant_record: dict[str, object] = {
+        "_id": "edu.uci.sydnee",
+        "first_name": "sydnee",
+        "last_name": "unknown",
+        "roles": ["Applicant", "Hacker"],
+        "status": "PENDING_REVIEW",
+        "application_data": {
+            "school": "Hamburger University",
+            "submission_time": datetime(2023, 1, 12, 9, 0, 0),
+            "email": "sydnee@uci.edu",
+            "resume_url": "https://example.com/sydnee.pdf",
+            "linkedin": "https://linkedin.com/in/sydnee",
+            "frq_change": "project answer",
+            "frq_ambition": "ambition answer",
+            "frq_character": "character answer",
+            "reviews": [],
+            "review_breakdown": {},
+        },
+    }
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        HACKER_REVIEWER_IDENTITY,
+        HACKER_REVIEWER_IDENTITY,
+    ]
+    mock_mongodb_handler_retrieve.return_value = [applicant_record]
+
+    res = reviewer_client.get(
+        f"/applicant/hacker/{_hacker_applicant_token('edu.uci.sydnee')}"
+    )
+
+    assert res.status_code == 200
+    data = res.json()
+    assert data["first_name"] == ""
+    assert data["last_name"] == ""
+    assert data["application_data"] == {
+        "frq_change": "project answer",
+        "frq_ambition": "ambition answer",
+        "frq_character": "character answer",
+        "submission_time": "2023-01-12T09:00:00",
+        "reviews": [],
+        "review_breakdown": {},
+    }
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_hacker_applicant_hides_direct_uid_urls_for_reviewers(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test that reviewers cannot confirm guessed hacker applicant UIDs."""
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        HACKER_REVIEWER_IDENTITY,
+        HACKER_REVIEWER_IDENTITY,
+    ]
+
+    res = reviewer_client.get("/applicant/hacker/edu.uci.friend")
+
+    assert res.status_code == 404
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_hacker_applicant_returns_full_application_for_directors(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test that directors still receive full hacker applications."""
+    applicant_record: dict[str, object] = {
+        "_id": "edu.uci.sydnee",
+        "first_name": "sydnee",
+        "last_name": "unknown",
+        "roles": ["Applicant", "Hacker"],
+        "status": "PENDING_REVIEW",
+        "application_data": {
+            "pronouns": ["she"],
+            "ethnicity": "Asian",
+            "is_first_hackathon": False,
+            "school": "Hamburger University",
+            "major": "Computer Science",
+            "education_level": "fourth-year-undergrad",
+            "t_shirt_size": "M",
+            "dietary_restrictions": ["none"],
+            "allergies": None,
+            "ih_reference": ["word_of_mouth"],
+            "portfolio": None,
+            "linkedin": "https://linkedin.com/in/sydnee",
+            "areas_interested": ["software"],
+            "frq_change": "project answer",
+            "frq_ambition": "ambition answer",
+            "frq_character": "character answer",
+            "character_head_index": 0,
+            "character_body_index": 0,
+            "character_feet_index": 0,
+            "character_companion_index": 0,
+            "is_18_older": True,
+            "email": "sydnee@uci.edu",
+            "resume_url": "https://example.com/sydnee.pdf",
+            "submission_time": datetime(2023, 1, 12, 9, 0, 0),
+            "reviews": [],
+            "review_breakdown": {},
+        },
+    }
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        DIRECTOR_IDENTITY,
+        applicant_record,
+    ]
+
+    res = director_client.get("/applicant/hacker/edu.uci.sydnee")
+
+    assert res.status_code == 200
+    data = res.json()
+    assert data["first_name"] == "sydnee"
+    assert data["last_name"] == "unknown"
+    assert data["application_data"]["school"] == "Hamburger University"
+    assert data["application_data"]["resume_url"] == "https://example.com/sydnee.pdf"
 
 
 @patch("services.mongodb_handler.raw_update_one", autospec=True)
@@ -577,7 +890,9 @@ def test_error_on_hacker_invalid_value(
 
 @patch("routers.admin.require_lead", autospec=True)
 @patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
 async def test_handle_global_only_review_success(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_mongodb_handler_update_one: AsyncMock,
     mock_require_lead: AsyncMock,
 ) -> None:
@@ -587,6 +902,10 @@ async def test_handle_global_only_review_success(
     reviewer = USER_REVIEWER
 
     mock_require_lead.return_value = None
+    mock_mongodb_handler_retrieve_one.return_value = {
+        "_id": applicant,
+        "roles": ["Applicant", "Hacker"],
+    }
     mock_mongodb_handler_update_one.return_value = True
 
     await _handle_global_only_review(applicant, scores, reviewer)
@@ -623,6 +942,32 @@ async def test_handle_global_only_review_forbidden(
     mock_require_lead.assert_awaited_once_with(reviewer)
 
 
+@patch("routers.admin.require_lead", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_handle_global_only_review_voided_applicant(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_require_lead: AsyncMock,
+) -> None:
+    """Test resume-only review submission fails for a voided applicant."""
+    applicant = "edu.uci.test"
+    scores = GlobalScores(resume=8, hackathon_experience=10)
+    reviewer = USER_REVIEWER
+
+    mock_require_lead.return_value = None
+    mock_mongodb_handler_retrieve_one.return_value = {
+        "_id": applicant,
+        "roles": ["Applicant", "Hacker"],
+        "status": Decision.VOIDED,
+    }
+
+    with pytest.raises(HTTPException) as exc_info:
+        await _handle_global_only_review(applicant, scores, reviewer)
+
+    assert exc_info.value.status_code == 400
+    assert exc_info.value.detail == "Cannot review a voided applicant."
+    mock_mongodb_handler_retrieve_one.assert_awaited_once()
+
+
 @patch("routers.admin._handle_global_only_review", autospec=True)
 @patch("routers.admin.require_lead", autospec=True)
 @patch("services.mongodb_handler.raw_update_one", autospec=True)
@@ -637,10 +982,9 @@ async def test_handle_detailed_scores_review_success(
     applicant = "edu.uci.test"
     scores = ZotHacksHackerDetailedScores(
         resume=8,
-        elevator_pitch_saq=7,
-        tech_experience_saq=9,
-        learn_about_self_saq=6,
-        pixel_art_saq=8,
+        collaboration_saq=7,
+        tech_inspiration_saq=9,
+        uci_gift_saq=6,
         hackathon_experience=10,
     )
     reviewer = USER_REVIEWER
@@ -690,10 +1034,9 @@ async def test_handle_detailed_scores_review_non_lead_user(
     applicant = "edu.uci.test"
     scores = ZotHacksHackerDetailedScores(
         resume=8,
-        elevator_pitch_saq=7,
-        tech_experience_saq=9,
-        learn_about_self_saq=6,
-        pixel_art_saq=8,
+        collaboration_saq=7,
+        tech_inspiration_saq=9,
+        uci_gift_saq=6,
         hackathon_experience=10,
     )
     reviewer = USER_REVIEWER
@@ -733,10 +1076,9 @@ async def test_handle_detailed_scores_review_invalid_score(
     applicant = "edu.uci.test"
     scores = ZotHacksHackerDetailedScores(
         resume=100,  # This will make total score > 100
-        elevator_pitch_saq=100,
-        tech_experience_saq=100,
-        learn_about_self_saq=100,
-        pixel_art_saq=100,
+        collaboration_saq=100,
+        tech_inspiration_saq=100,
+        uci_gift_saq=100,
         hackathon_experience=10,
     )
     reviewer = USER_REVIEWER
@@ -745,6 +1087,138 @@ async def test_handle_detailed_scores_review_invalid_score(
         await _handle_detailed_scores_review(applicant, scores, reviewer)
 
     assert exc_info.value.status_code == 400
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_handle_irvinehacks_detailed_scores_review_accepts_frq_only_scores(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+    """Test that anonymized reviewers can submit only FRQ scores."""
+    applicant = "edu.uci.test"
+    scores = IrvineHacksHackerDetailedScores(
+        frq_change=20,
+        frq_ambition=20,
+        frq_character=20,
+    )
+    reviewer = USER_REVIEWER
+    applicant_record = {
+        "_id": applicant,
+        "roles": ["Applicant", "Hacker"],
+        "application_data": {
+            "reviews": [
+                [datetime(2023, 1, 19), "edu.uci.alicia2", 100, None],
+            ]
+        },
+    }
+
+    mock_mongodb_handler_retrieve_one.return_value = applicant_record
+    mock_mongodb_handler_raw_update_one.return_value = True
+
+    await _handle_irvinehacks_detailed_scores_review(applicant, scores, reviewer)
+
+    first_update = mock_mongodb_handler_raw_update_one.await_args_list[0].args[2]
+    pushed_review = first_update["$push"]["application_data.reviews"]
+    assert pushed_review[2] == 100
+    second_update = mock_mongodb_handler_raw_update_one.await_args_list[1].args[2]
+    assert second_update["$set"]["application_data.review_breakdown.alicia"] == {
+        "frq_change": 20,
+        "frq_ambition": 20,
+        "frq_character": 20,
+    }
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_handle_irvinehacks_director_previous_experience_does_not_score(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+    """Test director previous-experience fields are stored separately from scores."""
+    applicant = "edu.uci.test"
+    scores = IrvineHacksHackerDetailedScores(
+        frq_change=20,
+        frq_ambition=20,
+        frq_character=20,
+        previous_experience=0,
+        has_socials=0,
+    )
+    reviewer = USER_DIRECTOR
+    applicant_record = {
+        "_id": applicant,
+        "roles": ["Applicant", "Hacker"],
+        "application_data": {
+            "reviews": [
+                [datetime(2023, 1, 19), "edu.uci.alicia", 80, None],
+            ]
+        },
+    }
+
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        applicant_record,
+        DIRECTOR_IDENTITY,
+    ]
+    mock_mongodb_handler_raw_update_one.return_value = True
+
+    await _handle_irvinehacks_detailed_scores_review(applicant, scores, reviewer)
+
+    review_update = mock_mongodb_handler_raw_update_one.await_args_list[0].args[2]
+    pushed_review = review_update["$push"]["application_data.reviews"]
+    assert pushed_review[2] == 100
+
+    breakdown_update = mock_mongodb_handler_raw_update_one.await_args_list[1].args[2]
+    assert breakdown_update["$set"]["application_data.review_breakdown.dir"] == {
+        "frq_change": 20,
+        "frq_ambition": 20,
+        "frq_character": 20,
+    }
+
+    director_update = mock_mongodb_handler_raw_update_one.await_args_list[2].args[2]
+    director_review = director_update["$set"][
+        "application_data.director_previous_experience_review"
+    ]
+    assert director_review["reviewer"] == "edu.uci.dir"
+    assert director_review["previous_experience"] == 0
+    assert director_review["has_socials"] == 0
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_handle_irvinehacks_director_can_submit_previous_experience_only(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+    """Test directors can submit previous-experience review without FRQs."""
+    applicant = "edu.uci.test"
+    scores = IrvineHacksHackerDetailedScores(
+        previous_experience=1,
+        has_socials=0,
+    )
+    reviewer = USER_DIRECTOR
+    applicant_record = {
+        "_id": applicant,
+        "roles": ["Applicant", "Hacker"],
+        "application_data": {"reviews": []},
+    }
+
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        applicant_record,
+        DIRECTOR_IDENTITY,
+    ]
+    mock_mongodb_handler_raw_update_one.return_value = True
+
+    await _handle_irvinehacks_detailed_scores_review(applicant, scores, reviewer)
+
+    mock_mongodb_handler_raw_update_one.assert_awaited_once()
+    assert mock_mongodb_handler_raw_update_one.await_args is not None
+    update = mock_mongodb_handler_raw_update_one.await_args.args[2]
+    director_review = update["$set"][
+        "application_data.director_previous_experience_review"
+    ]
+    assert director_review["reviewer"] == "edu.uci.dir"
+    assert director_review["previous_experience"] == 1
+    assert director_review["has_socials"] == 0
 
 
 @patch("routers.admin.require_lead", autospec=True)
@@ -757,10 +1231,9 @@ async def test_handle_detailed_scores_review_applicant_not_found(
     applicant = "edu.uci.test"
     scores = ZotHacksHackerDetailedScores(
         resume=8,
-        elevator_pitch_saq=7,
-        tech_experience_saq=9,
-        learn_about_self_saq=6,
-        pixel_art_saq=8,
+        collaboration_saq=7,
+        tech_inspiration_saq=9,
+        uci_gift_saq=6,
         hackathon_experience=10,
     )
     reviewer = USER_REVIEWER
@@ -771,6 +1244,38 @@ async def test_handle_detailed_scores_review_applicant_not_found(
         await _handle_detailed_scores_review(applicant, scores, reviewer)
 
     assert exc_info.value.status_code == 500
+    mock_mongodb_handler_retrieve_one.assert_awaited_once()
+
+
+@patch("routers.admin.require_lead", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_handle_detailed_scores_review_voided_applicant(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_require_lead: AsyncMock,
+) -> None:
+    """Test detailed scores review submission fails for a voided applicant."""
+    applicant = "edu.uci.test"
+    scores = ZotHacksHackerDetailedScores(
+        resume=8,
+        collaboration_saq=7,
+        tech_inspiration_saq=9,
+        uci_gift_saq=6,
+        hackathon_experience=10,
+    )
+    reviewer = USER_REVIEWER
+
+    mock_mongodb_handler_retrieve_one.return_value = {
+        "_id": applicant,
+        "roles": ["Applicant", "Hacker"],
+        "status": Decision.VOIDED,
+        "application_data": {"reviews": []},
+    }
+
+    with pytest.raises(HTTPException) as exc_info:
+        await _handle_detailed_scores_review(applicant, scores, reviewer)
+
+    assert exc_info.value.status_code == 400
+    assert exc_info.value.detail == "Cannot review a voided applicant."
     mock_mongodb_handler_retrieve_one.assert_awaited_once()
 
 

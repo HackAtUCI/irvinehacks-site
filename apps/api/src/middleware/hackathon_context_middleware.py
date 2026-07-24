@@ -11,11 +11,14 @@ class HackathonContextMiddleware(BaseHTTPMiddleware):
         hackathon_name = request.headers.get("X-Hackathon-Name")
 
         if not hackathon_name:
-            raise ValueError("X-Hackathon-Name header is required for admin routes")
-        try:
-            hackathon_enum = HackathonName(hackathon_name)
-        except ValueError:
-            raise ValueError(f"Invalid hackathon name: {hackathon_name}")
+            if request.url.path.startswith("/admin"):
+                raise ValueError("X-Hackathon-Name header is required for admin routes")
+            hackathon_enum = HackathonName.IRVINEHACKS
+        else:
+            try:
+                hackathon_enum = HackathonName(hackathon_name)
+            except ValueError:
+                raise ValueError(f"Invalid hackathon name: {hackathon_name}")
 
         hackathon_name_ctx.set(hackathon_enum)
         return await call_next(request)

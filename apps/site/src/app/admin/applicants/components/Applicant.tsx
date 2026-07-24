@@ -150,6 +150,8 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 				? Decision.Rejected
 				: null;
 
+	const reviewDisabled = Boolean(applicant.auto_decision_reason);
+
 	return (
 		<ContentLayout
 			header={
@@ -179,6 +181,7 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 									reviews={application_data.reviews}
 									scores={scores}
 									notes={notes}
+									autoDecisionReason={applicant.auto_decision_reason}
 									onSubmitDetailedReview={handleSubmitDetailedReview}
 								/>
 							</SpaceBetween>
@@ -192,6 +195,7 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 								<ApplicantActions
 									applicant={applicant._id}
 									submitReview={submitReview}
+									autoDecisionReason={applicant.auto_decision_reason}
 								/>
 							</SpaceBetween>
 						)
@@ -222,6 +226,7 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 						reviews={application_data.reviews}
 						onDeleteNotes={(uid, idx) => deleteNotes(uid, idx)}
 						isDirector={isUserDirector}
+						reviewDisabled={reviewDisabled}
 					/>
 				) : applicant.roles.includes(ParticipantRole.Mentor) ? (
 					<MentorApplication
@@ -261,6 +266,7 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 							reviews={application_data.reviews}
 							scores={scores}
 							notes={notes}
+							autoDecisionReason={applicant.auto_decision_reason}
 							onSubmitDetailedReview={handleSubmitDetailedReview}
 						/>
 					</SpaceBetween>

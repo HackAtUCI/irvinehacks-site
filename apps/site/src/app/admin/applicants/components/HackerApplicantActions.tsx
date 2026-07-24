@@ -38,6 +38,7 @@ interface ApplicantActionsProps {
 	reviews: Review[];
 	scores: IrvineHacksHackerScoredFields | ZotHacksHackerScoredFields;
 	notes?: string;
+	autoDecisionReason?: string | null;
 	onSubmitDetailedReview: (
 		uid: Uid,
 		scores: IrvineHacksHackerScoredFields | ZotHacksHackerScoredFields,
@@ -50,6 +51,7 @@ function HackerApplicantActions({
 	reviews,
 	scores,
 	notes,
+	autoDecisionReason,
 	onSubmitDetailedReview,
 }: ApplicantActionsProps) {
 	const { uid, roles } = useContext(UserContext);
@@ -67,6 +69,14 @@ function HackerApplicantActions({
 
 	if (!isReviewer(roles) && !isUserDirector) {
 		return null;
+	}
+
+	if (autoDecisionReason) {
+		return (
+			<Box variant="awsui-key-label" color="text-status-info">
+				This applicant has an auto decision and cannot be reviewed.
+			</Box>
+		);
 	}
 
 	const hasDirectorPreviousExperienceReview = "previous_experience" in scores;

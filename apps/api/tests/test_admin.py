@@ -13,6 +13,7 @@ from routers.admin import (
     _handle_detailed_scores_review,
     _handle_global_only_review,
     _hacker_applicant_token,
+    _is_review_assignable,
     delete_notes,
     GlobalScores,
     DeleteNotesRequest,
@@ -213,6 +214,62 @@ def test_hacker_review_assignments_caps_active_assignments(
     assert first_update.args == (
         Collection.USERS,
         {"_id": "edu.uci.assigned10"},
+        {"$pull": {"assigned_reviewers": "edu.uci.alicia"}},
+    )
+
+
+def test_is_review_assignable_excludes_auto_decided_applicant() -> None:
+    record = {
+        "_id": "edu.uci.auto",
+        "status": "REVIEWED",
+        "auto_decision_reason": "UNDER_18",
+        "application_data": {"reviews": []},
+        "assigned_reviewers": [],
+    }
+
+    assert not _is_review_assignable(record, "edu.uci.alicia")
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_hacker_review_assignments_excludes_auto_decided_applicants(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_retrieve: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.return_value = HACKER_REVIEWER_IDENTITY
+    mock_mongodb_handler_retrieve.return_value = [
+        {
+            "_id": "edu.uci.auto-decided",
+            "status": "REVIEWED",
+            "auto_decision_reason": "GRADUATED",
+            "application_data": {
+                "reviews": [],
+                "submission_time": datetime(2026, 1, 1),
+            },
+            "assigned_reviewers": ["edu.uci.alicia"],
+        },
+        {
+            "_id": "edu.uci.assignable",
+            "status": "PENDING",
+            "application_data": {
+                "reviews": [],
+                "submission_time": datetime(2026, 1, 2),
+            },
+            "assigned_reviewers": [],
+        },
+    ]
+
+    res = reviewer_client.get("/review-assignments/hackers")
+
+    assert res.status_code == 200
+    assert res.json()["applicant_ids"] == ["edu.uci.assignable"]
+    assert mock_mongodb_handler_raw_update_one.await_count == 2
+    pull_update = mock_mongodb_handler_raw_update_one.await_args_list[0]
+    assert pull_update.args == (
+        Collection.USERS,
+        {"_id": "edu.uci.auto-decided"},
         {"$pull": {"assigned_reviewers": "edu.uci.alicia"}},
     )
 
@@ -598,6 +655,7 @@ def test_hacker_applicants_returns_correct_applicants(
             "duplicate_name_approved": False,
             "status": "REVIEWED",
             "decision": "ACCEPTED",
+            "auto_decision_reason": None,
             "avg_score": 73.462,
             "reviewers": ["edu.uci.alicia", "edu.uci.alicia2"],
             "application_data": {
@@ -968,6 +1026,33 @@ async def test_handle_global_only_review_voided_applicant(
     mock_mongodb_handler_retrieve_one.assert_awaited_once()
 
 
+@patch("routers.admin.require_lead", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_handle_global_only_review_auto_decided_applicant(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_require_lead: AsyncMock,
+) -> None:
+    """Test resume-only review submission fails for an auto-decided applicant."""
+    applicant = "edu.uci.test"
+    scores = GlobalScores(resume=8, hackathon_experience=10)
+    reviewer = USER_REVIEWER
+
+    mock_require_lead.return_value = None
+    mock_mongodb_handler_retrieve_one.return_value = {
+        "_id": applicant,
+        "roles": ["Applicant", "Hacker"],
+        "status": "REVIEWED",
+        "auto_decision_reason": "UNDER_18",
+    }
+
+    with pytest.raises(HTTPException) as exc_info:
+        await _handle_global_only_review(applicant, scores, reviewer)
+
+    assert exc_info.value.status_code == 400
+    assert exc_info.value.detail == "Cannot review an auto-decided applicant."
+    mock_mongodb_handler_retrieve_one.assert_awaited_once()
+
+
 @patch("routers.admin._handle_global_only_review", autospec=True)
 @patch("routers.admin.require_lead", autospec=True)
 @patch("services.mongodb_handler.raw_update_one", autospec=True)
@@ -1276,6 +1361,39 @@ async def test_handle_detailed_scores_review_voided_applicant(
 
     assert exc_info.value.status_code == 400
     assert exc_info.value.detail == "Cannot review a voided applicant."
+    mock_mongodb_handler_retrieve_one.assert_awaited_once()
+
+
+@patch("routers.admin.require_lead", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_handle_detailed_scores_review_auto_decided_applicant(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_require_lead: AsyncMock,
+) -> None:
+    """Test detailed scores review submission fails for an auto-decided applicant."""
+    applicant = "edu.uci.test"
+    scores = ZotHacksHackerDetailedScores(
+        resume=8,
+        collaboration_saq=7,
+        tech_inspiration_saq=9,
+        uci_gift_saq=6,
+        hackathon_experience=10,
+    )
+    reviewer = USER_REVIEWER
+
+    mock_mongodb_handler_retrieve_one.return_value = {
+        "_id": applicant,
+        "roles": ["Applicant", "Hacker"],
+        "status": "REVIEWED",
+        "auto_decision_reason": "DIRECTOR_AUTO_ACCEPT",
+        "application_data": {"reviews": []},
+    }
+
+    with pytest.raises(HTTPException) as exc_info:
+        await _handle_detailed_scores_review(applicant, scores, reviewer)
+
+    assert exc_info.value.status_code == 400
+    assert exc_info.value.detail == "Cannot review an auto-decided applicant."
     mock_mongodb_handler_retrieve_one.assert_awaited_once()
 
 

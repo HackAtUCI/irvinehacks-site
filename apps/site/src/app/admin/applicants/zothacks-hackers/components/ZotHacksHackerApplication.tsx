@@ -74,7 +74,7 @@ function ZotHacksHackerApplication({
 	const formattedUid = reviewer_uid?.split(".").at(-1);
 
 	const isResumeDisabled =
-		!isDirector(roles) && !isLead(roles) || reviewDisabled;
+		(!isDirector(roles) && !isLead(roles)) || reviewDisabled;
 
 	// Resume options used for dropdown-based ScoreSection
 	const resumeOptions = useMemo(

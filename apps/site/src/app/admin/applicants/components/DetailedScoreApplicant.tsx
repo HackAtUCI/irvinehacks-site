@@ -56,6 +56,7 @@ function DetailedScoreApplicant({
 	}
 
 	const { first_name, last_name, application_data } = applicant;
+	const reviewDisabled = Boolean(applicant.auto_decision_reason);
 
 	const successMessage: FlashbarProps.MessageDefinition = {
 		type: "success",
@@ -105,6 +106,7 @@ function DetailedScoreApplicant({
 									reviews={application_data.reviews}
 									scores={scores}
 									notes={notes}
+									autoDecisionReason={applicant.auto_decision_reason}
 									onSubmitDetailedReview={handleSubmitDetailedReview}
 								/>
 							</SpaceBetween>
@@ -145,6 +147,7 @@ function DetailedScoreApplicant({
 						notes={notes}
 						onNotesChange={setNotes}
 						reviews={application_data.reviews}
+						reviewDisabled={reviewDisabled}
 					/>
 				) : applicant.roles.includes(ParticipantRole.Mentor) ? (
 					<></>
@@ -165,6 +168,7 @@ function DetailedScoreApplicant({
 					reviews={application_data.reviews}
 					scores={scores}
 					notes={notes}
+					autoDecisionReason={applicant.auto_decision_reason}
 					onSubmitDetailedReview={handleSubmitDetailedReview}
 				/>
 				<ApplicantNavigationButtons

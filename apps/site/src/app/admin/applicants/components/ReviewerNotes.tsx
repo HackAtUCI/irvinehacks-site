@@ -19,6 +19,7 @@ interface ReviewerNotesProps {
 	applicant: Uid;
 	onDeleteNotes: (uid: Uid, idx: number) => void;
 	reviewerId: Uid | null;
+	disabled?: boolean;
 }
 
 interface ReviewWithOriginalIdx {
@@ -33,6 +34,7 @@ export default function ReviewerNotes({
 	applicant,
 	reviewerId,
 	onDeleteNotes,
+	disabled = false,
 }: ReviewerNotesProps) {
 	const reviewsWithNotes: ReviewWithOriginalIdx[] = (reviews ?? [])
 		.map((review, originalIdx) => ({ review, originalIdx }))
@@ -62,7 +64,7 @@ export default function ReviewerNotes({
 												}}
 											>
 												<Box fontWeight="bold">{reviewer}</Box>
-												{reviewer === reviewerId && (
+												{reviewer === reviewerId && !disabled && (
 													<Button
 														onClick={() =>
 															onDeleteNotes(applicant, originalIdx)
@@ -94,6 +96,7 @@ export default function ReviewerNotes({
 						if (detail.value.length < 2048) onNotesChange(detail.value);
 					}}
 					rows={5}
+					disabled={disabled}
 				/>
 			</SpaceBetween>
 		</Container>

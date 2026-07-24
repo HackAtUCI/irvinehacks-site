@@ -8,6 +8,7 @@ import Box from "@cloudscape-design/components/box";
 import Cards from "@cloudscape-design/components/cards";
 import Header from "@cloudscape-design/components/header";
 import Link from "@cloudscape-design/components/link";
+import SpaceBetween from "@cloudscape-design/components/space-between";
 
 import { useFollowWithNextLink } from "@/app/admin/layout/common";
 import useMentorVolunteerApplicants, {
@@ -18,6 +19,7 @@ import ApplicantFilters, {
 	Options,
 } from "@/app/admin/applicants/components/ApplicantFilters";
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
+import AutoDecisionBadge from "@/app/admin/applicants/components/AutoDecisionBadge";
 
 import UserContext from "@/lib/admin/UserContext";
 import { isMentorReviewer } from "@/lib/admin/authorization";
@@ -114,16 +116,25 @@ function MentorApplicants() {
 	);
 }
 
-const CardHeader = ({ _id, first_name, last_name }: ApplicantSummary) => {
+const CardHeader = ({
+	_id,
+	first_name,
+	last_name,
+	decision,
+	auto_decision_reason,
+}: ApplicantSummary) => {
 	const followWithNextLink = useFollowWithNextLink();
 	return (
-		<Link
-			href={`/admin/applicants/mentors/${_id}`}
-			fontSize="inherit"
-			onFollow={followWithNextLink}
-		>
-			{first_name} {last_name}
-		</Link>
+		<SpaceBetween direction="horizontal" size="s">
+			<Link
+				href={`/admin/applicants/mentors/${_id}`}
+				fontSize="inherit"
+				onFollow={followWithNextLink}
+			>
+				{first_name} {last_name}
+			</Link>
+			<AutoDecisionBadge reason={auto_decision_reason} decision={decision} />
+		</SpaceBetween>
 	);
 };
 

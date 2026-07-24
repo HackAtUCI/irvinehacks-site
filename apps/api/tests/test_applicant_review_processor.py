@@ -271,7 +271,8 @@ def test_auto_reject_under_18_hacker() -> None:
     )
     assert record["decision"] == "REJECTED"
     assert (
-        record["auto_decision_reason"] == applicant_review_processor.AUTO_REASON_UNDER_18
+        record["auto_decision_reason"]
+        == applicant_review_processor.AUTO_REASON_UNDER_18
     )
 
 

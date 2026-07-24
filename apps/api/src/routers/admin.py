@@ -250,6 +250,7 @@ async def _persist_auto_decision_status_if_needed(record: dict[str, object]) -> 
     if ok:
         record.update(update)
 
+
 REVIEW_ASSIGNMENT_BATCH_SIZE = 10
 
 
@@ -459,7 +460,8 @@ async def hacker_review_assignments(
         1 for record in records if _reviewer_has_reviewed(record, user.uid)
     )
 
-    # remove reviewer from assigned_reviewers if applicant has been auto-decided and not reviewed
+    # Remove reviewer from assigned_reviewers when applicant is auto-decided
+    # and this reviewer has not submitted a review yet.
     for record in records:
         if (
             user.uid in _assigned_reviewers(record)

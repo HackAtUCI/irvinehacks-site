@@ -222,10 +222,7 @@ def get_auto_decision_status_update(
     if applicant_record.get("status") != Status.PENDING_REVIEW:
         return None
 
-    if (
-        applicant_record.get("auto_decision_reason")
-        == AUTO_REASON_DIRECTOR_AUTO_ACCEPT
-    ):
+    if applicant_record.get("auto_decision_reason") == AUTO_REASON_DIRECTOR_AUTO_ACCEPT:
         return {"status": Status.REVIEWED}
 
     rule_result = _compute_rule_based_auto_decision(applicant_record)

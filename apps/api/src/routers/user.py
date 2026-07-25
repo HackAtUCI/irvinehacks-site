@@ -35,10 +35,11 @@ from models.ApplicationData import (
 )
 from models.user_record import Applicant, BareApplicant, Role, Status
 from models.ApplicationData import Decision
-from services import docusign_handler, mongodb_handler
+from services import docusign_handler, google_wallet_handler, mongodb_handler
 from services.docusign_handler import WebhookPayload
 from services.mongodb_handler import Collection
 from utils import email_handler, resume_handler
+from utils.hackathon_context import HackathonName, hackathon_name_ctx
 
 log = getLogger(__name__)
 
@@ -78,6 +79,10 @@ class WaitlistStatus(BaseModel):
 
 class ApplicationData(BaseModel):
     application_data: Union[CharacterIndexes, None] = None
+
+
+class WalletPassResponse(BaseModel):
+    save_url: str
 
 
 def _is_past_deadline(now: datetime) -> bool:
@@ -725,6 +730,36 @@ async def rsvp_late_arrival(
         log.info(f"User {user.uid} set arrival_time to {arrival_value}.")
 
     return RedirectResponse("/portal", status.HTTP_303_SEE_OTHER)
+
+
+@router.get("/wallet/pass")
+async def wallet_checkin_pass(
+    user: Annotated[User, Depends(require_user_identity)],
+) -> WalletPassResponse:
+    """Provide an 'Add to Google Wallet' save URL for the ZotHacks
+    applicant check-in pass; the barcode encodes the user's uid."""
+    if hackathon_name_ctx.get() != HackathonName.ZOTHACKS:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            "Wallet check-in passes are only available for ZotHacks.",
+        )
+
+    user_record = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": user.uid}, ["first_name", "last_name"]
+    )
+    full_name = None
+    if user_record and user_record.get("first_name") and user_record.get("last_name"):
+        full_name = f"{user_record['first_name']} {user_record['last_name']}"
+
+    try:
+        save_url = google_wallet_handler.build_checkin_pass_save_url(
+            user.uid, full_name
+        )
+    except Exception:
+        log.exception("Could not build Google Wallet pass for %s.", user.uid)
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    return WalletPassResponse(save_url=save_url)
 
 
 def _parsed_form(form: FormData) -> dict[str, Any]:

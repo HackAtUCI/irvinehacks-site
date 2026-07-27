@@ -14,8 +14,6 @@ from utils.hackathon_context import hackathon_name_ctx, HackathonName
 
 log = getLogger(__name__)
 
-STAGING_ENV = os.getenv("DEPLOYMENT") == "STAGING"
-
 MONGODB_URI = os.getenv("MONGODB_URI")
 
 # Mypy thinks AgnosticClient is a generic type, but providing type parameters to it
@@ -25,8 +23,15 @@ MONGODB_CLIENT: AgnosticClient = AsyncIOMotorClient(MONGODB_URI)  # type: ignore
 # Resolve Vercel runtime issue
 MONGODB_CLIENT.get_io_loop = asyncio.get_event_loop  # type: ignore
 
-IRVINE_HACKS_DATABASE_NAME = "irvinehacks" if STAGING_ENV else "irvinehacks-prod"
-ZOTHACKS_DATABASE_NAME = "zothacks" if STAGING_ENV else "zothacks-prod"
+IRVINEHACKS_DATABASE_NAME = os.getenv(
+    "IRVINE_HACKS_DATABASE_NAME",
+    "irvinehacks-prod",
+)
+
+ZOTHACKS_DATABASE_NAME = os.getenv(
+    "ZOTHACKS_DATABASE_NAME",
+    "zothacks-prod",
+)
 
 
 class BaseRecord(BaseModel):
@@ -54,7 +59,7 @@ class Collection(str, Enum):
 def get_database() -> AgnosticDatabase[Any]:
     hackathon_name = hackathon_name_ctx.get()
     if hackathon_name == HackathonName.IRVINEHACKS:
-        database_name = IRVINE_HACKS_DATABASE_NAME
+        database_name = IRVINEHACKS_DATABASE_NAME
     elif hackathon_name == HackathonName.ZOTHACKS:
         database_name = ZOTHACKS_DATABASE_NAME
     else:

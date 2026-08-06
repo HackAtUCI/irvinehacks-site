@@ -144,7 +144,8 @@ EXPECTED_ZOTHACKS_HACKER_USER = Applicant(
     first_name="pk",
     last_name="fire",
     roles=(Role.APPLICANT, Role.HACKER),
-    status=Status.PENDING_REVIEW,
+    status=Status.REVIEWED,
+    auto_decision_reason="UNDER_18",
     application_data=EXPECTED_ZOTHACKS_HACKER_APPLICATION_DATA,
 )
 

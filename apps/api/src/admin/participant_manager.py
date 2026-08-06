@@ -126,8 +126,10 @@ async def check_in_participant(uid: str, associate: User) -> None:
         Status.ATTENDING,
         Status.CONFIRMED,
     ):
+        current_status = record.get("status", "")
         raise ValueError(
-            f'User is {record.get("status", "")} and can not be checked in.'
+            f"User is {getattr(current_status, 'value', current_status)} "
+            "and can not be checked in."
         )
 
     new_checkin_entry: Checkin = (utc_now(), associate.uid)

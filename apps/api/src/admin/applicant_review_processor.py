@@ -1,11 +1,17 @@
+from datetime import datetime
 from typing import Any, Optional
 
 from models.ApplicationData import Decision
+from models.user_record import Role, Status
 from .score_normalizing_handler import IH_WEIGHTING_CONFIG
 
 OVERQUALIFIED = -3
 NOT_FULLY_REVIEWED = -1
 NON_SCORING_IH_FIELDS = {"previous_experience", "has_socials"}
+
+AUTO_REASON_UNDER_18 = "UNDER_18"
+AUTO_REASON_GRADUATED = "GRADUATED"
+AUTO_REASON_DIRECTOR_AUTO_ACCEPT = "DIRECTOR_AUTO_ACCEPT"
 
 scores_to_decisions: dict[Optional[int], Decision] = {
     100: Decision.ACCEPTED,
@@ -43,6 +49,8 @@ def include_review_decision(applicant_record: dict[str, Any]) -> None:
     """Sets the applicant's decision as the last submitted review decision or None."""
     if applicant_record.get("status") == Decision.VOIDED:
         applicant_record["decision"] = Decision.VOIDED
+        return
+    if _apply_auto_decision_if_any(applicant_record):
         return
     reviews = applicant_record["application_data"]["reviews"]
     score: Optional[int] = reviews[-1][2] if reviews else None
@@ -129,6 +137,8 @@ def _include_decision_based_on_threshold(
     if applicant_record.get("status") == Decision.VOIDED:
         applicant_record["decision"] = Decision.VOIDED
         return
+    if _apply_auto_decision_if_any(applicant_record):
+        return
     avg_score = _get_avg_score(
         applicant_record["application_data"]["reviews"],
         applicant_record["application_data"].get("global_field_scores", {}),
@@ -147,6 +157,8 @@ def _include_decision_based_on_threshold_and_score_breakdown(
     if applicant_record.get("status") == Decision.VOIDED:
         applicant_record["decision"] = Decision.VOIDED
         return
+    if _apply_auto_decision_if_any(applicant_record):
+        return
     avg_score = _get_avg_score_with_globals_and_breakdown(
         applicant_record["application_data"].get("review_breakdown", {}),
         applicant_record["application_data"].get("global_field_scores", {}),
@@ -158,6 +170,79 @@ def _include_decision_based_on_threshold_and_score_breakdown(
         applicant_record["decision"] = Decision.WAITLISTED
     else:
         applicant_record["decision"] = Decision.REJECTED
+
+
+def _is_graduated(app_data: dict[str, Any]) -> bool:
+    education_level = app_data.get("education_level")
+    if isinstance(education_level, str) and education_level.lower() == "graduate":
+        return True
+
+    grad_year = app_data.get("graduation_year")
+    if isinstance(grad_year, int) and grad_year < datetime.now().year:
+        return True
+
+    return False
+
+
+def _compute_rule_based_auto_decision(
+    applicant_record: dict[str, Any],
+) -> Optional[tuple[Decision, str]]:
+    app_data = applicant_record.get("application_data", {}) or {}
+    roles = applicant_record.get("roles", []) or []
+
+    if app_data.get("is_18_older") is False:
+        return Decision.REJECTED, AUTO_REASON_UNDER_18
+
+    if _is_graduated(app_data):
+        if Role.HACKER in roles:
+            return Decision.REJECTED, AUTO_REASON_GRADUATED
+        # if Role.MENTOR in roles:
+        #     return Decision.ACCEPTED, AUTO_REASON_GRADUATED
+
+    return None
+
+
+def _compute_auto_decision(
+    applicant_record: dict[str, Any],
+) -> Optional[tuple[Decision, str]]:
+    persisted = applicant_record.get("auto_decision_reason")
+    if persisted == AUTO_REASON_DIRECTOR_AUTO_ACCEPT:
+        return Decision.ACCEPTED, persisted
+    if persisted == AUTO_REASON_UNDER_18:
+        return Decision.REJECTED, persisted
+    if persisted == AUTO_REASON_GRADUATED:
+        return Decision.REJECTED, persisted
+
+    return _compute_rule_based_auto_decision(applicant_record)
+
+
+def get_auto_decision_status_update(
+    applicant_record: dict[str, Any],
+) -> Optional[dict[str, str]]:
+    if applicant_record.get("status") != Status.PENDING_REVIEW:
+        return None
+
+    if applicant_record.get("auto_decision_reason") == AUTO_REASON_DIRECTOR_AUTO_ACCEPT:
+        return {"status": Status.REVIEWED}
+
+    rule_result = _compute_rule_based_auto_decision(applicant_record)
+    if rule_result is None:
+        return None
+
+    _, reason = rule_result
+    return {"status": Status.REVIEWED, "auto_decision_reason": reason}
+
+
+def _apply_auto_decision_if_any(applicant_record: dict[str, Any]) -> bool:
+    result = _compute_auto_decision(applicant_record)
+    if result is None:
+        applicant_record.setdefault("auto_decision_reason", None)
+        return False
+
+    decision, reason = result
+    applicant_record["decision"] = decision
+    applicant_record["auto_decision_reason"] = reason
+    return True
 
 
 def _include_reviewers(applicant_record: dict[str, Any]) -> None:

@@ -22,6 +22,7 @@ import ApplicantFilters, {
 } from "@/app/admin/applicants/components/ApplicantFilters";
 import { SelectProps } from "@cloudscape-design/components/select";
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
+import AutoDecisionBadge from "@/app/admin/applicants/components/AutoDecisionBadge";
 
 import UserContext from "@/lib/admin/UserContext";
 import {
@@ -39,7 +40,7 @@ import useHackerApplicants, {
 } from "@/lib/admin/useHackerApplicants";
 import useHackerReviewAssignments from "@/lib/admin/useHackerReviewAssignments";
 import { uidToPseudonym } from "@/lib/admin/anonymize";
-import { ParticipantRole, Status } from "@/lib/userRecord";
+import { Decision, ParticipantRole, Status } from "@/lib/userRecord";
 import { OVERQUALIFIED_SCORE } from "@/lib/decisionScores";
 import Badge from "@cloudscape-design/components/badge";
 import Icon from "@cloudscape-design/components/icon";
@@ -52,6 +53,52 @@ type ColumnDef = {
 
 interface HackerApplicantsListProps {
 	hackathonName: "irvinehacks" | "zothacks";
+}
+
+type DecisionBucket = "accepted" | "waitlisted" | "rejected";
+
+function getApplicantDecisionFilterValue(
+	applicant: HackerApplicantSummary,
+): string {
+	if (applicant.auto_decision_reason && applicant.decision) {
+		return applicant.decision;
+	}
+	if (applicant.director_previous_experience_reviewed) {
+		return applicant.decision || "-";
+	}
+	return "-";
+}
+
+function getApplicantDecisionBucket(
+	applicant: HackerApplicantSummary,
+	acceptThreshold: number,
+	waitlistThreshold: number,
+): DecisionBucket | null {
+	if (applicant.status === Status.Voided) {
+		return null;
+	}
+
+	if (applicant.auto_decision_reason) {
+		if (applicant.decision === Decision.Accepted) {
+			return "accepted";
+		}
+		if (applicant.decision === Decision.Rejected) {
+			return "rejected";
+		}
+		return null;
+	}
+
+	if (!applicant.director_previous_experience_reviewed) {
+		return null;
+	}
+
+	if (applicant.avg_score >= acceptThreshold) {
+		return "accepted";
+	}
+	if (applicant.avg_score >= waitlistThreshold) {
+		return "waitlisted";
+	}
+	return "rejected";
 }
 
 function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
@@ -141,9 +188,7 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 				selectedStatusValues.includes(applicant.status)) &&
 			(selectedDecisions.length === 0 ||
 				selectedDecisionValues.includes(
-					applicant.director_previous_experience_reviewed
-						? applicant.decision || "-"
-						: "-",
+					getApplicantDecisionFilterValue(applicant),
 				)) &&
 			(uciNetIDFilter.length === 0 ||
 				applicant.reviewers.some((reviewer) =>
@@ -162,28 +207,31 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		.slice(0, 400);
 
 	useEffect(() => {
-		const accepted = acceptThreshold ? acceptThreshold : 0;
-		const waitlisted = waitlistThreshold ? waitlistThreshold : 0;
+		const accepted = acceptThreshold ?? 0;
+		const waitlisted = waitlistThreshold ?? 0;
 
-		const scoreReadyApplicants = applicantList.filter(
-			(applicant) => applicant.director_previous_experience_reviewed,
-		);
+		let nextAcceptedCount = 0;
+		let nextWaitlistedCount = 0;
+		let nextRejectedCount = 0;
 
-		const acceptedCount = scoreReadyApplicants.filter(
-			(applicant) => applicant.avg_score >= accepted,
-		).length;
-		setAcceptedCount(acceptedCount);
+		for (const applicant of applicantList) {
+			const bucket = getApplicantDecisionBucket(
+				applicant,
+				accepted,
+				waitlisted,
+			);
+			if (bucket === "accepted") {
+				nextAcceptedCount++;
+			} else if (bucket === "waitlisted") {
+				nextWaitlistedCount++;
+			} else if (bucket === "rejected") {
+				nextRejectedCount++;
+			}
+		}
 
-		const waitlistedCount = scoreReadyApplicants.filter(
-			(applicant) =>
-				applicant.avg_score >= waitlisted && applicant.avg_score < accepted,
-		).length;
-		setWaitlistedCount(waitlistedCount);
-
-		const rejectedCount = scoreReadyApplicants.filter(
-			(applicant) => applicant.avg_score < waitlisted,
-		).length;
-		setRejectCount(rejectedCount);
+		setAcceptedCount(nextAcceptedCount);
+		setWaitlistedCount(nextWaitlistedCount);
+		setRejectCount(nextRejectedCount);
 	}, [applicantList, acceptThreshold, waitlistThreshold]);
 
 	const baseItems = top400 ? filteredApplicants400 : filteredApplicants;
@@ -275,6 +323,8 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 			first_name,
 			last_name,
 			avg_score,
+			decision,
+			auto_decision_reason,
 			director_previous_experience_reviewed,
 			duplicate_name_approved,
 		}: HackerApplicantSummary) => (
@@ -284,6 +334,8 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 				last_name={last_name}
 				hackathonName={hackathonName}
 				avg_score={avg_score}
+				decision={decision}
+				auto_decision_reason={auto_decision_reason}
 				director_previous_experience_reviewed={
 					director_previous_experience_reviewed
 				}
@@ -446,6 +498,8 @@ const CardHeader = ({
 	last_name,
 	hackathonName,
 	avg_score,
+	decision,
+	auto_decision_reason,
 	director_previous_experience_reviewed,
 	isDirector,
 	isDuplicate,
@@ -457,6 +511,8 @@ const CardHeader = ({
 	| "first_name"
 	| "last_name"
 	| "avg_score"
+	| "decision"
+	| "auto_decision_reason"
 	| "director_previous_experience_reviewed"
 > & {
 	hackathonName: "irvinehacks" | "zothacks";
@@ -519,6 +575,7 @@ const CardHeader = ({
 				avg_score === OVERQUALIFIED_SCORE && (
 					<Badge color="red">OVERQUALIFIED</Badge>
 				)}
+			<AutoDecisionBadge reason={auto_decision_reason} decision={decision} />
 			{duplicateIcon}
 		</div>
 	);
@@ -526,9 +583,11 @@ const CardHeader = ({
 
 const DecisionStatus = ({
 	decision,
+	auto_decision_reason,
 	director_previous_experience_reviewed,
 }: HackerApplicantSummary) =>
-	director_previous_experience_reviewed && decision ? (
+	(director_previous_experience_reviewed || auto_decision_reason) &&
+	decision ? (
 		<ApplicantStatus status={decision} />
 	) : (
 		"-"

@@ -13,6 +13,7 @@ import { decisionsToScores } from "@/lib/decisionScores";
 interface ApplicantActionsProps {
 	applicant: Uid;
 	submitReview: submitReview;
+	autoDecisionReason?: string | null;
 }
 
 interface ReviewButtonItem extends ButtonDropdownProps.Item {
@@ -21,10 +22,18 @@ interface ReviewButtonItem extends ButtonDropdownProps.Item {
 
 type ReviewButtonItems = ReviewButtonItem[];
 
-function ApplicantActions({ applicant, submitReview }: ApplicantActionsProps) {
+function ApplicantActions({
+	applicant,
+	submitReview,
+	autoDecisionReason,
+}: ApplicantActionsProps) {
 	const { roles } = useContext(UserContext);
 
 	if (!isReviewer(roles)) {
+		return null;
+	}
+
+	if (autoDecisionReason) {
 		return null;
 	}
 

@@ -54,6 +54,7 @@ function ZotHacksHackerApplication({
 	onNotesChange,
 	reviews,
 	onDeleteNotes,
+	reviewDisabled = false,
 }: {
 	application_data: ZotHacksHackerApplicationData;
 	onResumeScore: (
@@ -67,11 +68,13 @@ function ZotHacksHackerApplication({
 	applicant: Uid;
 	reviews: Review[];
 	onDeleteNotes: (uid: Uid, idx: number) => void;
+	reviewDisabled?: boolean;
 }) {
 	const { uid: reviewer_uid, roles } = useContext(UserContext);
 	const formattedUid = reviewer_uid?.split(".").at(-1);
 
-	const isResumeDisabled = !isDirector(roles) && !isLead(roles);
+	const isResumeDisabled =
+		(!isDirector(roles) && !isLead(roles)) || reviewDisabled;
 
 	// Resume options used for dropdown-based ScoreSection
 	const resumeOptions = useMemo(
@@ -218,6 +221,7 @@ function ZotHacksHackerApplication({
 				value={collaborationScore}
 				onChange={setCollaborationScore}
 				wordLimit={100}
+				disabled={reviewDisabled}
 			/>
 			<ScoreSection
 				title="Describe an application or technological concept that inspires your growth. Why is it important to you? (Ex: Robots in surgery, quantum computing, social media, etc.) [Max 100 words]"
@@ -230,6 +234,7 @@ function ZotHacksHackerApplication({
 				value={techInspirationScore}
 				onChange={setTechInspirationScore}
 				wordLimit={100}
+				disabled={reviewDisabled}
 			/>
 			<ScoreSection
 				title="If you could give each person at UCI one item under $100, what would it be and why? [Max 75 words]"
@@ -240,6 +245,7 @@ function ZotHacksHackerApplication({
 				value={uciGiftScore}
 				onChange={setUciGiftScore}
 				wordLimit={75}
+				disabled={reviewDisabled}
 			/>
 			<ReviewerNotes
 				applicant={applicant}
@@ -248,6 +254,7 @@ function ZotHacksHackerApplication({
 				reviews={reviews}
 				onDeleteNotes={onDeleteNotes}
 				reviewerId={reviewer_uid}
+				disabled={reviewDisabled}
 			/>
 		</SpaceBetween>
 	);

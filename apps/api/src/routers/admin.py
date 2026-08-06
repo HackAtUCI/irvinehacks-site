@@ -92,6 +92,8 @@ class SimplifiedApplicantSummary(BaseRecord):
     first_name: str
     last_name: str
     status: str
+    decision: Optional[Decision] = None
+    auto_decision_reason: Optional[str] = None
     application_data: SimplifiedApplicationDataSummary
 
 
@@ -100,6 +102,7 @@ class ApplicantSummary(BaseRecord):
     last_name: str
     status: str
     decision: Optional[Decision] = None
+    auto_decision_reason: Optional[str] = None
     application_data: ApplicationDataSummary
 
 
@@ -108,6 +111,7 @@ class HackerApplicantSummary(BaseRecord):
     last_name: str
     status: str
     decision: Optional[Decision] = None
+    auto_decision_reason: Optional[str] = None
     reviewers: list[str] = []
     resume_reviewed: bool = False
     director_previous_experience_reviewed: bool = False
@@ -235,6 +239,18 @@ class WaiverStatusRequest(BaseModel):
     is_signed: bool
 
 
+async def _persist_auto_decision_status_if_needed(record: dict[str, object]) -> None:
+    update = applicant_review_processor.get_auto_decision_status_update(record)
+    if update is None:
+        return
+
+    ok = await mongodb_handler.update_one(
+        Collection.USERS, {"_id": record["_id"]}, update
+    )
+    if ok:
+        record.update(update)
+
+
 REVIEW_ASSIGNMENT_BATCH_SIZE = 10
 
 
@@ -261,8 +277,42 @@ def _assigned_reviewers(record: Mapping[str, Any]) -> list[str]:
     return assigned_reviewers if isinstance(assigned_reviewers, list) else []
 
 
+def _has_auto_decision(record: Mapping[str, Any]) -> bool:
+    return bool(record.get("auto_decision_reason"))
+
+
+def _raise_if_applicant_not_reviewable(
+    applicant_record: Mapping[str, Any],
+    reviewer: User,
+    applicant_id: str,
+    *,
+    modify_reviews: bool = False,
+) -> None:
+    if applicant_record.get("status") == Decision.VOIDED:
+        log.error("%s tried to review voided applicant %s", reviewer, applicant_id)
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST, "Cannot review a voided applicant."
+        )
+    if _has_auto_decision(applicant_record):
+        action = "modify reviews on" if modify_reviews else "review"
+        log.error(
+            "%s tried to %s auto-decided applicant %s",
+            reviewer,
+            action,
+            applicant_id,
+        )
+        detail = (
+            "Cannot modify reviews on an auto-decided applicant."
+            if modify_reviews
+            else "Cannot review an auto-decided applicant."
+        )
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail)
+
+
 def _is_review_assignable(record: Mapping[str, Any], reviewer_uid: str) -> bool:
     if record.get("status") == Decision.VOIDED:
+        return False
+    if _has_auto_decision(record):
         return False
     if reviewer_uid in _unique_reviewers(record):
         return False
@@ -283,13 +333,19 @@ async def mentor_volunteer_applicants(
             "status",
             "first_name",
             "last_name",
+            "roles",
+            "auto_decision_reason",
             "application_data.school",
             "application_data.submission_time",
             "application_data.reviews",
+            "application_data.is_18_older",
+            "application_data.education_level",
+            "application_data.graduation_year",
         ],
     )
 
     for record in records:
+        await _persist_auto_decision_status_if_needed(record)
         applicant_review_processor.include_review_decision(record)
 
     try:
@@ -333,6 +389,8 @@ async def hacker_applicants(
             "status",
             "first_name",
             "last_name",
+            "roles",
+            "auto_decision_reason",
             "application_data",
             "duplicate_name_approved",
         ],
@@ -345,6 +403,7 @@ async def hacker_applicants(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     for record in records:
+        await _persist_auto_decision_status_if_needed(record)
         # TODO: Use different route for different avg score types.
 
         # Difference between them:
@@ -390,6 +449,7 @@ async def hacker_review_assignments(
         [
             "_id",
             "status",
+            "auto_decision_reason",
             "application_data.reviews",
             "application_data.submission_time",
             "assigned_reviewers",
@@ -400,12 +460,27 @@ async def hacker_review_assignments(
         1 for record in records if _reviewer_has_reviewed(record, user.uid)
     )
 
+    # Remove reviewer from assigned_reviewers when applicant is auto-decided
+    # and this reviewer has not submitted a review yet.
+    for record in records:
+        if (
+            user.uid in _assigned_reviewers(record)
+            and _has_auto_decision(record)
+            and not _reviewer_has_reviewed(record, user.uid)
+        ):
+            await mongodb_handler.raw_update_one(
+                Collection.USERS,
+                {"_id": record["_id"]},
+                {"$pull": {"assigned_reviewers": user.uid}},
+            )
+
     active_assignment_records = [
         record
         for record in records
         if user.uid in _assigned_reviewers(record)
         and not _reviewer_has_reviewed(record, user.uid)
         and record.get("status") != Decision.VOIDED
+        and not _has_auto_decision(record)
         and len(_unique_reviewers(record)) < 2
     ]
     overflow_assignment_records = active_assignment_records[
@@ -529,6 +604,8 @@ async def applicant(
     """Get record of an applicant by uid."""
     record = await _applicant_record(uid, application_type)
 
+    await _persist_auto_decision_status_if_needed(record)
+
     try:
         return Applicant.model_validate(record)
     except ValidationError:
@@ -621,6 +698,74 @@ async def approve_duplicate_name(
         {"_id": uid, "roles": Role.HACKER},
         {"duplicate_name_approved": body.approved},
     )
+
+
+@router.post("/applicant/hacker/{uid}/director-auto-accept")
+async def director_auto_accept_hacker(
+    uid: str,
+    director: Annotated[User, Depends(require_director)],
+) -> None:
+    record = await mongodb_handler.retrieve_one(
+        Collection.USERS,
+        {"_id": uid, "roles": Role.HACKER},
+        ["_id", "auto_decision_reason"],
+    )
+    if not record:
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
+
+    if (
+        record.get("auto_decision_reason")
+        == applicant_review_processor.AUTO_REASON_DIRECTOR_AUTO_ACCEPT
+    ):
+        return
+
+    ok = await mongodb_handler.update_one(
+        Collection.USERS,
+        {"_id": uid},
+        {
+            "status": UserStatus.REVIEWED,
+            "auto_decision_reason": (
+                applicant_review_processor.AUTO_REASON_DIRECTOR_AUTO_ACCEPT
+            ),
+        },
+    )
+    if not ok:
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    log.info("%s director auto-accepted hacker %s", director, uid)
+
+
+@router.post("/applicant/hacker/{uid}/director-undo-auto-accept")
+async def director_undo_auto_accept_hacker(
+    uid: str,
+    director: Annotated[User, Depends(require_director)],
+) -> None:
+    record = await mongodb_handler.retrieve_one(
+        Collection.USERS,
+        {"_id": uid, "roles": Role.HACKER},
+        ["_id", "auto_decision_reason"],
+    )
+    if not record:
+        raise HTTPException(status.HTTP_404_NOT_FOUND)
+
+    if (
+        record.get("auto_decision_reason")
+        != applicant_review_processor.AUTO_REASON_DIRECTOR_AUTO_ACCEPT
+    ):
+        return
+
+    ok = await mongodb_handler.raw_update_one(
+        Collection.USERS,
+        {"_id": uid},
+        {
+            "$set": {"status": UserStatus.PENDING_REVIEW},
+            "$unset": {"auto_decision_reason": "", "decision": ""},
+        },
+    )
+    if not ok:
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    log.info("%s removed director auto-accept for hacker %s", director, uid)
 
 
 @router.get("/applicant/mentor/{uid}", dependencies=[Depends(require_mentor_reviewer)])
@@ -763,17 +908,13 @@ async def submit_review(
     applicant_record = await mongodb_handler.retrieve_one(
         Collection.USERS,
         {"_id": app},
-        ["_id", "application_data.reviews", "roles", "status"],
+        ["_id", "application_data.reviews", "roles", "status", "auto_decision_reason"],
     )
     if not applicant_record:
         log.error("Could not retrieve applicant after submitting review")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    if applicant_record.get("status") == Decision.VOIDED:
-        log.error("%s tried to review voided applicant %s", reviewer, app)
-        raise HTTPException(
-            status.HTTP_400_BAD_REQUEST, "Cannot review a voided applicant."
-        )
+    _raise_if_applicant_not_reviewable(applicant_record, reviewer, app)
 
     if Role.HACKER in applicant_record["roles"]:
         if applicant_review.score < 0 or applicant_review.score > 10:
@@ -868,7 +1009,7 @@ async def delete_notes(
     applicant_record = await mongodb_handler.retrieve_one(
         Collection.USERS,
         {"_id": applicant},
-        ["_id", "application_data.reviews", "roles", "status"],
+        ["_id", "application_data.reviews", "roles", "status", "auto_decision_reason"],
     )
 
     # Check if applicant record exists
@@ -887,6 +1028,17 @@ async def delete_notes(
         raise HTTPException(
             status.HTTP_400_BAD_REQUEST,
             "Cannot modify reviews on a voided applicant.",
+        )
+
+    if _has_auto_decision(applicant_record):
+        log.error(
+            "%s tried to delete notes on auto-decided applicant %s",
+            reviewer,
+            applicant,
+        )
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            "Cannot modify reviews on an auto-decided applicant.",
         )
 
     reviews = applicant_record.get("application_data", {}).get("reviews", [])
@@ -1109,17 +1261,10 @@ async def _handle_global_only_review(
     applicant_record = await mongodb_handler.retrieve_one(
         Collection.USERS,
         {"_id": applicant},
-        ["status"],
+        ["status", "auto_decision_reason"],
     )
-    if applicant_record and applicant_record.get("status") == Decision.VOIDED:
-        log.error(
-            "%s tried to submit global-only review on voided applicant %s",
-            reviewer,
-            applicant,
-        )
-        raise HTTPException(
-            status.HTTP_400_BAD_REQUEST, "Cannot review a voided applicant."
-        )
+    if applicant_record:
+        _raise_if_applicant_not_reviewable(applicant_record, reviewer, applicant)
 
     # Update the user record with global field scores
     await mongodb_handler.update_one(
@@ -1184,21 +1329,13 @@ async def _handle_irvinehacks_detailed_scores_review(
     applicant_record = await mongodb_handler.retrieve_one(
         Collection.USERS,
         {"_id": applicant},
-        ["_id", "application_data.reviews", "roles", "status"],
+        ["_id", "application_data.reviews", "roles", "status", "auto_decision_reason"],
     )
     if not applicant_record:
         log.error("Could not retrieve applicant after submitting review")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    if applicant_record.get("status") == Decision.VOIDED:
-        log.error(
-            "%s tried to submit IH detailed review on voided applicant %s",
-            reviewer,
-            applicant,
-        )
-        raise HTTPException(
-            status.HTTP_400_BAD_REQUEST, "Cannot review a voided applicant."
-        )
+    _raise_if_applicant_not_reviewable(applicant_record, reviewer, applicant)
 
     unique_reviewers = applicant_review_processor.get_unique_reviewers(applicant_record)
 
@@ -1290,21 +1427,14 @@ async def _handle_detailed_scores_review(
             "application_data.reviews",
             "roles",
             "status",
+            "auto_decision_reason",
         ],
     )
     if not applicant_record:
         log.error("Could not retrieve applicant after submitting review")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    if applicant_record.get("status") == Decision.VOIDED:
-        log.error(
-            "%s tried to submit detailed review on voided applicant %s",
-            reviewer,
-            applicant,
-        )
-        raise HTTPException(
-            status.HTTP_400_BAD_REQUEST, "Cannot review a voided applicant."
-        )
+    _raise_if_applicant_not_reviewable(applicant_record, reviewer, applicant)
 
     if Role.HACKER in applicant_record["roles"]:
         unique_reviewers = applicant_review_processor.get_unique_reviewers(

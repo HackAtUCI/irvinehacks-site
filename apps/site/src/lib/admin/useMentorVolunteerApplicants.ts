@@ -9,6 +9,7 @@ export interface ApplicantSummary {
 	last_name: string;
 	status: Status;
 	decision: Decision | null;
+	auto_decision_reason: string | null;
 	application_data: {
 		school: string;
 		submission_time: string;

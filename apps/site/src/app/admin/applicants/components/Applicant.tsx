@@ -24,8 +24,10 @@ import ApplicantActions from "./ApplicantActions";
 import ApplicantNavigationButtons from "./ApplicantNavigationButtons";
 import ApplicantOverview from "./ApplicantOverview";
 import HackerApplicantActions from "./HackerApplicantActions";
+import DirectorAutoAcceptButton from "./DirectorAutoAcceptButton";
+import AutoDecisionBadge from "./AutoDecisionBadge";
+import { Decision, ParticipantRole } from "@/lib/userRecord";
 import VoidApplicantButton from "./VoidApplicantButton";
-import { ParticipantRole } from "@/lib/userRecord";
 import { ScoredFields } from "@/lib/detailedScores";
 import { IrvineHacksHackerScoringGuidelinesType } from "@/app/admin/applicants/hackers/components/getScoringGuidelines";
 import { IrvineHacksMentorScoringGuidelinesType } from "@/app/admin/applicants/mentors/components/getScoringGuidelines";
@@ -52,6 +54,8 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 		submitReview,
 		submitDetailedReview,
 		deleteNotes,
+		directorAutoAccept,
+		directorUndoAutoAccept,
 		voidApplicant,
 	} = useApplicant(uid, applicationType);
 	const [scores, setScores] = useState<ScoredFields>({});
@@ -100,6 +104,54 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 		});
 	};
 
+	const autoAcceptSuccessMessage: FlashbarProps.MessageDefinition = {
+		type: "success",
+		content: "Successfully auto-accepted applicant!",
+		id: `auto-accept-${Date.now()}`,
+		dismissible: true,
+		onDismiss: () => {
+			if (setNotifications)
+				setNotifications((prev) =>
+					prev.filter((msg) => msg.id !== autoAcceptSuccessMessage.id),
+				);
+		},
+	};
+
+	const handleDirectorAutoAccept = (Uid: string) =>
+		directorAutoAccept(Uid).then(() => {
+			if (setNotifications)
+				setNotifications((prev) => [autoAcceptSuccessMessage, ...prev]);
+		});
+
+	const undoAutoAcceptSuccessMessage: FlashbarProps.MessageDefinition = {
+		type: "success",
+		content: "Successfully removed auto-accept!",
+		id: `undo-auto-accept-${Date.now()}`,
+		dismissible: true,
+		onDismiss: () => {
+			if (setNotifications)
+				setNotifications((prev) =>
+					prev.filter((msg) => msg.id !== undoAutoAcceptSuccessMessage.id),
+				);
+		},
+	};
+
+	const handleDirectorUndoAutoAccept = (Uid: string) =>
+		directorUndoAutoAccept(Uid).then(() => {
+			if (setNotifications)
+				setNotifications((prev) => [undoAutoAcceptSuccessMessage, ...prev]);
+		});
+
+	const autoAcceptDecision =
+		applicant.auto_decision_reason === "DIRECTOR_AUTO_ACCEPT"
+			? Decision.Accepted
+			: applicant.auto_decision_reason === "UNDER_18" ||
+			    applicant.auto_decision_reason === "GRADUATED"
+			  ? Decision.Rejected
+			  : null;
+
+	const reviewDisabled = Boolean(applicant.auto_decision_reason);
+
 	return (
 		<ContentLayout
 			header={
@@ -118,11 +170,18 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 									uid={uid}
 									basePath="/admin/applicants/hackers" // hardcoded for Irvinehacks (Applicant.tsx)
 								/>
+								<DirectorAutoAcceptButton
+									applicant={applicant._id}
+									autoDecisionReason={applicant.auto_decision_reason}
+									onAutoAccept={handleDirectorAutoAccept}
+									onUndoAutoAccept={handleDirectorUndoAutoAccept}
+								/>
 								<HackerApplicantActions
 									applicant={applicant._id}
 									reviews={application_data.reviews}
 									scores={scores}
 									notes={notes}
+									autoDecisionReason={applicant.auto_decision_reason}
 									onSubmitDetailedReview={handleSubmitDetailedReview}
 								/>
 							</SpaceBetween>
@@ -136,12 +195,17 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 								<ApplicantActions
 									applicant={applicant._id}
 									submitReview={submitReview}
+									autoDecisionReason={applicant.auto_decision_reason}
 								/>
 							</SpaceBetween>
 						)
 					}
 				>
-					{isUserDirector ? `${first_name} ${last_name}` : uidToPseudonym(uid)}
+					{isUserDirector ? `${first_name} ${last_name}` : uidToPseudonym(uid)}{" "}
+					<AutoDecisionBadge
+						reason={applicant.auto_decision_reason}
+						decision={autoAcceptDecision}
+					/>
 				</Header>
 			}
 		>
@@ -162,6 +226,7 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 						reviews={application_data.reviews}
 						onDeleteNotes={(uid, idx) => deleteNotes(uid, idx)}
 						isDirector={isUserDirector}
+						reviewDisabled={reviewDisabled}
 					/>
 				) : applicant.roles.includes(ParticipantRole.Mentor) ? (
 					<MentorApplication
@@ -190,11 +255,18 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 							uid={uid}
 							basePath="/admin/applicants/hackers" // hardcoded for Irvinehacks (Applicant.tsx)
 						/>
+						<DirectorAutoAcceptButton
+							applicant={applicant._id}
+							autoDecisionReason={applicant.auto_decision_reason}
+							onAutoAccept={handleDirectorAutoAccept}
+							onUndoAutoAccept={handleDirectorUndoAutoAccept}
+						/>
 						<HackerApplicantActions
 							applicant={applicant._id}
 							reviews={application_data.reviews}
 							scores={scores}
 							notes={notes}
+							autoDecisionReason={applicant.auto_decision_reason}
 							onSubmitDetailedReview={handleSubmitDetailedReview}
 						/>
 					</SpaceBetween>

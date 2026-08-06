@@ -56,6 +56,7 @@ interface IrvineHacksHackerApplicationProps {
 	reviews: Review[];
 	onDeleteNotes: (uid: Uid, idx: number) => void;
 	isDirector: boolean;
+	reviewDisabled?: boolean;
 }
 
 function IrvineHacksHackerApplication({
@@ -69,6 +70,7 @@ function IrvineHacksHackerApplication({
 	reviews,
 	onDeleteNotes,
 	isDirector,
+	reviewDisabled = false,
 }: IrvineHacksHackerApplicationProps) {
 	const { uid: reviewer_uid } = useContext(UserContext);
 	const formattedUid = reviewer_uid?.split(".").at(-1);
@@ -216,6 +218,7 @@ function IrvineHacksHackerApplication({
 							setPreviousExperienceScore(value);
 							onResumeScore(value, hackathonExperienceScore);
 						}}
+						disabled={reviewDisabled}
 					/>
 				</>
 			)}
@@ -240,6 +243,7 @@ function IrvineHacksHackerApplication({
 				value={frqChangeScore}
 				onChange={setFrqChangeScore}
 				wordLimit={100}
+				disabled={reviewDisabled}
 			/>
 			<ScoreSection
 				title="What is something you feel like going above and beyond for? Why? [100 words]"
@@ -254,6 +258,7 @@ function IrvineHacksHackerApplication({
 				value={frqAmbitionScore}
 				onChange={setFrqAmbitionScore}
 				wordLimit={100}
+				disabled={reviewDisabled}
 			/>
 			<ScoreSection
 				title="Build your cyberpunk character! Choose your augmentations, accessories, and companion, then explain how each choice reflects your character's identity, role, or backstory. [75 words]"
@@ -268,6 +273,7 @@ function IrvineHacksHackerApplication({
 				value={frqCharacterScore}
 				onChange={setFrqCharacterScore}
 				wordLimit={75}
+				disabled={reviewDisabled}
 			/>
 			{isDirector && (
 				<CharacterDisplay
@@ -284,6 +290,7 @@ function IrvineHacksHackerApplication({
 				reviews={reviews}
 				onDeleteNotes={onDeleteNotes}
 				reviewerId={reviewer_uid}
+				disabled={reviewDisabled}
 			/>
 		</SpaceBetween>
 	);

@@ -5,13 +5,20 @@ from logging import getLogger
 from typing import Annotated, Any, Literal, Optional, Sequence
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
-from pydantic import BaseModel, EmailStr, TypeAdapter, ValidationError
+from pydantic import BaseModel, EmailStr, Field, TypeAdapter, ValidationError
 
-from admin import applicant_review_processor
+from admin import applicant_review_processor, shift_solver
 from auth.authorization import require_role
 from auth.user_identity import User, uci_email, utc_now
 from models.ApplicationData import Decision
-from models.Schedule import Shift, ScheduleTemplate, ScheduleTemplateInfo
+from models.Availability import AvailabilitySlot
+from models.Schedule import (
+    Draft,
+    DraftInfo,
+    Shift,
+    ScheduleTemplate,
+    ScheduleTemplateInfo,
+)
 from models.user_record import Role, Status
 from services import mongodb_handler, sendgrid_handler
 from services.mongodb_handler import BaseRecord, Collection
@@ -742,6 +749,138 @@ async def update_template(
         array_filters=[{"t.template_name": original_template_name}],
     )
     log.info("Template name searched: '%s'", original_template_name)
+
+
+class GenerateDraftRequest(BaseModel):
+    draft_name: str
+    minimum_pts: int = Field(ge=0)
+
+
+class GenerateDraftResponse(BaseModel):
+    draft: Draft
+    status: Literal["optimal", "feasible"]
+    understaffed_shifts: list[str]
+    under_points_floor: list[str]
+    warnings: list[str]
+
+
+@router.post("/templates/{template_name}/generate-draft")
+async def generate_draft(
+    user: Annotated[User, Depends(require_director)],
+    template_name: str,
+    request: GenerateDraftRequest,
+) -> GenerateDraftResponse:
+    """Automatically generate a shift draft for a template from submitted
+    organizer availability."""
+    log.info("%s generating draft for template %s", user, template_name)
+
+    records = await mongodb_handler.retrieve_one(
+        Collection.SETTINGS, {"_id": "templates"}, ["templates"]
+    )
+    if not records:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Template not found.")
+
+    try:
+        templates = TypeAdapter(list[ScheduleTemplate]).validate_python(
+            records["templates"]
+        )
+    except ValidationError:
+        raise RuntimeError("Could not parse template.")
+
+    template = next(
+        (t for t in templates if t.template_name == template_name), None
+    )
+    if template is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Template not found.")
+
+    if any(d.draft_name == request.draft_name for d in template.drafts):
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            f"A draft named {request.draft_name!r} already exists.",
+        )
+
+    availability_records = await mongodb_handler.retrieve(
+        Collection.AVAILABILITY,
+        {"template_name": template_name},
+        ["_id", "availability"],
+    )
+    try:
+        availability = {
+            str(record["_id"]): TypeAdapter(
+                list[AvailabilitySlot]
+            ).validate_python(record.get("availability", []))
+            for record in availability_records
+        }
+    except ValidationError:
+        raise RuntimeError("Could not parse availability records.")
+
+    organizer_records = await mongodb_handler.retrieve(
+        Collection.USERS, {"roles": Role.ORGANIZER}, ["_id", "committees"]
+    )
+    committees: dict[str, list[str]] = {}
+    for organizer_record in organizer_records:
+        committee_list = organizer_record.get("committees")
+        committees[str(organizer_record["_id"])] = (
+            [str(committee) for committee in committee_list]
+            if isinstance(committee_list, list)
+            else []
+        )
+
+    shifts = template.template_info.shifts
+    result = shift_solver.solve_shifts(
+        shifts=shifts,
+        availability=availability,
+        committees=committees,
+        minimum_pts=request.minimum_pts,
+    )
+
+    if result.status == "infeasible":
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            {
+                "message": "No feasible schedule exists. Check preassigned"
+                " organizers for overlapping shifts.",
+                "shifts_without_candidates": shift_solver.shifts_without_candidates(
+                    shifts, availability, committees
+                ),
+                "warnings": result.warnings,
+            },
+        )
+
+    draft_shifts = [
+        shift.model_copy(
+            update={"organizers": result.assignments.get(index, [])}, deep=True
+        )
+        for index, shift in enumerate(shifts)
+    ]
+    draft = Draft(
+        draft_name=request.draft_name,
+        draft_info=DraftInfo(
+            minimum_pts=request.minimum_pts,
+            draft=ScheduleTemplateInfo(
+                event_dates=template.template_info.event_dates,
+                shifts=draft_shifts,
+                org_availabilities=template.template_info.org_availabilities,
+            ),
+        ),
+    )
+
+    await mongodb_handler.raw_update_one(
+        Collection.SETTINGS,
+        {"_id": "templates"},
+        {"$push": {"templates.$[t].drafts": draft.model_dump(mode="json")}},
+        array_filters=[{"t.template_name": template_name}],
+    )
+
+    return GenerateDraftResponse(
+        draft=draft,
+        status=result.status,
+        understaffed_shifts=[
+            shifts[index].shift_name for index in result.understaffed
+        ],
+        under_points_floor=result.under_points_floor,
+        warnings=result.warnings,
+    )
 
 
 async def _process_decision(

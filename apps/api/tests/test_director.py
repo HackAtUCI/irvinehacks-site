@@ -6,12 +6,12 @@ from fastapi import FastAPI
 
 from auth.user_identity import NativeUser, UserTestClient
 from models.ApplicationData import Decision
+from models.Schedule import Draft
 from models.user_record import Role
 from routers import director
 from services.mongodb_handler import Collection
 from services.sendgrid_handler import Template
 from utils.email_handler import IH_SENDER
-
 
 USER_REVIEWER = NativeUser(
     ucinetid="alicia",
@@ -58,36 +58,43 @@ EXPECTED_ORGANIZER = director.OrganizerSummary(
 )
 
 SCHEDULE_TEMPLATE = {
-    '_id': 'templates',
-    'templates': [
-        {'template_name': 'test2',
-         'template_info': {
-            'event_dates': [
-                    '2026-05-27T22:00:00+00:00', '2026-06-08T22:00:00+00:00'
+    "_id": "templates",
+    "templates": [
+        {
+            "template_name": "test2",
+            "template_info": {
+                "event_dates": [
+                    "2026-05-27T22:00:00+00:00",
+                    "2026-06-08T22:00:00+00:00",
                 ],
-            'shifts': [
-                {'shift_name': 'f',
-                 'location': 'fs',
-                    'min_num_organizers': 2,
-                    'shift_pts': 2,
-                    'organizers': [],
-                    'hour': {
-                        'start_time': '2026-05-29T19:00:00Z',
-                        'end_time': '2026-05-29T20:00:00Z',
-                        'director_on_shift': []
-                    },
-                    'committee_prereq': 'Logistics',
-                    'subcommittee_prereq': 'Emcee',
-                    'preassigned_orgs': []}
-            ],
-            'org_availabilities': {}
-            }, 'drafts': []}]
-    }
+                "shifts": [
+                    {
+                        "shift_name": "f",
+                        "location": "fs",
+                        "min_num_organizers": 2,
+                        "shift_pts": 2,
+                        "organizers": [],
+                        "hour": {
+                            "start_time": "2026-05-29T19:00:00Z",
+                            "end_time": "2026-05-29T20:00:00Z",
+                            "director_on_shift": [],
+                        },
+                        "committee_prereq": "Logistics",
+                        "subcommittee_prereq": "Emcee",
+                        "preassigned_orgs": [],
+                    }
+                ],
+                "org_availabilities": {},
+            },
+            "drafts": [],
+        }
+    ],
+}
 
 EMPTY_TEMPLATE = {
-    '_id': 'templates',
-    'templates': [],
-    }
+    "_id": "templates",
+    "templates": [],
+}
 
 
 @patch("services.mongodb_handler.retrieve", autospec=True)
@@ -551,3 +558,223 @@ def test_can_update_template(
     mock_mongodb_handler_raw_update_one.assert_awaited_once()
     call_args = mock_mongodb_handler_raw_update_one.call_args
     assert call_args[1]["array_filters"] == [{"t.template_name": "test2"}]
+
+
+SOLVER_TEMPLATE: dict[str, Any] = {
+    "_id": "templates",
+    "templates": [
+        {
+            "template_name": "solver-template",
+            "template_info": {
+                "event_dates": ["2026-10-17T00:00:00Z"],
+                "shifts": [
+                    {
+                        "shift_name": "check-in",
+                        "location": "lobby",
+                        "min_num_organizers": 1,
+                        "shift_pts": 2,
+                        "organizers": [],
+                        "hour": {
+                            "start_time": "2026-10-17T10:00:00Z",
+                            "end_time": "2026-10-17T12:00:00Z",
+                            "director_on_shift": [],
+                        },
+                        "committee_prereq": "Logistics",
+                        "subcommittee_prereq": None,
+                        "preassigned_orgs": [],
+                    }
+                ],
+                "org_availabilities": {},
+            },
+            "drafts": [],
+        }
+    ],
+}
+
+SOLVER_AVAILABILITY_RECORDS = [
+    {
+        "_id": "edu.uci.logi",
+        "availability": [
+            {"date": "2026-10-17", "start_time": "10:00"},
+            {"date": "2026-10-17", "start_time": "10:30"},
+            {"date": "2026-10-17", "start_time": "11:00"},
+            {"date": "2026-10-17", "start_time": "11:30"},
+        ],
+    },
+    {
+        "_id": "edu.uci.nope",
+        "availability": [{"date": "2026-10-17", "start_time": "10:00"}],
+    },
+]
+
+SOLVER_ORGANIZER_RECORDS = [
+    {"_id": "edu.uci.logi", "committees": ["Logistics"]},
+    {"_id": "edu.uci.nope", "committees": ["Design"]},
+]
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_can_generate_draft(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_retrieve: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+    """Test that a draft is solved and pushed into the template."""
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        SOLVER_TEMPLATE,
+    ]
+    mock_mongodb_handler_retrieve.side_effect = [
+        SOLVER_AVAILABILITY_RECORDS,
+        SOLVER_ORGANIZER_RECORDS,
+    ]
+
+    res = director_client.post(
+        "/templates/solver-template/generate-draft",
+        json={"draft_name": "auto-1", "minimum_pts": 2},
+    )
+
+    assert res.status_code == 200
+    data = res.json()
+    assert data["status"] == "optimal"
+    assert data["understaffed_shifts"] == []
+    assert data["draft"]["draft_info"]["draft"]["shifts"][0]["organizers"] == [
+        "edu.uci.logi"
+    ]
+
+    mock_mongodb_handler_raw_update_one.assert_awaited_once()
+    call_args = mock_mongodb_handler_raw_update_one.call_args
+    pushed_draft = call_args[0][2]["$push"]["templates.$[t].drafts"]
+    validated = Draft.model_validate(pushed_draft)
+    assert validated.draft_name == "auto-1"
+    assert validated.draft_info.minimum_pts == 2
+    assert validated.draft_info.draft.shifts[0].organizers == ["edu.uci.logi"]
+    assert call_args[1]["array_filters"] == [{"t.template_name": "solver-template"}]
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_generate_draft_missing_template_returns_404(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test that generating a draft for an unknown template 404s."""
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        SOLVER_TEMPLATE,
+    ]
+
+    res = director_client.post(
+        "/templates/nonexistent/generate-draft",
+        json={"draft_name": "auto-1", "minimum_pts": 2},
+    )
+
+    assert res.status_code == 404
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_generate_draft_duplicate_name_returns_400(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test that a duplicate draft name is rejected before solving."""
+    template_with_draft: dict[str, Any] = {
+        "_id": "templates",
+        "templates": [
+            {
+                **SOLVER_TEMPLATE["templates"][0],
+                "drafts": [
+                    {
+                        "draft_name": "auto-1",
+                        "draft_info": {
+                            "minimum_pts": 0,
+                            "draft": {
+                                "event_dates": [],
+                                "shifts": [],
+                                "org_availabilities": {},
+                            },
+                        },
+                    }
+                ],
+            }
+        ],
+    }
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        template_with_draft,
+    ]
+
+    res = director_client.post(
+        "/templates/solver-template/generate-draft",
+        json={"draft_name": "auto-1", "minimum_pts": 2},
+    )
+
+    assert res.status_code == 400
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_generate_draft_infeasible_returns_422(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_retrieve: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+    """Test that conflicting preassignments produce a 422 with detail."""
+    shift = SOLVER_TEMPLATE["templates"][0]["template_info"]["shifts"][0]
+    overlapping = {
+        **shift,
+        "shift_name": "overlap",
+        "hour": {
+            "start_time": "2026-10-17T11:00:00Z",
+            "end_time": "2026-10-17T13:00:00Z",
+            "director_on_shift": [],
+        },
+    }
+    infeasible_template: dict[str, Any] = {
+        "_id": "templates",
+        "templates": [
+            {
+                "template_name": "solver-template",
+                "template_info": {
+                    "event_dates": ["2026-10-17T00:00:00Z"],
+                    "shifts": [
+                        {**shift, "preassigned_orgs": ["edu.uci.logi"]},
+                        {**overlapping, "preassigned_orgs": ["edu.uci.logi"]},
+                    ],
+                    "org_availabilities": {},
+                },
+                "drafts": [],
+            }
+        ],
+    }
+    availability_records = [
+        {
+            "_id": "edu.uci.logi",
+            "availability": [
+                {"date": "2026-10-17", "start_time": "10:00"},
+                {"date": "2026-10-17", "start_time": "10:30"},
+                {"date": "2026-10-17", "start_time": "11:00"},
+                {"date": "2026-10-17", "start_time": "11:30"},
+                {"date": "2026-10-17", "start_time": "12:00"},
+                {"date": "2026-10-17", "start_time": "12:30"},
+            ],
+        }
+    ]
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        infeasible_template,
+    ]
+    mock_mongodb_handler_retrieve.side_effect = [
+        availability_records,
+        [{"_id": "edu.uci.logi", "committees": ["Logistics"]}],
+    ]
+
+    res = director_client.post(
+        "/templates/solver-template/generate-draft",
+        json={"draft_name": "auto-1", "minimum_pts": 0},
+    )
+
+    assert res.status_code == 422
+    detail = res.json()["detail"]
+    assert "shifts_without_candidates" in detail
+    mock_mongodb_handler_raw_update_one.assert_not_awaited()

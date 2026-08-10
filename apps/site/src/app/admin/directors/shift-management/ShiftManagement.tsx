@@ -25,6 +25,14 @@ import useAvailabilityTemplate from "@/lib/admin/useAvailabilityTemplate";
 import useOrganizers from "@/lib/admin/useOrganizers";
 import useTemplates from "@/lib/admin/useTemplates";
 
+interface GenerateDraftResponse {
+	draft: { draft_name: string };
+	status: "optimal" | "feasible";
+	understaffed_shifts: string[];
+	under_points_floor: string[];
+	warnings: string[];
+}
+
 export default function ShiftManagement() {
 	const { roles } = useContext(UserContext);
 	const { setNotifications } = useContext(NotificationContext);
@@ -42,7 +50,11 @@ export default function ShiftManagement() {
 		requestAvailabilityTemplate,
 		resetAvailabilityTemplate,
 	} = useAvailabilityTemplate();
-	const { templateList, loading: templatesLoading } = useTemplates();
+	const {
+		templateList,
+		loading: templatesLoading,
+		mutate: mutateTemplates,
+	} = useTemplates();
 
 	const [clearingAvailability, setClearingAvailability] = useState(false);
 	const [clearModalVisible, setClearModalVisible] = useState(false);
@@ -51,6 +63,15 @@ export default function ShiftManagement() {
 	const [resetModalVisible, setResetModalVisible] = useState(false);
 	const [selectedTemplate, setSelectedTemplate] =
 		useState<SelectProps.Option | null>(null);
+	const [minimumPts, setMinimumPts] = useState("");
+	const [draftName, setDraftName] = useState("");
+	const [generateModalVisible, setGenerateModalVisible] = useState(false);
+	const [generatingDraft, setGeneratingDraft] = useState(false);
+	const [generateError, setGenerateError] = useState<string | null>(null);
+	const [lastDraftResult, setLastDraftResult] =
+		useState<GenerateDraftResponse | null>(null);
+
+	const minimumPtsValid = /^\d+$/.test(minimumPts.trim());
 
 	function showNotification(
 		content: string,
@@ -121,6 +142,51 @@ export default function ShiftManagement() {
 			showNotification(message, "error");
 		} finally {
 			setResettingTemplate(false);
+		}
+	}
+
+	async function handleGenerateDraft() {
+		if (!templateName || !draftName.trim() || !minimumPtsValid) return;
+
+		try {
+			setGeneratingDraft(true);
+			setGenerateError(null);
+			const res = await axios.post<GenerateDraftResponse>(
+				`/api/director/templates/${encodeURIComponent(
+					templateName,
+				)}/generate-draft`,
+				{
+					draft_name: draftName.trim(),
+					minimum_pts: Number(minimumPts.trim()),
+				},
+			);
+			setLastDraftResult(res.data);
+			setGenerateModalVisible(false);
+			setDraftName("");
+			await mutateTemplates();
+			showNotification(`Draft "${res.data.draft.draft_name}" has been created.`);
+		} catch (err) {
+			let message = "Unable to generate a draft. Please try again.";
+			if (axios.isAxiosError(err)) {
+				const detail = err.response?.data?.detail;
+				if (err.response?.status === 400) {
+					message = "A draft with that name already exists.";
+				} else if (err.response?.status === 404) {
+					message = "That template could not be found.";
+				} else if (err.response?.status === 422) {
+					const shifts: string[] = detail?.shifts_without_candidates ?? [];
+					message =
+						(detail?.message ?? "No feasible schedule exists.") +
+						(shifts.length > 0
+							? ` Shifts with no available, eligible organizers: ${shifts.join(
+									", ",
+							  )}.`
+							: "");
+				}
+			}
+			setGenerateError(message);
+		} finally {
+			setGeneratingDraft(false);
 		}
 	}
 
@@ -248,8 +314,19 @@ export default function ShiftManagement() {
 								Each organizer must be assigned at least this many points.
 							</Box>
 						</div>
-						<FormField>
-							<Input value="" onChange={() => {}} />
+						<FormField
+							errorText={
+								minimumPts && !minimumPtsValid
+									? "Enter a whole number of points."
+									: undefined
+							}
+						>
+							<Input
+								value={minimumPts}
+								onChange={({ detail }) => setMinimumPts(detail.value)}
+								inputMode="numeric"
+								placeholder="e.g. 4"
+							/>
 						</FormField>
 					</div>
 
@@ -269,13 +346,106 @@ export default function ShiftManagement() {
 						</div>
 						<Button
 							variant="primary"
-							onClick={() => setClearModalVisible(true)}
+							disabled={!minimumPtsValid}
+							onClick={() => {
+								setGenerateError(null);
+								setGenerateModalVisible(true);
+							}}
 						>
 							Auto-assign
 						</Button>
 					</div>
 				</SpaceBetween>
 			</Container>
+
+			{lastDraftResult &&
+				(lastDraftResult.understaffed_shifts.length > 0 ||
+				lastDraftResult.under_points_floor.length > 0 ||
+				lastDraftResult.warnings.length > 0 ? (
+					<Alert
+						type="warning"
+						header={`Draft "${lastDraftResult.draft.draft_name}" created with warnings`}
+						dismissible
+						onDismiss={() => setLastDraftResult(null)}
+					>
+						<SpaceBetween size="xs">
+							{lastDraftResult.understaffed_shifts.length > 0 && (
+								<Box>
+									Understaffed shifts:{" "}
+									{lastDraftResult.understaffed_shifts.join(", ")}
+								</Box>
+							)}
+							{lastDraftResult.under_points_floor.length > 0 && (
+								<Box>
+									Organizers below the points minimum:{" "}
+									{lastDraftResult.under_points_floor.join(", ")}
+								</Box>
+							)}
+							{lastDraftResult.warnings.map((warning) => (
+								<Box key={warning}>{warning}</Box>
+							))}
+						</SpaceBetween>
+					</Alert>
+				) : (
+					<Alert
+						type="success"
+						header={`Draft "${lastDraftResult.draft.draft_name}" created`}
+						dismissible
+						onDismiss={() => setLastDraftResult(null)}
+					>
+						Every shift is fully staffed and every organizer meets the points
+						minimum.
+					</Alert>
+				))}
+
+			<Modal
+				visible={generateModalVisible}
+				onDismiss={() => {
+					if (!generatingDraft) {
+						setGenerateModalVisible(false);
+					}
+				}}
+				header="Generate a shift draft"
+				footer={
+					<Box float="right">
+						<SpaceBetween direction="horizontal" size="xs">
+							<Button
+								variant="link"
+								disabled={generatingDraft}
+								onClick={() => setGenerateModalVisible(false)}
+							>
+								Cancel
+							</Button>
+							<Button
+								variant="primary"
+								loading={generatingDraft}
+								disabled={!draftName.trim()}
+								onClick={handleGenerateDraft}
+							>
+								Generate draft
+							</Button>
+						</SpaceBetween>
+					</Box>
+				}
+			>
+				<SpaceBetween size="m">
+					<TextContent>
+						<p>
+							Shifts will be assigned automatically from submitted availability,
+							with at least {minimumPts.trim() || "0"} points per organizer. The
+							result is saved as a new draft; the template itself is not
+							changed.
+						</p>
+					</TextContent>
+					<FormField label="Draft name" errorText={generateError ?? undefined}>
+						<Input
+							value={draftName}
+							onChange={({ detail }) => setDraftName(detail.value)}
+							placeholder="e.g. Auto draft 1"
+						/>
+					</FormField>
+				</SpaceBetween>
+			</Modal>
 
 			<Modal
 				visible={clearModalVisible}

@@ -481,10 +481,16 @@ async def request_waiver(
 async def decline_acceptance(
     user: Annotated[User, Depends(require_user_identity)],
 ) -> RedirectResponse:
-    """Allow accepted hackers to void their own application."""
+    """Allow accepted hackers and mentors to void their own application."""
     user_record = await mongodb_handler.retrieve_one(
         Collection.USERS,
-        {"_id": user.uid, "roles": {"$all": [Role.APPLICANT, Role.HACKER]}},
+        {
+            "_id": user.uid,
+            "roles": {
+                "$all": [Role.APPLICANT],
+                "$in": [Role.HACKER, Role.MENTOR],
+            },
+        },
         ["status", "decision"],
     )
 
@@ -507,7 +513,7 @@ async def decline_acceptance(
     if not is_accepted or user_record["status"] not in allowed_decline_statuses:
         raise HTTPException(
             status.HTTP_403_FORBIDDEN,
-            "Only accepted hackers can decline their spot.",
+            "Only accepted hackers and mentors can decline their spot.",
         )
 
     ok = await mongodb_handler.update_one(
@@ -518,7 +524,7 @@ async def decline_acceptance(
     if not ok:
         raise RuntimeError(f"Error voiding applicant {user.uid}")
 
-    log.info("%s declined their accepted hacker spot.", user.uid)
+    log.info("%s declined their accepted spot.", user.uid)
     return RedirectResponse("/portal", status.HTTP_303_SEE_OTHER)
 
 

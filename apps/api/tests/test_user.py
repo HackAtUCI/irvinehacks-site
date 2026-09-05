@@ -213,7 +213,10 @@ def test_accepted_hacker_can_decline_acceptance(
         Collection.USERS,
         {
             "_id": "edu.stanford.tree",
-            "roles": {"$all": [Role.APPLICANT, Role.HACKER]},
+            "roles": {
+                "$all": [Role.APPLICANT],
+                "$in": [Role.HACKER, Role.MENTOR],
+            },
         },
         ["status", "decision"],
     )
@@ -228,11 +231,33 @@ def test_accepted_hacker_can_decline_acceptance(
 
 @patch("services.mongodb_handler.update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
-def test_non_hacker_cannot_decline_acceptance(
+def test_accepted_mentor_can_decline_acceptance(
     mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_mongodb_handler_update_one: AsyncMock,
 ) -> None:
-    """Test non-hackers cannot use the hacker decline acceptance flow."""
+    """Test accepted mentors can void their own application."""
+    mock_mongodb_handler_retrieve_one.return_value = {"status": Decision.ACCEPTED}
+    mock_mongodb_handler_update_one.return_value = True
+
+    auth_client = UserTestClient(GuestUser(email=USER_EMAIL), app)
+    res = auth_client.post("/decline-acceptance", follow_redirects=False)
+
+    mock_mongodb_handler_update_one.assert_awaited_once_with(
+        Collection.USERS,
+        {"_id": "edu.stanford.tree"},
+        {"status": Decision.VOIDED, "decision": Decision.VOIDED},
+    )
+    assert res.status_code == status.HTTP_303_SEE_OTHER
+    assert res.headers["location"] == "/portal"
+
+
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_non_hacker_or_mentor_cannot_decline_acceptance(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_update_one: AsyncMock,
+) -> None:
+    """Test other roles cannot use the applicant decline acceptance flow."""
     mock_mongodb_handler_retrieve_one.return_value = None
 
     auth_client = UserTestClient(GuestUser(email=USER_EMAIL), app)

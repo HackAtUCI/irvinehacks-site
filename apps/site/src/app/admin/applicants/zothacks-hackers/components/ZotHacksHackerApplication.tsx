@@ -247,6 +247,48 @@ function ZotHacksHackerApplication({
 				wordLimit={75}
 				disabled={reviewDisabled}
 			/>
+			<Container header={<Header variant="h3">Drawing Submission</Header>}>
+				<SpaceBetween direction="vertical" size="m">
+					{application_data.drawing_response ? (
+						<div
+							style={{
+								display: "flex",
+								justifyContent: "center",
+								padding: "1rem",
+							}}
+						>
+							{/* eslint-disable-next-line @next/next/no-img-element */}
+							<img
+								src={application_data.drawing_response}
+								alt="Applicant's Peter Anteater Drawing"
+								style={{
+									maxWidth: "100%",
+									maxHeight: "460px",
+									objectFit: "contain",
+									border: "2px solid #e5e7eb",
+									borderRadius: "8px",
+									backgroundColor: "#ffffff",
+									boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)",
+								}}
+							/>
+						</div>
+					) : (
+						<p>No drawing provided.</p>
+					)}
+					{application_data.peter_thought_process_saq && (
+						<div>
+							<Box variant="h4">
+								Describe your thought process as you decorated your Peter.
+								Now that you&apos;ve finished your design, is there anything you
+								wish you&apos;d done differently? [Max 100 words]
+							</Box>
+							<p style={{ marginTop: "0.5rem", whiteSpace: "pre-wrap" }}>
+								{application_data.peter_thought_process_saq}
+							</p>
+						</div>
+					)}
+				</SpaceBetween>
+			</Container>
 			<ReviewerNotes
 				applicant={applicant}
 				notes={notes}

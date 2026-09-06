@@ -26,6 +26,8 @@ export interface ZotHacksHackerApplicationData extends BaseApplicationData {
 	collaboration_saq: string;
 	tech_inspiration_saq: string;
 	uci_gift_saq: string;
+	drawing_response: string;
+	peter_thought_process_saq?: string | null;
 	comments: string | null;
 	resume_url: string | null;
 	submission_time: string;

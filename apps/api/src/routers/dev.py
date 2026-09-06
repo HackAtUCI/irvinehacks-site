@@ -19,7 +19,9 @@ async def impersonate(ucinetid: str) -> RedirectResponse:
     )
 
     redirect_path = (
-        "/" if hackathon_name_ctx.get() == HackathonName.ZOTHACKS else "/admin/dashboard"
+        "/"
+        if hackathon_name_ctx.get() == HackathonName.ZOTHACKS
+        else "/admin/dashboard"
     )
     res = RedirectResponse(redirect_path, status_code=303)
     user_identity.issue_user_identity(user, res)

@@ -154,6 +154,7 @@ async def test_get_participants(mock_retrieve: AsyncMock) -> None:
         ANY,
         PARTICIPANT_FIELDS,
     )
+    assert mock_retrieve.await_args is not None
     query = mock_retrieve.await_args.args[1]
     assert all("decision" not in branch for branch in query["$or"])
 

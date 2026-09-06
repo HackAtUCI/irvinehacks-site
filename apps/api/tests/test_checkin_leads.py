@@ -11,7 +11,6 @@ from routers.checkin_leads import (
 )
 from routers.user import DEFAULT_CHECKIN_TIME
 from models.user_record import Role, Status
-from models.ApplicationData import Decision
 from services.mongodb_handler import Collection
 from services.sendgrid_handler import Template
 from utils.email_handler import IH_SENDER
@@ -19,11 +18,9 @@ from utils.email_handler import IH_SENDER
 
 @pytest.mark.asyncio
 @patch("services.mongodb_handler.retrieve", autospec=True)
-@patch("routers.checkin_leads._process_decision", autospec=True)
 @patch("routers.checkin_leads._process_status", autospec=True)
 async def test_queue_removal_success(
     mock_process_status: AsyncMock,
-    mock_process_decision: AsyncMock,
     mock_retrieve: AsyncMock,
 ) -> None:
     mock_retrieve.return_value = [
@@ -40,9 +37,6 @@ async def test_queue_removal_success(
             "status": Status.CONFIRMED,
             "arrival_time": DEFAULT_CHECKIN_TIME,
         },
-    )
-    mock_process_decision.assert_awaited_once_with(
-        ("user1", "user2"), Decision.WAITLISTED, no_modifications_ok=True
     )
     mock_process_status.assert_awaited_once_with(
         ("user1", "user2"), Status.WAIVER_SIGNED

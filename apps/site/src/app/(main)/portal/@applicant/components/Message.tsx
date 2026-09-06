@@ -15,8 +15,8 @@ function Message({ status, waitlistStarted }: MessageProps) {
 					Thank you for applying to IrvineHacks this year. We have read through
 					many applications so far, and unfortunately are unable to offer you a
 					spot at our event. We highly encourage you to continue developing your
-					skills and passion for technology. We would love to see you apply again
-					next year!
+					skills and passion for technology. We would love to see you apply
+					again next year!
 				</p>
 			);
 			break;
@@ -56,7 +56,9 @@ function Message({ status, waitlistStarted }: MessageProps) {
 					<br />
 					<br />
 					Note that check-in will start on{" "}
-					<strong className="underline">Friday, 2/27 at 6:00 p.m. PST</strong>{" "}
+					<strong className="underline">
+						Friday, 2/27 at 6:00 p.m. PST
+					</strong>{" "}
 					and will be on first-come first-served basis depending on venue
 					capacity.
 				</p>
@@ -68,7 +70,9 @@ function Message({ status, waitlistStarted }: MessageProps) {
 					<br />
 					<br />
 					Check back to this page on{" "}
-					<strong className="underline">Friday, 2/20 at 12:00 p.m. PST</strong>{" "}
+					<strong className="underline">
+						Friday, 2/20 at 12:00 p.m. PST
+					</strong>{" "}
 					for when our waitlist opens. Please check your email for more info
 					about the waitlist and waitlist walk-ins!
 				</p>

@@ -1,4 +1,4 @@
-import { PostAcceptedStatus, Status } from "@/lib/userRecord";
+import { Status } from "@/lib/userRecord";
 
 interface MessageProps {
 	status: Status;
@@ -92,7 +92,7 @@ function Message({ status, waitlistStarted }: MessageProps) {
 		case Status.Accepted:
 		case Status.Signed:
 		case Status.Attending:
-		case PostAcceptedStatus.Queued: {
+		case Status.Queued: {
 			message = <></>;
 			break;
 		}

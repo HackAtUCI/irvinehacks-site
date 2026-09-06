@@ -33,7 +33,7 @@ interface ApplicantFiltersProps {
 	setSortOption?: Dispatch<SetStateAction<SelectProps.Option>>;
 }
 
-const StatusIcons: Record<Status, IconProps.Name> = {
+const StatusIcons: Record<Status | Decision, IconProps.Name> = {
 	[ReviewStatus.Pending]: "status-pending",
 	[ReviewStatus.Reviewed]: "status-in-progress",
 	[Decision.Accepted]: "status-positive",
@@ -46,7 +46,7 @@ const StatusIcons: Record<Status, IconProps.Name> = {
 	[PostAcceptedStatus.Queued]: "status-in-progress",
 };
 
-const statusOption = (status: Status): MultiselectProps.Option => ({
+const statusOption = (status: Status | Decision): MultiselectProps.Option => ({
 	label: StatusLabels[status],
 	value: status,
 	iconName: StatusIcons[status],

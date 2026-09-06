@@ -33,10 +33,7 @@ export enum AdminRole {
 /** All of the different possible user roles. */
 export type Role = ParticipantRole | AdminRole;
 
-/**
- * The decision for an applicant.
- * An applicant's decision becomes their status when released.
- */
+/** The decision for an applicant. */
 export enum Decision {
 	Accepted = "ACCEPTED",
 	Rejected = "REJECTED",
@@ -62,6 +59,10 @@ export enum PostAcceptedStatus {
 
 /** All of the different possible status values. */
 export const Status = { ...ReviewStatus, ...Decision, ...PostAcceptedStatus };
-export type Status = ReviewStatus | Decision | PostAcceptedStatus;
+export type Status =
+	| ReviewStatus
+	| Decision.Rejected
+	| Decision.Waitlisted
+	| PostAcceptedStatus;
 
 export const ReviewDecision = { ...Decision };

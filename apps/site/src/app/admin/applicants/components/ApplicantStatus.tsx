@@ -2,7 +2,7 @@ import StatusIndicator, {
 	StatusIndicatorProps,
 } from "@cloudscape-design/components/status-indicator";
 
-import { Status } from "@/lib/userRecord";
+import { Decision, Status } from "@/lib/userRecord";
 
 export const StatusLabels = {
 	[Status.Accepted]: "accepted",
@@ -17,7 +17,9 @@ export const StatusLabels = {
 	[Status.Queued]: "queued",
 };
 
-const StatusTypes: Record<Status, StatusIndicatorProps.Type> = {
+type ApplicantStatusValue = Status | Decision;
+
+const StatusTypes: Record<ApplicantStatusValue, StatusIndicatorProps.Type> = {
 	[Status.Accepted]: "success",
 	[Status.Rejected]: "error",
 	[Status.Waitlisted]: "pending",
@@ -31,7 +33,7 @@ const StatusTypes: Record<Status, StatusIndicatorProps.Type> = {
 };
 
 interface ApplicantStatusProps {
-	status: Status;
+	status: ApplicantStatusValue;
 }
 
 function ApplicantStatus({ status }: ApplicantStatusProps) {

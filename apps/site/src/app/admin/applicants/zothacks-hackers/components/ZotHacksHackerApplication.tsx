@@ -278,8 +278,8 @@ function ZotHacksHackerApplication({
 					{application_data.peter_thought_process_saq && (
 						<div>
 							<Box variant="h4">
-								Describe your thought process as you decorated your Peter.
-								Now that you&apos;ve finished your design, is there anything you
+								Describe your thought process as you decorated your Peter. Now
+								that you&apos;ve finished your design, is there anything you
 								wish you&apos;d done differently? [Max 100 words]
 							</Box>
 							<p style={{ marginTop: "0.5rem", whiteSpace: "pre-wrap" }}>

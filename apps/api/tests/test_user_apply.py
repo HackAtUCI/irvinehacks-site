@@ -73,6 +73,8 @@ SAMPLE_ZOTHACKS_HACKER_APPLICATION = {
     "collaboration_saq": "s",
     "tech_inspiration_saq": "ss",
     "uci_gift_saq": "s",
+    "drawing_response": "data:image/png;base64,sample_drawing_base64_data",
+    "peter_thought_process_saq": "s",
     "comments": "a",
     "application_type": "Hacker",
 }
@@ -234,6 +236,71 @@ def test_zothacks_hacker_apply_successfully(
     mock_send_application_confirmation_email.assert_awaited_once_with(
         USER_EMAIL, EXPECTED_ZOTHACKS_HACKER_USER, Role.HACKER
     )
+    assert res.status_code == 201
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_zothacks_hacker_apply_without_drawing_response_causes_422(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.return_value = None
+    bad_application = copy.deepcopy(SAMPLE_ZOTHACKS_HACKER_APPLICATION)
+    del bad_application["drawing_response"]
+    res = client.post("/apply", data=bad_application, files=SAMPLE_FILES)
+
+    mock_mongodb_handler_retrieve_one.assert_not_called()
+    assert res.status_code == 422
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_zothacks_hacker_apply_with_empty_drawing_response_causes_422(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.return_value = None
+    bad_application = copy.deepcopy(SAMPLE_ZOTHACKS_HACKER_APPLICATION)
+    bad_application["drawing_response"] = ""
+    res = client.post("/apply", data=bad_application, files=SAMPLE_FILES)
+
+    mock_mongodb_handler_retrieve_one.assert_not_called()
+    assert res.status_code == 422
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_zothacks_hacker_apply_without_peter_thought_process_causes_422(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.return_value = None
+    bad_application = copy.deepcopy(SAMPLE_ZOTHACKS_HACKER_APPLICATION)
+    del bad_application["peter_thought_process_saq"]
+    res = client.post("/apply", data=bad_application, files=SAMPLE_FILES)
+
+    mock_mongodb_handler_retrieve_one.assert_not_called()
+    assert res.status_code == 422
+
+
+@patch("utils.email_handler.send_application_confirmation_email", autospec=True)
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("routers.user._is_past_deadline", autospec=True)
+@patch("routers.user.datetime", autospec=True)
+@patch("services.gdrive_handler.upload_file", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_zothacks_hacker_apply_with_large_drawing_response_successfully(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_gdrive_handler_upload_file: AsyncMock,
+    mock_datetime: Mock,
+    mock_is_past_deadline: Mock,
+    mock_mongodb_handler_update_one: AsyncMock,
+    mock_raw_update_one: AsyncMock,
+    mock_send_application_confirmation_email: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.return_value = None
+    mock_gdrive_handler_upload_file.return_value = SAMPLE_RESUME_URL
+    mock_datetime.now.return_value = SAMPLE_SUBMISSION_TIME
+    mock_is_past_deadline.return_value = False
+    large_drawing_app = copy.deepcopy(SAMPLE_ZOTHACKS_HACKER_APPLICATION)
+    large_drawing_app["drawing_response"] = "data:image/png;base64," + ("A" * 50_000)
+    res = client.post("/apply", data=large_drawing_app, files=SAMPLE_FILES)
     assert res.status_code == 201
 
 

@@ -124,6 +124,19 @@ function ZotHacksHackerApplication({
 			? application_data?.review_breakdown?.[formattedUid]?.uci_gift_saq ?? -1
 			: -1,
 	);
+	const [drawingScore, setDrawingScore] = useState<number>(
+		formattedUid
+			? application_data?.review_breakdown?.[formattedUid]?.drawing_response ??
+					-1
+			: -1,
+	);
+	const [peterThoughtProcessScore, setPeterThoughtProcessScore] =
+		useState<number>(
+			formattedUid
+				? application_data?.review_breakdown?.[formattedUid]
+						?.peter_thought_process_saq ?? -1
+				: -1,
+		);
 
 	const [showResume, setShowResume] = useState<boolean>(false);
 
@@ -150,6 +163,12 @@ function ZotHacksHackerApplication({
 		if (uciGiftScore !== -1) {
 			scoresObject.uci_gift_saq = uciGiftScore;
 		}
+		if (drawingScore !== -1) {
+			scoresObject.drawing_response = drawingScore;
+		}
+		if (peterThoughtProcessScore !== -1) {
+			scoresObject.peter_thought_process_saq = peterThoughtProcessScore;
+		}
 
 		onScoreChange(scoresObject);
 	}, [
@@ -158,6 +177,8 @@ function ZotHacksHackerApplication({
 		collaborationScore,
 		techInspirationScore,
 		uciGiftScore,
+		drawingScore,
+		peterThoughtProcessScore,
 		onScoreChange,
 	]);
 
@@ -245,6 +266,64 @@ function ZotHacksHackerApplication({
 				value={uciGiftScore}
 				onChange={setUciGiftScore}
 				wordLimit={75}
+				disabled={reviewDisabled}
+			/>
+			<ScoreSection
+				title="Draw your current emotional state on a blank Anteater face."
+				min={0}
+				max={10}
+				leftColumn={
+					<PortableText value={guidelines.guidelines.drawing_response} />
+				}
+				rightColumn={
+					application_data.drawing_response ? (
+						<div
+							style={{
+								display: "flex",
+								justifyContent: "center",
+								padding: "1rem",
+							}}
+						>
+							{/* eslint-disable-next-line @next/next/no-img-element */}
+							<img
+								src={application_data.drawing_response}
+								alt="Applicant's Peter Anteater Drawing"
+								style={{
+									maxWidth: "100%",
+									maxHeight: "460px",
+									objectFit: "contain",
+									border: "2px solid #e5e7eb",
+									borderRadius: "8px",
+									backgroundColor: "#ffffff",
+									boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)",
+								}}
+							/>
+						</div>
+					) : (
+						<p>No drawing provided.</p>
+					)
+				}
+				value={drawingScore}
+				onChange={setDrawingScore}
+				disabled={reviewDisabled}
+			/>
+			<ScoreSection
+				title="Describe your thought process as you decorated your Peter. Now that you've finished your design, is there anything you wish you'd done differently? [Max 100 words]"
+				min={0}
+				max={10}
+				leftColumn={
+					<PortableText
+						value={guidelines.guidelines.peter_thought_process_saq}
+					/>
+				}
+				rightColumn={
+					<p style={{ whiteSpace: "pre-wrap" }}>
+						{application_data.peter_thought_process_saq}
+					</p>
+				}
+				value={peterThoughtProcessScore}
+				onChange={setPeterThoughtProcessScore}
+				wordLimit={100}
 				disabled={reviewDisabled}
 			/>
 			<ReviewerNotes

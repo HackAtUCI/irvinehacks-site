@@ -36,6 +36,18 @@ export default defineType({
 					type: "array",
 					of: [{ type: "block" }],
 				}),
+				defineField({
+					name: "drawing_response",
+					title: "Drawing Response",
+					type: "array",
+					of: [{ type: "block" }],
+				}),
+				defineField({
+					name: "peter_thought_process_saq",
+					title: "Peter Thought Process SAQ",
+					type: "array",
+					of: [{ type: "block" }],
+				}),
 			],
 			options: {
 				collapsible: true,

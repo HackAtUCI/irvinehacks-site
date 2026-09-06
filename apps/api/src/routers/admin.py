@@ -195,6 +195,8 @@ class ZotHacksHackerDetailedScores(BaseModel):
     collaboration_saq: int
     tech_inspiration_saq: int
     uci_gift_saq: int
+    drawing_response: int
+    peter_thought_process_saq: int
     hackathon_experience: Optional[int] = None
 
 

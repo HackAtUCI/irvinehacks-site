@@ -252,6 +252,32 @@ def test_zothacks_hacker_apply_without_drawing_response_causes_422(
     assert res.status_code == 422
 
 
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_zothacks_hacker_apply_with_empty_drawing_response_causes_422(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.return_value = None
+    bad_application = copy.deepcopy(SAMPLE_ZOTHACKS_HACKER_APPLICATION)
+    bad_application["drawing_response"] = ""
+    res = client.post("/apply", data=bad_application, files=SAMPLE_FILES)
+
+    mock_mongodb_handler_retrieve_one.assert_not_called()
+    assert res.status_code == 422
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_zothacks_hacker_apply_without_peter_thought_process_causes_422(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.return_value = None
+    bad_application = copy.deepcopy(SAMPLE_ZOTHACKS_HACKER_APPLICATION)
+    del bad_application["peter_thought_process_saq"]
+    res = client.post("/apply", data=bad_application, files=SAMPLE_FILES)
+
+    mock_mongodb_handler_retrieve_one.assert_not_called()
+    assert res.status_code == 422
+
+
 @patch("utils.email_handler.send_application_confirmation_email", autospec=True)
 @patch("services.mongodb_handler.raw_update_one", autospec=True)
 @patch("services.mongodb_handler.update_one", autospec=True)

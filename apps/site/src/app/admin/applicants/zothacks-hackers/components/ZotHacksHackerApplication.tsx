@@ -124,6 +124,19 @@ function ZotHacksHackerApplication({
 			? application_data?.review_breakdown?.[formattedUid]?.uci_gift_saq ?? -1
 			: -1,
 	);
+	const [drawingScore, setDrawingScore] = useState<number>(
+		formattedUid
+			? application_data?.review_breakdown?.[formattedUid]?.drawing_response ??
+					-1
+			: -1,
+	);
+	const [peterThoughtProcessScore, setPeterThoughtProcessScore] =
+		useState<number>(
+			formattedUid
+				? application_data?.review_breakdown?.[formattedUid]
+						?.peter_thought_process_saq ?? -1
+				: -1,
+		);
 
 	const [showResume, setShowResume] = useState<boolean>(false);
 
@@ -150,6 +163,12 @@ function ZotHacksHackerApplication({
 		if (uciGiftScore !== -1) {
 			scoresObject.uci_gift_saq = uciGiftScore;
 		}
+		if (drawingScore !== -1) {
+			scoresObject.drawing_response = drawingScore;
+		}
+		if (peterThoughtProcessScore !== -1) {
+			scoresObject.peter_thought_process_saq = peterThoughtProcessScore;
+		}
 
 		onScoreChange(scoresObject);
 	}, [
@@ -158,6 +177,8 @@ function ZotHacksHackerApplication({
 		collaborationScore,
 		techInspirationScore,
 		uciGiftScore,
+		drawingScore,
+		peterThoughtProcessScore,
 		onScoreChange,
 	]);
 
@@ -247,9 +268,15 @@ function ZotHacksHackerApplication({
 				wordLimit={75}
 				disabled={reviewDisabled}
 			/>
-			<Container header={<Header variant="h3">Drawing Submission</Header>}>
-				<SpaceBetween direction="vertical" size="m">
-					{application_data.drawing_response ? (
+			<ScoreSection
+				title="Draw your current emotional state on a blank Anteater face."
+				min={0}
+				max={10}
+				leftColumn={
+					<PortableText value={guidelines.guidelines.drawing_response} />
+				}
+				rightColumn={
+					application_data.drawing_response ? (
 						<div
 							style={{
 								display: "flex",
@@ -274,21 +301,31 @@ function ZotHacksHackerApplication({
 						</div>
 					) : (
 						<p>No drawing provided.</p>
-					)}
-					{application_data.peter_thought_process_saq && (
-						<div>
-							<Box variant="h4">
-								Describe your thought process as you decorated your Peter. Now
-								that you&apos;ve finished your design, is there anything you
-								wish you&apos;d done differently? [Max 100 words]
-							</Box>
-							<p style={{ marginTop: "0.5rem", whiteSpace: "pre-wrap" }}>
-								{application_data.peter_thought_process_saq}
-							</p>
-						</div>
-					)}
-				</SpaceBetween>
-			</Container>
+					)
+				}
+				value={drawingScore}
+				onChange={setDrawingScore}
+				disabled={reviewDisabled}
+			/>
+			<ScoreSection
+				title="Describe your thought process as you decorated your Peter. Now that you've finished your design, is there anything you wish you'd done differently? [Max 100 words]"
+				min={0}
+				max={10}
+				leftColumn={
+					<PortableText
+						value={guidelines.guidelines.peter_thought_process_saq}
+					/>
+				}
+				rightColumn={
+					<p style={{ whiteSpace: "pre-wrap" }}>
+						{application_data.peter_thought_process_saq}
+					</p>
+				}
+				value={peterThoughtProcessScore}
+				onChange={setPeterThoughtProcessScore}
+				wordLimit={100}
+				disabled={reviewDisabled}
+			/>
 			<ReviewerNotes
 				applicant={applicant}
 				notes={notes}

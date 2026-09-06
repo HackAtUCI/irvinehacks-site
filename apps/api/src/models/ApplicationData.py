@@ -188,8 +188,8 @@ class BaseZotHacksHackerApplicationData(BaseModel):
     collaboration_saq: str = Field(max_length=1024)
     tech_inspiration_saq: str = Field(max_length=1024)
     uci_gift_saq: str = Field(max_length=1024)
-    drawing_response: str = Field(max_length=2_000_000)
-    peter_thought_process_saq: Union[str, None] = Field(None, max_length=1024)
+    drawing_response: str = Field(min_length=1, max_length=2_000_000)
+    peter_thought_process_saq: str = Field(min_length=1, max_length=1024)
     comments: Union[str, None] = Field(None, max_length=2048)
 
 

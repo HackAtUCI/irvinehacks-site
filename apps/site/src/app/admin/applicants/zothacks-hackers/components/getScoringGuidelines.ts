@@ -3,14 +3,21 @@ import { cache } from "react";
 import { client } from "@/lib/sanity/client";
 import { groq } from "next-sanity";
 
+const portableTextBlocks = z
+	.array(z.any())
+	.nullish()
+	.transform((value) => value ?? []);
+
 export const ZothacksHackerScoringGuidelines = z.object({
 	_id: z.string(),
 	_type: z.literal("zothacksHackerScoringGuidelines"),
 	guidelines: z.object({
-		resume: z.array(z.any()),
-		collaboration_saq: z.array(z.any()),
-		tech_inspiration_saq: z.array(z.any()),
-		uci_gift_saq: z.array(z.any()),
+		resume: portableTextBlocks,
+		collaboration_saq: portableTextBlocks,
+		tech_inspiration_saq: portableTextBlocks,
+		uci_gift_saq: portableTextBlocks,
+		drawing_response: portableTextBlocks,
+		peter_thought_process_saq: portableTextBlocks,
 	}),
 });
 
@@ -27,7 +34,9 @@ export const getZothacksHackerScoringGuidelines = cache(async () => {
         resume,
         collaboration_saq,
         tech_inspiration_saq,
-        uci_gift_saq
+        uci_gift_saq,
+        drawing_response,
+        peter_thought_process_saq,
       }
     }`,
 	);

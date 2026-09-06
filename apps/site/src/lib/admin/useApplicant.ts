@@ -27,7 +27,7 @@ export interface ZotHacksHackerApplicationData extends BaseApplicationData {
 	tech_inspiration_saq: string;
 	uci_gift_saq: string;
 	drawing_response: string;
-	peter_thought_process_saq?: string | null;
+	peter_thought_process_saq: string;
 	comments: string | null;
 	resume_url: string | null;
 	submission_time: string;
@@ -38,6 +38,8 @@ export interface ZotHacksHackerApplicationData extends BaseApplicationData {
 			collaboration_saq: number;
 			tech_inspiration_saq: number;
 			uci_gift_saq: number;
+			drawing_response: number;
+			peter_thought_process_saq: number;
 		};
 	};
 	global_field_scores?: { resume?: number };

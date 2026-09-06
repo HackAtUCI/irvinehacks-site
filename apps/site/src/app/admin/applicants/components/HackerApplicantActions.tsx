@@ -93,16 +93,23 @@ function HackerApplicantActions({
 			"collaboration_saq",
 			"tech_inspiration_saq",
 			"uci_gift_saq",
+			"drawing_response",
+			"peter_thought_process_saq",
 		].some((field) => field in scores);
+		const requiredZotHacksFields = [
+			"collaboration_saq",
+			"tech_inspiration_saq",
+			"uci_gift_saq",
+			"drawing_response",
+			"peter_thought_process_saq",
+		];
 		const hasMissingFields =
 			(hasIrvineHacksScoring &&
 				["frq_change", "frq_ambition", "frq_character"].some(
 					(field) => !(field in scores),
 				)) ||
 			(hasZotHacksScoring &&
-				["collaboration_saq", "tech_inspiration_saq", "uci_gift_saq"].some(
-					(field) => !(field in scores),
-				));
+				requiredZotHacksFields.some((field) => !(field in scores)));
 
 		if (hasMissingFields) {
 			const msgId = `missing-fields-${Date.now()}`;

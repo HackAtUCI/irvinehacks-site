@@ -11,6 +11,8 @@ export interface ZotHacksHackerScoredFields {
 	collaboration_saq?: number;
 	tech_inspiration_saq?: number;
 	uci_gift_saq?: number;
+	drawing_response?: number;
+	peter_thought_process_saq?: number;
 	hackathon_experience?: number;
 }
 

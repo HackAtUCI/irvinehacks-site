@@ -1070,6 +1070,8 @@ async def test_handle_detailed_scores_review_success(
         collaboration_saq=7,
         tech_inspiration_saq=9,
         uci_gift_saq=6,
+        drawing_response=8,
+        peter_thought_process_saq=7,
         hackathon_experience=10,
     )
     reviewer = USER_REVIEWER
@@ -1122,6 +1124,8 @@ async def test_handle_detailed_scores_review_non_lead_user(
         collaboration_saq=7,
         tech_inspiration_saq=9,
         uci_gift_saq=6,
+        drawing_response=8,
+        peter_thought_process_saq=7,
         hackathon_experience=10,
     )
     reviewer = USER_REVIEWER
@@ -1164,6 +1168,8 @@ async def test_handle_detailed_scores_review_invalid_score(
         collaboration_saq=100,
         tech_inspiration_saq=100,
         uci_gift_saq=100,
+        drawing_response=100,
+        peter_thought_process_saq=100,
         hackathon_experience=10,
     )
     reviewer = USER_REVIEWER
@@ -1319,6 +1325,8 @@ async def test_handle_detailed_scores_review_applicant_not_found(
         collaboration_saq=7,
         tech_inspiration_saq=9,
         uci_gift_saq=6,
+        drawing_response=8,
+        peter_thought_process_saq=7,
         hackathon_experience=10,
     )
     reviewer = USER_REVIEWER
@@ -1345,6 +1353,8 @@ async def test_handle_detailed_scores_review_voided_applicant(
         collaboration_saq=7,
         tech_inspiration_saq=9,
         uci_gift_saq=6,
+        drawing_response=8,
+        peter_thought_process_saq=7,
         hackathon_experience=10,
     )
     reviewer = USER_REVIEWER
@@ -1377,6 +1387,8 @@ async def test_handle_detailed_scores_review_auto_decided_applicant(
         collaboration_saq=7,
         tech_inspiration_saq=9,
         uci_gift_saq=6,
+        drawing_response=8,
+        peter_thought_process_saq=7,
         hackathon_experience=10,
     )
     reviewer = USER_REVIEWER

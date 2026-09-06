@@ -3,6 +3,7 @@ from fastapi.responses import RedirectResponse
 
 from auth import user_identity
 from auth.user_identity import NativeUser
+from utils.hackathon_context import HackathonName, hackathon_name_ctx
 
 router = APIRouter()
 
@@ -17,6 +18,11 @@ async def impersonate(ucinetid: str) -> RedirectResponse:
         affiliations=[],
     )
 
-    res = RedirectResponse("/admin/dashboard", status_code=303)
+    redirect_path = (
+        "/"
+        if hackathon_name_ctx.get() == HackathonName.ZOTHACKS
+        else "/admin/dashboard"
+    )
+    res = RedirectResponse(redirect_path, status_code=303)
     user_identity.issue_user_identity(user, res)
     return res

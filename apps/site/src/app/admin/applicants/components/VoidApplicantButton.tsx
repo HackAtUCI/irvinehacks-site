@@ -8,7 +8,7 @@ import { isDirector } from "@/lib/admin/authorization";
 import NotificationContext from "@/lib/admin/NotificationContext";
 import { voidApplicant } from "@/lib/admin/useApplicant";
 import UserContext from "@/lib/admin/UserContext";
-import { Decision, Status, Uid } from "@/lib/userRecord";
+import { Status, Uid } from "@/lib/userRecord";
 
 interface VoidApplicantButtonProps {
 	uid: Uid;
@@ -29,7 +29,7 @@ function VoidApplicantButton({
 		return null;
 	}
 
-	if (status === Decision.Voided) {
+	if (status === Status.Voided) {
 		return null;
 	}
 

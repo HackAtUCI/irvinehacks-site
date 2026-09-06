@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 
 import useUserIdentity from "@/lib/utils/useUserIdentity";
-import { Decision, Status } from "@/lib/userRecord";
+import { Status } from "@/lib/userRecord";
 import useWaitlistOpen from "@/lib/utils/useWaitlistOpen";
 
 import ConfirmAttendance from "./components/ConfirmAttendance";
@@ -18,7 +18,6 @@ import DeclineAcceptance from "./components/DeclineAcceptance";
 const rolesArray = ["Mentor", "Hacker", "Volunteer"];
 const declineableStatuses: Status[] = [
 	Status.Accepted,
-	Status.Reviewed,
 	Status.Signed,
 	Status.Confirmed,
 ];
@@ -41,27 +40,20 @@ function Portal() {
 		rolesArray.includes(role),
 	);
 
-	const isWaitlisted =
-		status === Status.Waitlisted || identity?.decision === Status.Waitlisted;
-	const isAccepted =
-		status === Status.Accepted || identity?.decision === Status.Accepted;
+	const isAccepted = status === Status.Accepted;
 
 	const waitlistStarted = waitlistStatus?.is_started ?? false;
-	const waitlistOpen = waitlistStatus?.is_open ?? false;
 	const hasSignedWaiver =
 		status === Status.Signed ||
 		status === Status.Confirmed ||
 		status === Status.Attending;
 
-	const needsToSignWaiver =
-		!hasSignedWaiver && (isAccepted || (isWaitlisted && waitlistStarted));
-	const needsToRSVP =
-		hasSignedWaiver && (isAccepted || (isWaitlisted && waitlistOpen));
+	const needsToSignWaiver = isAccepted && !hasSignedWaiver;
+	const showRSVP = status === Status.Signed || status === Status.Confirmed;
 
 	const showReturnHome = status === Status.Rejected || status === Status.Voided;
 	const canDeclineAcceptance =
-		roleToDisplay === "Hacker" &&
-		isAccepted &&
+		(roleToDisplay === "Hacker" || roleToDisplay === "Mentor") &&
 		declineableStatuses.includes(status as Status);
 
 	return (
@@ -79,22 +71,10 @@ function Portal() {
 					{roleToDisplay} Application Status
 				</h2>
 				<AvatarDisplay />
-				<VerticalTimeline
-					status={status as Status}
-					decision={identity?.decision as Decision | null}
-				/>
-				<Message
-					status={status as Status}
-					decision={identity?.decision as Decision}
-				/>
-				{needsToSignWaiver && (
-					<SignWaiver
-						status={status as Status}
-						decision={identity?.decision as Decision}
-						waitlistOpen={waitlistOpen}
-					/>
-				)}
-				{needsToRSVP && <ConfirmAttendance status={status as Status} />}
+				<VerticalTimeline status={status as Status} />
+				<Message status={status as Status} waitlistStarted={waitlistStarted} />
+				{needsToSignWaiver && <SignWaiver />}
+				{showRSVP && <ConfirmAttendance status={status as Status} />}
 				{canDeclineAcceptance && <DeclineAcceptance />}
 				{showReturnHome && <ReturnHome />}
 			</div>

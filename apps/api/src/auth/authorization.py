@@ -4,7 +4,6 @@ from fastapi import Depends, HTTPException, status
 from pydantic import ValidationError
 
 from auth.user_identity import User, require_user_identity
-from models.ApplicationData import Decision
 from models.user_record import BareApplicant, Role, Status
 from services import mongodb_handler
 from services.mongodb_handler import BaseRecord, Collection
@@ -43,22 +42,19 @@ async def require_accepted_applicant(
     record = await mongodb_handler.retrieve_one(
         Collection.USERS,
         {"_id": user.uid},
-        ["roles", "status", "decision", "first_name", "last_name"],
+        ["roles", "status", "first_name", "last_name"],
     )
 
     try:
         applicant_record = BareApplicant.model_validate(record)
 
         if applicant_record.status not in (
-            Decision.ACCEPTED,
-            Decision.WAITLISTED,
+            Status.ACCEPTED,
             Status.WAIVER_SIGNED,
             Status.CONFIRMED,
             Status.ATTENDING,
-        ) and applicant_record.decision not in (Decision.ACCEPTED, Decision.WAITLISTED):
-            raise HTTPException(
-                status.HTTP_403_FORBIDDEN, "User was not accepted or waitlisted."
-            )
+        ):
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "User was not accepted.")
 
         return user, applicant_record
     except ValidationError:

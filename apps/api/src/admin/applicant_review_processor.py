@@ -47,9 +47,6 @@ def include_hacker_app_fields_with_global_and_breakdown(
 
 def include_review_decision(applicant_record: dict[str, Any]) -> None:
     """Sets the applicant's decision as the last submitted review decision or None."""
-    if applicant_record.get("status") == Decision.VOIDED:
-        applicant_record["decision"] = Decision.VOIDED
-        return
     if _apply_auto_decision_if_any(applicant_record):
         return
     reviews = applicant_record["application_data"]["reviews"]
@@ -134,9 +131,6 @@ def _get_avg_score_with_globals_and_breakdown(
 def _include_decision_based_on_threshold(
     applicant_record: dict[str, Any], accept: float, waitlist: float
 ) -> None:
-    if applicant_record.get("status") == Decision.VOIDED:
-        applicant_record["decision"] = Decision.VOIDED
-        return
     if _apply_auto_decision_if_any(applicant_record):
         return
     avg_score = _get_avg_score(
@@ -154,9 +148,6 @@ def _include_decision_based_on_threshold(
 def _include_decision_based_on_threshold_and_score_breakdown(
     applicant_record: dict[str, Any], accept: float, waitlist: float
 ) -> None:
-    if applicant_record.get("status") == Decision.VOIDED:
-        applicant_record["decision"] = Decision.VOIDED
-        return
     if _apply_auto_decision_if_any(applicant_record):
         return
     avg_score = _get_avg_score_with_globals_and_breakdown(

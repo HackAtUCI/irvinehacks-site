@@ -7,7 +7,7 @@ from fastapi import FastAPI, HTTPException
 
 from auth import user_identity
 from auth.user_identity import NativeUser, UserTestClient
-from models.ApplicationData import Decision
+from models.user_record import Status
 from routers import admin
 from routers.admin import (
     _handle_detailed_scores_review,
@@ -432,7 +432,7 @@ def test_waitlisted_applicant_can_be_released(
     mock_mongodb_handler_retrieve_one.side_effect = [
         DIRECTOR_IDENTITY,
         {
-            "status": Decision.WAITLISTED,
+            "status": Status.WAITLISTED,
             "first_name": "Peter",
         },
     ]
@@ -442,7 +442,7 @@ def test_waitlisted_applicant_can_be_released(
     assert res.status_code == 200
 
     mock_mongodb_handler_update_one.assert_awaited_once_with(
-        Collection.USERS, {"_id": "edu.uci.petr"}, {"status": Decision.ACCEPTED}
+        Collection.USERS, {"_id": "edu.uci.petr"}, {"status": Status.ACCEPTED}
     )
     mock_sendgrid_handler_send_email.assert_awaited_once_with(
         Template.WAITLIST_RELEASE_EMAIL,
@@ -1015,7 +1015,7 @@ async def test_handle_global_only_review_voided_applicant(
     mock_mongodb_handler_retrieve_one.return_value = {
         "_id": applicant,
         "roles": ["Applicant", "Hacker"],
-        "status": Decision.VOIDED,
+        "status": Status.VOIDED,
     }
 
     with pytest.raises(HTTPException) as exc_info:
@@ -1352,7 +1352,7 @@ async def test_handle_detailed_scores_review_voided_applicant(
     mock_mongodb_handler_retrieve_one.return_value = {
         "_id": applicant,
         "roles": ["Applicant", "Hacker"],
-        "status": Decision.VOIDED,
+        "status": Status.VOIDED,
         "application_data": {"reviews": []},
     }
 

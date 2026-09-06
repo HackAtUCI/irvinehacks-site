@@ -35,7 +35,6 @@ from models.ApplicationData import (
     get_raw_mentor_discriminator_value,
 )
 from models.user_record import Applicant, BareApplicant, Role, Status
-from models.ApplicationData import Decision
 from services import docusign_handler, google_wallet_handler, mongodb_handler
 from services.docusign_handler import WebhookPayload
 from services.mongodb_handler import Collection
@@ -491,26 +490,21 @@ async def decline_acceptance(
                 "$in": [Role.HACKER, Role.MENTOR],
             },
         },
-        ["status", "decision"],
+        ["status"],
     )
 
     if not user_record or "status" not in user_record:
         raise HTTPException(status.HTTP_404_NOT_FOUND)
 
-    if user_record["status"] == Decision.VOIDED:
+    if user_record["status"] == Status.VOIDED:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Applicant is already voided.")
 
     allowed_decline_statuses = {
-        Decision.ACCEPTED,
-        Status.REVIEWED,
+        Status.ACCEPTED,
         Status.WAIVER_SIGNED,
         Status.CONFIRMED,
     }
-    is_accepted = (
-        user_record["status"] == Decision.ACCEPTED
-        or user_record.get("decision") == Decision.ACCEPTED
-    )
-    if not is_accepted or user_record["status"] not in allowed_decline_statuses:
+    if user_record["status"] not in allowed_decline_statuses:
         raise HTTPException(
             status.HTTP_403_FORBIDDEN,
             "Only accepted hackers and mentors can decline their spot.",
@@ -519,7 +513,7 @@ async def decline_acceptance(
     ok = await mongodb_handler.update_one(
         Collection.USERS,
         {"_id": user.uid},
-        {"status": Decision.VOIDED, "decision": Decision.VOIDED},
+        {"status": Status.VOIDED},
     )
     if not ok:
         raise RuntimeError(f"Error voiding applicant {user.uid}")
@@ -598,7 +592,7 @@ async def rsvp(
 ) -> RedirectResponse:
     """Change user status for RSVP"""
     user_record = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": user.uid}, ["status", "decision", "first_name"]
+        Collection.USERS, {"_id": user.uid}, ["status", "first_name"]
     )
 
     if not user_record or "status" not in user_record:
@@ -606,17 +600,9 @@ async def rsvp(
 
     new_status: Status
     if user_record["status"] == Status.WAIVER_SIGNED:
-        if (
-            user_record.get("decision") == Decision.WAITLISTED
-            and not (await _get_waitlist_status()).is_open
-        ):
-            raise HTTPException(
-                status.HTTP_403_FORBIDDEN,
-                "Waitlist is closed.",
-            )
         new_status = Status.CONFIRMED
     elif user_record["status"] == Status.CONFIRMED:
-        new_status = Status.WAIVER_SIGNED
+        new_status = Status.CONFIRMED
     else:
         log.warning(f"User {user.uid} has not signed waiver. Status has not changed.")
         raise HTTPException(
@@ -637,14 +623,14 @@ async def rsvp(
         updated_fields["late_arrival_reason"] = _validate_late_arrival_reason(
             late_arrival_reason
         )
+    old_status = user_record["status"]
     await mongodb_handler.update_one(
         Collection.USERS, {"_id": user.uid}, updated_fields
     )
 
-    old_status = user_record["status"]
     log.info(f"User {user.uid} changed status from {old_status} to {new_status}.")
 
-    if new_status == Status.CONFIRMED:
+    if old_status == Status.WAIVER_SIGNED and new_status == Status.CONFIRMED:
         try:
             await email_handler.send_rsvp_confirmation_email(
                 user.email, user_record.get("first_name", user.email.split("@")[0])

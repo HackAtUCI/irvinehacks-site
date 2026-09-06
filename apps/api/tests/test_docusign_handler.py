@@ -49,7 +49,7 @@ async def test_new_waiver_submission_can_be_processed(
         "first_name": "Nicole",
         "last_name": "Pham",
         "roles": [Role.APPLICANT],
-        "status": Decision.ACCEPTED,
+        "status": Status.ACCEPTED,
     }
     await docusign_handler.process_webhook_event(SAMPLE_WEBHOOK_DATA)
     mock_mongodb_handler_update_one.assert_awaited_once_with(
@@ -59,11 +59,11 @@ async def test_new_waiver_submission_can_be_processed(
 
 @patch("services.mongodb_handler.update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
-async def test_waiver_submission_can_be_processed_for_accepted_decision(
+async def test_waiver_submission_ignores_accepted_decision_without_accepted_status(
     mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_mongodb_handler_update_one: AsyncMock,
 ) -> None:
-    """Waiver signing works when acceptance is stored in decision."""
+    """Decision alone should not unlock waiver signing."""
     mock_mongodb_handler_retrieve_one.return_value = {
         "_id": SAMPLE_UID,
         "first_name": "Ian",
@@ -73,9 +73,7 @@ async def test_waiver_submission_can_be_processed_for_accepted_decision(
         "decision": Decision.ACCEPTED,
     }
     await docusign_handler.process_webhook_event(SAMPLE_WEBHOOK_DATA)
-    mock_mongodb_handler_update_one.assert_awaited_once_with(
-        Collection.USERS, {"_id": SAMPLE_UID}, {"status": Status.WAIVER_SIGNED}
-    )
+    mock_mongodb_handler_update_one.assert_not_awaited()
 
 
 @patch("services.mongodb_handler.update_one", autospec=True)
@@ -108,7 +106,7 @@ async def test_no_op_for_rejected_applicant(
         "first_name": "King",
         "last_name": "Triton",
         "roles": [Role.APPLICANT],
-        "status": Decision.REJECTED,
+        "status": Status.REJECTED,
     }
     await docusign_handler.process_webhook_event(SAMPLE_WEBHOOK_DATA)
     mock_mongodb_handler_update_one.assert_not_awaited()

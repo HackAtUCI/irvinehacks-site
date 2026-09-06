@@ -1,5 +1,6 @@
 """Tests for admin.participant_manager (event/subevent check-in, etc.)."""
 
+from datetime import datetime, timezone
 from unittest.mock import ANY, AsyncMock, patch
 
 import pytest
@@ -153,6 +154,8 @@ async def test_get_participants(mock_retrieve: AsyncMock) -> None:
         ANY,
         PARTICIPANT_FIELDS,
     )
+    query = mock_retrieve.await_args.args[1]
+    assert all("decision" not in branch for branch in query["$or"])
 
 
 # ---- check_in_participant ----
@@ -170,7 +173,9 @@ async def test_check_in_participant_success(
     await check_in_participant(uid, USER_ASSOCIATE)
 
     mock_retrieve_one.assert_awaited_once_with(
-        Collection.USERS, {"_id": uid, "roles": {"$exists": True}}, ["status"]
+        Collection.USERS,
+        {"_id": uid, "roles": {"$exists": True}},
+        ["status", "checkins"],
     )
     mock_raw_update_one.assert_awaited_once_with(
         Collection.USERS,
@@ -200,6 +205,56 @@ async def test_check_in_participant_invalid_status(
         ValueError, match="User is PENDING_REVIEW and can not be checked in."
     ):
         await check_in_participant("user123", USER_ASSOCIATE)
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_check_in_participant_attending_from_previous_day_allowed(
+    mock_retrieve_one: AsyncMock,
+    mock_raw_update_one: AsyncMock,
+) -> None:
+    """ATTENDING user can check in again on a later Pacific date."""
+    uid = "user123"
+    mock_retrieve_one.return_value = {
+        "status": Status.ATTENDING,
+        "checkins": [
+            (datetime(2026, 9, 5, 6, 30, tzinfo=timezone.utc), USER_ASSOCIATE.uid)
+        ],
+    }
+    mock_raw_update_one.return_value = True
+
+    with patch(
+        "admin.participant_manager.utc_now",
+        return_value=datetime(2026, 9, 6, 7, 30, tzinfo=timezone.utc),
+    ):
+        await check_in_participant(uid, USER_ASSOCIATE)
+
+    mock_raw_update_one.assert_awaited_once()
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_check_in_participant_attending_same_pacific_day_rejected(
+    mock_retrieve_one: AsyncMock,
+    mock_raw_update_one: AsyncMock,
+) -> None:
+    """ATTENDING user cannot check in twice on the same Pacific date."""
+    uid = "user123"
+    mock_retrieve_one.return_value = {
+        "status": Status.ATTENDING,
+        "checkins": [
+            (datetime(2026, 9, 5, 8, 30, tzinfo=timezone.utc), USER_ASSOCIATE.uid)
+        ],
+    }
+
+    with patch(
+        "admin.participant_manager.utc_now",
+        return_value=datetime(2026, 9, 6, 6, 30, tzinfo=timezone.utc),
+    ):
+        with pytest.raises(AlreadyCheckedInError, match="already checked in today"):
+            await check_in_participant(uid, USER_ASSOCIATE)
+
+    mock_raw_update_one.assert_not_awaited()
 
 
 # ---- add_participant_to_queue ----

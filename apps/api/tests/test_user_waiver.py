@@ -8,7 +8,6 @@ from test_docusign_handler import SAMPLE_WEBHOOK_PAYLOAD
 
 from auth.authorization import require_accepted_applicant
 from auth.user_identity import User
-from models.ApplicationData import Decision
 from models.user_record import BareApplicant, Role, Status
 from routers import user
 from services import docusign_handler
@@ -29,7 +28,7 @@ def test_accepted_user_can_request_waiver() -> None:
             first_name="Riley",
             last_name="Wong",
             roles=(Role.APPLICANT,),
-            status=Decision.ACCEPTED,
+            status=Status.ACCEPTED,
         ),
     )
 

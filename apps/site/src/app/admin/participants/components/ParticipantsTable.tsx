@@ -23,9 +23,9 @@ import RoleBadge from "./RoleBadge";
 import SearchScannerModal from "./SearchScannerModal";
 import StatusIndicator from "@cloudscape-design/components/status-indicator";
 
-const FRIDAY = new Date("2026-02-27T12:00:00");
-const SATURDAY = new Date("2026-02-28T12:00:00");
-const SUNDAY = new Date("2026-03-01T12:00:00");
+const FRIDAY = new Date("2026-10-16T12:00:00");
+const SATURDAY = new Date("2026-10-17T12:00:00");
+const SUNDAY = new Date("2026-10-18T12:00:00");
 
 interface EmptyStateProps {
 	title: string;

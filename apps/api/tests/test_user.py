@@ -158,14 +158,20 @@ def test_user_with_late_arrival_rsvp_saves_reason(
     assert res.status_code == 303
 
 
+@patch("utils.email_handler.send_rsvp_confirmation_email", autospec=True)
 @patch("services.mongodb_handler.update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
-def test_user_with_status_confirmed_un_rsvp_changes_status_to_waiver_signed(
+def test_waitlisted_decision_with_waiver_signed_status_can_rsvp(
     mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_mongodb_handler_update_one: AsyncMock,
+    mock_send_rsvp_confirmation_email: AsyncMock,
 ) -> None:
-    """Test user with CONFIRMED status has new status of WAIVER_SIGNED after un-RSVP."""
-    mock_mongodb_handler_retrieve_one.return_value = {"status": Status.CONFIRMED}
+    """Original waitlisted decision should not block a WAIVER_SIGNED user."""
+    mock_mongodb_handler_retrieve_one.return_value = {
+        "decision": Decision.WAITLISTED,
+        "status": Status.WAIVER_SIGNED,
+        "first_name": "tree",
+    }
 
     auth_client = UserTestClient(GuestUser(email=USER_EMAIL), app)
     res = auth_client.post("/rsvp", follow_redirects=False)
@@ -173,8 +179,39 @@ def test_user_with_status_confirmed_un_rsvp_changes_status_to_waiver_signed(
     mock_mongodb_handler_update_one.assert_awaited_once_with(
         Collection.USERS,
         {"_id": "edu.stanford.tree"},
-        {"status": Status.WAIVER_SIGNED, "arrival_time": "17:00"},
+        {"status": Status.CONFIRMED, "arrival_time": "17:00"},
     )
+    mock_send_rsvp_confirmation_email.assert_awaited_once_with(
+        USER_EMAIL,
+        "tree",
+    )
+
+    assert res.status_code == status.HTTP_303_SEE_OTHER
+
+
+@patch("utils.email_handler.send_rsvp_confirmation_email", autospec=True)
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_user_with_status_confirmed_rsvp_keeps_status_confirmed(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_update_one: AsyncMock,
+    mock_send_rsvp_confirmation_email: AsyncMock,
+) -> None:
+    """Test user with CONFIRMED status remains CONFIRMED after another RSVP."""
+    mock_mongodb_handler_retrieve_one.return_value = {
+        "status": Status.CONFIRMED,
+        "first_name": "tree",
+    }
+
+    auth_client = UserTestClient(GuestUser(email=USER_EMAIL), app)
+    res = auth_client.post("/rsvp", follow_redirects=False)
+
+    mock_mongodb_handler_update_one.assert_awaited_once_with(
+        Collection.USERS,
+        {"_id": "edu.stanford.tree"},
+        {"status": Status.CONFIRMED, "arrival_time": "17:00"},
+    )
+    mock_send_rsvp_confirmation_email.assert_not_awaited()
 
     assert res.status_code == status.HTTP_303_SEE_OTHER
 
@@ -186,7 +223,24 @@ def test_user_with_status_accepted_rsvp_returns_403(
     mock_mongodb_handler_update_one: AsyncMock,
 ) -> None:
     """Test accepted user cannot RSVP before signing waiver."""
-    mock_mongodb_handler_retrieve_one.return_value = {"status": Decision.ACCEPTED}
+    mock_mongodb_handler_retrieve_one.return_value = {"status": Status.ACCEPTED}
+
+    client = UserTestClient(GuestUser(email="tree@stanford.edu"), app)
+    res = client.post("/rsvp", follow_redirects=False)
+
+    mock_mongodb_handler_update_one.assert_not_awaited()
+
+    assert res.status_code == 403
+
+
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_user_with_status_waitlisted_rsvp_returns_403(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_update_one: AsyncMock,
+) -> None:
+    """Waitlisted user cannot RSVP before being released and signing waiver."""
+    mock_mongodb_handler_retrieve_one.return_value = {"status": Status.WAITLISTED}
 
     client = UserTestClient(GuestUser(email="tree@stanford.edu"), app)
     res = client.post("/rsvp", follow_redirects=False)
@@ -203,7 +257,7 @@ def test_accepted_hacker_can_decline_acceptance(
     mock_mongodb_handler_update_one: AsyncMock,
 ) -> None:
     """Test accepted hackers can void their own application."""
-    mock_mongodb_handler_retrieve_one.return_value = {"status": Decision.ACCEPTED}
+    mock_mongodb_handler_retrieve_one.return_value = {"status": Status.ACCEPTED}
     mock_mongodb_handler_update_one.return_value = True
 
     auth_client = UserTestClient(GuestUser(email=USER_EMAIL), app)
@@ -218,12 +272,12 @@ def test_accepted_hacker_can_decline_acceptance(
                 "$in": [Role.HACKER, Role.MENTOR],
             },
         },
-        ["status", "decision"],
+        ["status"],
     )
     mock_mongodb_handler_update_one.assert_awaited_once_with(
         Collection.USERS,
         {"_id": "edu.stanford.tree"},
-        {"status": Decision.VOIDED, "decision": Decision.VOIDED},
+        {"status": Status.VOIDED},
     )
     assert res.status_code == status.HTTP_303_SEE_OTHER
     assert res.headers["location"] == "/portal"
@@ -236,7 +290,7 @@ def test_accepted_mentor_can_decline_acceptance(
     mock_mongodb_handler_update_one: AsyncMock,
 ) -> None:
     """Test accepted mentors can void their own application."""
-    mock_mongodb_handler_retrieve_one.return_value = {"status": Decision.ACCEPTED}
+    mock_mongodb_handler_retrieve_one.return_value = {"status": Status.ACCEPTED}
     mock_mongodb_handler_update_one.return_value = True
 
     auth_client = UserTestClient(GuestUser(email=USER_EMAIL), app)
@@ -245,7 +299,7 @@ def test_accepted_mentor_can_decline_acceptance(
     mock_mongodb_handler_update_one.assert_awaited_once_with(
         Collection.USERS,
         {"_id": "edu.stanford.tree"},
-        {"status": Decision.VOIDED, "decision": Decision.VOIDED},
+        {"status": Status.VOIDED},
     )
     assert res.status_code == status.HTTP_303_SEE_OTHER
     assert res.headers["location"] == "/portal"

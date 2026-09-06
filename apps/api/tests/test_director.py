@@ -6,7 +6,7 @@ from fastapi import FastAPI
 
 from auth.user_identity import NativeUser, UserTestClient
 from models.ApplicationData import Decision
-from models.user_record import Role
+from models.user_record import Role, Status
 from routers import director
 from services.mongodb_handler import Collection
 from services.sendgrid_handler import Template
@@ -278,6 +278,35 @@ def test_release_hacker_decisions_works(
     assert returned_records[0]["decision"] == Decision.ACCEPTED
 
 
+@patch("routers.director.sendgrid_handler.send_email", autospec=True)
+@patch("services.mongodb_handler.update", autospec=True)
+@patch("services.mongodb_handler.retrieve", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_waitlist_transfer_uses_status_as_source_of_truth(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_retrieve: AsyncMock,
+    mock_mongodb_handler_update: AsyncMock,
+    mock_send_email: AsyncMock,
+) -> None:
+    """Only currently accepted statuses should be transferred to waitlist."""
+    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
+    mock_mongodb_handler_retrieve.return_value = []
+    mock_mongodb_handler_update.return_value = True
+
+    res = director_client.post("/waitlist-transfer")
+
+    assert res.status_code == 200
+    mock_mongodb_handler_retrieve.assert_awaited_once_with(
+        Collection.USERS,
+        {
+            "roles": Role.HACKER,
+            "status": {"$in": [Status.ACCEPTED, Status.WAIVER_SIGNED]},
+        },
+        ["_id", "first_name"],
+    )
+    mock_send_email.assert_not_awaited()
+
+
 @patch("services.mongodb_handler.update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 def test_void_applicant_succeeds(
@@ -297,7 +326,7 @@ def test_void_applicant_succeeds(
     mock_mongodb_handler_update_one.assert_awaited_once_with(
         Collection.USERS,
         {"_id": "edu.uci.someone"},
-        {"status": Decision.VOIDED, "decision": Decision.VOIDED},
+        {"status": Status.VOIDED},
     )
 
 
@@ -325,7 +354,7 @@ def test_void_applicant_400_when_already_voided(
     """Test that voiding an already-voided applicant returns 400."""
     mock_mongodb_handler_retrieve_one.side_effect = [
         DIRECTOR_IDENTITY,
-        {"status": Decision.VOIDED},
+        {"status": Status.VOIDED},
     ]
 
     res = director_client.post("/void-applicant/edu.uci.someone")

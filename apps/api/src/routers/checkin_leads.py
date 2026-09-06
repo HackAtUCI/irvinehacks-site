@@ -21,7 +21,6 @@ from services.sendgrid_handler import (
 from utils.email_handler import IH_SENDER, recover_email_from_uid
 from utils.batched import batched
 from routers.user import DEFAULT_CHECKIN_TIME
-from routers.director import _process_decision
 
 from time import time
 
@@ -67,15 +66,6 @@ async def queue_removal() -> None:
         return
 
     log.info(f"Changing {len(records)} status to {Status.WAIVER_SIGNED}.")
-    log.info(f"Changing {len(records)} decision to {Decision.WAITLISTED}.")
-
-    await asyncio.gather(
-        *(
-            _process_decision(batch, Decision.WAITLISTED, no_modifications_ok=True)
-            for batch in batched([str(record["_id"]) for record in records], 100)
-        )
-    )
-
     await asyncio.gather(
         *(
             _process_status(batch, Status.WAIVER_SIGNED)
@@ -359,17 +349,13 @@ async def reject_late_arrival_edit(uid: str) -> None:
     dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],
 )
 async def move_to_waitlist(uid: str) -> None:
-    """Set the given user's status to WAIVER_SIGNED and decision to WAITLISTED."""
+    """Set the given user's status to WAIVER_SIGNED."""
     record = await mongodb_handler.retrieve_one(Collection.USERS, {"_id": uid}, ["_id"])
     if not record:
         raise HTTPException(status_code=404, detail="User not found.")
 
-    log.info(
-        f"Changing {uid} status to {Status.WAIVER_SIGNED}"
-        + f" and decision to {Decision.WAITLISTED}."
-    )
+    log.info(f"Changing {uid} status to {Status.WAIVER_SIGNED}.")
 
-    await _process_decision([uid], Decision.WAITLISTED, no_modifications_ok=True)
     await _process_status([uid], Status.WAIVER_SIGNED, no_modifications_ok=True)
 
 

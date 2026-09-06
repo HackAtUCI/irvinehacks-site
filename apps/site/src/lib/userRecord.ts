@@ -52,10 +52,12 @@ export enum ReviewStatus {
 
 /** The possible status after an applicant has been accepted. */
 export enum PostAcceptedStatus {
+	Accepted = "ACCEPTED",
 	Signed = "WAIVER_SIGNED",
 	Confirmed = "CONFIRMED",
 	Attending = "ATTENDING",
 	Queued = "QUEUED",
+	Voided = "VOIDED",
 }
 
 /** All of the different possible status values. */

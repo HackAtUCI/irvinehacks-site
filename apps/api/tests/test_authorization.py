@@ -6,7 +6,7 @@ from fastapi.exceptions import HTTPException
 from auth import authorization
 from auth.user_identity import GuestUser, User
 from models.ApplicationData import Decision
-from models.user_record import Role
+from models.user_record import Role, Status
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
@@ -33,7 +33,7 @@ async def test_rejected_applicant_is_unapplied(
     mock_mongodb_handler_retrieve_one.return_value = {
         "_id": "edu.ucsd.tritons",
         "roles": [Role.APPLICANT],
-        "status": Decision.REJECTED,
+        "status": Status.REJECTED,
         "first_name": "King",
         "last_name": "Triton",
     }
@@ -53,7 +53,7 @@ async def test_accepted_applicant_is_fine(
     mock_mongodb_handler_retrieve_one.return_value = {
         "_id": "edu.berkeley.oski",
         "roles": [Role.APPLICANT],
-        "status": Decision.ACCEPTED,
+        "status": Status.ACCEPTED,
         "first_name": "Oski",
         "last_name": "Bear",
     }
@@ -62,14 +62,14 @@ async def test_accepted_applicant_is_fine(
         GuestUser(email="oski@berkeley.edu")
     )
     assert user.uid == "edu.berkeley.oski"
-    assert applicant.status == Decision.ACCEPTED
+    assert applicant.status == Status.ACCEPTED
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
-async def test_applicant_with_accepted_decision_is_fine(
+async def test_applicant_with_accepted_decision_and_reviewed_status_is_blocked(
     mock_mongodb_handler_retrieve_one: AsyncMock,
 ) -> None:
-    """User with accepted decision is fine even when status is still REVIEWED."""
+    """Decision alone should not unlock accepted-applicant routes."""
     mock_mongodb_handler_retrieve_one.return_value = {
         "_id": "edu.uci.hacker1",
         "roles": [Role.APPLICANT],
@@ -79,11 +79,11 @@ async def test_applicant_with_accepted_decision_is_fine(
         "last_name": "Dai",
     }
 
-    user, applicant = await authorization.require_accepted_applicant(
-        User(uid="edu.uci.hacker1", email="hacker1@uci.edu")
-    )
-    assert user.uid == "edu.uci.hacker1"
-    assert applicant.decision == Decision.ACCEPTED
+    with pytest.raises(HTTPException) as excinfo:
+        await authorization.require_accepted_applicant(
+            User(uid="edu.uci.hacker1", email="hacker1@uci.edu")
+        )
+    assert "403" in str(excinfo.value)
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)

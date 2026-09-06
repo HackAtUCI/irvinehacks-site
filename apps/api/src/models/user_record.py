@@ -44,11 +44,14 @@ class Role(str, Enum):
 class Status(str, Enum):
     PENDING_REVIEW = "PENDING_REVIEW"
     REVIEWED = "REVIEWED"
+    ACCEPTED = "ACCEPTED"
     WAIVER_SIGNED = "WAIVER_SIGNED"
     CONFIRMED = "CONFIRMED"
     ATTENDING = "ATTENDING"
     WAITLISTED = "WAITLISTED"
+    REJECTED = "REJECTED"
     QUEUED = "QUEUED"
+    VOIDED = "VOIDED"
 
 
 class UserRecord(BaseRecord):

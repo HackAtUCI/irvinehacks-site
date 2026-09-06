@@ -281,7 +281,7 @@ async def _rsvp_reminder(
         Collection.USERS,
         {
             "roles": Role(application_type),
-            "status": {"$in": [Decision.ACCEPTED, Status.WAIVER_SIGNED]},
+            "status": {"$in": [Status.ACCEPTED, Status.WAIVER_SIGNED]},
         },
         ["_id", "first_name"],
     )
@@ -467,7 +467,7 @@ async def waitlist_logistics_emails() -> None:
     """Send logistics emails to waitlisted hackers."""
     records: list[dict[str, Any]] = await mongodb_handler.retrieve(
         mongodb_handler.Collection.USERS,
-        {"roles": Role.HACKER, "status": Decision.WAITLISTED},
+        {"roles": Role.HACKER, "status": Status.WAITLISTED},
         ["_id", "first_name"],
     )
 
@@ -496,17 +496,16 @@ async def waitlist_transfer() -> None:
         Collection.USERS,
         {
             "roles": Role.HACKER,
-            "status": {"$nin": [Status.CONFIRMED, Status.ATTENDING]},
-            "decision": Decision.ACCEPTED,
+            "status": {"$in": [Status.ACCEPTED, Status.WAIVER_SIGNED]},
         },
         ["_id", "first_name"],
     )
 
-    log.info(f"Changing status of {len(records)} to {Decision.WAITLISTED}")
+    log.info(f"Changing status of {len(records)} to {Status.WAITLISTED}")
 
     await asyncio.gather(
         *(
-            _process_decision(batch, Decision.WAITLISTED)
+            _process_status(batch, Status.WAITLISTED)
             for batch in batched([str(record["_id"]) for record in records], 100)
         )
     )
@@ -545,13 +544,13 @@ async def void_applicant(
     if not record:
         raise HTTPException(status.HTTP_404_NOT_FOUND)
 
-    if record["status"] == Decision.VOIDED:
+    if record["status"] == Status.VOIDED:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Applicant is already voided.")
 
     ok = await mongodb_handler.update_one(
         Collection.USERS,
         {"_id": uid},
-        {"status": Decision.VOIDED, "decision": Decision.VOIDED},
+        {"status": Status.VOIDED},
     )
     if not ok:
         raise RuntimeError(f"Error voiding applicant {uid}")
@@ -559,11 +558,11 @@ async def void_applicant(
     log.info("%s voided applicant %s", user, uid)
 
 
-async def _process_decision(
-    uids: Sequence[str], decision: Decision, *, no_modifications_ok: bool = False
+async def _process_status(
+    uids: Sequence[str], status: Status, *, no_modifications_ok: bool = False
 ) -> None:
     any_modified = await mongodb_handler.update(
-        Collection.USERS, {"_id": {"$in": uids}}, {"decision": decision}
+        Collection.USERS, {"_id": {"$in": uids}}, {"status": status}
     )
     if not any_modified and not no_modifications_ok:
         raise RuntimeError(
@@ -594,8 +593,9 @@ async def _process_batch(
 ) -> None:
     uids: list[str] = [record["_id"] for record in batch]
     log.info(f"Setting {application_type}s {','.join(uids)} as {decision}")
+    release_update = {"decision": decision, "status": Status(decision.value)}
     ok = await mongodb_handler.update(
-        Collection.USERS, {"_id": {"$in": uids}}, {"decision": decision}
+        Collection.USERS, {"_id": {"$in": uids}}, release_update
     )
     if not ok:
         raise RuntimeError("gg wp")

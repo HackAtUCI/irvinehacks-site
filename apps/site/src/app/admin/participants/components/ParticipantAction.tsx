@@ -1,4 +1,7 @@
 import Button from "@cloudscape-design/components/button";
+import dayjs from "dayjs";
+import timezone from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
 
 import { Participant } from "@/lib/admin/useParticipants";
 import { ParticipantRole, ReviewStatus, Status } from "@/lib/userRecord";
@@ -11,6 +14,10 @@ const HACKER_MENTOR_VOLUNTEER_ROLES = [
 	ParticipantRole.Mentor,
 	ParticipantRole.Volunteer,
 ];
+const EVENT_TIMEZONE = "America/Los_Angeles";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 export function isJudgeSponsorParticipant(
 	roles: ReadonlyArray<ParticipantRole>,
@@ -26,6 +33,13 @@ function isHackerMentorVolunteer(roles: ReadonlyArray<ParticipantRole>) {
 	return roles.some((role) => HACKER_MENTOR_VOLUNTEER_ROLES.includes(role));
 }
 
+function hasCheckedInToday(participant: Participant) {
+	const today = dayjs().tz(EVENT_TIMEZONE);
+	return participant.checkins.some(([datetime]) =>
+		dayjs(datetime).tz(EVENT_TIMEZONE).isSame(today, "date"),
+	);
+}
+
 interface ParticipantActionProps {
 	participant: Participant;
 	initiateCheckIn: (participant: Participant) => void;
@@ -39,6 +53,7 @@ function ParticipantAction({
 }: ParticipantActionProps) {
 	const isWaiverSigned = participant.status === Status.Signed;
 	const isAccepted = participant.status === Status.Accepted;
+	const isCheckedInToday = hasCheckedInToday(participant);
 	const judgeSponsorParticipant = isJudgeSponsorParticipant(participant.roles);
 	const hackerMentorVolunteer = isHackerMentorVolunteer(participant.roles);
 	const workshopLead = isWorkshopLead(participant.roles);
@@ -48,7 +63,7 @@ function ParticipantAction({
 			variant="inline-link"
 			ariaLabel={`Check in ${participant._id}`}
 			onClick={() => initiateCheckIn(participant)}
-			disabled={isAccepted}
+			disabled={isAccepted || isCheckedInToday}
 		>
 			Check In
 		</Button>

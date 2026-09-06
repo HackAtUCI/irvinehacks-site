@@ -288,7 +288,7 @@ def _raise_if_applicant_not_reviewable(
     *,
     modify_reviews: bool = False,
 ) -> None:
-    if applicant_record.get("status") == Decision.VOIDED:
+    if applicant_record.get("status") == UserStatus.VOIDED:
         log.error("%s tried to review voided applicant %s", reviewer, applicant_id)
         raise HTTPException(
             status.HTTP_400_BAD_REQUEST, "Cannot review a voided applicant."
@@ -310,7 +310,7 @@ def _raise_if_applicant_not_reviewable(
 
 
 def _is_review_assignable(record: Mapping[str, Any], reviewer_uid: str) -> bool:
-    if record.get("status") == Decision.VOIDED:
+    if record.get("status") == UserStatus.VOIDED:
         return False
     if _has_auto_decision(record):
         return False
@@ -479,7 +479,7 @@ async def hacker_review_assignments(
         for record in records
         if user.uid in _assigned_reviewers(record)
         and not _reviewer_has_reviewed(record, user.uid)
-        and record.get("status") != Decision.VOIDED
+        and record.get("status") != UserStatus.VOIDED
         and not _has_auto_decision(record)
         and len(_unique_reviewers(record)) < 2
     ]
@@ -1019,7 +1019,7 @@ async def delete_notes(
         )
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    if applicant_record.get("status") == Decision.VOIDED:
+    if applicant_record.get("status") == UserStatus.VOIDED:
         log.error(
             "%s tried to delete notes on voided applicant %s",
             reviewer,
@@ -1105,14 +1105,14 @@ async def waitlist_release(
     """Release an applicant from the waitlist and send email."""
     record = await mongodb_handler.retrieve_one(
         Collection.USERS,
-        {"_id": uid, "roles": Role.APPLICANT, "status": Decision.WAITLISTED},
+        {"_id": uid, "roles": Role.APPLICANT, "status": UserStatus.WAITLISTED},
         ["status", "first_name"],
     )
     if not record:
         raise HTTPException(status.HTTP_404_NOT_FOUND)
 
     ok = await mongodb_handler.update_one(
-        Collection.USERS, {"_id": uid}, {"status": Decision.ACCEPTED}
+        Collection.USERS, {"_id": uid}, {"status": UserStatus.ACCEPTED}
     )
     if not ok:
         raise RuntimeError("gg wp")

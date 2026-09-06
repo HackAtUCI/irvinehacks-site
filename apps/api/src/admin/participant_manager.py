@@ -1,6 +1,7 @@
-from datetime import datetime
+from datetime import date, datetime, timezone
 from logging import getLogger
 from typing import Any, cast, Optional, Union
+from zoneinfo import ZoneInfo
 
 from typing_extensions import TypeAlias
 
@@ -14,6 +15,7 @@ from routers.user import DEFAULT_CHECKIN_TIME
 log = getLogger(__name__)
 
 Checkin: TypeAlias = tuple[datetime, str]
+LOCAL_TIMEZONE = ZoneInfo("America/Los_Angeles")
 
 OUTSIDE_ROLES = (
     Role.SPONSOR,
@@ -26,7 +28,7 @@ class Participant(UserRecord):
     """Participants attending the event."""
 
     checkins: list[Checkin] = []
-    status: Union[Status, Decision] = Status.REVIEWED
+    status: Status = Status.REVIEWED
     decision: Optional[Decision]
     is_added_to_slack: bool = False
     is_waiver_signed: bool = False
@@ -50,10 +52,7 @@ PARTICIPANT_FIELDS = [
 async def get_participants() -> list[Participant]:
     """
     Fetch all Sponsors, Judges, and Workshop Leads,
-    all applicants who have a status of:
-    - WAITLISTED, QUEUED, ATTENDING, WAIVER_SIGNED, CONFIRMED, ACCEPTED, or WAITLISTED,
-    and all applicants who have a decisoin of:
-    - ACCEPTED or WAITLISTED
+    all applicants who have a participant lifecycle status.
     """
     records: list[dict[str, Any]] = await mongodb_handler.retrieve(
         Collection.USERS,
@@ -76,9 +75,6 @@ async def get_participants() -> list[Participant]:
                             Role.VOLUNTEER,
                         ]
                     },
-                    # TODO: Should deprecate the use of decisions in the status
-                    # i.e. Status.WAITLISTED, Status.ACCEPTED, Status.REJECTED
-                    # should be removed.
                     "status": {
                         "$in": [
                             Status.WAITLISTED,
@@ -86,23 +82,7 @@ async def get_participants() -> list[Participant]:
                             Status.ATTENDING,
                             Status.WAIVER_SIGNED,
                             Status.CONFIRMED,
-                            Decision.ACCEPTED,
-                            Decision.WAITLISTED,
-                        ]
-                    },
-                },
-                {
-                    "roles": {
-                        "$in": [
-                            Role.HACKER,
-                            Role.MENTOR,
-                            Role.VOLUNTEER,
-                        ]
-                    },
-                    "decision": {
-                        "$in": [
-                            Decision.ACCEPTED,
-                            Decision.WAITLISTED,
+                            Status.ACCEPTED,
                         ]
                     },
                 },
@@ -117,22 +97,27 @@ async def get_participants() -> list[Participant]:
 async def check_in_participant(uid: str, associate: User) -> None:
     """Check in participant at IrvineHacks"""
     record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": uid, "roles": {"$exists": True}}, ["status"]
+        Collection.USERS,
+        {"_id": uid, "roles": {"$exists": True}},
+        ["status", "checkins"],
     )
     if not record:
         # Error message ties to exception raised in routers/admin.py
         raise ValueError("No application record found.")
-    elif record.get("status", "") not in (
-        Status.ATTENDING,
-        Status.CONFIRMED,
-    ):
+
+    now = utc_now()
+    status = record.get("status", "")
+    if status == Status.ATTENDING:
+        if _has_checked_in_today(record.get("checkins"), now):
+            raise AlreadyCheckedInError(f"{uid} is already checked in today.")
+    elif status != Status.CONFIRMED:
         current_status = record.get("status", "")
         raise ValueError(
             f"User is {getattr(current_status, 'value', current_status)} "
             "and can not be checked in."
         )
 
-    new_checkin_entry: Checkin = (utc_now(), associate.uid)
+    new_checkin_entry: Checkin = (now, associate.uid)
 
     update_status = await mongodb_handler.raw_update_one(
         Collection.USERS,
@@ -147,12 +132,32 @@ async def check_in_participant(uid: str, associate: User) -> None:
     log.info(f"Applicant {uid} checked in by {associate.uid}")
 
 
+def _has_checked_in_today(raw: object, now: datetime) -> bool:
+    if not isinstance(raw, list):
+        return False
+
+    today = _local_date(now)
+    for checkin in raw:
+        if not isinstance(checkin, (list, tuple)) or not checkin:
+            continue
+        checked_in_at = checkin[0]
+        if isinstance(checked_in_at, datetime) and _local_date(checked_in_at) == today:
+            return True
+    return False
+
+
+def _local_date(value: datetime) -> date:
+    if value.tzinfo is None:
+        value = value.replace(tzinfo=timezone.utc)
+    return value.astimezone(LOCAL_TIMEZONE).date()
+
+
 async def add_participant_to_queue(uid: str, associate: User) -> None:
     """Add waitlisted participant to queue at IrvineHacks"""
     record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
         Collection.USERS,
         {"_id": uid, "roles": {"$exists": True}},
-        ["status", "decision", "roles"],
+        ["status", "roles"],
     )
 
     if record is None:

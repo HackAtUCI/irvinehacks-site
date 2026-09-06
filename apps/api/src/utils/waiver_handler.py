@@ -2,7 +2,6 @@ from logging import getLogger
 
 from pydantic import EmailStr
 
-from models.ApplicationData import Decision
 from models.user_record import BareApplicant, Role, Status, UserRecord
 from services import mongodb_handler
 from services.mongodb_handler import Collection
@@ -21,7 +20,7 @@ async def process_waiver_completion(uid: str, email: EmailStr) -> None:
     record = await mongodb_handler.retrieve_one(
         Collection.USERS,
         {"_id": uid},
-        ["roles", "status", "decision", "first_name", "last_name"],
+        ["roles", "status", "first_name", "last_name"],
     )
 
     if not record:
@@ -43,10 +42,7 @@ async def process_waiver_completion(uid: str, email: EmailStr) -> None:
         elif applicant_record.status == Status.ATTENDING:
             log.warning(f"User {uid} has already signed the waiver and is attending.")
             return
-        elif (
-            applicant_record.status != Decision.ACCEPTED
-            and applicant_record.decision != Decision.ACCEPTED
-        ):
+        elif applicant_record.status != Status.ACCEPTED:
             log.warning(f"User {uid} attempted to sign waiver but was not accepted.")
             return
 

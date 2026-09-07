@@ -7,7 +7,7 @@ from logging import getLogger
 from typing import Annotated, Any, Literal, Mapping, Optional, Union
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
-from pydantic import BaseModel, TypeAdapter, ValidationError
+from pydantic import BaseModel, EmailStr, TypeAdapter, ValidationError
 from typing_extensions import assert_never
 from pymongo import DESCENDING
 
@@ -166,6 +166,30 @@ class ReviewRequest(BaseModel):
     applicant: str
     score: float
     notes: Optional[str] = None  # notes from reviewer
+
+
+NON_HACKER_PARTICIPANT_ROLES = (
+    Role.SPONSOR,
+    Role.JUDGE,
+    Role.WORKSHOP_LEAD,
+)
+
+
+class RawNonHackerParticipantData(BaseModel):
+    email: EmailStr
+    first_name: str
+    last_name: str
+    role: Role
+
+
+def _uid_from_email(email: EmailStr) -> str:
+    if user_identity.uci_email(email):
+        local, domain = email.split("@")
+        reversed_domains = ".".join(reversed(domain.split(".")))
+        cleaned_local = local.replace(".", "..")
+        return f"{reversed_domains}.{cleaned_local}"
+
+    return user_identity.scoped_uid(email)
 
 
 def _hacker_applicant_token(uid: str) -> str:
@@ -1129,6 +1153,57 @@ async def waitlist_release(
 async def participants() -> list[Participant]:
     """Get list of participants."""
     return await participant_manager.get_participants()
+
+
+@router.post(
+    "/non-hacker-participants",
+    dependencies=[Depends(require_checkin_lead)],
+    status_code=status.HTTP_201_CREATED,
+)
+async def add_non_hacker_participant(participant: RawNonHackerParticipantData) -> None:
+    """Add a sponsor, judge, or workshop lead as a confirmed participant."""
+    if participant.role not in NON_HACKER_PARTICIPANT_ROLES:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            "Role must be Sponsor, Judge, or Workshop Lead.",
+        )
+
+    uid = _uid_from_email(participant.email)
+    existing_record = await mongodb_handler.retrieve_one(
+        Collection.USERS, {"_id": uid}, ["roles"]
+    )
+
+    if existing_record is not None:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            "A user record already exists for this email.",
+        )
+
+    first_name = participant.first_name.strip()
+    last_name = participant.last_name.strip()
+    if not first_name or not last_name:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            "First name and last name are required.",
+        )
+
+    await mongodb_handler.update_one(
+        Collection.USERS,
+        {"_id": uid},
+        {
+            "_id": uid,
+            "first_name": first_name,
+            "last_name": last_name,
+            "roles": [participant.role],
+            "status": UserStatus.CONFIRMED,
+            "decision": None,
+            "is_added_to_slack": False,
+            "is_waiver_signed": False,
+            "checkins": [],
+            "badge_number": None,
+        },
+        upsert=True,
+    )
 
 
 @router.post("/checkin/{uid}")

@@ -16,6 +16,7 @@ function Participants() {
 		queueParticipant,
 		confirmOutsideParticipants,
 		updateWaiverStatus,
+		mutate,
 	} = useParticipants();
 	const [checkinParticipant, setCheckinParticipant] =
 		useState<Participant | null>(null);
@@ -134,6 +135,7 @@ function Participants() {
 				initiateCheckIn={initiateCheckIn}
 				initiateConfirm={confirmOutsideParticipants}
 				updateWaiverStatus={onUpdateWaiver}
+				onParticipantAdded={mutate}
 			/>
 			<CheckInModal
 				onDismiss={() => {

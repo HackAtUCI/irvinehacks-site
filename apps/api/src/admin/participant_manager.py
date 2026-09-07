@@ -99,11 +99,14 @@ async def check_in_participant(uid: str, associate: User) -> None:
     record: Optional[dict[str, object]] = await mongodb_handler.retrieve_one(
         Collection.USERS,
         {"_id": uid, "roles": {"$exists": True}},
-        ["status", "checkins"],
+        ["status", "checkins", "is_waiver_signed"],
     )
     if not record:
         # Error message ties to exception raised in routers/admin.py
         raise ValueError("No application record found.")
+
+    if not record.get("is_waiver_signed"):
+        raise ValueError("User has not signed the waiver and can not be checked in.")
 
     now = utc_now()
     status = record.get("status", "")

@@ -168,7 +168,10 @@ async def test_check_in_participant_success(
 ) -> None:
     """Check-in succeeds for confirmed user."""
     uid = "user123"
-    mock_retrieve_one.return_value = {"status": Status.CONFIRMED}
+    mock_retrieve_one.return_value = {
+        "status": Status.CONFIRMED,
+        "is_waiver_signed": True,
+    }
     mock_raw_update_one.return_value = True
 
     await check_in_participant(uid, USER_ASSOCIATE)
@@ -176,7 +179,7 @@ async def test_check_in_participant_success(
     mock_retrieve_one.assert_awaited_once_with(
         Collection.USERS,
         {"_id": uid, "roles": {"$exists": True}},
-        ["status", "checkins"],
+        ["status", "checkins", "is_waiver_signed"],
     )
     mock_raw_update_one.assert_awaited_once_with(
         Collection.USERS,
@@ -201,11 +204,32 @@ async def test_check_in_participant_invalid_status(
     mock_retrieve_one: AsyncMock,
 ) -> None:
     """Check-in raises when user status is not CONFIRMED/ATTENDING."""
-    mock_retrieve_one.return_value = {"status": Status.PENDING_REVIEW}
+    mock_retrieve_one.return_value = {
+        "status": Status.PENDING_REVIEW,
+        "is_waiver_signed": True,
+    }
     with pytest.raises(
         ValueError, match="User is PENDING_REVIEW and can not be checked in."
     ):
         await check_in_participant("user123", USER_ASSOCIATE)
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_check_in_participant_unsigned_waiver_rejected(
+    mock_retrieve_one: AsyncMock,
+    mock_raw_update_one: AsyncMock,
+) -> None:
+    """Check-in raises when user has not signed the waiver."""
+    mock_retrieve_one.return_value = {
+        "status": Status.CONFIRMED,
+        "is_waiver_signed": False,
+    }
+
+    with pytest.raises(ValueError, match="has not signed the waiver"):
+        await check_in_participant("user123", USER_ASSOCIATE)
+
+    mock_raw_update_one.assert_not_awaited()
 
 
 @patch("services.mongodb_handler.raw_update_one", autospec=True)
@@ -218,6 +242,7 @@ async def test_check_in_participant_attending_from_previous_day_allowed(
     uid = "user123"
     mock_retrieve_one.return_value = {
         "status": Status.ATTENDING,
+        "is_waiver_signed": True,
         "checkins": [
             (datetime(2026, 9, 5, 6, 30, tzinfo=timezone.utc), USER_ASSOCIATE.uid)
         ],
@@ -243,6 +268,7 @@ async def test_check_in_participant_attending_same_pacific_day_rejected(
     uid = "user123"
     mock_retrieve_one.return_value = {
         "status": Status.ATTENDING,
+        "is_waiver_signed": True,
         "checkins": [
             (datetime(2026, 9, 5, 8, 30, tzinfo=timezone.utc), USER_ASSOCIATE.uid)
         ],

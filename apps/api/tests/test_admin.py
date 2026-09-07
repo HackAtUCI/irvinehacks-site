@@ -7,7 +7,7 @@ from fastapi import FastAPI, HTTPException
 
 from auth import user_identity
 from auth.user_identity import NativeUser, UserTestClient
-from models.user_record import Status
+from models.user_record import Role, Status
 from routers import admin
 from routers.admin import (
     _handle_detailed_scores_review,
@@ -61,6 +61,13 @@ reviewer_client = UserTestClient(USER_REVIEWER, app)
 
 director_client = UserTestClient(USER_DIRECTOR, app)
 
+SAMPLE_NON_HACKER_PARTICIPANT = {
+    "email": "judge@example.com",
+    "first_name": "Judge",
+    "last_name": "Person",
+    "role": Role.JUDGE,
+}
+
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 def test_restricted_admin_route_is_forbidden(
@@ -77,6 +84,83 @@ def test_restricted_admin_route_is_forbidden(
 
     mock_mongodb_handler_retrieve_one.assert_awaited_once()
     assert res.status_code == 403
+
+
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_can_add_non_hacker_participant(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_update_one: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.side_effect = [DIRECTOR_IDENTITY, None]
+
+    res = director_client.post(
+        "/non-hacker-participants",
+        json=SAMPLE_NON_HACKER_PARTICIPANT,
+    )
+
+    assert res.status_code == 201
+    mock_mongodb_handler_update_one.assert_awaited_once_with(
+        Collection.USERS,
+        {"_id": "com.example.judge"},
+        {
+            "_id": "com.example.judge",
+            "first_name": "Judge",
+            "last_name": "Person",
+            "roles": [Role.JUDGE],
+            "status": Status.CONFIRMED,
+            "decision": None,
+            "is_added_to_slack": False,
+            "is_waiver_signed": False,
+            "checkins": [],
+            "badge_number": None,
+        },
+        upsert=True,
+    )
+
+
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_can_add_workshop_lead_participant(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_update_one: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.side_effect = [DIRECTOR_IDENTITY, None]
+
+    res = director_client.post(
+        "/non-hacker-participants",
+        json={
+            **SAMPLE_NON_HACKER_PARTICIPANT,
+            "email": "lead@example.com",
+            "role": Role.WORKSHOP_LEAD,
+        },
+    )
+
+    assert res.status_code == 201
+    assert mock_mongodb_handler_update_one.await_args is not None
+    update = mock_mongodb_handler_update_one.await_args.args[2]
+    assert update["roles"] == [Role.WORKSHOP_LEAD]
+    assert update["is_waiver_signed"] is False
+
+
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_cannot_add_duplicate_non_hacker_participant(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_update_one: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        {"_id": "com.example.judge", "roles": [Role.JUDGE]},
+    ]
+
+    res = director_client.post(
+        "/non-hacker-participants",
+        json=SAMPLE_NON_HACKER_PARTICIPANT,
+    )
+
+    assert res.status_code == 409
+    mock_mongodb_handler_update_one.assert_not_awaited()
 
 
 @patch("services.mongodb_handler.retrieve", autospec=True)

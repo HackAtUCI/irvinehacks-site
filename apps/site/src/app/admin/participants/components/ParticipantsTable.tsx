@@ -1,4 +1,4 @@
-import { ReactElement, useCallback, useState } from "react";
+import { ReactElement, useCallback, useContext, useState } from "react";
 
 import Checkbox from "@cloudscape-design/components/checkbox";
 import { useCollection } from "@cloudscape-design/collection-hooks";
@@ -13,9 +13,12 @@ import Table, { TableProps } from "@cloudscape-design/components/table";
 import Spinner from "@cloudscape-design/components/spinner";
 
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
+import UserContext from "@/lib/admin/UserContext";
+import { isCheckInLead } from "@/lib/admin/authorization";
 import { Participant } from "@/lib/admin/useParticipants";
 import { Decision, ParticipantRole } from "@/lib/userRecord";
 
+import AddParticipant from "./AddParticipant";
 import CheckinDayIcon from "./CheckinDayIcon";
 import ParticipantAction from "./ParticipantAction";
 import ParticipantsFilters from "./ParticipantsFilters";
@@ -39,6 +42,7 @@ interface ParticipantsTableProps {
 	initiateCheckIn: (participant: Participant) => void;
 	initiateConfirm: (participant: Participant) => void;
 	updateWaiverStatus: (participant: Participant, isSigned: boolean) => void;
+	onParticipantAdded: () => Promise<unknown>;
 }
 
 export type Options = ReadonlyArray<MultiselectProps.Option>;
@@ -85,7 +89,9 @@ function ParticipantsTable({
 	initiateCheckIn,
 	initiateConfirm,
 	updateWaiverStatus,
+	onParticipantAdded,
 }: ParticipantsTableProps) {
+	const { roles } = useContext(UserContext);
 	const [preferences, setPreferences] = useState({
 		pageSize: 20,
 		visibleContent: [
@@ -333,6 +339,13 @@ function ParticipantsTable({
 		setShowScanner(false);
 	};
 
+	const headerActions = (
+		<SpaceBetween direction="horizontal" size="xs">
+			{isCheckInLead(roles) && <AddParticipant onAdded={onParticipantAdded} />}
+			<Button onClick={openScanner}>Scan Badge</Button>
+		</SpaceBetween>
+	);
+
 	return (
 		<>
 			<SearchScannerModal
@@ -343,10 +356,7 @@ function ParticipantsTable({
 			<Table
 				{...collectionProps}
 				header={
-					<Header
-						counter={`(${participants.length})`}
-						actions={<Button onClick={openScanner}>Scan Badge</Button>}
-					>
+					<Header counter={`(${participants.length})`} actions={headerActions}>
 						Participants
 					</Header>
 				}

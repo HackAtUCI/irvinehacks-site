@@ -106,6 +106,7 @@ function useParticipants() {
 		releaseParticipantFromWaitlist,
 		confirmOutsideParticipants,
 		updateWaiverStatus,
+		mutate,
 	};
 }
 

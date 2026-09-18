@@ -53,7 +53,9 @@ async def test_new_waiver_submission_can_be_processed(
     }
     await docusign_handler.process_webhook_event(SAMPLE_WEBHOOK_DATA)
     mock_mongodb_handler_update_one.assert_awaited_once_with(
-        Collection.USERS, {"_id": SAMPLE_UID}, {"status": Status.WAIVER_SIGNED}
+        Collection.USERS,
+        {"_id": SAMPLE_UID},
+        {"status": Status.WAIVER_SIGNED, "is_waiver_signed": True},
     )
 
 
@@ -74,6 +76,28 @@ async def test_waiver_submission_ignores_accepted_decision_without_accepted_stat
     }
     await docusign_handler.process_webhook_event(SAMPLE_WEBHOOK_DATA)
     mock_mongodb_handler_update_one.assert_not_awaited()
+
+
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_waitlisted_hacker_waiver_submission_can_be_processed(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_update_one: AsyncMock,
+) -> None:
+    """Waitlisted hackers can sign before trying to RSVP for a released spot."""
+    mock_mongodb_handler_retrieve_one.return_value = {
+        "_id": SAMPLE_UID,
+        "first_name": "Nicole",
+        "last_name": "Pham",
+        "roles": [Role.APPLICANT, Role.HACKER],
+        "status": Status.WAITLISTED,
+    }
+    await docusign_handler.process_webhook_event(SAMPLE_WEBHOOK_DATA)
+    mock_mongodb_handler_update_one.assert_awaited_once_with(
+        Collection.USERS,
+        {"_id": SAMPLE_UID},
+        {"status": Status.WAIVER_SIGNED, "is_waiver_signed": True},
+    )
 
 
 @patch("services.mongodb_handler.update_one", autospec=True)
@@ -122,7 +146,12 @@ async def test_new_user_record_when_unknown_external_participant_signs_waiver(
     mock_mongodb_handler_retrieve_one.return_value = None
     await docusign_handler.process_webhook_event(SAMPLE_WEBHOOK_DATA)
     mock_mongodb_handler_insert.assert_awaited_once_with(
-        Collection.USERS, {"_id": SAMPLE_UID, "status": Status.WAIVER_SIGNED}
+        Collection.USERS,
+        {
+            "_id": SAMPLE_UID,
+            "status": Status.WAIVER_SIGNED,
+            "is_waiver_signed": True,
+        },
     )
 
 
@@ -142,7 +171,9 @@ async def test_user_record_updated_even_for_non_applicant(
     }
     await docusign_handler.process_webhook_event(SAMPLE_WEBHOOK_DATA)
     mock_mongodb_handler_update_one.assert_awaited_once_with(
-        Collection.USERS, {"_id": SAMPLE_UID}, {"status": Status.WAIVER_SIGNED}
+        Collection.USERS,
+        {"_id": SAMPLE_UID},
+        {"status": Status.WAIVER_SIGNED, "is_waiver_signed": True},
     )
 
 

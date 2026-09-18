@@ -20,9 +20,9 @@ from pydantic import BaseModel, EmailStr, TypeAdapter, ValidationError
 
 from admin import applicant_review_processor
 from auth import user_identity
-from auth.authorization import require_accepted_applicant
 from auth.user_identity import User, require_user_identity, use_user_identity
 from models.ApplicationData import (
+    Decision,
     FIELDS_SUPPORTING_OTHER,
     ProcessedApplicationDataUnion,
     ProcessedZotHacksHackerApplicationData,
@@ -45,10 +45,9 @@ log = getLogger(__name__)
 
 router = APIRouter()
 
-DEADLINE = datetime(2026, 2, 14, 8, 1, tzinfo=timezone.utc)
-WAITLIST_OPEN_TIME = datetime(2026, 2, 20, 20, 0, tzinfo=timezone.utc)
-WAITLIST_CLOSE_TIME = datetime(2026, 2, 23, 8, 1, tzinfo=timezone.utc)
-MAX_HACKER_CAP = 400
+DEADLINE = datetime(2026, 10, 3, 6, 59, tzinfo=timezone.utc)
+WAITLIST_OPEN_TIME = datetime(2026, 10, 9, 19, 0, tzinfo=timezone.utc)
+WAITLIST_SETTINGS_ID = "waitlist_claims"
 
 
 HACKATHON_EXPERIENCE_SCORE_MAP = {
@@ -75,6 +74,13 @@ class CharacterIndexes(BaseModel):
 class WaitlistStatus(BaseModel):
     is_started: bool
     is_open: bool
+    capacity: Union[int, None] = None
+    claimed_count: int = 0
+    remaining_spots: Union[int, None] = None
+
+
+class WaitlistClaimResponse(BaseModel):
+    status: Status
 
 
 class ApplicationData(BaseModel):
@@ -92,19 +98,103 @@ def _is_past_deadline(now: datetime) -> bool:
 async def _get_waitlist_status() -> WaitlistStatus:
     now = datetime.now(timezone.utc)
     is_started = now >= WAITLIST_OPEN_TIME
-    is_open = False
-    if is_started and now < WAITLIST_CLOSE_TIME:
-        confirmed_count = await mongodb_handler.count(
-            Collection.USERS, {"status": Status.CONFIRMED, "roles": Role.HACKER}
-        )
-        is_open = confirmed_count < MAX_HACKER_CAP
+    settings = await mongodb_handler.retrieve_one(
+        Collection.SETTINGS,
+        {"_id": WAITLIST_SETTINGS_ID},
+        ["capacity", "claimed_count"],
+    )
 
-    return WaitlistStatus(is_started=is_started, is_open=is_open)
+    capacity = None
+    claimed_count = 0
+    if settings is not None:
+        raw_capacity = settings.get("capacity")
+        raw_claimed_count = settings.get("claimed_count")
+        if isinstance(raw_capacity, int) and not isinstance(raw_capacity, bool):
+            capacity = raw_capacity
+        if isinstance(raw_claimed_count, int) and not isinstance(
+            raw_claimed_count, bool
+        ):
+            claimed_count = max(raw_claimed_count, 0)
+
+    remaining_spots = None
+    is_open = False
+    if capacity is not None and capacity > 0:
+        remaining_spots = max(capacity - claimed_count, 0)
+        is_open = is_started and remaining_spots > 0
+
+    return WaitlistStatus(
+        is_started=is_started,
+        is_open=is_open,
+        capacity=capacity,
+        claimed_count=claimed_count,
+        remaining_spots=remaining_spots,
+    )
+
+
+async def _reserve_waitlist_spot() -> bool:
+    return await mongodb_handler.raw_update_one(
+        Collection.SETTINGS,
+        {
+            "_id": WAITLIST_SETTINGS_ID,
+            "capacity": {"$gt": 0},
+            "$expr": {
+                "$lt": [
+                    {"$ifNull": ["$claimed_count", 0]},
+                    "$capacity",
+                ]
+            },
+        },
+        {"$inc": {"claimed_count": 1}},
+    )
+
+
+async def _release_waitlist_spot() -> None:
+    await mongodb_handler.raw_update_one(
+        Collection.SETTINGS,
+        {"_id": WAITLIST_SETTINGS_ID, "claimed_count": {"$gt": 0}},
+        {"$inc": {"claimed_count": -1}},
+    )
 
 
 @router.get("/waitlist-open")
 async def waitlist_open() -> WaitlistStatus:
     return await _get_waitlist_status()
+
+
+@router.post("/waitlist/claim")
+async def claim_waitlist_spot(
+    user: Annotated[User, Depends(require_user_identity)],
+) -> WaitlistClaimResponse:
+    """Deprecated compatibility endpoint.
+
+    Waitlisted hackers no longer reserve a spot before signing the waiver.
+    Capacity is atomically reserved during RSVP instead.
+    """
+    waitlist_status = await _get_waitlist_status()
+    if not waitlist_status.is_started:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Waitlist has not opened yet.")
+    if not waitlist_status.is_open:
+        raise HTTPException(
+            status.HTTP_409_CONFLICT,
+            "There are no waitlist spots available.",
+        )
+
+    user_record = await mongodb_handler.retrieve_one(
+        Collection.USERS,
+        {
+            "_id": user.uid,
+            "roles": {"$all": [Role.APPLICANT, Role.HACKER]},
+        },
+        ["status"],
+    )
+    if not user_record or user_record.get("status") != Status.WAITLISTED:
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN,
+            "Only waitlisted hackers can continue to the waiver.",
+        )
+
+    log.info("%s continued to waiver from the waitlist.", user.uid)
+    return WaitlistClaimResponse(status=Status.WAITLISTED)
 
 
 @router.post("/login")
@@ -460,19 +550,42 @@ async def save_application_draft(
 
 @router.get("/waiver")
 async def request_waiver(
-    user: Annotated[tuple[User, BareApplicant], Depends(require_accepted_applicant)],
+    user: Annotated[User, Depends(require_user_identity)],
 ) -> RedirectResponse:
     """Request to sign the participant waiver through DocuSign."""
     # TODO: non-applicants might also want to request a waiver
-    user_data, applicant = user
+    record = await mongodb_handler.retrieve_one(
+        Collection.USERS,
+        {"_id": user.uid},
+        ["roles", "status", "first_name", "last_name"],
+    )
 
+    try:
+        applicant = BareApplicant.model_validate(record)
+    except ValidationError:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "User is not an applicant.")
+
+    can_request_as_accepted = applicant.status in (
+        Status.ACCEPTED,
+        Status.WAIVER_SIGNED,
+        Status.CONFIRMED,
+        Status.ATTENDING,
+    )
+    can_request_as_waitlisted_hacker = (
+        applicant.status == Status.WAITLISTED
+        and Role.HACKER in applicant.roles
+        and (await _get_waitlist_status()).is_open
+    )
+
+    if not can_request_as_accepted and not can_request_as_waitlisted_hacker:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "User cannot request a waiver.")
     if applicant.status in (Status.WAIVER_SIGNED, Status.CONFIRMED, Status.ATTENDING):
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Already submitted a waiver.")
 
     user_name = f"{applicant.first_name} {applicant.last_name}"
 
     # TODO: email may not match UCInetID format from `docusign_handler._acquire_uid`
-    form_url = docusign_handler.waiver_form_url(user_data.email, user_name)
+    form_url = docusign_handler.waiver_form_url(user.email, user_name)
     return RedirectResponse(form_url, status.HTTP_303_SEE_OTHER)
 
 
@@ -592,7 +705,9 @@ async def rsvp(
 ) -> RedirectResponse:
     """Change user status for RSVP"""
     user_record = await mongodb_handler.retrieve_one(
-        Collection.USERS, {"_id": user.uid}, ["status", "first_name"]
+        Collection.USERS,
+        {"_id": user.uid},
+        ["status", "first_name", "roles", "decision"],
     )
 
     if not user_record or "status" not in user_record:
@@ -624,9 +739,52 @@ async def rsvp(
             late_arrival_reason
         )
     old_status = user_record["status"]
-    await mongodb_handler.update_one(
-        Collection.USERS, {"_id": user.uid}, updated_fields
+    roles = set(user_record.get("roles", []))
+    is_waitlisted_hacker_rsvp = (
+        old_status == Status.WAIVER_SIGNED
+        and user_record.get("decision") == Decision.WAITLISTED
+        and Role.HACKER in roles
     )
+
+    if is_waitlisted_hacker_rsvp:
+        waitlist_status = await _get_waitlist_status()
+        if not waitlist_status.is_open:
+            raise HTTPException(
+                status.HTTP_409_CONFLICT,
+                "There are no waitlist spots available.",
+            )
+
+        if not await _reserve_waitlist_spot():
+            raise HTTPException(
+                status.HTTP_409_CONFLICT,
+                "There are no waitlist spots available.",
+            )
+
+        try:
+            did_confirm = await mongodb_handler.update_one(
+                Collection.USERS,
+                {
+                    "_id": user.uid,
+                    "roles": {"$all": [Role.APPLICANT, Role.HACKER]},
+                    "decision": Decision.WAITLISTED,
+                    "status": Status.WAIVER_SIGNED,
+                },
+                updated_fields,
+            )
+        except RuntimeError:
+            await _release_waitlist_spot()
+            raise
+
+        if not did_confirm:
+            await _release_waitlist_spot()
+            raise HTTPException(
+                status.HTTP_409_CONFLICT,
+                "This waitlist spot could not be claimed.",
+            )
+    else:
+        await mongodb_handler.update_one(
+            Collection.USERS, {"_id": user.uid}, updated_fields
+        )
 
     log.info(f"User {user.uid} changed status from {old_status} to {new_status}.")
 

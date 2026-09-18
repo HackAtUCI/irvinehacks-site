@@ -30,6 +30,7 @@ const ZH_HACKER_APPLICATION_SECTIONS: ZHHackerApplicationSections = {
 	"Personal Information": [
 		"pronouns",
 		"is_18_older",
+		"discord_username",
 		"dietary_restrictions",
 		"allergies",
 	],
@@ -258,14 +259,14 @@ function ZotHacksHackerApplication({
 				disabled={reviewDisabled}
 			/>
 			<ScoreSection
-				title="If you could give each person at UCI one item under $100, what would it be and why? [Max 75 words]"
+				title="If you could give each person at UCI one item under $100, what would it be and why? [Max 100 words]"
 				min={0}
 				max={20}
 				leftColumn={<PortableText value={guidelines.guidelines.uci_gift_saq} />}
 				rightColumn={<p>{application_data.uci_gift_saq}</p>}
 				value={uciGiftScore}
 				onChange={setUciGiftScore}
-				wordLimit={75}
+				wordLimit={100}
 				disabled={reviewDisabled}
 			/>
 			<ScoreSection

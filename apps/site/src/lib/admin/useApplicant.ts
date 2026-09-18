@@ -19,6 +19,7 @@ interface BaseApplicationData {
 export type HackathonExperience = "first_time" | "some_experience" | "veteran";
 
 export interface ZotHacksHackerApplicationData extends BaseApplicationData {
+	discord_username: string;
 	school_year: string;
 	dietary_restrictions: string[];
 	allergies: string | null;

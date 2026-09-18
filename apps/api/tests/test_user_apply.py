@@ -65,6 +65,7 @@ SAMPLE_ZOTHACKS_HACKER_APPLICATION = {
     "last_name": "fire",
     "pronouns": ["pk"],
     "is_18_older": "false",
+    "discord_username": "pkfire",
     "school_year": "2nd Year",
     "dietary_restrictions": ["No pork"],
     "allergies": "s",
@@ -237,6 +238,18 @@ def test_zothacks_hacker_apply_successfully(
         USER_EMAIL, EXPECTED_ZOTHACKS_HACKER_USER, Role.HACKER
     )
     assert res.status_code == 201
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_zothacks_hacker_apply_with_too_many_words_causes_422(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    bad_application = SAMPLE_ZOTHACKS_HACKER_APPLICATION.copy()
+    bad_application["collaboration_saq"] = "word " * 101
+    res = client.post("/apply", data=bad_application, files=SAMPLE_FILES)
+
+    mock_mongodb_handler_retrieve_one.assert_not_called()
+    assert res.status_code == 422
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)

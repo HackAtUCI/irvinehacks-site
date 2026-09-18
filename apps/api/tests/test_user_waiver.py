@@ -6,9 +6,8 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from test_docusign_handler import SAMPLE_WEBHOOK_PAYLOAD
 
-from auth.authorization import require_accepted_applicant
-from auth.user_identity import User
-from models.user_record import BareApplicant, Role, Status
+from auth.user_identity import User, require_user_identity
+from models.user_record import Role, Status
 from routers import user
 from services import docusign_handler
 
@@ -21,18 +20,19 @@ client = TestClient(app)
 def test_accepted_user_can_request_waiver() -> None:
     """Test accepted applicant can request signing waiver."""
     uid = "edu.uci.hack"
-    app.dependency_overrides[require_accepted_applicant] = lambda: (
-        User(uid=uid, email="hack@uci.edu"),
-        BareApplicant(
-            uid=uid,
-            first_name="Riley",
-            last_name="Wong",
-            roles=(Role.APPLICANT,),
-            status=Status.ACCEPTED,
-        ),
+    app.dependency_overrides[require_user_identity] = lambda: User(
+        uid=uid, email="hack@uci.edu"
     )
 
-    res = client.get("/waiver", follow_redirects=False)
+    with patch("services.mongodb_handler.retrieve_one", autospec=True) as retrieve_one:
+        retrieve_one.return_value = {
+            "_id": uid,
+            "first_name": "Riley",
+            "last_name": "Wong",
+            "roles": (Role.APPLICANT,),
+            "status": Status.ACCEPTED,
+        }
+        res = client.get("/waiver", follow_redirects=False)
 
     assert res.status_code == 303
     location = res.headers["location"]
@@ -46,19 +46,52 @@ def test_accepted_user_can_request_waiver() -> None:
 def test_cannot_request_waiver_if_already_signed() -> None:
     """Test applicant who already signed waiver cannot re-request signing."""
     uid = "edu.uci.hack"
-    app.dependency_overrides[require_accepted_applicant] = lambda: (
-        User(uid=uid, email="hack@uci.edu"),
-        BareApplicant(
-            uid="edu.uci.hack",
-            first_name="John",
-            last_name="Hancock",
-            roles=(Role.APPLICANT,),
-            status=Status.WAIVER_SIGNED,
-        ),
+    app.dependency_overrides[require_user_identity] = lambda: User(
+        uid=uid, email="hack@uci.edu"
     )
 
-    res = client.get("/waiver")
+    with patch("services.mongodb_handler.retrieve_one", autospec=True) as retrieve_one:
+        retrieve_one.return_value = {
+            "_id": uid,
+            "first_name": "John",
+            "last_name": "Hancock",
+            "roles": (Role.APPLICANT,),
+            "status": Status.WAIVER_SIGNED,
+        }
+        res = client.get("/waiver")
     assert res.status_code == 403
+
+    app.dependency_overrides = {}
+
+
+@patch("routers.user._get_waitlist_status", autospec=True)
+def test_waitlisted_hacker_can_request_waiver_when_spots_are_open(
+    mock_get_waitlist_status: AsyncMock,
+) -> None:
+    """Waitlisted hackers can sign the waiver once waitlist spots open."""
+    uid = "edu.uci.hack"
+    app.dependency_overrides[require_user_identity] = lambda: User(
+        uid=uid, email="hack@uci.edu"
+    )
+    mock_get_waitlist_status.return_value = user.WaitlistStatus(
+        is_started=True,
+        is_open=True,
+        capacity=2,
+        claimed_count=0,
+        remaining_spots=2,
+    )
+
+    with patch("services.mongodb_handler.retrieve_one", autospec=True) as retrieve_one:
+        retrieve_one.return_value = {
+            "_id": uid,
+            "first_name": "Riley",
+            "last_name": "Wong",
+            "roles": (Role.APPLICANT, Role.HACKER),
+            "status": Status.WAITLISTED,
+        }
+        res = client.get("/waiver", follow_redirects=False)
+
+    assert res.status_code == 303
 
     app.dependency_overrides = {}
 

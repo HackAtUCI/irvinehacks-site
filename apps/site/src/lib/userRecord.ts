@@ -16,6 +16,7 @@ export enum ParticipantRole {
 	Sponsor = "Sponsor",
 	Judge = "Judge",
 	WorkshopLead = "Workshop Lead",
+	Guest = "Guest",
 }
 
 /** The possible roles of admin users (organizers). */

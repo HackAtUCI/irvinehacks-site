@@ -145,6 +145,86 @@ def test_can_add_workshop_lead_participant(
 
 @patch("services.mongodb_handler.update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_can_add_guest_participant(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_update_one: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.side_effect = [DIRECTOR_IDENTITY, None]
+
+    res = director_client.post(
+        "/non-hacker-participants",
+        json={
+            **SAMPLE_NON_HACKER_PARTICIPANT,
+            "email": "guest@example.com",
+            "role": Role.GUEST,
+        },
+    )
+
+    assert res.status_code == 201
+    assert mock_mongodb_handler_update_one.await_args is not None
+    update = mock_mongodb_handler_update_one.await_args.args[2]
+    assert update["roles"] == [Role.GUEST]
+    assert update["status"] == Status.CONFIRMED
+
+
+@patch("services.mongodb_handler.bulk_update", autospec=True)
+@patch("services.mongodb_handler.retrieve", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_can_import_non_hacker_participants(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_retrieve: AsyncMock,
+    mock_mongodb_handler_bulk_update: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
+    mock_mongodb_handler_retrieve.return_value = []
+
+    res = director_client.post(
+        "/non-hacker-participants/import",
+        json={
+            "participants": [
+                SAMPLE_NON_HACKER_PARTICIPANT,
+                {
+                    "email": "guest@example.com",
+                    "first_name": "Guest",
+                    "last_name": "Person",
+                    "role": Role.GUEST,
+                },
+            ]
+        },
+    )
+
+    assert res.status_code == 201
+    assert res.json() == {"created": 2}
+    mock_mongodb_handler_bulk_update.assert_awaited_once()
+
+
+@patch("services.mongodb_handler.bulk_update", autospec=True)
+@patch("services.mongodb_handler.retrieve", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_cannot_import_duplicate_non_hacker_participants(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_retrieve: AsyncMock,
+    mock_mongodb_handler_bulk_update: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
+
+    res = director_client.post(
+        "/non-hacker-participants/import",
+        json={
+            "participants": [
+                SAMPLE_NON_HACKER_PARTICIPANT,
+                SAMPLE_NON_HACKER_PARTICIPANT,
+            ]
+        },
+    )
+
+    assert res.status_code == 400
+    mock_mongodb_handler_retrieve.assert_not_awaited()
+    mock_mongodb_handler_bulk_update.assert_not_awaited()
+
+
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
 def test_cannot_add_duplicate_non_hacker_participant(
     mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_mongodb_handler_update_one: AsyncMock,

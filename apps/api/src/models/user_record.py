@@ -39,6 +39,7 @@ class Role(str, Enum):
     SPONSOR = "Sponsor"
     JUDGE = "Judge"
     WORKSHOP_LEAD = "Workshop Lead"
+    GUEST = "Guest"
 
 
 class Status(str, Enum):

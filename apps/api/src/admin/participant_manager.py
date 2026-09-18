@@ -21,6 +21,7 @@ OUTSIDE_ROLES = (
     Role.SPONSOR,
     Role.JUDGE,
     Role.WORKSHOP_LEAD,
+    Role.GUEST,
 )
 
 
@@ -64,6 +65,7 @@ async def get_participants() -> list[Participant]:
                             Role.SPONSOR,
                             Role.JUDGE,
                             Role.WORKSHOP_LEAD,
+                            Role.GUEST,
                         ]
                     }
                 },

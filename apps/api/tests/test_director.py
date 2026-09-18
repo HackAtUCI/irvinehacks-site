@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Any
-from unittest.mock import ANY, AsyncMock, patch
+from unittest.mock import ANY, AsyncMock, call, patch
 
 from fastapi import FastAPI
 
@@ -46,7 +46,7 @@ SAMPLE_ORGANIZER = {
     "first_name": "Albert",
     "last_name": "Wang",
     "roles": [Role.ORGANIZER],
-    "committee": ["Tech"],
+    "committees": ["Tech"],
 }
 
 EXPECTED_ORGANIZER = director.OrganizerSummary(
@@ -54,7 +54,7 @@ EXPECTED_ORGANIZER = director.OrganizerSummary(
     first_name="Albert",
     last_name="Wang",
     roles=[Role.ORGANIZER],
-    committee=["Tech"],
+    committees=["Tech"],
 )
 
 
@@ -73,7 +73,7 @@ def test_can_retrieve_organizers(
             "first_name": "Peter",
             "last_name": "Anteater",
             "roles": ["Organizer"],
-            "committee": ["Tech"],
+            "committees": ["Tech"],
         },
     ]
 
@@ -88,7 +88,7 @@ def test_can_retrieve_organizers(
             "first_name": "Peter",
             "last_name": "Anteater",
             "roles": ["Organizer"],
-            "committee": ["Tech"],
+            "committees": ["Tech"],
         },
     ]
 
@@ -104,14 +104,84 @@ def test_can_add_organizer(
 
     res = director_client.post("/organizers", json=SAMPLE_ORGANIZER)
 
-    mock_mongodb_handler_update_one.assert_awaited_once_with(
-        Collection.USERS,
-        {"_id": EXPECTED_ORGANIZER.uid},
-        EXPECTED_ORGANIZER.model_dump(),
-        upsert=True,
+    mock_mongodb_handler_update_one.assert_has_awaits(
+        [
+            call(
+                Collection.USERS,
+                {"_id": EXPECTED_ORGANIZER.uid},
+                EXPECTED_ORGANIZER.model_dump(),
+                upsert=True,
+            ),
+            call(
+                Collection.USERS,
+                {"_id": EXPECTED_ORGANIZER.uid},
+                EXPECTED_ORGANIZER.model_dump(),
+                upsert=True,
+            ),
+        ]
     )
+    assert mock_mongodb_handler_update_one.await_count == 2
 
     assert res.status_code == 201
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+@patch("services.mongodb_handler.update_one", autospec=True)
+def test_can_update_organizer_roles_in_all_hackathon_databases(
+    mock_mongodb_handler_update_one: AsyncMock,
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test that organizer roles are updated in all hackathon databases."""
+    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
+    roles = [Role.ORGANIZER, Role.DIRECTOR]
+
+    res = director_client.post(
+        "/update-organizers",
+        json={"uid": EXPECTED_ORGANIZER.uid, "roles": roles},
+    )
+
+    mock_mongodb_handler_update_one.assert_has_awaits(
+        [
+            call(
+                Collection.USERS,
+                {"_id": EXPECTED_ORGANIZER.uid},
+                {"_id": EXPECTED_ORGANIZER.uid, "roles": roles},
+                upsert=True,
+            ),
+            call(
+                Collection.USERS,
+                {"_id": EXPECTED_ORGANIZER.uid},
+                {"_id": EXPECTED_ORGANIZER.uid, "roles": roles},
+                upsert=True,
+            ),
+        ]
+    )
+    assert mock_mongodb_handler_update_one.await_count == 2
+    assert res.status_code == 200
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+@patch("services.mongodb_handler.delete_one", autospec=True)
+def test_can_delete_organizer_in_all_hackathon_databases(
+    mock_mongodb_handler_delete_one: AsyncMock,
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test that organizers are deleted in all hackathon databases."""
+    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
+
+    res = director_client.post(
+        "/delete-organizers",
+        json={"uid": EXPECTED_ORGANIZER.uid},
+    )
+
+    mock_mongodb_handler_delete_one.assert_has_awaits(
+        [
+            call(Collection.USERS, {"_id": EXPECTED_ORGANIZER.uid}),
+            call(Collection.USERS, {"_id": EXPECTED_ORGANIZER.uid}),
+        ]
+    )
+    assert mock_mongodb_handler_delete_one.await_count == 2
+    assert res.status_code == 200
 
 
 @patch("services.sendgrid_handler.send_email", autospec=True)

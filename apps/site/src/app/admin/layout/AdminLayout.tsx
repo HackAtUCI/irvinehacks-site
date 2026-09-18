@@ -14,15 +14,27 @@ import Spinner from "@cloudscape-design/components/spinner";
 import axios from "axios";
 import { SWRConfig } from "swr";
 
-import { hasAdminRole } from "@/lib/admin/authorization";
+import { hasAdminRole, isDirector } from "@/lib/admin/authorization";
 import UserContext from "@/lib/admin/UserContext";
 import NotificationContext from "@/lib/admin/NotificationContext";
 import useUserIdentityStatic from "@/lib/admin/useUserIdentityStatic";
 
 import AdminSidebar from "./AdminSidebar";
 import Breadcrumbs from "./Breadcrumbs";
+import { ACTIVE_ADMIN_HACKATHON, HACKATHON_COOKIE_MAX_AGE } from "./common";
 import SessionTimeoutModal from "./SessionTimeoutModal";
 import { useSessionTimeout } from "@/lib/admin/useSessionTimeout";
+
+function getHackathonCookie(): string | undefined {
+	return document.cookie
+		.split("; ")
+		.find((cookie) => cookie.startsWith("hackathon="))
+		?.split("=")[1];
+}
+
+function setHackathonCookie(hackathon: string) {
+	document.cookie = `hackathon=${hackathon}; path=/; max-age=${HACKATHON_COOKIE_MAX_AGE}`;
+}
 
 function AdminLayout({ children }: PropsWithChildren) {
 	const identity = useUserIdentityStatic();
@@ -58,19 +70,25 @@ function AdminLayout({ children }: PropsWithChildren) {
 		setNotifications(() => []);
 
 		if (pathName.includes("/zothacks")) {
-			document.cookie =
-				"hackathon=zothacks; path=/; max-age=" + 60 * 60 * 24 * 30;
+			setHackathonCookie("zothacks");
 			return;
 		}
 
-		const hasHackathonCookie = document.cookie
-			.split("; ")
-			.some((cookie) => cookie.startsWith("hackathon="));
-		if (!hasHackathonCookie) {
-			document.cookie =
-				"hackathon=irvinehacks; path=/; max-age=" + 60 * 60 * 24 * 30;
+		if (!getHackathonCookie()) {
+			setHackathonCookie(ACTIVE_ADMIN_HACKATHON);
 		}
 	}, [pathName]);
+
+	useEffect(() => {
+		if (!identity || identity.uid === null || isDirector(identity.roles)) {
+			return;
+		}
+
+		if (getHackathonCookie() !== ACTIVE_ADMIN_HACKATHON) {
+			setHackathonCookie(ACTIVE_ADMIN_HACKATHON);
+			window.location.reload();
+		}
+	}, [identity]);
 
 	if (!identity) {
 		return (
@@ -96,9 +114,32 @@ function AdminLayout({ children }: PropsWithChildren) {
 	const { uid, roles } = identity;
 	const loggedIn = uid !== null;
 	const authorized = hasAdminRole(roles);
+	const waitingForActiveHackathon =
+		loggedIn &&
+		!isDirector(roles) &&
+		getHackathonCookie() !== ACTIVE_ADMIN_HACKATHON;
 
 	if (!loggedIn) {
 		router.push("/login");
+	} else if (waitingForActiveHackathon) {
+		return (
+			<div
+				style={{
+					alignItems: "center",
+					display: "flex",
+					justifyContent: "center",
+					minHeight: "100vh",
+					padding: "2rem",
+				}}
+			>
+				<SpaceBetween size="m" alignItems="center">
+					<Spinner size="large" />
+					<Box variant="h2" textAlign="center">
+						Loading...
+					</Box>
+				</SpaceBetween>
+			</div>
+		);
 	} else if (!authorized) {
 		router.push("/unauthorized");
 	}

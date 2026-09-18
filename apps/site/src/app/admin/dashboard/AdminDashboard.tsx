@@ -14,10 +14,9 @@ import ApplicantSummary from "./components/ApplicantSummary";
 import ApplicantTable from "./components/ApplicantTable";
 import HackerCount from "./components/HackerCount";
 import ReviewerSummary from "./components/ReviewerSummary";
+import { HACKATHON_COOKIE_MAX_AGE } from "../layout/common";
 
 type HackathonMode = "irvinehacks" | "zothacks";
-
-const HACKATHON_COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
 
 function getHackathonMode(): HackathonMode {
 	const value = document.cookie

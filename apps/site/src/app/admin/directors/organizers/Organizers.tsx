@@ -18,6 +18,7 @@ import ConfirmationModal from "../email-sender/components/ConfirmationModal";
 import EditOrganizerModal, { type OrganizerUpdate } from "./EditOrganizerModal";
 import UserContext from "@/lib/admin/UserContext";
 import { isDirector } from "@/lib/admin/authorization";
+import { EDITABLE_COMMITTEES, EDITABLE_ROLES } from "@/lib/admin/EditableRoles";
 
 import AddOrganizer from "./AddOrganizer";
 import useOrganizers, { Organizer } from "@/lib/admin/useOrganizers";
@@ -69,14 +70,10 @@ function Organizers() {
 	const [selectedRoles, setSelectedRoles] = useState<Options>([]);
 	const [selectedCommittees, setSelectedCommittees] = useState<Options>([]);
 
-	const roleOptions = useMemo(
-		() => createOptions(organizerList.flatMap((organizer) => organizer.roles)),
-		[organizerList],
-	);
+	const roleOptions = useMemo(() => createOptions(EDITABLE_ROLES), []);
 	const committeeOptions = useMemo(
-		() =>
-			createOptions(organizerList.flatMap((organizer) => organizer.committees)),
-		[organizerList],
+		() => createOptions(EDITABLE_COMMITTEES),
+		[],
 	);
 	const filteredOrganizers = useMemo(() => {
 		const roleFilters = selectedValues(selectedRoles);

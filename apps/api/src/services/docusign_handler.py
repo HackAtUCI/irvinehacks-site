@@ -8,7 +8,7 @@ from logging import getLogger
 from typing import Sequence
 from uuid import UUID
 
-from pydantic import UUID4, BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr
 
 from auth import user_identity
 from utils import waiver_handler
@@ -18,7 +18,7 @@ log = getLogger(__name__)
 
 
 class PowerForm(BaseModel):
-    powerFormId: UUID4
+    powerFormId: UUID
 
 
 class Signer(BaseModel):
@@ -38,9 +38,9 @@ class EnvelopeSummary(BaseModel):
 
 
 class EnvelopeCompletedData(BaseModel):
-    accountId: UUID4
-    userId: UUID4
-    envelopeId: UUID4
+    accountId: UUID
+    userId: UUID
+    envelopeId: UUID
     envelopeSummary: EnvelopeSummary
 
 

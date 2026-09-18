@@ -16,3 +16,11 @@ export const EDITABLE_ROLES = [
 ];
 
 export const REMOVABLE_ORGANIZER_ROLES = new Set(EDITABLE_ROLES);
+
+export const EDITABLE_COMMITTEES = [
+	"Corporate",
+	"Design",
+	"Logistics",
+	"Marketing",
+	"Tech",
+];

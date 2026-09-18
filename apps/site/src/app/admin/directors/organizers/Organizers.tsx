@@ -2,22 +2,28 @@
 
 import { useRouter } from "next/navigation";
 
-import { useContext, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 
 import axios from "axios";
 import Cards from "@cloudscape-design/components/cards";
 import Box from "@cloudscape-design/components/box";
 import Header from "@cloudscape-design/components/header";
 import Button from "@cloudscape-design/components/button";
+import Multiselect, {
+	MultiselectProps,
+} from "@cloudscape-design/components/multiselect";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 
 import ConfirmationModal from "../email-sender/components/ConfirmationModal";
-import EditOrganizerModal from "./EditOrganizerModal";
+import EditOrganizerModal, { type OrganizerUpdate } from "./EditOrganizerModal";
 import UserContext from "@/lib/admin/UserContext";
 import { isDirector } from "@/lib/admin/authorization";
+import { EDITABLE_COMMITTEES, EDITABLE_ROLES } from "@/lib/admin/EditableRoles";
 
 import AddOrganizer from "./AddOrganizer";
 import useOrganizers, { Organizer } from "@/lib/admin/useOrganizers";
+
+type Options = ReadonlyArray<MultiselectProps.Option>;
 
 const createCardHeaderFactory = (
 	onEdit: (organizer: Organizer) => void,
@@ -32,6 +38,18 @@ const createCardHeaderFactory = (
 			/>
 		);
 	};
+
+function createOptions(values: ReadonlyArray<string>): Options {
+	return Array.from(new Set(values))
+		.sort((a, b) => a.localeCompare(b))
+		.map((value) => ({ label: value, value }));
+}
+
+function selectedValues(options: Options): string[] {
+	return options
+		.map((option) => option.value)
+		.filter((value): value is string => value !== undefined);
+}
 
 function Organizers() {
 	const router = useRouter();
@@ -49,8 +67,36 @@ function Organizers() {
 	const [removingOrganizer, setRemovingOrganizer] = useState<Organizer | null>(
 		null,
 	);
+	const [selectedRoles, setSelectedRoles] = useState<Options>([]);
+	const [selectedCommittees, setSelectedCommittees] = useState<Options>([]);
 
-	const counter = `(${organizerList.length})`;
+	const roleOptions = useMemo(() => createOptions(EDITABLE_ROLES), []);
+	const committeeOptions = useMemo(
+		() => createOptions(EDITABLE_COMMITTEES),
+		[],
+	);
+	const filteredOrganizers = useMemo(() => {
+		const roleFilters = selectedValues(selectedRoles);
+		const committeeFilters = selectedValues(selectedCommittees);
+
+		return organizerList.filter((organizer) => {
+			const matchesRole =
+				roleFilters.length === 0 ||
+				roleFilters.some((role) => organizer.roles.includes(role));
+			const matchesCommittee =
+				committeeFilters.length === 0 ||
+				committeeFilters.some((committee) =>
+					organizer.committees.includes(committee),
+				);
+
+			return matchesRole && matchesCommittee;
+		});
+	}, [organizerList, selectedCommittees, selectedRoles]);
+
+	const counter =
+		filteredOrganizers.length === organizerList.length
+			? `(${organizerList.length})`
+			: `(${filteredOrganizers.length}/${organizerList.length})`;
 
 	const emptyContent = (
 		<Box textAlign="center" color="inherit">
@@ -58,8 +104,8 @@ function Organizers() {
 		</Box>
 	);
 
-	async function updateOrganizerRoles(uid: string, roles: string[]) {
-		await axios.post("/api/director/update-organizers", { uid, roles });
+	async function updateOrganizer(uid: string, organizer: OrganizerUpdate) {
+		await axios.post("/api/director/update-organizers", { uid, ...organizer });
 	}
 
 	async function deleteOrganizer(organizer: Organizer) {
@@ -85,14 +131,41 @@ function Organizers() {
 							header: "Roles",
 							content: ({ roles }) => roles.join(", "),
 						},
+						{
+							id: "committees",
+							header: "Committees",
+							content: ({ committees }) => committees.join(", "),
+						},
 					],
 				}}
 				loading={loading}
 				loadingText="Loading applicants"
-				items={organizerList}
+				items={filteredOrganizers}
 				trackBy="_id"
 				variant="full-page"
 				empty={emptyContent}
+				filter={
+					<SpaceBetween direction="horizontal" size="s">
+						<Multiselect
+							selectedOptions={selectedRoles}
+							onChange={({ detail }) =>
+								setSelectedRoles(detail.selectedOptions)
+							}
+							options={roleOptions}
+							placeholder="Filter by role"
+							selectedAriaLabel="Selected"
+						/>
+						<Multiselect
+							selectedOptions={selectedCommittees}
+							onChange={({ detail }) =>
+								setSelectedCommittees(detail.selectedOptions)
+							}
+							options={committeeOptions}
+							placeholder="Filter by committee"
+							selectedAriaLabel="Selected"
+						/>
+					</SpaceBetween>
+				}
 				header={
 					<Header counter={counter} actions={<AddOrganizer />}>
 						Organizers
@@ -103,11 +176,11 @@ function Organizers() {
 			<EditOrganizerModal
 				organizer={editingOrganizer}
 				onDismissAction={() => setEditingOrganizer(null)}
-				onConfirmAction={async (roles) => {
+				onConfirmAction={async (organizer) => {
 					if (!editingOrganizer) {
 						return;
 					}
-					await updateOrganizerRoles(editingOrganizer._id, roles);
+					await updateOrganizer(editingOrganizer._id, organizer);
 					await mutate();
 					setEditingOrganizer(null);
 				}}

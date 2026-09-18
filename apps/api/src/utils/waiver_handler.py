@@ -56,7 +56,8 @@ async def process_waiver_completion(uid: str, email: EmailStr) -> None:
             and Role.HACKER not in applicant_record.roles
         ):
             log.warning(
-                f"User {uid} attempted to sign waiver from waitlist without hacker role."
+                "User %s attempted to sign waiver from waitlist without hacker role.",
+                uid,
             )
             return
 

@@ -1251,7 +1251,7 @@ async def import_non_hacker_participants(
         {"_id": {"$in": list(records_by_uid.keys())}},
         ["_id"],
     )
-    existing_uids = [record["_id"] for record in existing_records]
+    existing_uids = [str(record["_id"]) for record in existing_records]
     if existing_uids:
         raise HTTPException(
             status.HTTP_409_CONFLICT,

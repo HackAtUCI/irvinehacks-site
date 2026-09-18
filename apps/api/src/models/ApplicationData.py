@@ -13,6 +13,7 @@ from pydantic import (
     HttpUrl,
     SerializerFunctionWrapHandler,
     Tag,
+    field_validator,
     field_serializer,
     model_serializer,
 )
@@ -37,11 +38,21 @@ class DirectorPreviousExperienceReview(BaseModel):
     has_socials: Optional[float] = None
 
 
-def make_empty_none(val: Union[str, None]) -> Union[str, None]:
+def make_empty_none(val: Any) -> Any:
     """Browser will send empty strings for unspecified form inputs."""
     if val == "":
         return None
     return val
+
+
+def count_words(value: str) -> int:
+    return len(value.split())
+
+
+def validate_100_words(value: str) -> str:
+    if count_words(value) > 100:
+        raise ValueError("Response must be 100 words or fewer.")
+    return value
 
 
 # Ensure this array matches FIELDS_With_OTHER in frontend BaseForm.tsx
@@ -59,6 +70,8 @@ FIELDS_SUPPORTING_OTHER = [
 
 
 NullableHttpUrl = Annotated[Union[None, HttpUrl], BeforeValidator(make_empty_none)]
+NullableStr = Annotated[Union[None, str], BeforeValidator(make_empty_none)]
+NullableInt = Annotated[Union[None, int], BeforeValidator(make_empty_none)]
 
 
 # hacker application model
@@ -178,6 +191,7 @@ class BaseZotHacksHackerApplicationData(BaseModel):
 
     pronouns: list[str] = []
     is_18_older: bool
+    discord_username: str
     school_year: str
     dietary_restrictions: list[str] = []
     allergies: Union[str, None] = Field(None, max_length=2048)
@@ -191,6 +205,17 @@ class BaseZotHacksHackerApplicationData(BaseModel):
     drawing_response: str = Field(min_length=1, max_length=2_000_000)
     peter_thought_process_saq: str = Field(min_length=1, max_length=1024)
     comments: Union[str, None] = Field(None, max_length=2048)
+
+    _validate_collaboration_words = field_validator("collaboration_saq")(
+        validate_100_words
+    )
+    _validate_tech_inspiration_words = field_validator("tech_inspiration_saq")(
+        validate_100_words
+    )
+    _validate_uci_gift_words = field_validator("uci_gift_saq")(validate_100_words)
+    _validate_peter_thought_process_words = field_validator(
+        "peter_thought_process_saq"
+    )(validate_100_words)
 
 
 # Not tested for ZH 2025
@@ -221,17 +246,25 @@ class BaseZotHacksMentorApplicationData(BaseModel):
     skill_java: int
     skill_c__: int
     skill_javascript: int
-    skill_c_: int
+    skill_c_: NullableInt = None
+    other_languages_name: NullableStr = None
+    skill_languages_other_rating: NullableInt = None
     skill_html_css: int
-    skill_react: int
-    skill_next_js: int
-    skill_github_pages: int
-    skill_other: int
+    skill_react_js: int
+    skill_next_js_vite: int
+    skill_fastapi_node_js: int
+    skill_django: int
+    skill_express_js: int
+    other_frameworks_name: NullableStr = None
+    skill_frameworks_other_rating: NullableInt = None
     skill_git: int
     skill_sql__any_variation_: int
     skill_aws_services: int
-    skill_vercel: int
-    skill_netlify: int
+    skill_vercel_github_pages: int
+    other_tools_platforms_name: NullableStr = None
+    skill_github_pages: NullableInt = None
+    skill_vercel: NullableInt = None
+    skill_netlify: NullableInt = None
 
 
 class RawHackerApplicationData(BaseApplicationData):

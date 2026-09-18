@@ -10,6 +10,7 @@ import Checkbox from "@cloudscape-design/components/checkbox";
 import Box from "@cloudscape-design/components/box";
 
 import AddOrganizerModal from "./AddOrganizerModal";
+import { EDITABLE_COMMITTEES } from "@/lib/admin/EditableRoles";
 
 // eslint-disable-next-line no-useless-escape
 const EMAIL_REGEX = /^\w+([\.\-]?\w+)*@uci.edu/;
@@ -27,11 +28,9 @@ function AddOrganizer() {
 	const [firstName, setFirstName] = useState("");
 	const [lastName, setLastName] = useState("");
 
-	const [isCorporate, setCorporate] = useState(false);
-	const [isLogistics, setLogistics] = useState(false);
-	const [isDesign, setDesign] = useState(false);
-	const [isTech, setTech] = useState(false);
-	const [isMarketing, setMarketing] = useState(false);
+	const [selectedCommittees, setSelectedCommittees] = useState<Set<string>>(
+		new Set(),
+	);
 
 	const [isDirector, setDirector] = useState(false);
 	const [isCheckInLead, setCheckInLead] = useState(false);
@@ -59,12 +58,7 @@ function AddOrganizer() {
 			setInvalidEmailError("");
 		}
 
-		const committees = [];
-		if (isCorporate) committees.push("Corporate");
-		if (isDesign) committees.push("Design");
-		if (isLogistics) committees.push("Logistics");
-		if (isMarketing) committees.push("Marketing");
-		if (isTech) committees.push("Tech");
+		const committees = Array.from(selectedCommittees);
 
 		if (committees.length === 0) {
 			setNoCommitteeError("Please select at least one committee");
@@ -94,6 +88,18 @@ function AddOrganizer() {
 			last_name: lastName,
 			roles,
 			committees,
+		});
+	}
+
+	function toggleCommittee(committee: string) {
+		setSelectedCommittees((prev) => {
+			const next = new Set(prev);
+			if (next.has(committee)) {
+				next.delete(committee);
+			} else {
+				next.add(committee);
+			}
+			return next;
 		});
 	}
 
@@ -227,36 +233,15 @@ function AddOrganizer() {
 							</Button>
 						</Box>
 						<SpaceBetween direction="vertical" size="xs">
-							<Checkbox
-								onChange={({ detail }) => setCorporate(detail.checked)}
-								checked={isCorporate}
-							>
-								Corporate
-							</Checkbox>
-							<Checkbox
-								onChange={({ detail }) => setLogistics(detail.checked)}
-								checked={isLogistics}
-							>
-								Logistics
-							</Checkbox>
-							<Checkbox
-								onChange={({ detail }) => setDesign(detail.checked)}
-								checked={isDesign}
-							>
-								Design
-							</Checkbox>
-							<Checkbox
-								onChange={({ detail }) => setMarketing(detail.checked)}
-								checked={isMarketing}
-							>
-								Marketing
-							</Checkbox>
-							<Checkbox
-								onChange={({ detail }) => setTech(detail.checked)}
-								checked={isTech}
-							>
-								Tech
-							</Checkbox>
+							{EDITABLE_COMMITTEES.map((committee) => (
+								<Checkbox
+									key={committee}
+									onChange={() => toggleCommittee(committee)}
+									checked={selectedCommittees.has(committee)}
+								>
+									{committee}
+								</Checkbox>
+							))}
 						</SpaceBetween>
 					</FormField>
 				</ColumnLayout>

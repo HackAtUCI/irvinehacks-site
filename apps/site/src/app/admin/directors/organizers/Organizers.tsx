@@ -15,7 +15,7 @@ import Multiselect, {
 import SpaceBetween from "@cloudscape-design/components/space-between";
 
 import ConfirmationModal from "../email-sender/components/ConfirmationModal";
-import EditOrganizerModal from "./EditOrganizerModal";
+import EditOrganizerModal, { type OrganizerUpdate } from "./EditOrganizerModal";
 import UserContext from "@/lib/admin/UserContext";
 import { isDirector } from "@/lib/admin/authorization";
 
@@ -107,8 +107,8 @@ function Organizers() {
 		</Box>
 	);
 
-	async function updateOrganizerRoles(uid: string, roles: string[]) {
-		await axios.post("/api/director/update-organizers", { uid, roles });
+	async function updateOrganizer(uid: string, organizer: OrganizerUpdate) {
+		await axios.post("/api/director/update-organizers", { uid, ...organizer });
 	}
 
 	async function deleteOrganizer(organizer: Organizer) {
@@ -179,11 +179,11 @@ function Organizers() {
 			<EditOrganizerModal
 				organizer={editingOrganizer}
 				onDismissAction={() => setEditingOrganizer(null)}
-				onConfirmAction={async (roles) => {
+				onConfirmAction={async (organizer) => {
 					if (!editingOrganizer) {
 						return;
 					}
-					await updateOrganizerRoles(editingOrganizer._id, roles);
+					await updateOrganizer(editingOrganizer._id, organizer);
 					await mutate();
 					setEditingOrganizer(null);
 				}}

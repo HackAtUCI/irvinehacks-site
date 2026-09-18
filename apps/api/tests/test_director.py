@@ -127,23 +127,36 @@ def test_can_add_organizer(
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 @patch("services.mongodb_handler.update_one", autospec=True)
-def test_can_update_organizer_roles_in_current_hackathon_database(
+def test_can_update_organizer_in_current_hackathon_database(
     mock_mongodb_handler_update_one: AsyncMock,
     mock_mongodb_handler_retrieve_one: AsyncMock,
 ) -> None:
-    """Test that organizer roles are updated in the current hackathon database."""
+    """Test that organizer info is updated in the current hackathon database."""
     mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
     roles = [Role.ORGANIZER, Role.DIRECTOR]
+    committees = ["Tech", "Marketing"]
 
     res = director_client.post(
         "/update-organizers",
-        json={"uid": EXPECTED_ORGANIZER.uid, "roles": roles},
+        json={
+            "uid": EXPECTED_ORGANIZER.uid,
+            "first_name": "Al",
+            "last_name": "Wong",
+            "roles": roles,
+            "committees": committees,
+        },
     )
 
     mock_mongodb_handler_update_one.assert_awaited_once_with(
         Collection.USERS,
         {"_id": EXPECTED_ORGANIZER.uid},
-        {"_id": EXPECTED_ORGANIZER.uid, "roles": roles},
+        {
+            "_id": EXPECTED_ORGANIZER.uid,
+            "first_name": "Al",
+            "last_name": "Wong",
+            "roles": roles,
+            "committees": committees,
+        },
         upsert=True,
     )
     assert res.status_code == 200

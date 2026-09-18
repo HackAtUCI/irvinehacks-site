@@ -188,17 +188,23 @@ async def add_organizer(
 async def update_organizer(
     user: Annotated[User, Depends(require_director)],
     uid: str = Body(..., embed=True),
+    first_name: str = Body(),
+    last_name: str = Body(),
     roles: list[Role] = Body(),
+    committees: list[str] = Body(),
 ) -> None:
-    """Updates organizer's roles"""
-    log.info("%s updating %s's roles", user, uid)
+    """Updates organizer information for the current hackathon."""
+    log.info("%s updating %s's organizer info", user, uid)
 
     await mongodb_handler.update_one(
         Collection.USERS,
         {"_id": uid},
         {
             "_id": uid,
+            "first_name": first_name,
+            "last_name": last_name,
             "roles": roles,
+            "committees": committees,
         },
         upsert=True,
     )

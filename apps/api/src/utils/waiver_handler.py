@@ -12,7 +12,8 @@ log = getLogger(__name__)
 async def process_waiver_completion(uid: str, email: EmailStr) -> None:
     """
     Update user record with WAIVER_SIGNED status if the user is filling out the
-    waiver for the first time and if the user has a status of ACCEPTED.
+    waiver for the first time and if the user has a status of ACCEPTED or is a
+    waitlisted hacker claiming a released spot.
 
     If no user record exists, insert a new record. In all other cases, ignore
     the submission.
@@ -27,7 +28,12 @@ async def process_waiver_completion(uid: str, email: EmailStr) -> None:
         # external participant, create database record
         log.info(f"external participant {email} signed waiver.")
         await mongodb_handler.insert(
-            Collection.USERS, {"_id": uid, "status": Status.WAIVER_SIGNED}
+            Collection.USERS,
+            {
+                "_id": uid,
+                "status": Status.WAIVER_SIGNED,
+                "is_waiver_signed": True,
+            },
         )
         return
 
@@ -42,13 +48,23 @@ async def process_waiver_completion(uid: str, email: EmailStr) -> None:
         elif applicant_record.status == Status.ATTENDING:
             log.warning(f"User {uid} has already signed the waiver and is attending.")
             return
-        elif applicant_record.status != Status.ACCEPTED:
+        elif applicant_record.status not in (Status.ACCEPTED, Status.WAITLISTED):
             log.warning(f"User {uid} attempted to sign waiver but was not accepted.")
+            return
+        elif (
+            applicant_record.status == Status.WAITLISTED
+            and Role.HACKER not in applicant_record.roles
+        ):
+            log.warning(
+                f"User {uid} attempted to sign waiver from waitlist without hacker role."
+            )
             return
 
     log.info("User %s (%s) signed waiver.", uid, ",".join(user_record.roles))
     # Note: this should be able to account for other participant types
     # including mentors, volunteers, etc.
     await mongodb_handler.update_one(
-        Collection.USERS, {"_id": uid}, {"status": Status.WAIVER_SIGNED}
+        Collection.USERS,
+        {"_id": uid},
+        {"status": Status.WAIVER_SIGNED, "is_waiver_signed": True},
     )

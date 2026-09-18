@@ -159,28 +159,51 @@ def test_user_with_late_arrival_rsvp_saves_reason(
 
 
 @patch("utils.email_handler.send_rsvp_confirmation_email", autospec=True)
+@patch("routers.user._release_waitlist_spot", autospec=True)
+@patch("routers.user._reserve_waitlist_spot", autospec=True)
+@patch("routers.user._get_waitlist_status", autospec=True)
 @patch("services.mongodb_handler.update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 def test_waitlisted_decision_with_waiver_signed_status_can_rsvp(
     mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_mongodb_handler_update_one: AsyncMock,
+    mock_get_waitlist_status: AsyncMock,
+    mock_reserve_waitlist_spot: AsyncMock,
+    mock_release_waitlist_spot: AsyncMock,
     mock_send_rsvp_confirmation_email: AsyncMock,
 ) -> None:
-    """Original waitlisted decision should not block a WAIVER_SIGNED user."""
+    """Waitlisted hackers reserve an available spot when they RSVP."""
+    mock_get_waitlist_status.return_value = user.WaitlistStatus(
+        is_started=True,
+        is_open=True,
+        capacity=2,
+        claimed_count=0,
+        remaining_spots=2,
+    )
     mock_mongodb_handler_retrieve_one.return_value = {
         "decision": Decision.WAITLISTED,
         "status": Status.WAIVER_SIGNED,
+        "roles": [Role.APPLICANT, Role.HACKER],
         "first_name": "tree",
     }
+    mock_reserve_waitlist_spot.return_value = True
+    mock_mongodb_handler_update_one.return_value = True
 
     auth_client = UserTestClient(GuestUser(email=USER_EMAIL), app)
     res = auth_client.post("/rsvp", follow_redirects=False)
 
+    mock_reserve_waitlist_spot.assert_awaited_once()
     mock_mongodb_handler_update_one.assert_awaited_once_with(
         Collection.USERS,
-        {"_id": "edu.stanford.tree"},
+        {
+            "_id": "edu.stanford.tree",
+            "roles": {"$all": [Role.APPLICANT, Role.HACKER]},
+            "decision": Decision.WAITLISTED,
+            "status": Status.WAIVER_SIGNED,
+        },
         {"status": Status.CONFIRMED, "arrival_time": "17:00"},
     )
+    mock_release_waitlist_spot.assert_not_awaited()
     mock_send_rsvp_confirmation_email.assert_awaited_once_with(
         USER_EMAIL,
         "tree",
@@ -248,6 +271,125 @@ def test_user_with_status_waitlisted_rsvp_returns_403(
     mock_mongodb_handler_update_one.assert_not_awaited()
 
     assert res.status_code == 403
+
+
+@patch("routers.user._release_waitlist_spot", autospec=True)
+@patch("routers.user._reserve_waitlist_spot", autospec=True)
+@patch("routers.user._get_waitlist_status", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_waitlisted_hacker_can_continue_to_waiver_when_spots_are_open(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_get_waitlist_status: AsyncMock,
+    mock_reserve_waitlist_spot: AsyncMock,
+    mock_release_waitlist_spot: AsyncMock,
+) -> None:
+    """Waitlisted hackers can continue to waiver when spots are open."""
+    mock_get_waitlist_status.return_value = user.WaitlistStatus(
+        is_started=True,
+        is_open=True,
+        capacity=2,
+        claimed_count=0,
+        remaining_spots=2,
+    )
+    mock_mongodb_handler_retrieve_one.return_value = {"status": Status.WAITLISTED}
+
+    auth_client = UserTestClient(GuestUser(email=USER_EMAIL), app)
+    res = auth_client.post("/waitlist/claim")
+
+    mock_mongodb_handler_retrieve_one.assert_awaited_once_with(
+        Collection.USERS,
+        {
+            "_id": "edu.stanford.tree",
+            "roles": {"$all": [Role.APPLICANT, Role.HACKER]},
+        },
+        ["status"],
+    )
+    mock_reserve_waitlist_spot.assert_not_awaited()
+    mock_release_waitlist_spot.assert_not_awaited()
+
+    assert res.status_code == status.HTTP_200_OK
+    assert res.json() == {"status": Status.WAITLISTED}
+
+
+@patch("routers.user._get_waitlist_status", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_waitlist_claim_requires_open_waitlist(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_get_waitlist_status: AsyncMock,
+) -> None:
+    """Claiming is blocked until the waitlist is open and has spots."""
+    mock_get_waitlist_status.return_value = user.WaitlistStatus(
+        is_started=True,
+        is_open=False,
+        capacity=2,
+        claimed_count=2,
+        remaining_spots=0,
+    )
+
+    auth_client = UserTestClient(GuestUser(email=USER_EMAIL), app)
+    res = auth_client.post("/waitlist/claim")
+
+    mock_mongodb_handler_retrieve_one.assert_not_awaited()
+    assert res.status_code == status.HTTP_409_CONFLICT
+
+
+@patch("routers.user._get_waitlist_status", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_waitlist_claim_requires_waitlisted_hacker_status(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_get_waitlist_status: AsyncMock,
+) -> None:
+    """Only currently waitlisted hackers can continue to the waiver."""
+    mock_get_waitlist_status.return_value = user.WaitlistStatus(
+        is_started=True,
+        is_open=True,
+        capacity=2,
+        claimed_count=0,
+        remaining_spots=2,
+    )
+    mock_mongodb_handler_retrieve_one.return_value = {"status": Status.ACCEPTED}
+
+    auth_client = UserTestClient(GuestUser(email=USER_EMAIL), app)
+    res = auth_client.post("/waitlist/claim")
+
+    assert res.status_code == status.HTTP_403_FORBIDDEN
+
+
+@patch("routers.user._release_waitlist_spot", autospec=True)
+@patch("routers.user._reserve_waitlist_spot", autospec=True)
+@patch("routers.user._get_waitlist_status", autospec=True)
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_waitlisted_rsvp_releases_spot_if_confirmation_loses_race(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_update_one: AsyncMock,
+    mock_get_waitlist_status: AsyncMock,
+    mock_reserve_waitlist_spot: AsyncMock,
+    mock_release_waitlist_spot: AsyncMock,
+) -> None:
+    """Double clicks cannot consume extra waitlist spots during RSVP."""
+    mock_get_waitlist_status.return_value = user.WaitlistStatus(
+        is_started=True,
+        is_open=True,
+        capacity=2,
+        claimed_count=0,
+        remaining_spots=2,
+    )
+    mock_mongodb_handler_retrieve_one.return_value = {
+        "decision": Decision.WAITLISTED,
+        "status": Status.WAIVER_SIGNED,
+        "roles": [Role.APPLICANT, Role.HACKER],
+        "first_name": "tree",
+    }
+    mock_reserve_waitlist_spot.return_value = True
+    mock_mongodb_handler_update_one.return_value = False
+
+    auth_client = UserTestClient(GuestUser(email=USER_EMAIL), app)
+    res = auth_client.post("/rsvp")
+
+    mock_reserve_waitlist_spot.assert_awaited_once()
+    mock_release_waitlist_spot.assert_awaited_once()
+    assert res.status_code == status.HTTP_409_CONFLICT
 
 
 @patch("services.mongodb_handler.update_one", autospec=True)

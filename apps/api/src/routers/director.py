@@ -2,10 +2,17 @@ import asyncio
 
 from datetime import datetime
 from logging import getLogger
-from typing import Annotated, Any, Literal, Optional, Sequence
+from typing import Annotated, Any, Literal, Mapping, Optional, Sequence
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
-from pydantic import BaseModel, EmailStr, TypeAdapter, ValidationError
+from pydantic import (
+    AliasChoices,
+    BaseModel,
+    EmailStr,
+    Field,
+    TypeAdapter,
+    ValidationError,
+)
 
 from admin import applicant_review_processor
 from auth.authorization import require_role
@@ -23,6 +30,7 @@ from routers.admin import retrieve_thresholds
 from utils import email_handler
 from utils.email_handler import IH_SENDER, recover_email_from_uid
 from utils.batched import batched
+from utils.hackathon_context import HackathonName, hackathon_name_ctx
 
 log = getLogger(__name__)
 
@@ -59,7 +67,9 @@ class OrganizerSummary(BaseRecord):
     first_name: str
     last_name: str
     roles: list[Role]
-    committee: list[str]
+    committees: list[str] = Field(
+        validation_alias=AliasChoices("committees", "committee")
+    )
 
 
 class RawOrganizerData(BaseModel):
@@ -83,6 +93,36 @@ def roles_includes_organizer(roles: list[Role]) -> bool:
 
 def roles_includes_applicant(roles: list[Role]) -> bool:
     return Role.APPLICANT in roles
+
+
+async def _update_user_in_all_hackathon_databases(
+    query: Mapping[str, object],
+    data: Mapping[str, object],
+    *,
+    upsert: bool = False,
+) -> None:
+    for hackathon_name in (HackathonName.IRVINEHACKS, HackathonName.ZOTHACKS):
+        token = hackathon_name_ctx.set(hackathon_name)
+        try:
+            await mongodb_handler.update_one(
+                Collection.USERS,
+                query,
+                data,
+                upsert=upsert,
+            )
+        finally:
+            hackathon_name_ctx.reset(token)
+
+
+async def _delete_user_in_all_hackathon_databases(
+    query: Mapping[str, object],
+) -> None:
+    for hackathon_name in (HackathonName.IRVINEHACKS, HackathonName.ZOTHACKS):
+        token = hackathon_name_ctx.set(hackathon_name)
+        try:
+            await mongodb_handler.delete_one(Collection.USERS, query)
+        finally:
+            hackathon_name_ctx.reset(token)
 
 
 async def _get_apply_reminder_email_recipients() -> Optional[dict[str, Any]]:
@@ -121,7 +161,7 @@ async def add_organizer(
     first_name: str = Body(),
     last_name: str = Body(),
     roles: list[Role] = Body(),
-    committee: list[str] = Body(),
+    committees: list[str] = Body(),
 ) -> None:
     """Adds an organizer record"""
     log.info("%s adding organizer", user)
@@ -142,15 +182,14 @@ async def add_organizer(
         )
 
     uid = uci_scoped_uid(email)
-    await mongodb_handler.update_one(
-        Collection.USERS,
+    await _update_user_in_all_hackathon_databases(
         {"_id": uid},
         {
             "_id": uid,
             "first_name": first_name,
             "last_name": last_name,
             "roles": roles,
-            "committee": committee,
+            "committees": committees,
         },
         upsert=True,
     )
@@ -165,8 +204,7 @@ async def update_organizer(
     """Updates organizer's roles"""
     log.info("%s updating %s's roles", user, uid)
 
-    await mongodb_handler.update_one(
-        Collection.USERS,
+    await _update_user_in_all_hackathon_databases(
         {"_id": uid},
         {
             "_id": uid,
@@ -183,10 +221,7 @@ async def delete_organizer(
     """Delete organizer from all perms"""
     log.info("%s clearing %s's roles", user, uid)
 
-    await mongodb_handler.delete_one(
-        Collection.USERS,
-        {"_id": uid},
-    )
+    await _delete_user_in_all_hackathon_databases({"_id": uid})
 
 
 @router.get("/apply-reminder", dependencies=[Depends(require_director)])

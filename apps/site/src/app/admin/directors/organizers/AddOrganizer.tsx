@@ -33,6 +33,7 @@ function AddOrganizer() {
 	const [isTech, setTech] = useState(false);
 	const [isMarketing, setMarketing] = useState(false);
 
+	const [isDirector, setDirector] = useState(false);
 	const [isCheckInLead, setCheckInLead] = useState(false);
 	const [isHackerReviewer, setHackerReviewer] = useState(true);
 	const [isMentorReviewer, setMentorReviewer] = useState(false);
@@ -73,6 +74,7 @@ function AddOrganizer() {
 		}
 
 		const roles = ["Organizer"];
+		if (isDirector) roles.push("Director");
 		if (isCheckInLead) roles.push("Check-in Lead");
 		if (isHackerReviewer) roles.push("Hacker Reviewer");
 		if (isMentorReviewer) roles.push("Mentor Reviewer");
@@ -137,6 +139,12 @@ function AddOrganizer() {
 				<ColumnLayout columns={2} variant="text-grid">
 					<FormField label="Roles">
 						<ColumnLayout columns={2} variant="text-grid">
+							<Checkbox
+								onChange={({ detail }) => setDirector(detail.checked)}
+								checked={isDirector}
+							>
+								Director
+							</Checkbox>
 							<Checkbox
 								onChange={({ detail }) => setCheckInLead(detail.checked)}
 								checked={isCheckInLead}

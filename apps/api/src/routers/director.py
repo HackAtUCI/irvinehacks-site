@@ -114,17 +114,6 @@ async def _update_user_in_all_hackathon_databases(
             hackathon_name_ctx.reset(token)
 
 
-async def _delete_user_in_all_hackathon_databases(
-    query: Mapping[str, object],
-) -> None:
-    for hackathon_name in (HackathonName.IRVINEHACKS, HackathonName.ZOTHACKS):
-        token = hackathon_name_ctx.set(hackathon_name)
-        try:
-            await mongodb_handler.delete_one(Collection.USERS, query)
-        finally:
-            hackathon_name_ctx.reset(token)
-
-
 async def _get_apply_reminder_email_recipients() -> Optional[dict[str, Any]]:
     try:
         apply_reminder_recipients = await mongodb_handler.retrieve_one(
@@ -207,7 +196,8 @@ async def update_organizer(
     """Updates organizer information for the current hackathon."""
     log.info("%s updating %s's organizer info", user, uid)
 
-    await _update_user_in_all_hackathon_databases(
+    await mongodb_handler.update_one(
+        Collection.USERS,
         {"_id": uid},
         {
             "_id": uid,
@@ -224,10 +214,13 @@ async def update_organizer(
 async def delete_organizer(
     user: Annotated[User, Depends(require_director)], uid: str = Body(..., embed=True)
 ) -> None:
-    """Delete organizer from all perms"""
+    """Delete organizer from the current hackathon."""
     log.info("%s clearing %s's roles", user, uid)
 
-    await _delete_user_in_all_hackathon_databases({"_id": uid})
+    await mongodb_handler.delete_one(
+        Collection.USERS,
+        {"_id": uid},
+    )
 
 
 @router.get("/apply-reminder", dependencies=[Depends(require_director)])

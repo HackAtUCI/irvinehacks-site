@@ -121,6 +121,44 @@ def test_can_add_organizer(
         ]
     )
     assert mock_mongodb_handler_update_one.await_count == 2
+    assert res.status_code == 201
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+@patch("services.mongodb_handler.update_one", autospec=True)
+def test_can_update_organizer_in_current_hackathon_database(
+    mock_mongodb_handler_update_one: AsyncMock,
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """Test that organizer info is updated in the current hackathon database."""
+    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
+    roles = [Role.ORGANIZER, Role.DIRECTOR]
+    committees = ["Tech", "Marketing"]
+
+    res = director_client.post(
+        "/update-organizers",
+        json={
+            "uid": EXPECTED_ORGANIZER.uid,
+            "first_name": "Al",
+            "last_name": "Wong",
+            "roles": roles,
+            "committees": committees,
+        },
+    )
+
+    mock_mongodb_handler_update_one.assert_awaited_once_with(
+        Collection.USERS,
+        {"_id": EXPECTED_ORGANIZER.uid},
+        {
+            "_id": EXPECTED_ORGANIZER.uid,
+            "first_name": "Al",
+            "last_name": "Wong",
+            "roles": roles,
+            "committees": committees,
+        },
+        upsert=True,
+    )
+    assert res.status_code == 200
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
@@ -140,65 +178,6 @@ def test_can_delete_organizer_in_current_hackathon_database(
     mock_mongodb_handler_delete_one.assert_awaited_once_with(
         Collection.USERS, {"_id": EXPECTED_ORGANIZER.uid}
     )
-    assert res.status_code == 200
-
-
-@patch("services.mongodb_handler.retrieve_one", autospec=True)
-@patch("services.mongodb_handler.update_one", autospec=True)
-def test_can_update_organizer_roles_in_all_hackathon_databases(
-    mock_mongodb_handler_update_one: AsyncMock,
-    mock_mongodb_handler_retrieve_one: AsyncMock,
-) -> None:
-    """Test that organizer roles are updated in all hackathon databases."""
-    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
-    roles = [Role.ORGANIZER, Role.DIRECTOR]
-
-    res = director_client.post(
-        "/update-organizers",
-        json={"uid": EXPECTED_ORGANIZER.uid, "roles": roles},
-    )
-
-    mock_mongodb_handler_update_one.assert_has_awaits(
-        [
-            call(
-                Collection.USERS,
-                {"_id": EXPECTED_ORGANIZER.uid},
-                {"_id": EXPECTED_ORGANIZER.uid, "roles": roles},
-                upsert=True,
-            ),
-            call(
-                Collection.USERS,
-                {"_id": EXPECTED_ORGANIZER.uid},
-                {"_id": EXPECTED_ORGANIZER.uid, "roles": roles},
-                upsert=True,
-            ),
-        ]
-    )
-    assert mock_mongodb_handler_update_one.await_count == 2
-    assert res.status_code == 200
-
-
-@patch("services.mongodb_handler.retrieve_one", autospec=True)
-@patch("services.mongodb_handler.delete_one", autospec=True)
-def test_can_delete_organizer_in_all_hackathon_databases(
-    mock_mongodb_handler_delete_one: AsyncMock,
-    mock_mongodb_handler_retrieve_one: AsyncMock,
-) -> None:
-    """Test that organizers are deleted in all hackathon databases."""
-    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
-
-    res = director_client.post(
-        "/delete-organizers",
-        json={"uid": EXPECTED_ORGANIZER.uid},
-    )
-
-    mock_mongodb_handler_delete_one.assert_has_awaits(
-        [
-            call(Collection.USERS, {"_id": EXPECTED_ORGANIZER.uid}),
-            call(Collection.USERS, {"_id": EXPECTED_ORGANIZER.uid}),
-        ]
-    )
-    assert mock_mongodb_handler_delete_one.await_count == 2
     assert res.status_code == 200
 
 

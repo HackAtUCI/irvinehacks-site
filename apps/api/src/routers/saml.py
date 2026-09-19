@@ -31,6 +31,8 @@ ALLOWED_RELAY_HOSTS = {"zothacks.com", "www.zothacks.com", "localhost"}
 
 
 ONE_TIME_CODE_TTL = 5 * 60  # in seconds
+ZOTHACKS_AUTH_RELAY_STATE = "/auth?hackathon=zothacks"
+ZOTHACKS_AUTH_CALLBACK_URL = "https://zothacks.com/auth"
 
 
 def _is_valid_relay_state(relay_state: str) -> bool:
@@ -268,11 +270,15 @@ async def acs(
 
     await _update_last_login(user)
 
-    # Generate one-time code if returning to external site
-    if relay_state.startswith("https://zothacks.com"):
+    # Generate one-time code if returning to external site. The relative ZotHacks
+    # marker keeps UCI SSO happy while still routing the callback back to ZH.
+    if (
+        relay_state == ZOTHACKS_AUTH_RELAY_STATE
+        or relay_state.startswith("https://zothacks.com")
+    ):
         log.info("Relay starts with zothacks, generating one-time code")
         code = await _generate_one_time_code(user)
-        redirect_url = f"{relay_state}?code={code}"
+        redirect_url = f"{ZOTHACKS_AUTH_CALLBACK_URL}?code={code}"
         return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
     else:
         # Same-domain redirect: set cookie directly

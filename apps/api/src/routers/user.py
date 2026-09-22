@@ -448,7 +448,12 @@ async def _apply_flow(
         log.error("Could not insert applicant %s to MongoDB.", user.uid)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    log.info("Skipping application confirmation email for %s.", user.uid)
+    try:
+        await email_handler.send_application_confirmation_email(
+            user.email, applicant, application_type
+        )
+    except Exception:
+        log.exception("Could not send application confirmation email for %s.", user.uid)
 
     # TODO: handle inconsistent results if one service fails
 

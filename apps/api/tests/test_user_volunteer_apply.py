@@ -91,9 +91,7 @@ def test_volunteer_apply_successfully(
     assert res.status_code == 201
 
     mock_raw_update_one.assert_awaited_once()
-    mock_send_application_confirmation_email.assert_awaited_once_with(
-        USER_EMAIL, EXPECTED_USER, Role.VOLUNTEER
-    )
+    mock_send_application_confirmation_email.assert_not_awaited()
 
 
 @patch("routers.user._is_past_deadline", autospec=True)
@@ -150,7 +148,7 @@ def test_volunteer_apply_with_user_insert_issue_causes_500(
 @patch("services.mongodb_handler.raw_update_one", autospec=True)
 @patch("services.mongodb_handler.update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
-def test_volunteer_apply_with_confirmation_email_issue_causes_500(
+def test_volunteer_apply_skips_confirmation_email_issue(
     mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_mongodb_handler_update_one: AsyncMock,
     mock_raw_update_one: AsyncMock,
@@ -161,9 +159,9 @@ def test_volunteer_apply_with_confirmation_email_issue_causes_500(
 
     res = client.post("/volunteer", data=SAMPLE_APPLICATION)
 
-    assert res.status_code == 500
+    assert res.status_code == 201
     mock_raw_update_one.assert_awaited_once()
-    mock_send_application_confirmation_email.assert_awaited_once()
+    mock_send_application_confirmation_email.assert_not_awaited()
 
 
 def test_volunteer_application_data_is_bson_encodable() -> None:

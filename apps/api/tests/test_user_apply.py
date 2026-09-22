@@ -199,9 +199,7 @@ def test_apply_successfully(
         *EXPECTED_RESUME_UPLOAD,
     )
     mock_raw_update_one.assert_awaited_once()
-    mock_send_application_confirmation_email.assert_awaited_once_with(
-        USER_EMAIL, EXPECTED_USER, Role.HACKER
-    )
+    mock_send_application_confirmation_email.assert_not_awaited()
     assert res.status_code == 201
 
 
@@ -234,9 +232,7 @@ def test_zothacks_hacker_apply_successfully(
         *EXPECTED_RESUME_UPLOAD,
     )
     mock_raw_update_one.assert_awaited_once()
-    mock_send_application_confirmation_email.assert_awaited_once_with(
-        USER_EMAIL, EXPECTED_ZOTHACKS_HACKER_USER, Role.HACKER
-    )
+    mock_send_application_confirmation_email.assert_not_awaited()
     assert res.status_code == 201
 
 
@@ -421,7 +417,7 @@ def test_apply_with_user_insert_issue_causes_500(
 @patch("services.mongodb_handler.update_one", autospec=True)
 @patch("services.gdrive_handler.upload_file", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
-def test_apply_with_confirmation_email_issue_causes_500(
+def test_apply_skips_confirmation_email_issue(
     mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_gdrive_handler_upload_file: AsyncMock,
     mock_mongodb_handler_update_one: AsyncMock,
@@ -434,9 +430,9 @@ def test_apply_with_confirmation_email_issue_causes_500(
 
     res = client.post("/apply", data=SAMPLE_APPLICATION, files=SAMPLE_FILES)
 
-    assert res.status_code == 500
+    assert res.status_code == 201
     mock_raw_update_one.assert_awaited_once()
-    mock_send_application_confirmation_email.assert_awaited_once()
+    mock_send_application_confirmation_email.assert_not_awaited()
 
 
 @patch("utils.email_handler.send_application_confirmation_email", autospec=True)
@@ -464,9 +460,7 @@ def test_apply_successfully_without_resume(
     assert res.status_code == 201
     mock_gdrive_handler_upload_file.assert_not_called()
     mock_raw_update_one.assert_awaited_once()
-    mock_send_application_confirmation_email.assert_awaited_once_with(
-        USER_EMAIL, EXPECTED_USER_WITHOUT_RESUME, Role.HACKER
-    )
+    mock_send_application_confirmation_email.assert_not_awaited()
 
 
 def test_application_data_is_bson_encodable() -> None:

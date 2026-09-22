@@ -167,9 +167,7 @@ def test_mentor_apply_successfully(
         resume_handler.IRVINEHACKS_MENTOR_RESUMES_FOLDER_ID, *EXPECTED_RESUME_UPLOAD
     )
     mock_raw_update_one.assert_awaited_once()
-    mock_send_application_confirmation_email.assert_awaited_once_with(
-        USER_EMAIL, EXPECTED_USER, Role.MENTOR
-    )
+    mock_send_application_confirmation_email.assert_not_awaited()
     assert res.status_code == 201
 
 
@@ -224,7 +222,7 @@ def test_zothacks_mentor_apply_successfully(
     assert application_data["github"] == "https://github.com/"
     assert application_data["linkedin"] is None
     assert application_data["resume_url"] is None
-    mock_send_application_confirmation_email.assert_awaited_once()
+    mock_send_application_confirmation_email.assert_not_awaited()
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
@@ -333,7 +331,7 @@ def test_mentor_apply_with_user_insert_issue_causes_500(
 @patch("services.mongodb_handler.update_one", autospec=True)
 @patch("services.gdrive_handler.upload_file", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
-def test_mentor_apply_with_confirmation_email_issue_causes_500(
+def test_mentor_apply_skips_confirmation_email_issue(
     mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_gdrive_handler_upload_file: AsyncMock,
     mock_mongodb_handler_update_one: AsyncMock,
@@ -346,9 +344,9 @@ def test_mentor_apply_with_confirmation_email_issue_causes_500(
 
     res = client.post("/mentor", data=SAMPLE_APPLICATION, files=SAMPLE_FILES)
 
-    assert res.status_code == 500
+    assert res.status_code == 201
     mock_raw_update_one.assert_awaited_once()
-    mock_send_application_confirmation_email.assert_awaited_once()
+    mock_send_application_confirmation_email.assert_not_awaited()
 
 
 def test_mentor_application_data_is_bson_encodable() -> None:

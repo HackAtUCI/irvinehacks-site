@@ -98,9 +98,7 @@ function formatZotHacksQuestion(question: string) {
 		.replace("skill_sql__any_variation_", "skill_sql_any_variation")
 		.split("_")
 		.map((word) =>
-			word === "frq"
-				? "FRQ"
-				: word.charAt(0).toUpperCase() + word.substring(1),
+			word === "frq" ? "FRQ" : word.charAt(0).toUpperCase() + word.substring(1),
 		)
 		.join(" ");
 }
@@ -112,7 +110,9 @@ function ZotHacksMentorApplication({
 }) {
 	return (
 		<SpaceBetween direction="vertical" size="m">
-			<Container header={<Header variant="h2">ZotHacks Mentor Application</Header>}>
+			<Container
+				header={<Header variant="h2">ZotHacks Mentor Application</Header>}
+			>
 				<SpaceBetween direction="vertical" size="m">
 					{ZOTHACKS_MENTOR_SECTIONS.map(({ title, fields }) => (
 						<div key={title}>

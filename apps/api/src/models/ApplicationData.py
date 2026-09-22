@@ -318,24 +318,6 @@ class RawZotHacksMentorApplicationData(BaseZotHacksMentorApplicationData):
     skill_react_js: int
     skill_next_js_vite: int
 
-class ProcessedZotHacksMentorApplication(BaseZotHacksMentorApplicationData):
-    email: EmailStr
-    resume_url: NullableHttpUrl = None
-    submission_time: datetime
-    reviews: list[Review] = []
-
-    @field_serializer("linkedin", "github", "portfolio", "resume_url")
-    def url2str(self, val: Union[HttpUrl, None]) -> Union[str, None]:
-        if val is not None:
-            return str(val)
-        return val
-    skill_fastapi_node_js: int
-    skill_git: int
-    skill_sql__any_variation_: int
-    skill_aws_services: int
-    skill_vercel_github_pages: int
-
-
 class ProcessedHackerApplicationData(BaseApplicationData):
     email: EmailStr
     resume_url: Union[HttpUrl, None] = None

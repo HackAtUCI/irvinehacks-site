@@ -490,8 +490,7 @@ async def hacker_applicants(
             )
         else:
             (
-                applicant_review_processor.
-                include_hacker_app_fields_with_global_and_breakdown(
+                applicant_review_processor.include_hacker_app_fields_with_global_and_breakdown(
                     record, thresholds["accept"], thresholds["waitlist"]
                 )
             )

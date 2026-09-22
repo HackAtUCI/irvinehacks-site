@@ -20,8 +20,16 @@ async def test_send_application_confirmation_email_uses_ses_smtp(
     mock_smtp.send_message.assert_called_once()
     message = mock_smtp.send_message.call_args.args[0]
     assert message["To"] == "peter@uci.edu"
-    assert message["From"] == "ZotHacks 2026 Applications <hello@zothacks.com>"
-    assert message["Subject"] == "ZotHacks 2026 hacker application confirmation"
+    assert message["From"] == "ZotHacks 2026 Applications <apply@zothacks.com>"
+    assert message["Subject"] == "Thank You For Applying!"
+    assert (
+        "ZotHacks 2026 as a Hacker"
+        in message.get_body(preferencelist=("html",)).get_content()
+    )
+    assert (
+        "zothacks2026@gmail.com"
+        in message.get_body(preferencelist=("html",)).get_content()
+    )
 
 
 @patch("services.ses_handler.SES_SMTP_USERNAME", None)

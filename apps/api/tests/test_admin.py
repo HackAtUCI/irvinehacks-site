@@ -868,6 +868,101 @@ def test_hacker_applicants_returns_correct_applicants(
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 @patch("services.mongodb_handler.retrieve", autospec=True)
+def test_hacker_applicants_allows_zothacks_hacker_without_resume(
+    mock_mongodb_handler_retrieve: AsyncMock,
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """ZotHacks hacker resumes are optional, so summaries must allow no resume URL."""
+    returned_records: list[dict[str, object]] = [
+        {
+            "_id": "edu.uci.peter",
+            "first_name": "Peter",
+            "last_name": "Anteater",
+            "status": "PENDING_REVIEW",
+            "roles": ["Applicant", "Hacker"],
+            "application_data": {
+                "school_year": "2nd Year",
+                "submission_time": datetime(2026, 9, 21, 9, 0, 0),
+                "email": "peter@uci.edu",
+                "major": "Computer Science",
+                "reviews": [],
+                "review_breakdown": {},
+                "global_field_scores": {},
+            },
+        }
+    ]
+    returned_thresholds: dict[str, object] = {"accept": 12, "waitlist": 5}
+
+    mock_mongodb_handler_retrieve.return_value = returned_records
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        returned_thresholds,
+        DIRECTOR_IDENTITY,
+    ]
+
+    res = director_client.get("/applicants/hackers")
+
+    assert res.status_code == 200
+    data = res.json()
+    assert data[0]["application_data"]["resume_url"] is None
+    assert data[0]["application_data"]["school_year"] == "2nd Year"
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+@patch("services.mongodb_handler.retrieve", autospec=True)
+def test_hacker_applicants_allows_zothacks_hacker_review_breakdown(
+    mock_mongodb_handler_retrieve: AsyncMock,
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """ZotHacks summaries use stored review scores, not IrvineHacks weights."""
+    returned_records: list[dict[str, object]] = [
+        {
+            "_id": "edu.uci.peter",
+            "first_name": "Peter",
+            "last_name": "Anteater",
+            "status": "PENDING_REVIEW",
+            "roles": ["Applicant", "Hacker"],
+            "application_data": {
+                "school_year": "2nd Year",
+                "submission_time": datetime(2026, 9, 21, 9, 0, 0),
+                "email": "peter@uci.edu",
+                "major": "Computer Science",
+                "tech_inspiration_saq": "Robots doing surgery are neat.",
+                "reviews": [
+                    [datetime(2026, 9, 21), "edu.uci.alicia", 70, "good app"],
+                ],
+                "review_breakdown": {
+                    "alicia": {
+                        "collaboration_saq": 15,
+                        "tech_inspiration_saq": 18,
+                        "uci_gift_saq": 14,
+                        "drawing_response": 8,
+                        "peter_thought_process_saq": 9,
+                    }
+                },
+                "global_field_scores": {},
+            },
+        }
+    ]
+    returned_thresholds: dict[str, object] = {"accept": 60, "waitlist": 40}
+
+    mock_mongodb_handler_retrieve.return_value = returned_records
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        returned_thresholds,
+        DIRECTOR_IDENTITY,
+    ]
+
+    res = director_client.get("/applicants/hackers")
+
+    assert res.status_code == 200
+    data = res.json()
+    assert data[0]["avg_score"] == 70
+    assert data[0]["decision"] == "ACCEPTED"
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+@patch("services.mongodb_handler.retrieve", autospec=True)
 def test_hacker_applicants_redacts_identity_for_reviewers(
     mock_mongodb_handler_retrieve: AsyncMock,
     mock_mongodb_handler_retrieve_one: AsyncMock,

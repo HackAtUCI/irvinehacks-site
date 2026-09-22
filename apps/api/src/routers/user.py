@@ -448,19 +448,13 @@ async def _apply_flow(
         log.error("Could not insert applicant %s to MongoDB.", user.uid)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    try:
-        await email_handler.send_application_confirmation_email(
-            user.email, applicant, application_type
-        )
-    except RuntimeError:
-        log.error("Could not send confirmation email with SendGrid to %s.", user.uid)
-        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
+    log.info("Skipping application confirmation email for %s.", user.uid)
 
     # TODO: handle inconsistent results if one service fails
 
     log.info("%s submitted an application", user.uid)
     return (
-        "Thank you for submitting an application to ZotHacks 2025! Please "
+        "Thank you for submitting an application to ZotHacks 2026! Please "
         + "visit https://zothacks.com/portal to see your application status."
     )
 

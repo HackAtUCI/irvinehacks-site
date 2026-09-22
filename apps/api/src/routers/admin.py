@@ -64,7 +64,7 @@ class ApplicationDataSummary(BaseModel):
     normalized_scores: Optional[dict[str, float]] = None
     extra_points: Optional[float] = None
     email: str
-    resume_url: str
+    resume_url: Optional[str] = None
     major: Optional[str] = None
     linkedin: Optional[str] = None
     reviews: list[Review] = []
@@ -76,7 +76,7 @@ class ZotHacksApplicationDataSummary(BaseModel):
     normalized_scores: Optional[dict[str, float]] = None
     extra_points: Optional[float] = None
     email: str
-    resume_url: str
+    resume_url: Optional[str] = None
     major: Optional[str] = None
     linkedin: Optional[str] = None
     reviews: list[Review] = []
@@ -480,10 +480,18 @@ async def hacker_applicants(
         # include_hacker_app_fields uses reviews array as source of truth
         # for "most recent scores"
 
-        applicant_review_processor.include_hacker_app_fields_with_global_and_breakdown(
-            record, thresholds["accept"], thresholds["waitlist"]
-        )
         application_data = record.get("application_data", {})
+        if (
+            isinstance(application_data, dict)
+            and "tech_inspiration_saq" in application_data
+        ):
+            applicant_review_processor.include_hacker_app_fields(
+                record, thresholds["accept"], thresholds["waitlist"]
+            )
+        else:
+            applicant_review_processor.include_hacker_app_fields_with_global_and_breakdown(
+                record, thresholds["accept"], thresholds["waitlist"]
+            )
         record["director_previous_experience_reviewed"] = bool(
             isinstance(application_data, dict)
             and application_data.get("director_previous_experience_review")

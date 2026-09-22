@@ -45,6 +45,15 @@ def make_empty_none(val: Any) -> Any:
     return val
 
 
+def make_list(val: Any) -> Any:
+    """Older records may store single-select fields as scalars."""
+    if val is None:
+        return []
+    if isinstance(val, list):
+        return val
+    return [val]
+
+
 def count_words(value: str) -> int:
     return len(value.split())
 
@@ -72,13 +81,14 @@ FIELDS_SUPPORTING_OTHER = [
 NullableHttpUrl = Annotated[Union[None, HttpUrl], BeforeValidator(make_empty_none)]
 NullableStr = Annotated[Union[None, str], BeforeValidator(make_empty_none)]
 NullableInt = Annotated[Union[None, int], BeforeValidator(make_empty_none)]
+StringList = Annotated[list[str], BeforeValidator(make_list)]
 
 
 # hacker application model
 class BaseApplicationData(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, str_max_length=254)
 
-    pronouns: list[str] = []
+    pronouns: StringList = []
 
     ethnicity: str
     is_first_hackathon: bool
@@ -87,7 +97,7 @@ class BaseApplicationData(BaseModel):
     major: str
     education_level: str
     t_shirt_size: Literal["S", "M", "L", "XL"]
-    dietary_restrictions: list[str] = []
+    dietary_restrictions: StringList = []
     allergies: Union[str, None] = Field(None, max_length=2048)
     # Field for question: "How did you hear about IrvineHacks?"
     ih_reference: list[str] = []
@@ -116,13 +126,13 @@ class BaseMentorApplicationData(BaseModel):
 
     mentor_type: list[str]
 
-    pronouns: list[str] = []
+    pronouns: StringList = []
     # ethnicity: str
     school: str
     major: str
     education_level: str
     t_shirt_size: Literal["S", "M", "L", "XL"]
-    dietary_restrictions: list[str]
+    dietary_restrictions: StringList
     allergies: Union[str, None] = Field(None, max_length=2048)
     # Field for question: "How did you hear about IrvineHacks?"
     ih_reference: list[str] = []
@@ -161,7 +171,7 @@ class BaseMentorApplicationData(BaseModel):
 class BaseVolunteerApplicationData(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, str_max_length=1024)
 
-    pronouns: list[str] = []
+    pronouns: StringList = []
     # ethnicity: str
     is_18_older: bool
     t_shirt_size: Literal["S", "M", "L", "XL"]
@@ -172,7 +182,7 @@ class BaseVolunteerApplicationData(BaseModel):
     ih_reference: list[str] = []
     frq_volunteer: str = Field(max_length=2048)
     frq_memory: str = Field(max_length=2048)
-    dietary_restrictions: list[str] = []
+    dietary_restrictions: StringList = []
     allergies: Union[str, None] = Field(None, max_length=2048)
     frq_volunteer_allergy: Optional[str] = ""
 
@@ -189,11 +199,11 @@ class BaseVolunteerApplicationData(BaseModel):
 class BaseZotHacksHackerApplicationData(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, str_max_length=1024)
 
-    pronouns: list[str] = []
+    pronouns: StringList = []
     is_18_older: bool
     discord_username: str
     school_year: str
-    dietary_restrictions: list[str] = []
+    dietary_restrictions: StringList = []
     allergies: Union[str, None] = Field(None, max_length=2048)
 
     major: str
@@ -223,8 +233,8 @@ class BaseZotHacksMentorApplicationData(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, str_max_length=1024)
 
     is_18_older: bool
-    pronouns: list[str] = []
-    dietary_restrictions: list[str] = []
+    pronouns: StringList = []
+    dietary_restrictions: StringList = []
     allergies: Union[str, None] = Field(None, max_length=2048)
 
     phone_number: str
@@ -372,9 +382,21 @@ class ProcessedZotHacksHackerApplicationData(BaseZotHacksHackerApplicationData):
 
 class ProcessedZotHacksMentorApplication(BaseZotHacksMentorApplicationData):
     email: EmailStr
-    resume_url: Union[HttpUrl, None] = None
+    resume_url: NullableHttpUrl = None
     submission_time: datetime
     reviews: list[Review] = []
+    skill_python: NullableInt = None
+    skill_java: NullableInt = None
+    skill_c__: NullableInt = None
+    skill_javascript: NullableInt = None
+    skill_html_css: NullableInt = None
+    skill_react_js: NullableInt = None
+    skill_next_js_vite: NullableInt = None
+    skill_fastapi_node_js: NullableInt = None
+    skill_git: NullableInt = None
+    skill_sql__any_variation_: NullableInt = None
+    skill_aws_services: NullableInt = None
+    skill_vercel_github_pages: NullableInt = None
 
     @field_serializer("linkedin", "github", "portfolio", "resume_url")
     def url2str(self, val: Union[HttpUrl, None]) -> Union[str, None]:

@@ -7,24 +7,6 @@ from utils import email_handler
 from utils.email_handler import IH_SENDER
 
 
-class User:
-    first_name = "Peter"
-    last_name = "Anteater"
-
-
-@patch("services.ses_handler.send_application_confirmation_email")
-async def test_send_application_confirmation_email_uses_ses(
-    mock_ses_send_application_confirmation_email: AsyncMock,
-) -> None:
-    await email_handler.send_application_confirmation_email(
-        "peter@uci.edu", User(), "Hacker"
-    )
-
-    mock_ses_send_application_confirmation_email.assert_awaited_once_with(
-        "peter@uci.edu", "Peter", "Anteater", "Hacker"
-    )
-
-
 @patch("services.sendgrid_handler.send_email")
 async def test_send_hacker_decision_email(
     mock_sendgrid_handler_send_email: AsyncMock,

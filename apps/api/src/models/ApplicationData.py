@@ -228,7 +228,6 @@ class BaseZotHacksHackerApplicationData(BaseModel):
     )(validate_100_words)
 
 
-# Not tested for ZH 2025
 class BaseZotHacksMentorApplicationData(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True, str_max_length=1024)
 
@@ -252,20 +251,22 @@ class BaseZotHacksMentorApplicationData(BaseModel):
     team_leadership_frq: str = Field(max_length=2048)
     comments: Union[str, None] = Field(None, max_length=2048)
 
-    skill_python: int
-    skill_java: int
-    skill_c__: int
-    skill_javascript: int
+    skill_python: NullableInt = None
+    skill_java: NullableInt = None
+    skill_c__: NullableInt = None
+    skill_javascript: NullableInt = None
     other_languages_name: NullableStr = None
-    skill_html_css: int
-    skill_react_js: int
-    skill_next_js_vite: int
-    skill_fastapi_node_js: int
+
+    skill_html_css: NullableInt = None
+    skill_react_js: NullableInt = None
+    skill_next_js_vite: NullableInt = None
+    skill_fastapi_node_js: NullableInt = None
     other_frameworks_name: NullableStr = None
-    skill_git: int
-    skill_sql__any_variation_: int
-    skill_aws_services: int
-    skill_vercel_github_pages: int
+
+    skill_git: NullableInt = None
+    skill_sql__any_variation_: NullableInt = None
+    skill_aws_services: NullableInt = None
+    skill_vercel_github_pages: NullableInt = None
     other_tools_platforms_name: NullableStr = None
 
 
@@ -308,6 +309,29 @@ class RawZotHacksMentorApplicationData(BaseZotHacksMentorApplicationData):
     last_name: str
     resume: Union[UploadFile, None] = None
     application_type: Literal["Mentor"]
+
+    skill_python: int
+    skill_java: int
+    skill_c__: int
+    skill_javascript: int
+    skill_html_css: int
+    skill_react_js: int
+    skill_next_js_vite: intclass ProcessedZotHacksMentorApplication(BaseZotHacksMentorApplicationData):
+    email: EmailStr
+    resume_url: NullableHttpUrl = None
+    submission_time: datetime
+    reviews: list[Review] = []
+
+    @field_serializer("linkedin", "github", "portfolio", "resume_url")
+    def url2str(self, val: Union[HttpUrl, None]) -> Union[str, None]:
+        if val is not None:
+            return str(val)
+        return val
+    skill_fastapi_node_js: int
+    skill_git: int
+    skill_sql__any_variation_: int
+    skill_aws_services: int
+    skill_vercel_github_pages: int
 
 
 class ProcessedHackerApplicationData(BaseApplicationData):
@@ -385,18 +409,6 @@ class ProcessedZotHacksMentorApplication(BaseZotHacksMentorApplicationData):
     resume_url: NullableHttpUrl = None
     submission_time: datetime
     reviews: list[Review] = []
-    skill_python: NullableInt = None
-    skill_java: NullableInt = None
-    skill_c__: NullableInt = None
-    skill_javascript: NullableInt = None
-    skill_html_css: NullableInt = None
-    skill_react_js: NullableInt = None
-    skill_next_js_vite: NullableInt = None
-    skill_fastapi_node_js: NullableInt = None
-    skill_git: NullableInt = None
-    skill_sql__any_variation_: NullableInt = None
-    skill_aws_services: NullableInt = None
-    skill_vercel_github_pages: NullableInt = None
 
     @field_serializer("linkedin", "github", "portfolio", "resume_url")
     def url2str(self, val: Union[HttpUrl, None]) -> Union[str, None]:

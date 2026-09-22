@@ -13,6 +13,7 @@ import { uidToPseudonym } from "@/lib/admin/anonymize";
 import useApplicant, {
 	IrvineHacksHackerApplicationData,
 	IrvineHacksMentorApplicationData,
+	ZotHacksMentorApplicationData,
 	VolunteerApplicationData,
 } from "@/lib/admin/useApplicant";
 
@@ -231,7 +232,9 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 				) : applicant.roles.includes(ParticipantRole.Mentor) ? (
 					<MentorApplication
 						application_data={
-							application_data as IrvineHacksMentorApplicationData
+							application_data as
+								| IrvineHacksMentorApplicationData
+								| ZotHacksMentorApplicationData
 						}
 						guidelines={guidelines as IrvineHacksMentorScoringGuidelinesType}
 					/>

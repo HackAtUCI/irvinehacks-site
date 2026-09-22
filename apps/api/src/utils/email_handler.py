@@ -4,7 +4,7 @@ from pydantic import EmailStr
 
 from models.ApplicationData import Decision
 from models.user_record import Role, Status
-from services import mongodb_handler, sendgrid_handler, ses_handler
+from services import mongodb_handler, sendgrid_handler
 from services.sendgrid_handler import (
     ApplicationUpdatePersonalization,
     ApplicationUpdateTemplates,
@@ -47,9 +47,16 @@ async def send_application_confirmation_email(
     email: EmailStr, user: ContactInfo, application_type: str
 ) -> None:
     """Send a confirmation email after a user submits an application.
-    Will propagate exceptions from SES."""
-    await ses_handler.send_application_confirmation_email(
-        str(email), user.first_name, user.last_name, application_type
+    Will propagate exceptions from SendGrid."""
+    await sendgrid_handler.send_email(
+        Template.SUBMISSION_CONFIRMATION_EMAIL,
+        IH_SENDER,
+        {
+            "email": email,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "application_type": application_type,
+        },
     )
 
 

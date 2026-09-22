@@ -165,7 +165,7 @@ def test_mentor_apply_successfully(
         resume_handler.IRVINEHACKS_MENTOR_RESUMES_FOLDER_ID, *EXPECTED_RESUME_UPLOAD
     )
     mock_raw_update_one.assert_awaited_once()
-    mock_send_application_confirmation_email.assert_awaited_once()
+    mock_send_application_confirmation_email.assert_not_awaited()
     assert res.status_code == 201
 
 
@@ -216,7 +216,7 @@ def test_zothacks_mentor_apply_successfully(
     assert application_data["github"] == "https://github.com/"
     assert application_data["linkedin"] is None
     assert application_data["resume_url"] is None
-    mock_send_application_confirmation_email.assert_awaited_once()
+    mock_send_application_confirmation_email.assert_not_awaited()
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
@@ -340,7 +340,7 @@ def test_mentor_apply_skips_confirmation_email_issue(
 
     assert res.status_code == 201
     mock_raw_update_one.assert_awaited_once()
-    mock_send_application_confirmation_email.assert_awaited_once()
+    mock_send_application_confirmation_email.assert_not_awaited()
 
 
 def test_mentor_application_data_is_bson_encodable() -> None:

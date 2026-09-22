@@ -259,6 +259,37 @@ def test_cannot_retrieve_applicants_without_role(
     mock_mongodb_handler_retrieve.assert_not_awaited()
 
 
+@patch("services.mongodb_handler.retrieve", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_can_retrieve_zothacks_mentor_applicants_without_school(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_retrieve: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
+    mock_mongodb_handler_retrieve.return_value = [
+        {
+            "_id": "edu.uci.mentor",
+            "first_name": "Zot",
+            "last_name": "Mentor",
+            "status": "PENDING_REVIEW",
+            "roles": ["Applicant", "Mentor"],
+            "application_data": {
+                "submission_time": datetime(2026, 9, 21, 18, 49, 19),
+                "reviews": [],
+                "is_18_older": True,
+            },
+        }
+    ]
+
+    res = director_client.get("/applicants/mentors")
+
+    assert res.status_code == 200
+    data = res.json()
+    assert len(data) == 1
+    assert data[0]["_id"] == "edu.uci.mentor"
+    assert data[0]["application_data"]["school"] is None
+
+
 @patch("services.mongodb_handler.raw_update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)

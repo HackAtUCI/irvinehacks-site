@@ -83,7 +83,7 @@ class ZotHacksApplicationDataSummary(BaseModel):
 
 
 class SimplifiedApplicationDataSummary(BaseModel):
-    school: str
+    school: Optional[str] = None
     submission_time: datetime
     reviews: list[Review] = []
 

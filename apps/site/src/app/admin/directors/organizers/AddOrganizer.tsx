@@ -33,6 +33,7 @@ function AddOrganizer() {
 	);
 
 	const [isDirector, setDirector] = useState(false);
+	const [isLead, setLead] = useState(false);
 	const [isCheckInLead, setCheckInLead] = useState(false);
 	const [isHackerReviewer, setHackerReviewer] = useState(true);
 	const [isMentorReviewer, setMentorReviewer] = useState(false);
@@ -69,6 +70,7 @@ function AddOrganizer() {
 
 		const roles = ["Organizer"];
 		if (isDirector) roles.push("Director");
+		if (isLead) roles.push("Lead");
 		if (isCheckInLead) roles.push("Check-in Lead");
 		if (isHackerReviewer) roles.push("Hacker Reviewer");
 		if (isMentorReviewer) roles.push("Mentor Reviewer");
@@ -150,6 +152,12 @@ function AddOrganizer() {
 								checked={isDirector}
 							>
 								Director
+							</Checkbox>
+							<Checkbox
+								onChange={({ detail }) => setLead(detail.checked)}
+								checked={isLead}
+							>
+								Lead
 							</Checkbox>
 							<Checkbox
 								onChange={({ detail }) => setCheckInLead(detail.checked)}

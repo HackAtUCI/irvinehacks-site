@@ -1,6 +1,7 @@
 export const EDITABLE_ROLES = [
 	"Director",
 	"Organizer",
+	"Lead",
 	"Check-in Lead",
 	"Hacker Reviewer",
 	"Mentor Reviewer",

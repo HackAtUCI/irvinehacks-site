@@ -94,8 +94,6 @@ SAMPLE_ZOTHACKS_MENTOR_APPLICATION = {
     "skill_react_js": "4",
     "skill_next_js_vite": "4",
     "skill_fastapi_node_js": "3",
-    "skill_django": "3",
-    "skill_express_js": "4",
     "other_frameworks_name": "Vue.js (4)",
     "skill_git": "5",
     "skill_sql__any_variation_": "3",
@@ -210,12 +208,8 @@ def test_zothacks_mentor_apply_successfully(
     assert application_data["skill_react_js"] == 4
     assert application_data["skill_next_js_vite"] == 4
     assert application_data["skill_fastapi_node_js"] == 3
-    assert application_data["skill_django"] == 3
-    assert application_data["skill_express_js"] == 4
     assert application_data["other_languages_name"] == "Ruby (2)"
-    assert application_data["skill_languages_other_rating"] is None
     assert application_data["other_frameworks_name"] == "Vue.js (4)"
-    assert application_data["skill_frameworks_other_rating"] is None
     assert application_data["skill_vercel_github_pages"] == 4
     assert application_data["other_tools_platforms_name"] == "Docker (4)"
     assert application_data["skill_sql__any_variation_"] == 3

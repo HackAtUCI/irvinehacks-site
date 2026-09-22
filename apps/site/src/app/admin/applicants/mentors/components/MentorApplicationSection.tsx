@@ -132,7 +132,7 @@ const SINGLE_ANSWER_LABELS: Record<string, string> = {
 	...RESUME_SHARE_LABELS,
 };
 
-function ApplicationResponse({ value }: ApplicationResponseProps) {
+export function ApplicationResponse({ value }: ApplicationResponseProps) {
 	if (value === null) {
 		return <p>Not provided</p>;
 	}

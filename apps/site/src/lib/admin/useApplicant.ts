@@ -124,6 +124,44 @@ export interface IrvineHacksMentorApplicationData extends BaseApplicationData {
 	mentor_design_saq4: string;
 }
 
+export interface ZotHacksMentorApplicationData {
+	email: string;
+	is_18_older: boolean;
+	pronouns: string[];
+	dietary_restrictions: string[];
+	allergies: string | null;
+	phone_number: string;
+	discord_username: string;
+	major: string;
+	academic_status: string;
+	linkedin: string | null;
+	github: string | null;
+	portfolio: string | null;
+	resume_url: string | null;
+	submission_time: string;
+	reviews: Review[];
+	tech_stack_frq: string;
+	frontend_backend_frq: string;
+	teaching_experience_frq: string;
+	team_leadership_frq: string;
+	comments: string | null;
+	skill_python: number | null;
+	skill_java: number | null;
+	skill_c__: number | null;
+	skill_javascript: number | null;
+	other_languages_name: string | null;
+	skill_html_css: number | null;
+	skill_react_js: number | null;
+	skill_next_js_vite: number | null;
+	skill_fastapi_node_js: number | null;
+	other_frameworks_name: string | null;
+	skill_git: number | null;
+	skill_sql__any_variation_: number | null;
+	skill_aws_services: number | null;
+	skill_vercel_github_pages: number | null;
+	other_tools_platforms_name: string | null;
+}
+
 export interface VolunteerApplicationData extends BaseApplicationData {
 	t_shirt_size: string;
 	ih_reference: string[];
@@ -166,6 +204,7 @@ export type ZotHacksHackerApplicationQuestion = Exclude<
 type ApplicationData =
 	| IrvineHacksHackerApplicationData
 	| IrvineHacksMentorApplicationData
+	| ZotHacksMentorApplicationData
 	| VolunteerApplicationData
 	| ZotHacksHackerApplicationData;
 

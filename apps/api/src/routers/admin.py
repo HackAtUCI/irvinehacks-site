@@ -83,7 +83,7 @@ class ZotHacksApplicationDataSummary(BaseModel):
 
 
 class SimplifiedApplicationDataSummary(BaseModel):
-    school: str
+    school: Optional[str] = None
     submission_time: datetime
     reviews: list[Review] = []
 
@@ -489,8 +489,10 @@ async def hacker_applicants(
                 record, thresholds["accept"], thresholds["waitlist"]
             )
         else:
-            applicant_review_processor.include_hacker_app_fields_with_global_and_breakdown(
-                record, thresholds["accept"], thresholds["waitlist"]
+            (
+                applicant_review_processor.include_hacker_app_fields_with_global_and_breakdown(  # noqa: E501
+                    record, thresholds["accept"], thresholds["waitlist"]
+                )
             )
         record["director_previous_experience_reviewed"] = bool(
             isinstance(application_data, dict)

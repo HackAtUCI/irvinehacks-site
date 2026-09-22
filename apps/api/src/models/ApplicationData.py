@@ -316,7 +316,9 @@ class RawZotHacksMentorApplicationData(BaseZotHacksMentorApplicationData):
     skill_javascript: int
     skill_html_css: int
     skill_react_js: int
-    skill_next_js_vite: intclass ProcessedZotHacksMentorApplication(BaseZotHacksMentorApplicationData):
+    skill_next_js_vite: int
+
+class ProcessedZotHacksMentorApplication(BaseZotHacksMentorApplicationData):
     email: EmailStr
     resume_url: NullableHttpUrl = None
     submission_time: datetime

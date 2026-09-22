@@ -490,8 +490,7 @@ async def hacker_applicants(
             )
         else:
             (
-                applicant_review_processor.
-                include_hacker_app_fields_with_global_and_breakdown(
+                applicant_review_processor.include_hacker_app_fields_with_global_and_breakdown(
                     record, thresholds["accept"], thresholds["waitlist"]
                 )
             )
@@ -1662,10 +1661,12 @@ async def _try_update_applicant_with_query(
             update_query,
         )
         if not modified:
-            log.warning(f"""
+            log.warning(
+                f"""
                 Update query did not modify any documents
                 for {applicant}: {update_query}
-                """)
+                """
+            )
     except RuntimeError:
         log.error(err_msg)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)

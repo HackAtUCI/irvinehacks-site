@@ -318,6 +318,7 @@ class RawZotHacksMentorApplicationData(BaseZotHacksMentorApplicationData):
     skill_react_js: int
     skill_next_js_vite: int
 
+
 class ProcessedHackerApplicationData(BaseApplicationData):
     email: EmailStr
     resume_url: Union[HttpUrl, None] = None

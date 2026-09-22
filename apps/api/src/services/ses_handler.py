@@ -43,10 +43,23 @@ async def send_application_confirmation_email(
 ) -> None:
     sent_at = _sent_at()
     subject = "Thank You For Applying!"
+    confirmation_text = (
+        f"Thank you for applying to ZotHacks 2026 as a {application_type}! "
+        "You should expect to hear back from us in early October after "
+        "applications close. If you have any additional questions, please do "
+        f"not hesitate to email us at {CONTACT_EMAIL}!"
+    )
+    confirmation_html = (
+        "Thank you for applying to ZotHacks 2026 as a "
+        f"{escape(application_type)}! You should expect to hear back from us "
+        "in early October after applications close. If you have any additional "
+        "questions, please do not hesitate to email us at "
+        f'<a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>!'
+    )
 
     text_body = f"""Hello {first_name}!
 
-Thank you for applying to ZotHacks 2026 as a {application_type}! You should expect to hear back from us in early October after applications close. If you have any additional questions, please do not hesitate to email us at {CONTACT_EMAIL}!
+{confirmation_text}
 
 Best regards,
 
@@ -58,7 +71,7 @@ Sent at: {sent_at}
     html_body = f"""
 <p>Hello {escape(first_name)}!</p>
 
-<p>Thank you for applying to ZotHacks 2026 as a {escape(application_type)}! You should expect to hear back from us in early October after applications close. If you have any additional questions, please do not hesitate to email us at <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>!</p>
+<p>{confirmation_html}</p>
 
 <p>Best regards,</p>
 

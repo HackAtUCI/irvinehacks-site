@@ -246,25 +246,17 @@ class BaseZotHacksMentorApplicationData(BaseModel):
     skill_java: int
     skill_c__: int
     skill_javascript: int
-    skill_c_: NullableInt = None
     other_languages_name: NullableStr = None
-    skill_languages_other_rating: NullableInt = None
     skill_html_css: int
     skill_react_js: int
     skill_next_js_vite: int
     skill_fastapi_node_js: int
-    skill_django: int
-    skill_express_js: int
     other_frameworks_name: NullableStr = None
-    skill_frameworks_other_rating: NullableInt = None
     skill_git: int
     skill_sql__any_variation_: int
     skill_aws_services: int
     skill_vercel_github_pages: int
     other_tools_platforms_name: NullableStr = None
-    skill_github_pages: NullableInt = None
-    skill_vercel: NullableInt = None
-    skill_netlify: NullableInt = None
 
 
 class RawHackerApplicationData(BaseApplicationData):

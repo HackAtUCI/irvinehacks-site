@@ -29,7 +29,6 @@ const majorOptions = [
 		value: "Business Information Management",
 		text: "Business Information Management",
 	},
-	{ value: "Computer Game Science", text: "Computer Game Science" },
 	{ value: "Computer Science", text: "Computer Science" },
 	{
 		value: "Computer Science and Engineering",
@@ -38,6 +37,10 @@ const majorOptions = [
 	{ value: "Data Science", text: "Data Science" },
 	{ value: "Informatics", text: "Informatics" },
 	{ value: "Electrical Engineering", text: "Electrical Engineering" },
+	{
+		value: "Game Design and Interactive Media",
+		text: "Game Design and Interactive Media",
+	},
 	{ value: "Software Engineering", text: "Software Engineering" },
 	{ value: "N/A (High School)", text: "N/A (High School)" },
 	{ value: "Undeclared", text: "Undeclared" },

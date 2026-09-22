@@ -199,7 +199,7 @@ def test_apply_successfully(
         *EXPECTED_RESUME_UPLOAD,
     )
     mock_raw_update_one.assert_awaited_once()
-    mock_send_application_confirmation_email.assert_not_awaited()
+    mock_send_application_confirmation_email.assert_awaited_once()
     assert res.status_code == 201
 
 
@@ -232,7 +232,7 @@ def test_zothacks_hacker_apply_successfully(
         *EXPECTED_RESUME_UPLOAD,
     )
     mock_raw_update_one.assert_awaited_once()
-    mock_send_application_confirmation_email.assert_not_awaited()
+    mock_send_application_confirmation_email.assert_awaited_once()
     assert res.status_code == 201
 
 
@@ -432,7 +432,7 @@ def test_apply_skips_confirmation_email_issue(
 
     assert res.status_code == 201
     mock_raw_update_one.assert_awaited_once()
-    mock_send_application_confirmation_email.assert_not_awaited()
+    mock_send_application_confirmation_email.assert_awaited_once()
 
 
 @patch("utils.email_handler.send_application_confirmation_email", autospec=True)
@@ -460,7 +460,7 @@ def test_apply_successfully_without_resume(
     assert res.status_code == 201
     mock_gdrive_handler_upload_file.assert_not_called()
     mock_raw_update_one.assert_awaited_once()
-    mock_send_application_confirmation_email.assert_not_awaited()
+    mock_send_application_confirmation_email.assert_awaited_once()
 
 
 def test_application_data_is_bson_encodable() -> None:

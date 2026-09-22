@@ -91,7 +91,7 @@ def test_volunteer_apply_successfully(
     assert res.status_code == 201
 
     mock_raw_update_one.assert_awaited_once()
-    mock_send_application_confirmation_email.assert_not_awaited()
+    mock_send_application_confirmation_email.assert_awaited_once()
 
 
 @patch("routers.user._is_past_deadline", autospec=True)
@@ -161,7 +161,7 @@ def test_volunteer_apply_skips_confirmation_email_issue(
 
     assert res.status_code == 201
     mock_raw_update_one.assert_awaited_once()
-    mock_send_application_confirmation_email.assert_not_awaited()
+    mock_send_application_confirmation_email.assert_awaited_once()
 
 
 def test_volunteer_application_data_is_bson_encodable() -> None:

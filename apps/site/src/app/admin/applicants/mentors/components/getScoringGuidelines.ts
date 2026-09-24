@@ -1,6 +1,5 @@
-import { cache } from "react";
 import { z } from "zod";
-import { client } from "@/lib/sanity/client";
+import { freshClient } from "@/lib/sanity/client";
 import { groq } from "next-sanity";
 
 export const IrvineHacksMentorScoringGuidelines = z.object({
@@ -19,9 +18,9 @@ export type IrvineHacksMentorScoringGuidelinesType = z.infer<
 	typeof IrvineHacksMentorScoringGuidelines
 >;
 
-export const getIrvineHacksMentorScoringGuidelines = cache(async () => {
-	const data = await client.fetch(
-		groq`*[_type == "irvinehacksMentorScoringGuidelines"][0]{
+export const getIrvineHacksMentorScoringGuidelines = async () => {
+	const data = await freshClient.fetch(
+		groq`*[_type == "irvinehacksMentorScoringGuidelines"] | order(_updatedAt desc)[0]{
       _id,
       _type,
       guidelines {
@@ -35,4 +34,4 @@ export const getIrvineHacksMentorScoringGuidelines = cache(async () => {
 	);
 
 	return IrvineHacksMentorScoringGuidelines.parse(data);
-});
+};

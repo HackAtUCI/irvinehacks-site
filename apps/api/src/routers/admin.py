@@ -260,7 +260,7 @@ class ZotHacksHackerDetailedScores(BaseModel):
     collaboration_saq: int
     tech_inspiration_saq: int
     uci_gift_saq: int
-    drawing_response: int
+    drawing_response: Optional[int] = None
     peter_thought_process_saq: int
     hackathon_experience: Optional[int] = None
 
@@ -1559,7 +1559,8 @@ async def _handle_detailed_scores_review(
 ) -> None:
     """Handle detailed scores review submission."""
     score_breakdown = scores.model_dump(exclude_none=True)
-    total_score = max(sum(score_breakdown.get(k, 0) for k in scores.model_fields), -3)
+    scoring_fields = set(scores.model_fields) - {"drawing_response"}
+    total_score = max(sum(score_breakdown.get(k, 0) for k in scoring_fields), -3)
 
     if total_score < -3 or total_score > 100:
         log.error("Invalid review score submitted.")

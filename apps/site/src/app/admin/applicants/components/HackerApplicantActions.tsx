@@ -93,14 +93,12 @@ function HackerApplicantActions({
 			"collaboration_saq",
 			"tech_inspiration_saq",
 			"uci_gift_saq",
-			"drawing_response",
 			"peter_thought_process_saq",
 		].some((field) => field in scores);
 		const requiredZotHacksFields = [
 			"collaboration_saq",
 			"tech_inspiration_saq",
 			"uci_gift_saq",
-			"drawing_response",
 			"peter_thought_process_saq",
 		];
 		const hasMissingFields =

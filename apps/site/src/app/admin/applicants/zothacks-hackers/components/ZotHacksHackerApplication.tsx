@@ -12,6 +12,7 @@ import {
 	ZotHacksHackerApplicationData,
 } from "@/lib/admin/useApplicant";
 import ScoreSection from "../../components/ScoreSection";
+import ResponseSection from "../../components/ResponseSection";
 import ReviewerNotes from "@/app/admin/applicants/components/ReviewerNotes";
 import UserContext from "@/lib/admin/UserContext";
 import { isDirector, isLead } from "@/lib/admin/authorization";
@@ -125,12 +126,6 @@ function ZotHacksHackerApplication({
 			? application_data?.review_breakdown?.[formattedUid]?.uci_gift_saq ?? -1
 			: -1,
 	);
-	const [drawingScore, setDrawingScore] = useState<number>(
-		formattedUid
-			? application_data?.review_breakdown?.[formattedUid]?.drawing_response ??
-					-1
-			: -1,
-	);
 	const [peterThoughtProcessScore, setPeterThoughtProcessScore] =
 		useState<number>(
 			formattedUid
@@ -164,9 +159,6 @@ function ZotHacksHackerApplication({
 		if (uciGiftScore !== -1) {
 			scoresObject.uci_gift_saq = uciGiftScore;
 		}
-		if (drawingScore !== -1) {
-			scoresObject.drawing_response = drawingScore;
-		}
 		if (peterThoughtProcessScore !== -1) {
 			scoresObject.peter_thought_process_saq = peterThoughtProcessScore;
 		}
@@ -178,7 +170,6 @@ function ZotHacksHackerApplication({
 		collaborationScore,
 		techInspirationScore,
 		uciGiftScore,
-		drawingScore,
 		peterThoughtProcessScore,
 		onScoreChange,
 	]);
@@ -269,10 +260,8 @@ function ZotHacksHackerApplication({
 				wordLimit={100}
 				disabled={reviewDisabled}
 			/>
-			<ScoreSection
+			<ResponseSection
 				title="Draw your current emotional state on a blank Anteater face."
-				min={0}
-				max={10}
 				leftColumn={
 					<PortableText value={guidelines.guidelines.drawing_response} />
 				}
@@ -304,9 +293,6 @@ function ZotHacksHackerApplication({
 						<p>No drawing provided.</p>
 					)
 				}
-				value={drawingScore}
-				onChange={setDrawingScore}
-				disabled={reviewDisabled}
 			/>
 			<ScoreSection
 				title="Describe your thought process as you decorated your Peter. Now that you've finished your design, is there anything you wish you'd done differently? [Max 100 words]"

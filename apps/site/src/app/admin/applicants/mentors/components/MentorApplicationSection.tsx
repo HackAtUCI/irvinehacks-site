@@ -140,6 +140,8 @@ export function ApplicationResponse({ value }: ApplicationResponseProps) {
 	switch (typeof value) {
 		case "boolean":
 			return <p>{value ? "Yes" : "No"}</p>;
+		case "number":
+			return <p>{value}</p>;
 		case "string":
 			if (value.startsWith("http")) {
 				return (

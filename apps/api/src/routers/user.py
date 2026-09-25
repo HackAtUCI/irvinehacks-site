@@ -367,6 +367,14 @@ async def _apply_flow(
             )
 
     resume = raw_application_data.resume
+    if not isinstance(raw_application_data, RawVolunteerApplicationData) and (
+        resume is None or not resume.size or resume.size <= 0
+    ):
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            "Resume upload is required.",
+        )
+
     if resume is not None and resume.size and resume.size > 0:
         try:
             resume_url = await resume_handler.upload_resume(

@@ -107,6 +107,12 @@ SAMPLE_RESUME = ("my-resume.pdf", b"resume", "application/pdf")
 SAMPLE_FILES = {"resume": SAMPLE_RESUME}
 BAD_RESUME = ("bad-resume.doc", b"resume", "application/msword")
 LARGE_RESUME = ("large-resume.pdf", b"resume" * 2_000_000, "application/pdf")
+EMPTY_RESUME = (
+    "",
+    b"",
+    "application/octet-stream",
+    {"content-disposition": 'form-data; name="resume"; filename=""'},
+)
 
 EXPECTED_RESUME_UPLOAD = ("pk-fire-69f2afc2.pdf", b"resume", "application/pdf")
 SAMPLE_RESUME_URL = HttpUrl("https://drive.google.com/file/d/...")
@@ -174,9 +180,11 @@ def test_mentor_apply_successfully(
 @patch("services.mongodb_handler.update_one", autospec=True)
 @patch("routers.user._is_past_deadline", autospec=True)
 @patch("routers.user.datetime", autospec=True)
+@patch("services.gdrive_handler.upload_file", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 def test_zothacks_mentor_apply_successfully(
     mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_gdrive_handler_upload_file: AsyncMock,
     mock_datetime: Mock,
     mock_is_past_deadline: Mock,
     mock_mongodb_handler_update_one: AsyncMock,
@@ -184,12 +192,16 @@ def test_zothacks_mentor_apply_successfully(
     mock_send_application_confirmation_email: AsyncMock,
 ) -> None:
     mock_mongodb_handler_retrieve_one.return_value = None
+    mock_gdrive_handler_upload_file.return_value = SAMPLE_RESUME_URL
     mock_datetime.now.return_value = SAMPLE_SUBMISSION_TIME
     mock_is_past_deadline.return_value = False
 
-    res = client.post("/mentor", data=SAMPLE_ZOTHACKS_MENTOR_APPLICATION)
+    res = client.post(
+        "/mentor", data=SAMPLE_ZOTHACKS_MENTOR_APPLICATION, files=SAMPLE_FILES
+    )
 
     assert res.status_code == 201
+    mock_gdrive_handler_upload_file.assert_awaited_once()
     mock_raw_update_one.assert_awaited_once()
     update_call = mock_raw_update_one.await_args
     assert update_call is not None
@@ -215,8 +227,26 @@ def test_zothacks_mentor_apply_successfully(
     assert application_data["skill_sql__any_variation_"] == 3
     assert application_data["github"] == "https://github.com/"
     assert application_data["linkedin"] is None
-    assert application_data["resume_url"] is None
+    assert application_data["resume_url"] == str(SAMPLE_RESUME_URL)
     mock_send_application_confirmation_email.assert_awaited_once()
+
+
+@patch("services.gdrive_handler.upload_file", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_zothacks_mentor_apply_with_empty_resume_causes_422(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_gdrive_handler_upload_file: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.return_value = None
+
+    res = client.post(
+        "/mentor",
+        data=SAMPLE_ZOTHACKS_MENTOR_APPLICATION,
+        files={"resume": EMPTY_RESUME},
+    )
+
+    assert res.status_code == 422
+    mock_gdrive_handler_upload_file.assert_not_called()
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)

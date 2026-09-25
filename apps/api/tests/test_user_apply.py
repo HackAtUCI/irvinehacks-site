@@ -236,6 +236,38 @@ def test_zothacks_hacker_apply_successfully(
     assert res.status_code == 201
 
 
+@patch("services.gdrive_handler.upload_file", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_zothacks_hacker_apply_without_resume_causes_422(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_gdrive_handler_upload_file: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.return_value = None
+
+    res = client.post("/apply", data=SAMPLE_ZOTHACKS_HACKER_APPLICATION)
+
+    assert res.status_code == 422
+    mock_gdrive_handler_upload_file.assert_not_called()
+
+
+@patch("services.gdrive_handler.upload_file", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_zothacks_hacker_apply_with_empty_resume_causes_422(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_gdrive_handler_upload_file: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.return_value = None
+
+    res = client.post(
+        "/apply",
+        data=SAMPLE_ZOTHACKS_HACKER_APPLICATION,
+        files={"resume": EMPTY_RESUME},
+    )
+
+    assert res.status_code == 422
+    mock_gdrive_handler_upload_file.assert_not_called()
+
+
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 def test_zothacks_hacker_apply_with_too_many_words_causes_422(
     mock_mongodb_handler_retrieve_one: AsyncMock,
@@ -442,7 +474,7 @@ def test_apply_skips_confirmation_email_issue(
 @patch("routers.user.datetime", autospec=True)
 @patch("services.gdrive_handler.upload_file", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
-def test_apply_successfully_without_resume(
+def test_apply_without_resume_causes_422(
     mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_gdrive_handler_upload_file: AsyncMock,
     mock_datetime: Mock,
@@ -457,10 +489,10 @@ def test_apply_successfully_without_resume(
 
     res = client.post("/apply", data=SAMPLE_APPLICATION, files={"resume": EMPTY_RESUME})
 
-    assert res.status_code == 201
+    assert res.status_code == 422
     mock_gdrive_handler_upload_file.assert_not_called()
-    mock_raw_update_one.assert_awaited_once()
-    mock_send_application_confirmation_email.assert_awaited_once()
+    mock_raw_update_one.assert_not_awaited()
+    mock_send_application_confirmation_email.assert_not_awaited()
 
 
 def test_application_data_is_bson_encodable() -> None:

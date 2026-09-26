@@ -66,14 +66,7 @@ async def send_rsvp_confirmation_email(email: EmailStr, first_name: str) -> None
 
 async def send_guest_login_email(email: EmailStr, passphrase: str) -> None:
     """Email login passphrase to guest."""
-    await sendgrid_handler.send_email(
-        Template.GUEST_TOKEN,
-        IH_SENDER,
-        {
-            "email": email,
-            "passphrase": passphrase,
-        },
-    )
+    await ses_handler.send_guest_login_email(str(email), passphrase)
 
 
 async def send_decision_email(

@@ -1,12 +1,10 @@
 import asyncio
 import os
 import smtplib
-from datetime import datetime
 from email.message import EmailMessage
 from email.utils import formataddr
 from html import escape
 from logging import getLogger
-from zoneinfo import ZoneInfo
 
 log = getLogger(__name__)
 
@@ -17,12 +15,6 @@ SES_SMTP_PASSWORD = os.getenv("SES_SMTP_PASSWORD")
 SES_FROM_EMAIL = os.getenv("SES_FROM_EMAIL", "apply@zothacks.com")
 SES_FROM_NAME = os.getenv("SES_FROM_NAME", "ZotHacks 2026 Applications")
 CONTACT_EMAIL = "zothacks2026@gmail.com"
-
-
-def _sent_at() -> str:
-    return datetime.now(ZoneInfo("America/Los_Angeles")).strftime(
-        "%B %-d, %Y at %-I:%M %p %Z"
-    )
 
 
 def _send_message(message: EmailMessage) -> None:
@@ -41,7 +33,6 @@ async def send_application_confirmation_email(
     last_name: str,
     application_type: str,
 ) -> None:
-    sent_at = _sent_at()
     subject = "Thank You For Applying!"
     confirmation_text = (
         f"Thank you for applying to ZotHacks 2026 as a {application_type}! "
@@ -64,8 +55,6 @@ async def send_application_confirmation_email(
 Best regards,
 
 The ZotHacks 2026 Team
-
-Sent at: {sent_at}
 """
 
     html_body = f"""
@@ -76,8 +65,6 @@ Sent at: {sent_at}
 <p>Best regards,</p>
 
 <p>The ZotHacks 2026 Team</p>
-
-<p>Sent at: {escape(sent_at)}</p>
 """
 
     message = EmailMessage()
@@ -89,3 +76,44 @@ Sent at: {sent_at}
 
     await asyncio.to_thread(_send_message, message)
     log.info("Sent SES application confirmation email to %s", email)
+
+
+async def send_guest_login_email(email: str, passphrase: str) -> None:
+    subject = "Your ZotHacks login code"
+
+    text_body = f"""Hello!
+
+Use this login code to continue signing in to ZotHacks:
+
+{passphrase}
+
+This code expires in 10 minutes. If you did not request this code, you can ignore this email.
+
+Best regards,
+
+The ZotHacks 2026 Team
+"""
+
+    html_body = f"""
+<p>Hello!</p>
+
+<p>Use this login code to continue signing in to ZotHacks:</p>
+
+<p><strong>{escape(passphrase)}</strong></p>
+
+<p>This code expires in 10 minutes. If you did not request this code, you can ignore this email.</p>
+
+<p>Best regards,</p>
+
+<p>The ZotHacks 2026 Team</p>
+"""
+
+    message = EmailMessage()
+    message["Subject"] = subject
+    message["From"] = formataddr((SES_FROM_NAME, SES_FROM_EMAIL))
+    message["To"] = email
+    message.set_content(text_body)
+    message.add_alternative(html_body, subtype="html")
+
+    await asyncio.to_thread(_send_message, message)
+    log.info("Sent SES guest login email to %s", email)

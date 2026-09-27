@@ -356,9 +356,9 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		reviewers,
 		director_previous_experience_reviewed,
 	}: HackerApplicantSummary) => {
-		if (!director_previous_experience_reviewed) return "-";
 		if (avg_score === OVERQUALIFIED_SCORE)
 			return <Box color="text-status-error">OVERQUALIFIED</Box>;
+		if (!director_previous_experience_reviewed) return "-";
 		if (avg_score === -1) return "-";
 		if (reviewers.length < 2 && !showWithOneReviewer) return "-";
 		return avg_score.toFixed(3);
@@ -500,7 +500,6 @@ const CardHeader = ({
 	avg_score,
 	decision,
 	auto_decision_reason,
-	director_previous_experience_reviewed,
 	isDirector,
 	isDuplicate,
 	duplicateNameApproved,
@@ -513,7 +512,6 @@ const CardHeader = ({
 	| "avg_score"
 	| "decision"
 	| "auto_decision_reason"
-	| "director_previous_experience_reviewed"
 > & {
 	hackathonName: "irvinehacks" | "zothacks";
 	isDirector: boolean;
@@ -571,10 +569,9 @@ const CardHeader = ({
 			<Link href={href} fontSize="inherit" onFollow={followWithNextLink}>
 				{displayName}
 			</Link>
-			{director_previous_experience_reviewed &&
-				avg_score === OVERQUALIFIED_SCORE && (
-					<Badge color="red">OVERQUALIFIED</Badge>
-				)}
+			{avg_score === OVERQUALIFIED_SCORE && (
+				<Badge color="red">OVERQUALIFIED</Badge>
+			)}
 			<AutoDecisionBadge reason={auto_decision_reason} decision={decision} />
 			{duplicateIcon}
 		</div>
@@ -585,8 +582,11 @@ const DecisionStatus = ({
 	decision,
 	auto_decision_reason,
 	director_previous_experience_reviewed,
+	avg_score,
 }: HackerApplicantSummary) =>
-	(director_previous_experience_reviewed || auto_decision_reason) &&
+	(director_previous_experience_reviewed ||
+		auto_decision_reason ||
+		avg_score === OVERQUALIFIED_SCORE) &&
 	decision ? (
 		<ApplicantStatus status={decision} />
 	) : (

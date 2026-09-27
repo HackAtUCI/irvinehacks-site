@@ -6,6 +6,7 @@ from models.user_record import Role, Status
 from .score_normalizing_handler import IH_WEIGHTING_CONFIG
 
 OVERQUALIFIED = -3
+OVERQUALIFIED_GLOBAL_SCORE = -1000
 NOT_FULLY_REVIEWED = -1
 NON_SCORING_IH_FIELDS = {"previous_experience", "has_socials"}
 
@@ -18,6 +19,12 @@ scores_to_decisions: dict[Optional[int], Decision] = {
     -2: Decision.WAITLISTED,
     0: Decision.REJECTED,
 }
+
+
+def _is_overqualified_global_score(score: object) -> bool:
+    return (
+        isinstance(score, (int, float)) and score <= OVERQUALIFIED_GLOBAL_SCORE
+    )
 
 
 # TODO: Make this function only used for old applicant summary
@@ -72,9 +79,11 @@ def _get_last_score(reviewer: str, reviews: list[tuple[str, str, float]]) -> flo
 def _get_avg_score(
     reviews: list[tuple[str, str, float]], global_field_scores: dict[str, Any]
 ) -> float:
-    # Check global_field_scores first - if any value is less than 0,
-    # return OVERQUALIFIED
-    if global_field_scores and any(score < 0 for score in global_field_scores.values()):
+    # Check global_field_scores first - if any value is explicitly OQ,
+    # return OVERQUALIFIED. Other negative values can be UI sentinels.
+    if global_field_scores and any(
+        _is_overqualified_global_score(score) for score in global_field_scores.values()
+    ):
         return OVERQUALIFIED
 
     unique_reviewers = {t[1] for t in reviews}
@@ -97,9 +106,11 @@ def _get_avg_score_with_globals_and_breakdown(
     global_field_scores: dict[str, int],
     weight_config: dict[str, tuple[int, float]],
 ) -> float:
-    # Check global_field_scores first - if any value is less than 0,
-    # return OVERQUALIFIED
-    if global_field_scores and any(score < 0 for score in global_field_scores.values()):
+    # Check global_field_scores first - if any value is explicitly OQ,
+    # return OVERQUALIFIED. Other negative values can be UI sentinels.
+    if global_field_scores and any(
+        _is_overqualified_global_score(score) for score in global_field_scores.values()
+    ):
         return OVERQUALIFIED
 
     if len(review_breakdowns) < 1:

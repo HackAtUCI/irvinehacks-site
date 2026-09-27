@@ -297,7 +297,7 @@ function ZotHacksHackerApplication({
 			<ScoreSection
 				title="Describe your thought process as you decorated your Peter. Now that you've finished your design, is there anything you wish you'd done differently? [Max 100 words]"
 				min={0}
-				max={10}
+				max={20}
 				leftColumn={
 					<PortableText
 						value={guidelines.guidelines.peter_thought_process_saq}

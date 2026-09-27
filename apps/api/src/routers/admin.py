@@ -274,6 +274,7 @@ class IrvineHacksHackerDetailedScores(BaseModel):
 
 
 NON_SCORING_IH_FIELDS = {"previous_experience", "has_socials"}
+OVERQUALIFIED_SCORE = -1000
 
 
 class GlobalScores(BaseModel):
@@ -348,6 +349,26 @@ def _has_auto_decision(record: Mapping[str, Any]) -> bool:
     return bool(record.get("auto_decision_reason"))
 
 
+def _is_overqualified_score(score: object) -> bool:
+    return isinstance(score, (int, float)) and score <= OVERQUALIFIED_SCORE
+
+
+def _has_overqualified_score(record: Mapping[str, Any]) -> bool:
+    application_data = record.get("application_data", {})
+    if not isinstance(application_data, Mapping):
+        return False
+
+    global_field_scores = application_data.get("global_field_scores", {})
+    if not isinstance(global_field_scores, Mapping):
+        return False
+
+    return any(_is_overqualified_score(score) for score in global_field_scores.values())
+
+
+def _is_not_reviewable(record: Mapping[str, Any]) -> bool:
+    return _has_auto_decision(record) or _has_overqualified_score(record)
+
+
 def _raise_if_applicant_not_reviewable(
     applicant_record: Mapping[str, Any],
     reviewer: User,
@@ -374,12 +395,26 @@ def _raise_if_applicant_not_reviewable(
             else "Cannot review an auto-decided applicant."
         )
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail)
+    if _has_overqualified_score(applicant_record):
+        action = "modify reviews on" if modify_reviews else "review"
+        log.error(
+            "%s tried to %s overqualified applicant %s",
+            reviewer,
+            action,
+            applicant_id,
+        )
+        detail = (
+            "Cannot modify reviews on an overqualified applicant."
+            if modify_reviews
+            else "Cannot review an overqualified applicant."
+        )
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail)
 
 
 def _is_review_assignable(record: Mapping[str, Any], reviewer_uid: str) -> bool:
     if record.get("status") == UserStatus.VOIDED:
         return False
-    if _has_auto_decision(record):
+    if _is_not_reviewable(record):
         return False
     if reviewer_uid in _unique_reviewers(record):
         return False
@@ -529,6 +564,7 @@ async def hacker_review_assignments(
             "auto_decision_reason",
             "application_data.reviews",
             "application_data.submission_time",
+            "application_data.global_field_scores",
             "assigned_reviewers",
         ],
         sort=[("application_data.submission_time", DESCENDING)],
@@ -537,12 +573,12 @@ async def hacker_review_assignments(
         1 for record in records if _reviewer_has_reviewed(record, user.uid)
     )
 
-    # Remove reviewer from assigned_reviewers when applicant is auto-decided
-    # and this reviewer has not submitted a review yet.
+    # Remove reviewer from assigned_reviewers when applicant can no longer be
+    # reviewed and this reviewer has not submitted a review yet.
     for record in records:
         if (
             user.uid in _assigned_reviewers(record)
-            and _has_auto_decision(record)
+            and _is_not_reviewable(record)
             and not _reviewer_has_reviewed(record, user.uid)
         ):
             await mongodb_handler.raw_update_one(
@@ -557,7 +593,7 @@ async def hacker_review_assignments(
         if user.uid in _assigned_reviewers(record)
         and not _reviewer_has_reviewed(record, user.uid)
         and record.get("status") != UserStatus.VOIDED
-        and not _has_auto_decision(record)
+        and not _is_not_reviewable(record)
         and len(_unique_reviewers(record)) < 2
     ]
     overflow_assignment_records = active_assignment_records[
@@ -985,7 +1021,14 @@ async def submit_review(
     applicant_record = await mongodb_handler.retrieve_one(
         Collection.USERS,
         {"_id": app},
-        ["_id", "application_data.reviews", "roles", "status", "auto_decision_reason"],
+        [
+            "_id",
+            "application_data.reviews",
+            "application_data.global_field_scores",
+            "roles",
+            "status",
+            "auto_decision_reason",
+        ],
     )
     if not applicant_record:
         log.error("Could not retrieve applicant after submitting review")
@@ -1409,16 +1452,63 @@ async def _handle_global_only_review(
     applicant_record = await mongodb_handler.retrieve_one(
         Collection.USERS,
         {"_id": applicant},
-        ["status", "auto_decision_reason"],
+        [
+            "status",
+            "auto_decision_reason",
+            "application_data.global_field_scores",
+            "application_data.reviews",
+        ],
     )
     if applicant_record:
-        _raise_if_applicant_not_reviewable(applicant_record, reviewer, applicant)
+        if applicant_record.get("status") == UserStatus.VOIDED:
+            log.error("%s tried to review voided applicant %s", reviewer, applicant)
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST, "Cannot review a voided applicant."
+            )
+        if _has_auto_decision(applicant_record):
+            log.error(
+                "%s tried to review auto-decided applicant %s",
+                reviewer,
+                applicant,
+            )
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                "Cannot review an auto-decided applicant.",
+            )
 
-    # Update the user record with global field scores
-    await mongodb_handler.update_one(
+    score_data = {
+        key: score for key, score in scores.model_dump().items() if score != -1
+    }
+    update_data: dict[str, object] = {
+        "application_data.global_field_scores": score_data
+    }
+    unset_data: dict[str, object] = {}
+
+    if any(_is_overqualified_score(score) for score in score_data.values()):
+        update_data.update(
+            {
+                "status": UserStatus.REVIEWED,
+                "decision": Decision.REJECTED,
+            }
+        )
+    elif applicant_record and _has_overqualified_score(applicant_record):
+        update_data["status"] = (
+            UserStatus.REVIEWED
+            if len(_unique_reviewers(applicant_record)) >= 2
+            else UserStatus.PENDING_REVIEW
+        )
+        unset_data["decision"] = ""
+
+    # Update the user record with global field scores. If a lead marks an
+    # applicant overqualified, persist the resulting rejection immediately.
+    update_query: dict[str, object] = {"$set": update_data}
+    if unset_data:
+        update_query["$unset"] = unset_data
+
+    await mongodb_handler.raw_update_one(
         Collection.USERS,
         {"_id": applicant},
-        {"application_data.global_field_scores": scores.model_dump()},
+        update_query,
         upsert=True,
     )
 
@@ -1477,7 +1567,14 @@ async def _handle_irvinehacks_detailed_scores_review(
     applicant_record = await mongodb_handler.retrieve_one(
         Collection.USERS,
         {"_id": applicant},
-        ["_id", "application_data.reviews", "roles", "status", "auto_decision_reason"],
+        [
+            "_id",
+            "application_data.reviews",
+            "application_data.global_field_scores",
+            "roles",
+            "status",
+            "auto_decision_reason",
+        ],
     )
     if not applicant_record:
         log.error("Could not retrieve applicant after submitting review")
@@ -1574,6 +1671,7 @@ async def _handle_detailed_scores_review(
         [
             "_id",
             "application_data.reviews",
+            "application_data.global_field_scores",
             "roles",
             "status",
             "auto_decision_reason",

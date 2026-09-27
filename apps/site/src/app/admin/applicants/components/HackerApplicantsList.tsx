@@ -325,7 +325,6 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 			avg_score,
 			decision,
 			auto_decision_reason,
-			director_previous_experience_reviewed,
 			duplicate_name_approved,
 		}: HackerApplicantSummary) => (
 			<CardHeader
@@ -336,9 +335,6 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 				avg_score={avg_score}
 				decision={decision}
 				auto_decision_reason={auto_decision_reason}
-				director_previous_experience_reviewed={
-					director_previous_experience_reviewed
-				}
 				isDirector={isUserDirector}
 				isDuplicate={
 					isUserDirector &&

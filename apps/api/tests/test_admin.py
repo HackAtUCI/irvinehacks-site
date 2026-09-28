@@ -375,8 +375,8 @@ def test_hacker_review_assignments_are_created(
 
     assert res.status_code == 200
     assert res.json()["applicant_ids"] == [
-        "edu.uci.applicant2",
-        "edu.uci.applicant1",
+        _hacker_applicant_token("edu.uci.applicant2"),
+        _hacker_applicant_token("edu.uci.applicant1"),
     ]
     assert res.json()["target_count"] == 10
     mock_shuffle.assert_called_once()
@@ -422,7 +422,9 @@ def test_hacker_review_assignments_keep_active_assignments(
     res = reviewer_client.get("/review-assignments/hackers")
 
     assert res.status_code == 200
-    assert res.json()["applicant_ids"] == ["edu.uci.assigned"]
+    assert res.json()["applicant_ids"] == [
+        _hacker_applicant_token("edu.uci.assigned")
+    ]
     mock_mongodb_handler_raw_update_one.assert_not_awaited()
 
 
@@ -521,7 +523,9 @@ def test_hacker_review_assignments_excludes_auto_decided_applicants(
     res = reviewer_client.get("/review-assignments/hackers")
 
     assert res.status_code == 200
-    assert res.json()["applicant_ids"] == ["edu.uci.assignable"]
+    assert res.json()["applicant_ids"] == [
+        _hacker_applicant_token("edu.uci.assignable")
+    ]
     assert mock_mongodb_handler_raw_update_one.await_count == 2
     pull_update = mock_mongodb_handler_raw_update_one.await_args_list[0]
     assert pull_update.args == (
@@ -569,7 +573,9 @@ def test_hacker_review_assignments_excludes_overqualified_applicants(
     res = reviewer_client.get("/review-assignments/hackers")
 
     assert res.status_code == 200
-    assert res.json()["applicant_ids"] == ["edu.uci.assignable"]
+    assert res.json()["applicant_ids"] == [
+        _hacker_applicant_token("edu.uci.assignable")
+    ]
     assert mock_mongodb_handler_raw_update_one.await_count == 2
     pull_update = mock_mongodb_handler_raw_update_one.await_args_list[0]
     assert pull_update.args == (
@@ -1238,6 +1244,7 @@ def test_hacker_applicant_redacts_identity_for_reviewers(
             "reviews": [],
             "review_breakdown": {},
         },
+        "assigned_reviewers": ["edu.uci.alicia"],
     }
     mock_mongodb_handler_retrieve_one.side_effect = [
         HACKER_REVIEWER_IDENTITY,
@@ -1253,14 +1260,15 @@ def test_hacker_applicant_redacts_identity_for_reviewers(
     data = res.json()
     assert data["first_name"] == ""
     assert data["last_name"] == ""
-    assert data["application_data"] == {
-        "frq_change": "project answer",
-        "frq_ambition": "ambition answer",
-        "frq_character": "character answer",
-        "submission_time": "2023-01-12T09:00:00",
-        "reviews": [],
-        "review_breakdown": {},
-    }
+    assert data["application_data"]["frq_change"] == "project answer"
+    assert data["application_data"]["frq_ambition"] == "ambition answer"
+    assert data["application_data"]["frq_character"] == "character answer"
+    assert data["application_data"]["submission_time"] == "2023-01-12T09:00:00"
+    assert data["application_data"]["reviews"] == []
+    assert data["application_data"]["review_breakdown"] == {}
+    assert "email" not in data["application_data"]
+    assert "resume_url" not in data["application_data"]
+    assert "linkedin" not in data["application_data"]
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)

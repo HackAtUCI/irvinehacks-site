@@ -1721,9 +1721,7 @@ async def _handle_detailed_scores_review(
         # cleared instead of coercing it to 0, which is a real "Strong" score
         # and would re-mark the resume as reviewed.
         global_scores = GlobalScores(
-            resume=(
-                scores.resume if scores.resume is not None else EMPTY_GLOBAL_SCORE
-            ),
+            resume=(scores.resume if scores.resume is not None else EMPTY_GLOBAL_SCORE),
             hackathon_experience=(
                 scores.hackathon_experience
                 if scores.hackathon_experience is not None

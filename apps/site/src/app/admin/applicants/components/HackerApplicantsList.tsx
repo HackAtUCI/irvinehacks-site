@@ -178,7 +178,8 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 			((selectedStatusValues.includes("RESUME_REVIEWED") &&
 				applicant.resume_reviewed) ||
 				(selectedStatusValues.includes("RESUME_NOT_REVIEWED") &&
-					!applicant.resume_reviewed))
+					!applicant.resume_reviewed &&
+					applicant.avg_score !== OVERQUALIFIED_SCORE))
 		) {
 			return true;
 		}

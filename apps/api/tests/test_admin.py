@@ -1579,6 +1579,80 @@ def test_has_overqualified_score_ignores_unselected_resume_score() -> None:
 
 
 @patch("routers.admin.require_lead", autospec=True)
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_handle_global_only_review_clears_resume_score(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+    mock_require_lead: AsyncMock,
+) -> None:
+    """Clearing the resume dropdown removes the stored resume score."""
+    applicant = "edu.uci.test"
+    scores = GlobalScores(resume=-1, hackathon_experience=10)
+    reviewer = USER_REVIEWER
+
+    mock_require_lead.return_value = None
+    mock_mongodb_handler_retrieve_one.return_value = {
+        "_id": applicant,
+        "roles": ["Applicant", "Hacker"],
+    }
+    mock_mongodb_handler_raw_update_one.return_value = True
+
+    await _handle_global_only_review(applicant, scores, reviewer)
+
+    # No resume key means resume_reviewed becomes False, so the applicant shows
+    # up under "Resume Not Reviewed" again. The applicant was never marked
+    # overqualified, so status and decision are left alone.
+    mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
+        Collection.USERS,
+        {"_id": applicant},
+        {
+            "$set": {
+                "application_data.global_field_scores": {"hackathon_experience": 10}
+            }
+        },
+        upsert=True,
+    )
+
+
+@patch("routers.admin.require_lead", autospec=True)
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_handle_global_only_review_keeps_zero_resume_score(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+    mock_require_lead: AsyncMock,
+) -> None:
+    """A resume score of 0 is a real score and must not be treated as cleared."""
+    applicant = "edu.uci.test"
+    scores = GlobalScores(resume=0, hackathon_experience=10)
+    reviewer = USER_REVIEWER
+
+    mock_require_lead.return_value = None
+    mock_mongodb_handler_retrieve_one.return_value = {
+        "_id": applicant,
+        "roles": ["Applicant", "Hacker"],
+    }
+    mock_mongodb_handler_raw_update_one.return_value = True
+
+    await _handle_global_only_review(applicant, scores, reviewer)
+
+    mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
+        Collection.USERS,
+        {"_id": applicant},
+        {
+            "$set": {
+                "application_data.global_field_scores": {
+                    "resume": 0,
+                    "hackathon_experience": 10,
+                }
+            }
+        },
+        upsert=True,
+    )
+
+
+@patch("routers.admin.require_lead", autospec=True)
 async def test_handle_global_only_review_forbidden(
     mock_require_lead: AsyncMock,
 ) -> None:
@@ -1699,6 +1773,54 @@ async def test_handle_detailed_scores_review_success(
     mock_handle_global_only_review.assert_awaited_once_with(
         applicant,
         GlobalScores(resume=8, hackathon_experience=10),
+        reviewer,
+    )
+
+
+@patch("routers.admin._handle_global_only_review", autospec=True)
+@patch("routers.admin.require_lead", autospec=True)
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_handle_detailed_scores_review_keeps_resume_cleared(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+    mock_require_lead: AsyncMock,
+    mock_handle_global_only_review: AsyncMock,
+) -> None:
+    """An omitted resume score stays cleared instead of becoming a 0 score."""
+    applicant = "edu.uci.test"
+    scores = ZotHacksHackerDetailedScores(
+        collaboration_saq=7,
+        tech_inspiration_saq=9,
+        uci_gift_saq=6,
+        drawing_response=8,
+        peter_thought_process_saq=7,
+        hackathon_experience=10,
+    )
+    reviewer = USER_REVIEWER
+
+    applicant_record = {
+        "_id": applicant,
+        "roles": ["Applicant", "Hacker"],
+        "application_data": {
+            "reviews": [
+                [datetime(2023, 1, 19), "edu.uci.alicia2", 100],
+            ]
+        },
+    }
+
+    mock_mongodb_handler_retrieve_one.return_value = applicant_record
+    mock_mongodb_handler_raw_update_one.return_value = True
+    mock_require_lead.return_value = None
+    mock_handle_global_only_review.return_value = None
+
+    await _handle_detailed_scores_review(applicant, scores, reviewer)
+
+    # A resume of 0 here would mean "Strong" and would re-mark the resume as
+    # reviewed, so an untouched dropdown must stay cleared.
+    mock_handle_global_only_review.assert_awaited_once_with(
+        applicant,
+        GlobalScores(resume=-1, hackathon_experience=10),
         reviewer,
     )
 

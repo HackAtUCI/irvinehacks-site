@@ -276,6 +276,10 @@ class IrvineHacksHackerDetailedScores(BaseModel):
 NON_SCORING_IH_FIELDS = {"previous_experience", "has_socials"}
 OVERQUALIFIED_SCORE = -1000
 
+# Score the review dropdowns submit for "Select a score", meaning the reviewer
+# cleared the field rather than scoring it.
+EMPTY_GLOBAL_SCORE = -1
+
 
 class GlobalScores(BaseModel):
     resume: int
@@ -1476,8 +1480,13 @@ async def _handle_global_only_review(
                 "Cannot review an auto-decided applicant.",
             )
 
+    # Leave out any field the reviewer cleared, which removes it from the stored
+    # scores. resume_reviewed is derived from whether a resume score exists, so
+    # clearing the dropdown returns the applicant to "Resume Not Reviewed".
     score_data = {
-        key: score for key, score in scores.model_dump().items() if score != -1
+        field: score
+        for field, score in scores.model_dump().items()
+        if score != EMPTY_GLOBAL_SCORE
     }
     update_data: dict[str, object] = {
         "application_data.global_field_scores": score_data
@@ -1492,6 +1501,8 @@ async def _handle_global_only_review(
             }
         )
     elif applicant_record and _has_overqualified_score(applicant_record):
+        # The mark is being removed, so drop the rejection it forced and send
+        # the applicant back for review unless two reviewers already scored.
         update_data["status"] = (
             UserStatus.REVIEWED
             if len(_unique_reviewers(applicant_record)) >= 2
@@ -1735,9 +1746,16 @@ async def _handle_detailed_scores_review(
     # If user has Lead role, also update global field scores
     try:
         await require_lead(reviewer)
+        # A cleared dropdown is omitted from the payload entirely. Keep it
+        # cleared instead of coercing it to 0, which is a real "Strong" score
+        # and would re-mark the resume as reviewed.
         global_scores = GlobalScores(
-            resume=scores.resume or 0,
-            hackathon_experience=scores.hackathon_experience or 0,
+            resume=(scores.resume if scores.resume is not None else EMPTY_GLOBAL_SCORE),
+            hackathon_experience=(
+                scores.hackathon_experience
+                if scores.hackathon_experience is not None
+                else EMPTY_GLOBAL_SCORE
+            ),
         )
         await _handle_global_only_review(applicant, global_scores, reviewer)
     except HTTPException:

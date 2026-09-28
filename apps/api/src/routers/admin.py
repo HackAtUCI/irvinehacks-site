@@ -275,6 +275,10 @@ class IrvineHacksHackerDetailedScores(BaseModel):
 
 NON_SCORING_IH_FIELDS = {"previous_experience", "has_socials"}
 
+# Score the review dropdowns submit for "Select a score", meaning the reviewer
+# cleared the field rather than scoring it.
+EMPTY_GLOBAL_SCORE = -1
+
 
 class GlobalScores(BaseModel):
     resume: int
@@ -1414,11 +1418,17 @@ async def _handle_global_only_review(
     if applicant_record:
         _raise_if_applicant_not_reviewable(applicant_record, reviewer, applicant)
 
+    retained_scores = {
+        field: score
+        for field, score in scores.model_dump().items()
+        if score != EMPTY_GLOBAL_SCORE
+    }
+
     # Update the user record with global field scores
     await mongodb_handler.update_one(
         Collection.USERS,
         {"_id": applicant},
-        {"application_data.global_field_scores": scores.model_dump()},
+        {"application_data.global_field_scores": retained_scores},
         upsert=True,
     )
 
@@ -1636,9 +1646,18 @@ async def _handle_detailed_scores_review(
     # If user has Lead role, also update global field scores
     try:
         await require_lead(reviewer)
+        # A cleared dropdown is omitted from the payload entirely. Keep it
+        # cleared instead of coercing it to 0, which is a real "Strong" score
+        # and would re-mark the resume as reviewed.
         global_scores = GlobalScores(
-            resume=scores.resume or 0,
-            hackathon_experience=scores.hackathon_experience or 0,
+            resume=(
+                scores.resume if scores.resume is not None else EMPTY_GLOBAL_SCORE
+            ),
+            hackathon_experience=(
+                scores.hackathon_experience
+                if scores.hackathon_experience is not None
+                else EMPTY_GLOBAL_SCORE
+            ),
         )
         await _handle_global_only_review(applicant, global_scores, reviewer)
     except HTTPException:

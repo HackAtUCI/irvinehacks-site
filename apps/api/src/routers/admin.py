@@ -138,9 +138,23 @@ class RedactedHackerApplicantSummary(BaseRecord):
 
 
 class RedactedHackerApplicationData(BaseModel):
-    frq_change: str
-    frq_ambition: str
-    frq_character: str
+    frq_change: str = ""
+    frq_ambition: str = ""
+    frq_character: str = ""
+    collaboration_saq: str = ""
+    tech_inspiration_saq: str = ""
+    uci_gift_saq: str = ""
+    drawing_response: str = ""
+    peter_thought_process_saq: str = ""
+    pronouns: list[str] = []
+    is_18_older: Optional[bool] = None
+    discord_username: str = ""
+    dietary_restrictions: list[str] = []
+    allergies: Optional[str] = None
+    school_year: str = ""
+    major: str = ""
+    hackathon_experience: Optional[str] = None
+    comments: Optional[str] = None
     submission_time: datetime
     reviews: list[Review] = []
     review_breakdown: dict[str, dict[str, float]] = {}
@@ -236,6 +250,14 @@ def _non_hacker_participant_record(
 def _hacker_applicant_token(uid: str) -> str:
     secret = user_identity.JWT_SECRET.encode()
     return hmac.new(secret, uid.encode(), hashlib.sha256).hexdigest()[:24]
+
+
+def _hacker_assignment_ids_for_user(
+    applicant_ids: list[str], is_director: bool
+) -> list[str]:
+    if is_director:
+        return applicant_ids
+    return [_hacker_applicant_token(uid) for uid in applicant_ids]
 
 
 def _redact_reviewers(reviewers: list[str], reviewer_uid: str) -> list[str]:
@@ -559,6 +581,7 @@ async def hacker_review_assignments(
     user: Annotated[User, Depends(require_hacker_reviewer)],
 ) -> ReviewAssignmentsResponse:
     """Get or create the current reviewer's hacker application assignments."""
+    is_user_director = await _user_has_role(user.uid, Role.DIRECTOR)
     records: list[dict[str, object]] = await mongodb_handler.retrieve(
         Collection.USERS,
         {"roles": Role.HACKER},
@@ -611,12 +634,14 @@ async def hacker_review_assignments(
         )
 
     active_assignment_records = active_assignment_records[:REVIEW_ASSIGNMENT_BATCH_SIZE]
-    active_assignments = [str(record["_id"]) for record in active_assignment_records]
+    active_assignment_ids = [str(record["_id"]) for record in active_assignment_records]
 
-    needed_assignments = REVIEW_ASSIGNMENT_BATCH_SIZE - len(active_assignments)
+    needed_assignments = REVIEW_ASSIGNMENT_BATCH_SIZE - len(active_assignment_ids)
     if needed_assignments <= 0:
         return ReviewAssignmentsResponse(
-            applicant_ids=active_assignments,
+            applicant_ids=_hacker_assignment_ids_for_user(
+                active_assignment_ids, is_user_director
+            ),
             target_count=REVIEW_ASSIGNMENT_BATCH_SIZE,
             completed_count=completed_assignments,
         )
@@ -624,7 +649,7 @@ async def hacker_review_assignments(
     candidates = [
         record
         for record in records
-        if str(record["_id"]) not in active_assignments
+        if str(record["_id"]) not in active_assignment_ids
         and user.uid not in _assigned_reviewers(record)
         and _is_review_assignable(record, user.uid)
     ]
@@ -639,9 +664,11 @@ async def hacker_review_assignments(
             {"$addToSet": {"assigned_reviewers": user.uid}},
         )
 
+    new_assignment_ids = [str(record["_id"]) for record in new_assignments]
     return ReviewAssignmentsResponse(
-        applicant_ids=active_assignments
-        + [str(record["_id"]) for record in new_assignments],
+        applicant_ids=_hacker_assignment_ids_for_user(
+            active_assignment_ids + new_assignment_ids, is_user_director
+        ),
         target_count=REVIEW_ASSIGNMENT_BATCH_SIZE,
         completed_count=completed_assignments,
     )
@@ -705,6 +732,26 @@ def _redact_hacker_applicant(
                 "frq_change": application_data.get("frq_change", ""),
                 "frq_ambition": application_data.get("frq_ambition", ""),
                 "frq_character": application_data.get("frq_character", ""),
+                "collaboration_saq": application_data.get("collaboration_saq", ""),
+                "tech_inspiration_saq": application_data.get(
+                    "tech_inspiration_saq", ""
+                ),
+                "uci_gift_saq": application_data.get("uci_gift_saq", ""),
+                "drawing_response": application_data.get("drawing_response", ""),
+                "peter_thought_process_saq": application_data.get(
+                    "peter_thought_process_saq", ""
+                ),
+                "pronouns": application_data.get("pronouns", []),
+                "is_18_older": application_data.get("is_18_older"),
+                "discord_username": application_data.get("discord_username", ""),
+                "dietary_restrictions": application_data.get(
+                    "dietary_restrictions", []
+                ),
+                "allergies": application_data.get("allergies"),
+                "school_year": application_data.get("school_year", ""),
+                "major": application_data.get("major", ""),
+                "hackathon_experience": application_data.get("hackathon_experience"),
+                "comments": application_data.get("comments"),
                 "submission_time": application_data.get("submission_time"),
                 "reviews": _redact_reviews(
                     application_data.get("reviews", []), reviewer_uid
@@ -760,6 +807,10 @@ async def _hacker_applicant_record_for_user(
     for record in records:
         uid = record.get("_id")
         if isinstance(uid, str) and _hacker_applicant_token(uid) == uid_or_token:
+            if user.uid not in _assigned_reviewers(
+                record
+            ) and not _reviewer_has_reviewed(record, user.uid):
+                raise HTTPException(status.HTTP_404_NOT_FOUND)
             return record
 
     raise HTTPException(status.HTTP_404_NOT_FOUND)

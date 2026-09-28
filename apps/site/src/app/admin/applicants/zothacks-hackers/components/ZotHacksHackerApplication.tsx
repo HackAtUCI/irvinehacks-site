@@ -75,8 +75,9 @@ function ZotHacksHackerApplication({
 	const { uid: reviewer_uid, roles } = useContext(UserContext);
 	const formattedUid = reviewer_uid?.split(".").at(-1);
 
+	const canViewResume = Boolean(application_data.resume_url);
 	const isResumeDisabled =
-		(!isDirector(roles) && !isLead(roles)) || reviewDisabled;
+		!canViewResume || (!isDirector(roles) && !isLead(roles)) || reviewDisabled;
 
 	// Resume options used for dropdown-based ScoreSection
 	const resumeOptions = useMemo(
@@ -189,40 +190,42 @@ function ZotHacksHackerApplication({
 					),
 				)}
 			</Container>
-			<ScoreSection
-				title="Resume"
-				leftColumn={<PortableText value={guidelines.guidelines.resume} />}
-				rightColumn={
-					<>
-						<Button onClick={() => setShowResume(true)}>View resume</Button>
-						{showResume && (
-							<Modal
-								onDismiss={() => setShowResume(false)}
-								visible={showResume}
-								closeAriaLabel="Close modal"
-								header="Resume"
-								size="max"
-							>
-								<Box>
-									<iframe
-										src={`${application_data.resume_url as string}/preview`}
-										title="Resume"
-										style={{ width: "100%", height: "80vh", border: 0 }}
-									/>
-								</Box>
-							</Modal>
-						)}
-					</>
-				}
-				options={resumeOptions}
-				useDropdown
-				value={resumeScore}
-				onChange={(value) => {
-					setResumeScore(value);
-					onResumeScore(value, hackathonExperienceScore);
-				}}
-				disabled={isResumeDisabled}
-			/>
+			{canViewResume && (
+				<ScoreSection
+					title="Resume"
+					leftColumn={<PortableText value={guidelines.guidelines.resume} />}
+					rightColumn={
+						<>
+							<Button onClick={() => setShowResume(true)}>View resume</Button>
+							{showResume && (
+								<Modal
+									onDismiss={() => setShowResume(false)}
+									visible={showResume}
+									closeAriaLabel="Close modal"
+									header="Resume"
+									size="max"
+								>
+									<Box>
+										<iframe
+											src={`${application_data.resume_url}/preview`}
+											title="Resume"
+											style={{ width: "100%", height: "80vh", border: 0 }}
+										/>
+									</Box>
+								</Modal>
+							)}
+						</>
+					}
+					options={resumeOptions}
+					useDropdown
+					value={resumeScore}
+					onChange={(value) => {
+						setResumeScore(value);
+						onResumeScore(value, hackathonExperienceScore);
+					}}
+					disabled={isResumeDisabled}
+				/>
+			)}
 			<ScoreSection
 				title="Tell us about a time when collaboration was instrumental in your success. [Max 100 words]"
 				min={0}

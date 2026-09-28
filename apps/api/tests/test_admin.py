@@ -1579,11 +1579,11 @@ def test_has_overqualified_score_ignores_unselected_resume_score() -> None:
 
 
 @patch("routers.admin.require_lead", autospec=True)
-@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 async def test_handle_global_only_review_clears_resume_score(
     mock_mongodb_handler_retrieve_one: AsyncMock,
-    mock_mongodb_handler_update_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
     mock_require_lead: AsyncMock,
 ) -> None:
     """Clearing the resume dropdown removes the stored resume score."""
@@ -1596,26 +1596,31 @@ async def test_handle_global_only_review_clears_resume_score(
         "_id": applicant,
         "roles": ["Applicant", "Hacker"],
     }
-    mock_mongodb_handler_update_one.return_value = True
+    mock_mongodb_handler_raw_update_one.return_value = True
 
     await _handle_global_only_review(applicant, scores, reviewer)
 
     # No resume key means resume_reviewed becomes False, so the applicant shows
-    # up under "Resume Not Reviewed" again.
-    mock_mongodb_handler_update_one.assert_awaited_once_with(
+    # up under "Resume Not Reviewed" again. The applicant was never marked
+    # overqualified, so status and decision are left alone.
+    mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
         Collection.USERS,
         {"_id": applicant},
-        {"application_data.global_field_scores": {"hackathon_experience": 10}},
+        {
+            "$set": {
+                "application_data.global_field_scores": {"hackathon_experience": 10}
+            }
+        },
         upsert=True,
     )
 
 
 @patch("routers.admin.require_lead", autospec=True)
-@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 async def test_handle_global_only_review_keeps_zero_resume_score(
     mock_mongodb_handler_retrieve_one: AsyncMock,
-    mock_mongodb_handler_update_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
     mock_require_lead: AsyncMock,
 ) -> None:
     """A resume score of 0 is a real score and must not be treated as cleared."""
@@ -1628,17 +1633,19 @@ async def test_handle_global_only_review_keeps_zero_resume_score(
         "_id": applicant,
         "roles": ["Applicant", "Hacker"],
     }
-    mock_mongodb_handler_update_one.return_value = True
+    mock_mongodb_handler_raw_update_one.return_value = True
 
     await _handle_global_only_review(applicant, scores, reviewer)
 
-    mock_mongodb_handler_update_one.assert_awaited_once_with(
+    mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
         Collection.USERS,
         {"_id": applicant},
         {
-            "application_data.global_field_scores": {
-                "resume": 0,
-                "hackathon_experience": 10,
+            "$set": {
+                "application_data.global_field_scores": {
+                    "resume": 0,
+                    "hackathon_experience": 10,
+                }
             }
         },
         upsert=True,

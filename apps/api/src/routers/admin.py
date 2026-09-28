@@ -1480,17 +1480,46 @@ async def _handle_global_only_review(
                 "Cannot review an auto-decided applicant.",
             )
 
-    retained_scores = {
+    # Leave out any field the reviewer cleared, which removes it from the stored
+    # scores. resume_reviewed is derived from whether a resume score exists, so
+    # clearing the dropdown returns the applicant to "Resume Not Reviewed".
+    score_data = {
         field: score
         for field, score in scores.model_dump().items()
         if score != EMPTY_GLOBAL_SCORE
     }
+    update_data: dict[str, object] = {
+        "application_data.global_field_scores": score_data
+    }
+    unset_data: dict[str, object] = {}
 
-    # Update the user record with global field scores
-    await mongodb_handler.update_one(
+    if any(_is_overqualified_score(score) for score in score_data.values()):
+        update_data.update(
+            {
+                "status": UserStatus.REVIEWED,
+                "decision": Decision.REJECTED,
+            }
+        )
+    elif applicant_record and _has_overqualified_score(applicant_record):
+        # The mark is being removed, so drop the rejection it forced and send
+        # the applicant back for review unless two reviewers already scored.
+        update_data["status"] = (
+            UserStatus.REVIEWED
+            if len(_unique_reviewers(applicant_record)) >= 2
+            else UserStatus.PENDING_REVIEW
+        )
+        unset_data["decision"] = ""
+
+    # Update the user record with global field scores. If a lead marks an
+    # applicant overqualified, persist the resulting rejection immediately.
+    update_query: dict[str, object] = {"$set": update_data}
+    if unset_data:
+        update_query["$unset"] = unset_data
+
+    await mongodb_handler.raw_update_one(
         Collection.USERS,
         {"_id": applicant},
-        {"application_data.global_field_scores": retained_scores},
+        update_query,
         upsert=True,
     )
 

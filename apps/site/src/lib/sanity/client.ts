@@ -10,3 +10,10 @@ export const client = createClient({
 	apiVersion,
 	useCdn: true,
 });
+
+export const freshClient = createClient({
+	projectId,
+	dataset,
+	apiVersion,
+	useCdn: false,
+});

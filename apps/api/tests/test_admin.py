@@ -12,6 +12,7 @@ from routers import admin
 from routers.admin import (
     _handle_detailed_scores_review,
     _handle_global_only_review,
+    _has_overqualified_score,
     _hacker_applicant_token,
     _is_review_assignable,
     delete_notes,
@@ -472,6 +473,20 @@ def test_is_review_assignable_excludes_auto_decided_applicant() -> None:
     assert not _is_review_assignable(record, "edu.uci.alicia")
 
 
+def test_is_review_assignable_excludes_overqualified_applicant() -> None:
+    record = {
+        "_id": "edu.uci.overqualified",
+        "status": "PENDING_REVIEW",
+        "application_data": {
+            "reviews": [],
+            "global_field_scores": {"resume": -1000, "hackathon_experience": 0},
+        },
+        "assigned_reviewers": [],
+    }
+
+    assert not _is_review_assignable(record, "edu.uci.alicia")
+
+
 @patch("services.mongodb_handler.raw_update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
@@ -512,6 +527,54 @@ def test_hacker_review_assignments_excludes_auto_decided_applicants(
     assert pull_update.args == (
         Collection.USERS,
         {"_id": "edu.uci.auto-decided"},
+        {"$pull": {"assigned_reviewers": "edu.uci.alicia"}},
+    )
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_hacker_review_assignments_excludes_overqualified_applicants(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_retrieve: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.return_value = HACKER_REVIEWER_IDENTITY
+    mock_mongodb_handler_retrieve.return_value = [
+        {
+            "_id": "edu.uci.overqualified",
+            "status": "PENDING_REVIEW",
+            "application_data": {
+                "reviews": [],
+                "submission_time": datetime(2026, 1, 1),
+                "global_field_scores": {
+                    "resume": -1000,
+                    "hackathon_experience": 0,
+                },
+            },
+            "assigned_reviewers": ["edu.uci.alicia"],
+        },
+        {
+            "_id": "edu.uci.assignable",
+            "status": "PENDING_REVIEW",
+            "application_data": {
+                "reviews": [],
+                "submission_time": datetime(2026, 1, 2),
+                "global_field_scores": {},
+            },
+            "assigned_reviewers": [],
+        },
+    ]
+
+    res = reviewer_client.get("/review-assignments/hackers")
+
+    assert res.status_code == 200
+    assert res.json()["applicant_ids"] == ["edu.uci.assignable"]
+    assert mock_mongodb_handler_raw_update_one.await_count == 2
+    pull_update = mock_mongodb_handler_raw_update_one.await_args_list[0]
+    assert pull_update.args == (
+        Collection.USERS,
+        {"_id": "edu.uci.overqualified"},
         {"$pull": {"assigned_reviewers": "edu.uci.alicia"}},
     )
 
@@ -1041,6 +1104,54 @@ def test_hacker_applicants_allows_zothacks_hacker_review_breakdown(
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 @patch("services.mongodb_handler.retrieve", autospec=True)
+def test_hacker_applicants_marks_global_resume_overqualified_rejected(
+    mock_mongodb_handler_retrieve: AsyncMock,
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+) -> None:
+    """A global resume OQ score should show as rejected in summaries."""
+    returned_records: list[dict[str, object]] = [
+        {
+            "_id": "edu.uci.bruh3",
+            "first_name": "no",
+            "last_name": "no",
+            "status": "REVIEWED",
+            "roles": ["Applicant", "Hacker"],
+            "application_data": {
+                "school_year": "1st Year",
+                "submission_time": datetime(2026, 9, 6, 9, 0, 0),
+                "email": "bruh3@uci.edu",
+                "major": "Computer Science",
+                "tech_inspiration_saq": "Something.",
+                "reviews": [
+                    [datetime(2026, 9, 21), "edu.uci.nathan", 70, "reviewed"],
+                ],
+                "review_breakdown": {},
+                "global_field_scores": {
+                    "resume": -1000,
+                    "hackathon_experience": 0,
+                },
+            },
+        }
+    ]
+    returned_thresholds: dict[str, object] = {"accept": 60, "waitlist": 40}
+
+    mock_mongodb_handler_retrieve.return_value = returned_records
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        returned_thresholds,
+        DIRECTOR_IDENTITY,
+    ]
+
+    res = director_client.get("/applicants/hackers")
+
+    assert res.status_code == 200
+    data = res.json()
+    assert data[0]["avg_score"] == -3
+    assert data[0]["decision"] == "REJECTED"
+
+
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+@patch("services.mongodb_handler.retrieve", autospec=True)
 def test_hacker_applicants_redacts_identity_for_reviewers(
     mock_mongodb_handler_retrieve: AsyncMock,
     mock_mongodb_handler_retrieve_one: AsyncMock,
@@ -1284,11 +1395,11 @@ def test_error_on_hacker_invalid_value(
 
 
 @patch("routers.admin.require_lead", autospec=True)
-@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 async def test_handle_global_only_review_success(
     mock_mongodb_handler_retrieve_one: AsyncMock,
-    mock_mongodb_handler_update_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
     mock_require_lead: AsyncMock,
 ) -> None:
     """Test successful resume-only review submission."""
@@ -1301,22 +1412,170 @@ async def test_handle_global_only_review_success(
         "_id": applicant,
         "roles": ["Applicant", "Hacker"],
     }
-    mock_mongodb_handler_update_one.return_value = True
+    mock_mongodb_handler_raw_update_one.return_value = True
 
     await _handle_global_only_review(applicant, scores, reviewer)
 
     mock_require_lead.assert_awaited_once_with(reviewer)
-    mock_mongodb_handler_update_one.assert_awaited_once_with(
+    mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
         Collection.USERS,
         {"_id": applicant},
         {
-            "application_data.global_field_scores": {
-                "resume": 8,
-                "hackathon_experience": 10,
+            "$set": {
+                "application_data.global_field_scores": {
+                    "resume": 8,
+                    "hackathon_experience": 10,
+                }
             }
         },
         upsert=True,
     )
+
+
+@patch("routers.admin.require_lead", autospec=True)
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_handle_global_only_review_overqualified_rejects_applicant(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+    mock_require_lead: AsyncMock,
+) -> None:
+    """Overqualified global scoring should persist the rejection immediately."""
+    applicant = "edu.uci.test"
+    scores = GlobalScores(resume=-1000, hackathon_experience=0)
+    reviewer = USER_REVIEWER
+
+    mock_require_lead.return_value = None
+    mock_mongodb_handler_retrieve_one.return_value = {
+        "_id": applicant,
+        "roles": ["Applicant", "Hacker"],
+    }
+    mock_mongodb_handler_raw_update_one.return_value = True
+
+    await _handle_global_only_review(applicant, scores, reviewer)
+
+    mock_require_lead.assert_awaited_once_with(reviewer)
+    mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
+        Collection.USERS,
+        {"_id": applicant},
+        {
+            "$set": {
+                "application_data.global_field_scores": {
+                    "resume": -1000,
+                    "hackathon_experience": 0,
+                },
+                "status": "REVIEWED",
+                "decision": "REJECTED",
+            },
+        },
+        upsert=True,
+    )
+
+
+@patch("routers.admin.require_lead", autospec=True)
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_handle_global_only_review_can_clear_overqualified_resume_score(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+    mock_require_lead: AsyncMock,
+) -> None:
+    """Leads should be able to change an overqualified resume back to unscored."""
+    applicant = "edu.uci.test"
+    scores = GlobalScores(resume=-1, hackathon_experience=0)
+    reviewer = USER_REVIEWER
+
+    mock_require_lead.return_value = None
+    mock_mongodb_handler_retrieve_one.return_value = {
+        "_id": applicant,
+        "roles": ["Applicant", "Hacker"],
+        "status": "REVIEWED",
+        "decision": "REJECTED",
+        "application_data": {
+            "global_field_scores": {
+                "resume": -1000,
+                "hackathon_experience": 0,
+            }
+        },
+    }
+    mock_mongodb_handler_raw_update_one.return_value = True
+
+    await _handle_global_only_review(applicant, scores, reviewer)
+
+    mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
+        Collection.USERS,
+        {"_id": applicant},
+        {
+            "$set": {
+                "application_data.global_field_scores": {"hackathon_experience": 0},
+                "status": "PENDING_REVIEW",
+            },
+            "$unset": {"decision": ""},
+        },
+        upsert=True,
+    )
+
+
+@patch("routers.admin.require_lead", autospec=True)
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+async def test_handle_global_only_review_clear_overqualified_keeps_reviewed_status(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+    mock_require_lead: AsyncMock,
+) -> None:
+    """Clearing overqualified should preserve reviewed status after two reviews."""
+    applicant = "edu.uci.test"
+    scores = GlobalScores(resume=15, hackathon_experience=0)
+    reviewer = USER_REVIEWER
+
+    mock_require_lead.return_value = None
+    mock_mongodb_handler_retrieve_one.return_value = {
+        "_id": applicant,
+        "roles": ["Applicant", "Hacker"],
+        "status": "REVIEWED",
+        "decision": "REJECTED",
+        "application_data": {
+            "reviews": [
+                [datetime(2026, 1, 1), "edu.uci.alicia", 10],
+                [datetime(2026, 1, 2), "edu.uci.bob", 12],
+            ],
+            "global_field_scores": {
+                "resume": -1000,
+                "hackathon_experience": 0,
+            },
+        },
+    }
+    mock_mongodb_handler_raw_update_one.return_value = True
+
+    await _handle_global_only_review(applicant, scores, reviewer)
+
+    mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
+        Collection.USERS,
+        {"_id": applicant},
+        {
+            "$set": {
+                "application_data.global_field_scores": {
+                    "resume": 15,
+                    "hackathon_experience": 0,
+                },
+                "status": "REVIEWED",
+            },
+            "$unset": {"decision": ""},
+        },
+        upsert=True,
+    )
+
+
+def test_has_overqualified_score_ignores_unselected_resume_score() -> None:
+    """The -1 dropdown sentinel is not an overqualified score."""
+    record = {
+        "application_data": {
+            "global_field_scores": {"resume": -1, "hackathon_experience": 0}
+        }
+    }
+
+    assert not _has_overqualified_score(record)
 
 
 @patch("routers.admin.require_lead", autospec=True)

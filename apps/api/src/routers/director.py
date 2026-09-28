@@ -461,7 +461,7 @@ async def release_hacker_decisions() -> None:
     records = await mongodb_handler.retrieve(
         Collection.USERS,
         {"status": Status.REVIEWED, "roles": {"$in": [Role.HACKER]}},
-        ["_id", "application_data.reviews", "first_name", "auto_decision_reason"],
+        ["_id", "application_data", "first_name", "auto_decision_reason"],
     )
 
     thresholds: Optional[dict[str, float]] = await retrieve_thresholds()
@@ -471,9 +471,18 @@ async def release_hacker_decisions() -> None:
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     for record in records:
-        applicant_review_processor.include_hacker_app_fields(
-            record, thresholds["accept"], thresholds["waitlist"]
-        )
+        application_data = record.get("application_data", {})
+        if (
+            isinstance(application_data, Mapping)
+            and "tech_inspiration_saq" in application_data
+        ):
+            applicant_review_processor.include_hacker_app_fields_with_global_and_breakdown(
+                record, thresholds["accept"], thresholds["waitlist"]
+            )
+        else:
+            applicant_review_processor.include_hacker_app_fields(
+                record, thresholds["accept"], thresholds["waitlist"]
+            )
 
     await _process_records_in_batches(records, Role.HACKER)
 

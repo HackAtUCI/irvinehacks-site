@@ -1,6 +1,5 @@
 import { z } from "zod";
-import { cache } from "react";
-import { client } from "@/lib/sanity/client";
+import { freshClient } from "@/lib/sanity/client";
 import { groq } from "next-sanity";
 
 const portableTextBlocks = z
@@ -25,9 +24,9 @@ export type ZothacksHackerScoringGuidelinesType = z.infer<
 	typeof ZothacksHackerScoringGuidelines
 >;
 
-export const getZothacksHackerScoringGuidelines = cache(async () => {
-	const data = await client.fetch(
-		groq`*[_type == "zothacksHackerScoringGuidelines"][0]{
+export const getZothacksHackerScoringGuidelines = async () => {
+	const data = await freshClient.fetch(
+		groq`*[_type == "zothacksHackerScoringGuidelines"] | order(_updatedAt desc)[0]{
       _id,
       _type,
       guidelines {
@@ -42,4 +41,4 @@ export const getZothacksHackerScoringGuidelines = cache(async () => {
 	);
 
 	return ZothacksHackerScoringGuidelines.parse(data);
-});
+};

@@ -431,6 +431,64 @@ def test_hacker_review_assignments_keep_active_assignments(
 @patch("services.mongodb_handler.raw_update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_hacker_review_assignments_respects_maximum_reviews(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_retrieve: AsyncMock,
+    mock_mongodb_handler_raw_update_one: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        HACKER_REVIEWER_IDENTITY,
+        HACKER_REVIEWER_IDENTITY,
+        {"maximum_reviews_per_organizer": 1},
+    ]
+    mock_mongodb_handler_retrieve.return_value = [
+        {
+            "_id": "edu.uci.reviewed",
+            "status": "REVIEWED",
+            "application_data": {
+                "reviews": [[datetime(2026, 1, 2), "edu.uci.alicia", 10, None]],
+                "submission_time": datetime(2026, 1, 2),
+            },
+            "assigned_reviewers": ["edu.uci.alicia"],
+        },
+        {
+            "_id": "edu.uci.assigned",
+            "status": "PENDING",
+            "application_data": {
+                "reviews": [],
+                "submission_time": datetime(2026, 1, 1),
+            },
+            "assigned_reviewers": ["edu.uci.alicia"],
+        },
+        {
+            "_id": "edu.uci.unassigned",
+            "status": "PENDING",
+            "application_data": {
+                "reviews": [],
+                "submission_time": datetime(2026, 1, 3),
+            },
+            "assigned_reviewers": [],
+        },
+    ]
+
+    res = reviewer_client.get("/review-assignments/hackers")
+
+    assert res.status_code == 200
+    assert res.json() == {
+        "applicant_ids": [],
+        "target_count": 0,
+        "completed_count": 1,
+    }
+    mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
+        Collection.USERS,
+        {"_id": "edu.uci.assigned"},
+        {"$pull": {"assigned_reviewers": "edu.uci.alicia"}},
+    )
+
+
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
 def test_hacker_review_assignments_caps_active_assignments(
     mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_mongodb_handler_retrieve: AsyncMock,

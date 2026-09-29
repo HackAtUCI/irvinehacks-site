@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState, useContext } from "react";
+import { useEffect, useMemo, useState, useContext } from "react";
 import Box from "@cloudscape-design/components/box";
+import Button from "@cloudscape-design/components/button";
 import Container from "@cloudscape-design/components/container";
 import FormField from "@cloudscape-design/components/form-field";
 import Input from "@cloudscape-design/components/input";
@@ -14,6 +15,7 @@ import { useCollection } from "@cloudscape-design/collection-hooks";
 import { isDirector } from "@/lib/admin/authorization";
 import UserContext from "@/lib/admin/UserContext";
 import useHackerApplicants from "@/lib/admin/useHackerApplicants";
+import useReviewAssignmentSettings from "@/lib/admin/useReviewAssignmentSettings";
 
 interface Row {
 	name: string;
@@ -60,11 +62,51 @@ function ReviewerSummary() {
 	const { roles } = useContext(UserContext);
 	const { applicantList, loading } = useHackerApplicants();
 	const { organizerList, loading: organizersLoading } = useOrganizers();
+	const {
+		settings,
+		loading: settingsLoading,
+		updateSettings,
+	} = useReviewAssignmentSettings();
 	const [minimumInput, setMinimumInput] = useState("");
+	const [maximumInput, setMaximumInput] = useState("");
+	const [saving, setSaving] = useState(false);
+	const [saveStatus, setSaveStatus] = useState("");
 
-	const minimum = minimumInput !== "" ? parseInt(minimumInput, 10) : null;
+	useEffect(() => {
+		if (!settings) return;
+		setMinimumInput(
+			settings.minimum_reviews_per_organizer?.toString() ?? "",
+		);
+		setMaximumInput(
+			settings.maximum_reviews_per_organizer?.toString() ?? "",
+		);
+	}, [settings]);
+
+	const minimum =
+		settings?.minimum_reviews_per_organizer !== undefined
+			? settings.minimum_reviews_per_organizer
+			: null;
 	const director = isDirector(roles);
-	const combinedLoading = loading || organizersLoading;
+	const combinedLoading = loading || organizersLoading || settingsLoading;
+
+	const parseSettingInput = (value: string) =>
+		value === "" ? null : parseInt(value, 10);
+
+	const handleSaveSettings = async () => {
+		setSaving(true);
+		setSaveStatus("");
+		try {
+			await updateSettings({
+				minimum_reviews_per_organizer: parseSettingInput(minimumInput),
+				maximum_reviews_per_organizer: parseSettingInput(maximumInput),
+			});
+			setSaveStatus("Saved");
+		} catch {
+			setSaveStatus("Failed to save");
+		} finally {
+			setSaving(false);
+		}
+	};
 
 	const allItems: Row[] = useMemo(() => {
 		if (combinedLoading) return [];
@@ -107,21 +149,41 @@ function ReviewerSummary() {
 		},
 	});
 
-	return (
-		<Container header={<Box variant="h2">Reviewer Summary</Box>}>
-			<SpaceBetween size="m">
-				{director && (
-					<FormField label="Minimum reviews per organizer">
-						<div style={{ maxWidth: 250 }}>
-							<Input
-								type="number"
-								value={minimumInput}
-								onChange={({ detail }) => setMinimumInput(detail.value)}
-								placeholder="Set a goal (ex: 10, 50...)"
-							/>
-						</div>
-					</FormField>
-				)}
+		return (
+			<Container header={<Box variant="h2">Reviewer Summary</Box>}>
+				<SpaceBetween size="m">
+					{director && (
+						<SpaceBetween direction="horizontal" size="s" alignItems="end">
+							<FormField label="Minimum reviews per organizer">
+								<div style={{ width: 250 }}>
+									<Input
+										type="number"
+										value={minimumInput}
+										onChange={({ detail }) => setMinimumInput(detail.value)}
+										placeholder="Set a goal (ex: 10, 50...)"
+									/>
+								</div>
+							</FormField>
+							<FormField label="Maximum reviews per organizer">
+								<div style={{ width: 250 }}>
+									<Input
+										type="number"
+										value={maximumInput}
+										onChange={({ detail }) => setMaximumInput(detail.value)}
+										placeholder="Leave blank for no cap"
+									/>
+								</div>
+							</FormField>
+							<Button
+								variant="primary"
+								loading={saving}
+								onClick={handleSaveSettings}
+							>
+								Save
+							</Button>
+							{saveStatus && <Box>{saveStatus}</Box>}
+						</SpaceBetween>
+					)}
 				<Table
 					{...collectionProps}
 					columnDefinitions={columns}

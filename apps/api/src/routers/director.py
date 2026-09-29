@@ -26,7 +26,11 @@ from services.sendgrid_handler import (
     PersonalizationData,
     Template,
 )
-from routers.admin import retrieve_thresholds
+from routers.admin import (
+    REVIEW_ASSIGNMENT_SETTINGS_ID,
+    ReviewAssignmentSettings,
+    retrieve_thresholds,
+)
 from utils import email_handler
 from utils.email_handler import IH_SENDER, recover_email_from_uid
 from utils.batched import batched
@@ -77,6 +81,11 @@ class RawOrganizerData(BaseModel):
     first_name: str
     last_name: str
     roles: list[Role]
+
+
+class ReviewAssignmentSettingsRequest(BaseModel):
+    minimum_reviews_per_organizer: Optional[int] = Field(default=None, ge=0)
+    maximum_reviews_per_organizer: Optional[int] = Field(default=None, ge=0)
 
 
 def uci_scoped_uid(email: EmailStr) -> str:
@@ -428,6 +437,32 @@ async def toggle_avg_score_setting() -> dict[str, bool]:
         upsert=True,
     )
     return {"show_with_one_reviewer": new_value}
+
+
+@router.post(
+    "/review-assignment-settings",
+    dependencies=[Depends(require_director)],
+)
+async def set_review_assignment_settings(
+    settings: ReviewAssignmentSettingsRequest,
+) -> ReviewAssignmentSettings:
+    """Set reviewer queue goals and caps."""
+    minimum = settings.minimum_reviews_per_organizer
+    maximum = settings.maximum_reviews_per_organizer
+    if minimum is not None and maximum is not None and maximum < minimum:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST,
+            "Maximum reviews per organizer cannot be lower than the minimum.",
+        )
+
+    update_query = settings.model_dump()
+    await mongodb_handler.raw_update_one(
+        Collection.SETTINGS,
+        {"_id": REVIEW_ASSIGNMENT_SETTINGS_ID},
+        {"$set": update_query},
+        upsert=True,
+    )
+    return ReviewAssignmentSettings(**update_query)
 
 
 @router.post("/release/mentor-volunteer", dependencies=[Depends(require_director)])

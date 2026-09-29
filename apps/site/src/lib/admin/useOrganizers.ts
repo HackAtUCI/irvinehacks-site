@@ -16,7 +16,7 @@ const fetcher = async (url: string) => {
 
 function useOrganizers() {
 	const { data, error, isLoading, mutate } = useSWR<Organizer[]>(
-		"/api/director/organizers",
+		"/api/admin/organizers",
 		fetcher,
 	);
 

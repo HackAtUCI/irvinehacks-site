@@ -7,7 +7,14 @@ from logging import getLogger
 from typing import Annotated, Any, Literal, Mapping, Optional, Union
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
-from pydantic import BaseModel, EmailStr, Field, TypeAdapter, ValidationError
+from pydantic import (
+    AliasChoices,
+    BaseModel,
+    EmailStr,
+    Field,
+    TypeAdapter,
+    ValidationError,
+)
 from typing_extensions import assert_never
 from pymongo import DESCENDING, UpdateOne
 
@@ -95,6 +102,16 @@ class SimplifiedApplicantSummary(BaseRecord):
     decision: Optional[Decision] = None
     auto_decision_reason: Optional[str] = None
     application_data: SimplifiedApplicationDataSummary
+
+
+class OrganizerSummary(BaseRecord):
+    first_name: str
+    last_name: str
+    roles: list[Role]
+    committees: list[str] = Field(
+        default_factory=list,
+        validation_alias=AliasChoices("committees", "committee"),
+    )
 
 
 class ApplicantSummary(BaseRecord):
@@ -518,6 +535,19 @@ async def volunteer_applicants(
     log.info("%s requested volunteer applicants", user)
 
     return await mentor_volunteer_applicants("Volunteer")
+
+
+@router.get("/organizers", dependencies=[Depends(require_manager)])
+async def organizers() -> list[OrganizerSummary]:
+    """Get records of all organizers for read-only admin summaries."""
+    records: list[dict[str, object]] = await mongodb_handler.retrieve(
+        Collection.USERS, {"roles": Role.ORGANIZER}
+    )
+
+    try:
+        return TypeAdapter(list[OrganizerSummary]).validate_python(records)
+    except ValidationError:
+        raise RuntimeError("Could not parse organizer data.")
 
 
 @router.get("/applicants/hackers")

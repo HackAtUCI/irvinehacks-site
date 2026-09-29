@@ -87,6 +87,40 @@ def test_restricted_admin_route_is_forbidden(
     assert res.status_code == 403
 
 
+@patch("services.mongodb_handler.retrieve", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_reviewer_can_retrieve_organizers_for_summary(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_retrieve: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.return_value = HACKER_REVIEWER_IDENTITY
+    mock_mongodb_handler_retrieve.return_value = [
+        {
+            "_id": "edu.uci.petr",
+            "first_name": "Peter",
+            "last_name": "Anteater",
+            "roles": ["Organizer"],
+            "committees": ["Tech"],
+        },
+    ]
+
+    res = reviewer_client.get("/organizers")
+
+    assert res.status_code == 200
+    mock_mongodb_handler_retrieve.assert_awaited_once_with(
+        Collection.USERS, {"roles": Role.ORGANIZER}
+    )
+    assert res.json() == [
+        {
+            "_id": "edu.uci.petr",
+            "first_name": "Peter",
+            "last_name": "Anteater",
+            "roles": ["Organizer"],
+            "committees": ["Tech"],
+        },
+    ]
+
+
 @patch("services.mongodb_handler.update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 def test_can_add_non_hacker_participant(

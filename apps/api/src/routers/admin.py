@@ -7,7 +7,14 @@ from logging import getLogger
 from typing import Annotated, Any, Literal, Mapping, Optional, Union
 
 from fastapi import APIRouter, Body, Depends, HTTPException, status
-from pydantic import BaseModel, EmailStr, Field, TypeAdapter, ValidationError
+from pydantic import (
+    AliasChoices,
+    BaseModel,
+    EmailStr,
+    Field,
+    TypeAdapter,
+    ValidationError,
+)
 from typing_extensions import assert_never
 from pymongo import DESCENDING, UpdateOne
 
@@ -95,6 +102,16 @@ class SimplifiedApplicantSummary(BaseRecord):
     decision: Optional[Decision] = None
     auto_decision_reason: Optional[str] = None
     application_data: SimplifiedApplicationDataSummary
+
+
+class OrganizerSummary(BaseRecord):
+    first_name: str
+    last_name: str
+    roles: list[Role]
+    committees: list[str] = Field(
+        default_factory=list,
+        validation_alias=AliasChoices("committees", "committee"),
+    )
 
 
 class ApplicantSummary(BaseRecord):
@@ -329,6 +346,11 @@ class ReviewAssignmentsResponse(BaseModel):
     completed_count: int
 
 
+class ReviewAssignmentSettings(BaseModel):
+    minimum_reviews_per_organizer: Optional[int] = None
+    maximum_reviews_per_organizer: Optional[int] = None
+
+
 class WaiverStatusRequest(BaseModel):
     is_signed: bool
 
@@ -346,6 +368,19 @@ async def _persist_auto_decision_status_if_needed(record: dict[str, object]) -> 
 
 
 REVIEW_ASSIGNMENT_BATCH_SIZE = 10
+REVIEW_ASSIGNMENT_SETTINGS_ID = "hacker_review_assignment_settings"
+
+
+async def retrieve_hacker_review_assignment_settings() -> ReviewAssignmentSettings:
+    record = await mongodb_handler.retrieve_one(
+        Collection.SETTINGS,
+        {"_id": REVIEW_ASSIGNMENT_SETTINGS_ID},
+        ["minimum_reviews_per_organizer", "maximum_reviews_per_organizer"],
+    )
+    if record is None:
+        return ReviewAssignmentSettings()
+
+    return ReviewAssignmentSettings.model_validate(record)
 
 
 def _reviewer_has_reviewed(record: Mapping[str, Any], reviewer_uid: str) -> bool:
@@ -502,6 +537,19 @@ async def volunteer_applicants(
     return await mentor_volunteer_applicants("Volunteer")
 
 
+@router.get("/organizers", dependencies=[Depends(require_manager)])
+async def organizers() -> list[OrganizerSummary]:
+    """Get records of all organizers for read-only admin summaries."""
+    records: list[dict[str, object]] = await mongodb_handler.retrieve(
+        Collection.USERS, {"roles": Role.ORGANIZER}
+    )
+
+    try:
+        return TypeAdapter(list[OrganizerSummary]).validate_python(records)
+    except ValidationError:
+        raise RuntimeError("Could not parse organizer data.")
+
+
 @router.get("/applicants/hackers")
 async def hacker_applicants(
     user: Annotated[User, Depends(require_hacker_reviewer)],
@@ -582,6 +630,7 @@ async def hacker_review_assignments(
 ) -> ReviewAssignmentsResponse:
     """Get or create the current reviewer's hacker application assignments."""
     is_user_director = await _user_has_role(user.uid, Role.DIRECTOR)
+    review_settings = await retrieve_hacker_review_assignment_settings()
     records: list[dict[str, object]] = await mongodb_handler.retrieve(
         Collection.USERS,
         {"roles": Role.HACKER},
@@ -598,6 +647,15 @@ async def hacker_review_assignments(
     )
     completed_assignments = sum(
         1 for record in records if _reviewer_has_reviewed(record, user.uid)
+    )
+    remaining_review_capacity = REVIEW_ASSIGNMENT_BATCH_SIZE
+    if review_settings.maximum_reviews_per_organizer is not None:
+        remaining_review_capacity = max(
+            review_settings.maximum_reviews_per_organizer - completed_assignments,
+            0,
+        )
+    target_assignment_count = min(
+        REVIEW_ASSIGNMENT_BATCH_SIZE, remaining_review_capacity
     )
 
     # Remove reviewer from assigned_reviewers when applicant can no longer be
@@ -623,9 +681,7 @@ async def hacker_review_assignments(
         and not _is_not_reviewable(record)
         and len(_unique_reviewers(record)) < 2
     ]
-    overflow_assignment_records = active_assignment_records[
-        REVIEW_ASSIGNMENT_BATCH_SIZE:
-    ]
+    overflow_assignment_records = active_assignment_records[target_assignment_count:]
     for record in overflow_assignment_records:
         await mongodb_handler.raw_update_one(
             Collection.USERS,
@@ -633,16 +689,16 @@ async def hacker_review_assignments(
             {"$pull": {"assigned_reviewers": user.uid}},
         )
 
-    active_assignment_records = active_assignment_records[:REVIEW_ASSIGNMENT_BATCH_SIZE]
+    active_assignment_records = active_assignment_records[:target_assignment_count]
     active_assignment_ids = [str(record["_id"]) for record in active_assignment_records]
 
-    needed_assignments = REVIEW_ASSIGNMENT_BATCH_SIZE - len(active_assignment_ids)
+    needed_assignments = target_assignment_count - len(active_assignment_ids)
     if needed_assignments <= 0:
         return ReviewAssignmentsResponse(
             applicant_ids=_hacker_assignment_ids_for_user(
                 active_assignment_ids, is_user_director
             ),
-            target_count=REVIEW_ASSIGNMENT_BATCH_SIZE,
+            target_count=target_assignment_count,
             completed_count=completed_assignments,
         )
 
@@ -669,7 +725,7 @@ async def hacker_review_assignments(
         applicant_ids=_hacker_assignment_ids_for_user(
             active_assignment_ids + new_assignment_ids, is_user_director
         ),
-        target_count=REVIEW_ASSIGNMENT_BATCH_SIZE,
+        target_count=target_assignment_count,
         completed_count=completed_assignments,
     )
 
@@ -1494,6 +1550,15 @@ async def get_avg_score_setting() -> dict[str, bool]:
             record and record.get("show_with_one_reviewer", False)
         )
     }
+
+
+@router.get(
+    "/review-assignment-settings",
+    dependencies=[Depends(require_manager)],
+)
+async def get_review_assignment_settings() -> ReviewAssignmentSettings:
+    """Get settings for reviewer queue goals and caps."""
+    return await retrieve_hacker_review_assignment_settings()
 
 
 async def _handle_global_only_review(

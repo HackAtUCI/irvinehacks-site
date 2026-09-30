@@ -300,6 +300,31 @@ def test_auto_reject_graduated_hacker() -> None:
     )
 
 
+def test_auto_reject_hackathon_veteran() -> None:
+    """ZotHacks hackers with hackathon_experience == 'veteran' are auto-rejected."""
+    record: dict[str, Any] = {
+        "_id": "edu.uci.veteran",
+        "status": "REVIEWED",
+        "roles": [Role.APPLICANT, Role.HACKER],
+        "application_data": {
+            "is_18_older": True,
+            "hackathon_experience": "veteran",
+            "reviews": [],
+            "review_breakdown": {},
+            "global_field_scores": {"hackathon_experience": -1000},
+        },
+    }
+
+    applicant_review_processor._include_decision_based_on_threshold_and_score_breakdown(
+        record, accept=80.0, waitlist=50.0
+    )
+    assert record["decision"] == "REJECTED"
+    assert (
+        record["auto_decision_reason"]
+        == applicant_review_processor.AUTO_REASON_HACKATHON_VETERAN
+    )
+
+
 def test_auto_decision_skipped_when_no_rule_matches() -> None:
     """Score-based logic still runs when no auto-rule matches; reason is None."""
     record: dict[str, Any] = {
@@ -359,6 +384,24 @@ def test_get_auto_decision_status_update_for_under_18() -> None:
     assert update == {
         "status": "REVIEWED",
         "auto_decision_reason": applicant_review_processor.AUTO_REASON_UNDER_18,
+    }
+
+
+def test_get_auto_decision_status_update_for_hackathon_veteran() -> None:
+    record: dict[str, Any] = {
+        "_id": "edu.uci.veteran",
+        "status": "PENDING_REVIEW",
+        "roles": [Role.APPLICANT, Role.HACKER],
+        "application_data": {
+            "is_18_older": True,
+            "hackathon_experience": "veteran",
+        },
+    }
+
+    update = applicant_review_processor.get_auto_decision_status_update(record)
+    assert update == {
+        "status": "REVIEWED",
+        "auto_decision_reason": applicant_review_processor.AUTO_REASON_HACKATHON_VETERAN,
     }
 
 

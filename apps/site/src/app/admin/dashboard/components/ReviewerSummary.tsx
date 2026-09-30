@@ -74,12 +74,8 @@ function ReviewerSummary() {
 
 	useEffect(() => {
 		if (!settings) return;
-		setMinimumInput(
-			settings.minimum_reviews_per_organizer?.toString() ?? "",
-		);
-		setMaximumInput(
-			settings.maximum_reviews_per_organizer?.toString() ?? "",
-		);
+		setMinimumInput(settings.minimum_reviews_per_organizer?.toString() ?? "");
+		setMaximumInput(settings.maximum_reviews_per_organizer?.toString() ?? "");
 	}, [settings]);
 
 	const minimum =
@@ -149,41 +145,41 @@ function ReviewerSummary() {
 		},
 	});
 
-		return (
-			<Container header={<Box variant="h2">Reviewer Summary</Box>}>
-				<SpaceBetween size="m">
-					{director && (
-						<SpaceBetween direction="horizontal" size="s" alignItems="end">
-							<FormField label="Minimum reviews per organizer">
-								<div style={{ width: 250 }}>
-									<Input
-										type="number"
-										value={minimumInput}
-										onChange={({ detail }) => setMinimumInput(detail.value)}
-										placeholder="Set a goal (ex: 10, 50...)"
-									/>
-								</div>
-							</FormField>
-							<FormField label="Maximum reviews per organizer">
-								<div style={{ width: 250 }}>
-									<Input
-										type="number"
-										value={maximumInput}
-										onChange={({ detail }) => setMaximumInput(detail.value)}
-										placeholder="Leave blank for no cap"
-									/>
-								</div>
-							</FormField>
-							<Button
-								variant="primary"
-								loading={saving}
-								onClick={handleSaveSettings}
-							>
-								Save
-							</Button>
-							{saveStatus && <Box>{saveStatus}</Box>}
-						</SpaceBetween>
-					)}
+	return (
+		<Container header={<Box variant="h2">Reviewer Summary</Box>}>
+			<SpaceBetween size="m">
+				{director && (
+					<SpaceBetween direction="horizontal" size="s" alignItems="end">
+						<FormField label="Minimum reviews per organizer">
+							<div style={{ width: 250 }}>
+								<Input
+									type="number"
+									value={minimumInput}
+									onChange={({ detail }) => setMinimumInput(detail.value)}
+									placeholder="Set a goal (ex: 10, 50...)"
+								/>
+							</div>
+						</FormField>
+						<FormField label="Maximum reviews per organizer">
+							<div style={{ width: 250 }}>
+								<Input
+									type="number"
+									value={maximumInput}
+									onChange={({ detail }) => setMaximumInput(detail.value)}
+									placeholder="Leave blank for no cap"
+								/>
+							</div>
+						</FormField>
+						<Button
+							variant="primary"
+							loading={saving}
+							onClick={handleSaveSettings}
+						>
+							Save
+						</Button>
+						{saveStatus && <Box>{saveStatus}</Box>}
+					</SpaceBetween>
+				)}
 				<Table
 					{...collectionProps}
 					columnDefinitions={columns}

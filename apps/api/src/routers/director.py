@@ -15,6 +15,9 @@ from pydantic import (
 )
 
 from admin import applicant_review_processor
+from admin.applicant_review_processor import (
+    include_hacker_app_fields_with_global_and_breakdown,
+)
 from auth.authorization import require_role
 from auth.user_identity import User, uci_email, utc_now
 from models.ApplicationData import Decision
@@ -511,8 +514,10 @@ async def release_hacker_decisions() -> None:
             isinstance(application_data, Mapping)
             and "tech_inspiration_saq" in application_data
         ):
-            applicant_review_processor.include_hacker_app_fields_with_global_and_breakdown(
-                record, thresholds["accept"], thresholds["waitlist"]
+            include_hacker_app_fields_with_global_and_breakdown(
+                record,
+                thresholds["accept"],
+                thresholds["waitlist"],
             )
         else:
             applicant_review_processor.include_hacker_app_fields(

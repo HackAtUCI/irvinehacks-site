@@ -147,10 +147,10 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 		applicant.auto_decision_reason === "DIRECTOR_AUTO_ACCEPT"
 			? Decision.Accepted
 			: applicant.auto_decision_reason === "UNDER_18" ||
-				    applicant.auto_decision_reason === "GRADUATED" ||
-				    applicant.auto_decision_reason === "HACKATHON_VETERAN"
-				? Decision.Rejected
-				: null;
+			    applicant.auto_decision_reason === "GRADUATED" ||
+			    applicant.auto_decision_reason === "HACKATHON_VETERAN"
+			  ? Decision.Rejected
+			  : null;
 
 	const reviewDisabled = Boolean(applicant.auto_decision_reason);
 

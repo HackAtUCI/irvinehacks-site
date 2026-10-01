@@ -401,7 +401,9 @@ def test_get_auto_decision_status_update_for_hackathon_veteran() -> None:
     update = applicant_review_processor.get_auto_decision_status_update(record)
     assert update == {
         "status": "REVIEWED",
-        "auto_decision_reason": applicant_review_processor.AUTO_REASON_HACKATHON_VETERAN,
+        "auto_decision_reason": (
+            applicant_review_processor.AUTO_REASON_HACKATHON_VETERAN
+        ),
     }
 
 

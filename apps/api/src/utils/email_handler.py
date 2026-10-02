@@ -4,37 +4,18 @@ from pydantic import EmailStr
 
 from models.ApplicationData import Decision
 from models.user_record import Role, Status
-from services import mongodb_handler, sendgrid_handler, ses_handler
-from services.sendgrid_handler import (
-    ApplicationUpdatePersonalization,
-    ApplicationUpdateTemplates,
-    LogisticsTemplates,
-    Template,
-)
+from services import mongodb_handler, ses_handler
 
-IH_SENDER = ("apply@irvinehacks.com", "IrvineHacks 2026 Applications")
-
-DECISION_TEMPLATES: dict[Role, dict[Decision, ApplicationUpdateTemplates]] = {
-    Role.HACKER: {
-        Decision.ACCEPTED: Template.HACKER_ACCEPTED_EMAIL,
-        Decision.REJECTED: Template.HACKER_REJECTED_EMAIL,
-        Decision.WAITLISTED: Template.HACKER_WAITLISTED_EMAIL,
-    },
-    Role.MENTOR: {
-        Decision.ACCEPTED: Template.MENTOR_ACCEPTED_EMAIL,
-        Decision.REJECTED: Template.MENTOR_REJECTED_EMAIL,
-    },
-    Role.VOLUNTEER: {
-        Decision.ACCEPTED: Template.VOLUNTEER_ACCEPTED_EMAIL,
-        Decision.REJECTED: Template.VOLUNTEER_REJECTED_EMAIL,
-    },
+SES_ROLE_NAMES: dict[Role, ses_handler.RoleName] = {
+    Role.HACKER: "Hacker",
+    Role.MENTOR: "Mentor",
+    Role.VOLUNTEER: "Volunteer",
 }
 
-
-LOGISTICS_TEMPLATES: dict[Role, LogisticsTemplates] = {
-    Role.HACKER: Template.HACKER_LOGISTICS_EMAIL,
-    Role.MENTOR: Template.MENTOR_LOGISTICS_EMAIL,
-    Role.VOLUNTEER: Template.VOLUNTEER_LOGISTICS_EMAIL,
+SES_DECISION_NAMES: dict[Decision, ses_handler.DecisionName] = {
+    Decision.ACCEPTED: "ACCEPTED",
+    Decision.WAITLISTED: "WAITLISTED",
+    Decision.REJECTED: "REJECTED",
 }
 
 
@@ -55,13 +36,8 @@ async def send_application_confirmation_email(
 
 async def send_rsvp_confirmation_email(email: EmailStr, first_name: str) -> None:
     """Send a confirmation email after a user submits an RSVP.
-    Will propagate exceptions from SendGrid."""
-    await sendgrid_handler.send_email(
-        Template.RSVP_CONFIRMATION_EMAIL,
-        IH_SENDER,
-        ApplicationUpdatePersonalization(email=email, first_name=first_name),
-        False,
-    )
+    Will propagate exceptions from SES."""
+    await ses_handler.send_rsvp_confirmation_email(str(email), first_name)
 
 
 async def send_guest_login_email(email: EmailStr, passphrase: str) -> None:
@@ -75,27 +51,21 @@ async def send_decision_email(
     application_type: Literal[Role.HACKER, Role.MENTOR, Role.VOLUNTEER],
 ) -> None:
     """Send a specific decision email to a group of applicants."""
-    personalizations = [
-        ApplicationUpdatePersonalization(email=email, first_name=first_name)
+    recipients = [
+        (first_name, str(email))
         for first_name, email in applicant_batch
     ]
 
-    template = DECISION_TEMPLATES[application_type][decision]
-    await sendgrid_handler.send_email(template, IH_SENDER, personalizations, True)
+    await ses_handler.send_decision_emails(
+        recipients,
+        SES_DECISION_NAMES[decision],
+        SES_ROLE_NAMES[application_type],
+    )
 
 
 async def send_waitlist_release_email(first_name: str, email: EmailStr) -> None:
     """Send the waitlist release email to an applicant."""
-    personalization = ApplicationUpdatePersonalization(
-        email=email, first_name=first_name
-    )
-
-    await sendgrid_handler.send_email(
-        Template.WAITLIST_RELEASE_EMAIL,
-        IH_SENDER,
-        personalization,
-        send_to_multiple=False,
-    )
+    await ses_handler.send_waitlist_release_email(first_name, str(email))
 
 
 async def send_logistics_email(
@@ -111,15 +81,14 @@ async def send_logistics_email(
     personalizations = []
     for record in records:
         personalizations.append(
-            ApplicationUpdatePersonalization(
-                email=recover_email_from_uid(record["_id"]),
-                first_name=record["first_name"],
-            )
+            (record["first_name"], recover_email_from_uid(record["_id"]))
         )
 
-    template = LOGISTICS_TEMPLATES[application_type]
     if len(records) > 0:
-        await sendgrid_handler.send_email(template, IH_SENDER, personalizations, True)
+        await ses_handler.send_logistics_emails(
+            personalizations,
+            SES_ROLE_NAMES[application_type],
+        )
 
 
 def recover_email_from_uid(uid: str) -> str:

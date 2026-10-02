@@ -23,7 +23,6 @@ from routers.admin import (
     _handle_irvinehacks_detailed_scores_review,
 )
 from services.mongodb_handler import Collection
-from services.sendgrid_handler import Template
 
 user_identity.JWT_SECRET = "not a good idea"
 
@@ -823,13 +822,13 @@ def test_submit_hacker_review_with_three_reviewers_fails(
     assert res.status_code == 403
 
 
-@patch("services.sendgrid_handler.send_email", autospec=True)
+@patch("services.ses_handler.send_waitlist_release_email", autospec=True)
 @patch("services.mongodb_handler.update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 def test_waitlisted_applicant_can_be_released(
     mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_mongodb_handler_update_one: AsyncMock,
-    mock_sendgrid_handler_send_email: AsyncMock,
+    mock_send_waitlist_release_email: AsyncMock,
 ) -> None:
     """Test waitlisted applicant can be promoted to accepted."""
     mock_mongodb_handler_retrieve_one.side_effect = [
@@ -847,11 +846,9 @@ def test_waitlisted_applicant_can_be_released(
     mock_mongodb_handler_update_one.assert_awaited_once_with(
         Collection.USERS, {"_id": "edu.uci.petr"}, {"status": Status.ACCEPTED}
     )
-    mock_sendgrid_handler_send_email.assert_awaited_once_with(
-        Template.WAITLIST_RELEASE_EMAIL,
-        ANY,
-        {"email": "petr@uci.edu", "first_name": "Peter"},
-        False,
+    mock_send_waitlist_release_email.assert_awaited_once_with(
+        "Peter",
+        "petr@uci.edu",
     )
 
 

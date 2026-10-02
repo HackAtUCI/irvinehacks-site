@@ -9,8 +9,6 @@ from models.ApplicationData import Decision
 from models.user_record import Role, Status
 from routers import director
 from services.mongodb_handler import Collection
-from services.sendgrid_handler import Template
-from utils.email_handler import IH_SENDER
 
 
 USER_REVIEWER = NativeUser(
@@ -181,7 +179,7 @@ def test_can_delete_organizer_in_current_hackathon_database(
     assert res.status_code == 200
 
 
-@patch("services.sendgrid_handler.send_email", autospec=True)
+@patch("services.ses_handler.send_apply_reminder_emails", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 @patch("services.mongodb_handler.retrieve", autospec=True)
 @patch("services.mongodb_handler.raw_update_one", autospec=True)
@@ -189,7 +187,7 @@ def test_apply_reminder_emails(
     mock_mongodb_handler_raw_update_one: AsyncMock,
     mock_mongodb_handler_retrieve: AsyncMock,
     mock_mongodb_handler_retrieve_one: AsyncMock,
-    mock_sendgrid_handler_send_email: AsyncMock,
+    mock_send_apply_reminder_emails: AsyncMock,
 ) -> None:
     """Test that users that haven't submitted an application will be sent an email"""
     mock_mongodb_handler_retrieve_one.side_effect = [
@@ -217,14 +215,8 @@ def test_apply_reminder_emails(
         upsert=True,
     )
 
-    mock_sendgrid_handler_send_email.assert_awaited_once_with(
-        Template.APPLY_REMINDER,
-        IH_SENDER,
-        [
-            {"email": "petr@uci.edu"},
-            {"email": "albert@uci.edu"},
-        ],
-        True,
+    mock_send_apply_reminder_emails.assert_awaited_once_with(
+        ["petr@uci.edu", "albert@uci.edu"]
     )
 
 
@@ -345,7 +337,7 @@ def test_release_hacker_decisions_works(
     assert returned_records[0]["decision"] == Decision.ACCEPTED
 
 
-@patch("routers.director.sendgrid_handler.send_email", autospec=True)
+@patch("services.ses_handler.send_waitlist_transfer_emails", autospec=True)
 @patch("services.mongodb_handler.update", autospec=True)
 @patch("services.mongodb_handler.retrieve", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
@@ -353,7 +345,7 @@ def test_waitlist_transfer_uses_status_as_source_of_truth(
     mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_mongodb_handler_retrieve: AsyncMock,
     mock_mongodb_handler_update: AsyncMock,
-    mock_send_email: AsyncMock,
+    mock_send_waitlist_transfer_emails: AsyncMock,
 ) -> None:
     """Only currently accepted statuses should be transferred to waitlist."""
     mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
@@ -371,7 +363,7 @@ def test_waitlist_transfer_uses_status_as_source_of_truth(
         },
         ["_id", "first_name"],
     )
-    mock_send_email.assert_not_awaited()
+    mock_send_waitlist_transfer_emails.assert_not_awaited()
 
 
 @patch("services.mongodb_handler.update_one", autospec=True)

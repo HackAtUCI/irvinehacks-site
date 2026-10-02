@@ -22,20 +22,15 @@ from auth.authorization import require_role
 from auth.user_identity import User, uci_email, utc_now
 from models.ApplicationData import Decision
 from models.user_record import Role, Status
-from services import mongodb_handler, sendgrid_handler
+from services import mongodb_handler, ses_handler
 from services.mongodb_handler import BaseRecord, Collection
-from services.sendgrid_handler import (
-    ApplicationUpdatePersonalization,
-    PersonalizationData,
-    Template,
-)
 from routers.admin import (
     REVIEW_ASSIGNMENT_SETTINGS_ID,
     ReviewAssignmentSettings,
     retrieve_thresholds,
 )
 from utils import email_handler
-from utils.email_handler import IH_SENDER, recover_email_from_uid
+from utils.email_handler import recover_email_from_uid
 from utils.batched import batched
 from utils.hackathon_context import HackathonName, hackathon_name_ctx
 
@@ -46,17 +41,10 @@ router = APIRouter()
 require_director = require_role({Role.DIRECTOR})
 
 
-RSVP_REMINDER_EMAIL_TEMPLATES: dict[
-    Role,
-    Literal[
-        Template.HACKER_RSVP_REMINDER,
-        Template.MENTOR_RSVP_REMINDER,
-        Template.VOLUNTEER_RSVP_REMINDER,
-    ],
-] = {
-    Role.HACKER: Template.HACKER_RSVP_REMINDER,
-    Role.MENTOR: Template.MENTOR_RSVP_REMINDER,
-    Role.VOLUNTEER: Template.VOLUNTEER_RSVP_REMINDER,
+SES_ROLE_NAMES: dict[Role, ses_handler.RoleName] = {
+    Role.HACKER: "Hacker",
+    Role.MENTOR: "Mentor",
+    Role.VOLUNTEER: "Volunteer",
 }
 
 
@@ -279,16 +267,12 @@ async def apply_reminder(user: Annotated[User, Depends(require_director)]) -> No
 
     recipients = set(validated_recipients.recipients)
 
-    personalizations = []
+    reminder_emails = []
     new_recipients = []
     for record in not_yet_applied:
         if record["_id"] not in recipients:
             new_recipients.append(record["_id"])
-            personalizations.append(
-                PersonalizationData(
-                    email=recover_email_from_uid(record["_id"]),
-                )
-            )
+            reminder_emails.append(recover_email_from_uid(record["_id"]))
 
     log.info(f"{user} sending apply reminder emails to {len(new_recipients)} users")
 
@@ -309,12 +293,7 @@ async def apply_reminder(user: Annotated[User, Depends(require_director)]) -> No
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     if len(new_recipients) > 0:
-        await sendgrid_handler.send_email(
-            Template.APPLY_REMINDER,
-            IH_SENDER,
-            personalizations,
-            True,
-        )
+        await ses_handler.send_apply_reminder_emails(reminder_emails)
 
 
 async def _rsvp_reminder(
@@ -332,14 +311,9 @@ async def _rsvp_reminder(
         ["_id", "first_name"],
     )
 
-    personalizations = []
+    recipients = []
     for record in not_yet_rsvpd:
-        personalizations.append(
-            ApplicationUpdatePersonalization(
-                email=recover_email_from_uid(record["_id"]),
-                first_name=record["first_name"],
-            )
-        )
+        recipients.append((record["first_name"], recover_email_from_uid(record["_id"])))
 
     log.info(
         (
@@ -349,11 +323,9 @@ async def _rsvp_reminder(
     )
 
     if len(not_yet_rsvpd) > 0:
-        await sendgrid_handler.send_email(
-            RSVP_REMINDER_EMAIL_TEMPLATES[application_type],
-            IH_SENDER,
-            personalizations,
-            True,
+        await ses_handler.send_rsvp_reminder_emails(
+            recipients,
+            SES_ROLE_NAMES[application_type],
         )
 
 
@@ -471,26 +443,35 @@ async def set_review_assignment_settings(
 @router.post("/release/mentor-volunteer", dependencies=[Depends(require_director)])
 async def release_mentor_volunteer_decisions() -> None:
     """Update applicant status based on decision and send decision emails."""
-    mentor_records = await mongodb_handler.retrieve(
+    await _release_non_hacker_decisions(Role.MENTOR)
+    await _release_non_hacker_decisions(Role.VOLUNTEER)
+
+
+@router.post("/release/mentors", dependencies=[Depends(require_director)])
+async def release_mentor_decisions() -> None:
+    """Update mentor applicant status based on decision and send decision emails."""
+    await _release_non_hacker_decisions(Role.MENTOR)
+
+
+@router.post("/release/volunteers", dependencies=[Depends(require_director)])
+async def release_volunteer_decisions() -> None:
+    """Update volunteer applicant status based on decision and send decision emails."""
+    await _release_non_hacker_decisions(Role.VOLUNTEER)
+
+
+async def _release_non_hacker_decisions(
+    application_type: Literal[Role.MENTOR, Role.VOLUNTEER],
+) -> None:
+    records = await mongodb_handler.retrieve(
         Collection.USERS,
-        {"status": Status.REVIEWED, "roles": {"$in": [Role.MENTOR]}},
+        {"status": Status.REVIEWED, "roles": {"$in": [application_type]}},
         ["_id", "application_data.reviews", "first_name", "auto_decision_reason"],
     )
 
-    for record in mentor_records:
+    for record in records:
         applicant_review_processor.include_review_decision(record)
 
-    volunteer_records = await mongodb_handler.retrieve(
-        Collection.USERS,
-        {"status": Status.REVIEWED, "roles": {"$in": [Role.VOLUNTEER]}},
-        ["_id", "application_data.reviews", "first_name", "auto_decision_reason"],
-    )
-
-    for record in volunteer_records:
-        applicant_review_processor.include_review_decision(record)
-
-    await _process_records_in_batches(mentor_records, Role.MENTOR)
-    await _process_records_in_batches(volunteer_records, Role.VOLUNTEER)
+    await _process_records_in_batches(records, application_type)
 
 
 @router.post("/release/hackers", dependencies=[Depends(require_director)])
@@ -554,21 +535,15 @@ async def waitlist_logistics_emails() -> None:
         ["_id", "first_name"],
     )
 
-    personalizations = []
+    recipients = []
     for record in records:
-        personalizations.append(
-            ApplicationUpdatePersonalization(
-                email=recover_email_from_uid(record["_id"]),
-                first_name=record["first_name"],
-            )
-        )
+        recipients.append((record["first_name"], recover_email_from_uid(record["_id"])))
 
     if len(records) > 0:
-        await sendgrid_handler.send_email(
-            Template.HACKER_WAITLISTED_LOGISTICS_EMAIL,
-            IH_SENDER,
-            personalizations,
-            True,
+        await ses_handler.send_logistics_emails(
+            recipients,
+            "Hacker",
+            waitlisted=True,
         )
 
 
@@ -593,24 +568,14 @@ async def waitlist_transfer() -> None:
         )
     )
 
-    personalizations = []
+    recipients = []
     for record in records:
-        personalizations.append(
-            ApplicationUpdatePersonalization(
-                email=recover_email_from_uid(record["_id"]),
-                first_name=record["first_name"],
-            )
-        )
+        recipients.append((record["first_name"], recover_email_from_uid(record["_id"])))
 
     log.info(f"Sending waitlist transfer emails to {len(records)} hackers")
 
     if len(records) > 0:
-        await sendgrid_handler.send_email(
-            Template.WAITLIST_TRANSFER_EMAIL,
-            IH_SENDER,
-            personalizations,
-            True,
-        )
+        await ses_handler.send_waitlist_transfer_emails(recipients)
 
 
 @router.post("/void-applicant/{uid}")

@@ -12,8 +12,6 @@ from routers.checkin_leads import (
 from routers.user import DEFAULT_CHECKIN_TIME
 from models.user_record import Role, Status
 from services.mongodb_handler import Collection
-from services.sendgrid_handler import Template
-from utils.email_handler import IH_SENDER
 
 
 @pytest.mark.asyncio
@@ -60,11 +58,11 @@ async def test_queue_removal_no_records(mock_retrieve: AsyncMock) -> None:
 @patch("services.mongodb_handler.raw_update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve", autospec=True)
 @patch("routers.checkin_leads._process_status", autospec=True)
-@patch("services.sendgrid_handler.send_email", autospec=True)
+@patch("services.ses_handler.send_waitlist_queued_emails", autospec=True)
 @patch("routers.checkin_leads.recover_email_from_uid", autospec=True)
 async def test_queue_participants_success(
     mock_recover_email: MagicMock,
-    mock_send_email: AsyncMock,
+    mock_send_waitlist_queued_emails: AsyncMock,
     mock_process_status: AsyncMock,
     mock_retrieve_users: AsyncMock,
     mock_update_settings: AsyncMock,
@@ -91,7 +89,7 @@ async def test_queue_participants_success(
         {"$pull": {"users_queue": {"$in": ["user1", "user2", "user3"]}}},
     )
     mock_process_status.assert_awaited_once_with(("user1", "user2"), Status.CONFIRMED)
-    mock_send_email.assert_awaited_once()
+    mock_send_waitlist_queued_emails.assert_awaited_once()
 
 
 @pytest.mark.asyncio
@@ -102,9 +100,9 @@ async def test_queue_participants_success(
 @patch("services.mongodb_handler.raw_update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve", autospec=True)
 @patch("routers.checkin_leads._process_status", autospec=True)
-@patch("services.sendgrid_handler.send_email", autospec=True)
+@patch("services.ses_handler.send_waitlist_queued_emails", autospec=True)
 async def test_queue_participants_with_small_max(
-    mock_send_email: AsyncMock,
+    mock_send_waitlist_queued_emails: AsyncMock,
     mock_process_status: AsyncMock,
     mock_retrieve_users: AsyncMock,
     mock_update_settings: AsyncMock,
@@ -136,11 +134,11 @@ async def test_queue_participants_with_small_max(
 
 @pytest.mark.asyncio
 @patch("services.mongodb_handler.retrieve", autospec=True)
-@patch("services.sendgrid_handler.send_email", autospec=True)
+@patch("services.ses_handler.send_waitlist_closed_emails", autospec=True)
 @patch("routers.checkin_leads.recover_email_from_uid", autospec=True)
 async def test_close_walkins_success(
     mock_recover_email: MagicMock,
-    mock_send_email: AsyncMock,
+    mock_send_waitlist_closed_emails: AsyncMock,
     mock_retrieve: AsyncMock,
 ) -> None:
     mock_retrieve.return_value = [
@@ -151,7 +149,7 @@ async def test_close_walkins_success(
     await close_walkins()
 
     mock_retrieve.assert_awaited_once()
-    mock_send_email.assert_awaited_once()
+    mock_send_waitlist_closed_emails.assert_awaited_once()
 
 
 @pytest.mark.asyncio
@@ -171,13 +169,13 @@ async def test_process_status_failure(mock_update: AsyncMock) -> None:
 
 
 @pytest.mark.asyncio
-@patch("services.sendgrid_handler.send_email", autospec=True)
+@patch("services.ses_handler.send_late_arrival_approved_email", autospec=True)
 @patch("services.mongodb_handler.raw_update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 async def test_approve_late_arrival_edit_preserves_reason(
     mock_retrieve_one: AsyncMock,
     mock_raw_update_one: AsyncMock,
-    mock_send_email: AsyncMock,
+    mock_send_late_arrival_approved_email: AsyncMock,
 ) -> None:
     mock_retrieve_one.return_value = {
         "first_name": "Fiona",
@@ -201,28 +199,21 @@ async def test_approve_late_arrival_edit_preserves_reason(
             },
         },
     )
-    mock_send_email.assert_awaited_once_with(
-        Template.LATE_ARRIVAL_APPROVED_EMAIL,
-        IH_SENDER,
-        [
-            {
-                "email": "fiona@uci.edu",
-                "first_name": "Fiona",
-                "arrival_time": "18:45",
-            }
-        ],
-        True,
+    mock_send_late_arrival_approved_email.assert_awaited_once_with(
+        "fiona@uci.edu",
+        "Fiona",
+        "18:45",
     )
 
 
 @pytest.mark.asyncio
-@patch("services.sendgrid_handler.send_email", autospec=True)
+@patch("services.ses_handler.send_late_arrival_rejected_email", autospec=True)
 @patch("services.mongodb_handler.raw_update_one", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 async def test_reject_late_arrival_edit_clears_reason(
     mock_retrieve_one: AsyncMock,
     mock_raw_update_one: AsyncMock,
-    mock_send_email: AsyncMock,
+    mock_send_late_arrival_rejected_email: AsyncMock,
 ) -> None:
     mock_retrieve_one.return_value = {
         "first_name": "Fiona",
@@ -242,15 +233,8 @@ async def test_reject_late_arrival_edit_clears_reason(
             },
         },
     )
-    mock_send_email.assert_awaited_once_with(
-        Template.LATE_ARRIVAL_REJECTED_EMAIL,
-        IH_SENDER,
-        [
-            {
-                "email": "fiona@uci.edu",
-                "first_name": "Fiona",
-                "requested_time": "18:45",
-            }
-        ],
-        True,
+    mock_send_late_arrival_rejected_email.assert_awaited_once_with(
+        "fiona@uci.edu",
+        "Fiona",
+        "18:45",
     )

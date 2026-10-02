@@ -46,6 +46,7 @@ SES_ROLE_NAMES: dict[Role, ses_handler.RoleName] = {
     Role.MENTOR: "Mentor",
     Role.VOLUNTEER: "Volunteer",
 }
+APPLY_REMINDER_BATCH_SIZE = 25
 
 
 class ApplyReminderSenders(BaseModel):
@@ -267,14 +268,25 @@ async def apply_reminder(user: Annotated[User, Depends(require_director)]) -> No
 
     recipients = set(validated_recipients.recipients)
 
-    reminder_emails = []
     new_recipients = []
     for record in not_yet_applied:
         if record["_id"] not in recipients:
             new_recipients.append(record["_id"])
-            reminder_emails.append(recover_email_from_uid(record["_id"]))
 
-    log.info(f"{user} sending apply reminder emails to {len(new_recipients)} users")
+    batch_recipients = new_recipients[:APPLY_REMINDER_BATCH_SIZE]
+    reminder_emails = [
+        recover_email_from_uid(recipient) for recipient in batch_recipients
+    ]
+
+    log.info(
+        f"{user} sending apply reminder emails to {len(batch_recipients)} "
+        f"of {len(new_recipients)} users"
+    )
+
+    if len(batch_recipients) == 0:
+        return
+
+    await ses_handler.send_apply_reminder_emails(reminder_emails)
 
     try:
         await mongodb_handler.raw_update_one(
@@ -282,8 +294,8 @@ async def apply_reminder(user: Annotated[User, Depends(require_director)]) -> No
             {"_id": "apply_reminder"},
             {
                 "$push": {
-                    "senders": (utc_now(), user.uid, len(new_recipients)),
-                    "recipients": {"$each": new_recipients},
+                    "senders": (utc_now(), user.uid, len(batch_recipients)),
+                    "recipients": {"$each": batch_recipients},
                 },
             },
             upsert=True,
@@ -291,9 +303,6 @@ async def apply_reminder(user: Annotated[User, Depends(require_director)]) -> No
     except RuntimeError:
         log.error("Error when attempting to update list of senders and recipients")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    if len(new_recipients) > 0:
-        await ses_handler.send_apply_reminder_emails(reminder_emails)
 
 
 async def _rsvp_reminder(

@@ -51,10 +51,7 @@ async def send_decision_email(
     application_type: Literal[Role.HACKER, Role.MENTOR, Role.VOLUNTEER],
 ) -> None:
     """Send a specific decision email to a group of applicants."""
-    recipients = [
-        (first_name, str(email))
-        for first_name, email in applicant_batch
-    ]
+    recipients = [(first_name, str(email)) for first_name, email in applicant_batch]
 
     await ses_handler.send_decision_emails(
         recipients,

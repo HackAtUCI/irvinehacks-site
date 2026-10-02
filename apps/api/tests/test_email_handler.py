@@ -35,9 +35,7 @@ async def test_send_hacker_decision_email(
 
     await email_handler.send_decision_email(users, Decision.ACCEPTED, Role.HACKER)
 
-    mock_send_decision_emails.assert_called_once_with(
-        users, "ACCEPTED", "Hacker"
-    )
+    mock_send_decision_emails.assert_called_once_with(users, "ACCEPTED", "Hacker")
 
 
 @patch("services.ses_handler.send_decision_emails")
@@ -52,9 +50,7 @@ async def test_send_mentor_decision_email(
 
     await email_handler.send_decision_email(users, Decision.REJECTED, Role.MENTOR)
 
-    mock_send_decision_emails.assert_called_once_with(
-        users, "REJECTED", "Mentor"
-    )
+    mock_send_decision_emails.assert_called_once_with(users, "REJECTED", "Mentor")
 
 
 @patch("services.ses_handler.send_decision_emails")
@@ -69,6 +65,4 @@ async def test_send_volunteer_decision_email(
 
     await email_handler.send_decision_email(users, Decision.REJECTED, Role.VOLUNTEER)
 
-    mock_send_decision_emails.assert_called_once_with(
-        users, "REJECTED", "Volunteer"
-    )
+    mock_send_decision_emails.assert_called_once_with(users, "REJECTED", "Volunteer")

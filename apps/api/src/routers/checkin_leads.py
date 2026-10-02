@@ -24,6 +24,7 @@ router = APIRouter()
 
 HACKER_WAITLIST_MAX = 400
 
+
 @router.post(
     "/queue-removal",
     dependencies=[Depends(require_role({Role.DIRECTOR, Role.CHECKIN_LEAD}))],

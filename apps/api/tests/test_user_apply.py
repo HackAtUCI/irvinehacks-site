@@ -21,7 +21,7 @@ from utils.hackathon_context import HackathonName
 from middleware.hackathon_context_middleware import HackathonContextMiddleware
 
 
-TEST_DEADLINE = datetime(2026, 10, 1, 8, 0, 0, tzinfo=timezone.utc)
+TEST_DEADLINE = datetime(2027, 10, 1, 8, 0, 0, tzinfo=timezone.utc)
 user.DEADLINE = TEST_DEADLINE
 
 USER_EMAIL = "pkfire@uci.edu"

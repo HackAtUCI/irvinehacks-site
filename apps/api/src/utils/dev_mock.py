@@ -3,13 +3,12 @@ import hashlib
 import random
 from contextlib import asynccontextmanager
 from logging import getLogger
-from typing import Any, AsyncIterator, Iterable, Union
+from typing import Any, AsyncIterator, Iterable
 from unittest.mock import patch
 
 from fastapi import FastAPI, Response
 from fastapi.responses import RedirectResponse
 
-from services.sendgrid_handler import Template
 from utils import resume_handler
 from utils.hackathon_context import HackathonName
 
@@ -36,19 +35,12 @@ def mock_set_cookie(self: RedirectResponse, *args: Any, **kwargs: Any) -> None:
     return Response.set_cookie(self, *args, **kwargs)
 
 
-async def mock_send_email(
-    template_id: Template,
-    sender_email: tuple[str, str],
-    receiver_data: Union[dict[str, str], Iterable[dict[str, str]]],
-    send_to_multiple: bool = False,
+def mock_send_messages(
+    messages: Iterable[Any],
 ) -> None:
-    """Mock sending of email through SendGrid."""
-    if send_to_multiple:
-        log.info(
-            "Simulating sending %s email to %s", template_id.name, list(receiver_data)
-        )
-    else:
-        log.info("Simulating sending %s email to %s", template_id.name, receiver_data)
+    """Mock sending of email through SES."""
+    recipients = [message["To"] for message in messages]
+    log.info("Simulating sending SES email to %s", recipients)
 
 
 async def mock_upload_file(
@@ -74,7 +66,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # Important: these must be imported as `from services import handler`
     # rather than `from services.handler import function` when used to be patched
     patch("services.gdrive_handler.upload_file", new=mock_upload_file).start()
-    patch("services.sendgrid_handler.send_email", new=mock_send_email).start()
+    patch("services.ses_handler._send_messages", new=mock_send_messages).start()
 
     patch.object(
         resume_handler,

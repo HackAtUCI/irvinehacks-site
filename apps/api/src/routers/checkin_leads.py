@@ -1,7 +1,7 @@
 import asyncio
 
 from logging import getLogger
-from typing import Any, Literal, Sequence, cast, Optional
+from typing import Any, Sequence, cast, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -10,15 +10,9 @@ from admin import participant_manager
 from auth.authorization import require_role
 from models.ApplicationData import Decision
 from models.user_record import Role, Status, UserPromotionRecord
-from services import mongodb_handler, sendgrid_handler
+from services import mongodb_handler, ses_handler
 from services.mongodb_handler import Collection
-from services.sendgrid_handler import (
-    ApplicationUpdatePersonalization,
-    LateArrivalApprovalPersonalization,
-    LateArrivalRejectionPersonalization,
-    Template,
-)
-from utils.email_handler import IH_SENDER, recover_email_from_uid
+from utils.email_handler import recover_email_from_uid
 from utils.batched import batched
 from routers.user import DEFAULT_CHECKIN_TIME
 
@@ -29,19 +23,6 @@ log = getLogger(__name__)
 router = APIRouter()
 
 HACKER_WAITLIST_MAX = 400
-
-RSVP_REMINDER_EMAIL_TEMPLATES: dict[
-    Role,
-    Literal[
-        Template.HACKER_RSVP_REMINDER,
-        Template.MENTOR_RSVP_REMINDER,
-        Template.VOLUNTEER_RSVP_REMINDER,
-    ],
-] = {
-    Role.HACKER: Template.HACKER_RSVP_REMINDER,
-    Role.MENTOR: Template.MENTOR_RSVP_REMINDER,
-    Role.VOLUNTEER: Template.VOLUNTEER_RSVP_REMINDER,
-}
 
 
 @router.post(
@@ -121,24 +102,14 @@ async def queue_participants() -> None:
         )
     )
 
-    personalizations = []
+    recipients = []
     for record in validated_records:
-        personalizations.append(
-            ApplicationUpdatePersonalization(
-                email=recover_email_from_uid(record.uid),
-                first_name=record.first_name,
-            )
-        )
+        recipients.append((record.first_name, recover_email_from_uid(record.uid)))
 
     log.info(f"Sending queued emails to {len(records)} hackers")
 
     if len(records) > 0:
-        await sendgrid_handler.send_email(
-            Template.WAITLIST_QUEUED_EMAIL,
-            IH_SENDER,
-            personalizations,
-            True,
-        )
+        await ses_handler.send_waitlist_queued_emails(recipients)
 
 
 class LateArrivalRecord(BaseModel):
@@ -288,17 +259,10 @@ async def approve_late_arrival_edit(uid: str) -> None:
             },
         },
     )
-    await sendgrid_handler.send_email(
-        Template.LATE_ARRIVAL_APPROVED_EMAIL,
-        IH_SENDER,
-        [
-            LateArrivalApprovalPersonalization(
-                email=recover_email_from_uid(uid),
-                first_name=record["first_name"],
-                arrival_time=new_time,
-            )
-        ],
-        True,
+    await ses_handler.send_late_arrival_approved_email(
+        recover_email_from_uid(uid),
+        record["first_name"],
+        new_time,
     )
     log.info(f"Approved arrival time edit for {uid}: arrival_time set to {new_time}.")
 
@@ -329,17 +293,10 @@ async def reject_late_arrival_edit(uid: str) -> None:
             },
         },
     )
-    await sendgrid_handler.send_email(
-        Template.LATE_ARRIVAL_REJECTED_EMAIL,
-        IH_SENDER,
-        [
-            LateArrivalRejectionPersonalization(
-                email=recover_email_from_uid(uid),
-                first_name=record["first_name"],
-                requested_time=record["late_arrival_edit_request"],
-            )
-        ],
-        True,
+    await ses_handler.send_late_arrival_rejected_email(
+        recover_email_from_uid(uid),
+        record["first_name"],
+        record["late_arrival_edit_request"],
     )
     log.info(f"Rejected arrival time edit request for {uid}.")
 
@@ -377,24 +334,14 @@ async def close_walkins() -> None:
 
     validated_records = [UserPromotionRecord.model_validate(r) for r in records]
 
-    personalizations = []
+    recipients = []
     for record in validated_records:
-        personalizations.append(
-            ApplicationUpdatePersonalization(
-                email=recover_email_from_uid(record.uid),
-                first_name=record.first_name,
-            )
-        )
+        recipients.append((record.first_name, recover_email_from_uid(record.uid)))
 
     log.info(f"Sending emails to {len(validated_records)} hackers that we are full.")
 
     if len(validated_records) > 0:
-        await sendgrid_handler.send_email(
-            Template.WAITLIST_CLOSED_EMAIL,
-            IH_SENDER,
-            personalizations,
-            True,
-        )
+        await ses_handler.send_waitlist_closed_emails(recipients)
 
 
 async def _process_status(

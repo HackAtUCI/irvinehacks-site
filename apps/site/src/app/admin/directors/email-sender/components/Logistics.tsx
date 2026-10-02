@@ -1,10 +1,27 @@
 import { SpaceBetween } from "@cloudscape-design/components";
 import SendGroup from "./SendGroup";
 
+function selectedHackathon() {
+	if (typeof document === "undefined") {
+		return "irvinehacks";
+	}
+	return (
+		document.cookie
+			.split("; ")
+			.find((cookie) => cookie.startsWith("hackathon="))
+			?.split("=")[1] || "irvinehacks"
+	);
+}
+
 function Logistics() {
+	const types =
+		selectedHackathon() === "zothacks"
+			? ["hackers", "mentors", "waitlists"]
+			: ["hackers", "mentors", "volunteers", "waitlists"];
+
 	return (
 		<SpaceBetween size="m">
-			{["hackers", "mentors", "volunteers", "waitlists"].map((type, key) => {
+			{types.map((type, key) => {
 				return (
 					<SendGroup
 						key={key}

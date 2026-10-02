@@ -801,7 +801,7 @@ async def rsvp(
                 user.email, user_record.get("first_name", user.email.split("@")[0])
             )
         except RuntimeError:
-            log.error("Could not send RSVP email with SendGrid to %s.", user.uid)
+            log.error("Could not send RSVP email with SES to %s.", user.uid)
             raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     return RedirectResponse("/portal", status.HTTP_303_SEE_OTHER)

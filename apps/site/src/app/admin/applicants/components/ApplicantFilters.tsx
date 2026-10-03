@@ -120,7 +120,7 @@ function ApplicantFilters({
 				onChange={({ detail }) => setSelectedDecisions(detail.selectedOptions)}
 				deselectAriaLabel={(e) => `Remove ${e.label}`}
 				options={DECISION_OPTIONS}
-				placeholder="Choose reviews"
+				placeholder="Choose Decisions"
 				selectedAriaLabel="Selected"
 			/>
 			{applicantType === ParticipantRole.Hacker && setUCINetIDFilter && (

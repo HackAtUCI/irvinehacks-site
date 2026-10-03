@@ -60,13 +60,7 @@ type DecisionBucket = "accepted" | "waitlisted" | "rejected";
 function getApplicantDecisionFilterValue(
 	applicant: HackerApplicantSummary,
 ): string {
-	if (applicant.auto_decision_reason && applicant.decision) {
-		return applicant.decision;
-	}
-	if (applicant.director_previous_experience_reviewed) {
-		return applicant.decision || "-";
-	}
-	return "-";
+	return applicant.decision || "-";
 }
 
 function getApplicantDecisionBucket(

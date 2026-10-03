@@ -567,7 +567,21 @@ async def hacker_applicants(
             "last_name",
             "roles",
             "auto_decision_reason",
-            "application_data",
+            "application_data.school",
+            "application_data.school_year",
+            "application_data.submission_time",
+            "application_data.email",
+            "application_data.resume_url",
+            "application_data.major",
+            "application_data.linkedin",
+            "application_data.reviews",
+            "application_data.review_breakdown",
+            "application_data.global_field_scores",
+            "application_data.tech_inspiration_saq",
+            "application_data.director_previous_experience_review",
+            "application_data.is_18_older",
+            "application_data.education_level",
+            "application_data.graduation_year",
             "duplicate_name_approved",
         ],
         sort=[("application_data.submission_time", DESCENDING)],
@@ -579,7 +593,11 @@ async def hacker_applicants(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     for record in records:
-        await _persist_auto_decision_status_if_needed(record)
+        auto_status_update = (
+            applicant_review_processor.get_auto_decision_status_update(record)
+        )
+        if auto_status_update is not None:
+            record.update(auto_status_update)
         # TODO: Use different route for different avg score types.
 
         # Difference between them:
@@ -598,10 +616,8 @@ async def hacker_applicants(
                 record, thresholds["accept"], thresholds["waitlist"]
             )
         else:
-            (
-                applicant_review_processor.include_hacker_app_fields_with_global_and_breakdown(  # noqa: E501
-                    record, thresholds["accept"], thresholds["waitlist"]
-                )
+            include_hacker_app_fields_with_global_and_breakdown(
+                record, thresholds["accept"], thresholds["waitlist"]
             )
         record["director_previous_experience_reviewed"] = bool(
             isinstance(application_data, dict)

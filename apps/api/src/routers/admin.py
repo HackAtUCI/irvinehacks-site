@@ -19,6 +19,9 @@ from typing_extensions import assert_never
 from pymongo import DESCENDING, UpdateOne
 
 from admin import applicant_review_processor, participant_manager, summary_handler
+from admin.applicant_review_processor import (
+    include_hacker_app_fields_with_global_and_breakdown,
+)
 from admin.participant_manager import AlreadyCheckedInError, Participant
 from admin.score_normalizing_handler import (
     IH_WEIGHTING_CONFIG,

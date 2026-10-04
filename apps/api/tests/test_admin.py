@@ -1338,6 +1338,7 @@ def test_hacker_applicant_redacts_identity_for_reviewers(
     mock_mongodb_handler_retrieve_one.side_effect = [
         HACKER_REVIEWER_IDENTITY,
         HACKER_REVIEWER_IDENTITY,
+        applicant_record,
     ]
     mock_mongodb_handler_retrieve.return_value = [applicant_record]
 
@@ -1358,6 +1359,11 @@ def test_hacker_applicant_redacts_identity_for_reviewers(
     assert "email" not in data["application_data"]
     assert "resume_url" not in data["application_data"]
     assert "linkedin" not in data["application_data"]
+    mock_mongodb_handler_retrieve.assert_awaited_once_with(
+        Collection.USERS,
+        {"roles": Role.HACKER},
+        ["_id", "assigned_reviewers", "application_data.reviews"],
+    )
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)

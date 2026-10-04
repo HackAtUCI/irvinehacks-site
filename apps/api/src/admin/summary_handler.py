@@ -164,10 +164,19 @@ async def applicant_table(
     if ethnicity is not None:
         query["application_data.ethnicity"] = ethnicity
 
+    application_data_fields = (
+        "school",
+        "major",
+        "education_level",
+        "school_year",
+        "graduation_year",
+        "pronouns",
+        "ethnicity",
+    )
     records = await mongodb_handler.retrieve(
         Collection.USERS,
         query,
-        ["application_data"],
+        [f"application_data.{field}" for field in application_data_fields],
     )
     counts: dict[str, int] = defaultdict(int)
     for rec in records:

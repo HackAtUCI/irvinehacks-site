@@ -2,6 +2,8 @@ from datetime import date, datetime, timezone
 from unittest.mock import AsyncMock, patch
 
 from admin import summary_handler
+from models.user_record import Role
+from services.mongodb_handler import Collection
 
 
 @patch("services.mongodb_handler.retrieve", autospec=True)
@@ -23,6 +25,35 @@ async def test_applicant_summary(mock_mongodb_handler_retrieve: AsyncMock) -> No
         "WAIVER_SIGNED": 3,
         "CONFIRMED": 24,
     }
+
+
+@patch("services.mongodb_handler.retrieve", autospec=True)
+async def test_applicant_table_projects_summary_fields_only(
+    mock_mongodb_handler_retrieve: AsyncMock,
+) -> None:
+    """Applicant table avoids loading full application payloads."""
+    mock_mongodb_handler_retrieve.return_value = [
+        {"application_data": {"school": "UC Irvine"}},
+        {"application_data": {"school": "UC Irvine"}},
+        {"application_data": {"school": "Cal State Long Beach"}},
+    ]
+
+    table = await summary_handler.applicant_table(group_by="school")
+
+    mock_mongodb_handler_retrieve.assert_awaited_once_with(
+        Collection.USERS,
+        {"roles": Role.APPLICANT},
+        [
+            "application_data.school",
+            "application_data.major",
+            "application_data.education_level",
+            "application_data.school_year",
+            "application_data.graduation_year",
+            "application_data.pronouns",
+            "application_data.ethnicity",
+        ],
+    )
+    assert table == {"UC Irvine": 2, "Cal State Long Beach": 1}
 
 
 @patch("services.mongodb_handler.retrieve", autospec=True)

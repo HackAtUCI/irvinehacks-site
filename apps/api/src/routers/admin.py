@@ -263,6 +263,7 @@ def _non_hacker_participant_record(
         "status": UserStatus.CONFIRMED,
         "decision": None,
         "is_added_to_slack": False,
+        "is_added_to_discord": False,
         "is_waiver_signed": False,
         "checkins": [],
         "badge_number": None,

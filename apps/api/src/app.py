@@ -3,7 +3,7 @@ import os
 
 from fastapi import FastAPI
 
-from routers import admin, checkin_leads, director, guest, saml, user, slack
+from routers import admin, checkin_leads, director, discord, guest, saml, user, slack
 from middleware.hackathon_context_middleware import HackathonContextMiddleware
 from middleware.error_logging import register_exception_handlers
 
@@ -29,6 +29,7 @@ app.include_router(
 )
 app.include_router(director.router, prefix="/director", tags=["director"])
 app.include_router(slack.router, prefix="/slack", tags=["slack"])
+app.include_router(discord.router, prefix="/discord", tags=["discord"])
 
 app.add_middleware(HackathonContextMiddleware)
 register_exception_handlers(app)

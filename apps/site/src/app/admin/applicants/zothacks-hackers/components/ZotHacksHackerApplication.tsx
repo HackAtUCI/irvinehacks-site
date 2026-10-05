@@ -31,7 +31,6 @@ const ZH_HACKER_APPLICATION_SECTIONS: ZHHackerApplicationSections = {
 	"Personal Information": [
 		"pronouns",
 		"is_18_older",
-		"discord_username",
 		"dietary_restrictions",
 		"allergies",
 	],

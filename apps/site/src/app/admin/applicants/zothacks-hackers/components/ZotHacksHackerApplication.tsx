@@ -186,13 +186,13 @@ function ZotHacksHackerApplication({
 						);
 
 						return (
-						<ZotHacksHackerApplicationSection
-							key={section}
-							title={section}
-							data={application_data}
-							propsToShow={visiblePropsToShow}
-						/>
-						)
+							<ZotHacksHackerApplicationSection
+								key={section}
+								title={section}
+								data={application_data}
+								propsToShow={visiblePropsToShow}
+							/>
+						);
 					},
 				)}
 			</Container>

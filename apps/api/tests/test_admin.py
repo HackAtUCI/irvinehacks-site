@@ -455,9 +455,7 @@ def test_hacker_review_assignments_keep_active_assignments(
     res = reviewer_client.get("/review-assignments/hackers")
 
     assert res.status_code == 200
-    assert res.json()["applicant_ids"] == [
-        _hacker_applicant_token("edu.uci.assigned")
-    ]
+    assert res.json()["applicant_ids"] == [_hacker_applicant_token("edu.uci.assigned")]
     mock_mongodb_handler_raw_update_one.assert_not_awaited()
 
 
@@ -1057,6 +1055,7 @@ def test_hacker_applicants_returns_correct_applicants(
             "decision": "ACCEPTED",
             "auto_decision_reason": None,
             "avg_score": 73.462,
+            "is_overqualified": False,
             "reviewers": ["edu.uci.alicia", "edu.uci.alicia2"],
             "application_data": {
                 "school": "Hamburger University",

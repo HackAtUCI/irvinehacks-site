@@ -827,7 +827,8 @@ async def applicant(
     record = await _applicant_record(uid, application_type)
 
     await _persist_auto_decision_status_if_needed(record)
-    if Role.HACKER in record.get("roles", []):
+    roles = record.get("roles", [])
+    if isinstance(roles, list) and Role.HACKER in roles:
         applicant_review_processor.include_hacker_app_detail_fields(record)
 
     try:

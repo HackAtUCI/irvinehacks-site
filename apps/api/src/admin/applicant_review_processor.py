@@ -22,9 +22,7 @@ scores_to_decisions: dict[Optional[int], Decision] = {
 
 
 def _is_overqualified_global_score(score: object) -> bool:
-    return (
-        isinstance(score, (int, float)) and score <= OVERQUALIFIED_GLOBAL_SCORE
-    )
+    return isinstance(score, (int, float)) and score <= OVERQUALIFIED_GLOBAL_SCORE
 
 
 def _is_overqualified_review_score(score: object) -> bool:

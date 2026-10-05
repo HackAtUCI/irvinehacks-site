@@ -137,6 +137,7 @@ class HackerApplicantSummary(BaseRecord):
     director_previous_experience_reviewed: bool = False
     duplicate_name_approved: bool = False
     avg_score: float
+    is_overqualified: bool = False
     application_data: Union[ApplicationDataSummary, ZotHacksApplicationDataSummary]
 
 
@@ -154,6 +155,7 @@ class RedactedHackerApplicantSummary(BaseRecord):
     resume_reviewed: bool = False
     director_previous_experience_reviewed: bool = False
     avg_score: float
+    is_overqualified: bool = False
     application_data: RedactedApplicationDataSummary
 
 
@@ -844,6 +846,9 @@ async def applicant(
     record = await _applicant_record(uid, application_type)
 
     await _persist_auto_decision_status_if_needed(record)
+    roles = record.get("roles", [])
+    if isinstance(roles, list) and Role.HACKER in roles:
+        applicant_review_processor.include_hacker_app_detail_fields(record)
 
     try:
         return Applicant.model_validate(record)

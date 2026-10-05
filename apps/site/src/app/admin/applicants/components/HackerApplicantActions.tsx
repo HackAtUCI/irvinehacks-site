@@ -20,6 +20,7 @@ const NON_SCORING_IRVINEHACKS_FIELDS = new Set([
 	"previous_experience",
 	"has_socials",
 ]);
+const RAW_OVERQUALIFIED_SCORE = -1000;
 
 interface ColoredTextBoxProps {
 	text: string | undefined;
@@ -170,11 +171,14 @@ function HackerApplicantActions({
 	};
 
 	const totalScore = calculateTotalScore(scores);
+	const isOverqualified = Object.values(scores).some(
+		(score) => score !== undefined && score <= RAW_OVERQUALIFIED_SCORE,
+	);
 
 	return canSubmit ? (
 		<SpaceBetween direction="horizontal" size="xs">
 			<SpaceBetween direction="horizontal" size="xs">
-				{totalScore <= -1000 && (
+				{isOverqualified && (
 					<>
 						<Box variant="h3" color="text-status-error">
 							OVERQUALIFIED

@@ -1,7 +1,9 @@
+import Badge from "@cloudscape-design/components/badge";
 import Box from "@cloudscape-design/components/box";
 import ColumnLayout from "@cloudscape-design/components/column-layout";
 import Container from "@cloudscape-design/components/container";
 import Header from "@cloudscape-design/components/header";
+import SpaceBetween from "@cloudscape-design/components/space-between";
 
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
 import { Applicant } from "@/lib/admin/useApplicant";
@@ -28,7 +30,12 @@ function ApplicantOverview({ applicant }: ApplicantOverviewProps) {
 				</div>
 				<div>
 					<Box variant="awsui-key-label">Status</Box>
-					<ApplicantStatus status={status} />
+					<SpaceBetween direction="horizontal" size="xs">
+						<ApplicantStatus status={status} />
+						{applicant.is_overqualified && (
+							<Badge color="red">OVERQUALIFIED</Badge>
+						)}
+					</SpaceBetween>
 				</div>
 				<div>
 					<Box variant="awsui-key-label">Reviews</Box>

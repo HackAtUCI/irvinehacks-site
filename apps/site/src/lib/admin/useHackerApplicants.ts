@@ -12,6 +12,7 @@ export interface HackerApplicantSummary {
 	auto_decision_reason: string | null;
 	reviewers: ReadonlyArray<string>;
 	avg_score: number;
+	is_overqualified: boolean;
 	resume_reviewed: boolean;
 	director_previous_experience_reviewed: boolean;
 	duplicate_name_approved: boolean;

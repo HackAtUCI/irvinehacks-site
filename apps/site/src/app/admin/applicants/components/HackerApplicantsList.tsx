@@ -41,7 +41,6 @@ import useHackerApplicants, {
 import useHackerReviewAssignments from "@/lib/admin/useHackerReviewAssignments";
 import { uidToPseudonym } from "@/lib/admin/anonymize";
 import { Decision, ParticipantRole, Status } from "@/lib/userRecord";
-import { OVERQUALIFIED_SCORE } from "@/lib/decisionScores";
 import Badge from "@cloudscape-design/components/badge";
 import Icon from "@cloudscape-design/components/icon";
 
@@ -60,12 +59,18 @@ type DecisionBucket = "accepted" | "waitlisted" | "rejected";
 function getApplicantDecisionFilterValue(
 	applicant: HackerApplicantSummary,
 ): string {
+	if (applicant.status === Status.Accepted) return Decision.Accepted;
+	if (applicant.status === Status.Waitlisted) return Decision.Waitlisted;
+	if (applicant.status === Status.Rejected) return Decision.Rejected;
+	if (applicant.status === Status.Voided) return Decision.Voided;
+
 	if (applicant.auto_decision_reason && applicant.decision) {
 		return applicant.decision;
 	}
-	if (applicant.director_previous_experience_reviewed) {
-		return applicant.decision || "-";
+	if (applicant.is_overqualified && applicant.decision) {
+		return applicant.decision;
 	}
+
 	return "-";
 }
 
@@ -164,9 +169,18 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 	}, [top400]);
 
 	const filteredApplicants = reviewableApplicantList.filter((applicant) => {
+		const isEffectivelyResumeReviewed =
+			applicant.resume_reviewed ||
+			Boolean(applicant.auto_decision_reason) ||
+			applicant.is_overqualified;
+		const isEffectivelyReviewed =
+			applicant.status === Status.Reviewed ||
+			Boolean(applicant.auto_decision_reason) ||
+			applicant.is_overqualified;
+
 		if (
 			selectedStatusValues.includes(Status.Pending) &&
-			applicant.avg_score === OVERQUALIFIED_SCORE
+			applicant.is_overqualified
 		)
 			return false;
 
@@ -176,17 +190,18 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		if (
 			selectedStatusValues.length !== 0 &&
 			((selectedStatusValues.includes("RESUME_REVIEWED") &&
-				applicant.resume_reviewed) ||
+				isEffectivelyResumeReviewed) ||
 				(selectedStatusValues.includes("RESUME_NOT_REVIEWED") &&
-					!applicant.resume_reviewed &&
-					applicant.avg_score !== OVERQUALIFIED_SCORE))
+					!isEffectivelyResumeReviewed))
 		) {
 			return true;
 		}
 
 		return (
 			(selectedStatuses.length === 0 ||
-				selectedStatusValues.includes(applicant.status)) &&
+				selectedStatusValues.includes(applicant.status) ||
+				(selectedStatusValues.includes(Status.Reviewed) &&
+					isEffectivelyReviewed)) &&
 			(selectedDecisions.length === 0 ||
 				selectedDecisionValues.includes(
 					getApplicantDecisionFilterValue(applicant),
@@ -323,7 +338,7 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 			_id,
 			first_name,
 			last_name,
-			avg_score,
+			is_overqualified,
 			decision,
 			auto_decision_reason,
 			duplicate_name_approved,
@@ -333,7 +348,7 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 				first_name={first_name}
 				last_name={last_name}
 				hackathonName={hackathonName}
-				avg_score={avg_score}
+				is_overqualified={is_overqualified}
 				decision={decision}
 				auto_decision_reason={auto_decision_reason}
 				isDirector={isUserDirector}
@@ -350,10 +365,11 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 
 	const avgScore = ({
 		avg_score,
+		is_overqualified,
 		reviewers,
 		director_previous_experience_reviewed,
 	}: HackerApplicantSummary) => {
-		if (avg_score === OVERQUALIFIED_SCORE)
+		if (is_overqualified)
 			return <Box color="text-status-error">OVERQUALIFIED</Box>;
 		if (!director_previous_experience_reviewed) return "-";
 		if (avg_score === -1) return "-";
@@ -494,7 +510,7 @@ const CardHeader = ({
 	first_name,
 	last_name,
 	hackathonName,
-	avg_score,
+	is_overqualified,
 	decision,
 	auto_decision_reason,
 	isDirector,
@@ -506,7 +522,7 @@ const CardHeader = ({
 	| "_id"
 	| "first_name"
 	| "last_name"
-	| "avg_score"
+	| "is_overqualified"
 	| "decision"
 	| "auto_decision_reason"
 > & {
@@ -566,9 +582,7 @@ const CardHeader = ({
 			<Link href={href} fontSize="inherit" onFollow={followWithNextLink}>
 				{displayName}
 			</Link>
-			{avg_score === OVERQUALIFIED_SCORE && (
-				<Badge color="red">OVERQUALIFIED</Badge>
-			)}
+			{is_overqualified && <Badge color="red">OVERQUALIFIED</Badge>}
 			<AutoDecisionBadge reason={auto_decision_reason} decision={decision} />
 			{duplicateIcon}
 		</div>
@@ -579,20 +593,28 @@ const DecisionStatus = ({
 	decision,
 	auto_decision_reason,
 	director_previous_experience_reviewed,
-	avg_score,
+	is_overqualified,
 }: HackerApplicantSummary) =>
 	(director_previous_experience_reviewed ||
 		auto_decision_reason ||
-		avg_score === OVERQUALIFIED_SCORE) &&
+		is_overqualified) &&
 	decision ? (
 		<ApplicantStatus status={decision} />
 	) : (
 		"-"
 	);
 
-const ResumeReviewedStatus = ({ resume_reviewed }: HackerApplicantSummary) => (
+const ResumeReviewedStatus = ({
+	resume_reviewed,
+	auto_decision_reason,
+	is_overqualified,
+}: HackerApplicantSummary) => (
 	<ApplicantStatus
-		status={resume_reviewed ? Status.Reviewed : Status.Pending}
+		status={
+			resume_reviewed || auto_decision_reason || is_overqualified
+				? Status.Reviewed
+				: Status.Pending
+		}
 	/>
 );
 

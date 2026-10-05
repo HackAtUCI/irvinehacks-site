@@ -214,6 +214,8 @@ export interface Applicant {
 	roles: ReadonlyArray<ParticipantRole>;
 	status: Status;
 	auto_decision_reason?: string | null;
+	avg_score?: number | null;
+	is_overqualified: boolean;
 	application_data: ApplicationData;
 }
 

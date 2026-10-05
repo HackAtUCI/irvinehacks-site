@@ -197,14 +197,14 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 			return true;
 		}
 
-			return (
-				(selectedStatuses.length === 0 ||
-					selectedStatusValues.includes(applicant.status) ||
-					(selectedStatusValues.includes(Status.Reviewed) &&
-						isEffectivelyReviewed)) &&
-				(selectedDecisions.length === 0 ||
-					selectedDecisionValues.includes(
-						getApplicantDecisionFilterValue(applicant),
+		return (
+			(selectedStatuses.length === 0 ||
+				selectedStatusValues.includes(applicant.status) ||
+				(selectedStatusValues.includes(Status.Reviewed) &&
+					isEffectivelyReviewed)) &&
+			(selectedDecisions.length === 0 ||
+				selectedDecisionValues.includes(
+					getApplicantDecisionFilterValue(applicant),
 				)) &&
 			(uciNetIDFilter.length === 0 ||
 				applicant.reviewers.some((reviewer) =>

@@ -59,7 +59,19 @@ type DecisionBucket = "accepted" | "waitlisted" | "rejected";
 function getApplicantDecisionFilterValue(
 	applicant: HackerApplicantSummary,
 ): string {
-	return applicant.decision || "-";
+	if (applicant.status === Status.Accepted) return Decision.Accepted;
+	if (applicant.status === Status.Waitlisted) return Decision.Waitlisted;
+	if (applicant.status === Status.Rejected) return Decision.Rejected;
+	if (applicant.status === Status.Voided) return Decision.Voided;
+
+	if (applicant.auto_decision_reason && applicant.decision) {
+		return applicant.decision;
+	}
+	if (applicant.is_overqualified && applicant.decision) {
+		return applicant.decision;
+	}
+
+	return "-";
 }
 
 function getApplicantDecisionBucket(

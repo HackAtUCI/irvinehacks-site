@@ -23,7 +23,20 @@ import AutoDecisionBadge from "@/app/admin/applicants/components/AutoDecisionBad
 
 import UserContext from "@/lib/admin/UserContext";
 import { isVolunteerReviewer } from "@/lib/admin/authorization";
-import { ParticipantRole } from "@/lib/userRecord";
+import { Decision, ParticipantRole, Status } from "@/lib/userRecord";
+
+function getApplicantDecisionFilterValue(applicant: ApplicantSummary): string {
+	if (applicant.status === Status.Accepted) return Decision.Accepted;
+	if (applicant.status === Status.Waitlisted) return Decision.Waitlisted;
+	if (applicant.status === Status.Rejected) return Decision.Rejected;
+	if (applicant.status === Status.Voided) return Decision.Voided;
+
+	if (applicant.auto_decision_reason && applicant.decision) {
+		return applicant.decision;
+	}
+
+	return "-";
+}
 
 function VolunteerApplicants() {
 	const router = useRouter();
@@ -46,7 +59,9 @@ function VolunteerApplicants() {
 			(selectedStatuses.length === 0 ||
 				selectedStatusValues.includes(applicant.status)) &&
 			(selectedDecisions.length === 0 ||
-				selectedDecisionValues.includes(applicant.decision || "-")),
+				selectedDecisionValues.includes(
+					getApplicantDecisionFilterValue(applicant),
+				)),
 	);
 
 	const items = filteredApplicants;

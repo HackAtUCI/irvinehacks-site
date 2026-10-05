@@ -132,8 +132,7 @@ function CheckInModal({
 											defaultChecked={!!participant.is_added_to_discord}
 											disabled={!!participant.is_added_to_discord}
 										/>{" "}
-										Joined Discord? If not, ask for
-										check-in lead
+										Joined Discord? If not, ask for check-in lead
 									</label>
 								</li>
 								<li>

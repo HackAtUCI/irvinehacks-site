@@ -169,8 +169,14 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 	}, [top400]);
 
 	const filteredApplicants = reviewableApplicantList.filter((applicant) => {
-		const canAppearInResumeFilter =
-			!applicant.auto_decision_reason && !applicant.is_overqualified;
+		const isEffectivelyResumeReviewed =
+			applicant.resume_reviewed ||
+			Boolean(applicant.auto_decision_reason) ||
+			applicant.is_overqualified;
+		const isEffectivelyReviewed =
+			applicant.status === Status.Reviewed ||
+			Boolean(applicant.auto_decision_reason) ||
+			applicant.is_overqualified;
 
 		if (
 			selectedStatusValues.includes(Status.Pending) &&
@@ -184,21 +190,21 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		if (
 			selectedStatusValues.length !== 0 &&
 			((selectedStatusValues.includes("RESUME_REVIEWED") &&
-				applicant.resume_reviewed &&
-				canAppearInResumeFilter) ||
+				isEffectivelyResumeReviewed) ||
 				(selectedStatusValues.includes("RESUME_NOT_REVIEWED") &&
-					!applicant.resume_reviewed &&
-					canAppearInResumeFilter))
+					!isEffectivelyResumeReviewed))
 		) {
 			return true;
 		}
 
-		return (
-			(selectedStatuses.length === 0 ||
-				selectedStatusValues.includes(applicant.status)) &&
-			(selectedDecisions.length === 0 ||
-				selectedDecisionValues.includes(
-					getApplicantDecisionFilterValue(applicant),
+			return (
+				(selectedStatuses.length === 0 ||
+					selectedStatusValues.includes(applicant.status) ||
+					(selectedStatusValues.includes(Status.Reviewed) &&
+						isEffectivelyReviewed)) &&
+				(selectedDecisions.length === 0 ||
+					selectedDecisionValues.includes(
+						getApplicantDecisionFilterValue(applicant),
 				)) &&
 			(uciNetIDFilter.length === 0 ||
 				applicant.reviewers.some((reviewer) =>
@@ -598,9 +604,17 @@ const DecisionStatus = ({
 		"-"
 	);
 
-const ResumeReviewedStatus = ({ resume_reviewed }: HackerApplicantSummary) => (
+const ResumeReviewedStatus = ({
+	resume_reviewed,
+	auto_decision_reason,
+	is_overqualified,
+}: HackerApplicantSummary) => (
 	<ApplicantStatus
-		status={resume_reviewed ? Status.Reviewed : Status.Pending}
+		status={
+			resume_reviewed || auto_decision_reason || is_overqualified
+				? Status.Reviewed
+				: Status.Pending
+		}
 	/>
 );
 

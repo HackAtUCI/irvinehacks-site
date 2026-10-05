@@ -170,7 +170,6 @@ class RedactedHackerApplicationData(BaseModel):
     peter_thought_process_saq: str = ""
     pronouns: list[str] = []
     is_18_older: Optional[bool] = None
-    discord_username: str = ""
     dietary_restrictions: list[str] = []
     allergies: Optional[str] = None
     school_year: str = ""
@@ -821,7 +820,6 @@ def _redact_hacker_applicant(
                 ),
                 "pronouns": application_data.get("pronouns", []),
                 "is_18_older": application_data.get("is_18_older"),
-                "discord_username": application_data.get("discord_username", ""),
                 "dietary_restrictions": application_data.get(
                     "dietary_restrictions", []
                 ),

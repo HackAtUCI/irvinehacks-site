@@ -146,6 +146,7 @@ def test_can_add_non_hacker_participant(
             "status": Status.CONFIRMED,
             "decision": None,
             "is_added_to_slack": False,
+            "is_added_to_discord": False,
             "is_waiver_signed": False,
             "checkins": [],
             "badge_number": None,

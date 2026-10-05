@@ -31,7 +31,8 @@ class Participant(UserRecord):
     checkins: list[Checkin] = []
     status: Status = Status.REVIEWED
     decision: Optional[Decision]
-    is_added_to_slack: bool = False
+    is_added_to_slack: bool = False  # no slack for ZH 2026
+    is_added_to_discord: bool = False
     is_waiver_signed: bool = False
     badge_number: Union[str, None] = None
 
@@ -45,7 +46,8 @@ PARTICIPANT_FIELDS = [
     "decision",
     "checkins",
     "badge_number",
-    "is_added_to_slack",
+    "is_added_to_slack",  # no slack for ZH 2026
+    "is_added_to_discord",
     "is_waiver_signed",
 ]
 

@@ -15,6 +15,7 @@ export interface Participant {
 	decision?: Decision;
 	badge_number: string | null;
 	is_added_to_slack?: boolean;
+	is_added_to_discord?: boolean;
 	is_waiver_signed?: boolean;
 }
 
@@ -34,10 +35,18 @@ function useParticipants() {
 		fetcher,
 	);
 
-	useSWR("/api/slack/sync", syncFetcher, {
-		refreshInterval: 30000, // Sync every 30 seconds
+	// Slack onboarding is disabled for check-in for now.
+	// useSWR("/api/slack/sync", syncFetcher, {
+	// 	refreshInterval: 30000,
+	// 	onSuccess: () => {
+	// 		mutate();
+	// 	},
+	// });
+
+	useSWR("/api/discord/sync", syncFetcher, {
+		refreshInterval: 30000,
 		onSuccess: () => {
-			mutate(); // Refresh participant data after sync
+			mutate();
 		},
 	});
 

@@ -105,7 +105,7 @@ function ParticipantsTable({
 			"friday",
 			"saturday",
 			"sunday",
-			"slack",
+			"discord",
 			"action",
 		],
 	});
@@ -284,11 +284,18 @@ function ParticipantsTable({
 			cell: WaiverCell,
 			sortingField: "is_waiver_signed",
 		},
+		// Slack onboarding is disabled for check-in for now.
+		// {
+		// 	id: "slack",
+		// 	header: "Slack",
+		// 	cell: SlackCell,
+		// 	sortingField: "is_added_to_slack",
+		// },
 		{
-			id: "slack",
-			header: "Slack",
-			cell: SlackCell,
-			sortingField: "is_added_to_slack",
+			id: "discord",
+			header: "Discord",
+			cell: DiscordCell,
+			sortingField: "is_added_to_discord",
 		},
 		{
 			id: "friday",
@@ -447,8 +454,12 @@ const SundayCheckin = ({ checkins }: Participant) => (
 const DecisionCell = (item: Participant) =>
 	item.decision ? <ApplicantStatus status={item.decision} /> : "-";
 
-const SlackCell = (item: Participant) => (
-	<StatusIndicator type={item.is_added_to_slack ? "success" : "error"} />
+// const SlackCell = (item: Participant) => (
+// 	<StatusIndicator type={item.is_added_to_slack ? "success" : "error"} />
+// );
+
+const DiscordCell = (item: Participant) => (
+	<StatusIndicator type={item.is_added_to_discord ? "success" : "error"} />
 );
 
 export default ParticipantsTable;

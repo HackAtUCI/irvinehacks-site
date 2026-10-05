@@ -127,7 +127,12 @@ function CheckInModal({
 								</li>
 								<li>
 									<label>
-										<input type="checkbox" /> Joined Slack? If not, ask for
+										<input
+											type="checkbox"
+											defaultChecked={!!participant.is_added_to_discord}
+											disabled={!!participant.is_added_to_discord}
+										/>{" "}
+										Joined Discord? If not, ask for
 										check-in lead
 									</label>
 								</li>

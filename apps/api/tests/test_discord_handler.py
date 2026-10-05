@@ -66,6 +66,7 @@ async def test_sync_discord_users_updates_matching_applicants(
         ["_id", "application_data.discord_username"],
     )
     mock_bulk_update.assert_awaited_once()
+    assert mock_bulk_update.await_args is not None
     operations = mock_bulk_update.await_args.args[1]
     assert len(operations) == 1
     assert result["status"] == "success"

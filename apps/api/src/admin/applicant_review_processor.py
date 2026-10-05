@@ -27,6 +27,27 @@ def _is_overqualified_global_score(score: object) -> bool:
     )
 
 
+def _is_overqualified_review_score(score: object) -> bool:
+    return isinstance(score, (int, float)) and score == OVERQUALIFIED
+
+
+def _has_overqualified_marker(application_data: dict[str, Any]) -> bool:
+    global_field_scores = application_data.get("global_field_scores", {})
+    if isinstance(global_field_scores, dict) and any(
+        _is_overqualified_global_score(score) for score in global_field_scores.values()
+    ):
+        return True
+
+    reviews = application_data.get("reviews", [])
+    if isinstance(reviews, list) and any(
+        len(review) >= 3 and _is_overqualified_review_score(review[2])
+        for review in reviews
+    ):
+        return True
+
+    return False
+
+
 # TODO: Make this function only used for old applicant summary
 # meaning remove the resume_reviewed
 def include_hacker_app_fields(
@@ -37,6 +58,7 @@ def include_hacker_app_fields(
     )
     _include_reviewers(applicant_record)
     _include_avg_score(applicant_record)
+    _include_overqualified(applicant_record)
     _include_resume_reviewed(applicant_record)
 
 
@@ -49,6 +71,7 @@ def include_hacker_app_fields_with_global_and_breakdown(
     )
     _include_reviewers(applicant_record)
     _include_avg_score_with_global_and_breakdown(applicant_record)
+    _include_overqualified(applicant_record)
     _include_resume_reviewed(applicant_record)
 
 
@@ -59,6 +82,28 @@ def include_review_decision(applicant_record: dict[str, Any]) -> None:
     reviews = applicant_record["application_data"]["reviews"]
     score: Optional[int] = reviews[-1][2] if reviews else None
     applicant_record["decision"] = scores_to_decisions.get(score)
+
+
+def include_hacker_app_detail_fields(applicant_record: dict[str, Any]) -> None:
+    """Set detail fields using the same logic as the hacker applicant list view."""
+    application_data = applicant_record.get("application_data", {})
+    if not isinstance(application_data, dict):
+        applicant_record["avg_score"] = NOT_FULLY_REVIEWED
+        applicant_record["is_overqualified"] = False
+        return
+
+    if "tech_inspiration_saq" in application_data:
+        applicant_record["avg_score"] = _get_avg_score(
+            application_data.get("reviews", []),
+            application_data.get("global_field_scores", {}),
+        )
+    else:
+        applicant_record["avg_score"] = _get_avg_score_with_globals_and_breakdown(
+            application_data.get("review_breakdown", {}),
+            application_data.get("global_field_scores", {}),
+            IH_WEIGHTING_CONFIG,
+        )
+    _include_overqualified(applicant_record)
 
 
 def get_unique_reviewers(applicant_record: dict[str, Any]) -> set[str]:
@@ -267,6 +312,13 @@ def _include_avg_score_with_global_and_breakdown(
         applicant_record["application_data"].get("global_field_scores", {}),
         IH_WEIGHTING_CONFIG,
     )
+
+
+def _include_overqualified(applicant_record: dict[str, Any]) -> None:
+    application_data = applicant_record.get("application_data", {})
+    applicant_record["is_overqualified"] = isinstance(
+        application_data, dict
+    ) and _has_overqualified_marker(application_data)
 
 
 def _include_resume_reviewed(applicant_record: dict[str, Any]) -> None:

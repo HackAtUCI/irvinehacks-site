@@ -41,7 +41,6 @@ import useHackerApplicants, {
 import useHackerReviewAssignments from "@/lib/admin/useHackerReviewAssignments";
 import { uidToPseudonym } from "@/lib/admin/anonymize";
 import { Decision, ParticipantRole, Status } from "@/lib/userRecord";
-import { OVERQUALIFIED_SCORE } from "@/lib/decisionScores";
 import Badge from "@cloudscape-design/components/badge";
 import Icon from "@cloudscape-design/components/icon";
 
@@ -160,7 +159,7 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 	const filteredApplicants = reviewableApplicantList.filter((applicant) => {
 		if (
 			selectedStatusValues.includes(Status.Pending) &&
-			applicant.avg_score === OVERQUALIFIED_SCORE
+			applicant.is_overqualified
 		)
 			return false;
 
@@ -173,7 +172,7 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 				applicant.resume_reviewed) ||
 				(selectedStatusValues.includes("RESUME_NOT_REVIEWED") &&
 					!applicant.resume_reviewed &&
-					applicant.avg_score !== OVERQUALIFIED_SCORE))
+					!applicant.is_overqualified))
 		) {
 			return true;
 		}
@@ -317,7 +316,7 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 			_id,
 			first_name,
 			last_name,
-			avg_score,
+			is_overqualified,
 			decision,
 			auto_decision_reason,
 			duplicate_name_approved,
@@ -327,7 +326,7 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 				first_name={first_name}
 				last_name={last_name}
 				hackathonName={hackathonName}
-				avg_score={avg_score}
+				is_overqualified={is_overqualified}
 				decision={decision}
 				auto_decision_reason={auto_decision_reason}
 				isDirector={isUserDirector}
@@ -344,10 +343,11 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 
 	const avgScore = ({
 		avg_score,
+		is_overqualified,
 		reviewers,
 		director_previous_experience_reviewed,
 	}: HackerApplicantSummary) => {
-		if (avg_score === OVERQUALIFIED_SCORE)
+		if (is_overqualified)
 			return <Box color="text-status-error">OVERQUALIFIED</Box>;
 		if (!director_previous_experience_reviewed) return "-";
 		if (avg_score === -1) return "-";
@@ -488,7 +488,7 @@ const CardHeader = ({
 	first_name,
 	last_name,
 	hackathonName,
-	avg_score,
+	is_overqualified,
 	decision,
 	auto_decision_reason,
 	isDirector,
@@ -500,7 +500,7 @@ const CardHeader = ({
 	| "_id"
 	| "first_name"
 	| "last_name"
-	| "avg_score"
+	| "is_overqualified"
 	| "decision"
 	| "auto_decision_reason"
 > & {
@@ -560,9 +560,7 @@ const CardHeader = ({
 			<Link href={href} fontSize="inherit" onFollow={followWithNextLink}>
 				{displayName}
 			</Link>
-			{avg_score === OVERQUALIFIED_SCORE && (
-				<Badge color="red">OVERQUALIFIED</Badge>
-			)}
+			{is_overqualified && <Badge color="red">OVERQUALIFIED</Badge>}
 			<AutoDecisionBadge reason={auto_decision_reason} decision={decision} />
 			{duplicateIcon}
 		</div>
@@ -573,11 +571,11 @@ const DecisionStatus = ({
 	decision,
 	auto_decision_reason,
 	director_previous_experience_reviewed,
-	avg_score,
+	is_overqualified,
 }: HackerApplicantSummary) =>
 	(director_previous_experience_reviewed ||
 		auto_decision_reason ||
-		avg_score === OVERQUALIFIED_SCORE) &&
+		is_overqualified) &&
 	decision ? (
 		<ApplicantStatus status={decision} />
 	) : (

@@ -19,4 +19,3 @@ export const scoresToDecisions: Record<string, Decision> = {
 };
 
 export const OVERQUALIFIED_SCORE = -3;
-export const OVERQUALIFIED_GLOBAL_SCORE = -1000;

@@ -94,6 +94,8 @@ class BareApplicant(UserRecord):
     status: ApplicantStatus
     decision: Optional[Decision] = None
     auto_decision_reason: Optional[str] = None
+    avg_score: Optional[float] = None
+    is_overqualified: bool = False
 
 
 class Applicant(BareApplicant):

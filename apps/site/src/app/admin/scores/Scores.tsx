@@ -3,6 +3,7 @@
 import { useState, useMemo, useContext } from "react";
 import axios from "axios";
 import {
+	Badge,
 	Box,
 	Button,
 	FlashbarProps,
@@ -16,22 +17,56 @@ import NotificationContext from "@/lib/admin/NotificationContext";
 import useHackerApplicants, {
 	HackerApplicantSummary,
 } from "@/lib/admin/useHackerApplicants";
-import { OVERQUALIFIED_SCORE } from "@/lib/decisionScores";
+import {
+	NOT_FULLY_REVIEWED_SCORE,
+	OVERQUALIFIED_SCORE,
+} from "@/lib/decisionScores";
+import { Decision } from "@/lib/userRecord";
 import ExcludeUIDsModal from "./ExcludeUIDsModal";
+
+const SPECIAL_SCORE_SORT_VALUE = Number.NEGATIVE_INFINITY;
+
+function getSpecialScoreLabel(applicant: HackerApplicantSummary) {
+	if (applicant.is_overqualified || applicant.avg_score === OVERQUALIFIED_SCORE) {
+		return "OQ";
+	}
+
+	switch (applicant.auto_decision_reason) {
+		case "UNDER_18":
+			return "UNDERAGE";
+		case "GRADUATED":
+			return "GRADUATED";
+		case "DIRECTOR_AUTO_ACCEPT":
+			return "AUTO ACCEPT";
+		default:
+			return null;
+	}
+}
 
 function sortApplicantsByNormalizedScore(applicants: HackerApplicantSummary[]) {
 	return applicants
 		.map((applicant) => {
+			const specialScoreLabel = getSpecialScoreLabel(applicant);
 			const scores = applicant.application_data.normalized_scores;
-			if (!scores || Object.keys(scores).length === 0)
-				return { ...applicant, avgNormalizedScore: 0 };
+			if (!scores || Object.keys(scores).length === 0) {
+				const avgNormalizedScore = specialScoreLabel
+					? SPECIAL_SCORE_SORT_VALUE
+					: 0;
+				return { ...applicant, avgNormalizedScore, specialScoreLabel };
+			}
 
 			const total = Object.values(scores).reduce((sum, val) => sum + val, 0);
-			let avg = total / Object.keys(scores).length;
+			let avgNormalizedScore = total / Object.keys(scores).length;
 			if (applicant.application_data.extra_points)
-				avg += applicant.application_data.extra_points;
+				avgNormalizedScore += applicant.application_data.extra_points;
 
-			return { ...applicant, avgNormalizedScore: avg };
+			return {
+				...applicant,
+				avgNormalizedScore: specialScoreLabel
+					? SPECIAL_SCORE_SORT_VALUE
+					: avgNormalizedScore,
+				specialScoreLabel,
+			};
 		})
 		.sort((a, b) => b.avgNormalizedScore - a.avgNormalizedScore);
 }
@@ -40,6 +75,7 @@ const downloadCSV = (
 	data: (HackerApplicantSummary & {
 		avgNormalizedScore: number;
 		extraPoints?: number;
+		specialScoreLabel: string | null;
 	})[],
 ) => {
 	const headers = [
@@ -74,7 +110,7 @@ const downloadCSV = (
 			a.application_data.major || "",
 			a.application_data.linkedin || "",
 			a.application_data.resume_url || "",
-			a.avgNormalizedScore.toFixed(2),
+			a.specialScoreLabel ?? a.avgNormalizedScore.toFixed(2),
 			comments,
 		]
 			.map(escapeCSV)
@@ -140,6 +176,7 @@ const ResumeModalButton = (
 
 interface ScoredHackerApplicant extends HackerApplicantSummary {
 	avgNormalizedScore: number;
+	specialScoreLabel: string | null;
 	rowIndex: number;
 }
 
@@ -158,6 +195,16 @@ const LinkedInCell = (item: ScoredHackerApplicant) =>
 	) : (
 		"-"
 	);
+
+const AverageNormalizedScoreCell = (item: ScoredHackerApplicant) => {
+	if (!item.specialScoreLabel) return item.avgNormalizedScore.toFixed(2);
+
+	return (
+		<Badge color={item.decision === Decision.Accepted ? "green" : "red"}>
+			{item.specialScoreLabel}
+		</Badge>
+	);
+};
 
 const COLUMNS = [
 	{
@@ -196,7 +243,7 @@ const COLUMNS = [
 	{
 		id: "avgScore",
 		header: "Average Normalized Score",
-		cell: (item: ScoredHackerApplicant) => item.avgNormalizedScore.toFixed(2),
+		cell: AverageNormalizedScoreCell,
 	},
 ];
 
@@ -210,8 +257,8 @@ function Scores() {
 		() =>
 			applicantList.filter(
 				(a) =>
-					a.director_previous_experience_reviewed &&
-					a.avg_score !== OVERQUALIFIED_SCORE,
+					getSpecialScoreLabel(a) !== null ||
+					a.avg_score !== NOT_FULLY_REVIEWED_SCORE,
 			),
 		[applicantList],
 	);

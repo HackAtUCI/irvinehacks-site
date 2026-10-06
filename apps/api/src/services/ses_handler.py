@@ -312,7 +312,7 @@ def _hacker_decision_copy(decision: DecisionName) -> tuple[str, str, str]:
             "excited to welcome you to attend our beginner-friendly, 12-hour "
             "hackathon.\n\n"
             "ZotHacks will take place from Friday, October 16 to Sunday, "
-            "October 18 at The UCI Student Center. Here is a brief overview of "
+            "October 18 at the UCI Student Center @ Pacific Ballroom. Here is a brief overview of "
             "what you can expect on the weekend of ZotHacks:\n\n"
             "Friday, October 16 (7 PM - 10 PM) - Hacker Orientation and Team "
             "Formation\n"
@@ -357,9 +357,8 @@ def _hacker_decision_copy(decision: DecisionName) -> tuple[str, str, str]:
 welcome you to attend our beginner-friendly, 12-hour hackathon.</p>
 
 <p>ZotHacks will take place from <strong>Friday, October 16 to Sunday, October
-18</strong> at <a href="https://studentcenter.uci.edu/events/venue-information/
-the-uci-student-center/">The UCI Student
-Center</a>. Here is a brief overview of what you can expect on the weekend
+18</strong> at <a href="https://map.uci.edu/?id=463#!m/1117786?s/">UCI Student 
+Center @ Pacific Ballroom</a>. Here is a brief overview of what you can expect on the weekend
 of ZotHacks:</p>
 
 <p style="margin-left: 2rem;"><em>Friday, October 16 (7 PM - 10 PM)</em> -

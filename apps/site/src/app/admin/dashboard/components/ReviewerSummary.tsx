@@ -14,7 +14,6 @@ import { useCollection } from "@cloudscape-design/collection-hooks";
 
 import { isDirector } from "@/lib/admin/authorization";
 import UserContext from "@/lib/admin/UserContext";
-import useHackerApplicants from "@/lib/admin/useHackerApplicants";
 import useReviewAssignmentSettings from "@/lib/admin/useReviewAssignmentSettings";
 
 interface Row {
@@ -60,7 +59,6 @@ function buildColumns(
 
 function ReviewerSummary() {
 	const { roles } = useContext(UserContext);
-	const { applicantList, loading } = useHackerApplicants();
 	const { organizerList, loading: organizersLoading } = useOrganizers();
 	const {
 		settings,
@@ -83,7 +81,7 @@ function ReviewerSummary() {
 			? settings.minimum_reviews_per_organizer
 			: null;
 	const director = isDirector(roles);
-	const combinedLoading = loading || organizersLoading || settingsLoading;
+	const combinedLoading = organizersLoading || settingsLoading;
 
 	const parseSettingInput = (value: string) =>
 		value === "" ? null : parseInt(value, 10);
@@ -115,24 +113,11 @@ function ReviewerSummary() {
 			);
 		}
 
-		const reviewerCountMap = new Map<string, number>();
-		for (const organizer of organizerList) {
-			reviewerCountMap.set(organizer._id, 0);
-		}
-
-		for (const applicant of applicantList) {
-			for (const id of applicant.reviewers || []) {
-				if (reviewerCountMap.has(id)) {
-					reviewerCountMap.set(id, reviewerCountMap.get(id)! + 1);
-				}
-			}
-		}
-
-		return Array.from(reviewerCountMap.entries()).map(([id, count]) => ({
-			name: nameMap.get(id) || id.split(".")[2],
-			count,
+		return organizerList.map((organizer) => ({
+			name: nameMap.get(organizer._id) || organizer._id.split(".")[2],
+			count: organizer.hacker_review_count ?? 0,
 		}));
-	}, [applicantList, combinedLoading, organizerList]);
+	}, [combinedLoading, organizerList]);
 
 	const columns = useMemo(() => buildColumns(minimum), [minimum]);
 

@@ -115,6 +115,7 @@ class OrganizerSummary(BaseRecord):
         default_factory=list,
         validation_alias=AliasChoices("committees", "committee"),
     )
+    hacker_review_count: int = 0
 
 
 class ApplicantSummary(BaseRecord):
@@ -549,11 +550,46 @@ async def organizers() -> list[OrganizerSummary]:
     records: list[dict[str, object]] = await mongodb_handler.retrieve(
         Collection.USERS, {"roles": Role.ORGANIZER}
     )
+    hacker_review_counts = await _hacker_review_counts_by_reviewer()
+    for record in records:
+        uid = record.get("_id")
+        if isinstance(uid, str):
+            record["hacker_review_count"] = hacker_review_counts.get(uid, 0)
 
     try:
         return TypeAdapter(list[OrganizerSummary]).validate_python(records)
     except ValidationError:
         raise RuntimeError("Could not parse organizer data.")
+
+
+async def _hacker_review_counts_by_reviewer() -> dict[str, int]:
+    records: list[dict[str, object]] = await mongodb_handler.retrieve(
+        Collection.USERS,
+        {"roles": Role.HACKER},
+        ["application_data.reviews"],
+    )
+
+    reviewer_counts: dict[str, int] = {}
+    for record in records:
+        application_data = record.get("application_data", {})
+        if not isinstance(application_data, dict):
+            continue
+
+        reviews = application_data.get("reviews", [])
+        if not isinstance(reviews, list):
+            continue
+
+        unique_reviewers = {
+            review[1]
+            for review in reviews
+            if isinstance(review, list)
+            and len(review) >= 2
+            and isinstance(review[1], str)
+        }
+        for reviewer in unique_reviewers:
+            reviewer_counts[reviewer] = reviewer_counts.get(reviewer, 0) + 1
+
+    return reviewer_counts
 
 
 @router.get("/applicants/hackers")
@@ -599,8 +635,8 @@ async def hacker_applicants(
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     for record in records:
-        auto_status_update = (
-            applicant_review_processor.get_auto_decision_status_update(record)
+        auto_status_update = applicant_review_processor.get_auto_decision_status_update(
+            record
         )
         if auto_status_update is not None:
             record.update(auto_status_update)

@@ -312,7 +312,7 @@ def _hacker_decision_copy(decision: DecisionName) -> tuple[str, str, str]:
             "excited to welcome you to attend our beginner-friendly, 12-hour "
             "hackathon.\n\n"
             "ZotHacks will take place from Friday, October 16 to Sunday, "
-            "October 18 at the UCI Student Center @ Pacific Ballroom. Here is a brief overview of "
+            "October 18 at the Student Center @ Pacific Ballroom. Here is a brief overview of "
             "what you can expect on the weekend of ZotHacks:\n\n"
             "Friday, October 16 (7 PM - 10 PM) - Hacker Orientation and Team "
             "Formation\n"
@@ -326,14 +326,15 @@ def _hacker_decision_copy(decision: DecisionName) -> tuple[str, str, str]:
             "from scratch with comprehensive workshops and starter packs to get "
             "you started. Meals, snacks, and beverages will also be provided "
             "throughout the event, so you won't have to worry about that "
-            "either!\n\n"
+            "either! For a more detailed breakdown of the schedule and food "
+            "options, please visit our website.\n\n"
             "To confirm your attendance/participation at ZotHacks, make sure "
             "to RSVP and fill out the waiver on the portal by Thursday, "
             "October 8 at 11:59 PM PT. Make sure to complete these steps by "
             "then or we will have to forfeit your spot to a hacker on the "
             "waitlist!\n\n"
             "We also highly encourage that you attend our upcoming workshops:\n"
-            "- Intro to Git - Wednesday, October 7, 8-9 PM at DBH 6011\n"
+            "- Intro to Git - Wednesday, October 7, 8-9 PM at DBH 3011\n"
             "- Starter Packs & Resources - Thursday, October 8, 7-8 PM at DBH "
             "6011\n"
             "These workshops are essential for getting started for ZotHacks.\n\n"
@@ -357,7 +358,7 @@ def _hacker_decision_copy(decision: DecisionName) -> tuple[str, str, str]:
 welcome you to attend our beginner-friendly, 12-hour hackathon.</p>
 
 <p>ZotHacks will take place from <strong>Friday, October 16 to Sunday, October
-18</strong> at <a href="https://map.uci.edu/?id=463#!m/1117786?s/">UCI Student 
+18</strong> at <a href="https://map.uci.edu/?id=463#!m/1117786?s/">Student 
 Center @ Pacific Ballroom</a>. Here is a brief overview of what you can expect on the weekend
 of ZotHacks:</p>
 
@@ -372,7 +373,9 @@ ceremony</p>
 exclusive prizes! If that sounds a bit daunting to you, don't worry - we'll
 teach you how to build an application from scratch with comprehensive workshops
 and starter packs to get you started. Meals, snacks, and beverages will also be
-provided throughout the event, so you won't have to worry about that either!</p>
+provided throughout the event, so you won't have to worry about that either! For
+a more detailed breakdown of the schedule and food options, please visit
+<a href="https://zothacks.com">our website</a>.</p>
 
 <p><strong>To confirm your attendance/participation at ZotHacks</strong>, make
 sure to RSVP and fill out the waiver on the
@@ -384,7 +387,7 @@ will have to forfeit your spot to a hacker on the waitlist!</em></p>
 workshops:</p>
 
 <ul>
-<li><strong>Intro to Git - Wednesday, October 7, 8-9 PM at DBH 6011</strong></li>
+<li><strong>Intro to Git - Wednesday, October 7, 8-9 PM at DBH 3011</strong></li>
 <li><strong>Starter Packs &amp; Resources - Thursday, October 8, 7-8 PM at DBH
 6011</strong></li>
 </ul>
@@ -414,10 +417,10 @@ Create | Connect | Inspire</p>
             "reviewing your unique submission. Unfortunately, due to space "
             "constraints, we can only offer you a spot on our waitlist. RSVPs "
             "for the waitlist will open on a first-come, first-serve basis on "
-            "Friday, October 9 at 12 PM PT. You will receive a separate email "
+            "Friday, October 9 at 12 PM PST. You will receive a separate email "
             "when the waitlist RSVP officially opens.\n\n"
             "We also highly encourage that you attend our upcoming workshops:\n"
-            "- Intro to Git - Wednesday, October 7, 8-9 PM at DBH 6011\n"
+            "- Intro to Git - Wednesday, October 7, 8-9 PM at DBH 3011\n"
             "- Starter Packs & Resources - Thursday, October 8, 7-8 PM at DBH "
             "6011\n"
             "These workshops are essential for getting started for ZotHacks.\n\n"
@@ -442,13 +445,13 @@ overwhelming amount of applications, and we had a great time reviewing your
 unique submission. Unfortunately, due to space constraints, we can only offer
 you a spot on our waitlist. RSVPs for the waitlist will open on a
 <strong>first-come, first-serve basis</strong> on <strong>Friday, October 9 at
-12 PM PT.</strong> You will receive a separate email when the waitlist RSVP
+12 PM PST.</strong> You will receive a separate email when the waitlist RSVP
 officially opens.</p>
 
 <p>We also highly encourage that you attend our upcoming workshops:</p>
 
 <ul>
-<li><strong>Intro to Git - Wednesday, October 7, 8-9 PM at DBH 6011</strong></li>
+<li><strong>Intro to Git - Wednesday, October 7, 8-9 PM at DBH 3011</strong></li>
 <li><strong>Starter Packs &amp; Resources - Thursday, October 8, 7-8 PM at DBH
 6011</strong></li>
 </ul>

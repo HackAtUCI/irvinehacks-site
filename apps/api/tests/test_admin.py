@@ -93,22 +93,42 @@ def test_reviewer_can_retrieve_organizers_for_summary(
     mock_mongodb_handler_retrieve: AsyncMock,
 ) -> None:
     mock_mongodb_handler_retrieve_one.return_value = HACKER_REVIEWER_IDENTITY
-    mock_mongodb_handler_retrieve.return_value = [
-        {
-            "_id": "edu.uci.petr",
-            "first_name": "Peter",
-            "last_name": "Anteater",
-            "roles": ["Organizer"],
-            "committees": ["Tech"],
-        },
+    mock_mongodb_handler_retrieve.side_effect = [
+        [
+            {
+                "_id": "edu.uci.petr",
+                "first_name": "Peter",
+                "last_name": "Anteater",
+                "roles": ["Organizer"],
+                "committees": ["Tech"],
+            },
+        ],
+        [
+            {
+                "_id": "edu.uci.test",
+                "roles": ["Applicant", "Hacker"],
+                "application_data": {
+                    "reviews": [
+                        [datetime.now(), "edu.uci.petr", 10],
+                    ]
+                },
+            }
+        ],
     ]
 
     res = reviewer_client.get("/organizers")
 
     assert res.status_code == 200
-    mock_mongodb_handler_retrieve.assert_awaited_once_with(
-        Collection.USERS, {"roles": Role.ORGANIZER}
-    )
+    assert mock_mongodb_handler_retrieve.await_args_list == [
+        ((Collection.USERS, {"roles": Role.ORGANIZER}),),
+        (
+            (
+                Collection.USERS,
+                {"roles": Role.HACKER},
+                ["application_data.reviews"],
+            ),
+        ),
+    ]
     assert res.json() == [
         {
             "_id": "edu.uci.petr",
@@ -116,6 +136,7 @@ def test_reviewer_can_retrieve_organizers_for_summary(
             "last_name": "Anteater",
             "roles": ["Organizer"],
             "committees": ["Tech"],
+            "hacker_review_count": 1,
         },
     ]
 

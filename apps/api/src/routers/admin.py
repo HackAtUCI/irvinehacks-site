@@ -617,6 +617,8 @@ async def hacker_applicants(
             "application_data.major",
             "application_data.linkedin",
             "application_data.reviews",
+            "application_data.normalized_scores",
+            "application_data.extra_points",
             "application_data.review_breakdown",
             "application_data.global_field_scores",
             "application_data.tech_inspiration_saq",
@@ -1585,9 +1587,10 @@ async def add_uids_to_exclude(uids: list[str]) -> None:
     "/normalize-detailed-scores",
     dependencies=[Depends(require_role({Role.DIRECTOR, Role.LEAD}))],
 )
-async def normalize_detailed_scores_for_all_hacker_apps() -> None:
+async def normalize_detailed_scores_for_all_hacker_apps() -> dict[str, int]:
+    log.info("Normalizing detailed hacker scores")
     try:
-        await add_normalized_scores_to_all_hacker_applicants()
+        return await add_normalized_scores_to_all_hacker_applicants()
     except RuntimeError:
         log.error("Could not update/add normalized scores to hacker applicants")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)

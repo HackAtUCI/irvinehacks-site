@@ -58,6 +58,36 @@ def test_get_normalized_scores_for_hacker_applicants() -> None:
     assert normalized["app1"]["bob"] == 19.0
 
 
+def test_get_normalized_scores_for_zothacks_hacker_applicants() -> None:
+    all_apps = [
+        {
+            "_id": "app1",
+            "application_data": {
+                "review_breakdown": {
+                    "bob": {
+                        "resume": 8,
+                        "collaboration_saq": 7,
+                        "tech_inspiration_saq": 9,
+                        "uci_gift_saq": 6,
+                        "drawing_response": 8,
+                        "peter_thought_process_saq": 7,
+                        "hackathon_experience": 10,
+                    },
+                }
+            },
+        }
+    ]
+
+    stats = {"bob": {"mean": 30.0, "std": 5.0}}
+    normalized = score_normalizing_handler.get_normalized_scores_for_hacker_applicants(
+        all_apps, stats
+    )
+
+    # ZotHacks uses the submitted total score and excludes drawing_response:
+    # 8 + 7 + 9 + 6 + 7 + 10 = 47; z = (47 - 30) / 5 = 3.4.
+    assert normalized["app1"]["bob"] == 3.4
+
+
 @patch("services.mongodb_handler.retrieve", autospec=True)
 async def test_get_all_hacker_apps(mock_retrieve: AsyncMock) -> None:
     mock_retrieve.return_value = []
@@ -80,11 +110,26 @@ async def test_update_hacker_applicants_in_collection(
         for app_id, scores in normalized_scores.items()
     ]
 
-    await score_normalizing_handler.update_hacker_applicants_in_collection(
-        normalized_scores
+    updated_count = (
+        await score_normalizing_handler.update_hacker_applicants_in_collection(
+            normalized_scores
+        )
     )
 
     mock_bulk_update.assert_awaited_once_with(Collection.USERS, expected_operations)
+    assert updated_count == 1
+
+
+@patch("services.mongodb_handler.bulk_update", autospec=True)
+async def test_update_hacker_applicants_in_collection_skips_empty_updates(
+    mock_bulk_update: AsyncMock,
+) -> None:
+    updated_count = (
+        await score_normalizing_handler.update_hacker_applicants_in_collection({})
+    )
+
+    mock_bulk_update.assert_not_awaited()
+    assert updated_count == 0
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
@@ -100,6 +145,7 @@ async def test_add_normalized_scores_to_all_hacker_applicants(
     mock_retrieve_one: AsyncMock,
 ) -> None:
     mock_retrieve_one.return_value = None  # No excluded UIDs settings doc
+    mock_update.return_value = 1
     mock_get_all.return_value = [
         {
             "_id": "app1",
@@ -107,9 +153,16 @@ async def test_add_normalized_scores_to_all_hacker_applicants(
         }
     ]
 
-    await score_normalizing_handler.add_normalized_scores_to_all_hacker_applicants()
+    result = (
+        await score_normalizing_handler.add_normalized_scores_to_all_hacker_applicants()
+    )
 
     mock_get_all.assert_awaited_once_with([])
 
     expected_normalized_scores = {"app1": {"bob": 0.0}}
     mock_update.assert_awaited_once_with(expected_normalized_scores)
+    assert result == {
+        "matched_applicants": 1,
+        "normalized_applicants": 1,
+        "updated_applicants": mock_update.return_value,
+    }

@@ -1,4 +1,5 @@
 from collections import defaultdict
+from logging import getLogger
 from statistics import mean, stdev
 from typing import Any
 
@@ -10,6 +11,19 @@ from services.mongodb_handler import Collection
 
 GLOBAL_FIELDS = {"resume", "hackathon_experience"}
 NON_SCORING_IH_FIELDS = {"previous_experience", "has_socials"}
+ZH_NON_SCORING_FIELDS = {"drawing_response"}
+ZH_DETAIL_SCORING_FIELDS = {
+    "collaboration_saq",
+    "tech_inspiration_saq",
+    "uci_gift_saq",
+    "peter_thought_process_saq",
+}
+ZH_SCORING_FIELDS = {
+    "resume",
+    *ZH_DETAIL_SCORING_FIELDS,
+    "hackathon_experience",
+}
+log = getLogger(__name__)
 
 # Dictionary mapping field names to (total_points, weight_percentage)
 # The sum of weight_percentages should be 1.0 (100%)
@@ -35,51 +49,40 @@ async def add_uids_to_exclude_from_hacker_normalization(uids: list[str]) -> None
     )
 
 
-async def add_normalized_scores_to_all_hacker_applicants() -> None:
+async def add_normalized_scores_to_all_hacker_applicants() -> dict[str, int]:
     """Calculates normalized scores and adds them to all hacker apps"""
     excluded_doc = await mongodb_handler.retrieve_one(
         Collection.SETTINGS, {"_id": "excluded_uids_from_normalization"}
     )
     excluded_uids = excluded_doc.get("excluded_uids", []) if excluded_doc else []
     all_apps_excluding_uids = await get_all_hacker_apps(excluded_uids)
+    log.info(
+        "Normalizing hacker scores for %d apps (%d excluded)",
+        len(all_apps_excluding_uids),
+        len(excluded_uids),
+    )
     reviewer_stats = get_reviewer_stats(all_apps_excluding_uids)
 
     normalized_scores = get_normalized_scores_for_hacker_applicants(
         all_apps_excluding_uids, reviewer_stats
     )
+    log.info("Generated normalized scores for %d hacker apps", len(normalized_scores))
 
-    await update_hacker_applicants_in_collection(normalized_scores)
+    updated_count = await update_hacker_applicants_in_collection(normalized_scores)
+    return {
+        "matched_applicants": len(all_apps_excluding_uids),
+        "normalized_applicants": len(normalized_scores),
+        "updated_applicants": updated_count,
+    }
 
 
 async def get_all_hacker_apps(excluded_uids: list[str]) -> list[dict[str, object]]:
-    # Exclude hackers who have 0's for all frqs
-    rb = "$application_data.review_breakdown"
     query: dict[str, Any] = {
         "roles": Role.HACKER,
         "application_data.review_breakdown": {
             "$exists": True,
             "$ne": {},
             "$type": "object",
-        },
-        "$expr": {
-            "$gt": [
-                {
-                    "$size": {
-                        "$filter": {
-                            "input": {"$ifNull": [{"$objectToArray": rb}, []]},
-                            "as": "review",
-                            "cond": {
-                                "$and": [
-                                    {"$gt": ["$$review.v.frq_change", 0]},
-                                    {"$gt": ["$$review.v.frq_ambition", 0]},
-                                    {"$gt": ["$$review.v.frq_character", 0]},
-                                ]
-                            },
-                        }
-                    }
-                },
-                0,
-            ]
         },
     }
 
@@ -105,7 +108,7 @@ def get_reviewer_stats(all_apps: list[dict[str, Any]]) -> dict[str, dict[str, fl
     for app in all_apps:
         breakdown = app.get("application_data", {}).get("review_breakdown", {})
         for reviewer, scores_dict in breakdown.items():
-            total_score = _get_weighted_score(scores_dict)
+            total_score = _get_review_score(scores_dict)
             reviewer_totals[reviewer].append(total_score)
 
     reviewer_stats = {
@@ -145,7 +148,7 @@ def get_normalized_scores_for_hacker_applicants(
         normalized_scores: dict[str, float] = {}
 
         for reviewer, scores_dict in breakdown.items():
-            total_score = _get_weighted_score(scores_dict)
+            total_score = _get_review_score(scores_dict)
             stats = reviewer_stats.get(reviewer, {"mean": 0, "std": 1})
             normalized = (total_score - stats["mean"]) / stats["std"]
             normalized_scores[reviewer] = normalized
@@ -157,7 +160,11 @@ def get_normalized_scores_for_hacker_applicants(
 
 async def update_hacker_applicants_in_collection(
     normalized_scores: dict[str, dict[str, float]],
-) -> None:
+) -> int:
+    if not normalized_scores:
+        log.warning("No normalized hacker scores to write")
+        return 0
+
     operations = [
         UpdateOne(
             {"_id": app_id}, {"$set": {"application_data.normalized_scores": scores}}
@@ -165,7 +172,29 @@ async def update_hacker_applicants_in_collection(
         for app_id, scores in normalized_scores.items()
     ]
 
-    await mongodb_handler.bulk_update(Collection.USERS, operations)
+    did_update = await mongodb_handler.bulk_update(Collection.USERS, operations)
+    return len(operations) if did_update else 0
+
+
+def _is_zothacks_score_breakdown(scores_dict: dict[str, float]) -> bool:
+    return bool(set(scores_dict) & ZH_DETAIL_SCORING_FIELDS)
+
+
+def _get_review_score(scores_dict: dict[str, float]) -> float:
+    if _is_zothacks_score_breakdown(scores_dict):
+        return _get_zothacks_score(scores_dict)
+    return _get_weighted_score(scores_dict)
+
+
+def _get_zothacks_score(scores_dict: dict[str, float]) -> float:
+    return max(
+        sum(
+            score
+            for field, score in scores_dict.items()
+            if field not in ZH_NON_SCORING_FIELDS
+        ),
+        -3.0,
+    )
 
 
 def _get_weighted_score(scores_dict: dict[str, float]) -> float:

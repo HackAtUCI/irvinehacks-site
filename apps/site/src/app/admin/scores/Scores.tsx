@@ -180,6 +180,12 @@ interface ScoredHackerApplicant extends HackerApplicantSummary {
 	rowIndex: number;
 }
 
+interface NormalizeScoresResponse {
+	matched_applicants: number;
+	normalized_applicants: number;
+	updated_applicants: number;
+}
+
 const NameCell = (item: ScoredHackerApplicant) =>
 	`${item.first_name} ${item.last_name}`;
 
@@ -292,9 +298,14 @@ function Scores() {
 
 	const handleClick = () => {
 		axios
-			.get("/api/admin/normalize-detailed-scores")
-			.then(() => {
-				showNotification("success", "Successfully normalized scores!");
+			.get<NormalizeScoresResponse>("/api/admin/normalize-detailed-scores")
+			.then(({ data }) => {
+				showNotification(
+					"success",
+					`Normalized ${data.normalized_applicants} applicants ` +
+						`(${data.updated_applicants} updated, ` +
+						`${data.matched_applicants} matched).`,
+				);
 				refetch();
 			})
 			.catch((error) => {

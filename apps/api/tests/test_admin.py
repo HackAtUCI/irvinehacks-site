@@ -1197,6 +1197,7 @@ def test_hacker_applicants_allows_zothacks_hacker_review_breakdown(
                         "peter_thought_process_saq": 9,
                     }
                 },
+                "normalized_scores": {"alicia": 70},
                 "global_field_scores": {},
             },
         }

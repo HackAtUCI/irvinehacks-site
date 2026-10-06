@@ -242,14 +242,19 @@ def test_get_apply_reminder_senders(
     )
 
 
+@patch("routers.director._sync_hacker_decisions_with_thresholds", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 @patch("services.mongodb_handler.raw_update_one", autospec=True)
 def test_set_thresholds_correctly(
     mock_mongodb_handler_raw_update_one: AsyncMock,
     mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_sync_hacker_decisions: AsyncMock,
 ) -> None:
     """Test that the /set-thresholds route returns correctly"""
-    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        {"accept": 7.5, "waitlist": 6.3},
+    ]
 
     res = director_client.post(
         "/set-thresholds", json={"accept": "10", "waitlist": "5"}
@@ -262,28 +267,120 @@ def test_set_thresholds_correctly(
         {"$set": {"accept": 10, "waitlist": 5}},
         upsert=True,
     )
+    mock_sync_hacker_decisions.assert_awaited_once_with({"accept": 10, "waitlist": 5})
 
 
+@patch("routers.director._sync_hacker_decisions_with_thresholds", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 @patch("services.mongodb_handler.raw_update_one", autospec=True)
-def test_set_thresholds_with_empty_string_correctly(
+def test_set_normalized_thresholds_correctly(
     mock_mongodb_handler_raw_update_one: AsyncMock,
     mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_sync_hacker_decisions: AsyncMock,
 ) -> None:
-    """Test that the /set-thresholds route returns correctly with -1"""
-    mock_mongodb_handler_retrieve_one.return_value = DIRECTOR_IDENTITY
+    """Test that the /set-thresholds route accepts normalized threshold values."""
+    mock_mongodb_handler_retrieve_one.side_effect = [
+        DIRECTOR_IDENTITY,
+        {"accept": 7.5, "waitlist": 6.3},
+    ]
 
     res = director_client.post(
-        "/set-thresholds", json={"accept": "10", "waitlist": "-1"}
+        "/set-thresholds", json={"accept": "0.49", "waitlist": "-0.25"}
     )
 
     assert res.status_code == 200
     mock_mongodb_handler_raw_update_one.assert_awaited_once_with(
         Collection.SETTINGS,
         {"_id": "hacker_score_thresholds"},
-        {"$set": {"accept": 10}},
+        {"$set": {"accept": 0.49, "waitlist": -0.25}},
         upsert=True,
     )
+    mock_sync_hacker_decisions.assert_awaited_once_with(
+        {"accept": 0.49, "waitlist": -0.25}
+    )
+
+
+@patch("services.mongodb_handler.bulk_update", autospec=True)
+@patch("services.mongodb_handler.retrieve", autospec=True)
+async def test_sync_hacker_decisions_with_thresholds_uses_normalized_scores(
+    mock_mongodb_handler_retrieve: AsyncMock,
+    mock_mongodb_handler_bulk_update: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve.return_value = [
+        {
+            "_id": "edu.uci.accepted",
+            "roles": [Role.APPLICANT, Role.HACKER],
+            "status": Status.REVIEWED,
+            "application_data": {
+                "tech_inspiration_saq": "AI response",
+                "reviews": [[datetime(2026, 10, 6), "edu.uci.reviewer", 0]],
+                "review_breakdown": {
+                    "reviewer": {
+                        "collaboration_saq": 8,
+                        "tech_inspiration_saq": 8,
+                        "uci_gift_saq": 8,
+                        "peter_thought_process_saq": 8,
+                    }
+                },
+                "normalized_scores": {"reviewer": 0.5},
+            },
+        },
+        {
+            "_id": "edu.uci.waitlisted",
+            "roles": [Role.APPLICANT, Role.HACKER],
+            "status": Status.REVIEWED,
+            "application_data": {
+                "tech_inspiration_saq": "AI response",
+                "reviews": [[datetime(2026, 10, 6), "edu.uci.reviewer", 100]],
+                "review_breakdown": {
+                    "reviewer": {
+                        "collaboration_saq": 6,
+                        "tech_inspiration_saq": 6,
+                        "uci_gift_saq": 6,
+                        "peter_thought_process_saq": 6,
+                    }
+                },
+                "normalized_scores": {"reviewer": 0.0},
+            },
+        },
+        {
+            "_id": "edu.uci.rejected",
+            "roles": [Role.APPLICANT, Role.HACKER],
+            "status": Status.REVIEWED,
+            "application_data": {
+                "tech_inspiration_saq": "AI response",
+                "reviews": [[datetime(2026, 10, 6), "edu.uci.reviewer", 100]],
+                "review_breakdown": {
+                    "reviewer": {
+                        "collaboration_saq": 4,
+                        "tech_inspiration_saq": 4,
+                        "uci_gift_saq": 4,
+                        "peter_thought_process_saq": 4,
+                    }
+                },
+                "normalized_scores": {"reviewer": -0.5},
+            },
+        },
+    ]
+
+    synced_count = await director._sync_hacker_decisions_with_thresholds(
+        {"accept": 0.49, "waitlist": -0.25}
+    )
+
+    assert synced_count == 3
+    mock_mongodb_handler_bulk_update.assert_awaited_once()
+    assert mock_mongodb_handler_bulk_update.await_args is not None
+    operations = mock_mongodb_handler_bulk_update.await_args.args[1]
+    assert [operation._filter["_id"] for operation in operations] == [
+        "edu.uci.accepted",
+        "edu.uci.waitlisted",
+        "edu.uci.rejected",
+    ]
+    assert [operation._doc["$set"]["decision"] for operation in operations] == [
+        Decision.ACCEPTED,
+        Decision.WAITLISTED,
+        Decision.REJECTED,
+    ]
 
 
 @patch("services.mongodb_handler.retrieve_one", autospec=True)

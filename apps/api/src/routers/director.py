@@ -14,6 +14,7 @@ from pydantic import (
     TypeAdapter,
     ValidationError,
 )
+from pymongo import UpdateOne
 
 from admin import applicant_review_processor
 from admin.applicant_review_processor import (
@@ -357,43 +358,113 @@ async def rsvp_reminder() -> None:
     await _rsvp_reminder(Role.VOLUNTEER)
 
 
+async def _sync_hacker_decisions_with_thresholds(
+    thresholds: dict[str, float],
+) -> int:
+    records = await mongodb_handler.retrieve(
+        Collection.USERS,
+        {
+            "roles": Role.HACKER,
+            "status": Status.REVIEWED,
+            "decision_email_sent_at": {"$exists": False},
+        },
+        [
+            "_id",
+            "roles",
+            "status",
+            "auto_decision_reason",
+            "application_data.reviews",
+            "application_data.review_breakdown",
+            "application_data.global_field_scores",
+            "application_data.normalized_scores",
+            "application_data.extra_points",
+            "application_data.tech_inspiration_saq",
+            "application_data.is_18_older",
+            "application_data.education_level",
+            "application_data.graduation_year",
+        ],
+    )
+
+    operations = []
+    for record in records:
+        application_data = record.get("application_data", {})
+        if (
+            isinstance(application_data, Mapping)
+            and "tech_inspiration_saq" in application_data
+        ):
+            include_decision = (
+                applicant_review_processor
+                ._include_decision_based_on_threshold_and_score_breakdown
+            )
+            include_decision(record, thresholds["accept"], thresholds["waitlist"])
+        else:
+            applicant_review_processor._include_decision_based_on_threshold(
+                record, thresholds["accept"], thresholds["waitlist"]
+            )
+
+        decision = record.get("decision")
+        if decision not in RELEASE_DECISIONS:
+            continue
+
+        operations.append(
+            UpdateOne(
+                {"_id": record["_id"]},
+                {
+                    "$set": {
+                        "decision": decision,
+                        "auto_decision_reason": record.get("auto_decision_reason"),
+                    }
+                },
+            )
+        )
+
+    if not operations:
+        return 0
+
+    await mongodb_handler.bulk_update(Collection.USERS, operations)
+    return len(operations)
+
+
 @router.post("/set-thresholds")
 async def set_hacker_score_thresholds(
     user: Annotated[User, Depends(require_director)],
-    accept: float = Body(),
-    waitlist: float = Body(),
+    accept: Optional[float] = Body(default=None),
+    waitlist: Optional[float] = Body(default=None),
 ) -> None:
     """
-    Sets accepted and waitlisted score thresholds.
+    Sets accepted and waitlisted normalized score thresholds.
     Any score under waitlisted is considered rejected.
     """
 
-    thresholds: Optional[dict[str, float]] = await retrieve_thresholds()
+    existing_thresholds: Optional[dict[str, float]] = await retrieve_thresholds()
+    thresholds = dict(existing_thresholds or {})
 
-    if accept != -1 and thresholds is not None:
+    if accept is not None:
         thresholds["accept"] = accept
-    if waitlist != -1 and thresholds is not None:
+    if waitlist is not None:
         thresholds["waitlist"] = waitlist
 
     if (
-        accept < -1
-        or accept > 10
-        or waitlist < -1
-        or waitlist > 10
-        or (accept != -1 and waitlist != -1 and waitlist > accept)
-        or (thresholds and thresholds["waitlist"] > thresholds["accept"])
+        "accept" not in thresholds
+        or "waitlist" not in thresholds
+        or (accept is not None and (accept < -10 or accept > 10))
+        or (waitlist is not None and (waitlist < -10 or waitlist > 10))
+        or (
+            accept is not None
+            and waitlist is not None
+            and waitlist > accept
+        )
+        or thresholds["waitlist"] > thresholds["accept"]
     ):
         log.error("Invalid threshold score submitted.")
         raise HTTPException(status.HTTP_400_BAD_REQUEST)
 
-    log.info("%s changed thresholds: Accept-%f | Waitlist-%f", user, accept, waitlist)
+    log.info("%s changed thresholds: Accept-%s | Waitlist-%s", user, accept, waitlist)
 
-    # negative numbers should not be received, but -1 in this case
-    # means there is no update to the respective threshold
     update_query = {}
-    if accept != -1:
+    if accept is not None:
         update_query["accept"] = accept
-    if waitlist != -1:
+    if waitlist is not None:
         update_query["waitlist"] = waitlist
 
     try:
@@ -403,9 +474,11 @@ async def set_hacker_score_thresholds(
             {"$set": update_query},
             upsert=True,
         )
+        synced_count = await _sync_hacker_decisions_with_thresholds(thresholds)
+        log.info("Synced %d hacker decisions from thresholds", synced_count)
     except RuntimeError:
         log.error(
-            "%s could not change thresholds: Accept-%f | Waitlist-%f",
+            "%s could not change thresholds: Accept-%s | Waitlist-%s",
             user,
             accept,
             waitlist,

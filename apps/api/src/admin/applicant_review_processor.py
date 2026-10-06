@@ -9,6 +9,12 @@ OVERQUALIFIED = -3
 OVERQUALIFIED_GLOBAL_SCORE = -1000
 NOT_FULLY_REVIEWED = -1
 NON_SCORING_IH_FIELDS = {"previous_experience", "has_socials"}
+ZOTHACKS_REVIEW_FIELDS = {
+    "collaboration_saq",
+    "tech_inspiration_saq",
+    "uci_gift_saq",
+    "peter_thought_process_saq",
+}
 
 AUTO_REASON_UNDER_18 = "UNDER_18"
 AUTO_REASON_GRADUATED = "GRADUATED"
@@ -182,18 +188,56 @@ def _get_avg_score_with_globals_and_breakdown(
     return round((total_score / num_reviewers) * 100.0, 3)
 
 
+def _get_avg_normalized_score(application_data: dict[str, Any]) -> Optional[float]:
+    normalized_scores = application_data.get("normalized_scores", {})
+    if not isinstance(normalized_scores, dict) or not normalized_scores:
+        return None
+
+    scores = [
+        score
+        for score in normalized_scores.values()
+        if isinstance(score, (int, float))
+    ]
+    if not scores:
+        return None
+
+    avg_score = sum(scores) / len(scores)
+    extra_points = application_data.get("extra_points")
+    if isinstance(extra_points, (int, float)):
+        avg_score += extra_points
+
+    return avg_score
+
+
+def _has_zothacks_review_breakdown(
+    review_breakdowns: dict[str, dict[str, int]],
+) -> bool:
+    return any(
+        bool(set(breakdown) & ZOTHACKS_REVIEW_FIELDS)
+        for breakdown in review_breakdowns.values()
+    )
+
+
 def _include_decision_based_on_threshold(
     applicant_record: dict[str, Any], accept: float, waitlist: float
 ) -> None:
     if _apply_auto_decision_if_any(applicant_record):
         return
-    avg_score = _get_avg_score(
-        applicant_record["application_data"]["reviews"],
-        applicant_record["application_data"].get("global_field_scores", {}),
-    )
-    if avg_score >= accept:
+    application_data = applicant_record["application_data"]
+    threshold_score = _get_avg_normalized_score(application_data)
+    if threshold_score is None:
+        if _has_zothacks_review_breakdown(
+            application_data.get("review_breakdown", {})
+        ):
+            applicant_record["decision"] = None
+            return
+        threshold_score = _get_avg_score(
+            application_data["reviews"],
+            application_data.get("global_field_scores", {}),
+        )
+    if threshold_score >= accept:
         applicant_record["decision"] = Decision.ACCEPTED
-    elif avg_score >= waitlist:
+    elif threshold_score >= waitlist:
         applicant_record["decision"] = Decision.WAITLISTED
     else:
         applicant_record["decision"] = Decision.REJECTED
@@ -204,14 +248,21 @@ def _include_decision_based_on_threshold_and_score_breakdown(
 ) -> None:
     if _apply_auto_decision_if_any(applicant_record):
         return
-    avg_score = _get_avg_score_with_globals_and_breakdown(
-        applicant_record["application_data"].get("review_breakdown", {}),
-        applicant_record["application_data"].get("global_field_scores", {}),
-        IH_WEIGHTING_CONFIG,
-    )
-    if avg_score >= accept:
+    application_data = applicant_record["application_data"]
+    threshold_score = _get_avg_normalized_score(application_data)
+    if threshold_score is None:
+        review_breakdown = application_data.get("review_breakdown", {})
+        if _has_zothacks_review_breakdown(review_breakdown):
+            applicant_record["decision"] = None
+            return
+        threshold_score = _get_avg_score_with_globals_and_breakdown(
+            review_breakdown,
+            application_data.get("global_field_scores", {}),
+            IH_WEIGHTING_CONFIG,
+        )
+    if threshold_score >= accept:
         applicant_record["decision"] = Decision.ACCEPTED
-    elif avg_score >= waitlist:
+    elif threshold_score >= waitlist:
         applicant_record["decision"] = Decision.WAITLISTED
     else:
         applicant_record["decision"] = Decision.REJECTED

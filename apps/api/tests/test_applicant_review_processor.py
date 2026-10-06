@@ -172,6 +172,78 @@ def test_decision_based_on_threshold_with_overqualified() -> None:
     assert record["decision"] == "REJECTED"  # OVERQUALIFIED (-3) < waitlist (5.0)
 
 
+def test_decision_based_on_threshold_prefers_normalized_scores() -> None:
+    """Threshold decisions use normalized scores when they are available."""
+    record: dict[str, Any] = {
+        "_id": "edu.uci.sydnee",
+        "status": "REVIEWED",
+        "application_data": {
+            "reviews": [
+                [datetime(2023, 1, 19), "edu.uci.alicia", 100],
+                [datetime(2023, 1, 19), "edu.uci.alicia2", 100],
+            ],
+            "normalized_scores": {
+                "alicia": 0.6,
+                "alicia2": 0.4,
+            },
+        },
+    }
+
+    applicant_review_processor._include_decision_based_on_threshold(
+        record, accept=0.49, waitlist=0.0
+    )
+    assert record["decision"] == "ACCEPTED"
+
+
+def test_decision_based_on_threshold_with_zothacks_breakdown_uses_normalized_scores(
+) -> None:
+    """ZotHacks fields should not hit IrvineHacks raw weighting when normalized."""
+    record: dict[str, Any] = {
+        "_id": "edu.uci.zothacks",
+        "status": "REVIEWED",
+        "application_data": {
+            "review_breakdown": {
+                "reviewer": {
+                    "collaboration_saq": 8,
+                    "tech_inspiration_saq": 8,
+                    "uci_gift_saq": 8,
+                    "peter_thought_process_saq": 8,
+                }
+            },
+            "normalized_scores": {"reviewer": 0.0},
+        },
+    }
+
+    applicant_review_processor._include_decision_based_on_threshold_and_score_breakdown(
+        record, accept=2.0, waitlist=1.0
+    )
+    assert record["decision"] == "REJECTED"
+
+
+def test_decision_based_on_threshold_with_zothacks_breakdown_without_normalized_skips(
+) -> None:
+    """ZotHacks threshold decisions require normalized scores."""
+    record: dict[str, Any] = {
+        "_id": "edu.uci.zothacks",
+        "status": "REVIEWED",
+        "application_data": {
+            "review_breakdown": {
+                "reviewer": {
+                    "collaboration_saq": 8,
+                    "tech_inspiration_saq": 8,
+                    "uci_gift_saq": 8,
+                    "peter_thought_process_saq": 8,
+                }
+            },
+        },
+    }
+
+    applicant_review_processor._include_decision_based_on_threshold_and_score_breakdown(
+        record, accept=2.0, waitlist=1.0
+    )
+    assert record["decision"] is None
+
+
 def test_avg_score_no_reviewer() -> None:
     """Test that avg_score returns when there's only one reviewer."""
     record: dict[str, Any] = {

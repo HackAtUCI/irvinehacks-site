@@ -19,8 +19,8 @@ function HackerThresholdInputs() {
 	const [status, setStatus] = useState("");
 
 	async function submitThresholds() {
-		const sentAcceptValue = acceptValue ? parseFloat(acceptValue) : -1;
-		const sentWaitlistValue = waitlistValue ? parseFloat(waitlistValue) : -1;
+		const sentAcceptValue = acceptValue ? parseFloat(acceptValue) : null;
+		const sentWaitlistValue = waitlistValue ? parseFloat(waitlistValue) : null;
 
 		if (isValidAccept() && isValidWaitlist()) {
 			await axios
@@ -53,7 +53,7 @@ function HackerThresholdInputs() {
 
 			if (
 				sentAcceptValue < sentWaitlistValue ||
-				sentAcceptValue < -1 ||
+				sentAcceptValue < -10 ||
 				sentAcceptValue > 10
 			)
 				return false;
@@ -66,7 +66,7 @@ function HackerThresholdInputs() {
 			: thresholds.waitlist;
 
 		if (
-			sentAcceptValue < -1 ||
+			sentAcceptValue < -10 ||
 			sentAcceptValue > 10 ||
 			sentAcceptValue < sentWaitlistValue
 		)
@@ -87,7 +87,7 @@ function HackerThresholdInputs() {
 
 			if (
 				sentAcceptValue < sentWaitlistValue ||
-				sentWaitlistValue < -1 ||
+				sentWaitlistValue < -10 ||
 				sentWaitlistValue > 10
 			)
 				return false;
@@ -100,7 +100,7 @@ function HackerThresholdInputs() {
 			: thresholds.accept;
 
 		if (
-			sentWaitlistValue < -1 ||
+			sentWaitlistValue < -10 ||
 			sentWaitlistValue > 10 ||
 			sentAcceptValue < sentWaitlistValue
 		)
@@ -114,31 +114,31 @@ function HackerThresholdInputs() {
 			{thresholds && (
 				<>
 					<Box variant="awsui-key-label">
-						Current Accept Threshold: {thresholds.accept}
+						Current Normalized Accept Threshold: {thresholds.accept}
 					</Box>
 					<Box variant="awsui-key-label">
-						Current Waitlist Threshold: {thresholds.waitlist}
+						Current Normalized Waitlist Threshold: {thresholds.waitlist}
 					</Box>
 				</>
 			)}
-			<Box variant="awsui-key-label">Accept Threshold</Box>
+			<Box variant="awsui-key-label">Normalized Accept Threshold</Box>
 			<Input
 				onChange={({ detail }) => setAcceptValue(detail.value)}
 				value={acceptValue}
 				type="number"
 				inputMode="decimal"
-				placeholder="Accept Threshold"
-				step={0.1}
+				placeholder="Normalized Accept Threshold"
+				step={0.01}
 				invalid={!isValidAccept()}
 			/>
-			<Box variant="awsui-key-label">Waitlist Threshold</Box>
+			<Box variant="awsui-key-label">Normalized Waitlist Threshold</Box>
 			<Input
 				onChange={({ detail }) => setWaitlistValue(detail.value)}
 				value={waitlistValue}
 				type="number"
 				inputMode="decimal"
-				placeholder="Waitlist Threshold"
-				step={0.1}
+				placeholder="Normalized Waitlist Threshold"
+				step={0.01}
 				invalid={!isValidWaitlist()}
 			/>
 			<Box variant="p">

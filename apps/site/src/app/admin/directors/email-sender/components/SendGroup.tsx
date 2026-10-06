@@ -14,6 +14,12 @@ import Flashbar, {
 import ConfirmationModal from "./ConfirmationModal";
 import { Sender } from "@/lib/admin/useEmailSenders";
 
+interface SendResponse {
+	processed?: number;
+	remaining?: number;
+	complete?: boolean;
+}
+
 interface SendGroupProps {
 	description: string;
 	buttonText: string;
@@ -35,32 +41,57 @@ function SendGroup({
 	>([]);
 
 	const handleClick = async () => {
-		await axios
-			.post(route)
-			.then(() => {
-				setFlashBarItems([
-					{
-						type: "success",
-						content: "Success!",
-						dismissible: true,
-						dismissLabel: "Dismiss message",
-						onDismiss: () => setFlashBarItems([]),
-					},
-				]);
-				mutate?.();
-			})
-			.catch(() => {
-				console.error("Unable to send out emails");
-				setFlashBarItems([
-					{
-						type: "error",
-						content: "Failed!",
-						dismissible: true,
-						dismissLabel: "Dismiss message",
-						onDismiss: () => setFlashBarItems([]),
-					},
-				]);
-			});
+		try {
+			let totalProcessed = 0;
+			let lastRemaining = 0;
+
+			for (let i = 0; i < 100; i += 1) {
+				const { data } = await axios.post<SendResponse | null>(route);
+				if (!data || typeof data.processed !== "number") {
+					break;
+				}
+
+				totalProcessed += data.processed;
+				lastRemaining = data.remaining ?? 0;
+
+				if (data.complete) {
+					break;
+				}
+
+				if (data.processed === 0) {
+					throw new Error("Email batch made no progress");
+				}
+			}
+
+			const content =
+				totalProcessed > 0
+					? `Success! Processed ${totalProcessed} email(s).`
+					: "Success!";
+			setFlashBarItems([
+				{
+					type: "success",
+					content:
+						lastRemaining > 0
+							? `${content} ${lastRemaining} remaining.`
+							: content,
+					dismissible: true,
+					dismissLabel: "Dismiss message",
+					onDismiss: () => setFlashBarItems([]),
+				},
+			]);
+			mutate?.();
+		} catch {
+			console.error("Unable to send out emails");
+			setFlashBarItems([
+				{
+					type: "error",
+					content: "Failed!",
+					dismissible: true,
+					dismissLabel: "Dismiss message",
+					onDismiss: () => setFlashBarItems([]),
+				},
+			]);
+		}
 	};
 
 	return (

@@ -13,12 +13,22 @@ SES_SMTP_HOST = os.getenv("SES_SMTP_HOST", "email-smtp.us-west-2.amazonaws.com")
 SES_SMTP_PORT = int(os.getenv("SES_SMTP_PORT", "587"))
 SES_SMTP_USERNAME = os.getenv("SES_SMTP_USERNAME")
 SES_SMTP_PASSWORD = os.getenv("SES_SMTP_PASSWORD")
+SES_RECIPIENT_OVERRIDE_EMAIL = os.getenv("SES_RECIPIENT_OVERRIDE_EMAIL")
 SES_FROM_EMAIL = os.getenv("SES_FROM_EMAIL", "apply@zothacks.com")
 SES_FROM_NAME = os.getenv("SES_FROM_NAME", "ZotHacks 2026 Applications")
+SES_HACKER_FROM_EMAIL = os.getenv("SES_HACKER_FROM_EMAIL", SES_FROM_EMAIL)
+SES_HACKER_FROM_NAME = os.getenv("SES_HACKER_FROM_NAME", SES_FROM_NAME)
+SES_MENTOR_FROM_EMAIL = os.getenv("SES_MENTOR_FROM_EMAIL", SES_FROM_EMAIL)
+SES_MENTOR_FROM_NAME = os.getenv("SES_MENTOR_FROM_NAME", SES_FROM_NAME)
 CONTACT_EMAIL = "zothacks2026@gmail.com"
 Recipient = tuple[str, str]
 RoleName = Literal["Hacker", "Mentor", "Volunteer"]
 DecisionName = Literal["ACCEPTED", "WAITLISTED", "REJECTED"]
+
+ROLE_SENDERS: dict[str, tuple[str, str]] = {
+    "Hacker": (SES_HACKER_FROM_EMAIL, SES_HACKER_FROM_NAME),
+    "Mentor": (SES_MENTOR_FROM_EMAIL, SES_MENTOR_FROM_NAME),
+}
 
 
 def _send_message(message: EmailMessage) -> None:
@@ -48,7 +58,9 @@ def _build_message(
     message = EmailMessage()
     message["Subject"] = subject
     message["From"] = formataddr((from_name, from_email))
-    message["To"] = email
+    message["To"] = SES_RECIPIENT_OVERRIDE_EMAIL or email
+    if SES_RECIPIENT_OVERRIDE_EMAIL:
+        message["X-Original-To"] = email
     message.set_content(text_body)
     message.add_alternative(html_body, subtype="html")
     return message
@@ -57,11 +69,23 @@ def _build_message(
 async def _send_personalized_messages(
     recipients: Iterable[Recipient],
     build_content: Callable[[str], tuple[str, str, str]],
+    *,
+    from_email: str = SES_FROM_EMAIL,
+    from_name: str = SES_FROM_NAME,
 ) -> int:
     messages = []
     for first_name, email in recipients:
         subject, text_body, html_body = build_content(first_name)
-        messages.append(_build_message(email, subject, text_body, html_body))
+        messages.append(
+            _build_message(
+                email,
+                subject,
+                text_body,
+                html_body,
+                from_email=from_email,
+                from_name=from_name,
+            )
+        )
 
     if not messages:
         return 0
@@ -223,6 +247,9 @@ def _decision_copy(
     decision: DecisionName,
     application_type: RoleName,
 ) -> tuple[str, str, str]:
+    if application_type == "Hacker":
+        return _hacker_decision_copy(decision)
+
     role = application_type.lower()
     subject = f"ZotHacks 2026 {application_type} application update"
     greeting = f"Hello {first_name}!"
@@ -275,14 +302,233 @@ The ZotHacks 2026 Team
     return subject, text_body, html_body
 
 
+def _hacker_decision_copy(decision: DecisionName) -> tuple[str, str, str]:
+    subject = "[ZotHacks 2026] Hacker Application Decisions"
+
+    if decision == "ACCEPTED":
+        text_body = (
+            "Hello!\n\n"
+            "Congratulations, you've been accepted to ZotHacks 2026! We're so "
+            "excited to welcome you to attend our beginner-friendly, 12-hour "
+            "hackathon.\n\n"
+            "ZotHacks will take place from Friday, October 16 to Sunday, "
+            "October 18 at The UCI Student Center. Here is a brief overview of "
+            "what you can expect on the weekend of ZotHacks:\n\n"
+            "Friday, October 16 (7 PM - 10 PM) - Hacker Orientation and Team "
+            "Formation\n"
+            "Saturday, October 17 (8 AM - 10 PM) - Opening ceremony and "
+            "hacking period\n"
+            "Sunday, October 18 (9 AM - 1 PM) - Project showcase and closing "
+            "ceremony\n\n"
+            "You'll be working on a project in assigned teams of four to "
+            "compete for some exclusive prizes! If that sounds a bit daunting "
+            "to you, don't worry - we'll teach you how to build an application "
+            "from scratch with comprehensive workshops and starter packs to get "
+            "you started. Meals, snacks, and beverages will also be provided "
+            "throughout the event, so you won't have to worry about that "
+            "either!\n\n"
+            "To confirm your attendance/participation at ZotHacks, make sure "
+            "to RSVP and fill out the waiver on the portal by Thursday, "
+            "October 8 at 11:59 PM PT. Make sure to complete these steps by "
+            "then or we will have to forfeit your spot to a hacker on the "
+            "waitlist!\n\n"
+            "We also highly encourage that you attend our upcoming workshops:\n"
+            "- Intro to Git - Wednesday, October 7, 8-9 PM at DBH 6011\n"
+            "- Starter Packs & Resources - Thursday, October 8, 7-8 PM at DBH "
+            "6011\n"
+            "These workshops are essential for getting started for ZotHacks.\n\n"
+            "Feel free to check out the FAQ section at https://zothacks.com "
+            "for additional information about the hackathon. If you have any "
+            "further questions, please feel free to reach out to us directly by "
+            "replying to this email.\n\n"
+            "Once again, congratulations on your acceptance to ZotHacks 2026! "
+            "Further information regarding the schedule and logistics will be "
+            "provided in the coming days. We can't wait to see you there!\n\n"
+            "Regards,\n\n"
+            "ZotHacks Team\n"
+            "https://zothacks.com\n"
+            "Create | Connect | Inspire\n"
+        )
+
+        html_body = """
+<p>Hello!</p>
+
+<p>Congratulations, you've been accepted to ZotHacks 2026! We're so excited to
+welcome you to attend our beginner-friendly, 12-hour hackathon.</p>
+
+<p>ZotHacks will take place from <strong>Friday, October 16 to Sunday, October
+18</strong> at <a href="https://studentcenter.uci.edu/events/venue-information/
+the-uci-student-center/">The UCI Student
+Center</a>. Here is a brief overview of what you can expect on the weekend
+of ZotHacks:</p>
+
+<p style="margin-left: 2rem;"><em>Friday, October 16 (7 PM - 10 PM)</em> -
+Hacker Orientation and Team Formation<br>
+<em>Saturday, October 17 (8 AM - 10 PM)</em> - Opening ceremony and hacking
+period<br>
+<em>Sunday, October 18 (9 AM - 1 PM)</em> - Project showcase and closing
+ceremony</p>
+
+<p>You'll be working on a project in assigned teams of four to compete for some
+exclusive prizes! If that sounds a bit daunting to you, don't worry - we'll
+teach you how to build an application from scratch with comprehensive workshops
+and starter packs to get you started. Meals, snacks, and beverages will also be
+provided throughout the event, so you won't have to worry about that either!</p>
+
+<p><strong>To confirm your attendance/participation at ZotHacks</strong>, make
+sure to RSVP and fill out the waiver on the
+<a href="https://zothacks.com/portal">portal</a> by <strong>Thursday, October 8
+at 11:59 PM PT.</strong> <em>Make sure to complete these steps by then or we
+will have to forfeit your spot to a hacker on the waitlist!</em></p>
+
+<p>We also <strong>highly encourage</strong> that you attend our upcoming
+workshops:</p>
+
+<ul>
+<li><strong>Intro to Git - Wednesday, October 7, 8-9 PM at DBH 6011</strong></li>
+<li><strong>Starter Packs &amp; Resources - Thursday, October 8, 7-8 PM at DBH
+6011</strong></li>
+</ul>
+
+<p>These workshops are <em>essential</em> for getting started for ZotHacks.</p>
+
+<p>Feel free to check out the FAQ section at
+<a href="https://zothacks.com">zothacks.com</a> for additional information about
+the hackathon. If you have any further questions, please feel free to reach out
+to us directly by replying to this email.</p>
+
+<p>Once again, <strong>congratulations</strong> on your acceptance to ZotHacks
+2026! Further information regarding the schedule and logistics will be provided
+in the coming days. We can't wait to see you there!</p>
+
+<p>Regards,</p>
+
+<p><strong>ZotHacks Team</strong><br>
+<a href="https://zothacks.com">https://zothacks.com</a><br>
+Create | Connect | Inspire</p>
+"""
+    elif decision == "WAITLISTED":
+        text_body = (
+            "Hello!\n\n"
+            "Thank you for taking the time to apply for ZotHacks. We received "
+            "an overwhelming amount of applications, and we had a great time "
+            "reviewing your unique submission. Unfortunately, due to space "
+            "constraints, we can only offer you a spot on our waitlist. RSVPs "
+            "for the waitlist will open on a first-come, first-serve basis on "
+            "Friday, October 9 at 12 PM PT. You will receive a separate email "
+            "when the waitlist RSVP officially opens.\n\n"
+            "We also highly encourage that you attend our upcoming workshops:\n"
+            "- Intro to Git - Wednesday, October 7, 8-9 PM at DBH 6011\n"
+            "- Starter Packs & Resources - Thursday, October 8, 7-8 PM at DBH "
+            "6011\n"
+            "These workshops are essential for getting started for ZotHacks.\n\n"
+            "We also encourage you to continue staying in touch with Hack at "
+            "UCI by continuing to attend our other workshops and events. You "
+            "can follow our website and socials at https://linktr.ee/hackatuci "
+            "for the most up-to-date and comprehensive information about our "
+            "club's upcoming events. Most importantly, make sure to keep an eye "
+            "out for news about IrvineHacks, our largest hackathon, in winter "
+            "quarter!\n\n"
+            "Regards,\n\n"
+            "ZotHacks Team\n"
+            "https://zothacks.com\n"
+            "Create | Connect | Inspire\n"
+        )
+
+        html_body = """
+<p>Hello!</p>
+
+<p>Thank you for taking the time to apply for ZotHacks. We received an
+overwhelming amount of applications, and we had a great time reviewing your
+unique submission. Unfortunately, due to space constraints, we can only offer
+you a spot on our waitlist. RSVPs for the waitlist will open on a
+<strong>first-come, first-serve basis</strong> on <strong>Friday, October 9 at
+12 PM PT.</strong> You will receive a separate email when the waitlist RSVP
+officially opens.</p>
+
+<p>We also highly encourage that you attend our upcoming workshops:</p>
+
+<ul>
+<li><strong>Intro to Git - Wednesday, October 7, 8-9 PM at DBH 6011</strong></li>
+<li><strong>Starter Packs &amp; Resources - Thursday, October 8, 7-8 PM at DBH
+6011</strong></li>
+</ul>
+
+<p>These workshops are essential for getting started for ZotHacks.</p>
+
+<p>We also encourage you to continue staying in touch with Hack at UCI by
+continuing to attend our other workshops and events. You can follow our website
+and socials at <a href="https://linktr.ee/hackatuci">https://linktr.ee/hackatuci</a>
+for the most up-to-date and comprehensive information about our club's upcoming
+events. Most importantly, make sure to keep an eye out for news about
+IrvineHacks, our largest hackathon, in winter quarter!</p>
+
+<p>Regards,</p>
+
+<p><strong>ZotHacks Team</strong><br>
+<a href="https://zothacks.com">https://zothacks.com</a><br>
+Create | Connect | Inspire</p>
+"""
+    else:
+        text_body = (
+            "Hello!\n\n"
+            "Thank you for taking the time to apply for ZotHacks. We received "
+            "an overwhelming amount of applications, and we had a great time "
+            "reviewing your unique submission. However, due to space "
+            "constraints, we are unfortunately unable to extend you an invite "
+            "to ZotHacks this year.\n\n"
+            "That being said, we do encourage you to continue staying in touch "
+            "with Hack at UCI by continuing to attend our other workshops and "
+            "events. You can follow our website and socials at "
+            "https://linktr.ee/hackatuci for the most up-to-date and "
+            "comprehensive information about our club's upcoming events. Most "
+            "importantly, make sure to keep an eye out for IrvineHacks 2027 "
+            "applications!\n\n"
+            "Regards,\n\n"
+            "ZotHacks Team\n"
+            "https://zothacks.com\n"
+            "Create | Connect | Inspire\n"
+        )
+
+        html_body = """
+<p>Hello!</p>
+
+<p>Thank you for taking the time to apply for ZotHacks. We received an
+overwhelming amount of applications, and we had a great time reviewing your
+unique submission. However, due to space constraints, we are unfortunately
+unable to extend you an invite to ZotHacks this year.</p>
+
+<p>That being said, we do encourage you to continue staying in touch with Hack at
+UCI by continuing to attend our other workshops and events. You can follow our
+website and socials at
+<a href="https://linktr.ee/hackatuci">https://linktr.ee/hackatuci</a>
+for the most up-to-date and comprehensive information about our club's upcoming
+events. Most importantly, make sure to keep an eye out for IrvineHacks 2027
+applications!</p>
+
+<p>Regards,</p>
+
+<p><strong>ZotHacks Team</strong><br>
+<a href="https://zothacks.com">https://zothacks.com</a><br>
+Create | Connect | Inspire</p>
+"""
+
+    return subject, text_body, html_body
+
+
 async def send_decision_emails(
     recipients: Iterable[Recipient],
     decision: DecisionName,
     application_type: RoleName,
 ) -> None:
+    from_email, from_name = ROLE_SENDERS.get(
+        application_type, (SES_FROM_EMAIL, SES_FROM_NAME)
+    )
     count = await _send_personalized_messages(
         recipients,
         lambda first_name: _decision_copy(first_name, decision, application_type),
+        from_email=from_email,
+        from_name=from_name,
     )
     log.info(
         "Sent SES %s %s decision emails to %d recipients",

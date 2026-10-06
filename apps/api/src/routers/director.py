@@ -1,4 +1,5 @@
 import asyncio
+import os
 
 from datetime import datetime
 from logging import getLogger
@@ -47,6 +48,9 @@ SES_ROLE_NAMES: dict[Role, ses_handler.RoleName] = {
     Role.VOLUNTEER: "Volunteer",
 }
 APPLY_REMINDER_BATCH_SIZE = 25
+DECISION_EMAIL_BATCH_SIZE = int(os.getenv("DECISION_EMAIL_BATCH_SIZE", "25"))
+RELEASE_DECISIONS = (Decision.ACCEPTED, Decision.WAITLISTED, Decision.REJECTED)
+RELEASE_STATUSES = tuple(Status(decision.value) for decision in RELEASE_DECISIONS)
 
 
 class ApplyReminderSenders(BaseModel):
@@ -57,6 +61,12 @@ class ApplyReminderSenders(BaseModel):
 class ApplyReminderRecipients(BaseModel):
     _id: str
     recipients: list[str]
+
+
+class ReleaseDecisionResponse(BaseModel):
+    processed: int
+    remaining: int
+    complete: bool
 
 
 class OrganizerSummary(BaseRecord):
@@ -484,12 +494,23 @@ async def _release_non_hacker_decisions(
 
 
 @router.post("/release/hackers", dependencies=[Depends(require_director)])
-async def release_hacker_decisions() -> None:
+async def release_hacker_decisions() -> ReleaseDecisionResponse:
     """Update hacker applicant status based on decision and send decision emails."""
     records = await mongodb_handler.retrieve(
         Collection.USERS,
-        {"status": Status.REVIEWED, "roles": {"$in": [Role.HACKER]}},
-        ["_id", "application_data", "first_name", "auto_decision_reason"],
+        {
+            "roles": {"$in": [Role.HACKER]},
+            "status": {"$in": [Status.REVIEWED, *RELEASE_STATUSES]},
+            "decision_email_sent_at": {"$exists": False},
+        },
+        [
+            "_id",
+            "application_data",
+            "first_name",
+            "decision",
+            "status",
+            "auto_decision_reason",
+        ],
     )
 
     thresholds: Optional[dict[str, float]] = await retrieve_thresholds()
@@ -499,6 +520,9 @@ async def release_hacker_decisions() -> None:
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     for record in records:
+        if record.get("decision") in RELEASE_DECISIONS:
+            continue
+
         application_data = record.get("application_data", {})
         if (
             isinstance(application_data, Mapping)
@@ -514,7 +538,7 @@ async def release_hacker_decisions() -> None:
                 record, thresholds["accept"], thresholds["waitlist"]
             )
 
-    await _process_records_in_batches(records, Role.HACKER)
+    return await _process_hacker_release_batch(records)
 
 
 @router.post("/logistics/hackers", dependencies=[Depends(require_director)])
@@ -627,6 +651,32 @@ async def _process_status(
         )
 
 
+async def _process_hacker_release_batch(
+    records: list[dict[str, object]],
+) -> ReleaseDecisionResponse:
+    releasable_records = [
+        record for record in records if record.get("decision") in RELEASE_DECISIONS
+    ]
+    batch = releasable_records[:DECISION_EMAIL_BATCH_SIZE]
+    if not batch:
+        return ReleaseDecisionResponse(processed=0, remaining=0, complete=True)
+
+    for decision in RELEASE_DECISIONS:
+        decision_batch = [
+            record for record in batch if record.get("decision") == decision
+        ]
+        if not decision_batch:
+            continue
+        await _process_batch(tuple(decision_batch), decision, Role.HACKER)
+
+    remaining = max(len(releasable_records) - len(batch), 0)
+    return ReleaseDecisionResponse(
+        processed=len(batch),
+        remaining=remaining,
+        complete=remaining == 0,
+    )
+
+
 async def _process_records_in_batches(
     records: list[dict[str, object]],
     application_type: Literal[Role.HACKER, Role.MENTOR, Role.VOLUNTEER],
@@ -650,7 +700,11 @@ async def _process_batch(
 ) -> None:
     uids: list[str] = [record["_id"] for record in batch]
     log.info(f"Setting {application_type}s {','.join(uids)} as {decision}")
-    release_update = {"decision": decision, "status": Status(decision.value)}
+    release_update = {
+        "decision": decision,
+        "status": Status(decision.value),
+        "decision_email_release_started_at": utc_now(),
+    }
     ok = await mongodb_handler.update(
         Collection.USERS, {"_id": {"$in": uids}}, release_update
     )
@@ -663,6 +717,15 @@ async def _process_batch(
     )
     await email_handler.send_decision_email(
         map(_extract_personalizations, batch), decision, application_type
+    )
+
+    await mongodb_handler.update(
+        Collection.USERS,
+        {"_id": {"$in": uids}},
+        {
+            "decision_email_sent_at": utc_now(),
+            "decision_email_type": application_type.value,
+        },
     )
 
 

@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Any
-from unittest.mock import ANY, AsyncMock, call, patch
+from unittest.mock import ANY, AsyncMock, MagicMock, call, patch
 
 from fastapi import FastAPI
 
@@ -300,13 +300,13 @@ def test_organizer_set_thresholds_forbidden(
     assert res.status_code == 403
 
 
-@patch("routers.director._process_records_in_batches", autospec=True)
+@patch("routers.director._process_hacker_release_batch", autospec=True)
 @patch("services.mongodb_handler.retrieve", autospec=True)
 @patch("services.mongodb_handler.retrieve_one", autospec=True)
 def test_release_hacker_decisions_works(
     mock_mongodb_handler_retrieve_one: AsyncMock,
     mock_mongodb_handler_retrieve: AsyncMock,
-    mock_admin_process_records_in_batches: AsyncMock,
+    mock_process_hacker_release_batch: AsyncMock,
 ) -> None:
     """Test that the /release/hackers route works"""
     returned_records: list[dict[str, Any]] = [
@@ -329,12 +329,118 @@ def test_release_hacker_decisions_works(
         threshold_record,
     ]
     mock_mongodb_handler_retrieve.return_value = returned_records
-    mock_admin_process_records_in_batches.return_value = None
+    mock_process_hacker_release_batch.return_value = {
+        "processed": 1,
+        "remaining": 0,
+        "complete": True,
+    }
 
     res = director_client.post("/release/hackers")
 
     assert res.status_code == 200
+    assert res.json() == {"processed": 1, "remaining": 0, "complete": True}
     assert returned_records[0]["decision"] == Decision.ACCEPTED
+
+
+@patch("routers.director.DECISION_EMAIL_BATCH_SIZE", 2)
+@patch("routers.director._process_batch", autospec=True)
+async def test_process_hacker_release_batch_limits_batch_size(
+    mock_process_batch: AsyncMock,
+) -> None:
+    records: list[dict[str, Any]] = [
+        {"_id": "edu.uci.test1", "decision": Decision.ACCEPTED},
+        {"_id": "edu.uci.test2", "decision": Decision.WAITLISTED},
+        {"_id": "edu.uci.test3", "decision": Decision.REJECTED},
+    ]
+
+    res = await director._process_hacker_release_batch(records)
+
+    assert res.processed == 2
+    assert res.remaining == 1
+    assert not res.complete
+    mock_process_batch.assert_has_awaits(
+        [
+            call((records[0],), Decision.ACCEPTED, Role.HACKER),
+            call((records[1],), Decision.WAITLISTED, Role.HACKER),
+        ]
+    )
+
+
+@patch("routers.director._process_batch", autospec=True)
+async def test_process_hacker_release_batch_groups_decision_emails(
+    mock_process_batch: AsyncMock,
+) -> None:
+    records: list[dict[str, Any]] = [
+        {"_id": "edu.uci.accepted1", "decision": Decision.ACCEPTED},
+        {"_id": "edu.uci.waitlisted1", "decision": Decision.WAITLISTED},
+        {"_id": "edu.uci.rejected1", "decision": Decision.REJECTED},
+    ]
+
+    res = await director._process_hacker_release_batch(records)
+
+    assert res.processed == 3
+    assert res.remaining == 0
+    assert res.complete
+    mock_process_batch.assert_has_awaits(
+        [
+            call((records[0],), Decision.ACCEPTED, Role.HACKER),
+            call((records[1],), Decision.WAITLISTED, Role.HACKER),
+            call((records[2],), Decision.REJECTED, Role.HACKER),
+        ]
+    )
+
+
+@patch("routers.director.utc_now", autospec=True)
+@patch("utils.email_handler.send_decision_email", autospec=True)
+@patch("services.mongodb_handler.update", autospec=True)
+async def test_process_batch_updates_status_sends_emails_and_marks_sent(
+    mock_mongodb_handler_update: AsyncMock,
+    mock_send_decision_email: AsyncMock,
+    mock_utc_now: MagicMock,
+) -> None:
+    mock_mongodb_handler_update.return_value = True
+    started_at = datetime(2026, 10, 5, 1, 2, 3)
+    sent_at = datetime(2026, 10, 5, 1, 2, 4)
+    mock_utc_now.side_effect = [started_at, sent_at]
+    batch: tuple[dict[str, Any], ...] = (
+        {"_id": "edu.uci.accepted1", "first_name": "Accepted"},
+        {"_id": "edu.uci.accepted2", "first_name": "AlsoAccepted"},
+    )
+
+    await director._process_batch(batch, Decision.ACCEPTED, Role.HACKER)
+
+    mock_mongodb_handler_update.assert_has_awaits(
+        [
+            call(
+                Collection.USERS,
+                {"_id": {"$in": ["edu.uci.accepted1", "edu.uci.accepted2"]}},
+                {
+                    "decision": Decision.ACCEPTED,
+                    "status": Status.ACCEPTED,
+                    "decision_email_release_started_at": started_at,
+                },
+            ),
+            call(
+                Collection.USERS,
+                {"_id": {"$in": ["edu.uci.accepted1", "edu.uci.accepted2"]}},
+                {
+                    "decision_email_sent_at": sent_at,
+                    "decision_email_type": Role.HACKER.value,
+                },
+            ),
+        ]
+    )
+    mock_send_decision_email.assert_awaited_once()
+    assert mock_send_decision_email.await_args is not None
+    recipients = list(mock_send_decision_email.await_args.args[0])
+    assert recipients == [
+        ("Accepted", "accepted1@uci.edu"),
+        ("AlsoAccepted", "accepted2@uci.edu"),
+    ]
+    assert mock_send_decision_email.await_args.args[1:] == (
+        Decision.ACCEPTED,
+        Role.HACKER,
+    )
 
 
 @patch("services.ses_handler.send_waitlist_transfer_emails", autospec=True)

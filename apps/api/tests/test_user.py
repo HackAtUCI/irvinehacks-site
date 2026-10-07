@@ -105,7 +105,7 @@ def test_user_with_status_waiver_signed_rsvp_changes_status_to_confirmed(
     mock_mongodb_handler_update_one.assert_awaited_once_with(
         Collection.USERS,
         {"_id": "edu.stanford.tree"},
-        {"status": Status.CONFIRMED, "arrival_time": "17:00"},
+        {"status": Status.CONFIRMED, "arrival_time": "18:00"},
     )
 
     mock_send_rsvp_confirmation_email.assert_awaited_once_with(
@@ -201,7 +201,7 @@ def test_waitlisted_decision_with_waiver_signed_status_can_rsvp(
             "decision": Decision.WAITLISTED,
             "status": Status.WAIVER_SIGNED,
         },
-        {"status": Status.CONFIRMED, "arrival_time": "17:00"},
+        {"status": Status.CONFIRMED, "arrival_time": "18:00"},
     )
     mock_release_waitlist_spot.assert_not_awaited()
     mock_send_rsvp_confirmation_email.assert_awaited_once_with(
@@ -232,7 +232,7 @@ def test_user_with_status_confirmed_rsvp_keeps_status_confirmed(
     mock_mongodb_handler_update_one.assert_awaited_once_with(
         Collection.USERS,
         {"_id": "edu.stanford.tree"},
-        {"status": Status.CONFIRMED, "arrival_time": "17:00"},
+        {"status": Status.CONFIRMED, "arrival_time": "18:00"},
     )
     mock_send_rsvp_confirmation_email.assert_not_awaited()
 

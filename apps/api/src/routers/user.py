@@ -669,7 +669,7 @@ async def waiver_webhook(
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid payload content.")
 
 
-DEFAULT_CHECKIN_TIME = "17:00"
+DEFAULT_CHECKIN_TIME = "18:00"
 LATE_ARRIVAL_MIN = "18:00"
 LATE_ARRIVAL_MAX = "19:30"
 _TIME_PATTERN = re.compile(r"^([01]\d|2[0-3]):[0-5]\d$")
@@ -732,7 +732,7 @@ async def rsvp(
             "Waiver must be signed before being able to RSVP.",
         )
 
-    # Default check-in time is 5:00pm (17:00)
+    # Default check-in time is 6:00pm (18:00)
     arrival_value: str = DEFAULT_CHECKIN_TIME
     if arrival_time and arrival_time.strip():
         arrival_value = _validate_late_arrival_time(arrival_time)

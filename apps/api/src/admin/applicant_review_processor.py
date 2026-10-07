@@ -3,6 +3,7 @@ from typing import Any, Optional
 
 from models.ApplicationData import Decision
 from models.user_record import Role, Status
+from utils.hackathon_context import HackathonName, hackathon_name_ctx
 from .score_normalizing_handler import IH_WEIGHTING_CONFIG
 
 OVERQUALIFIED = -3
@@ -202,7 +203,11 @@ def _compute_rule_based_auto_decision(
         # if Role.MENTOR in roles:
         #     return Decision.ACCEPTED, AUTO_REASON_GRADUATED
 
-    if app_data.get("hackathon_experience") == "veteran" and Role.HACKER in roles:
+    if (
+        hackathon_name_ctx.get() == HackathonName.ZOTHACKS
+        and app_data.get("hackathon_experience") == "veteran"
+        and Role.HACKER in roles
+    ):
         return Decision.REJECTED, AUTO_REASON_HACKATHON_VETERAN
 
     return None

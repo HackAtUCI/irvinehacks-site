@@ -805,7 +805,7 @@ async def _process_hacker_release_batch(
 
     for record in batch:
         decision = record.get("decision")
-        if decision not in RELEASE_DECISIONS:
+        if not isinstance(decision, Decision) or decision not in RELEASE_DECISIONS:
             continue
         await _process_batch((record,), decision, Role.HACKER)
 

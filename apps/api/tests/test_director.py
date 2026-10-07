@@ -487,6 +487,28 @@ async def test_process_hacker_release_batch_groups_decision_emails(
     )
 
 
+@patch("routers.director._process_batch", autospec=True)
+async def test_process_hacker_release_batch_sends_each_applicant_individually(
+    mock_process_batch: AsyncMock,
+) -> None:
+    records: list[dict[str, Any]] = [
+        {"_id": "edu.uci.accepted1", "decision": Decision.ACCEPTED},
+        {"_id": "edu.uci.accepted2", "decision": Decision.ACCEPTED},
+    ]
+
+    res = await director._process_hacker_release_batch(records)
+
+    assert res.processed == 2
+    assert res.remaining == 0
+    assert res.complete
+    mock_process_batch.assert_has_awaits(
+        [
+            call((records[0],), Decision.ACCEPTED, Role.HACKER),
+            call((records[1],), Decision.ACCEPTED, Role.HACKER),
+        ]
+    )
+
+
 @patch("routers.director.utc_now", autospec=True)
 @patch("utils.email_handler.send_decision_email", autospec=True)
 @patch("services.mongodb_handler.update", autospec=True)
@@ -500,7 +522,11 @@ async def test_process_batch_updates_status_sends_emails_and_marks_sent(
     sent_at = datetime(2026, 10, 5, 1, 2, 4)
     mock_utc_now.side_effect = [started_at, sent_at]
     batch: tuple[dict[str, Any], ...] = (
-        {"_id": "edu.uci.accepted1", "first_name": "Accepted"},
+        {
+            "_id": "edu.uci.accepted1",
+            "first_name": "Accepted",
+            "application_data": {"email": "accepted.custom@example.com"},
+        },
         {"_id": "edu.uci.accepted2", "first_name": "AlsoAccepted"},
     )
 
@@ -531,12 +557,109 @@ async def test_process_batch_updates_status_sends_emails_and_marks_sent(
     assert mock_send_decision_email.await_args is not None
     recipients = list(mock_send_decision_email.await_args.args[0])
     assert recipients == [
-        ("Accepted", "accepted1@uci.edu"),
+        ("Accepted", "accepted.custom@example.com"),
         ("AlsoAccepted", "accepted2@uci.edu"),
     ]
     assert mock_send_decision_email.await_args.args[1:] == (
         Decision.ACCEPTED,
         Role.HACKER,
+    )
+
+
+@patch("routers.director.utc_now", autospec=True)
+@patch("services.ses_handler.send_rsvp_reminder_emails", autospec=True)
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve", autospec=True)
+async def test_rsvp_reminder_sends_each_hacker_and_marks_sent(
+    mock_mongodb_handler_retrieve: AsyncMock,
+    mock_mongodb_handler_update_one: AsyncMock,
+    mock_send_rsvp_reminder_emails: AsyncMock,
+    mock_utc_now: MagicMock,
+) -> None:
+    sent_at = datetime(2026, 10, 7, 9, 0, 0)
+    mock_utc_now.return_value = sent_at
+    mock_mongodb_handler_retrieve.return_value = [
+        {
+            "_id": "edu.uci.hacker1",
+            "first_name": "Hacker",
+            "application_data": {"email": "hacker.custom@example.com"},
+        }
+    ]
+
+    res = await director._rsvp_reminder(Role.HACKER)
+
+    assert res.processed == 1
+    assert res.remaining == 0
+    assert res.complete
+    mock_mongodb_handler_retrieve.assert_awaited_once_with(
+        Collection.USERS,
+        {
+            "roles": Role.HACKER,
+            "decision": Decision.ACCEPTED,
+            "status": {"$in": [Status.ACCEPTED, Status.WAIVER_SIGNED]},
+            "rsvp_reminder_email_sent_at": {"$exists": False},
+        },
+        ["_id", "first_name", "application_data.email"],
+    )
+    mock_send_rsvp_reminder_emails.assert_awaited_once_with(
+        [("Hacker", "hacker.custom@example.com")],
+        "Hacker",
+    )
+    mock_mongodb_handler_update_one.assert_awaited_once_with(
+        Collection.USERS,
+        {"_id": "edu.uci.hacker1"},
+        {
+            "rsvp_reminder_email_sent_at": sent_at,
+            "rsvp_reminder_email_type": Role.HACKER.value,
+        },
+    )
+
+
+@patch("routers.director.utc_now", autospec=True)
+@patch("services.ses_handler.send_logistics_emails", autospec=True)
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("services.mongodb_handler.retrieve", autospec=True)
+async def test_logistics_sends_each_hacker_and_marks_sent(
+    mock_mongodb_handler_retrieve: AsyncMock,
+    mock_mongodb_handler_update_one: AsyncMock,
+    mock_send_logistics_emails: AsyncMock,
+    mock_utc_now: MagicMock,
+) -> None:
+    sent_at = datetime(2026, 10, 9, 18, 0, 0)
+    mock_utc_now.return_value = sent_at
+    mock_mongodb_handler_retrieve.return_value = [
+        {
+            "_id": "edu.uci.hacker1",
+            "first_name": "Hacker",
+            "application_data": {"email": "hacker.custom@example.com"},
+        }
+    ]
+
+    res = await director._logistics_emails(Role.HACKER)
+
+    assert res.processed == 1
+    assert res.remaining == 0
+    assert res.complete
+    mock_mongodb_handler_retrieve.assert_awaited_once_with(
+        Collection.USERS,
+        {
+            "roles": Role.HACKER,
+            "status": Status.ATTENDING,
+            "logistics_email_sent_at": {"$exists": False},
+        },
+        ["_id", "first_name", "application_data.email"],
+    )
+    mock_send_logistics_emails.assert_awaited_once_with(
+        [("Hacker", "hacker.custom@example.com")],
+        "Hacker",
+    )
+    mock_mongodb_handler_update_one.assert_awaited_once_with(
+        Collection.USERS,
+        {"_id": "edu.uci.hacker1"},
+        {
+            "logistics_email_sent_at": sent_at,
+            "logistics_email_type": Role.HACKER.value,
+        },
     )
 
 

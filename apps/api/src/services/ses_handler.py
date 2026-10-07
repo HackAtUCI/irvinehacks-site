@@ -544,44 +544,51 @@ async def send_rsvp_reminder_emails(
     recipients: Iterable[Recipient],
     application_type: RoleName,
 ) -> None:
-    role = application_type.lower()
-
     def build_content(first_name: str) -> tuple[str, str, str]:
-        subject = f"Reminder: RSVP for ZotHacks 2026 as a {application_type}"
+        subject = "[ZotHacks 2026] Hacker RSVP Deadline Reminder!"
         text_body = f"""Hello {first_name}!
 
-You have been accepted to ZotHacks 2026 as a {role}, but our records show that
-you have not completed your RSVP yet.
+Congratulations again on your acceptance to ZotHacks 2026 as a hacker! Our
+records indicate that you may not have RSVP-ed for the event. Please remember
+to RSVP on the portal by tomorrow, Thursday, October 8, by 11:59 PM PT.
 
-Please visit https://zothacks.com/portal to RSVP as soon as possible.
+Portal: https://zothacks.com/portal
 
-If you have any questions, please email us at {CONTACT_EMAIL}.
+If you have any questions or concerns, please feel free to reply to this email.
+We would love to see you at the event!
 
 Best regards,
 
-The ZotHacks 2026 Team
+ZotHacks Team
+https://zothacks.com
+Create | Connect | Inspire
 """
 
         html_body = f"""
 <p>Hello {escape(first_name)}!</p>
 
-<p>You have been accepted to ZotHacks 2026 as a {escape(role)}, but our records
-show that you have not completed your RSVP yet.</p>
+<p>Congratulations again on your acceptance to ZotHacks 2026 as a hacker! Our
+records indicate that you may not have RSVP-ed for the event. Please remember
+to RSVP on the <a href="https://zothacks.com/portal">portal</a> by
+<strong>tomorrow, Thursday, October 8, by 11:59 PM PT</strong>.</p>
 
-<p>Please visit
-<a href="https://zothacks.com/portal">https://zothacks.com/portal</a> to RSVP
-as soon as possible.</p>
-
-<p>If you have any questions, please email us at
-<a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>.</p>
+<p>If you have any questions or concerns, please feel free to reply to this
+email. We would love to see you at the event!</p>
 
 <p>Best regards,</p>
 
-<p>The ZotHacks 2026 Team</p>
+<p><strong>ZotHacks Team</strong><br>
+<a href="https://zothacks.com">https://zothacks.com</a><br>
+Create | Connect | Inspire</p>
 """
         return subject, text_body, html_body
 
-    count = await _send_personalized_messages(recipients, build_content)
+    count = await _send_personalized_messages(
+        recipients,
+        build_content,
+        from_email=SES_HACKER_FROM_EMAIL,
+        from_name=SES_HACKER_FROM_NAME,
+    )
     log.info(
         "Sent SES %s RSVP reminder emails to %d recipients",
         application_type,
@@ -595,24 +602,24 @@ async def send_logistics_emails(
     *,
     waitlisted: bool = False,
 ) -> None:
-    role = application_type.lower()
-
     def build_content(first_name: str) -> tuple[str, str, str]:
-        if waitlisted:
-            subject = "ZotHacks 2026 waitlist logistics"
-            intro = (
-                "We are sending logistics information for waitlisted ZotHacks "
-                "2026 hackers. Please keep an eye on your email and portal for "
-                "updates."
-            )
-        else:
-            subject = f"ZotHacks 2026 {application_type} logistics"
-            intro = (
-                f"We are sending logistics information for ZotHacks 2026 {role}s. "
-                "Please review the portal and future emails for event details."
-            )
+        if application_type != "Hacker" or waitlisted:
+            if waitlisted:
+                subject = "ZotHacks 2026 waitlist logistics"
+                intro = (
+                    "We are sending logistics information for waitlisted ZotHacks "
+                    "2026 hackers. Please keep an eye on your email and portal for "
+                    "updates."
+                )
+            else:
+                role = application_type.lower()
+                subject = f"ZotHacks 2026 {application_type} logistics"
+                intro = (
+                    f"We are sending logistics information for ZotHacks 2026 {role}s. "
+                    "Please review the portal and future emails for event details."
+                )
 
-        text_body = f"""Hello {first_name}!
+            text_body = f"""Hello {first_name}!
 
 {intro}
 
@@ -625,7 +632,7 @@ Best regards,
 The ZotHacks 2026 Team
 """
 
-        html_body = f"""
+            html_body = f"""
 <p>Hello {escape(first_name)}!</p>
 
 <p>{escape(intro)}</p>
@@ -639,9 +646,197 @@ The ZotHacks 2026 Team
 
 <p>The ZotHacks 2026 Team</p>
 """
+            return subject, text_body, html_body
+
+        subject = "IMPORTANT: [ZotHacks 2026] Logistics and Team Assignments"
+
+        text_body = f"""Hello {first_name}!
+
+Thank you for confirming your attendance to ZotHacks 2026. Before the event,
+it is crucial that you read through the following event logistics in its
+entirety and complete the required tasks. We look forward to seeing you at
+ZotHacks!
+
+Pre-ZotHacks Checklist
+- Sign the liability waiver: https://zothacks.com/portal
+- Download all software listed on the prerequisite document: https://zothacks.com
+- Join the Discord: https://zothacks.com
+- Be sure to wear your badge for the entire duration of the event after checking in!
+- Bring your laptop + charger, a refillable water bottle, and a positive attitude to the event!
+
+Communication
+Communication during the event will primarily be done through Discord. Please
+review our starter pack if you are unfamiliar with using Discord.
+
+Team Assignment
+The team assignments can be found on the spreadsheet below. We highly recommend
+reaching out to your teammates via email or Discord before the event to get to
+know each other better and start building your team dynamic.
+
+Team Assignment Spreadsheet: https://zothacks.com
+
+General ZotHacks Schedule
+ZotHacks 2026 will take place Friday evening, all-day Saturday, and
+approximately the first half of Sunday in-person at the Student Center. If you
+cannot get inside the building at any point, please let an organizer know via
+Discord.
+
+Map: https://map.uci.edu/?id=463#!m/1117786?s/
+
+Food will be provided all day Saturday and Sunday breakfast only.
+
+Saturday (10/17):
+8:00 AM - Check In
+8:30 AM - Opening Ceremony
+9:00 AM - Breakfast
+10:00 AM - Hacking Begins
+12:00 PM - Lunch
+1:00 PM - Cookie Social
+4:30 PM - Jeopardy Social
+6:00 PM - Dinner
+10:00 PM - Hacking Ends
+
+Sunday (10/18):
+9:00 AM - Check In/Breakfast
+10:00 AM - Project Expo and Judging
+12:00 PM - Closing Ceremony
+1:00 PM - ZotHacks Ends
+
+The full event schedule will be posted on our live site in the coming days:
+https://zothacks.com. The latest check in time is 9pm. If you plan on arriving
+later than 7:30pm, please email us at {CONTACT_EMAIL} and let us know the
+reason, so we can save your spot.
+
+Health and Safety Protocols
+Please be mindful of your personal health and of those around you. If you feel
+sick, please stay home. To help us ensure your safety at the venue, keep your
+badge visible at all times.
+
+Resources and Starter Packs
+Make sure to check out these starter packs and resources to get more familiar
+with the technologies, terminology, and syntax you'll be using during ZotHacks.
+They're a great way to prepare and build confidence before you start hacking!
+We know this is a lot of information, but don't worry, you'll be supported by
+your team and mentor every step of the way!
+
+- ZotHacks 2026 Prerequisites: https://zothacks.com
+- ZotHacks 2026 Resources and Starter Packs: https://zothacks.com?overlay=resources
+- hack-intro-js-react: https://github.com/HackAtUCI/zothacks-frontend-startercode
+- starter-pack-full-stack-web-app: https://github.com/HackAtUCI/starter-pack-full-stack-web-app
+- zothacks-frontend-startercode: https://github.com/HackAtUCI/zothacks-frontend-startercode
+
+Questions/Comments
+If you have any questions that have not yet been answered or if you are unable
+to attend the event anymore, please reach out to us at {CONTACT_EMAIL}, and we
+will be glad to assist you with your concerns.
+
+Best Regards,
+The ZotHacks 2026 Team
+"""
+
+        html_body = f"""
+<p>Hello {escape(first_name)}!</p>
+
+<p>Thank you for confirming your attendance to ZotHacks 2026. Before the event,
+it is crucial that you read through the following event logistics in its
+entirety and complete the required tasks. We look forward to seeing you at
+ZotHacks!</p>
+
+<h2>Pre-ZotHacks Checklist</h2>
+<ul>
+  <li>Sign the <a href="https://zothacks.com/portal">liability waiver</a>!</li>
+  <li>Download all software listed on the
+  <a href="https://zothacks.com">prerequisite document</a>!</li>
+  <li>Join the Discord <a href="https://zothacks.com">here</a>!</li>
+  <li>Be sure to wear your badge for the entire duration of the event after
+  checking in!</li>
+  <li>Bring your laptop + charger, a refillable water bottle, and a positive
+  attitude to the event!</li>
+</ul>
+
+<h2>Communication</h2>
+<p>Communication during the event will primarily be done through Discord. Please
+review our starter pack if you are unfamiliar with using Discord.</p>
+
+<h2>Team Assignment</h2>
+<p>The team assignments can be found on the spreadsheet below. We highly
+recommend reaching out to your teammates via email or Discord before the event
+to get to know each other better and start building your team dynamic.</p>
+
+<p><a href="https://zothacks.com"><strong>Team Assignment
+Spreadsheet</strong></a></p>
+
+<h2>General ZotHacks Schedule</h2>
+<p>ZotHacks 2026 will take place Friday evening, all-day Saturday, and
+approximately the first half of Sunday in-person at the <strong>Student
+Center</strong>. If you cannot get inside the building at any point, please let
+an organizer know via Discord.</p>
+
+<p><a href="https://map.uci.edu/?id=463#!m/1117786?s/"><strong>Map</strong></a></p>
+
+<p>Food will be provided all day Saturday and Sunday breakfast only.</p>
+
+<p><strong><em>Saturday (10/17):</em></strong><br>
+8:00 AM - Check In<br>
+8:30 AM - Opening Ceremony<br>
+9:00 AM - Breakfast<br>
+10:00 AM - Hacking Begins<br>
+12:00 PM - Lunch<br>
+1:00 PM - Cookie Social<br>
+4:30 PM - Jeopardy Social<br>
+6:00 PM - Dinner<br>
+10:00 PM - Hacking Ends</p>
+
+<p><strong><em>Sunday (10/18):</em></strong><br>
+9:00 AM - Check In/Breakfast<br>
+10:00 AM - Project Expo and Judging<br>
+12:00 PM - Closing Ceremony<br>
+1:00 PM - ZotHacks Ends</p>
+
+<p>The full event schedule will be posted on our live site in the coming days:
+<a href="https://zothacks.com">https://zothacks.com</a>. The latest check in time
+is 9pm. If you plan on arriving later than 7:30pm, please email us at
+<a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a> and let us know the
+reason, so we can save your spot.</p>
+
+<h2>Health and Safety Protocols</h2>
+<p>Please be mindful of your personal health and of those around you. If you
+feel sick, please stay home. To help us ensure your safety at the venue, keep
+your <strong>badge</strong> visible at all times.</p>
+
+<h2>Resources and Starter Packs</h2>
+<p>Make sure to check out these starter packs and resources to get more familiar
+with the technologies, terminology, and syntax you'll be using during ZotHacks.
+They're a great way to prepare and build confidence before you start hacking!
+We know this is a lot of information, but don't worry, you'll be supported by
+your team and mentor every step of the way!</p>
+
+<ul>
+  <li><a href="https://zothacks.com">ZotHacks 2026 Prerequisites</a></li>
+  <li><a href="https://zothacks.com?overlay=resources">ZotHacks 2026 Resources and Starter
+  Packs</a></li>
+  <li><a href="https://github.com/HackAtUCI/zothacks-frontend-startercode">hack-intro-js-react</a></li>
+  <li><a href="https://github.com/HackAtUCI/starter-pack-full-stack-web-app">starter-pack-full-stack-web-app</a></li>
+  <li><a href="https://github.com/HackAtUCI/zothacks-frontend-startercode">zothacks-frontend-startercode</a></li>
+</ul>
+
+<h2>Questions/Comments</h2>
+<p>If you have any questions that have not yet been answered or if you are
+unable to attend the event anymore, please reach out to us at
+<a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>, and we will be glad to
+assist you with your concerns.</p>
+
+<p>Best Regards,<br>
+The ZotHacks 2026 Team</p>
+"""
         return subject, text_body, html_body
 
-    count = await _send_personalized_messages(recipients, build_content)
+    count = await _send_personalized_messages(
+        recipients,
+        build_content,
+        from_email=SES_HACKER_FROM_EMAIL,
+        from_name=SES_HACKER_FROM_NAME,
+    )
     log.info("Sent SES logistics emails to %d recipients", count)
 
 

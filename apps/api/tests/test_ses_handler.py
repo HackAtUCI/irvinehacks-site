@@ -100,3 +100,48 @@ async def test_send_hacker_decision_email_uses_decision_copy(
     message = mock_smtp.send_message.call_args.args[0]
     html = message.get_body(preferencelist=("html",)).get_content().lower()
     assert expected_text in html
+
+
+@patch("services.ses_handler.SES_SMTP_USERNAME", "smtp-user")
+@patch("services.ses_handler.SES_SMTP_PASSWORD", "smtp-password")
+@patch("services.ses_handler.smtplib.SMTP")
+async def test_send_hacker_rsvp_reminder_uses_zothacks_copy(
+    mock_smtp_class: MagicMock,
+) -> None:
+    mock_smtp = mock_smtp_class.return_value.__enter__.return_value
+
+    await ses_handler.send_rsvp_reminder_emails(
+        [("Peter", "peter@uci.edu")],
+        "Hacker",
+    )
+
+    message = mock_smtp.send_message.call_args.args[0]
+    html = message.get_body(preferencelist=("html",)).get_content()
+    assert message["Subject"] == "[ZotHacks 2026] Hacker RSVP Deadline Reminder!"
+    assert "Thursday, October 8" in html
+    assert "11:59 PM PT" in html
+    assert "portal" in html
+
+
+@patch("services.ses_handler.SES_SMTP_USERNAME", "smtp-user")
+@patch("services.ses_handler.SES_SMTP_PASSWORD", "smtp-password")
+@patch("services.ses_handler.smtplib.SMTP")
+async def test_send_hacker_logistics_uses_zothacks_copy(
+    mock_smtp_class: MagicMock,
+) -> None:
+    mock_smtp = mock_smtp_class.return_value.__enter__.return_value
+
+    await ses_handler.send_logistics_emails(
+        [("Peter", "peter@uci.edu")],
+        "Hacker",
+    )
+
+    message = mock_smtp.send_message.call_args.args[0]
+    html = message.get_body(preferencelist=("html",)).get_content()
+    assert (
+        message["Subject"]
+        == "IMPORTANT: [ZotHacks 2026] Logistics and Team Assignments"
+    )
+    assert "Pre-ZotHacks Checklist" in html
+    assert "Team Assignment" in html
+    assert "Resources and Starter Packs" in html

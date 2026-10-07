@@ -50,6 +50,8 @@ SES_ROLE_NAMES: dict[Role, ses_handler.RoleName] = {
 }
 APPLY_REMINDER_BATCH_SIZE = 25
 DECISION_EMAIL_BATCH_SIZE = int(os.getenv("DECISION_EMAIL_BATCH_SIZE", "25"))
+RSVP_REMINDER_EMAIL_BATCH_SIZE = int(os.getenv("RSVP_REMINDER_EMAIL_BATCH_SIZE", "25"))
+LOGISTICS_EMAIL_BATCH_SIZE = int(os.getenv("LOGISTICS_EMAIL_BATCH_SIZE", "25"))
 RELEASE_DECISIONS = (Decision.ACCEPTED, Decision.WAITLISTED, Decision.REJECTED)
 RELEASE_STATUSES = tuple(Status(decision.value) for decision in RELEASE_DECISIONS)
 
@@ -318,7 +320,7 @@ async def apply_reminder(user: Annotated[User, Depends(require_director)]) -> No
 
 async def _rsvp_reminder(
     application_type: Literal[Role.HACKER, Role.MENTOR, Role.VOLUNTEER],
-) -> None:
+) -> ReleaseDecisionResponse:
     """Send email to applicants based on application_type who have a status of ACCEPTED
     or WAIVER_SIGNED reminding them to RSVP."""
     # TODO: Consider using Pydantic model validation instead of type annotations
@@ -326,36 +328,49 @@ async def _rsvp_reminder(
         Collection.USERS,
         {
             "roles": Role(application_type),
+            "decision": Decision.ACCEPTED,
             "status": {"$in": [Status.ACCEPTED, Status.WAIVER_SIGNED]},
+            "rsvp_reminder_email_sent_at": {"$exists": False},
         },
-        ["_id", "first_name"],
+        ["_id", "first_name", "application_data.email"],
     )
 
-    recipients = []
-    for record in not_yet_rsvpd:
-        recipients.append((record["first_name"], recover_email_from_uid(record["_id"])))
+    batch = not_yet_rsvpd[:RSVP_REMINDER_EMAIL_BATCH_SIZE]
 
     log.info(
         (
-            f"Sending RSVP reminder emails to {len(not_yet_rsvpd)} "
+            f"Sending RSVP reminder emails to {len(batch)} "
             f"{application_type} applicants"
         )
     )
 
-    if len(not_yet_rsvpd) > 0:
+    for record in batch:
         await ses_handler.send_rsvp_reminder_emails(
-            recipients,
+            [_extract_personalizations(record)],
             SES_ROLE_NAMES[application_type],
         )
+        await mongodb_handler.update_one(
+            Collection.USERS,
+            {"_id": record["_id"]},
+            {
+                "rsvp_reminder_email_sent_at": utc_now(),
+                "rsvp_reminder_email_type": application_type.value,
+            },
+        )
+
+    remaining = max(len(not_yet_rsvpd) - len(batch), 0)
+    return ReleaseDecisionResponse(
+        processed=len(batch),
+        remaining=remaining,
+        complete=remaining == 0,
+    )
 
 
 @router.post("/rsvp-reminder", dependencies=[Depends(require_director)])
-async def rsvp_reminder() -> None:
+async def rsvp_reminder() -> ReleaseDecisionResponse:
     """Send email to applicants who have a status of ACCEPTED or WAIVER_SIGNED
     reminding them to RSVP."""
-    await _rsvp_reminder(Role.HACKER)
-    await _rsvp_reminder(Role.MENTOR)
-    await _rsvp_reminder(Role.VOLUNTEER)
+    return await _rsvp_reminder(Role.HACKER)
 
 
 async def _sync_hacker_decisions_with_thresholds(
@@ -615,42 +630,96 @@ async def release_hacker_decisions() -> ReleaseDecisionResponse:
 
 
 @router.post("/logistics/hackers", dependencies=[Depends(require_director)])
-async def hacker_logistics_emails() -> None:
+async def hacker_logistics_emails() -> ReleaseDecisionResponse:
     """Send logistics emails to hackers."""
-    await email_handler.send_logistics_email(Role.HACKER)
+    return await _logistics_emails(Role.HACKER)
 
 
 @router.post("/logistics/mentors", dependencies=[Depends(require_director)])
-async def mentor_logistics_emails() -> None:
+async def mentor_logistics_emails() -> ReleaseDecisionResponse:
     """Send logistics email to mentors."""
-    await email_handler.send_logistics_email(Role.MENTOR)
+    return await _logistics_emails(Role.MENTOR)
 
 
 @router.post("/logistics/volunteers", dependencies=[Depends(require_director)])
-async def volunteer_logistics_emails() -> None:
+async def volunteer_logistics_emails() -> ReleaseDecisionResponse:
     """Send logistics email to volunteers."""
-    await email_handler.send_logistics_email(Role.VOLUNTEER)
+    return await _logistics_emails(Role.VOLUNTEER)
 
 
 @router.post("/logistics/waitlists", dependencies=[Depends(require_director)])
-async def waitlist_logistics_emails() -> None:
+async def waitlist_logistics_emails() -> ReleaseDecisionResponse:
     """Send logistics emails to waitlisted hackers."""
     records: list[dict[str, Any]] = await mongodb_handler.retrieve(
         mongodb_handler.Collection.USERS,
-        {"roles": Role.HACKER, "status": Status.WAITLISTED},
-        ["_id", "first_name"],
+        {
+            "roles": Role.HACKER,
+            "status": Status.WAITLISTED,
+            "waitlist_logistics_email_sent_at": {"$exists": False},
+        },
+        ["_id", "first_name", "application_data.email"],
     )
 
-    recipients = []
-    for record in records:
-        recipients.append((record["first_name"], recover_email_from_uid(record["_id"])))
+    batch = records[:LOGISTICS_EMAIL_BATCH_SIZE]
 
-    if len(records) > 0:
+    for record in batch:
         await ses_handler.send_logistics_emails(
-            recipients,
+            [_extract_personalizations(record)],
             "Hacker",
             waitlisted=True,
         )
+        await mongodb_handler.update_one(
+            Collection.USERS,
+            {"_id": record["_id"]},
+            {
+                "waitlist_logistics_email_sent_at": utc_now(),
+                "logistics_email_type": Role.HACKER.value,
+            },
+        )
+
+    remaining = max(len(records) - len(batch), 0)
+    return ReleaseDecisionResponse(
+        processed=len(batch),
+        remaining=remaining,
+        complete=remaining == 0,
+    )
+
+
+async def _logistics_emails(
+    application_type: Literal[Role.HACKER, Role.MENTOR, Role.VOLUNTEER],
+) -> ReleaseDecisionResponse:
+    records: list[dict[str, Any]] = await mongodb_handler.retrieve(
+        Collection.USERS,
+        {
+            "roles": Role(application_type),
+            "status": Status.ATTENDING,
+            "logistics_email_sent_at": {"$exists": False},
+        },
+        ["_id", "first_name", "application_data.email"],
+    )
+
+    batch = records[:LOGISTICS_EMAIL_BATCH_SIZE]
+
+    for record in batch:
+        await ses_handler.send_logistics_emails(
+            [_extract_personalizations(record)],
+            SES_ROLE_NAMES[application_type],
+        )
+        await mongodb_handler.update_one(
+            Collection.USERS,
+            {"_id": record["_id"]},
+            {
+                "logistics_email_sent_at": utc_now(),
+                "logistics_email_type": application_type.value,
+            },
+        )
+
+    remaining = max(len(records) - len(batch), 0)
+    return ReleaseDecisionResponse(
+        processed=len(batch),
+        remaining=remaining,
+        complete=remaining == 0,
+    )
 
 
 @router.post("/waitlist-transfer", dependencies=[Depends(require_director)])
@@ -734,13 +803,11 @@ async def _process_hacker_release_batch(
     if not batch:
         return ReleaseDecisionResponse(processed=0, remaining=0, complete=True)
 
-    for decision in RELEASE_DECISIONS:
-        decision_batch = [
-            record for record in batch if record.get("decision") == decision
-        ]
-        if not decision_batch:
+    for record in batch:
+        decision = record.get("decision")
+        if decision not in RELEASE_DECISIONS:
             continue
-        await _process_batch(tuple(decision_batch), decision, Role.HACKER)
+        await _process_batch((record,), decision, Role.HACKER)
 
     remaining = max(len(releasable_records) - len(batch), 0)
     return ReleaseDecisionResponse(
@@ -804,5 +871,10 @@ async def _process_batch(
 
 def _extract_personalizations(decision_data: dict[str, Any]) -> tuple[str, EmailStr]:
     name = decision_data["first_name"]
-    email = recover_email_from_uid(decision_data["_id"])
+    application_data = decision_data.get("application_data")
+    email = None
+    if isinstance(application_data, Mapping):
+        email = application_data.get("email")
+    if not isinstance(email, str) or not email:
+        email = recover_email_from_uid(decision_data["_id"])
     return name, email

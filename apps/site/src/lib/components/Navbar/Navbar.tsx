@@ -8,6 +8,7 @@ import NavLinkItem from "./NavbarHelpers";
 import Button from "@/lib/components/Button/Button";
 import buttonStyles from "@/lib/components/Button/Button.module.scss";
 import { Identity } from "@/lib/utils/getUserIdentity";
+import { hasAdminRole } from "@/lib/admin/authorization";
 import BaseNavbar from "./BaseNavbar";
 
 interface NavbarProps {
@@ -15,13 +16,16 @@ interface NavbarProps {
 }
 
 export default function Navbar({ identity }: NavbarProps) {
-	const { uid, status } = identity;
+	const { uid, roles, status } = identity;
 
 	const isLoggedIn = uid !== null;
 
 	return (
 		<BaseNavbar>
 			{status !== null && <NavLinkItem href="/portal">Portal</NavLinkItem>}
+			{hasAdminRole(roles) && (
+				<NavLinkItem href="/admin/dashboard">Admin</NavLinkItem>
+			)}
 			{isLoggedIn ? (
 				<a
 					href="/logout"

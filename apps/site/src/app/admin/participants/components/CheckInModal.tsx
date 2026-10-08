@@ -3,18 +3,41 @@ import { useEffect, useState } from "react";
 import Alert from "@cloudscape-design/components/alert";
 import Box from "@cloudscape-design/components/box";
 import Button from "@cloudscape-design/components/button";
+import Link from "@cloudscape-design/components/link";
 import Modal from "@cloudscape-design/components/modal";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 import TextContent from "@cloudscape-design/components/text-content";
 import Tiles from "@cloudscape-design/components/tiles";
 
 import { Participant } from "@/lib/admin/useParticipants";
+import { ParticipantRole } from "@/lib/userRecord";
 
 export interface ActionModalProps {
 	onDismiss: () => void;
 	onConfirm: (participant: Participant, type: string) => void;
 	participant: Participant | null;
 	checkInConfirmed: boolean;
+}
+
+function getPrimaryRole(
+	roles: ReadonlyArray<ParticipantRole> = [],
+): ParticipantRole | "General" {
+	if (roles.includes(ParticipantRole.Judge)) return ParticipantRole.Judge;
+	if (roles.includes(ParticipantRole.Sponsor)) return ParticipantRole.Sponsor;
+	if (roles.includes(ParticipantRole.WorkshopLead))
+		return ParticipantRole.WorkshopLead;
+	if (roles.includes(ParticipantRole.Mentor)) return ParticipantRole.Mentor;
+	if (roles.includes(ParticipantRole.Volunteer))
+		return ParticipantRole.Volunteer;
+	if (
+		roles.includes(ParticipantRole.Hacker) ||
+		roles.includes(ParticipantRole.ZotHacks_Hacker) ||
+		roles.includes(ParticipantRole.Applicant)
+	) {
+		return ParticipantRole.Hacker;
+	}
+	if (roles.includes(ParticipantRole.Guest)) return ParticipantRole.Guest;
+	return "General";
 }
 
 function CheckInModal({
@@ -34,6 +57,8 @@ function CheckInModal({
 	if (!participant) {
 		return null;
 	}
+
+	const primaryRole = getPrimaryRole(participant.roles);
 
 	const handleDismiss = () => {
 		if (showExitWarning || checkInConfirmed) {
@@ -102,77 +127,223 @@ function CheckInModal({
 				{selectedType === "accepted" && (
 					<div>
 						<p>
-							<strong>General Check-in Instructions</strong>
+							<strong>
+								{primaryRole === ParticipantRole.Hacker ||
+								primaryRole === ParticipantRole.Mentor
+									? "Hacker / Mentor"
+									: primaryRole === "General"
+									  ? "General"
+									  : primaryRole}{" "}
+								Check-in Instructions
+							</strong>
 						</p>
 						<TextContent>
-							<ul style={{ listStyle: "none", padding: 0 }}>
-								<li>
-									<label>
-										<input type="checkbox" /> Check ID photo matches
-										participant&apos;s face
-									</label>
-								</li>
-								<li>
-									<label>
-										<input type="checkbox" /> Check participant&apos;s{" "}
-										<strong>date of birth </strong>
-										is before <strong>October 10, 2008</strong>
-									</label>
-								</li>
-								<li>
-									<label>
-										<input type="checkbox" /> Ask participant to sign the SPFB
-										sheet
-									</label>
-								</li>
-								<li>
-									<label>
-										<input
-											type="checkbox"
-											defaultChecked={!!participant.is_added_to_discord}
-											disabled={!!participant.is_added_to_discord}
-										/>{" "}
-										Joined Discord? If not, ask for check-in lead
-									</label>
-								</li>
-								<li>
-									<label>
-										<input type="checkbox" /> Fill out badge
-									</label>
-								</li>
-								<li>
-									<label>
-										<input type="checkbox" /> Inform participant regarding the
-										following:
-									</label>
-									<ul style={{ listStyle: "none", padding: "0 0 0 1.5rem" }}>
-										<li>
-											<label>
-												<input type="checkbox" /> Talk to sponsors inside
-												ballroom
-											</label>
-										</li>
-										<li>
-											<label>
-												<input type="checkbox" /> Team formation starts at 7pm
-												at Moss Cove B
-											</label>
-										</li>
-										<li>
-											<label>
-												<input type="checkbox" /> Opening ceremony starts at 8pm
-											</label>
-										</li>
-										<li>
-											<label>
-												<input type="checkbox" /> Schedule is available on
-												website at
-												<b> irvinehacks.com/schedule.</b>
-											</label>
-										</li>
-									</ul>
-								</li>
-							</ul>
+							{(primaryRole === ParticipantRole.Hacker ||
+								primaryRole === ParticipantRole.Mentor) && (
+								<ul style={{ listStyle: "none", padding: 0 }}>
+									<li>
+										<label>
+											<input type="checkbox" /> Check ID photo matches
+											participant&apos;s face
+										</label>
+									</li>
+									<li>
+										<label>
+											<input type="checkbox" /> Check participant&apos;s{" "}
+											<strong>date of birth</strong> is before or on{" "}
+											<strong>October 16, 2008</strong>
+										</label>
+									</li>
+									<li>
+										<label>
+											<input type="checkbox" /> Ask participant to sign the SPFB
+											sheet
+										</label>
+									</li>
+									<li>
+										<label>
+											<input
+												type="checkbox"
+												defaultChecked={!!participant.is_added_to_discord}
+												disabled={!!participant.is_added_to_discord}
+											/>{" "}
+											Joined Discord? If not, ask for check-in lead
+										</label>
+									</li>
+									<li>
+										<label>
+											<input type="checkbox" /> Provide / ask to fill out badge
+										</label>
+									</li>
+									<li>
+										<label>
+											<input type="checkbox" /> Inform participant regarding the
+											following:
+										</label>
+										<ul style={{ listStyle: "none", padding: "0 0 0 1.5rem" }}>
+											<li>
+												<label>
+													<input type="checkbox" /> Intro Presentation starts at
+													7pm
+												</label>
+											</li>
+											<li>
+												<label>
+													<input type="checkbox" /> Icebreakers &amp; Ideation
+													start after, at 7:30pm
+												</label>
+											</li>
+											<li>
+												<label>
+													<input type="checkbox" /> Check-in starts at 8am
+													tomorrow
+												</label>
+											</li>
+										</ul>
+									</li>
+								</ul>
+							)}
+
+							{primaryRole === ParticipantRole.Judge && (
+								<ul style={{ listStyle: "none", padding: 0 }}>
+									<li>
+										<label>
+											<input type="checkbox" /> Ask participant to sign the SPFB
+											sheet
+										</label>
+									</li>
+									<li>
+										<label>
+											<input
+												type="checkbox"
+												defaultChecked={!!participant.is_added_to_discord}
+												disabled={!!participant.is_added_to_discord}
+											/>{" "}
+											Joined Discord? If not, ask for check-in lead
+										</label>
+										<ul style={{ listStyle: "none", padding: "0 0 0 1.5rem" }}>
+											<li>
+												<label>
+													<input type="checkbox" /> Ideally, they join the
+													Discord, but they can opt out
+												</label>
+											</li>
+										</ul>
+									</li>
+									<li>
+										<label>
+											<input type="checkbox" /> Provide / ask to fill out badge
+										</label>
+									</li>
+								</ul>
+							)}
+
+							{primaryRole === ParticipantRole.Sponsor && (
+								<ul style={{ listStyle: "none", padding: 0 }}>
+									<li>
+										<label>
+											<input type="checkbox" /> Ask participant to sign the SPFB
+											sheet
+										</label>
+									</li>
+									<li>
+										<label>
+											<input type="checkbox" /> Provide / ask to fill out badge
+										</label>
+									</li>
+									<li>
+										<label>
+											<input type="checkbox" /> Inform participant regarding
+											sponsor booths &amp; ballroom
+										</label>
+									</li>
+								</ul>
+							)}
+
+							{primaryRole === ParticipantRole.WorkshopLead && (
+								<ul style={{ listStyle: "none", padding: 0 }}>
+									<li>
+										<label>
+											<input type="checkbox" /> Check ID photo matches
+											participant&apos;s face
+										</label>
+									</li>
+									<li>
+										<label>
+											<input type="checkbox" /> Ask participant to sign the SPFB
+											sheet
+										</label>
+									</li>
+									<li>
+										<label>
+											<input type="checkbox" /> Provide / ask to fill out badge
+										</label>
+									</li>
+									<li>
+										<label>
+											<input type="checkbox" /> Inform participant regarding
+											workshop schedule &amp; room
+										</label>
+									</li>
+								</ul>
+							)}
+
+							{primaryRole === ParticipantRole.Volunteer && (
+								<ul style={{ listStyle: "none", padding: 0 }}>
+									<li>
+										<label>
+											<input type="checkbox" /> Check ID photo matches
+											participant&apos;s face
+										</label>
+									</li>
+									<li>
+										<label>
+											<input type="checkbox" /> Ask participant to sign the SPFB
+											sheet
+										</label>
+									</li>
+									<li>
+										<label>
+											<input
+												type="checkbox"
+												defaultChecked={!!participant.is_added_to_discord}
+												disabled={!!participant.is_added_to_discord}
+											/>{" "}
+											Joined Discord? If not, ask for check-in lead
+										</label>
+									</li>
+									<li>
+										<label>
+											<input type="checkbox" /> Provide / ask to fill out badge
+										</label>
+									</li>
+								</ul>
+							)}
+
+							{(primaryRole === ParticipantRole.Guest ||
+								primaryRole === "General") && (
+								<ul style={{ listStyle: "none", padding: 0 }}>
+									<li>
+										<label>
+											<input type="checkbox" /> Ask participant to sign the SPFB
+											sheet
+										</label>
+									</li>
+									<li>
+										<label>
+											<input type="checkbox" /> Provide / ask to fill out badge
+										</label>
+									</li>
+								</ul>
+							)}
+
+							<p style={{ marginTop: "1rem" }}>
+								The schedule is available on the website at{" "}
+								<Link external href="/schedule">
+									Schedule
+								</Link>
+								.
+							</p>
 						</TextContent>
 					</div>
 				)}

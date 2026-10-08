@@ -19,12 +19,16 @@ export interface ActionModalProps {
 	checkInConfirmed: boolean;
 }
 
-function getPrimaryRole(roles: ReadonlyArray<ParticipantRole> = []): ParticipantRole | "General" {
+function getPrimaryRole(
+	roles: ReadonlyArray<ParticipantRole> = [],
+): ParticipantRole | "General" {
 	if (roles.includes(ParticipantRole.Judge)) return ParticipantRole.Judge;
 	if (roles.includes(ParticipantRole.Sponsor)) return ParticipantRole.Sponsor;
-	if (roles.includes(ParticipantRole.WorkshopLead)) return ParticipantRole.WorkshopLead;
+	if (roles.includes(ParticipantRole.WorkshopLead))
+		return ParticipantRole.WorkshopLead;
 	if (roles.includes(ParticipantRole.Mentor)) return ParticipantRole.Mentor;
-	if (roles.includes(ParticipantRole.Volunteer)) return ParticipantRole.Volunteer;
+	if (roles.includes(ParticipantRole.Volunteer))
+		return ParticipantRole.Volunteer;
 	if (
 		roles.includes(ParticipantRole.Hacker) ||
 		roles.includes(ParticipantRole.ZotHacks_Hacker) ||
@@ -124,11 +128,12 @@ function CheckInModal({
 					<div>
 						<p>
 							<strong>
-								{primaryRole === ParticipantRole.Hacker || primaryRole === ParticipantRole.Mentor
+								{primaryRole === ParticipantRole.Hacker ||
+								primaryRole === ParticipantRole.Mentor
 									? "Hacker / Mentor"
 									: primaryRole === "General"
-									? "General"
-									: primaryRole}{" "}
+									  ? "General"
+									  : primaryRole}{" "}
 								Check-in Instructions
 							</strong>
 						</p>
@@ -138,7 +143,8 @@ function CheckInModal({
 								<ul style={{ listStyle: "none", padding: 0 }}>
 									<li>
 										<label>
-											<input type="checkbox" /> Check ID photo matches participant&apos;s face
+											<input type="checkbox" /> Check ID photo matches
+											participant&apos;s face
 										</label>
 									</li>
 									<li>
@@ -150,7 +156,8 @@ function CheckInModal({
 									</li>
 									<li>
 										<label>
-											<input type="checkbox" /> Ask participant to sign the SPFB sheet
+											<input type="checkbox" /> Ask participant to sign the SPFB
+											sheet
 										</label>
 									</li>
 									<li>
@@ -170,22 +177,26 @@ function CheckInModal({
 									</li>
 									<li>
 										<label>
-											<input type="checkbox" /> Inform participant regarding the following:
+											<input type="checkbox" /> Inform participant regarding the
+											following:
 										</label>
 										<ul style={{ listStyle: "none", padding: "0 0 0 1.5rem" }}>
 											<li>
 												<label>
-													<input type="checkbox" /> Intro Presentation starts at 7pm
+													<input type="checkbox" /> Intro Presentation starts at
+													7pm
 												</label>
 											</li>
 											<li>
 												<label>
-													<input type="checkbox" /> Icebreakers &amp; Ideation start after, at 7:30pm
+													<input type="checkbox" /> Icebreakers &amp; Ideation
+													start after, at 7:30pm
 												</label>
 											</li>
 											<li>
 												<label>
-													<input type="checkbox" /> Check-in starts at 8am tomorrow
+													<input type="checkbox" /> Check-in starts at 8am
+													tomorrow
 												</label>
 											</li>
 										</ul>
@@ -197,7 +208,8 @@ function CheckInModal({
 								<ul style={{ listStyle: "none", padding: 0 }}>
 									<li>
 										<label>
-											<input type="checkbox" /> Ask participant to sign the SPFB sheet
+											<input type="checkbox" /> Ask participant to sign the SPFB
+											sheet
 										</label>
 									</li>
 									<li>
@@ -212,7 +224,8 @@ function CheckInModal({
 										<ul style={{ listStyle: "none", padding: "0 0 0 1.5rem" }}>
 											<li>
 												<label>
-													<input type="checkbox" /> Ideally, they join the Discord, but they can opt out
+													<input type="checkbox" /> Ideally, they join the
+													Discord, but they can opt out
 												</label>
 											</li>
 										</ul>
@@ -229,7 +242,8 @@ function CheckInModal({
 								<ul style={{ listStyle: "none", padding: 0 }}>
 									<li>
 										<label>
-											<input type="checkbox" /> Ask participant to sign the SPFB sheet
+											<input type="checkbox" /> Ask participant to sign the SPFB
+											sheet
 										</label>
 									</li>
 									<li>
@@ -239,7 +253,8 @@ function CheckInModal({
 									</li>
 									<li>
 										<label>
-											<input type="checkbox" /> Inform participant regarding sponsor booths &amp; ballroom
+											<input type="checkbox" /> Inform participant regarding
+											sponsor booths &amp; ballroom
 										</label>
 									</li>
 								</ul>
@@ -249,12 +264,14 @@ function CheckInModal({
 								<ul style={{ listStyle: "none", padding: 0 }}>
 									<li>
 										<label>
-											<input type="checkbox" /> Check ID photo matches participant&apos;s face
+											<input type="checkbox" /> Check ID photo matches
+											participant&apos;s face
 										</label>
 									</li>
 									<li>
 										<label>
-											<input type="checkbox" /> Ask participant to sign the SPFB sheet
+											<input type="checkbox" /> Ask participant to sign the SPFB
+											sheet
 										</label>
 									</li>
 									<li>
@@ -264,7 +281,8 @@ function CheckInModal({
 									</li>
 									<li>
 										<label>
-											<input type="checkbox" /> Inform participant regarding workshop schedule &amp; room
+											<input type="checkbox" /> Inform participant regarding
+											workshop schedule &amp; room
 										</label>
 									</li>
 								</ul>
@@ -274,12 +292,14 @@ function CheckInModal({
 								<ul style={{ listStyle: "none", padding: 0 }}>
 									<li>
 										<label>
-											<input type="checkbox" /> Check ID photo matches participant&apos;s face
+											<input type="checkbox" /> Check ID photo matches
+											participant&apos;s face
 										</label>
 									</li>
 									<li>
 										<label>
-											<input type="checkbox" /> Ask participant to sign the SPFB sheet
+											<input type="checkbox" /> Ask participant to sign the SPFB
+											sheet
 										</label>
 									</li>
 									<li>
@@ -300,11 +320,13 @@ function CheckInModal({
 								</ul>
 							)}
 
-							{(primaryRole === ParticipantRole.Guest || primaryRole === "General") && (
+							{(primaryRole === ParticipantRole.Guest ||
+								primaryRole === "General") && (
 								<ul style={{ listStyle: "none", padding: 0 }}>
 									<li>
 										<label>
-											<input type="checkbox" /> Ask participant to sign the SPFB sheet
+											<input type="checkbox" /> Ask participant to sign the SPFB
+											sheet
 										</label>
 									</li>
 									<li>

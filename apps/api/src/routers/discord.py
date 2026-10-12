@@ -1,3 +1,4 @@
+import asyncio
 import os
 from datetime import datetime, timezone
 from logging import getLogger
@@ -359,6 +360,18 @@ async def _retrieve_team_sync_mentors() -> list[dict[str, object]]:
     )
 
 
+async def _mark_team_pinged(uid: str, pinged_at: datetime) -> None:
+    token = hackathon_name_ctx.set(HackathonName.ZOTHACKS)
+    try:
+        await mongodb_handler.update_one(
+            Collection.USERS,
+            {"_id": uid},
+            {"discord_team_pinged_at": pinged_at},
+        )
+    finally:
+        hackathon_name_ctx.reset(token)
+
+
 def _new_sync_summary(dry_run: bool, participant_count: int) -> dict[str, Any]:
     return {
         "status": "success",
@@ -397,84 +410,100 @@ async def sync_discord_team_assignments(
     team_channels = await _fetch_team_channel_ids()
 
     summary = _new_sync_summary(dry_run, len(participants))
-    ping_updates = []
     now = datetime.now(timezone.utc)
+    semaphore = asyncio.Semaphore(10)
 
     async with httpx.AsyncClient() as client:
-        for participant in participants:
-            uid_value = participant.get("_id")
-            roles = participant.get("roles", [])
-            if not isinstance(uid_value, str) or not isinstance(roles, list):
-                continue
 
-            discord_username = _application_discord_username(participant)
-            if not discord_username:
-                summary["missing_discord_username"].append(uid_value)
-                continue
-            if discord_username in duplicate_names:
-                summary["duplicate_discord_username"].append(uid_value)
-                continue
-
-            member = member_lookup.get(discord_username)
-            if not member:
-                summary["member_not_found"].append(uid_value)
-                continue
-
-            member_id = _member_id(member)
-            role_id = _participant_discord_role_id(roles)
-            team_number = _team_number(participant.get("team_number"))
-            if not member_id or not role_id:
-                continue
-            if team_number is None:
-                summary["missing_team_number"].append(uid_value)
-                continue
-
-            channel_id = team_channels.get(team_number)
-            if not channel_id:
-                summary["missing_team_channel"].append(uid_value)
-                continue
-
-            assigned_role = await _assign_role(
-                client, member_id, role_id, member, dry_run
-            )
-            if assigned_role:
-                summary["roles_assigned"] += 1
-
-            await _allow_team_channel(client, member_id, channel_id, dry_run)
-            summary["channels_allowed"] += 1
-
-            if participant.get("discord_team_pinged_at") is not None:
-                summary["skipped_already_pinged"] += 1
-            else:
-                ping_sent = await _send_team_ping(
+        async def process_participant(participant: dict[str, object]) -> None:
+            async with semaphore:
+                await _process_participant_team_sync(
                     client,
-                    member_id,
-                    channel_id,
-                    team_number,
-                    roles,
-                    mentor_mentions.get(team_number, []),
+                    participant,
+                    member_lookup,
+                    duplicate_names,
+                    mentor_mentions,
+                    team_channels,
+                    summary,
+                    now,
                     dry_run,
                 )
-                if ping_sent:
-                    summary["pings_sent"] += 1
-                    if not dry_run:
-                        ping_updates.append(
-                            UpdateOne(
-                                {"_id": uid_value},
-                                {"$set": {"discord_team_pinged_at": now}},
-                            )
-                        )
 
-            summary["synced"] += 1
-
-    if ping_updates:
-        token = hackathon_name_ctx.set(HackathonName.ZOTHACKS)
-        try:
-            await mongodb_handler.bulk_update(Collection.USERS, ping_updates)
-        finally:
-            hackathon_name_ctx.reset(token)
+        await asyncio.gather(
+            *(process_participant(participant) for participant in participants)
+        )
 
     return summary
+
+
+async def _process_participant_team_sync(
+    client: httpx.AsyncClient,
+    participant: dict[str, object],
+    member_lookup: dict[str, dict[str, Any]],
+    duplicate_names: set[str],
+    mentor_mentions: dict[int, list[str]],
+    team_channels: dict[int, str],
+    summary: dict[str, Any],
+    now: datetime,
+    dry_run: bool,
+) -> None:
+    uid_value = participant.get("_id")
+    roles = participant.get("roles", [])
+    if not isinstance(uid_value, str) or not isinstance(roles, list):
+        return
+
+    discord_username = _application_discord_username(participant)
+    if not discord_username:
+        summary["missing_discord_username"].append(uid_value)
+        return
+    if discord_username in duplicate_names:
+        summary["duplicate_discord_username"].append(uid_value)
+        return
+
+    member = member_lookup.get(discord_username)
+    if not member:
+        summary["member_not_found"].append(uid_value)
+        return
+
+    member_id = _member_id(member)
+    role_id = _participant_discord_role_id(roles)
+    team_number = _team_number(participant.get("team_number"))
+    if not member_id or not role_id:
+        return
+    if team_number is None:
+        summary["missing_team_number"].append(uid_value)
+        return
+
+    channel_id = team_channels.get(team_number)
+    if not channel_id:
+        summary["missing_team_channel"].append(uid_value)
+        return
+
+    assigned_role = await _assign_role(client, member_id, role_id, member, dry_run)
+    if assigned_role:
+        summary["roles_assigned"] += 1
+
+    await _allow_team_channel(client, member_id, channel_id, dry_run)
+    summary["channels_allowed"] += 1
+
+    if participant.get("discord_team_pinged_at") is not None:
+        summary["skipped_already_pinged"] += 1
+    else:
+        ping_sent = await _send_team_ping(
+            client,
+            member_id,
+            channel_id,
+            team_number,
+            roles,
+            mentor_mentions.get(team_number, []),
+            dry_run,
+        )
+        if ping_sent:
+            summary["pings_sent"] += 1
+            if not dry_run:
+                await _mark_team_pinged(uid_value, now)
+
+    summary["synced"] += 1
 
 
 def _verify_discord_signature(

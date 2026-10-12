@@ -312,8 +312,9 @@ def _hacker_decision_copy(decision: DecisionName) -> tuple[str, str, str]:
             "excited to welcome you to attend our beginner-friendly, 12-hour "
             "hackathon.\n\n"
             "ZotHacks will take place from Friday, October 16 to Sunday, "
-            "October 18 at the Student Center @ Pacific Ballroom. Here is a brief overview of "
-            "what you can expect on the weekend of ZotHacks:\n\n"
+            "October 18 at the Student Center @ Pacific Ballroom. Here is a "
+            "brief overview of what you can expect on the weekend of "
+            "ZotHacks:\n\n"
             "Friday, October 16 (7 PM - 10 PM) - Hacker Orientation and Team "
             "Formation\n"
             "Saturday, October 17 (8 AM - 10 PM) - Opening ceremony and "
@@ -357,10 +358,11 @@ def _hacker_decision_copy(decision: DecisionName) -> tuple[str, str, str]:
 <p>Congratulations, you've been accepted to ZotHacks 2026! We're so excited to
 welcome you to attend our beginner-friendly, 12-hour hackathon.</p>
 
-<p>ZotHacks will take place from <strong>Friday, October 16 to Sunday, October
-18</strong> at <a href="https://map.uci.edu/?id=463#!m/1117786?s/">Student 
-Center @ Pacific Ballroom</a>. Here is a brief overview of what you can expect on the weekend
-of ZotHacks:</p>
+<p>ZotHacks will take place from <strong>Friday, October 16 to Sunday,
+October 18</strong> at
+<a href="https://map.uci.edu/?id=463#!m/1117786?s/">Student Center @ Pacific
+Ballroom</a>. Here is a brief overview of what you can expect on the weekend of
+ZotHacks:</p>
 
 <p style="margin-left: 2rem;"><em>Friday, October 16 (7 PM - 10 PM)</em> -
 Hacker Orientation and Team Formation<br>
@@ -662,7 +664,8 @@ Pre-ZotHacks Checklist
 - Download all software listed on the prerequisite document: https://zothacks.com
 - Join the Discord: https://zothacks.com
 - Be sure to wear your badge for the entire duration of the event after checking in!
-- Bring your laptop + charger, a refillable water bottle, and a positive attitude to the event!
+- Bring your laptop + charger, a refillable water bottle, and a positive
+  attitude to the event!
 
 Communication
 Communication during the event will primarily be done through Discord. Please
@@ -720,10 +723,14 @@ We know this is a lot of information, but don't worry, you'll be supported by
 your team and mentor every step of the way!
 
 - ZotHacks 2026 Prerequisites: https://zothacks.com
-- ZotHacks 2026 Resources and Starter Packs: https://zothacks.com?overlay=resources
-- hack-intro-js-react: https://github.com/HackAtUCI/zothacks-frontend-startercode
-- starter-pack-full-stack-web-app: https://github.com/HackAtUCI/starter-pack-full-stack-web-app
-- zothacks-frontend-startercode: https://github.com/HackAtUCI/zothacks-frontend-startercode
+- ZotHacks 2026 Resources and Starter Packs:
+  https://zothacks.com?overlay=resources
+- hack-intro-js-react:
+  https://github.com/HackAtUCI/zothacks-frontend-startercode
+- starter-pack-full-stack-web-app:
+  https://github.com/HackAtUCI/starter-pack-full-stack-web-app
+- zothacks-frontend-startercode:
+  https://github.com/HackAtUCI/zothacks-frontend-startercode
 
 Questions/Comments
 If you have any questions that have not yet been answered or if you are unable
@@ -813,11 +820,14 @@ your team and mentor every step of the way!</p>
 
 <ul>
   <li><a href="https://zothacks.com">ZotHacks 2026 Prerequisites</a></li>
-  <li><a href="https://zothacks.com?overlay=resources">ZotHacks 2026 Resources and Starter
-  Packs</a></li>
-  <li><a href="https://github.com/HackAtUCI/zothacks-frontend-startercode">hack-intro-js-react</a></li>
-  <li><a href="https://github.com/HackAtUCI/starter-pack-full-stack-web-app">starter-pack-full-stack-web-app</a></li>
-  <li><a href="https://github.com/HackAtUCI/zothacks-frontend-startercode">zothacks-frontend-startercode</a></li>
+  <li><a href="https://zothacks.com?overlay=resources">ZotHacks 2026
+  Resources and Starter Packs</a></li>
+  <li><a href="https://github.com/HackAtUCI/zothacks-frontend-startercode">
+  hack-intro-js-react</a></li>
+  <li><a href="https://github.com/HackAtUCI/starter-pack-full-stack-web-app">
+  starter-pack-full-stack-web-app</a></li>
+  <li><a href="https://github.com/HackAtUCI/zothacks-frontend-startercode">
+  zothacks-frontend-startercode</a></li>
 </ul>
 
 <h2>Questions/Comments</h2>

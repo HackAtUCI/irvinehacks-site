@@ -9,7 +9,7 @@ from jose import jwt
 
 SAVE_URL_BASE = "https://pay.google.com/gp/v/save/"
 
-GENERIC_CLASS_ID = "3388000000023162467.zothacks-2026"
+GENERIC_CLASS_ID = "3388000000023211721.zothacks-2026"
 ISSUER_ID = GENERIC_CLASS_ID.split(".")[0]
 
 GENERIC_TYPE = "GENERIC_ENTRY_TICKET"

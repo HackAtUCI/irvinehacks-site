@@ -92,10 +92,10 @@ async def test_fetch_discord_member_names(mock_client_cls: MagicMock) -> None:
         }
     ]
     client = AsyncMock()
-    client.get.return_value = response
+    client.request.return_value = response
     mock_client_cls.return_value.__aenter__.return_value = client
 
     names = await discord._fetch_discord_member_names()
 
     assert names == {"nick", "username", "global name"}
-    client.get.assert_awaited_once()
+    client.request.assert_awaited_once()

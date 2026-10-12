@@ -414,6 +414,7 @@ async def sync_discord_team_assignments(
     semaphore = asyncio.Semaphore(10)
 
     async with httpx.AsyncClient() as client:
+
         async def process_participant(participant: dict[str, object]) -> None:
             async with semaphore:
                 await _process_participant_team_sync(

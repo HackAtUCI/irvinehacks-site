@@ -83,12 +83,28 @@ async def _discord_request(
     path: str,
     **kwargs: Any,
 ) -> httpx.Response:
-    response = await client.request(
-        method,
-        f"https://discord.com/api/v10{path}",
-        headers=_discord_headers(),
-        **kwargs,
-    )
+    max_attempts = 3
+    for attempt in range(max_attempts):
+        response = await client.request(
+            method,
+            f"https://discord.com/api/v10{path}",
+            headers=_discord_headers(),
+            **kwargs,
+        )
+
+        if response.status_code != 429:
+            break
+
+        retry_after = response.json().get("retry_after", 1)
+        try:
+            delay = float(retry_after)
+        except (TypeError, ValueError):
+            delay = 1
+
+        if attempt == max_attempts - 1:
+            break
+
+        await asyncio.sleep(delay + 0.25)
 
     if response.status_code >= 400:
         log.error(
@@ -386,6 +402,7 @@ def _new_sync_summary(dry_run: bool, participant_count: int) -> dict[str, Any]:
         "member_not_found": [],
         "missing_team_number": [],
         "missing_team_channel": [],
+        "discord_api_failed": [],
         "skipped_already_pinged": 0,
     }
 
@@ -411,10 +428,9 @@ async def sync_discord_team_assignments(
 
     summary = _new_sync_summary(dry_run, len(participants))
     now = datetime.now(timezone.utc)
-    semaphore = asyncio.Semaphore(10)
+    semaphore = asyncio.Semaphore(2)
 
     async with httpx.AsyncClient() as client:
-
         async def process_participant(participant: dict[str, object]) -> None:
             async with semaphore:
                 await _process_participant_team_sync(
@@ -479,16 +495,19 @@ async def _process_participant_team_sync(
         summary["missing_team_channel"].append(uid_value)
         return
 
-    assigned_role = await _assign_role(client, member_id, role_id, member, dry_run)
-    if assigned_role:
-        summary["roles_assigned"] += 1
-
-    await _allow_team_channel(client, member_id, channel_id, dry_run)
-    summary["channels_allowed"] += 1
-
     if participant.get("discord_team_pinged_at") is not None:
         summary["skipped_already_pinged"] += 1
-    else:
+        summary["synced"] += 1
+        return
+
+    try:
+        assigned_role = await _assign_role(client, member_id, role_id, member, dry_run)
+        if assigned_role:
+            summary["roles_assigned"] += 1
+
+        await _allow_team_channel(client, member_id, channel_id, dry_run)
+        summary["channels_allowed"] += 1
+
         ping_sent = await _send_team_ping(
             client,
             member_id,
@@ -502,6 +521,9 @@ async def _process_participant_team_sync(
             summary["pings_sent"] += 1
             if not dry_run:
                 await _mark_team_pinged(uid_value, now)
+    except HTTPException:
+        summary["discord_api_failed"].append(uid_value)
+        return
 
     summary["synced"] += 1
 
@@ -559,6 +581,7 @@ def _format_sync_summary(summary: dict[str, Any]) -> str:
         ("member_not_found", "Member not found"),
         ("missing_team_number", "Missing team number"),
         ("missing_team_channel", "Missing team channel"),
+        ("discord_api_failed", "Discord API failed"),
     ):
         values = summary.get(key, [])
         if values:

@@ -59,6 +59,17 @@ function CheckInModal({
 	}
 
 	const primaryRole = getPrimaryRole(participant.roles);
+	const hackathon =
+		typeof document === "undefined"
+			? undefined
+			: document.cookie
+					.split(";")
+					.find((cookie) => cookie.trim().startsWith("hackathon="))
+					?.split("=")[1];
+	const scheduleUrl =
+		hackathon === "zothacks"
+			? "https://zothacks.com/schedule"
+			: "https://irvinehacks.com/schedule";
 
 	const handleDismiss = () => {
 		if (showExitWarning || checkInConfirmed) {
@@ -339,8 +350,8 @@ function CheckInModal({
 
 							<p style={{ marginTop: "1rem" }}>
 								The schedule is available on the website at{" "}
-								<Link external href="/schedule">
-									Schedule
+								<Link external href={scheduleUrl}>
+									{scheduleUrl.replace("https://", "")}
 								</Link>
 								.
 							</p>

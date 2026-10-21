@@ -3,6 +3,7 @@ from typing import Any, Optional
 
 from models.ApplicationData import Decision
 from models.user_record import Role, Status
+from utils.hackathon_context import HackathonName, hackathon_name_ctx
 from .score_normalizing_handler import IH_WEIGHTING_CONFIG
 
 OVERQUALIFIED = -3
@@ -18,6 +19,7 @@ ZOTHACKS_REVIEW_FIELDS = {
 
 AUTO_REASON_UNDER_18 = "UNDER_18"
 AUTO_REASON_GRADUATED = "GRADUATED"
+AUTO_REASON_HACKATHON_VETERAN = "HACKATHON_VETERAN"
 AUTO_REASON_DIRECTOR_AUTO_ACCEPT = "DIRECTOR_AUTO_ACCEPT"
 
 scores_to_decisions: dict[Optional[int], Decision] = {
@@ -295,6 +297,13 @@ def _compute_rule_based_auto_decision(
         # if Role.MENTOR in roles:
         #     return Decision.ACCEPTED, AUTO_REASON_GRADUATED
 
+    if (
+        hackathon_name_ctx.get() == HackathonName.ZOTHACKS
+        and app_data.get("hackathon_experience") == "veteran"
+        and Role.HACKER in roles
+    ):
+        return Decision.REJECTED, AUTO_REASON_HACKATHON_VETERAN
+
     return None
 
 
@@ -307,6 +316,8 @@ def _compute_auto_decision(
     if persisted == AUTO_REASON_UNDER_18:
         return Decision.REJECTED, persisted
     if persisted == AUTO_REASON_GRADUATED:
+        return Decision.REJECTED, persisted
+    if persisted == AUTO_REASON_HACKATHON_VETERAN:
         return Decision.REJECTED, persisted
 
     return _compute_rule_based_auto_decision(applicant_record)

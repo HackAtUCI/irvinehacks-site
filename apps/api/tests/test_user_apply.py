@@ -13,8 +13,10 @@ from models.ApplicationData import (
     ProcessedZotHacksHackerApplicationData,
 )
 
+from admin import applicant_review_processor
 from models.user_record import Applicant, Status, Role
 from routers import user
+from services.mongodb_handler import Collection
 from utils import resume_handler
 
 from utils.hackathon_context import HackathonName
@@ -234,6 +236,95 @@ def test_zothacks_hacker_apply_successfully(
     mock_raw_update_one.assert_awaited_once()
     mock_send_application_confirmation_email.assert_awaited_once()
     assert res.status_code == 201
+
+
+@patch("utils.email_handler.send_application_confirmation_email", autospec=True)
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("routers.user._is_past_deadline", autospec=True)
+@patch("routers.user.datetime", autospec=True)
+@patch("services.gdrive_handler.upload_file", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_zothacks_hacker_veteran_apply_auto_rejects(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_gdrive_handler_upload_file: AsyncMock,
+    mock_datetime: Mock,
+    mock_is_past_deadline: Mock,
+    mock_mongodb_handler_update_one: AsyncMock,
+    mock_raw_update_one: AsyncMock,
+    mock_send_application_confirmation_email: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.return_value = None
+    mock_gdrive_handler_upload_file.return_value = SAMPLE_RESUME_URL
+    mock_datetime.now.return_value = SAMPLE_SUBMISSION_TIME
+    mock_is_past_deadline.return_value = False
+
+    veteran_application = {
+        **SAMPLE_ZOTHACKS_HACKER_APPLICATION,
+        "is_18_older": "true",
+        "hackathon_experience": "veteran",
+    }
+
+    res = client.post(
+        "/apply",
+        data=veteran_application,
+        files=SAMPLE_FILES,
+        headers={"X-Hackathon-Name": HackathonName.ZOTHACKS},
+    )
+
+    assert res.status_code == 201
+    mock_raw_update_one.assert_awaited_once()
+    update_call = mock_raw_update_one.await_args
+    assert update_call is not None
+    applicant = update_call.args[2]["$set"]
+    assert applicant["status"] == Status.REVIEWED
+    assert (
+        applicant["auto_decision_reason"]
+        == applicant_review_processor.AUTO_REASON_HACKATHON_VETERAN
+    )
+    assert applicant["application_data"]["global_field_scores"] == {
+        "hackathon_experience": -1000,
+    }
+    assert update_call.args[0] == Collection.USERS
+    assert update_call.args[1] == {"_id": USER_PKFIRE.uid}
+
+
+@patch("utils.email_handler.send_application_confirmation_email", autospec=True)
+@patch("services.mongodb_handler.raw_update_one", autospec=True)
+@patch("services.mongodb_handler.update_one", autospec=True)
+@patch("routers.user._is_past_deadline", autospec=True)
+@patch("routers.user.datetime", autospec=True)
+@patch("services.gdrive_handler.upload_file", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_zothacks_hacker_veteran_apply_not_auto_rejected_for_irvinehacks(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_gdrive_handler_upload_file: AsyncMock,
+    mock_datetime: Mock,
+    mock_is_past_deadline: Mock,
+    mock_mongodb_handler_update_one: AsyncMock,
+    mock_raw_update_one: AsyncMock,
+    mock_send_application_confirmation_email: AsyncMock,
+) -> None:
+    mock_mongodb_handler_retrieve_one.return_value = None
+    mock_gdrive_handler_upload_file.return_value = SAMPLE_RESUME_URL
+    mock_datetime.now.return_value = SAMPLE_SUBMISSION_TIME
+    mock_is_past_deadline.return_value = False
+
+    veteran_application = {
+        **SAMPLE_ZOTHACKS_HACKER_APPLICATION,
+        "is_18_older": "true",
+        "hackathon_experience": "veteran",
+    }
+
+    res = client.post("/apply", data=veteran_application, files=SAMPLE_FILES)
+
+    assert res.status_code == 201
+    mock_raw_update_one.assert_awaited_once()
+    update_call = mock_raw_update_one.await_args
+    assert update_call is not None
+    applicant = update_call.args[2]["$set"]
+    assert applicant["status"] == Status.PENDING_REVIEW
+    assert applicant.get("auto_decision_reason") is None
 
 
 @patch("services.gdrive_handler.upload_file", autospec=True)

@@ -11,7 +11,7 @@ on:
 jobs:
   check-api:
     name: Check API
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04 # switch back to latest and upgrade pyton to 3.12 later
     defaults:
       run:
         working-directory: apps/api

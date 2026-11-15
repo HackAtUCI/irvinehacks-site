@@ -37,3 +37,7 @@ yarn-error.log*
 
 # Python
 .venv
+
+# Agents
+SKILL.MD
+.agents

@@ -103,7 +103,7 @@ export default function InterestFormsSection() {
 
 						<div className="flex flex-col gap-3.5 text-black">
 							<h2 className="m-0 font-londrina text-[32px] font-normal leading-tight sm:text-[40px]">
-								What is Irvinehacks?
+								What is IrvineHacks?
 							</h2>
 							<p className="m-0 font-nunito text-[15px] font-normal leading-[1.35] sm:text-[16.65px]">
 								IrvineHacks is the largest collegiate hackathon in Orange

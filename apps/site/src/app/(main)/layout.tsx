@@ -8,7 +8,7 @@ import BaseNavbar from "@/lib/components/Navbar/BaseNavbar";
 
 import "./globals.css";
 
-const title = "IrvineHacks 2026";
+const title = "IrvineHacks 2027";
 const description =
 	"IrvineHacks is Hack at UCI's premier hackathon for collegiate students.";
 

@@ -1,31 +1,13 @@
-import {
-	Landing,
-	Prizes,
-	ChooseCharacter,
-	FAQ,
-	Sponsors,
-	Partners,
-	// Organizers,
-} from "./sections";
+import ComingSoonHero from "./sections/ComingSoon/ComingSoonHero";
+import InterestFormsSection from "./sections/ComingSoon/InterestFormsSection";
 
 export const revalidate = 60;
 
 export default function Home() {
-	// Show landing section only if still in maintenance,
-	// otherwise show the rest of the sections
-	return process.env.MAINTENANCE_MODE_HOME ? (
-		<>
-			<Landing />
-		</>
-	) : (
-		<>
-			<Landing />
-			<Prizes />
-			<ChooseCharacter />
-			<FAQ />
-			<Sponsors />
-			<Partners />
-			{/* <Organizers /> */}
-		</>
+	return (
+		<main className="w-full bg-cream">
+			<ComingSoonHero />
+			<InterestFormsSection />
+		</main>
 	);
 }

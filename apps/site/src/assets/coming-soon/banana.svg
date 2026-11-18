@@ -1,0 +1,22 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="100.251" height="75.6432" viewBox="0 0 100.251 75.6432" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Banana">
+<g id="Vector 52" filter="url(#filter0_d_0_87)">
+<path d="M5.25032 1.0506L2.1012 2.84947L5.25032 21.3521L2.1012 39.8548L29.1312 66.0669L59.5727 72.4914L73.7438 66.0669L86.8652 58.1005L98.1495 35.2291L86.8652 28.8046L53.2745 42.4246L29.1312 32.4023L12.3359 19.2963L10.2364 2.84947L5.25032 1.0506Z" fill="#FFCC40"/>
+</g>
+<path id="Vector 53" d="M5.77535 2.07932L3.15108 3.62121L5.77535 7.98989L9.71176 3.62121L5.77535 2.07932Z" fill="#543B1C"/>
+<path id="Vector 54" d="M86.8653 29.8324L81.8791 35.229L86.8653 40.8826L92.3762 38.5698L96.3126 35.229L86.8653 29.8324Z" fill="#503919"/>
+<path id="Vector 55" d="M37.1838 55.7884L15.8399 39.0846L12.5983 44.9952L34.9046 62.213L55.8988 64.7828L56.8104 58.1013L37.1838 55.7884Z" fill="#513412"/>
+</g>
+<defs>
+<filter id="filter0_d_0_87" x="-2.98023e-08" y="0" width="100.251" height="75.6432" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="1.0506"/>
+<feGaussianBlur stdDeviation="1.0506"/>
+<feComposite in2="hardAlpha" operator="out"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0.310096 0 0 0 0 0.310096 0 0 0 0 0.310096 0 0 0 0.25 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_0_87"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_0_87" result="shape"/>
+</filter>
+</defs>
+</svg>

@@ -6,8 +6,7 @@ import heroBase from "@/assets/coming-soon/hero-base.png";
 import heroRightDoor from "@/assets/coming-soon/hero-right-door.png";
 import heroLeftDoor from "@/assets/coming-soon/hero-left-door.png";
 import heroOverlay from "@/assets/coming-soon/hero-overlay.png";
-import stickerOuter from "@/assets/coming-soon/sticker-outer.svg";
-import stickerInner from "@/assets/coming-soon/sticker-inner.svg";
+import comingSoonSticker from "@/assets/coming-soon/coming-soon-sticker.svg";
 
 export default function ComingSoonHero() {
 	const handleStickerClick = () => {
@@ -19,7 +18,7 @@ export default function ComingSoonHero() {
 
 	return (
 		<section className="relative h-[580px] w-full overflow-hidden bg-cream sm:h-[780px] lg:h-[1080px]">
-			{/* Layered storefront & doors */}
+			{/* Layered storefront & doors (kept separate for future door animations) */}
 			<div className="pointer-events-none absolute inset-0">
 				<Image
 					src={heroBase}
@@ -61,28 +60,22 @@ export default function ComingSoonHero() {
 			/>
 
 			{/* Coming Soon interactive sticker */}
-			<div className="relative z-10 flex h-full w-full items-end justify-center pb-14 sm:pb-24 lg:pb-[110px]">
+			<div className="relative z-10 flex h-full w-full items-end justify-center pb-12 sm:pb-20 lg:pb-[110px]">
 				<button
 					type="button"
 					onClick={handleStickerClick}
 					aria-label="Scroll to interest forms"
-					className="group relative flex h-[250px] w-[360px] cursor-pointer items-center justify-center transition-transform duration-200 ease-out hover:scale-105 active:scale-95 sm:h-[340px] sm:w-[500px] lg:h-[439px] lg:w-[650px]"
+					className="group relative flex h-[230px] w-[350px] cursor-pointer items-center justify-center transition-transform duration-200 ease-out hover:scale-105 active:scale-95 sm:h-[310px] sm:w-[490px] lg:h-[391px] lg:w-[621px]"
 				>
 					<Image
-						src={stickerOuter}
+						src={comingSoonSticker}
 						alt=""
 						aria-hidden="true"
 						className="pointer-events-none absolute inset-0 h-full w-full rotate-[4.56deg] object-contain"
 					/>
-					<Image
-						src={stickerInner}
-						alt=""
-						aria-hidden="true"
-						className="pointer-events-none absolute inset-[6%] h-[88%] w-[88%] rotate-[4.56deg] object-contain"
-					/>
 
-					<div className="relative z-10 flex rotate-[4.56deg] flex-col items-center text-center">
-						<h1 className="m-0 font-storefront text-[40px] font-normal leading-[1.08] text-sticker-green sm:text-[58px] lg:text-[76px] lg:leading-[84px]">
+					<div className="relative z-10 flex rotate-[4.56deg] flex-col items-center justify-center text-center">
+						<h1 className="m-0 font-storefront text-[38px] font-normal leading-[1.08] text-sticker-green sm:text-[56px] lg:text-[76px] lg:leading-[84px]">
 							Coming Soon..
 						</h1>
 						<p className="m-0 mt-1 font-nunito text-[15px] font-semibold leading-snug text-sticker-green sm:text-[20px] lg:text-[24px] lg:leading-[30px]">
@@ -90,7 +83,7 @@ export default function ComingSoonHero() {
 						</p>
 						<span
 							aria-hidden="true"
-							className="mt-2 inline-block rotate-[90deg] font-handwritten text-[28px] leading-none text-ih-blue transition-transform duration-200 group-hover:translate-y-1 sm:mt-3 sm:text-[34px] lg:text-[40px]"
+							className="absolute left-1/2 top-full mt-3 inline-block -translate-x-1/2 rotate-[90deg] font-handwritten text-[28px] leading-none text-ih-blue transition-transform duration-200 group-hover:translate-y-1 sm:mt-5 sm:text-[34px] lg:mt-7 lg:text-[40px]"
 						>
 							&gt;&gt;
 						</span>

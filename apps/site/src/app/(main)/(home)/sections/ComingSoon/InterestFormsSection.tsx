@@ -7,12 +7,8 @@ import barcodeHacker from "@/assets/coming-soon/barcode-hacker.svg";
 import barcodeJudge from "@/assets/coming-soon/barcode-judge.svg";
 import barcodeMentor from "@/assets/coming-soon/barcode-mentor.svg";
 import arrowLine from "@/assets/coming-soon/arrow-line.svg";
-import flare1 from "@/assets/coming-soon/flare-1.svg";
-import flare2 from "@/assets/coming-soon/flare-2.svg";
-import flare3 from "@/assets/coming-soon/flare-3.svg";
-import flare4 from "@/assets/coming-soon/flare-4.svg";
-
-const INTEREST_FORM_URL = "https://forms.gle/piQ793jmrL2m99VP6";
+import flaresTopLeft from "@/assets/coming-soon/flares-top-left.svg";
+import flaresBottomRight from "@/assets/coming-soon/flares-bottom-right.svg";
 
 interface CouponConfig {
 	role: string;
@@ -22,6 +18,7 @@ interface CouponConfig {
 	illustration: StaticImageData;
 	illustrationClass: string;
 	barcode: StaticImageData;
+	interestForm: string;
 }
 
 const COUPONS: CouponConfig[] = [
@@ -32,8 +29,9 @@ const COUPONS: CouponConfig[] = [
 		expColorClass: "text-[#ff7830]",
 		illustration: sodaCan,
 		illustrationClass:
-			"right-3 top-6 h-[64px] w-[40px] rotate-[11.64deg] sm:right-4 sm:top-7 sm:h-[67px] sm:w-[40px]",
+			"right-3 top-6 h-[64px] w-[40px] rotate-[11.64deg] sm:right-4 sm:top-8 sm:h-[67px] sm:w-[40px]",
 		barcode: barcodeHacker,
+		interestForm: "https://forms.gle/Tqn91PCedcb1iqNc6",
 	},
 	{
 		role: "Judge",
@@ -42,8 +40,9 @@ const COUPONS: CouponConfig[] = [
 		expColorClass: "text-ih-yellow",
 		illustration: banana,
 		illustrationClass:
-			"right-2 top-3 h-[68px] w-[90px] rotate-[139.41deg] -scale-y-100 sm:right-3 sm:top-3 sm:h-[71px] sm:w-[96px]",
+			"right-2 top-[24px] h-[68px] w-[90px] rotate-[139.41deg] -scale-y-100 sm:right-1 sm:top-[36px] sm:h-[71px] sm:w-[96px]",
 		barcode: barcodeJudge,
+		interestForm: "https://forms.gle/1s819TcMoYUKAyyf7",
 	},
 	{
 		role: "Mentor",
@@ -52,8 +51,9 @@ const COUPONS: CouponConfig[] = [
 		expColorClass: "text-[#25c3e6]",
 		illustration: ramune,
 		illustrationClass:
-			"right-4 top-2 h-[96px] w-[34px] rotate-[15.4deg] sm:right-5 sm:top-3 sm:h-[105px] sm:w-[36px]",
+			"right-4 top-2 h-[96px] w-[34px] rotate-[15.4deg] sm:right-4 sm:top-3 sm:h-[105px] sm:w-[36px]",
 		barcode: barcodeMentor,
+		interestForm: "https://forms.gle/piQ793jmrL2m99VP6",
 	},
 ];
 
@@ -71,54 +71,48 @@ export default function InterestFormsSection() {
 			</div>
 
 			{/* Main content: What is IrvineHacks poster + Interest form coupons */}
-			<div className="mx-auto flex w-full max-w-[1260px] flex-col items-center justify-between gap-14 px-6 py-14 sm:px-10 sm:py-20 lg:flex-row lg:items-center lg:gap-12 lg:py-24">
+			<div className="mx-auto flex w-full max-w-[1180px] flex-col items-center justify-center gap-14 px-6 py-14 sm:px-10 sm:py-20 lg:flex-row lg:items-center lg:gap-[74px] lg:py-24">
 				{/* Left: What is IrvineHacks? taped poster */}
-				<div className="relative w-full max-w-[563px]">
-					{/* Top-left green flares */}
+				<div className="relative w-full max-w-[563px] shrink-0 lg:w-[563px]">
+					{/* Top-left bundled green flares */}
 					<Image
-						src={flare1}
+						src={flaresTopLeft}
 						alt=""
 						aria-hidden="true"
-						className="pointer-events-none absolute -left-8 top-4 hidden h-7 w-14 -rotate-[5.55deg] -scale-y-100 sm:block"
-					/>
-					<Image
-						src={flare2}
-						alt=""
-						aria-hidden="true"
-						className="pointer-events-none absolute -left-4 -top-6 hidden h-7 w-14 rotate-[56.72deg] sm:block"
+						className="pointer-events-none absolute -left-[100px] -top-[26px] hidden h-[78px] w-[71px] sm:block"
 					/>
 
-					<div className="relative -rotate-[2.5deg] bg-coupon-bg px-7 py-8 shadow-[0px_11.65px_12.49px_rgba(60,40,10,0.18)] sm:-rotate-[4.07deg] sm:px-9 sm:py-11">
+					<div className="relative -rotate-[2.5deg] bg-coupon-bg px-7 py-8 shadow-[0px_11.65px_12.49px_rgba(60,40,10,0.18)] sm:-rotate-[4.07deg] sm:px-8 sm:py-10">
 						{/* Corner masking tape */}
 						<div
 							aria-hidden="true"
-							className="absolute -left-5 -top-3 h-[20px] w-[62px] -rotate-[42.24deg] bg-ih-yellow/85 sm:h-[23px] sm:w-[70px]"
+							className="absolute -left-5 -top-3 h-[20px] w-[62px] -rotate-[42.24deg] skew-x-[-4.45deg] bg-[rgba(255,204,64,0.85)] sm:h-[23px] sm:w-[70px]"
 						/>
 						<div
 							aria-hidden="true"
-							className="absolute -right-5 -top-3 h-[20px] w-[62px] rotate-[42.25deg] bg-ih-yellow/85 sm:h-[23px] sm:w-[70px]"
+							className="absolute -right-5 -top-3 h-[20px] w-[62px] rotate-[42.25deg] skew-x-[4.46deg] bg-[rgba(255,204,64,0.85)] sm:h-[23px] sm:w-[70px]"
 						/>
 						<div
 							aria-hidden="true"
-							className="absolute -bottom-3 -left-5 h-[20px] w-[62px] rotate-[42.25deg] bg-ih-yellow/85 sm:h-[23px] sm:w-[70px]"
+							className="absolute -bottom-3 -left-5 h-[20px] w-[62px] rotate-[42.25deg] skew-x-[4.46deg] bg-[rgba(255,204,64,0.85)] sm:h-[23px] sm:w-[70px]"
 						/>
 						<div
 							aria-hidden="true"
-							className="absolute -bottom-3 -right-5 h-[20px] w-[62px] -rotate-[42.25deg] bg-ih-yellow/85 sm:h-[23px] sm:w-[70px]"
+							className="absolute -bottom-3 -right-5 h-[20px] w-[62px] -rotate-[42.25deg] skew-x-[-4.46deg] bg-[rgba(255,204,64,0.85)] sm:h-[23px] sm:w-[70px]"
 						/>
 
-						<div className="flex flex-col gap-4 text-black">
+						<div className="flex flex-col gap-3.5 text-black">
 							<h2 className="m-0 font-londrina text-[32px] font-normal leading-tight sm:text-[40px]">
 								What is Irvinehacks?
 							</h2>
-							<p className="m-0 font-nunito text-[15px] font-normal leading-relaxed sm:text-[16.65px]">
+							<p className="m-0 font-nunito text-[15px] font-normal leading-[1.35] sm:text-[16.65px]">
 								IrvineHacks is the largest collegiate hackathon in Orange
 								County, and we continue expanding and improving our event every
 								year. Our focus? - Enhance the community around us by giving
 								students the platform to unleash their creativity in an
 								environment of forward thinking individuals.
 							</p>
-							<p className="m-0 font-nunito text-[15px] font-normal leading-relaxed sm:text-[16.65px]">
+							<p className="m-0 font-nunito text-[15px] font-normal leading-[1.35] sm:text-[16.65px]">
 								This year, IrvineHacks will take place the weekend of February
 								12th to 14th. The event will be 100% in-person during the day
 								(not overnight). Free workshops, socials, food, and swag will be
@@ -129,18 +123,22 @@ export default function InterestFormsSection() {
 				</div>
 
 				{/* Right: Confirm your interest + Coupon buttons */}
-				<div className="relative flex flex-col items-center lg:items-start">
+				<div className="relative flex shrink-0 flex-col items-center lg:items-start">
 					{/* Handwritten prompt + arrow */}
-					<div className="mb-3 flex items-center gap-2 self-start sm:ml-2">
+					<div className="relative mb-3 flex items-center self-start sm:-ml-2">
 						<p className="m-0 rotate-[2.45deg] font-handwritten text-[22px] leading-normal text-black sm:text-[24px]">
 							Confirm your interest!!
 						</p>
-						<Image
-							src={arrowLine}
-							alt=""
+						<div
 							aria-hidden="true"
-							className="h-10 w-24 translate-y-2 -rotate-[70.99deg] object-contain sm:h-12 sm:w-28"
-						/>
+							className="pointer-events-none flex h-[60px] w-[105px] translate-x-[4px] translate-y-[8px] items-center justify-center sm:h-[73px] sm:w-[125px]"
+						>
+							<Image
+								src={arrowLine}
+								alt=""
+								className="h-[100px] w-[30px] -rotate-[70.99deg] sm:h-[120px] sm:w-[35px]"
+							/>
+						</div>
 					</div>
 
 					{/* Coupon stack */}
@@ -148,21 +146,21 @@ export default function InterestFormsSection() {
 						{COUPONS.map((coupon) => (
 							<a
 								key={coupon.role}
-								href={INTEREST_FORM_URL}
+								href={coupon.interestForm}
 								target="_blank"
 								rel="noopener noreferrer"
 								aria-label={`${coupon.role} Interest Form (opens in new tab)`}
-								className="group flex items-stretch transition-transform duration-200 ease-out hover:scale-[1.04] active:scale-[0.98]"
+								className="group flex items-center drop-shadow-[0px_8px_5px_rgba(0,0,0,0.22)] transition-transform duration-200 ease-out hover:scale-[1.04] active:scale-[0.98]"
 							>
 								{/* Main coupon card */}
-								<div className="flex h-[94px] w-[260px] items-stretch rounded-[8.5px] border-[5px] border-coupon-bg bg-coupon-bg drop-shadow-[0px_8.5px_9.9px_rgba(0,0,0,0.12)] sm:h-[104px] sm:w-[303px] sm:border-[5.6px]">
+								<div className="flex h-[94px] w-[264px] items-stretch rounded-[8.5px] border-[5px] border-coupon-bg bg-coupon-bg sm:h-[104px] sm:w-[303px] sm:border-[5.6px]">
 									<div
-										className={`relative flex h-full w-[210px] shrink-0 flex-col justify-center overflow-hidden px-5 py-3 sm:w-[244px] sm:px-[22px] ${coupon.bgClass}`}
+										className={`relative flex h-full w-[206px] shrink-0 flex-col justify-center overflow-hidden px-5 py-3 sm:w-[244px] sm:px-[22px] ${coupon.bgClass}`}
 									>
-										<span className="font-storefront text-[40px] leading-none text-white sm:text-[48px] sm:leading-[48px]">
+										<span className="font-storefront text-[40px] leading-none text-white sm:text-[48px] sm:leading-[44px]">
 											{coupon.role}
 										</span>
-										<span className="mt-1 font-nunito text-[14px] font-normal text-coupon-bg/90 sm:text-[16px]">
+										<span className="font-nunito text-[14px] font-normal leading-tight text-[#f8f7f3]/90 sm:text-[16px]">
 											Interest Form
 										</span>
 										<Image
@@ -173,9 +171,9 @@ export default function InterestFormsSection() {
 										/>
 									</div>
 
-									<div className="flex flex-1 items-center justify-center">
+									<div className="flex w-[48px] shrink-0 items-center justify-center">
 										<span
-											className={`inline-block rotate-90 whitespace-nowrap font-chakra text-[10px] font-bold sm:text-[11px] ${coupon.textAccentClass}`}
+											className={`inline-block rotate-90 whitespace-nowrap font-chakra text-[10px] font-bold leading-none sm:text-[11px] ${coupon.textAccentClass}`}
 										>
 											IrvineHacks 2027
 										</span>
@@ -183,42 +181,40 @@ export default function InterestFormsSection() {
 								</div>
 
 								{/* Coupon right stub */}
-								<div className="relative flex h-[94px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[6.7px] border border-coupon-bg bg-coupon-bg drop-shadow-[0px_8.5px_9.9px_rgba(0,0,0,0.12)] sm:h-[104px] sm:w-[62px]">
+								<div className="relative -ml-[1px] flex h-[96px] w-[56px] shrink-0 items-center justify-center overflow-hidden rounded-[6.7px] border border-coupon-bg bg-coupon-bg sm:h-[107px] sm:w-[62px]">
 									{/* Notch cutout on left edge */}
 									<div
 										aria-hidden="true"
 										className="absolute -left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full bg-cream"
 									/>
-									<div className="flex items-center gap-1.5">
-										<Image
-											src={coupon.barcode}
-											alt=""
-											aria-hidden="true"
-											className="h-[68px] w-[20px] sm:h-[78px] sm:w-[22px]"
-										/>
-										<span
-											className={`inline-block -rotate-90 whitespace-nowrap font-nunito text-[6.5px] font-light sm:text-[7px] ${coupon.expColorClass}`}
-										>
-											exp never - 1 per hack
-										</span>
+									<div className="flex items-center justify-center gap-1 pl-1">
+										<div className="flex h-[68px] w-[20px] items-center justify-center sm:h-[78px] sm:w-[22px]">
+											<Image
+												src={coupon.barcode}
+												alt=""
+												aria-hidden="true"
+												className="h-[20px] w-[68px] max-w-none rotate-90 sm:h-[22px] sm:w-[78px]"
+											/>
+										</div>
+										<div className="flex h-[68px] w-[9px] items-center justify-center sm:h-[76px]">
+											<span
+												className={`inline-block -rotate-90 whitespace-nowrap font-nunito text-[6.5px] font-light leading-none sm:text-[6.87px] ${coupon.expColorClass}`}
+											>
+												exp never - 1 per hack
+											</span>
+										</div>
 									</div>
 								</div>
 							</a>
 						))}
 					</div>
 
-					{/* Bottom-right green flares */}
+					{/* Bottom-right bundled green flares */}
 					<Image
-						src={flare3}
+						src={flaresBottomRight}
 						alt=""
 						aria-hidden="true"
-						className="pointer-events-none absolute -bottom-7 -right-8 hidden h-6 w-11 -rotate-[132.82deg] sm:block"
-					/>
-					<Image
-						src={flare4}
-						alt=""
-						aria-hidden="true"
-						className="pointer-events-none absolute -bottom-3 -right-11 hidden h-6 w-11 rotate-[164.91deg] -scale-y-100 sm:block"
+						className="pointer-events-none absolute -bottom-[40px] -right-[64px] hidden h-[61px] w-[57px] sm:block"
 					/>
 				</div>
 			</div>

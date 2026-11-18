@@ -1,118 +1,76 @@
 "use client";
 
-import * as NavMenu from "@radix-ui/react-navigation-menu";
 import Image from "next/image";
-import { useEffect, useState, PropsWithChildren } from "react";
+import Link from "next/link";
+import { PropsWithChildren } from "react";
 
-import HackLogo from "@/lib/components/HackLogo/HackLogo";
-import NavLinkItem from "./NavbarHelpers";
+import ih27Logo from "@/assets/coming-soon/ih27-logo.svg";
+import navButtonBg from "@/assets/coming-soon/nav-button-bg.svg";
+import barcodeNav from "@/assets/coming-soon/barcode-nav.svg";
 
-import hamburger from "@/assets/icons/navigation-icon.svg";
-import hasDeadlinePassed from "@/lib/utils/hasDeadlinePassed";
-
-import styles from "./Navbar.module.scss";
-
-export default function BaseNavbar({ children }: PropsWithChildren) {
-	const [listShown, setListShown] = useState(false);
-	const [hasScrolled, setHasScrolled] = useState(false);
-	const [hidden, setHidden] = useState(true);
-
-	useEffect(() => {
-		const scrollHandler = () =>
-			window.scrollY !== 0 ? setHasScrolled(true) : setHasScrolled(false);
-
-		window.addEventListener("scroll", scrollHandler);
-	}, []);
-
-	// const goToChooseChar = (e: React.MouseEvent) => {
-	// 	e.preventDefault();
-
-	// 	if (window.location.pathname !== "/") {
-	// 		window.location.href = "/#apply";
-	// 	} else {
-	// 		const target = document.getElementById("apply");
-	// 		if (target) {
-	// 			target.scrollIntoView({ behavior: "smooth" });
-	// 		}
-	// 	}
-	// };
-
-	const deadlinePassed = hasDeadlinePassed();
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export default function BaseNavbar(_props: PropsWithChildren) {
+	const handleInterestFormClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+		if (window.location.pathname === "/") {
+			e.preventDefault();
+			const target = document.getElementById("interest-forms");
+			if (target) {
+				target.scrollIntoView({ behavior: "smooth" });
+			}
+		}
+	};
 
 	return (
-		<NavMenu.Root
-			className={`${hasScrolled ? "md:bg-midnight/60" : "md:bg-midnight/40"} ${
-				hidden ? "max-md:h-[4rem] max-md:overflow-hidden" : ""
-			} transition-colors duration-0 md:duration-700 ease-out w-full z-50 flex flex-col fixed bg-midnight/40 backdrop-blur md:flex-row md:items-center`}
-		>
-			<NavMenu.List className="bg-midnight/60 md:bg-transparent flex p-3 text-yellow font-display">
-				<NavLinkItem href="/">
-					<HackLogo />
-				</NavLinkItem>
-				<button
-					type="button"
-					className="ml-auto h-auto md:hidden cursor-pointer"
-					onClick={() => {
-						setListShown((listShown) => !listShown);
-						setHidden(false);
-					}}
-				>
-					<Image src={hamburger} width="40" alt="Mobile hamburger menu" />
-				</button>
-			</NavMenu.List>
-			<div
-				className={`${styles.navMenuListWrapper} md:my-3 md:mr-3 md:ml-auto inline-block md:flex md:items-center`}
+		<header className="pointer-events-none fixed inset-x-0 top-0 z-50 flex items-start justify-between px-4 pt-4 sm:px-10 sm:pt-8 lg:px-14 lg:pt-10">
+			<Link
+				href="/"
+				aria-label="IrvineHacks 2027 Home"
+				className="pointer-events-auto transition-transform duration-200 hover:scale-105"
 			>
-				<NavMenu.List
-					className={
-						(hidden ? "opacity-0 " : "opacity-100 ") +
-						(listShown ? "" : "-translate-y-full ") +
-						"transition-transform duration-500 ease-in-out md:transition-none md:translate-y-0 md:opacity-100 " +
-						"[&>*]:mb-5 [&>*]:md:mb-0 font-display text-yellow gap-10 p-5 pt-3 bg-midnight/60 md:bg-transparent md:p-0 md:flex md:items-center"
-					}
-					onTransitionEnd={() => setHidden(!listShown)}
-				>
-					<NavLinkItem href="/">Home</NavLinkItem>
-					{!deadlinePassed && (
-						<NavLinkItem
-							href="/#apply"
-							// onClick={goToChooseChar}
-						>
-							Apply
-						</NavLinkItem>
-					)}
+				<Image
+					src={ih27Logo}
+					alt="IrvineHacks 2027 Logo"
+					className="h-auto w-[68px] sm:w-[88px] lg:w-[100px]"
+					priority
+				/>
+			</Link>
 
-					<NavLinkItem href="/resources">Resources</NavLinkItem>
-
-					<NavLinkItem href="/schedule">Schedule</NavLinkItem>
-
-					<NavLinkItem
-						href="/incident"
-						target="_blank"
-						rel="noopener noreferrer"
+			<nav
+				aria-label="Primary navigation"
+				className="pointer-events-auto flex h-[68px] items-center rounded-[12px] border-[4px] border-white bg-coral px-2.5 drop-shadow-[0px_10px_5px_rgba(0,0,0,0.25)] sm:h-[82px] sm:border-[5px] sm:px-3 lg:h-[88px]"
+			>
+				<div className="flex items-center gap-4 sm:gap-10 lg:gap-[75px]">
+					<a
+						href="/#interest-forms"
+						onClick={handleInterestFormClick}
+						className="relative inline-flex h-[46px] w-[114px] items-center justify-center transition-transform duration-200 hover:scale-105 active:scale-95 sm:h-[55px] sm:w-[137px]"
 					>
-						Report Incident
-					</NavLinkItem>
+						<Image
+							src={navButtonBg}
+							alt=""
+							aria-hidden="true"
+							className="pointer-events-none absolute inset-0 h-full w-full object-contain"
+						/>
+						<span className="relative z-10 flex h-[31px] w-[82px] -rotate-[3.51deg] skew-x-[1.76deg] items-center justify-center rounded-[10px] bg-white sm:h-[37px] sm:w-[98px]">
+							<span className="flex flex-col text-center font-geo text-[15px] leading-[13px] text-black sm:text-[18px] sm:leading-[16px]">
+								<span>interest</span>
+								<span>form</span>
+							</span>
+						</span>
+					</a>
 
-					{/* <NavLinkItem
-						href="/devpost"
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						Devpost
-					</NavLinkItem> */}
-
-					{/* <NavLinkItem
-						href="/feedback"
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						Feedback Form
-					</NavLinkItem> */}
-
-					{children}
-				</NavMenu.List>
-			</div>
-		</NavMenu.Root>
+					<div className="relative flex h-[48px] w-[54px] shrink-0 items-end sm:h-[56px] sm:w-[62px]">
+						<Image
+							src={barcodeNav}
+							alt="IrvineHacks 2027 barcode"
+							className="h-[34px] w-[46px] sm:h-[39px] sm:w-[52px]"
+						/>
+						<span className="absolute right-0 top-0 rotate-[10.1deg] font-inter text-[12px] font-semibold leading-none text-black drop-shadow-[0px_2px_2px_rgba(0,0,0,0.25)] sm:text-[14px]">
+							2027!
+						</span>
+					</div>
+				</div>
+			</nav>
+		</header>
 	);
 }

@@ -1,6 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Cantarell:ital,wght@0,400;0,700;1,400;1,700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Lexend+Giga:wght@100..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@700&family=Geo&family=Inter:wght@600&family=Lilita+One&family=Londrina+Solid&family=Nunito+Sans:ital,opsz,wght@0,6..12,300..700;1,6..12,300..700&family=Single+Day&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -35,11 +36,33 @@
 	--color-dark-blue: #170f51;
 	--color-blue: #0a0e8f;
 	--color-turquoise: #00ffff;
+
+	/* 2027 Design System colors */
+	--color-cream: #fff9e7;
+	--color-coral: #f14b54;
+	--color-ih-blue: #2581e6;
+	--color-ih-green: #0f8742;
+	--color-ih-yellow: #ffcc40;
+	--color-ih-pink: #ffabc3;
+	--color-judge-pink: #ea5997;
+	--color-action-blue: #1c6bd0;
+	--color-paper: #f6f5f3;
+	--color-coupon-bg: #f8f7f3;
+	--color-ink: #29282c;
+	--color-muted-ink: #62615e;
+	--color-wall-line: #ebe1cb;
+	--color-stripe-blue: #3b6fd4;
+	--color-stripe-green: #13994a;
+	--color-sticker-green: #407c50;
+}
+
+html {
+	scroll-behavior: smooth;
 }
 
 body {
-	color: var(--color-turquoise);
-	background-color: var(--color-blue);
+	color: var(--color-ink);
+	background-color: var(--color-cream);
 }
 
 /* based on Bootstrap Reboot */

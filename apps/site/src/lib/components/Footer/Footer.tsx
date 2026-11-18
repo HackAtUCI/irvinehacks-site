@@ -2,6 +2,7 @@ import Image from "next/image";
 
 import ihLogoMask from "@/assets/coming-soon/ih-logo-mask.png";
 import barcodeNav from "@/assets/coming-soon/barcode-nav.svg";
+import StickerText from "@/lib/components/StickerText";
 
 const Footer = () => {
 	return (
@@ -22,12 +23,16 @@ const Footer = () => {
 							maskPosition: "center",
 						}}
 					/>
-					<p className="m-0 font-inter text-[18px] font-semibold leading-normal text-black sm:text-[20px]">
-						Hack at UCI
-					</p>
-					<span className="inline-block rotate-[10.1deg] font-inter text-[13px] font-semibold leading-none text-black drop-shadow-[0px_2px_2px_rgba(0,0,0,0.25)] sm:text-[14px]">
-						2027!
-					</span>
+					<StickerText
+						text="Hack at UCI"
+						strokeWidth={8}
+						className="font-inter text-[18px] font-semibold leading-normal sm:text-[20px]"
+					/>
+					<StickerText
+						text="2027!"
+						strokeWidth={6}
+						className="rotate-[10.1deg] font-inter text-[13px] font-semibold leading-none sm:text-[14px]"
+					/>
 				</div>
 				<p className="m-0 font-geo text-[16px] leading-normal text-black sm:text-[18px]">
 					Produced and packaged in Irvine, CA
@@ -40,9 +45,11 @@ const Footer = () => {
 					alt="IrvineHacks 2027 barcode"
 					className="h-[39px] w-[52px]"
 				/>
-				<span className="absolute right-0 top-0 rotate-[10.1deg] font-inter text-[14px] font-semibold leading-none text-black drop-shadow-[0px_2px_2px_rgba(0,0,0,0.25)]">
-					2027!
-				</span>
+				<StickerText
+					text="2027!"
+					strokeWidth={6}
+					className="absolute right-0 top-[6px] rotate-[10.1deg] font-inter text-[14px] font-semibold leading-none"
+				/>
 			</div>
 		</footer>
 	);

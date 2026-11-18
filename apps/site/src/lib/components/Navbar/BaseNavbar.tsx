@@ -5,8 +5,9 @@ import Link from "next/link";
 import { PropsWithChildren } from "react";
 
 import ih27Logo from "@/assets/coming-soon/ih27-logo.svg";
-import navButtonBg from "@/assets/coming-soon/nav-button-bg.svg";
+import navTicket from "@/assets/coming-soon/nav-ticket.svg";
 import barcodeNav from "@/assets/coming-soon/barcode-nav.svg";
+import StickerText from "@/lib/components/StickerText";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function BaseNavbar(_props: PropsWithChildren) {
@@ -43,19 +44,17 @@ export default function BaseNavbar(_props: PropsWithChildren) {
 					<a
 						href="/#interest-forms"
 						onClick={handleInterestFormClick}
-						className="relative inline-flex h-[46px] w-[114px] items-center justify-center transition-transform duration-200 hover:scale-105 active:scale-95 sm:h-[55px] sm:w-[137px]"
+						className="relative inline-flex h-[48px] w-[120px] items-center justify-center transition-transform duration-200 hover:scale-105 active:scale-95 sm:h-[55px] sm:w-[137px]"
 					>
 						<Image
-							src={navButtonBg}
+							src={navTicket}
 							alt=""
 							aria-hidden="true"
-							className="pointer-events-none absolute inset-0 h-full w-full object-contain"
+							className="pointer-events-none h-full w-full object-contain drop-shadow-[0px_4px_4px_rgba(0,0,0,0.25)]"
 						/>
-						<span className="relative z-10 flex h-[31px] w-[82px] -rotate-[3.51deg] skew-x-[1.76deg] items-center justify-center rounded-[10px] bg-white sm:h-[37px] sm:w-[98px]">
-							<span className="flex flex-col text-center font-geo text-[15px] leading-[13px] text-black sm:text-[18px] sm:leading-[16px]">
-								<span>interest</span>
-								<span>form</span>
-							</span>
+						<span className="pointer-events-none absolute inset-0 flex -rotate-[2.97deg] flex-col items-center justify-center text-center font-geo text-[15px] leading-[13px] text-black sm:text-[18px] sm:leading-[16px]">
+							<span>interest</span>
+							<span>form</span>
 						</span>
 					</a>
 
@@ -65,9 +64,11 @@ export default function BaseNavbar(_props: PropsWithChildren) {
 							alt="IrvineHacks 2027 barcode"
 							className="h-[34px] w-[46px] sm:h-[39px] sm:w-[52px]"
 						/>
-						<span className="absolute right-0 top-0 rotate-[10.1deg] font-inter text-[12px] font-semibold leading-none text-black drop-shadow-[0px_2px_2px_rgba(0,0,0,0.25)] sm:text-[14px]">
-							2027!
-						</span>
+						<StickerText
+							text="2027!"
+							strokeWidth={6}
+							className="absolute right-0 top-[5px] rotate-[10.1deg] font-inter text-[12px] font-semibold leading-none drop-shadow-[0px_2px_2px_rgba(0,0,0,0.25)] sm:top-[6px] sm:text-[14px]"
+						/>
 					</div>
 				</div>
 			</nav>

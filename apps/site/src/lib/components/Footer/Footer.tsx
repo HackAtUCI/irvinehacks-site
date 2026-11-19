@@ -28,11 +28,6 @@ const Footer = () => {
 						strokeWidth={8}
 						className="font-inter text-[18px] font-semibold leading-normal drop-shadow-[0px_2px_2px_rgba(0,0,0,0.25)] sm:text-[20px]"
 					/>
-					<StickerText
-						text="2027!"
-						strokeWidth={6}
-						className="rotate-[10.1deg] font-inter text-[13px] font-semibold leading-none drop-shadow-[0px_2px_2px_rgba(0,0,0,0.25)] sm:text-[14px]"
-					/>
 				</div>
 				<p className="m-0 font-geo text-[16px] leading-normal text-black sm:text-[18px]">
 					Produced and packaged in Irvine, CA

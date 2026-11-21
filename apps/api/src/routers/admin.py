@@ -1994,7 +1994,8 @@ async def _try_update_applicant_with_query(
             update_query,
         )
         if not modified:
-            log.warning(f"""
+            log.warning(
+                f"""
                 Update query did not modify any documents
                 for {applicant}: {update_query}
                 """)

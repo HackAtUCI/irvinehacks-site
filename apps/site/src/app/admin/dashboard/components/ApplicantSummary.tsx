@@ -7,7 +7,7 @@ import PieChart from "@cloudscape-design/components/pie-chart";
 import Select, { SelectProps } from "@cloudscape-design/components/select";
 import SpaceBetween from "@cloudscape-design/components/space-between";
 
-import { Status, ParticipantRole } from "@/lib/userRecord";
+import { Decision, Status, ParticipantRole } from "@/lib/userRecord";
 
 import useApplicantSummary from "./useApplicantSummary";
 import RefreshSummaryButton from "../../checkin-leads/components/RefreshSummaryButton";
@@ -38,16 +38,28 @@ const statusOptions: SelectProps.Options = [
 	{ label: "Voided", value: Status.Voided },
 ];
 
+// Decision options for the dropdown
+const decisionOptions: SelectProps.Options = [
+	{ label: "All Decisions", value: "" },
+	{ label: "Accepted", value: Decision.Accepted },
+	{ label: "Rejected", value: Decision.Rejected },
+	{ label: "Waitlisted", value: Decision.Waitlisted },
+	{ label: "Voided", value: Decision.Voided },
+];
+
 function ApplicantSummary() {
 	const [selectedRole, setSelectedRole] = useState<SelectProps.Option | null>(
 		null,
 	);
 	const [selectedStatus, setSelectedStatus] =
 		useState<SelectProps.Option | null>(null);
+	const [selectedDecision, setSelectedDecision] =
+		useState<SelectProps.Option | null>(null);
 
 	const { summary, loading, error, mutate } = useApplicantSummary({
 		role: (selectedRole?.value as ParticipantRole) || null,
 		status: (selectedStatus?.value as Status) || null,
+		decision: (selectedDecision?.value as Decision) || null,
 	});
 	const totalApplicants = Object.values(summary).reduce((s, v) => s + v, 0);
 
@@ -82,6 +94,14 @@ function ApplicantSummary() {
 						onChange={({ detail }) => setSelectedStatus(detail.selectedOption)}
 						options={statusOptions}
 						placeholder="Filter by status"
+					/>
+					<Select
+						selectedOption={selectedDecision}
+						onChange={({ detail }) =>
+							setSelectedDecision(detail.selectedOption)
+						}
+						options={decisionOptions}
+						placeholder="Filter by decision"
 					/>
 					<RefreshSummaryButton onRefresh={mutate} />
 				</SpaceBetween>

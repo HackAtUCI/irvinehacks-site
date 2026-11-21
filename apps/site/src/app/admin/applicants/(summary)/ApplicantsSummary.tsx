@@ -7,6 +7,7 @@ import SpaceBetween from "@cloudscape-design/components/space-between";
 
 import ApplicationsByRoleChart from "./ApplicationsByRoleChart";
 import ApplicationsBySchoolChart from "./ApplicationsBySchoolChart";
+import ExportApplicants from "./ExportApplicants";
 
 function ApplicantsSummary() {
 	return (
@@ -15,6 +16,7 @@ function ApplicantsSummary() {
 			header={<Header variant="h1">Applicants</Header>}
 		>
 			<SpaceBetween size="l">
+				<ExportApplicants />
 				<Container
 					header={
 						<Header

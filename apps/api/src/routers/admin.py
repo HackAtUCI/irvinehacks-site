@@ -1998,7 +1998,8 @@ async def _try_update_applicant_with_query(
                 f"""
                 Update query did not modify any documents
                 for {applicant}: {update_query}
-                """)
+                """
+            )
     except RuntimeError:
         log.error(err_msg)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)

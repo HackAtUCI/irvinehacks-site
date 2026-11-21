@@ -1081,11 +1081,13 @@ async def volunteer_applicant(
 async def applicant_summary(
     role: Optional[str] = None,
     status_filter: Optional[str] = None,
+    decision: Optional[str] = None,
 ) -> dict[ApplicantStatus, int]:
     """Provide summary of statuses of applicants"""
     # Convert string params to enums if provided
     role_enum: Optional[Role] = None
     status_enum: Optional[ApplicantStatus] = None
+    decision_enum: Optional[Decision] = None
 
     if role:
         try:
@@ -1108,8 +1110,16 @@ async def applicant_summary(
                     detail=f"Invalid status: {status_filter}",
                 )
 
-    return await summary_handler.applicant_summary(role=role_enum, status=status_enum)
-
+    if decision:
+        try:
+            decision_enum = Decision(decision)
+        except ValueError:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid decision: {decision}",
+            )
+        
+    return await summary_handler.applicant_summary(role=role_enum, status=status_enum, decision=decision_enum)
 
 @router.get(
     "/summary/applicants/table",

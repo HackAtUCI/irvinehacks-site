@@ -1,13 +1,14 @@
 import axios from "axios";
 import useSWR from "swr";
 
-import { Status, ParticipantRole } from "@/lib/userRecord";
+import { Decision, Status, ParticipantRole } from "@/lib/userRecord";
 
 type ApplicantSummary = Partial<Record<Status, number>>;
 
 interface UseApplicantSummaryOptions {
 	role?: ParticipantRole | null;
 	status?: Status | null;
+	decision?: Decision | null;
 }
 
 const fetcher = async (url: string) => {
@@ -16,12 +17,13 @@ const fetcher = async (url: string) => {
 };
 
 function useApplicantSummary(options: UseApplicantSummaryOptions = {}) {
-	const { role, status } = options;
+	const { role, status, decision } = options;
 
 	// Build URL with query parameters
 	const params = new URLSearchParams();
 	if (role) params.append("role", role);
 	if (status) params.append("status_filter", status);
+	if (decision) params.append("decision", decision);
 
 	const queryString = params.toString();
 	const url = `/api/admin/summary/applicants${

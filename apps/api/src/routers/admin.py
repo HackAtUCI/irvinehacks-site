@@ -6,9 +6,10 @@ from datetime import date, datetime
 from logging import getLogger
 from typing import Annotated, Any, Literal, Mapping, Optional, Union
 
-from fastapi import APIRouter, Body, Depends, HTTPException, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from pydantic import (
     AliasChoices,
+    AliasPath,
     BaseModel,
     EmailStr,
     Field,
@@ -16,7 +17,7 @@ from pydantic import (
     ValidationError,
 )
 from typing_extensions import assert_never
-from pymongo import DESCENDING, UpdateOne
+from pymongo import ASCENDING, DESCENDING, UpdateOne
 
 from admin import applicant_review_processor, participant_manager, summary_handler
 from admin.applicant_review_processor import (
@@ -542,6 +543,37 @@ async def volunteer_applicants(
     log.info("%s requested volunteer applicants", user)
 
     return await mentor_volunteer_applicants("Volunteer")
+
+
+class ApplicantExportRecord(BaseModel):
+    first_name: str
+    last_name: str
+    email: EmailStr = Field(validation_alias=AliasPath("application_data", "email"))
+    status: UserStatus
+
+
+@router.get("/applicants/export")
+async def export_applicants(
+    user: Annotated[User, Depends(require_organizer)],
+    role: Literal["Hacker", "Mentor"],
+    statuses: Annotated[list[UserStatus], Query(min_length=1)],
+) -> list[ApplicantExportRecord]:
+    """Get names, emails, and statuses of applicants with the given statuses,
+    sorted by status and then name."""
+    log.info("%s exported %s applicants with statuses %s", user, role, statuses)
+
+    records = await mongodb_handler.retrieve(
+        Collection.USERS,
+        {"roles": {"$all": [Role.APPLICANT, Role(role)]}, "status": {"$in": statuses}},
+        ["first_name", "last_name", "application_data.email", "status"],
+        sort=[
+            ("status", ASCENDING),
+            ("last_name", ASCENDING),
+            ("first_name", ASCENDING),
+        ],
+    )
+
+    return TypeAdapter(list[ApplicantExportRecord]).validate_python(records)
 
 
 @router.get("/organizers", dependencies=[Depends(require_manager)])
@@ -1962,12 +1994,10 @@ async def _try_update_applicant_with_query(
             update_query,
         )
         if not modified:
-            log.warning(
-                f"""
+            log.warning(f"""
                 Update query did not modify any documents
                 for {applicant}: {update_query}
-                """
-            )
+                """)
     except RuntimeError:
         log.error(err_msg)
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -2366,3 +2366,92 @@ def test_director_undo_auto_accept_is_noop_when_not_auto_accepted(
 
     assert res.status_code == 200
     mock_mongodb_handler_raw_update_one.assert_not_awaited()
+
+
+@patch("services.mongodb_handler.retrieve", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_organizer_can_export_applicants_by_status(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_retrieve: AsyncMock,
+) -> None:
+    """Test that an organizer can export applicants filtered by status."""
+    mock_mongodb_handler_retrieve_one.return_value = HACKER_REVIEWER_IDENTITY
+    mock_mongodb_handler_retrieve.return_value = [
+        {
+            "_id": "edu.uci.petr",
+            "first_name": "Peter",
+            "last_name": "Anteater",
+            "status": "CONFIRMED",
+            "application_data": {"email": "petr@uci.edu"},
+        },
+        {
+            "_id": "edu.uci.zot",
+            "first_name": "Zot",
+            "last_name": "Zot",
+            "status": "WAITLISTED",
+            "application_data": {"email": "zot@uci.edu"},
+        },
+    ]
+
+    res = reviewer_client.get(
+        "/applicants/export?role=Hacker&statuses=CONFIRMED&statuses=WAITLISTED"
+    )
+
+    assert res.status_code == 200
+    assert res.json() == [
+        {
+            "first_name": "Peter",
+            "last_name": "Anteater",
+            "email": "petr@uci.edu",
+            "status": "CONFIRMED",
+        },
+        {
+            "first_name": "Zot",
+            "last_name": "Zot",
+            "email": "zot@uci.edu",
+            "status": "WAITLISTED",
+        },
+    ]
+    mock_mongodb_handler_retrieve.assert_awaited_once_with(
+        Collection.USERS,
+        {
+            "roles": {"$all": [Role.APPLICANT, Role.HACKER]},
+            "status": {"$in": [Status.CONFIRMED, Status.WAITLISTED]},
+        },
+        ["first_name", "last_name", "application_data.email", "status"],
+        sort=[("status", 1), ("last_name", 1), ("first_name", 1)],
+    )
+
+
+@patch("services.mongodb_handler.retrieve", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_export_applicants_requires_statuses(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_retrieve: AsyncMock,
+) -> None:
+    """Test that exporting applicants without any statuses is rejected."""
+    mock_mongodb_handler_retrieve_one.return_value = HACKER_REVIEWER_IDENTITY
+
+    res = reviewer_client.get("/applicants/export?role=Mentor")
+
+    assert res.status_code == 422
+    mock_mongodb_handler_retrieve.assert_not_awaited()
+
+
+@patch("services.mongodb_handler.retrieve", autospec=True)
+@patch("services.mongodb_handler.retrieve_one", autospec=True)
+def test_non_organizer_cannot_export_applicants(
+    mock_mongodb_handler_retrieve_one: AsyncMock,
+    mock_mongodb_handler_retrieve: AsyncMock,
+) -> None:
+    """Test that a non-organizer cannot export applicants."""
+    unauthorized_client = UserTestClient(USER_ICSSC, app)
+    mock_mongodb_handler_retrieve_one.return_value = {
+        "_id": "edu.uci.icssc",
+        "roles": ["Mentor"],
+    }
+
+    res = unauthorized_client.get("/applicants/export?role=Hacker&statuses=CONFIRMED")
+
+    assert res.status_code == 403
+    mock_mongodb_handler_retrieve.assert_not_awaited()

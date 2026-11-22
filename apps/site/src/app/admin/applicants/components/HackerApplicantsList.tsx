@@ -39,7 +39,6 @@ import useAvgScoreSetting from "@/lib/admin/useAvgScoreSetting";
 import useHackerApplicants, {
 	HackerApplicantSummary,
 } from "@/lib/admin/useHackerApplicants";
-import useHackerReviewAssignments from "@/lib/admin/useHackerReviewAssignments";
 import { uidToPseudonym } from "@/lib/admin/anonymize";
 import { Decision, ParticipantRole, Status } from "@/lib/userRecord";
 import Badge from "@cloudscape-design/components/badge";
@@ -139,23 +138,6 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 
 	const { applicantList, loading, approveDuplicateName } =
 		useHackerApplicants();
-	const {
-		assignedApplicantIds,
-		targetCount,
-		completedCount,
-		loading: assignmentsLoading,
-	} = useHackerReviewAssignments(!isUserDirector);
-	const reviewableApplicantList = useMemo(() => {
-		if (isUserDirector) return applicantList;
-
-		const applicantById = new Map(
-			applicantList.map((applicant) => [applicant._id, applicant]),
-		);
-		return assignedApplicantIds.flatMap((applicantId) => {
-			const applicant = applicantById.get(applicantId);
-			return applicant ? [applicant] : [];
-		});
-	}, [applicantList, assignedApplicantIds, isUserDirector]);
 
 	const selectedStatusValues = selectedStatuses.map(({ value }) => value);
 	const selectedDecisionValues = selectedDecisions.map(({ value }) => value);
@@ -180,7 +162,7 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		}
 	}, [top400]);
 
-	const filteredApplicants = reviewableApplicantList.filter((applicant) => {
+	const filteredApplicants = applicantList.filter((applicant) => {
 		const isEffectivelyResumeReviewed =
 			applicant.resume_reviewed ||
 			Boolean(applicant.auto_decision_reason) ||
@@ -225,7 +207,7 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		);
 	});
 
-	const filteredApplicants400 = [...reviewableApplicantList]
+	const filteredApplicants400 = [...applicantList]
 		.filter(
 			(applicant) =>
 				applicant.director_previous_experience_reviewed &&
@@ -269,7 +251,6 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 			: base;
 	}, [top400, filteredApplicants400, filteredApplicants, searchText]);
 	const items = useMemo(() => {
-		if (!isUserDirector) return baseItems;
 		if (!sortOption?.value) return baseItems;
 		return [...baseItems].sort((a, b) => {
 			switch (sortOption.value) {
@@ -291,15 +272,15 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 					return 0;
 			}
 		});
-	}, [baseItems, isUserDirector, sortOption]);
+	}, [baseItems, sortOption]);
 
 	const counter =
 		selectedStatuses.length > 0 ||
 		selectedDecisions.length > 0 ||
 		uciNetIDFilter.length > 0 ||
 		searchText.trim() !== ""
-			? `(${items.length}/${reviewableApplicantList.length})`
-			: `(${reviewableApplicantList.length})`;
+			? `(${items.length}/${applicantList.length})`
+			: `(${applicantList.length})`;
 
 	const emptyContent = (
 		<Box textAlign="center" color="inherit">
@@ -437,47 +418,34 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 						: []),
 				],
 			}}
-			loading={loading || assignmentsLoading}
+			loading={loading}
 			loadingText="Loading applicants"
 			items={items}
 			trackBy="_id"
 			variant="full-page"
 			filter={
-				isUserDirector ? (
-					<ApplicantFilters
-						selectedStatuses={selectedStatuses}
-						setSelectedStatuses={setSelectedStatuses}
-						selectedDecisions={selectedDecisions}
-						setSelectedDecisions={setSelectedDecisions}
-						uciNetIDFilter={uciNetIDFilter}
-						setUCINetIDFilter={setUCINetIDFilter}
-						applicantType={ParticipantRole.Hacker}
-						sortOption={sortOption}
-						setSortOption={setSortOption}
-						searchText={searchText}
-						setSearchText={setSearchText}
-						searchResultCount={items.length}
-					/>
-				) : null
+				<ApplicantFilters
+					selectedStatuses={selectedStatuses}
+					setSelectedStatuses={setSelectedStatuses}
+					selectedDecisions={selectedDecisions}
+					setSelectedDecisions={setSelectedDecisions}
+					applicantType={ParticipantRole.Hacker}
+					{...(isUserDirector && {
+						uciNetIDFilter,
+						setUCINetIDFilter,
+						sortOption,
+						setSortOption,
+						searchText,
+						setSearchText,
+						searchResultCount: items.length,
+					})}
+				/>
 			}
 			empty={emptyContent}
 			header={
 				<div>
 					<Header actions={isUserDirector && <HackerThresholdInputs />}>
 						Hacker Applicants {counter}
-						{!isUserDirector && (
-							<div
-								style={{
-									fontSize: "0.875rem",
-									color: "#5f6b7a",
-									marginTop: "4px",
-								}}
-							>
-								Showing your assigned review queue
-								{targetCount ? ` (${items.length}/${targetCount})` : ""}
-								{completedCount ? `, ${completedCount} reviewed` : ""}
-							</div>
-						)}
 						<div
 							style={{
 								fontSize: "0.875rem",

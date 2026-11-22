@@ -340,7 +340,6 @@ class DeleteNotesRequest(BaseModel):
 
 class ReviewAssignmentSettings(BaseModel):
     minimum_reviews_per_organizer: Optional[int] = None
-    maximum_reviews_per_organizer: Optional[int] = None
 
 
 class WaiverStatusRequest(BaseModel):
@@ -366,7 +365,7 @@ async def retrieve_hacker_review_assignment_settings() -> ReviewAssignmentSettin
     record = await mongodb_handler.retrieve_one(
         Collection.SETTINGS,
         {"_id": REVIEW_ASSIGNMENT_SETTINGS_ID},
-        ["minimum_reviews_per_organizer", "maximum_reviews_per_organizer"],
+        ["minimum_reviews_per_organizer"],
     )
     if record is None:
         return ReviewAssignmentSettings()
@@ -1479,7 +1478,7 @@ async def get_avg_score_setting() -> dict[str, bool]:
     dependencies=[Depends(require_manager)],
 )
 async def get_review_assignment_settings() -> ReviewAssignmentSettings:
-    """Get settings for reviewer queue goals and caps."""
+    """Get reviewer minimum review goal."""
     return await retrieve_hacker_review_assignment_settings()
 
 

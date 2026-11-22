@@ -90,7 +90,6 @@ class RawOrganizerData(BaseModel):
 
 class ReviewAssignmentSettingsRequest(BaseModel):
     minimum_reviews_per_organizer: Optional[int] = Field(default=None, ge=0)
-    maximum_reviews_per_organizer: Optional[int] = Field(default=None, ge=0)
 
 
 def uci_scoped_uid(email: EmailStr) -> str:
@@ -528,15 +527,7 @@ async def toggle_avg_score_setting() -> dict[str, bool]:
 async def set_review_assignment_settings(
     settings: ReviewAssignmentSettingsRequest,
 ) -> ReviewAssignmentSettings:
-    """Set reviewer queue goals and caps."""
-    minimum = settings.minimum_reviews_per_organizer
-    maximum = settings.maximum_reviews_per_organizer
-    if minimum is not None and maximum is not None and maximum < minimum:
-        raise HTTPException(
-            status.HTTP_400_BAD_REQUEST,
-            "Maximum reviews per organizer cannot be lower than the minimum.",
-        )
-
+    """Set reviewer minimum review goal."""
     update_query = settings.model_dump()
     await mongodb_handler.raw_update_one(
         Collection.SETTINGS,

@@ -23,6 +23,7 @@ import ApplicantFilters, {
 import { SelectProps } from "@cloudscape-design/components/select";
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
 import AutoDecisionBadge from "@/app/admin/applicants/components/AutoDecisionBadge";
+import { matchesSearch } from "@/app/admin/applicants/components/applicantSearch";
 
 import UserContext from "@/lib/admin/UserContext";
 import {
@@ -119,6 +120,7 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 
 	const [selectedStatuses, setSelectedStatuses] = useState<Options>([]);
 	const [selectedDecisions, setSelectedDecisions] = useState<Options>([]);
+	const [ searchText, setSearchText] = useState<string>("");
 	const [uciNetIDFilter, setUCINetIDFilter] = useState<Options>([]);
 	const [sortOption, setSortOption] = useState<SelectProps.Option>({
 		value: "latest",
@@ -250,7 +252,12 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		setRejectCount(nextRejectedCount);
 	}, [applicantList, acceptThreshold, waitlistThreshold]);
 
-	const baseItems = top400 ? filteredApplicants400 : filteredApplicants;
+	const baseItems = useMemo(() => {
+		const base = top400 ? filteredApplicants400 : filteredApplicants;
+		return searchText.trim()
+			? base.filter((applicant) => matchesSearch(applicant, searchText))
+			: base;
+	}, [top400, filteredApplicants400, filteredApplicants, searchText]);
 	const items = useMemo(() => {
 		if (!isUserDirector) return baseItems;
 		if (!sortOption?.value) return baseItems;
@@ -279,7 +286,8 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 	const counter =
 		selectedStatuses.length > 0 ||
 		selectedDecisions.length > 0 ||
-		uciNetIDFilter.length > 0
+		uciNetIDFilter.length > 0 ||
+		searchText.trim() !== ""
 			? `(${items.length}/${reviewableApplicantList.length})`
 			: `(${reviewableApplicantList.length})`;
 
@@ -435,6 +443,9 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 						applicantType={ParticipantRole.Hacker}
 						sortOption={sortOption}
 						setSortOption={setSortOption}
+						searchText={searchText}
+						setSearchText={setSearchText}
+						searchResultCount={items.length}
 					/>
 				) : null
 			}

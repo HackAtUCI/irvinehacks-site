@@ -1,5 +1,7 @@
 import { Dispatch, SetStateAction } from "react";
 
+import SpaceBetween from "@cloudscape-design/components/space-between";
+import TextFilter from "@cloudscape-design/components/text-filter";
 import ColumnLayout from "@cloudscape-design/components/column-layout";
 import { IconProps } from "@cloudscape-design/components/icon";
 import Multiselect, {
@@ -31,6 +33,9 @@ interface ApplicantFiltersProps {
 	applicantType: ParticipantRole;
 	sortOption?: SelectProps.Option;
 	setSortOption?: Dispatch<SetStateAction<SelectProps.Option>>;
+	searchText?: string;
+	setSearchText?: Dispatch<SetStateAction<string>>;
+	searchResultCount?: number;
 }
 
 const StatusIcons: Record<Status | Decision, IconProps.Name> = {
@@ -88,6 +93,9 @@ function ApplicantFilters({
 	applicantType,
 	sortOption,
 	setSortOption,
+	searchText,
+	setSearchText,
+	searchResultCount,
 }: ApplicantFiltersProps) {
 	const { applicantList, loading } = useHackerApplicants();
 
@@ -106,44 +114,61 @@ function ApplicantFilters({
 	}
 
 	return (
-		<ColumnLayout columns={4}>
-			<Multiselect
-				selectedOptions={selectedStatuses}
-				onChange={({ detail }) => setSelectedStatuses(detail.selectedOptions)}
-				deselectAriaLabel={(e) => `Remove ${e.label}`}
-				options={STATUS_OPTIONS}
-				placeholder="Choose statuses"
-				selectedAriaLabel="Selected"
-			/>
-			<Multiselect
-				selectedOptions={selectedDecisions}
-				onChange={({ detail }) => setSelectedDecisions(detail.selectedOptions)}
-				deselectAriaLabel={(e) => `Remove ${e.label}`}
-				options={DECISION_OPTIONS}
-				placeholder="Choose Decisions"
-				selectedAriaLabel="Selected"
-			/>
-			{applicantType === ParticipantRole.Hacker && setUCINetIDFilter && (
+		<SpaceBetween size="s">
+			{setSearchText && (
+				<TextFilter
+					filteringText={searchText ?? ""}
+					onChange={({ detail }) => setSearchText(detail.filteringText)}
+					filteringPlaceholder="Search applicants by name or UCINetID"
+					filteringAriaLabel="Search applicants"
+					countText={
+						searchText
+							? searchResultCount === 1
+								? "1 match"
+								: `${searchResultCount ?? 0} matches`
+							: undefined
+					}
+				/>
+			)}
+			<ColumnLayout columns={4}>
 				<Multiselect
-					selectedOptions={uciNetIDFilter ?? []}
-					onChange={({ detail }) => setUCINetIDFilter?.(detail.selectedOptions)}
+					selectedOptions={selectedStatuses}
+					onChange={({ detail }) => setSelectedStatuses(detail.selectedOptions)}
 					deselectAriaLabel={(e) => `Remove ${e.label}`}
-					options={reviewerOptions}
-					placeholder="Search by Reviewer's UCINetID"
+					options={STATUS_OPTIONS}
+					placeholder="Choose statuses"
 					selectedAriaLabel="Selected"
 				/>
-			)}
-			{setSortOption && (
-				<Select
-					selectedOption={sortOption ?? null}
-					onChange={({ detail }) =>
-						detail.selectedOption && setSortOption(detail.selectedOption)
-					}
-					options={SORT_OPTIONS}
-					placeholder="Order by"
+				<Multiselect
+					selectedOptions={selectedDecisions}
+					onChange={({ detail }) => setSelectedDecisions(detail.selectedOptions)}
+					deselectAriaLabel={(e) => `Remove ${e.label}`}
+					options={DECISION_OPTIONS}
+					placeholder="Choose Decisions"
+					selectedAriaLabel="Selected"
 				/>
-			)}
-		</ColumnLayout>
+				{applicantType === ParticipantRole.Hacker && setUCINetIDFilter && (
+					<Multiselect
+						selectedOptions={uciNetIDFilter ?? []}
+						onChange={({ detail }) => setUCINetIDFilter?.(detail.selectedOptions)}
+						deselectAriaLabel={(e) => `Remove ${e.label}`}
+						options={reviewerOptions}
+						placeholder="Search by Reviewer's UCINetID"
+						selectedAriaLabel="Selected"
+					/>
+				)}
+				{setSortOption && (
+					<Select
+						selectedOption={sortOption ?? null}
+						onChange={({ detail }) =>
+							detail.selectedOption && setSortOption(detail.selectedOption)
+						}
+						options={SORT_OPTIONS}
+						placeholder="Order by"
+					/>
+				)}
+			</ColumnLayout>
+		</SpaceBetween>
 	);
 }
 

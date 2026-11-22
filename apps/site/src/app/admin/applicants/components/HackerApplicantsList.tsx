@@ -107,6 +107,16 @@ function getApplicantDecisionBucket(
 	return "rejected";
 }
 
+function getNormalizedAverage(
+	applicant: HackerApplicantSummary,
+): number | null {
+	const scores = applicant.application_data.normalized_scores;
+	if (!scores || Object.keys(scores).length === 0) return null;
+	const values = Object.values(scores);
+	const avg = values.reduce((sum, v) => sum + v, 0) / values.length;
+	return avg + (applicant.application_data.extra_points ?? 0);
+}
+
 function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 	const router = useRouter();
 	const { roles } = useContext(UserContext);
@@ -371,20 +381,17 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		[hackathonName, duplicateNames, isUserDirector, approveDuplicateName],
 	);
 
-	const avgScore = ({
-		avg_score,
-		is_overqualified,
-		reviewers,
-		director_previous_experience_reviewed,
-	}: HackerApplicantSummary) => {
-		if (is_overqualified)
+	const avgScore = (applicant: HackerApplicantSummary) => {
+		if (applicant.is_overqualified)
 			return <Box color="text-status-error">OVERQUALIFIED</Box>;
-		if (!director_previous_experience_reviewed) return "-";
-		if (avg_score === -1) return "-";
-		if (reviewers.length < 2 && !showWithOneReviewer) return "-";
-		return avg_score.toFixed(3);
-	};
 
+		const normalized = getNormalizedAverage(applicant);
+		if (normalized !== null) return normalized.toFixed(3);
+
+		if (applicant.avg_score === -1) return "-";
+		return applicant.avg_score.toFixed(3);
+	};
+	
 	return (
 		<Cards
 			cardDefinition={{

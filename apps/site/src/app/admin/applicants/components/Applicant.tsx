@@ -8,7 +8,7 @@ import { FlashbarProps } from "@cloudscape-design/components/flashbar";
 
 import NotificationContext from "@/lib/admin/NotificationContext";
 import UserContext from "@/lib/admin/UserContext";
-import { isDirector } from "@/lib/admin/authorization";
+import { isDirector, isMentorReviewer } from "@/lib/admin/authorization";
 import { uidToPseudonym } from "@/lib/admin/anonymize";
 import useApplicant, {
 	IrvineHacksHackerApplicationData,
@@ -49,6 +49,9 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 	const { setNotifications } = useContext(NotificationContext);
 	const { roles } = useContext(UserContext);
 	const isUserDirector = isDirector(roles);
+	const isUserMentorReviewer = isMentorReviewer(roles);
+	const canSeeApplicantName =
+		isUserDirector || (isUserMentorReviewer && applicationType === "mentor");
 	const {
 		applicant,
 		loading,
@@ -202,7 +205,9 @@ function Applicant({ uid, applicationType, guidelines }: ApplicantProps) {
 						)
 					}
 				>
-					{isUserDirector ? `${first_name} ${last_name}` : uidToPseudonym(uid)}{" "}
+					{canSeeApplicantName
+						? `${first_name} ${last_name}`
+						: uidToPseudonym(uid)}{" "}
 					<AutoDecisionBadge
 						reason={applicant.auto_decision_reason}
 						decision={autoAcceptDecision}

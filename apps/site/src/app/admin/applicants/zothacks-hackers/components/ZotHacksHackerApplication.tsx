@@ -31,8 +31,8 @@ const ZH_HACKER_APPLICATION_SECTIONS: ZHHackerApplicationSections = {
 	"Personal Information": [
 		"pronouns",
 		"is_18_older",
-		"discord_username",
 		"dietary_restrictions",
+		"discord_username",
 		"allergies",
 	],
 	Education: ["school_year", "major"],
@@ -180,14 +180,20 @@ function ZotHacksHackerApplication({
 			<Header variant="h2">ZotHacks Hacker Application</Header>
 			<Container>
 				{Object.entries(ZH_HACKER_APPLICATION_SECTIONS).map(
-					([section, propsToShow]) => (
-						<ZotHacksHackerApplicationSection
-							key={section}
-							title={section}
-							data={application_data}
-							propsToShow={propsToShow}
-						/>
-					),
+					([section, propsToShow]) => {
+						const visiblePropsToShow = propsToShow.filter(
+							(prop) => prop !== "discord_username" || isDirector(roles),
+						);
+
+						return (
+							<ZotHacksHackerApplicationSection
+								key={section}
+								title={section}
+								data={application_data}
+								propsToShow={visiblePropsToShow}
+							/>
+						);
+					},
 				)}
 			</Container>
 			{canViewResume && (

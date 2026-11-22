@@ -391,7 +391,7 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		if (applicant.avg_score === -1) return "-";
 		return applicant.avg_score.toFixed(3);
 	};
-	
+
 	return (
 		<Cards
 			cardDefinition={{
@@ -421,16 +421,20 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 						content: ({ application_data }) =>
 							new Date(application_data.submission_time).toLocaleDateString(),
 					},
-					{
-						id: "avg_score",
-						header: "Averaged Score",
-						content: avgScore,
-					},
-					{
-						id: "decision",
-						header: "Decision",
-						content: DecisionStatus,
-					},
+					...(isUserDirector 
+						? [
+							{
+								id: "avg_score",
+								header: "Averaged Score",
+								content: avgScore,
+							},
+							{
+								id: "decision",
+								header: "Decision",
+								content: DecisionStatus,
+							}, 
+							] 
+						: []),
 				],
 			}}
 			loading={loading || assignmentsLoading}
@@ -601,7 +605,10 @@ const CardHeader = ({
 				{displayName}
 			</Link>
 			{is_overqualified && <Badge color="red">OVERQUALIFIED</Badge>}
-			<AutoDecisionBadge reason={auto_decision_reason} decision={decision} />
+			<AutoDecisionBadge
+				reason={isDirector ? auto_decision_reason : null}
+				decision={isDirector ? decision : null}
+			/>			
 			{duplicateIcon}
 		</div>
 	);
@@ -610,13 +617,11 @@ const CardHeader = ({
 const DecisionStatus = ({
 	decision,
 	auto_decision_reason,
-	director_previous_experience_reviewed,
 	is_overqualified,
+	avg_score,
 }: HackerApplicantSummary) =>
-	(director_previous_experience_reviewed ||
-		auto_decision_reason ||
-		is_overqualified) &&
-	decision ? (
+	decision &&
+	(auto_decision_reason || is_overqualified || avg_score !== -1) ? (
 		<ApplicantStatus status={decision} />
 	) : (
 		"-"

@@ -144,6 +144,8 @@ class HackerApplicantSummary(BaseRecord):
 class RedactedApplicationDataSummary(BaseModel):
     submission_time: datetime
     reviews: list[Review] = []
+    normalized_scores: Optional[dict[str, float]] = None
+    extra_points: Optional[float] = None
 
 
 class RedactedHackerApplicantSummary(BaseRecord):
@@ -626,9 +628,10 @@ async def hacker_applicants(
 
     try:
         if not await _user_has_role(user.uid, Role.DIRECTOR):
+            show_scores = await _user_has_role(user.uid, Role.LEAD)
             return TypeAdapter(list[RedactedHackerApplicantSummary]).validate_python(
                 [
-                    _redact_hacker_applicant_summary(record, user.uid)
+                    _redact_hacker_applicant_summary(record, user.uid, show_scores)
                     for record in records
                 ]
             )
@@ -645,32 +648,48 @@ async def _user_has_role(uid: str, role: Role) -> bool:
 
 
 def _redact_hacker_applicant_summary(
-    record: dict[str, object], reviewer_uid: str
+    record: dict[str, object], reviewer_uid: str, show_scores: bool = False
 ) -> dict[str, object]:
     application_data = record.get("application_data", {})
     if not isinstance(application_data, dict):
         application_data = {}
 
     director_reviewed = bool(record.get("director_previous_experience_reviewed", False))
+    reveal = director_reviewed or show_scores
     reviewers = record.get("reviewers", [])
     if not isinstance(reviewers, list):
         reviewers = []
     reviewers = [uid for uid in reviewers if isinstance(uid, str)]
+
+    normalized_scores = None
+    if show_scores:
+        raw_scores = application_data.get("normalized_scores") or {}
+        normalized_scores = {
+            f"reviewer_{i}": score
+            for i, score in enumerate(raw_scores.values(), start=1)
+        } or None
 
     return {
         "_id": _hacker_applicant_token(str(record["_id"])),
         "first_name": "",
         "last_name": "",
         "status": record["status"],
-        "decision": record.get("decision") if director_reviewed else None,
+        "decision": record.get("decision") if reveal else None,
         "reviewers": _redact_reviewers(reviewers, reviewer_uid),
         "resume_reviewed": record.get("resume_reviewed", False),
         "director_previous_experience_reviewed": director_reviewed,
-        "avg_score": record.get("avg_score", -1) if director_reviewed else -1,
+        "is_overqualified": (
+            bool(record.get("is_overqualified", False)) if show_scores else False
+        ),
+        "avg_score": record.get("avg_score", -1) if reveal else -1,
         "application_data": {
             "submission_time": application_data.get("submission_time"),
             "reviews": _redact_reviews(
                 application_data.get("reviews", []), reviewer_uid
+            ),
+            "normalized_scores": normalized_scores,
+            "extra_points": (
+                application_data.get("extra_points") if show_scores else None
             ),
         },
     }
@@ -962,7 +981,10 @@ async def applicant_summary(
                 detail=f"Invalid decision: {decision}",
             )
         
-    return await summary_handler.applicant_summary(role=role_enum, status=status_enum, decision=decision_enum)
+    return await summary_handler.applicant_summary(
+        role=role_enum, status=status_enum, decision=decision_enum
+    )
+
 
 @router.get(
     "/summary/applicants/table",

@@ -28,6 +28,7 @@ import { matchesSearch } from "@/app/admin/applicants/components/applicantSearch
 import UserContext from "@/lib/admin/UserContext";
 import {
 	isDirector,
+	isLead,
 	hasAdminRole,
 	isHackerReviewer,
 } from "@/lib/admin/authorization";
@@ -126,6 +127,7 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 
 	const isUserDirector = isDirector(roles);
 	const isOrganizer = hasAdminRole(roles);
+	const canSeeScores = isUserDirector || isLead(roles);
 
 	const [selectedStatuses, setSelectedStatuses] = useState<Options>([]);
 	const [selectedDecisions, setSelectedDecisions] = useState<Options>([]);
@@ -402,7 +404,7 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 						content: ({ application_data }) =>
 							new Date(application_data.submission_time).toLocaleDateString(),
 					},
-					...(isUserDirector 
+					...(canSeeScores 
 						? [
 							{
 								id: "avg_score",

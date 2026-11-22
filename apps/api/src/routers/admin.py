@@ -925,15 +925,11 @@ async def _hacker_applicant_record_for_user(
     records = await mongodb_handler.retrieve(
         Collection.USERS,
         {"roles": Role.HACKER},
-        ["_id", "assigned_reviewers", "application_data.reviews"],
+        ["_id"],
     )
     for record in records:
         uid = record.get("_id")
         if isinstance(uid, str) and _hacker_applicant_token(uid) == uid_or_token:
-            if user.uid not in _assigned_reviewers(
-                record
-            ) and not _reviewer_has_reviewed(record, user.uid):
-                raise HTTPException(status.HTTP_404_NOT_FOUND)
             return await _applicant_record(uid, "Hacker")
 
     raise HTTPException(status.HTTP_404_NOT_FOUND)

@@ -3,7 +3,6 @@ import useSWR from "swr";
 
 export interface ReviewAssignmentSettings {
 	minimum_reviews_per_organizer: number | null;
-	maximum_reviews_per_organizer: number | null;
 }
 
 const REVIEW_ASSIGNMENT_SETTINGS_ROUTE =

@@ -43,7 +43,7 @@ export default function Teamsection() {
     return (
         <section>
             { /* main content */ }
-            <div className="mx-auto flex w-full max-w-[1000px] flex-col items-center px-4 py-14 sm:px-8 lg:py-20">
+            <div className="mx-auto flex w-full max-w-[960px] flex-col items-center px-4 py-14 sm:px-8 lg:py-20">
                 { /* staff only sign */ }
                 <div className="mb-8 rounded-[9.212px] bg-ink px-7 py-2.5 shadow-md">
                     <span className="font-geo text-[22px] text-white">
@@ -53,7 +53,7 @@ export default function Teamsection() {
 
                 { /* corkboard */}
                 { /*TODO: FIX TO ADD CORKBOARD TEXURE */}
-                { /*TODO: FIX THE CORKBOARD SIZE */}
+                { /*TODO: FIX PLACEMENT OF THE STICKERS */}
                 <div className="relative w-full border-[8px] border-[#3B2820] bg-[#B39B84] px-4 pb-16 pt-8 shadow-xl sm:px-10">
                     <Image
                         src={petrSoda}
@@ -75,9 +75,56 @@ export default function Teamsection() {
                     <Image 
                         src={roundLogo}
                         alt="IrvineHacks 2027"
-                        className="pointer-events-none absolute right-6 top-16 hidden w-[125px] rotate-[6deg] sm:block"
+                        className="pointer-events-none absolute right-4 top-14 hidden w-[110px] rotate-[6deg] sm:block"
                     />
                     {/* tear-away flyer */}
+                    <div className="relative mx-auto mb-12 flex max-w-[380px] flex-col items-center">
+                        {/* main header and pushpins */}
+                        <div className="relative z-10 w-full">
+                            <Image
+                                src={teamNav}
+                                alt="Meet the Team!"
+                                className="h-auto w-full drop-shadow-md"
+                            />
+                            <Image
+                                src={pushpin}
+                                alt=""
+                                aria-hidden="true"
+                                className="pointer-events-none absolute -top-3 left-[4%] w-[28px]"
+                            />
+                            <Image
+                                src={pushpin}
+                                alt=""
+                                aria-hidden="true"
+                                className="pointer-events-none absolute top-3 right-[3%] w-[28px]"
+                            />
+                            {/*jagged edges L to R*/}
+                            <Image
+                                src={torn3}
+                                alt=""
+                                aria-hidden="true"
+                                className="pointer-events-none absolute left-[-0.3%] top-[79%] w-[30%]"
+                            />
+                            <Image
+                                src={torn1}
+                                alt=""
+                                aria-hidden="true"
+                                className="pointer-events-none absolute left-[39%] top-[85%] w-[10.5%]"
+                            />
+                            <Image
+                                src={torn0}
+                                alt=""
+                                aria-hidden="true"
+                                className="pointer-events-none absolute left-[58.5%] top-[88.5%] w-[10.5%] rotate-[4deg]"
+                            />
+                            <Image
+                                src={torn2}
+                                alt=""
+                                aria-hidden="true"
+                                className="pointer-events-none absolute left-[78%] top-[91%] w-[10.5%] rotate-[4deg]"
+                            />
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>

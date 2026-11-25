@@ -1,6 +1,5 @@
 import hashlib
 import hmac
-import random
 
 from datetime import date, datetime
 from logging import getLogger
@@ -145,6 +144,8 @@ class HackerApplicantSummary(BaseRecord):
 class RedactedApplicationDataSummary(BaseModel):
     submission_time: datetime
     reviews: list[Review] = []
+    normalized_scores: Optional[dict[str, float]] = None
+    extra_points: Optional[float] = None
 
 
 class RedactedHackerApplicantSummary(BaseRecord):
@@ -276,14 +277,6 @@ def _hacker_applicant_token(uid: str) -> str:
     return hmac.new(secret, uid.encode(), hashlib.sha256).hexdigest()[:24]
 
 
-def _hacker_assignment_ids_for_user(
-    applicant_ids: list[str], is_director: bool
-) -> list[str]:
-    if is_director:
-        return applicant_ids
-    return [_hacker_applicant_token(uid) for uid in applicant_ids]
-
-
 def _redact_reviewers(reviewers: list[str], reviewer_uid: str) -> list[str]:
     return [uid if uid == reviewer_uid else "reviewer" for uid in reviewers]
 
@@ -347,15 +340,8 @@ class DeleteNotesRequest(BaseModel):
     review_index: int
 
 
-class ReviewAssignmentsResponse(BaseModel):
-    applicant_ids: list[str]
-    target_count: int
-    completed_count: int
-
-
 class ReviewAssignmentSettings(BaseModel):
     minimum_reviews_per_organizer: Optional[int] = None
-    maximum_reviews_per_organizer: Optional[int] = None
 
 
 class WaiverStatusRequest(BaseModel):
@@ -374,7 +360,6 @@ async def _persist_auto_decision_status_if_needed(record: dict[str, object]) -> 
         record.update(update)
 
 
-REVIEW_ASSIGNMENT_BATCH_SIZE = 10
 REVIEW_ASSIGNMENT_SETTINGS_ID = "hacker_review_assignment_settings"
 
 
@@ -382,21 +367,12 @@ async def retrieve_hacker_review_assignment_settings() -> ReviewAssignmentSettin
     record = await mongodb_handler.retrieve_one(
         Collection.SETTINGS,
         {"_id": REVIEW_ASSIGNMENT_SETTINGS_ID},
-        ["minimum_reviews_per_organizer", "maximum_reviews_per_organizer"],
+        ["minimum_reviews_per_organizer"],
     )
     if record is None:
         return ReviewAssignmentSettings()
 
     return ReviewAssignmentSettings.model_validate(record)
-
-
-def _reviewer_has_reviewed(record: Mapping[str, Any], reviewer_uid: str) -> bool:
-    application_data = record.get("application_data", {})
-    if not isinstance(application_data, Mapping):
-        return False
-
-    reviews = application_data.get("reviews", [])
-    return any(review[1] == reviewer_uid for review in reviews)
 
 
 def _unique_reviewers(record: Mapping[str, Any]) -> set[str]:
@@ -406,11 +382,6 @@ def _unique_reviewers(record: Mapping[str, Any]) -> set[str]:
 
     reviews = application_data.get("reviews", [])
     return {review[1] for review in reviews}
-
-
-def _assigned_reviewers(record: Mapping[str, Any]) -> list[str]:
-    assigned_reviewers = record.get("assigned_reviewers", [])
-    return assigned_reviewers if isinstance(assigned_reviewers, list) else []
 
 
 def _has_auto_decision(record: Mapping[str, Any]) -> bool:
@@ -431,10 +402,6 @@ def _has_overqualified_score(record: Mapping[str, Any]) -> bool:
         return False
 
     return any(_is_overqualified_score(score) for score in global_field_scores.values())
-
-
-def _is_not_reviewable(record: Mapping[str, Any]) -> bool:
-    return _has_auto_decision(record) or _has_overqualified_score(record)
 
 
 def _raise_if_applicant_not_reviewable(
@@ -477,18 +444,6 @@ def _raise_if_applicant_not_reviewable(
             else "Cannot review an overqualified applicant."
         )
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail)
-
-
-def _is_review_assignable(record: Mapping[str, Any], reviewer_uid: str) -> bool:
-    if record.get("status") == UserStatus.VOIDED:
-        return False
-    if _is_not_reviewable(record):
-        return False
-    if reviewer_uid in _unique_reviewers(record):
-        return False
-    if len(_unique_reviewers(record)) >= 2:
-        return False
-    return len(_assigned_reviewers(record)) < 2
 
 
 async def mentor_volunteer_applicants(
@@ -673,121 +628,16 @@ async def hacker_applicants(
 
     try:
         if not await _user_has_role(user.uid, Role.DIRECTOR):
+            show_scores = await _user_has_role(user.uid, Role.LEAD)
             return TypeAdapter(list[RedactedHackerApplicantSummary]).validate_python(
                 [
-                    _redact_hacker_applicant_summary(record, user.uid)
+                    _redact_hacker_applicant_summary(record, user.uid, show_scores)
                     for record in records
                 ]
             )
         return TypeAdapter(list[HackerApplicantSummary]).validate_python(records)
     except ValidationError:
         raise RuntimeError("Could not parse applicant data.")
-
-
-@router.get("/review-assignments/hackers")
-async def hacker_review_assignments(
-    user: Annotated[User, Depends(require_hacker_reviewer)],
-) -> ReviewAssignmentsResponse:
-    """Get or create the current reviewer's hacker application assignments."""
-    is_user_director = await _user_has_role(user.uid, Role.DIRECTOR)
-    review_settings = await retrieve_hacker_review_assignment_settings()
-    records: list[dict[str, object]] = await mongodb_handler.retrieve(
-        Collection.USERS,
-        {"roles": Role.HACKER},
-        [
-            "_id",
-            "status",
-            "auto_decision_reason",
-            "application_data.reviews",
-            "application_data.submission_time",
-            "application_data.global_field_scores",
-            "assigned_reviewers",
-        ],
-        sort=[("application_data.submission_time", DESCENDING)],
-    )
-    completed_assignments = sum(
-        1 for record in records if _reviewer_has_reviewed(record, user.uid)
-    )
-    remaining_review_capacity = REVIEW_ASSIGNMENT_BATCH_SIZE
-    if review_settings.maximum_reviews_per_organizer is not None:
-        remaining_review_capacity = max(
-            review_settings.maximum_reviews_per_organizer - completed_assignments,
-            0,
-        )
-    target_assignment_count = min(
-        REVIEW_ASSIGNMENT_BATCH_SIZE, remaining_review_capacity
-    )
-
-    # Remove reviewer from assigned_reviewers when applicant can no longer be
-    # reviewed and this reviewer has not submitted a review yet.
-    for record in records:
-        if (
-            user.uid in _assigned_reviewers(record)
-            and _is_not_reviewable(record)
-            and not _reviewer_has_reviewed(record, user.uid)
-        ):
-            await mongodb_handler.raw_update_one(
-                Collection.USERS,
-                {"_id": record["_id"]},
-                {"$pull": {"assigned_reviewers": user.uid}},
-            )
-
-    active_assignment_records = [
-        record
-        for record in records
-        if user.uid in _assigned_reviewers(record)
-        and not _reviewer_has_reviewed(record, user.uid)
-        and record.get("status") != UserStatus.VOIDED
-        and not _is_not_reviewable(record)
-        and len(_unique_reviewers(record)) < 2
-    ]
-    overflow_assignment_records = active_assignment_records[target_assignment_count:]
-    for record in overflow_assignment_records:
-        await mongodb_handler.raw_update_one(
-            Collection.USERS,
-            {"_id": record["_id"]},
-            {"$pull": {"assigned_reviewers": user.uid}},
-        )
-
-    active_assignment_records = active_assignment_records[:target_assignment_count]
-    active_assignment_ids = [str(record["_id"]) for record in active_assignment_records]
-
-    needed_assignments = target_assignment_count - len(active_assignment_ids)
-    if needed_assignments <= 0:
-        return ReviewAssignmentsResponse(
-            applicant_ids=_hacker_assignment_ids_for_user(
-                active_assignment_ids, is_user_director
-            ),
-            target_count=target_assignment_count,
-            completed_count=completed_assignments,
-        )
-
-    candidates = [
-        record
-        for record in records
-        if str(record["_id"]) not in active_assignment_ids
-        and user.uid not in _assigned_reviewers(record)
-        and _is_review_assignable(record, user.uid)
-    ]
-    random.shuffle(candidates)
-    candidates.sort(key=lambda record: len(_assigned_reviewers(record)))
-
-    new_assignments = candidates[:needed_assignments]
-    for record in new_assignments:
-        await mongodb_handler.raw_update_one(
-            Collection.USERS,
-            {"_id": record["_id"]},
-            {"$addToSet": {"assigned_reviewers": user.uid}},
-        )
-
-    new_assignment_ids = [str(record["_id"]) for record in new_assignments]
-    return ReviewAssignmentsResponse(
-        applicant_ids=_hacker_assignment_ids_for_user(
-            active_assignment_ids + new_assignment_ids, is_user_director
-        ),
-        target_count=target_assignment_count,
-        completed_count=completed_assignments,
-    )
 
 
 async def _user_has_role(uid: str, role: Role) -> bool:
@@ -798,32 +648,48 @@ async def _user_has_role(uid: str, role: Role) -> bool:
 
 
 def _redact_hacker_applicant_summary(
-    record: dict[str, object], reviewer_uid: str
+    record: dict[str, object], reviewer_uid: str, show_scores: bool = False
 ) -> dict[str, object]:
     application_data = record.get("application_data", {})
     if not isinstance(application_data, dict):
         application_data = {}
 
     director_reviewed = bool(record.get("director_previous_experience_reviewed", False))
+    reveal = director_reviewed or show_scores
     reviewers = record.get("reviewers", [])
     if not isinstance(reviewers, list):
         reviewers = []
     reviewers = [uid for uid in reviewers if isinstance(uid, str)]
+
+    normalized_scores = None
+    if show_scores:
+        raw_scores = application_data.get("normalized_scores") or {}
+        normalized_scores = {
+            f"reviewer_{i}": score
+            for i, score in enumerate(raw_scores.values(), start=1)
+        } or None
 
     return {
         "_id": _hacker_applicant_token(str(record["_id"])),
         "first_name": "",
         "last_name": "",
         "status": record["status"],
-        "decision": record.get("decision") if director_reviewed else None,
+        "decision": record.get("decision") if reveal else None,
         "reviewers": _redact_reviewers(reviewers, reviewer_uid),
         "resume_reviewed": record.get("resume_reviewed", False),
         "director_previous_experience_reviewed": director_reviewed,
-        "avg_score": record.get("avg_score", -1) if director_reviewed else -1,
+        "is_overqualified": (
+            bool(record.get("is_overqualified", False)) if show_scores else False
+        ),
+        "avg_score": record.get("avg_score", -1) if reveal else -1,
         "application_data": {
             "submission_time": application_data.get("submission_time"),
             "reviews": _redact_reviews(
                 application_data.get("reviews", []), reviewer_uid
+            ),
+            "normalized_scores": normalized_scores,
+            "extra_points": (
+                application_data.get("extra_points") if show_scores else None
             ),
         },
     }
@@ -925,15 +791,11 @@ async def _hacker_applicant_record_for_user(
     records = await mongodb_handler.retrieve(
         Collection.USERS,
         {"roles": Role.HACKER},
-        ["_id", "assigned_reviewers", "application_data.reviews"],
+        ["_id"],
     )
     for record in records:
         uid = record.get("_id")
         if isinstance(uid, str) and _hacker_applicant_token(uid) == uid_or_token:
-            if user.uid not in _assigned_reviewers(
-                record
-            ) and not _reviewer_has_reviewed(record, user.uid):
-                raise HTTPException(status.HTTP_404_NOT_FOUND)
             return await _applicant_record(uid, "Hacker")
 
     raise HTTPException(status.HTTP_404_NOT_FOUND)
@@ -1081,11 +943,13 @@ async def volunteer_applicant(
 async def applicant_summary(
     role: Optional[str] = None,
     status_filter: Optional[str] = None,
+    decision: Optional[str] = None,
 ) -> dict[ApplicantStatus, int]:
     """Provide summary of statuses of applicants"""
     # Convert string params to enums if provided
     role_enum: Optional[Role] = None
     status_enum: Optional[ApplicantStatus] = None
+    decision_enum: Optional[Decision] = None
 
     if role:
         try:
@@ -1108,7 +972,18 @@ async def applicant_summary(
                     detail=f"Invalid status: {status_filter}",
                 )
 
-    return await summary_handler.applicant_summary(role=role_enum, status=status_enum)
+    if decision:
+        try:
+            decision_enum = Decision(decision)
+        except ValueError:
+            raise HTTPException(
+                status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid decision: {decision}",
+            )
+
+    return await summary_handler.applicant_summary(
+        role=role_enum, status=status_enum, decision=decision_enum
+    )
 
 
 @router.get(
@@ -1625,7 +1500,7 @@ async def get_avg_score_setting() -> dict[str, bool]:
     dependencies=[Depends(require_manager)],
 )
 async def get_review_assignment_settings() -> ReviewAssignmentSettings:
-    """Get settings for reviewer queue goals and caps."""
+    """Get reviewer minimum review goal."""
     return await retrieve_hacker_review_assignment_settings()
 
 

@@ -20,6 +20,7 @@ import ApplicantFilters, {
 } from "@/app/admin/applicants/components/ApplicantFilters";
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
 import AutoDecisionBadge from "@/app/admin/applicants/components/AutoDecisionBadge";
+import { matchesSearch } from "@/app/admin/applicants/components/applicantSearch";
 
 import UserContext from "@/lib/admin/UserContext";
 import { isVolunteerReviewer } from "@/lib/admin/authorization";
@@ -49,6 +50,7 @@ function VolunteerApplicants() {
 
 	const [selectedStatuses, setSelectedStatuses] = useState<Options>([]);
 	const [selectedDecisions, setSelectedDecisions] = useState<Options>([]);
+	const [searchText, setSearchText] = useState<string>("");
 	const { applicantList, loading } = useMentorVolunteerApplicants("volunteers");
 
 	const selectedStatusValues = selectedStatuses.map(({ value }) => value);
@@ -61,13 +63,16 @@ function VolunteerApplicants() {
 			(selectedDecisions.length === 0 ||
 				selectedDecisionValues.includes(
 					getApplicantDecisionFilterValue(applicant),
-				)),
+				)) &&
+			matchesSearch(applicant, searchText),
 	);
 
 	const items = filteredApplicants;
 
 	const counter =
-		selectedStatuses.length > 0 || selectedDecisions.length > 0
+		selectedStatuses.length > 0 ||
+		selectedDecisions.length > 0 ||
+		searchText.trim() !== ""
 			? `(${items.length}/${applicantList.length})`
 			: `(${applicantList.length})`;
 
@@ -123,6 +128,9 @@ function VolunteerApplicants() {
 					selectedDecisions={selectedDecisions}
 					setSelectedDecisions={setSelectedDecisions}
 					applicantType={ParticipantRole.Volunteer}
+					searchText={searchText}
+					setSearchText={setSearchText}
+					searchResultCount={items.length}
 				/>
 			}
 			empty={emptyContent}

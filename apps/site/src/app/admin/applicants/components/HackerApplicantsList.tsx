@@ -23,10 +23,12 @@ import ApplicantFilters, {
 import { SelectProps } from "@cloudscape-design/components/select";
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
 import AutoDecisionBadge from "@/app/admin/applicants/components/AutoDecisionBadge";
+import { matchesSearch } from "@/app/admin/applicants/components/applicantSearch";
 
 import UserContext from "@/lib/admin/UserContext";
 import {
 	isDirector,
+	isLead,
 	hasAdminRole,
 	isHackerReviewer,
 } from "@/lib/admin/authorization";
@@ -34,11 +36,9 @@ import ApplicantReviewerIndicator from "../components/ApplicantReviewerIndicator
 import HackerThresholdInputs from "../components/HackerThresholdInputs";
 
 import useHackerThresholds from "@/lib/admin/useHackerThresholds";
-import useAvgScoreSetting from "@/lib/admin/useAvgScoreSetting";
 import useHackerApplicants, {
 	HackerApplicantSummary,
 } from "@/lib/admin/useHackerApplicants";
-import useHackerReviewAssignments from "@/lib/admin/useHackerReviewAssignments";
 import { uidToPseudonym } from "@/lib/admin/anonymize";
 import { Decision, ParticipantRole, Status } from "@/lib/userRecord";
 import Badge from "@cloudscape-design/components/badge";
@@ -106,6 +106,16 @@ function getApplicantDecisionBucket(
 	return "rejected";
 }
 
+function getNormalizedAverage(
+	applicant: HackerApplicantSummary,
+): number | null {
+	const scores = applicant.application_data.normalized_scores;
+	if (!scores || Object.keys(scores).length === 0) return null;
+	const values = Object.values(scores);
+	const avg = values.reduce((sum, v) => sum + v, 0) / values.length;
+	return avg + (applicant.application_data.extra_points ?? 0);
+}
+
 function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 	const router = useRouter();
 	const { roles } = useContext(UserContext);
@@ -116,9 +126,11 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 
 	const isUserDirector = isDirector(roles);
 	const isOrganizer = hasAdminRole(roles);
+	const canSeeScores = isUserDirector || isLead(roles);
 
 	const [selectedStatuses, setSelectedStatuses] = useState<Options>([]);
 	const [selectedDecisions, setSelectedDecisions] = useState<Options>([]);
+	const [searchText, setSearchText] = useState<string>("");
 	const [uciNetIDFilter, setUCINetIDFilter] = useState<Options>([]);
 	const [sortOption, setSortOption] = useState<SelectProps.Option>({
 		value: "latest",
@@ -127,23 +139,6 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 
 	const { applicantList, loading, approveDuplicateName } =
 		useHackerApplicants();
-	const {
-		assignedApplicantIds,
-		targetCount,
-		completedCount,
-		loading: assignmentsLoading,
-	} = useHackerReviewAssignments(!isUserDirector);
-	const reviewableApplicantList = useMemo(() => {
-		if (isUserDirector) return applicantList;
-
-		const applicantById = new Map(
-			applicantList.map((applicant) => [applicant._id, applicant]),
-		);
-		return assignedApplicantIds.flatMap((applicantId) => {
-			const applicant = applicantById.get(applicantId);
-			return applicant ? [applicant] : [];
-		});
-	}, [applicantList, assignedApplicantIds, isUserDirector]);
 
 	const selectedStatusValues = selectedStatuses.map(({ value }) => value);
 	const selectedDecisionValues = selectedDecisions.map(({ value }) => value);
@@ -157,8 +152,6 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 	const acceptThreshold = thresholds?.accept;
 	const waitlistThreshold = thresholds?.waitlist;
 
-	const { showWithOneReviewer } = useAvgScoreSetting();
-
 	const [top400, setTop400] = useState(false);
 
 	useEffect(() => {
@@ -168,7 +161,7 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		}
 	}, [top400]);
 
-	const filteredApplicants = reviewableApplicantList.filter((applicant) => {
+	const filteredApplicants = applicantList.filter((applicant) => {
 		const isEffectivelyResumeReviewed =
 			applicant.resume_reviewed ||
 			Boolean(applicant.auto_decision_reason) ||
@@ -213,7 +206,7 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		);
 	});
 
-	const filteredApplicants400 = [...reviewableApplicantList]
+	const filteredApplicants400 = [...applicantList]
 		.filter(
 			(applicant) =>
 				applicant.director_previous_experience_reviewed &&
@@ -250,9 +243,13 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		setRejectCount(nextRejectedCount);
 	}, [applicantList, acceptThreshold, waitlistThreshold]);
 
-	const baseItems = top400 ? filteredApplicants400 : filteredApplicants;
+	const baseItems = useMemo(() => {
+		const base = top400 ? filteredApplicants400 : filteredApplicants;
+		return searchText.trim()
+			? base.filter((applicant) => matchesSearch(applicant, searchText))
+			: base;
+	}, [top400, filteredApplicants400, filteredApplicants, searchText]);
 	const items = useMemo(() => {
-		if (!isUserDirector) return baseItems;
 		if (!sortOption?.value) return baseItems;
 		return [...baseItems].sort((a, b) => {
 			switch (sortOption.value) {
@@ -274,14 +271,15 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 					return 0;
 			}
 		});
-	}, [baseItems, isUserDirector, sortOption]);
+	}, [baseItems, sortOption]);
 
 	const counter =
 		selectedStatuses.length > 0 ||
 		selectedDecisions.length > 0 ||
-		uciNetIDFilter.length > 0
-			? `(${items.length}/${reviewableApplicantList.length})`
-			: `(${reviewableApplicantList.length})`;
+		uciNetIDFilter.length > 0 ||
+		searchText.trim() !== ""
+			? `(${items.length}/${applicantList.length})`
+			: `(${applicantList.length})`;
 
 	const emptyContent = (
 		<Box textAlign="center" color="inherit">
@@ -363,18 +361,15 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 		[hackathonName, duplicateNames, isUserDirector, approveDuplicateName],
 	);
 
-	const avgScore = ({
-		avg_score,
-		is_overqualified,
-		reviewers,
-		director_previous_experience_reviewed,
-	}: HackerApplicantSummary) => {
-		if (is_overqualified)
+	const avgScore = (applicant: HackerApplicantSummary) => {
+		if (applicant.is_overqualified)
 			return <Box color="text-status-error">OVERQUALIFIED</Box>;
-		if (!director_previous_experience_reviewed) return "-";
-		if (avg_score === -1) return "-";
-		if (reviewers.length < 2 && !showWithOneReviewer) return "-";
-		return avg_score.toFixed(3);
+
+		const normalized = getNormalizedAverage(applicant);
+		if (normalized !== null) return normalized.toFixed(3);
+
+		if (applicant.avg_score === -1) return "-";
+		return applicant.avg_score.toFixed(3);
 	};
 
 	return (
@@ -406,56 +401,50 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 						content: ({ application_data }) =>
 							new Date(application_data.submission_time).toLocaleDateString(),
 					},
-					{
-						id: "avg_score",
-						header: "Averaged Score",
-						content: avgScore,
-					},
-					{
-						id: "decision",
-						header: "Decision",
-						content: DecisionStatus,
-					},
+					...(canSeeScores
+						? [
+								{
+									id: "avg_score",
+									header: "Averaged Score",
+									content: avgScore,
+								},
+								{
+									id: "decision",
+									header: "Decision",
+									content: DecisionStatus,
+								},
+						  ]
+						: []),
 				],
 			}}
-			loading={loading || assignmentsLoading}
+			loading={loading}
 			loadingText="Loading applicants"
 			items={items}
 			trackBy="_id"
 			variant="full-page"
 			filter={
-				isUserDirector ? (
-					<ApplicantFilters
-						selectedStatuses={selectedStatuses}
-						setSelectedStatuses={setSelectedStatuses}
-						selectedDecisions={selectedDecisions}
-						setSelectedDecisions={setSelectedDecisions}
-						uciNetIDFilter={uciNetIDFilter}
-						setUCINetIDFilter={setUCINetIDFilter}
-						applicantType={ParticipantRole.Hacker}
-						sortOption={sortOption}
-						setSortOption={setSortOption}
-					/>
-				) : null
+				<ApplicantFilters
+					selectedStatuses={selectedStatuses}
+					setSelectedStatuses={setSelectedStatuses}
+					selectedDecisions={selectedDecisions}
+					setSelectedDecisions={setSelectedDecisions}
+					applicantType={ParticipantRole.Hacker}
+					{...(isUserDirector && {
+						uciNetIDFilter,
+						setUCINetIDFilter,
+						sortOption,
+						setSortOption,
+						searchText,
+						setSearchText,
+						searchResultCount: items.length,
+					})}
+				/>
 			}
 			empty={emptyContent}
 			header={
 				<div>
 					<Header actions={isUserDirector && <HackerThresholdInputs />}>
 						Hacker Applicants {counter}
-						{!isUserDirector && (
-							<div
-								style={{
-									fontSize: "0.875rem",
-									color: "#5f6b7a",
-									marginTop: "4px",
-								}}
-							>
-								Showing your assigned review queue
-								{targetCount ? ` (${items.length}/${targetCount})` : ""}
-								{completedCount ? `, ${completedCount} reviewed` : ""}
-							</div>
-						)}
 						<div
 							style={{
 								fontSize: "0.875rem",
@@ -583,7 +572,10 @@ const CardHeader = ({
 				{displayName}
 			</Link>
 			{is_overqualified && <Badge color="red">OVERQUALIFIED</Badge>}
-			<AutoDecisionBadge reason={auto_decision_reason} decision={decision} />
+			<AutoDecisionBadge
+				reason={isDirector ? auto_decision_reason : null}
+				decision={isDirector ? decision : null}
+			/>
 			{duplicateIcon}
 		</div>
 	);
@@ -592,13 +584,10 @@ const CardHeader = ({
 const DecisionStatus = ({
 	decision,
 	auto_decision_reason,
-	director_previous_experience_reviewed,
 	is_overqualified,
+	avg_score,
 }: HackerApplicantSummary) =>
-	(director_previous_experience_reviewed ||
-		auto_decision_reason ||
-		is_overqualified) &&
-	decision ? (
+	decision && (auto_decision_reason || is_overqualified || avg_score !== -1) ? (
 		<ApplicantStatus status={decision} />
 	) : (
 		"-"

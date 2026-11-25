@@ -66,14 +66,12 @@ function ReviewerSummary() {
 		updateSettings,
 	} = useReviewAssignmentSettings();
 	const [minimumInput, setMinimumInput] = useState("");
-	const [maximumInput, setMaximumInput] = useState("");
 	const [saving, setSaving] = useState(false);
 	const [saveStatus, setSaveStatus] = useState("");
 
 	useEffect(() => {
 		if (!settings) return;
 		setMinimumInput(settings.minimum_reviews_per_organizer?.toString() ?? "");
-		setMaximumInput(settings.maximum_reviews_per_organizer?.toString() ?? "");
 	}, [settings]);
 
 	const minimum =
@@ -92,7 +90,6 @@ function ReviewerSummary() {
 		try {
 			await updateSettings({
 				minimum_reviews_per_organizer: parseSettingInput(minimumInput),
-				maximum_reviews_per_organizer: parseSettingInput(maximumInput),
 			});
 			setSaveStatus("Saved");
 		} catch {
@@ -142,16 +139,6 @@ function ReviewerSummary() {
 									value={minimumInput}
 									onChange={({ detail }) => setMinimumInput(detail.value)}
 									placeholder="Set a goal (ex: 10, 50...)"
-								/>
-							</div>
-						</FormField>
-						<FormField label="Maximum reviews per organizer">
-							<div style={{ width: 250 }}>
-								<Input
-									type="number"
-									value={maximumInput}
-									onChange={({ detail }) => setMaximumInput(detail.value)}
-									placeholder="Leave blank for no cap"
 								/>
 							</div>
 						</FormField>

@@ -6,6 +6,7 @@ from zoneinfo import ZoneInfo
 from pydantic import BaseModel, TypeAdapter, ValidationError
 
 from models.user_record import ApplicantStatus, Role
+from models.ApplicationData import Decision
 from services import mongodb_handler
 from services.mongodb_handler import Collection
 
@@ -19,8 +20,9 @@ class ApplicantSummaryRecord(BaseModel):
 async def applicant_summary(
     role: Optional[Role] = None,
     status: Optional[ApplicantStatus] = None,
+    decision: Optional[Decision] = None,
 ) -> Counter[ApplicantStatus]:
-    """Get summary of applicants by status, optionally filtered by role/status."""
+    """Get summary of applicants, optionally filtered by role/status/decision."""
     query: dict[str, object] = {"roles": Role.APPLICANT}
 
     if role is not None:
@@ -28,6 +30,9 @@ async def applicant_summary(
 
     if status is not None:
         query["status"] = status.value
+
+    if decision is not None:
+        query["decision"] = decision.value
 
     records = await mongodb_handler.retrieve(
         Collection.USERS,

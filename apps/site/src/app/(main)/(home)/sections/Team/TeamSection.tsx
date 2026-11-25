@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 import { teamMembers } from "@/lib/data/team";
 
 import linkedinIcon from "@/assets/team/linkedin.svg";
@@ -34,6 +34,21 @@ import tornTech from "@/assets/team/torn-tech.svg";
 
 type Committee = "Logistics" | "Corporate" | "Marketing" | "Design" | "Tech";
 
+interface TabConfig {
+    name: Committee; /* restrict title tab to Committee type */
+    untornStub: StaticImageData; /* represent tab's visual state */
+    tornStub: StaticImageData;
+}
+
+const COMMITTEE_TABS: TabConfig[] = [
+    /* list of the 5 tabs, uses TabConfig blueprint */
+    { name: "Logistics", untornStub: stubLog, tornStub: tornLog },
+    { name: "Corporate", untornStub: stubCorp, tornStub: tornCorp },
+    { name: "Marketing", untornStub: stubMark, tornStub: tornMark },
+    { name: "Design", untornStub: stubDes, tornStub: tornDes },
+    { name: "Tech", untornStub: stubTech, tornStub: tornTech },
+];
+
 export default function Teamsection() {
     const [selectedCommittee, setSelectedCommittee] = useState<Committee>("Logistics");
     const members = teamMembers[selectedCommittee];
@@ -59,7 +74,7 @@ export default function Teamsection() {
                         src={petrSoda}
                         alt=""
                         aria-hidden="true"
-                        className="pointer-events-none absolute -right-4 -top-16 z-20 w-[110px] sm:-right-8 sm:-top-24 sm:w-[155px]"
+                        className="pointer-events-none absolute -right-4 -top-16 z-20 w-[433px] sm:-right-10 sm:-top-[11rem] sm:w-[300px]"
                     />
                     <Image 
                         src={orange}
@@ -125,6 +140,41 @@ export default function Teamsection() {
                             />
                         </div>
                     </div>
+                </div>
+                {/*Committee tearoff slips*/}
+                <div className="-mt-3 flex w-full justify-center gap-2 px-4 sm:gap-3">
+                    {/**map thru tabs */}
+                    {COMMITTEE_TABS.map((tab) => {
+                        const isSelected = (selectedCommittee === tab.name);
+                        return(
+                            <button
+                                key={tab.name}
+                                type="button"
+                                onClick={() => setSelectedCommittee(tab.name)}
+                                className={`group relative flex h-[96p] w-[42px] items-center justify-center trainsition-all duration-300 ease-[cubic-bezier(0.34, 1.56, 0.64, 1)] ${
+                                    isSelected 
+                                        ? "translate-y-4 cursor-default"  // torn down
+                                        : "translate-y-0 cursor-pointer hover:translate-y-1" // attached
+                                }`}
+                            >
+                                {/**TODO: fix sizing */}
+                                <Image
+                                    src={isSelected ? tab.tornStub : tab.untornStub}
+                                    alt=""
+                                    aria-hidden="true"
+                                    className="pointer-events-none absolute inset-0 h-full w-full objet-contain drop-shadow"
+                                />
+                                <span
+                                    className={`relative z-10 -rotate-90 whitespace-nowrap font-nunito text-[13px] text-ink ${
+												isSelected ? "font-bold" : "font-normal group-hover:font-bold"
+											}`}
+                                >
+                                    {/* committee label (bold on hover) */}
+                                    {tab.name}
+                                </span>
+                            </button>
+                        );
+                    })}
                 </div>
             </div>
         </section>

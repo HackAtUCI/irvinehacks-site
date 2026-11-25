@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useContext } from "react";
+import { useCollection } from "@cloudscape-design/collection-hooks";
 import axios from "axios";
 import {
 	Badge,
@@ -8,177 +9,31 @@ import {
 	Button,
 	FlashbarProps,
 	Header,
-	Modal,
 	SpaceBetween,
 	Table,
+	TableProps,
 } from "@cloudscape-design/components";
+import { FileText } from "lucide-react";
 
+import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
+import { createLabelFunction } from "@/lib/admin/createLabelFunction";
 import NotificationContext from "@/lib/admin/NotificationContext";
-import useHackerApplicants, {
-	HackerApplicantSummary,
-} from "@/lib/admin/useHackerApplicants";
-import {
-	NOT_FULLY_REVIEWED_SCORE,
-	OVERQUALIFIED_SCORE,
-} from "@/lib/decisionScores";
+import useHackerApplicants from "@/lib/admin/useHackerApplicants";
 import { Decision } from "@/lib/userRecord";
 import ExcludeUIDsModal from "./ExcludeUIDsModal";
-
-const SPECIAL_SCORE_SORT_VALUE = Number.NEGATIVE_INFINITY;
-
-function getSpecialScoreLabel(applicant: HackerApplicantSummary) {
-	if (applicant.is_overqualified || applicant.avg_score === OVERQUALIFIED_SCORE) {
-		return "OQ";
-	}
-
-	switch (applicant.auto_decision_reason) {
-		case "UNDER_18":
-			return "UNDERAGE";
-		case "GRADUATED":
-			return "GRADUATED";
-		case "DIRECTOR_AUTO_ACCEPT":
-			return "AUTO ACCEPT";
-		default:
-			return null;
-	}
-}
-
-function sortApplicantsByNormalizedScore(applicants: HackerApplicantSummary[]) {
-	return applicants
-		.map((applicant) => {
-			const specialScoreLabel = getSpecialScoreLabel(applicant);
-			const scores = applicant.application_data.normalized_scores;
-			if (!scores || Object.keys(scores).length === 0) {
-				const avgNormalizedScore = specialScoreLabel
-					? SPECIAL_SCORE_SORT_VALUE
-					: 0;
-				return { ...applicant, avgNormalizedScore, specialScoreLabel };
-			}
-
-			const total = Object.values(scores).reduce((sum, val) => sum + val, 0);
-			let avgNormalizedScore = total / Object.keys(scores).length;
-			if (applicant.application_data.extra_points)
-				avgNormalizedScore += applicant.application_data.extra_points;
-
-			return {
-				...applicant,
-				avgNormalizedScore: specialScoreLabel
-					? SPECIAL_SCORE_SORT_VALUE
-					: avgNormalizedScore,
-				specialScoreLabel,
-			};
-		})
-		.sort((a, b) => b.avgNormalizedScore - a.avgNormalizedScore);
-}
-
-const downloadCSV = (
-	data: (HackerApplicantSummary & {
-		avgNormalizedScore: number;
-		extraPoints?: number;
-		specialScoreLabel: string | null;
-	})[],
-) => {
-	const headers = [
-		"Name",
-		"Email",
-		"Major",
-		"LinkedIn",
-		"Resume URL",
-		"Average Normalized Score",
-		"Comments",
-	];
-
-	// Helper to escape CSV fields (wrap in quotes, escape existing quotes)
-	const escapeCSV = (val: string | number) => {
-		const str = String(val);
-		if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-			return `"${str.replace(/"/g, '""')}"`;
-		}
-		return str;
-	};
-
-	const rows = data.map((a) => {
-		const comments = (a.application_data.reviews || [])
-			.map((r) => (r[3] ? `${r[1]}: ${r[3]}` : ""))
-			.filter(Boolean)
-			.map((c) => c!.replace(/[\r\n]+/g, " | "))
-			.join("; ");
-
-		return [
-			`${a.first_name} ${a.last_name}`,
-			a.application_data.email || "",
-			a.application_data.major || "",
-			a.application_data.linkedin || "",
-			a.application_data.resume_url || "",
-			a.specialScoreLabel ?? a.avgNormalizedScore.toFixed(2),
-			comments,
-		]
-			.map(escapeCSV)
-			.join(",");
-	});
-
-	const csvContent = [headers.join(","), ...rows].join("\n");
-	const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-	const url = URL.createObjectURL(blob);
-
-	const link = document.createElement("a");
-	link.setAttribute("href", url);
-	link.setAttribute("download", "applicants.csv");
-	document.body.appendChild(link);
-	link.click();
-	document.body.removeChild(link);
-	URL.revokeObjectURL(url);
-};
-
-const ResumeModalButton = (
-	item: HackerApplicantSummary & {
-		avgNormalizedScore: number;
-		extraPoints?: number;
-	},
-) => {
-	const [showResume, setShowResume] = useState(false);
-
-	return (
-		<>
-			<div style={{ display: "flex", gap: "0.5rem" }}>
-				<Button onClick={() => setShowResume(true)}>View Resume</Button>
-				<Button
-					variant="link"
-					onClick={() =>
-						window.open(
-							item.application_data.resume_url || "",
-							"_blank",
-							"noopener,noreferrer",
-						)
-					}
-				>
-					Open in New Tab
-				</Button>
-			</div>
-			<Modal
-				onDismiss={() => setShowResume(false)}
-				visible={showResume}
-				closeAriaLabel="Close modal"
-				header="Resume"
-				size="max"
-			>
-				<Box>
-					<iframe
-						src={`${item.application_data.resume_url || ""}/preview`}
-						title="Resume"
-						style={{ width: "100%", height: "80vh", border: 0 }}
-					/>
-				</Box>
-			</Modal>
-		</>
-	);
-};
-
-interface ScoredHackerApplicant extends HackerApplicantSummary {
-	avgNormalizedScore: number;
-	specialScoreLabel: string | null;
-	rowIndex: number;
-}
+import ApplicantNameLink from "./components/ApplicantNameLink";
+import IconLink from "./components/IconLink";
+import LinkedInIcon from "./components/LinkedInIcon";
+import ScoreFilters from "./components/ScoreFilters";
+import downloadScoresCSV from "./downloadScoresCSV";
+import { EMPTY_FILTERS, matchesFilters } from "./scoreFilters";
+import {
+	ScoreRow,
+	buildScoreRows,
+	compareNormalizedScores,
+	compareRawScores,
+	formatScore,
+} from "./scoreRows";
 
 interface NormalizeScoresResponse {
 	matched_applicants: number;
@@ -186,24 +41,24 @@ interface NormalizeScoresResponse {
 	updated_applicants: number;
 }
 
-const NameCell = (item: ScoredHackerApplicant) =>
-	`${item.first_name} ${item.last_name}`;
+const NameCell = (item: ScoreRow) => (
+	<ApplicantNameLink id={item.id} name={item.name} />
+);
 
-const LinkedInCell = (item: ScoredHackerApplicant) =>
-	item.application_data.linkedin ? (
-		<Button
-			variant="link"
-			href={item.application_data.linkedin}
-			target="_blank"
-		>
-			LinkedIn
-		</Button>
-	) : (
-		"-"
-	);
+const LinkedInCell = (item: ScoreRow) => (
+	<IconLink url={item.linkedin} label="LinkedIn" icon={<LinkedInIcon />} />
+);
 
-const AverageNormalizedScoreCell = (item: ScoredHackerApplicant) => {
-	if (!item.specialScoreLabel) return item.avgNormalizedScore.toFixed(2);
+const ResumeCell = (item: ScoreRow) => (
+	<IconLink
+		url={item.resumeUrl}
+		label="Resume"
+		icon={<FileText size={20} aria-hidden="true" />}
+	/>
+);
+
+const NormalizedScoreCell = (item: ScoreRow) => {
+	if (!item.specialScoreLabel) return formatScore(item.normalizedScore);
 
 	return (
 		<Badge color={item.decision === Decision.Accepted ? "green" : "red"}>
@@ -212,46 +67,70 @@ const AverageNormalizedScoreCell = (item: ScoredHackerApplicant) => {
 	);
 };
 
-const COLUMNS = [
-	{
-		id: "index",
-		header: "#",
-		cell: (item: ScoredHackerApplicant) => item.rowIndex,
-		width: 40,
-	},
+const DecisionCell = (item: ScoreRow) =>
+	item.decision ? <ApplicantStatus status={item.decision} /> : "-";
+
+const COLUMNS: TableProps.ColumnDefinition<ScoreRow>[] = [
 	{
 		id: "name",
 		header: "Name",
 		cell: NameCell,
+		ariaLabel: createLabelFunction("Name"),
+		sortingField: "name",
 	},
 	{
 		id: "email",
 		header: "Email",
-		cell: (item: ScoredHackerApplicant) => item.application_data.email || "-",
+		cell: (item) => item.email || "-",
+		ariaLabel: createLabelFunction("Email"),
+		sortingField: "email",
 	},
 	{
-		id: "major",
-		header: "Major",
-		cell: (item: ScoredHackerApplicant) => item.application_data.major || "-",
+		id: "rawScore",
+		header: "Raw Score",
+		cell: (item) => formatScore(item.rawScore),
+		ariaLabel: createLabelFunction("Raw Score"),
+		sortingField: "rawScore",
+		sortingComparator: compareRawScores,
+	},
+	{
+		id: "normalizedScore",
+		header: "Normalized Score",
+		cell: NormalizedScoreCell,
+		ariaLabel: createLabelFunction("Normalized Score"),
+		sortingField: "normalizedScore",
+		sortingComparator: compareNormalizedScores,
+	},
+	{
+		id: "decision",
+		header: "Decision",
+		cell: DecisionCell,
+		ariaLabel: createLabelFunction("Decision"),
+		sortingField: "decision",
 	},
 	{
 		id: "linkedin",
 		header: "LinkedIn",
 		cell: LinkedInCell,
-		minWidth: 150,
+		ariaLabel: createLabelFunction("LinkedIn"),
+		sortingField: "linkedin",
 	},
 	{
 		id: "resume",
 		header: "Resume",
-		cell: ResumeModalButton,
-		minWidth: 350,
-	},
-	{
-		id: "avgScore",
-		header: "Average Normalized Score",
-		cell: AverageNormalizedScoreCell,
+		cell: ResumeCell,
+		ariaLabel: createLabelFunction("Resume"),
+		sortingField: "resumeUrl",
 	},
 ];
+
+const DEFAULT_SORTING = {
+	sortingColumn: {
+		sortingField: "normalizedScore",
+		sortingComparator: compareNormalizedScores,
+	},
+	isDescending: true,
+};
 
 function Scores() {
 	const { setNotifications } = useContext(NotificationContext);
@@ -259,22 +138,26 @@ function Scores() {
 
 	const [isExcludeModalVisible, setIsExcludeModalVisible] = useState(false);
 
-	const filteredApplicants = useMemo(
-		() =>
-			applicantList.filter(
-				(a) =>
-					getSpecialScoreLabel(a) !== null ||
-					a.avg_score !== NOT_FULLY_REVIEWED_SCORE,
-			),
-		[applicantList],
-	);
+	const rows = useMemo(() => buildScoreRows(applicantList), [applicantList]);
 
-	const sorted = sortApplicantsByNormalizedScore(filteredApplicants).map(
-		(item, index) => ({
-			...item,
-			rowIndex: index + 1,
-		}),
-	);
+	const [filters, setFilters] = useState(EMPTY_FILTERS);
+	const clearFilters = () => setFilters(EMPTY_FILTERS);
+
+	const { items, collectionProps, filteredItemsCount } = useCollection(rows, {
+		filtering: {
+			filteringFunction: (row) => matchesFilters(row, filters),
+			empty: "No applicants",
+			noMatch: (
+				<Box textAlign="center">
+					<SpaceBetween size="xs">
+						<b>No matches</b>
+						<Button onClick={clearFilters}>Clear filters</Button>
+					</SpaceBetween>
+				</Box>
+			),
+		},
+		sorting: { defaultState: DEFAULT_SORTING },
+	});
 
 	const showNotification = (
 		type: FlashbarProps.Type,
@@ -317,9 +200,21 @@ function Scores() {
 		<SpaceBetween size="l">
 			<Header variant="h1">Scores</Header>
 			<Table
+				{...collectionProps}
 				loading={loading}
 				columnDefinitions={COLUMNS}
-				items={sorted}
+				items={items}
+				trackBy="id"
+				wrapLines
+				filter={
+					<ScoreFilters
+						filters={filters}
+						onChange={setFilters}
+						onClear={clearFilters}
+						matchCount={filteredItemsCount ?? rows.length}
+						totalCount={rows.length}
+					/>
+				}
 				header={
 					<div
 						style={{
@@ -333,7 +228,9 @@ function Scores() {
 							<Button onClick={() => setIsExcludeModalVisible(true)}>
 								Exclude UIDs (auto-reject/auto-accept)
 							</Button>
-							<Button onClick={() => downloadCSV(sorted)}>Download CSV</Button>
+							<Button onClick={() => downloadScoresCSV(rows)}>
+								Download CSV
+							</Button>
 							<Button variant="primary" onClick={handleClick}>
 								Normalize scores
 							</Button>

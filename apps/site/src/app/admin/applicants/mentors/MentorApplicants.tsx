@@ -75,7 +75,7 @@ function MentorApplicants() {
 		searchText.trim() !== ""
 			? `(${items.length}/${applicantList.length})`
 			: `(${applicantList.length})`;
-			
+
 	const emptyContent = (
 		<Box textAlign="center" color="inherit">
 			No applicants

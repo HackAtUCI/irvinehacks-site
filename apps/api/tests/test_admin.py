@@ -1009,6 +1009,7 @@ def test_hacker_applicants_redacts_identity_for_reviewers(
         HACKER_REVIEWER_IDENTITY,
         returned_thresholds,
         HACKER_REVIEWER_IDENTITY,
+        HACKER_REVIEWER_IDENTITY,
     ]
 
     res = reviewer_client.get("/applicants/hackers")

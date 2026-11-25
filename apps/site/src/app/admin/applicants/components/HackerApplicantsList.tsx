@@ -36,7 +36,6 @@ import ApplicantReviewerIndicator from "../components/ApplicantReviewerIndicator
 import HackerThresholdInputs from "../components/HackerThresholdInputs";
 
 import useHackerThresholds from "@/lib/admin/useHackerThresholds";
-import useAvgScoreSetting from "@/lib/admin/useAvgScoreSetting";
 import useHackerApplicants, {
 	HackerApplicantSummary,
 } from "@/lib/admin/useHackerApplicants";
@@ -131,7 +130,7 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 
 	const [selectedStatuses, setSelectedStatuses] = useState<Options>([]);
 	const [selectedDecisions, setSelectedDecisions] = useState<Options>([]);
-	const [ searchText, setSearchText] = useState<string>("");
+	const [searchText, setSearchText] = useState<string>("");
 	const [uciNetIDFilter, setUCINetIDFilter] = useState<Options>([]);
 	const [sortOption, setSortOption] = useState<SelectProps.Option>({
 		value: "latest",
@@ -152,8 +151,6 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 	const { thresholds } = useHackerThresholds();
 	const acceptThreshold = thresholds?.accept;
 	const waitlistThreshold = thresholds?.waitlist;
-
-	const { showWithOneReviewer } = useAvgScoreSetting();
 
 	const [top400, setTop400] = useState(false);
 
@@ -404,19 +401,19 @@ function HackerApplicantsList({ hackathonName }: HackerApplicantsListProps) {
 						content: ({ application_data }) =>
 							new Date(application_data.submission_time).toLocaleDateString(),
 					},
-					...(canSeeScores 
+					...(canSeeScores
 						? [
-							{
-								id: "avg_score",
-								header: "Averaged Score",
-								content: avgScore,
-							},
-							{
-								id: "decision",
-								header: "Decision",
-								content: DecisionStatus,
-							}, 
-							] 
+								{
+									id: "avg_score",
+									header: "Averaged Score",
+									content: avgScore,
+								},
+								{
+									id: "decision",
+									header: "Decision",
+									content: DecisionStatus,
+								},
+						  ]
 						: []),
 				],
 			}}
@@ -578,7 +575,7 @@ const CardHeader = ({
 			<AutoDecisionBadge
 				reason={isDirector ? auto_decision_reason : null}
 				decision={isDirector ? decision : null}
-			/>			
+			/>
 			{duplicateIcon}
 		</div>
 	);
@@ -590,8 +587,7 @@ const DecisionStatus = ({
 	is_overqualified,
 	avg_score,
 }: HackerApplicantSummary) =>
-	decision &&
-	(auto_decision_reason || is_overqualified || avg_score !== -1) ? (
+	decision && (auto_decision_reason || is_overqualified || avg_score !== -1) ? (
 		<ApplicantStatus status={decision} />
 	) : (
 		"-"

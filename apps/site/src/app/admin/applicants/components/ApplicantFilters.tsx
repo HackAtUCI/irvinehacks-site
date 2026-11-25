@@ -141,7 +141,9 @@ function ApplicantFilters({
 				/>
 				<Multiselect
 					selectedOptions={selectedDecisions}
-					onChange={({ detail }) => setSelectedDecisions(detail.selectedOptions)}
+					onChange={({ detail }) =>
+						setSelectedDecisions(detail.selectedOptions)
+					}
 					deselectAriaLabel={(e) => `Remove ${e.label}`}
 					options={DECISION_OPTIONS}
 					placeholder="Choose Decisions"
@@ -150,7 +152,9 @@ function ApplicantFilters({
 				{applicantType === ParticipantRole.Hacker && setUCINetIDFilter && (
 					<Multiselect
 						selectedOptions={uciNetIDFilter ?? []}
-						onChange={({ detail }) => setUCINetIDFilter?.(detail.selectedOptions)}
+						onChange={({ detail }) =>
+							setUCINetIDFilter?.(detail.selectedOptions)
+						}
 						deselectAriaLabel={(e) => `Remove ${e.label}`}
 						options={reviewerOptions}
 						placeholder="Search by Reviewer's UCINetID"

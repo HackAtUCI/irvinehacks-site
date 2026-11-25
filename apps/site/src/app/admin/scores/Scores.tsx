@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useContext } from "react";
+import { useCollection } from "@cloudscape-design/collection-hooks";
 import axios from "axios";
 import {
 	Badge,
@@ -9,10 +10,12 @@ import {
 	Header,
 	SpaceBetween,
 	Table,
+	TableProps,
 } from "@cloudscape-design/components";
 import { FileText } from "lucide-react";
 
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
+import { createLabelFunction } from "@/lib/admin/createLabelFunction";
 import NotificationContext from "@/lib/admin/NotificationContext";
 import useHackerApplicants from "@/lib/admin/useHackerApplicants";
 import { Decision } from "@/lib/userRecord";
@@ -21,7 +24,13 @@ import ApplicantNameLink from "./components/ApplicantNameLink";
 import IconLink from "./components/IconLink";
 import LinkedInIcon from "./components/LinkedInIcon";
 import downloadScoresCSV from "./downloadScoresCSV";
-import { ScoreRow, buildScoreRows, formatScore } from "./scoreRows";
+import {
+	ScoreRow,
+	buildScoreRows,
+	compareNormalizedScores,
+	compareRawScores,
+	formatScore,
+} from "./scoreRows";
 
 interface NormalizeScoresResponse {
 	matched_applicants: number;
@@ -58,43 +67,67 @@ const NormalizedScoreCell = (item: ScoreRow) => {
 const DecisionCell = (item: ScoreRow) =>
 	item.decision ? <ApplicantStatus status={item.decision} /> : "-";
 
-const COLUMNS = [
+const COLUMNS: TableProps.ColumnDefinition<ScoreRow>[] = [
 	{
 		id: "name",
 		header: "Name",
 		cell: NameCell,
+		ariaLabel: createLabelFunction("Name"),
+		sortingField: "name",
 	},
 	{
 		id: "email",
 		header: "Email",
-		cell: (item: ScoreRow) => item.email || "-",
+		cell: (item) => item.email || "-",
+		ariaLabel: createLabelFunction("Email"),
+		sortingField: "email",
 	},
 	{
 		id: "rawScore",
 		header: "Raw Score",
-		cell: (item: ScoreRow) => formatScore(item.rawScore),
+		cell: (item) => formatScore(item.rawScore),
+		ariaLabel: createLabelFunction("Raw Score"),
+		sortingField: "rawScore",
+		sortingComparator: compareRawScores,
 	},
 	{
 		id: "normalizedScore",
 		header: "Normalized Score",
 		cell: NormalizedScoreCell,
+		ariaLabel: createLabelFunction("Normalized Score"),
+		sortingField: "normalizedScore",
+		sortingComparator: compareNormalizedScores,
 	},
 	{
 		id: "decision",
 		header: "Decision",
 		cell: DecisionCell,
+		ariaLabel: createLabelFunction("Decision"),
+		sortingField: "decision",
 	},
 	{
 		id: "linkedin",
 		header: "LinkedIn",
 		cell: LinkedInCell,
+		ariaLabel: createLabelFunction("LinkedIn"),
+		sortingField: "linkedin",
 	},
 	{
 		id: "resume",
 		header: "Resume",
 		cell: ResumeCell,
+		ariaLabel: createLabelFunction("Resume"),
+		sortingField: "resumeUrl",
 	},
 ];
+
+const DEFAULT_SORTING = {
+	sortingColumn: {
+		sortingField: "normalizedScore",
+		sortingComparator: compareNormalizedScores,
+	},
+	isDescending: true,
+};
 
 function Scores() {
 	const { setNotifications } = useContext(NotificationContext);
@@ -103,6 +136,10 @@ function Scores() {
 	const [isExcludeModalVisible, setIsExcludeModalVisible] = useState(false);
 
 	const rows = useMemo(() => buildScoreRows(applicantList), [applicantList]);
+
+	const { items, collectionProps } = useCollection(rows, {
+		sorting: { defaultState: DEFAULT_SORTING },
+	});
 
 	const showNotification = (
 		type: FlashbarProps.Type,
@@ -145,10 +182,12 @@ function Scores() {
 		<SpaceBetween size="l">
 			<Header variant="h1">Scores</Header>
 			<Table
+				{...collectionProps}
 				loading={loading}
 				columnDefinitions={COLUMNS}
-				items={rows}
+				items={items}
 				trackBy="id"
+				wrapLines
 				header={
 					<div
 						style={{

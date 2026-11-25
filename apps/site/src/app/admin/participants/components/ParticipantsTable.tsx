@@ -15,6 +15,7 @@ import Spinner from "@cloudscape-design/components/spinner";
 import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
 import UserContext from "@/lib/admin/UserContext";
 import { isCheckInLead } from "@/lib/admin/authorization";
+import { createLabelFunction } from "@/lib/admin/createLabelFunction";
 import { Participant } from "@/lib/admin/useParticipants";
 import { Decision, ParticipantRole } from "@/lib/userRecord";
 
@@ -59,15 +60,6 @@ type StrictColumnDefinition = TableProps.ColumnDefinition<Participant> & {
 	id: string;
 	header: string;
 };
-
-function createLabelFunction(columnName: string) {
-	return ({ sorted, descending }: { sorted: boolean; descending: boolean }) => {
-		const sortState = sorted
-			? `sorted ${descending ? "descending" : "ascending"}`
-			: "not sorted";
-		return `${columnName}, ${sortState}.`;
-	};
-}
 
 function EmptyState({ title, subtitle, action }: EmptyStateProps) {
 	return (

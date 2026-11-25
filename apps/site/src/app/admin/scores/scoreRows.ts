@@ -80,14 +80,22 @@ function toRow(applicant: HackerApplicantSummary): ScoreRow {
 	};
 }
 
-// Order: scored (high to low), then unscored, then special labels
-function compareRows(a: ScoreRow, b: ScoreRow) {
-	if (a.normalizedScore !== null && b.normalizedScore !== null) {
-		return b.normalizedScore - a.normalizedScore;
-	}
-	if (a.normalizedScore !== null) return -1;
-	if (b.normalizedScore !== null) return 1;
-	return Number(!!a.specialScoreLabel) - Number(!!b.specialScoreLabel);
+// Missing scores are lowest, so they never mix with real scores
+function compareScores(a: number | null, b: number | null) {
+	if (a !== null && b !== null) return a - b;
+	return Number(a !== null) - Number(b !== null);
+}
+
+export function compareRawScores(a: ScoreRow, b: ScoreRow) {
+	return compareScores(a.rawScore, b.rawScore);
+}
+
+// Special labels are below missing scores
+export function compareNormalizedScores(a: ScoreRow, b: ScoreRow) {
+	return (
+		compareScores(a.normalizedScore, b.normalizedScore) ||
+		Number(!a.specialScoreLabel) - Number(!b.specialScoreLabel)
+	);
 }
 
 export function buildScoreRows(
@@ -100,7 +108,7 @@ export function buildScoreRows(
 				applicant.avg_score !== NOT_FULLY_REVIEWED_SCORE,
 		)
 		.map(toRow)
-		.sort(compareRows);
+		.sort((a, b) => compareNormalizedScores(b, a));
 }
 
 export function formatScore(score: number | null) {

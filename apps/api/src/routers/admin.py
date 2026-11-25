@@ -980,7 +980,7 @@ async def applicant_summary(
                 status.HTTP_400_BAD_REQUEST,
                 detail=f"Invalid decision: {decision}",
             )
-        
+
     return await summary_handler.applicant_summary(
         role=role_enum, status=status_enum, decision=decision_enum
     )

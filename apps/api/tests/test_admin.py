@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Any
-from unittest.mock import ANY, AsyncMock, MagicMock, patch
+from unittest.mock import ANY, AsyncMock, patch
 
 import pytest
 from fastapi import FastAPI, HTTPException

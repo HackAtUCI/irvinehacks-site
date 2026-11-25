@@ -22,7 +22,7 @@ async def applicant_summary(
     status: Optional[ApplicantStatus] = None,
     decision: Optional[Decision] = None,
 ) -> Counter[ApplicantStatus]:
-    """Get summary of applicants by status, optionally filtered by role/status/decision."""
+    """Get summary of applicants, optionally filtered by role/status/decision."""
     query: dict[str, object] = {"roles": Role.APPLICANT}
 
     if role is not None:

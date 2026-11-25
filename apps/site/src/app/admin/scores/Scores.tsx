@@ -14,128 +14,13 @@ import {
 } from "@cloudscape-design/components";
 
 import NotificationContext from "@/lib/admin/NotificationContext";
-import useHackerApplicants, {
-	HackerApplicantSummary,
-} from "@/lib/admin/useHackerApplicants";
-import {
-	NOT_FULLY_REVIEWED_SCORE,
-	OVERQUALIFIED_SCORE,
-} from "@/lib/decisionScores";
+import useHackerApplicants from "@/lib/admin/useHackerApplicants";
 import { Decision } from "@/lib/userRecord";
 import ExcludeUIDsModal from "./ExcludeUIDsModal";
+import downloadScoresCSV from "./downloadScoresCSV";
+import { ScoreRow, buildScoreRows, formatScore } from "./scoreRows";
 
-const SPECIAL_SCORE_SORT_VALUE = Number.NEGATIVE_INFINITY;
-
-function getSpecialScoreLabel(applicant: HackerApplicantSummary) {
-	if (applicant.is_overqualified || applicant.avg_score === OVERQUALIFIED_SCORE) {
-		return "OQ";
-	}
-
-	switch (applicant.auto_decision_reason) {
-		case "UNDER_18":
-			return "UNDERAGE";
-		case "GRADUATED":
-			return "GRADUATED";
-		case "DIRECTOR_AUTO_ACCEPT":
-			return "AUTO ACCEPT";
-		default:
-			return null;
-	}
-}
-
-function sortApplicantsByNormalizedScore(applicants: HackerApplicantSummary[]) {
-	return applicants
-		.map((applicant) => {
-			const specialScoreLabel = getSpecialScoreLabel(applicant);
-			const scores = applicant.application_data.normalized_scores;
-			if (!scores || Object.keys(scores).length === 0) {
-				const avgNormalizedScore = specialScoreLabel
-					? SPECIAL_SCORE_SORT_VALUE
-					: 0;
-				return { ...applicant, avgNormalizedScore, specialScoreLabel };
-			}
-
-			const total = Object.values(scores).reduce((sum, val) => sum + val, 0);
-			let avgNormalizedScore = total / Object.keys(scores).length;
-			if (applicant.application_data.extra_points)
-				avgNormalizedScore += applicant.application_data.extra_points;
-
-			return {
-				...applicant,
-				avgNormalizedScore: specialScoreLabel
-					? SPECIAL_SCORE_SORT_VALUE
-					: avgNormalizedScore,
-				specialScoreLabel,
-			};
-		})
-		.sort((a, b) => b.avgNormalizedScore - a.avgNormalizedScore);
-}
-
-const downloadCSV = (
-	data: (HackerApplicantSummary & {
-		avgNormalizedScore: number;
-		extraPoints?: number;
-		specialScoreLabel: string | null;
-	})[],
-) => {
-	const headers = [
-		"Name",
-		"Email",
-		"Major",
-		"LinkedIn",
-		"Resume URL",
-		"Average Normalized Score",
-		"Comments",
-	];
-
-	// Helper to escape CSV fields (wrap in quotes, escape existing quotes)
-	const escapeCSV = (val: string | number) => {
-		const str = String(val);
-		if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-			return `"${str.replace(/"/g, '""')}"`;
-		}
-		return str;
-	};
-
-	const rows = data.map((a) => {
-		const comments = (a.application_data.reviews || [])
-			.map((r) => (r[3] ? `${r[1]}: ${r[3]}` : ""))
-			.filter(Boolean)
-			.map((c) => c!.replace(/[\r\n]+/g, " | "))
-			.join("; ");
-
-		return [
-			`${a.first_name} ${a.last_name}`,
-			a.application_data.email || "",
-			a.application_data.major || "",
-			a.application_data.linkedin || "",
-			a.application_data.resume_url || "",
-			a.specialScoreLabel ?? a.avgNormalizedScore.toFixed(2),
-			comments,
-		]
-			.map(escapeCSV)
-			.join(",");
-	});
-
-	const csvContent = [headers.join(","), ...rows].join("\n");
-	const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-	const url = URL.createObjectURL(blob);
-
-	const link = document.createElement("a");
-	link.setAttribute("href", url);
-	link.setAttribute("download", "applicants.csv");
-	document.body.appendChild(link);
-	link.click();
-	document.body.removeChild(link);
-	URL.revokeObjectURL(url);
-};
-
-const ResumeModalButton = (
-	item: HackerApplicantSummary & {
-		avgNormalizedScore: number;
-		extraPoints?: number;
-	},
-) => {
+const ResumeModalButton = (item: ScoreRow) => {
 	const [showResume, setShowResume] = useState(false);
 
 	return (
@@ -145,11 +30,7 @@ const ResumeModalButton = (
 				<Button
 					variant="link"
 					onClick={() =>
-						window.open(
-							item.application_data.resume_url || "",
-							"_blank",
-							"noopener,noreferrer",
-						)
+						window.open(item.resumeUrl || "", "_blank", "noopener,noreferrer")
 					}
 				>
 					Open in New Tab
@@ -164,7 +45,7 @@ const ResumeModalButton = (
 			>
 				<Box>
 					<iframe
-						src={`${item.application_data.resume_url || ""}/preview`}
+						src={`${item.resumeUrl || ""}/preview`}
 						title="Resume"
 						style={{ width: "100%", height: "80vh", border: 0 }}
 					/>
@@ -174,36 +55,25 @@ const ResumeModalButton = (
 	);
 };
 
-interface ScoredHackerApplicant extends HackerApplicantSummary {
-	avgNormalizedScore: number;
-	specialScoreLabel: string | null;
-	rowIndex: number;
-}
-
 interface NormalizeScoresResponse {
 	matched_applicants: number;
 	normalized_applicants: number;
 	updated_applicants: number;
 }
 
-const NameCell = (item: ScoredHackerApplicant) =>
-	`${item.first_name} ${item.last_name}`;
+const NameCell = (item: ScoreRow) => item.name;
 
-const LinkedInCell = (item: ScoredHackerApplicant) =>
-	item.application_data.linkedin ? (
-		<Button
-			variant="link"
-			href={item.application_data.linkedin}
-			target="_blank"
-		>
+const LinkedInCell = (item: ScoreRow) =>
+	item.linkedin ? (
+		<Button variant="link" href={item.linkedin} target="_blank">
 			LinkedIn
 		</Button>
 	) : (
 		"-"
 	);
 
-const AverageNormalizedScoreCell = (item: ScoredHackerApplicant) => {
-	if (!item.specialScoreLabel) return item.avgNormalizedScore.toFixed(2);
+const AverageNormalizedScoreCell = (item: ScoreRow) => {
+	if (!item.specialScoreLabel) return formatScore(item.normalizedScore);
 
 	return (
 		<Badge color={item.decision === Decision.Accepted ? "green" : "red"}>
@@ -216,7 +86,7 @@ const COLUMNS = [
 	{
 		id: "index",
 		header: "#",
-		cell: (item: ScoredHackerApplicant) => item.rowIndex,
+		cell: (item: ScoreRow) => item.rowIndex,
 		width: 40,
 	},
 	{
@@ -227,12 +97,12 @@ const COLUMNS = [
 	{
 		id: "email",
 		header: "Email",
-		cell: (item: ScoredHackerApplicant) => item.application_data.email || "-",
+		cell: (item: ScoreRow) => item.email || "-",
 	},
 	{
 		id: "major",
 		header: "Major",
-		cell: (item: ScoredHackerApplicant) => item.application_data.major || "-",
+		cell: (item: ScoreRow) => item.major || "-",
 	},
 	{
 		id: "linkedin",
@@ -259,22 +129,7 @@ function Scores() {
 
 	const [isExcludeModalVisible, setIsExcludeModalVisible] = useState(false);
 
-	const filteredApplicants = useMemo(
-		() =>
-			applicantList.filter(
-				(a) =>
-					getSpecialScoreLabel(a) !== null ||
-					a.avg_score !== NOT_FULLY_REVIEWED_SCORE,
-			),
-		[applicantList],
-	);
-
-	const sorted = sortApplicantsByNormalizedScore(filteredApplicants).map(
-		(item, index) => ({
-			...item,
-			rowIndex: index + 1,
-		}),
-	);
+	const rows = useMemo(() => buildScoreRows(applicantList), [applicantList]);
 
 	const showNotification = (
 		type: FlashbarProps.Type,
@@ -319,7 +174,7 @@ function Scores() {
 			<Table
 				loading={loading}
 				columnDefinitions={COLUMNS}
-				items={sorted}
+				items={rows}
 				header={
 					<div
 						style={{
@@ -333,7 +188,9 @@ function Scores() {
 							<Button onClick={() => setIsExcludeModalVisible(true)}>
 								Exclude UIDs (auto-reject/auto-accept)
 							</Button>
-							<Button onClick={() => downloadCSV(sorted)}>Download CSV</Button>
+							<Button onClick={() => downloadScoresCSV(rows)}>
+								Download CSV
+							</Button>
 							<Button variant="primary" onClick={handleClick}>
 								Normalize scores
 							</Button>

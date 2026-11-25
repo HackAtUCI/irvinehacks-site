@@ -4,56 +4,22 @@ import { useState, useMemo, useContext } from "react";
 import axios from "axios";
 import {
 	Badge,
-	Box,
 	Button,
 	FlashbarProps,
 	Header,
-	Modal,
 	SpaceBetween,
 	Table,
 } from "@cloudscape-design/components";
+import { FileText } from "lucide-react";
 
 import NotificationContext from "@/lib/admin/NotificationContext";
 import useHackerApplicants from "@/lib/admin/useHackerApplicants";
 import { Decision } from "@/lib/userRecord";
 import ExcludeUIDsModal from "./ExcludeUIDsModal";
+import IconLink from "./components/IconLink";
+import LinkedInIcon from "./components/LinkedInIcon";
 import downloadScoresCSV from "./downloadScoresCSV";
 import { ScoreRow, buildScoreRows, formatScore } from "./scoreRows";
-
-const ResumeModalButton = (item: ScoreRow) => {
-	const [showResume, setShowResume] = useState(false);
-
-	return (
-		<>
-			<div style={{ display: "flex", gap: "0.5rem" }}>
-				<Button onClick={() => setShowResume(true)}>View Resume</Button>
-				<Button
-					variant="link"
-					onClick={() =>
-						window.open(item.resumeUrl || "", "_blank", "noopener,noreferrer")
-					}
-				>
-					Open in New Tab
-				</Button>
-			</div>
-			<Modal
-				onDismiss={() => setShowResume(false)}
-				visible={showResume}
-				closeAriaLabel="Close modal"
-				header="Resume"
-				size="max"
-			>
-				<Box>
-					<iframe
-						src={`${item.resumeUrl || ""}/preview`}
-						title="Resume"
-						style={{ width: "100%", height: "80vh", border: 0 }}
-					/>
-				</Box>
-			</Modal>
-		</>
-	);
-};
 
 interface NormalizeScoresResponse {
 	matched_applicants: number;
@@ -63,14 +29,17 @@ interface NormalizeScoresResponse {
 
 const NameCell = (item: ScoreRow) => item.name;
 
-const LinkedInCell = (item: ScoreRow) =>
-	item.linkedin ? (
-		<Button variant="link" href={item.linkedin} target="_blank">
-			LinkedIn
-		</Button>
-	) : (
-		"-"
-	);
+const LinkedInCell = (item: ScoreRow) => (
+	<IconLink url={item.linkedin} label="LinkedIn" icon={<LinkedInIcon />} />
+);
+
+const ResumeCell = (item: ScoreRow) => (
+	<IconLink
+		url={item.resumeUrl}
+		label="Resume"
+		icon={<FileText size={20} aria-hidden="true" />}
+	/>
+);
 
 const AverageNormalizedScoreCell = (item: ScoreRow) => {
 	if (!item.specialScoreLabel) return formatScore(item.normalizedScore);
@@ -108,13 +77,11 @@ const COLUMNS = [
 		id: "linkedin",
 		header: "LinkedIn",
 		cell: LinkedInCell,
-		minWidth: 150,
 	},
 	{
 		id: "resume",
 		header: "Resume",
-		cell: ResumeModalButton,
-		minWidth: 350,
+		cell: ResumeCell,
 	},
 	{
 		id: "avgScore",

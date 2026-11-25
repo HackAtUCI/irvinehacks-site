@@ -18,18 +18,12 @@ import {
 
 import UserContext from "@/lib/admin/UserContext";
 
-import { BASE_PATH, useFollowWithNextLink } from "./common";
-
-type HackathonMode = "irvinehacks" | "zothacks";
-
-function getHackathonMode(): HackathonMode {
-	const value = document.cookie
-		.split("; ")
-		.find((cookie) => cookie.startsWith("hackathon="))
-		?.split("=")[1];
-
-	return value === "zothacks" ? "zothacks" : "irvinehacks";
-}
+import {
+	BASE_PATH,
+	HackathonMode,
+	getHackathonMode,
+	useFollowWithNextLink,
+} from "./common";
 
 function AdminSidebar() {
 	const pathname = usePathname();

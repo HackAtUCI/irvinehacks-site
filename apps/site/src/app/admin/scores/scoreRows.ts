@@ -1,3 +1,4 @@
+import { uidToPseudonym } from "@/lib/admin/anonymize";
 import { HackerApplicantSummary } from "@/lib/admin/useHackerApplicants";
 import {
 	NOT_FULLY_REVIEWED_SCORE,
@@ -11,7 +12,6 @@ type Review = NonNullable<
 
 export interface ScoreRow {
 	id: string;
-	rowIndex: number;
 	name: string;
 	email: string;
 	major: string;
@@ -23,8 +23,6 @@ export interface ScoreRow {
 	decision: Decision | null;
 	reviews: ReadonlyArray<Review>;
 }
-
-type UnrankedRow = Omit<ScoreRow, "rowIndex">;
 
 function getSpecialScoreLabel(applicant: HackerApplicantSummary) {
 	if (
@@ -60,13 +58,16 @@ function getNormalizedScore({ application_data }: HackerApplicantSummary) {
 	return total / scores.length + (application_data.extra_points ?? 0);
 }
 
-function toRow(applicant: HackerApplicantSummary): UnrankedRow {
+function toRow(applicant: HackerApplicantSummary): ScoreRow {
 	const { application_data } = applicant;
 	const specialScoreLabel = getSpecialScoreLabel(applicant);
 
 	return {
 		id: applicant._id,
-		name: `${applicant.first_name} ${applicant.last_name}`,
+		// Names are hidden from non-directors
+		name:
+			`${applicant.first_name} ${applicant.last_name}`.trim() ||
+			uidToPseudonym(applicant._id),
 		email: application_data.email ?? "",
 		major: application_data.major ?? "",
 		linkedin: application_data.linkedin || null,
@@ -80,7 +81,7 @@ function toRow(applicant: HackerApplicantSummary): UnrankedRow {
 }
 
 // Order: scored (high to low), then unscored, then special labels
-function compareRows(a: UnrankedRow, b: UnrankedRow) {
+function compareRows(a: ScoreRow, b: ScoreRow) {
 	if (a.normalizedScore !== null && b.normalizedScore !== null) {
 		return b.normalizedScore - a.normalizedScore;
 	}
@@ -99,8 +100,7 @@ export function buildScoreRows(
 				applicant.avg_score !== NOT_FULLY_REVIEWED_SCORE,
 		)
 		.map(toRow)
-		.sort(compareRows)
-		.map((row, index) => ({ ...row, rowIndex: index + 1 }));
+		.sort(compareRows);
 }
 
 export function formatScore(score: number | null) {

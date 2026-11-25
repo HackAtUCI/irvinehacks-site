@@ -9,8 +9,19 @@ export const ACTIVE_ADMIN_HACKATHON =
 		: "zothacks";
 export const HACKATHON_COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
 
+export type HackathonMode = "irvinehacks" | "zothacks";
+
 type BaseNavigationDetail = LinkProps.FollowDetail;
 type FollowEvent = CustomEvent<BaseNavigationDetail>;
+
+export function getHackathonMode(): HackathonMode {
+	const value = document.cookie
+		.split("; ")
+		.find((cookie) => cookie.startsWith("hackathon="))
+		?.split("=")[1];
+
+	return value === "zothacks" ? "zothacks" : "irvinehacks";
+}
 
 export function useFollowWithNextLink(): (event: FollowEvent) => void {
 	const router = useRouter();

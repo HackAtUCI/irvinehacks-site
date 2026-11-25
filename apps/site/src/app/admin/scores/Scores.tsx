@@ -12,10 +12,12 @@ import {
 } from "@cloudscape-design/components";
 import { FileText } from "lucide-react";
 
+import ApplicantStatus from "@/app/admin/applicants/components/ApplicantStatus";
 import NotificationContext from "@/lib/admin/NotificationContext";
 import useHackerApplicants from "@/lib/admin/useHackerApplicants";
 import { Decision } from "@/lib/userRecord";
 import ExcludeUIDsModal from "./ExcludeUIDsModal";
+import ApplicantNameLink from "./components/ApplicantNameLink";
 import IconLink from "./components/IconLink";
 import LinkedInIcon from "./components/LinkedInIcon";
 import downloadScoresCSV from "./downloadScoresCSV";
@@ -27,7 +29,9 @@ interface NormalizeScoresResponse {
 	updated_applicants: number;
 }
 
-const NameCell = (item: ScoreRow) => item.name;
+const NameCell = (item: ScoreRow) => (
+	<ApplicantNameLink id={item.id} name={item.name} />
+);
 
 const LinkedInCell = (item: ScoreRow) => (
 	<IconLink url={item.linkedin} label="LinkedIn" icon={<LinkedInIcon />} />
@@ -41,7 +45,7 @@ const ResumeCell = (item: ScoreRow) => (
 	/>
 );
 
-const AverageNormalizedScoreCell = (item: ScoreRow) => {
+const NormalizedScoreCell = (item: ScoreRow) => {
 	if (!item.specialScoreLabel) return formatScore(item.normalizedScore);
 
 	return (
@@ -51,13 +55,10 @@ const AverageNormalizedScoreCell = (item: ScoreRow) => {
 	);
 };
 
+const DecisionCell = (item: ScoreRow) =>
+	item.decision ? <ApplicantStatus status={item.decision} /> : "-";
+
 const COLUMNS = [
-	{
-		id: "index",
-		header: "#",
-		cell: (item: ScoreRow) => item.rowIndex,
-		width: 40,
-	},
 	{
 		id: "name",
 		header: "Name",
@@ -69,9 +70,19 @@ const COLUMNS = [
 		cell: (item: ScoreRow) => item.email || "-",
 	},
 	{
-		id: "major",
-		header: "Major",
-		cell: (item: ScoreRow) => item.major || "-",
+		id: "rawScore",
+		header: "Raw Score",
+		cell: (item: ScoreRow) => formatScore(item.rawScore),
+	},
+	{
+		id: "normalizedScore",
+		header: "Normalized Score",
+		cell: NormalizedScoreCell,
+	},
+	{
+		id: "decision",
+		header: "Decision",
+		cell: DecisionCell,
 	},
 	{
 		id: "linkedin",
@@ -82,11 +93,6 @@ const COLUMNS = [
 		id: "resume",
 		header: "Resume",
 		cell: ResumeCell,
-	},
-	{
-		id: "avgScore",
-		header: "Average Normalized Score",
-		cell: AverageNormalizedScoreCell,
 	},
 ];
 
@@ -142,6 +148,7 @@ function Scores() {
 				loading={loading}
 				columnDefinitions={COLUMNS}
 				items={rows}
+				trackBy="id"
 				header={
 					<div
 						style={{

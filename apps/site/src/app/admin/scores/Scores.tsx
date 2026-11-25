@@ -5,6 +5,7 @@ import { useCollection } from "@cloudscape-design/collection-hooks";
 import axios from "axios";
 import {
 	Badge,
+	Box,
 	Button,
 	FlashbarProps,
 	Header,
@@ -23,7 +24,9 @@ import ExcludeUIDsModal from "./ExcludeUIDsModal";
 import ApplicantNameLink from "./components/ApplicantNameLink";
 import IconLink from "./components/IconLink";
 import LinkedInIcon from "./components/LinkedInIcon";
+import ScoreFilters from "./components/ScoreFilters";
 import downloadScoresCSV from "./downloadScoresCSV";
+import { EMPTY_FILTERS, matchesFilters } from "./scoreFilters";
 import {
 	ScoreRow,
 	buildScoreRows,
@@ -137,7 +140,22 @@ function Scores() {
 
 	const rows = useMemo(() => buildScoreRows(applicantList), [applicantList]);
 
-	const { items, collectionProps } = useCollection(rows, {
+	const [filters, setFilters] = useState(EMPTY_FILTERS);
+	const clearFilters = () => setFilters(EMPTY_FILTERS);
+
+	const { items, collectionProps, filteredItemsCount } = useCollection(rows, {
+		filtering: {
+			filteringFunction: (row) => matchesFilters(row, filters),
+			empty: "No applicants",
+			noMatch: (
+				<Box textAlign="center">
+					<SpaceBetween size="xs">
+						<b>No matches</b>
+						<Button onClick={clearFilters}>Clear filters</Button>
+					</SpaceBetween>
+				</Box>
+			),
+		},
 		sorting: { defaultState: DEFAULT_SORTING },
 	});
 
@@ -188,6 +206,15 @@ function Scores() {
 				items={items}
 				trackBy="id"
 				wrapLines
+				filter={
+					<ScoreFilters
+						filters={filters}
+						onChange={setFilters}
+						onClear={clearFilters}
+						matchCount={filteredItemsCount ?? rows.length}
+						totalCount={rows.length}
+					/>
+				}
 				header={
 					<div
 						style={{

@@ -9,6 +9,8 @@ import orange from "@/assets/team/orange-tag.svg";
 import petrSoda from "@/assets/team/petr-soda.svg";
 import roundLogo from "@/assets/team/round-logo.svg";
 import pushpin from "@/assets/team/pushpin.svg";
+import loophole from "@/assets/team/loophole.svg";
+import tape from "@/assets/team/tape.svg";
 
 
 import teamNav from "@/assets/team/team-nav.svg";
@@ -193,11 +195,13 @@ export default function TeamSection() {
                                 key={director.name}
                                 className="relative flex w-[185px] rounded-xl bg-paper shadow-md"
                             >
+                                {/*Loophole pushpin*/}
                                 <Image
-                                    src={pushpin}
+                                    src={loophole}
                                     alt=""
                                     aria-hidden="true"
-                                    className="pointer-events-none absolute -top-3 left-1/2 z-20 w-[26px] -translate-x-1/2"
+                                    //TODO: ROTATE THE LOOPHOLE TO FIT AGAINST THE POLAROID
+                                    className="pointer-events-none absolute -top-[25px] left-1/2 z-20 w-[68px] -translate-x-1/2 -translate-y-5"
                                 />
 
                                 {/*photo, name, linkedin*/}
@@ -269,10 +273,12 @@ function PolaroidCard({
 	return (
 		<div className="relative flex w-[160px] flex-col bg-paper p-2.5 pb-3 shadow-md">
 			{/* Yellow masking tape at top center */}
-			<div
-				aria-hidden="true"
-				className="absolute -top-2.5 left-1/2 h-[14px] w-[46px] -translate-x-1/2 bg-ih-yellow/90"
-			/>
+			<Image
+                src={tape}
+                alt=""
+                aria-hidden="true"
+                className="pointer-events-none absolute -top-2.5 left-1/2 z-20 w-[56px] -translate-x-1/2"
+            />
 			<div className="relative aspect-square w-full overflow-hidden bg-white">
 				<Image src={member.image} alt={member.name} fill className="object-cover" />
 			</div>
@@ -289,7 +295,7 @@ function PolaroidCard({
 				aria-label={`${member.name}'s LinkedIn`}
 				className="mt-1.5 inline-block w-fit transition-transform hover:scale-110"
 			>
-				<Image src={linkedinIcon} alt="LinkedIn" className="h-4 w-4" />
+				<Image src={linkedinIcon} alt="LinkedIn" className="-translate-y-4 h-[18px] w-[18px]" />
 			</a>
 		</div>
 	);

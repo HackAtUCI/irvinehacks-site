@@ -67,6 +67,10 @@ const config: Config = {
 				"stripe-blue": "var(--color-stripe-blue)",
 				"stripe-green": "var(--color-stripe-green)",
 				"sticker-green": "var(--color-sticker-green)",
+				"coupon-blue": "var(--color-coupon-blue)",
+				"coupon-green": "var(--color-coupon-green)",
+				"coupon-cream": "var(--color-coupon-cream)",
+				"tape-gray": "var(--color-tape-gray)",
 			},
 		},
 		screens: {

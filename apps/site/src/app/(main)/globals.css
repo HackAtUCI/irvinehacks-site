@@ -54,6 +54,10 @@
 	--color-stripe-blue: #3b6fd4;
 	--color-stripe-green: #13994a;
 	--color-sticker-green: #407c50;
+	--color-coupon-blue: #3c64b4;
+	--color-coupon-green: #7ebf57;
+	--color-coupon-cream: #fffced;
+	--color-tape-gray: rgba(210, 210, 205, 0.85);
 }
 
 html {

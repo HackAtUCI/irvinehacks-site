@@ -4,7 +4,8 @@ import Link from "next/link";
 export interface CouponButtonProps {
 	title: string;
 	subtitle: string;
-	href: string;
+	/** When omitted, the coupon renders as a non-interactive <div role="group"> */
+	href?: string;
 	external?: boolean;
 	/** Background color behind the title/subtitle panel (e.g. "bg-coral", "bg-ih-blue") */
 	panelBgClass: string;
@@ -104,7 +105,20 @@ export default function CouponButton({
 	);
 
 	const computedAriaLabel =
-		ariaLabel ?? `${title} ${subtitle}${external ? " (opens in new tab)" : ""}`;
+		ariaLabel ??
+		`${title} ${subtitle}${href && external ? " (opens in new tab)" : ""}`;
+
+	if (!href) {
+		return (
+			<div
+				role="group"
+				aria-label={computedAriaLabel}
+				className={wrapperClassName}
+			>
+				{content}
+			</div>
+		);
+	}
 
 	if (external) {
 		return (
